@@ -141,6 +141,125 @@ networks:
     driver: bridge
 ```
 
+Staging environment:
+
+version: '3.8'
+
+services:
+  wordpress:
+    image: wordpress:php8.2-apache
+    container_name: mobility_wordpress_STAGING
+    restart: unless-stopped
+    ports:
+      - "9989:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: Wp7kL9xP2qR7vN6wE3zY4uC1sA5f
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'mobility_redis_STAGING');
+        define('WP_REDIS_PORT', 6379);
+        define('WP_TEMP_DIR', '/var/www/html/wp-content/uploads/tmp');
+        define('UPLOADS', 'wp-content/uploads');
+    volumes:
+      - /mnt/dietpi_userdata/docker-files/STAGING/wordpress_data:/var/www/html
+      - /mnt/dietpi_userdata/docker-files/STAGING/php.ini:/usr/local/etc/php/conf.d/custom-php.ini
+      - /mnt/dietpi_userdata/docker-files/STAGING/tmp:/var/www/html/wp-content/uploads/tmp
+    depends_on:
+      - db
+      - redis
+
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: mobility_wpcli_STAGING
+    restart: "no"
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: Wp7kL9xP2qR7vN6wE3zY4uC1sA5f
+      WORDPRESS_DB_NAME: wordpress_db
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'mobility_redis_STAGING');
+        define('WP_REDIS_PORT', 6379);
+        define('WP_TEMP_DIR', '/var/www/html/wp-content/uploads/tmp');
+        define('UPLOADS', 'wp-content/uploads');
+    volumes:
+      - /mnt/dietpi_userdata/docker-files/STAGING/wordpress_data:/var/www/html
+    depends_on:
+      - db
+      - wordpress
+      - redis
+    command: tail -f /dev/null
+
+  db:
+    image: mariadb:11
+    container_name: mobility_mariadb_STAGING
+    restart: unless-stopped
+    ports:
+      - "9306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: Rt9mK3nQ8xY7bV5cZ2wE4rT6yU1i
+      MARIADB_DATABASE: wordpress_db
+      MARIADB_USER: wp_user
+      MARIADB_PASSWORD: Wp7kL9xP2qR7vN6wE3zY4uC1sA5f
+    volumes:
+      - /mnt/dietpi_userdata/docker-files/STAGING/db_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: mobility_redis_STAGING
+    restart: unless-stopped
+    ports:
+      - "9191:6379"
+    volumes:
+      - /mnt/dietpi_userdata/docker-files/STAGING/redis_data:/data
+
+  # 🔧 phpMyAdmin - FIXED for both wp_user and root access
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: mobility_phpmyadmin_STAGING
+    restart: unless-stopped
+    ports:
+      - "9081:80"
+    environment:
+      # Database connection settings
+      PMA_HOST: db
+      PMA_PORT: 3306
+      
+      # 🚨 REMOVED AUTO-LOGIN - Now shows login screen
+      # PMA_USER: wp_user  # <- REMOVED
+      # PMA_PASSWORD: Wp7kL9xP2qR7vN6wE3zY4uC1sA5f  # <- REMOVED
+      
+      # Root password for administrative access
+      MYSQL_ROOT_PASSWORD: Rt9mK3nQ8xY7bV5cZ2wE4rT6yU1i
+      
+      # Interface configuration
+      PMA_ABSOLUTE_URI: http://192.168.1.7:9081/
+      UPLOAD_LIMIT: 100M
+      MEMORY_LIMIT: 512M
+      MAX_EXECUTION_TIME: 600
+      
+      # Security and features - Allow manual login
+      PMA_ARBITRARY: 1
+      HIDE_PHP_VERSION: 1
+    depends_on:
+      - db
+    volumes:
+      # Optional: Store phpMyAdmin sessions and configs
+      - /mnt/dietpi_userdata/docker-files/STAGING/phpmyadmin_sessions:/sessions
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+volumes: {}
+
+
 ### Web Access & Security
 
 - **Cloudflare Integration**: Provides secure tunneling, DDoS protection, and web-based management
