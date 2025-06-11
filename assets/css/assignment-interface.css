@@ -1,28 +1,19 @@
 /**
- * Mobility Trailblazers - Complete Assignment Interface Styles
- * File: assets/css/assignment-interface.css
- * Version: 3.2.0 - COMPLETE RESPONSIVE IMPLEMENTATION
- * 
- * FIXES APPLIED:
- * - Complete responsive design for mobile devices
- * - Fixed bulk operations styling
- * - Modal responsiveness improvements
- * - All shortcode styling included
- * - Comprehensive mobile layout fixes
+ * Mobility Trailblazers - Assignment Interface Styles
+ * Complete CSS for Advanced Jury Assignment Interface
  */
 
 /* ===== GLOBAL ASSIGNMENT INTERFACE STYLES ===== */
 .mt-assignment-interface {
-    background: #f8f9fa;
+    background: #f1f1f1;
     margin: -20px -20px 0 -2px;
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
     color: #2d3748;
-    min-height: calc(100vh - 100px);
 }
 
-/* ===== RESPONSIVE HEADER SECTION ===== */
+/* ===== HEADER SECTION ===== */
 .mt-assignment-header {
     background: white;
     padding: 20px;
@@ -40,7 +31,6 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
 .mt-assignment-actions .button {
@@ -50,14 +40,10 @@
     padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.2s ease;
-    font-weight: 500;
-    font-size: 14px;
-    white-space: nowrap;
 }
 
 .mt-assignment-actions .button:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .mt-assignment-filters {
@@ -65,122 +51,37 @@
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
-.mt-stage-selector,
-.mt-search-input,
-#mtCategoryFilter,
-#mtAssignmentStatusFilter {
+.mt-stage-selector {
+    font-weight: 600;
     padding: 8px 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    font-size: 14px;
-    min-height: 38px;
-}
-
-.mt-stage-selector:focus,
-.mt-search-input:focus,
-#mtCategoryFilter:focus,
-#mtAssignmentStatusFilter:focus {
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-    outline: none;
+    border-radius: 4px;
+    border: 1px solid #cbd5e0;
+    background: white;
+    color: #2d3748;
 }
 
 .mt-search-input {
-    min-width: 250px;
-    flex: 1;
-    max-width: 300px;
-}
-
-.mt-auto-refresh-btn {
-    background: #48bb78 !important;
-    border-color: #48bb78 !important;
-    color: white !important;
+    width: 200px;
     padding: 8px 12px;
-    border-radius: 6px;
-}
-
-.mt-auto-refresh-btn.active {
-    background: #ed8936 !important;
-    border-color: #ed8936 !important;
-}
-
-.mt-version-badge {
-    background: linear-gradient(135deg, #4299e1, #3182ce);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    margin-left: 10px;
-    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
-}
-
-/* ===== SYSTEM STATUS STYLES ===== */
-.mt-system-status {
-    margin-bottom: 20px;
-}
-
-.mt-status-card {
-    background: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    border-left: 4px solid #48bb78;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.mt-status-card.mt-status-degraded {
-    border-left-color: #ed8936;
-}
-
-.mt-status-card.mt-status-critical {
-    border-left-color: #e53e3e;
-}
-
-.mt-status-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    flex-wrap: wrap;
-}
-
-.mt-status-time {
-    margin-left: auto;
-    font-size: 12px;
-    color: #718096;
-    font-weight: normal;
-    white-space: nowrap;
-}
-
-.mt-status-issues {
-    margin-top: 10px;
-    padding: 10px;
-    background: #fed7d7;
     border-radius: 4px;
+    border: 1px solid #cbd5e0;
     font-size: 14px;
 }
 
-.mt-status-issues ul {
-    margin: 5px 0 0 20px;
+.mt-search-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
-/* ===== ASSIGNMENT OVERVIEW CARDS - RESPONSIVE ===== */
+/* ===== ASSIGNMENT OVERVIEW CARDS ===== */
 .mt-assignment-overview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    margin-bottom: 20px;
-}
-
-.mt-overview-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .mt-overview-card {
@@ -190,10 +91,6 @@
     text-align: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s ease;
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 .mt-overview-card:hover {
@@ -201,11 +98,11 @@
 }
 
 .mt-overview-number {
+    display: block;
     font-size: 2.5em;
     font-weight: bold;
     color: #2d3748;
     margin-bottom: 5px;
-    line-height: 1;
 }
 
 .mt-overview-card.success .mt-overview-number {
@@ -221,33 +118,24 @@
 }
 
 .mt-overview-label {
+    display: block;
     font-size: 0.9em;
     color: #718096;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
-    line-height: 1.2;
 }
 
-.mt-demo-notice {
-    background: #bee3f8;
-    border: 1px solid #90cdf4;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin-top: 15px;
-    font-size: 14px;
-}
-
-/* ===== MAIN ASSIGNMENT INTERFACE - RESPONSIVE GRID ===== */
+/* ===== MAIN ASSIGNMENT INTERFACE ===== */
 .mt-assignment-main {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     min-height: 600px;
 }
 
-/* ===== CANDIDATE AND JURY PANELS - RESPONSIVE ===== */
+/* ===== CANDIDATE AND JURY PANELS ===== */
 .mt-candidates-panel,
 .mt-jury-panel {
     background: white;
@@ -256,19 +144,16 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    min-height: 500px;
 }
 
 .mt-panel-header {
     background: #f8f9fa;
     padding: 15px 20px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e9ecef;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 .mt-panel-header h3 {
@@ -294,7 +179,6 @@
 .mt-panel-actions {
     display: flex;
     gap: 5px;
-    flex-wrap: wrap;
 }
 
 .mt-panel-actions .button {
@@ -302,23 +186,7 @@
     padding: 4px 8px;
 }
 
-.mt-panel-collapse {
-    background: none;
-    border: none;
-    font-size: 1.2em;
-    cursor: pointer;
-    color: #718096;
-    padding: 4px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.mt-panel-collapse:hover {
-    background: #e2e8f0;
-    color: #4a5568;
-}
-
-/* ===== CANDIDATES AND JURY LISTS - RESPONSIVE ===== */
+/* ===== CANDIDATES AND JURY LISTS ===== */
 .mt-candidates-list,
 .mt-jury-list {
     flex: 1;
@@ -329,6 +197,9 @@
 
 .mt-candidate-item,
 .mt-jury-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
@@ -336,7 +207,6 @@
     cursor: pointer;
     transition: all 0.2s ease;
     background: white;
-    position: relative;
 }
 
 .mt-candidate-item:hover,
@@ -357,38 +227,18 @@
     border-left: 4px solid #48bb78;
 }
 
-.mt-candidate-item.unassigned {
-    border-left: 4px solid #e2e8f0;
-}
-
 .mt-candidate-item.conflict {
     border-left: 4px solid #f56565;
 }
 
-.mt-candidate-header,
-.mt-jury-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.mt-candidate-checkbox-wrapper,
-.mt-jury-checkbox-wrapper {
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.mt-candidate-checkbox,
-.mt-jury-checkbox {
+.mt-item-checkbox {
+    margin: 0;
     width: 16px;
     height: 16px;
     accent-color: #4299e1;
-    cursor: pointer;
 }
 
-.mt-candidate-info,
-.mt-jury-info {
+.mt-item-info {
     flex: 1;
     min-width: 0;
 }
@@ -400,7 +250,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
 }
 
 .mt-item-meta {
@@ -409,28 +258,10 @@
     line-height: 1.3;
 }
 
-.mt-candidate-meta,
-.mt-jury-meta {
-    font-size: 12px;
-    color: #718096;
-    margin-bottom: 5px;
-}
-
-.mt-company {
-    display: inline-block;
-    margin-right: 8px;
-}
-
-.mt-position {
-    display: inline-block;
-    font-style: italic;
-}
-
 .mt-assignment-details {
     font-size: 0.8em;
     color: #4299e1;
     margin-top: 4px;
-    line-height: 1.3;
 }
 
 .mt-assignment-count {
@@ -445,43 +276,23 @@
     flex-shrink: 0;
 }
 
-.mt-jury-item.underloaded .mt-assignment-count,
-.mt-candidate-item.underloaded .mt-assignment-count {
+/* ===== JURY WORKLOAD INDICATORS ===== */
+.mt-jury-item.underloaded .mt-assignment-count {
     background: #fed7d7;
     color: #c53030;
 }
 
-.mt-jury-item.balanced .mt-assignment-count,
-.mt-candidate-item.balanced .mt-assignment-count {
+.mt-jury-item.balanced .mt-assignment-count {
     background: #c6f6d5;
     color: #22543d;
 }
 
-.mt-jury-item.overloaded .mt-assignment-count,
-.mt-candidate-item.overloaded .mt-assignment-count {
+.mt-jury-item.overloaded .mt-assignment-count {
     background: #fbb6ce;
     color: #97266d;
 }
 
-.mt-sample-badge {
-    background: #ed8936;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 8px;
-    margin-top: 5px;
-    display: inline-block;
-}
-
-.mt-workload-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
-/* ===== CENTER ASSIGNMENT ACTIONS PANEL - RESPONSIVE ===== */
+/* ===== CENTER ASSIGNMENT ACTIONS PANEL ===== */
 .mt-assignment-actions-panel {
     display: flex;
     flex-direction: column;
@@ -492,14 +303,12 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    min-width: 180px;
 }
 
 .mt-assignment-arrows {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 100%;
 }
 
 .mt-assign-btn,
@@ -516,13 +325,12 @@
     min-width: 120px;
     justify-content: center;
     font-size: 14px;
-    border: 2px solid transparent;
 }
 
 .mt-assign-btn {
     background: #4299e1;
     color: white;
-    border-color: #4299e1;
+    border: 2px solid #4299e1;
 }
 
 .mt-assign-btn:hover:not(:disabled) {
@@ -535,7 +343,7 @@
 .mt-remove-btn {
     background: #f56565;
     color: white;
-    border-color: #f56565;
+    border: 2px solid #f56565;
 }
 
 .mt-remove-btn:hover:not(:disabled) {
@@ -551,12 +359,9 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-    background: #cbd5e0;
-    border-color: #cbd5e0;
-    color: #a0aec0;
 }
 
-/* ===== ASSIGNMENT STATISTICS - RESPONSIVE ===== */
+/* ===== ASSIGNMENT STATISTICS ===== */
 .mt-assignment-stats {
     display: flex;
     flex-direction: column;
@@ -578,7 +383,6 @@
     font-size: 1.8em;
     font-weight: bold;
     color: #2d3748;
-    line-height: 1;
 }
 
 .mt-stat .label {
@@ -587,33 +391,9 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
-    line-height: 1.2;
 }
 
-.mt-quick-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-}
-
-.mt-quick-btn {
-    padding: 8px 12px;
-    background: #edf2f7;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.mt-quick-btn:hover {
-    background: #e2e8f0;
-    border-color: #cbd5e0;
-}
-
-/* ===== MODAL STYLES - RESPONSIVE ===== */
+/* ===== MODAL STYLES ===== */
 .mt-modal {
     position: fixed;
     top: 0;
@@ -627,8 +407,6 @@
     justify-content: center;
     backdrop-filter: blur(4px);
     animation: modalFadeIn 0.3s ease;
-    padding: 20px;
-    box-sizing: border-box;
 }
 
 @keyframes modalFadeIn {
@@ -646,15 +424,11 @@
     background: white;
     border-radius: 12px;
     max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
+    width: 90%;
+    max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     animation: modalSlideIn 0.3s ease;
-}
-
-.mt-modal-lg {
-    max-width: 800px;
 }
 
 @keyframes modalSlideIn {
@@ -676,8 +450,6 @@
     align-items: center;
     background: #f8f9fa;
     border-radius: 12px 12px 0 0;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
 .mt-modal-header h3 {
@@ -695,7 +467,6 @@
     padding: 4px;
     border-radius: 4px;
     transition: all 0.2s ease;
-    flex-shrink: 0;
 }
 
 .mt-modal-close:hover {
@@ -715,28 +486,9 @@
     justify-content: flex-end;
     background: #f8f9fa;
     border-radius: 0 0 12px 12px;
-    flex-wrap: wrap;
 }
 
-/* ===== FORM STYLES - RESPONSIVE ===== */
-.mt-form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.mt-form-section {
-    background: #f7fafc;
-    padding: 15px;
-    border-radius: 6px;
-}
-
-.mt-form-section h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #2d3748;
-}
-
+/* ===== FORM STYLES ===== */
 .mt-form-row {
     margin-bottom: 20px;
 }
@@ -750,20 +502,17 @@
 }
 
 .mt-form-row input,
-.mt-form-row select,
-.mt-form-row textarea {
+.mt-form-row select {
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     font-size: 14px;
     transition: border-color 0.2s ease;
-    font-family: inherit;
 }
 
 .mt-form-row input:focus,
-.mt-form-row select:focus,
-.mt-form-row textarea:focus {
+.mt-form-row select:focus {
     outline: none;
     border-color: #4299e1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
@@ -783,7 +532,7 @@
     line-height: 1.3;
 }
 
-/* ===== BULK OPERATIONS MODAL - RESPONSIVE ===== */
+/* ===== BULK OPERATIONS MODAL ===== */
 .mt-bulk-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -824,7 +573,6 @@
 
 .mt-bulk-content {
     flex: 1;
-    min-width: 0;
 }
 
 .mt-bulk-content h4 {
@@ -849,13 +597,7 @@
     margin-top: 15px;
 }
 
-.mt-bulk-settings h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #2d3748;
-}
-
-/* ===== MATRIX VIEW - RESPONSIVE ===== */
+/* ===== MATRIX VIEW ===== */
 .mt-matrix-view {
     margin-top: 20px;
     border: 1px solid #e2e8f0;
@@ -867,14 +609,12 @@
 .mt-matrix-table {
     overflow-x: auto;
     max-height: 500px;
-    overflow-y: auto;
 }
 
 .mt-assignment-matrix-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9em;
-    min-width: 600px;
 }
 
 .mt-assignment-matrix-table th,
@@ -914,7 +654,6 @@
     width: 40px;
     height: 40px;
     font-weight: bold;
-    position: relative;
 }
 
 .mt-matrix-cell.assigned {
@@ -927,8 +666,98 @@
     color: #4299e1;
 }
 
-.mt-matrix-cell.assigned:hover {
-    background: #9ae6b4;
+/* ===== ANALYTICS STYLES ===== */
+.mt-analytics-page {
+    background: #f1f1f1;
+    margin: -20px -20px 0 -2px;
+    padding: 20px;
+}
+
+.mt-analytics-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    flex-wrap: wrap;
+}
+
+.mt-charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.mt-charts-container canvas {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ===== REPORT STYLES ===== */
+.mt-detailed-report {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.mt-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mt-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.mt-summary-label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9em;
+}
+
+.mt-summary-value {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.mt-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.mt-report-table th,
+.mt-report-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mt-report-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.mt-report-table tr:hover {
+    background: #f7fafc;
 }
 
 /* ===== LOADING STATES ===== */
@@ -953,6 +782,72 @@
     100% { transform: rotate(360deg); }
 }
 
+.mt-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.mt-empty-state h4 {
+    color: #4a5568;
+    margin-bottom: 10px;
+}
+
+/* ===== NOTIFICATION STYLES ===== */
+.mt-notification {
+    position: fixed;
+    top: 32px;
+    right: 20px;
+    background: white;
+    border-left: 4px solid #4299e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 15px 40px 15px 20px;
+    border-radius: 4px;
+    z-index: 10000;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+}
+
+.mt-notification-success {
+    border-left-color: #48bb78;
+}
+
+.mt-notification-error {
+    border-left-color: #f56565;
+}
+
+.mt-notification-warning {
+    border-left-color: #ed8936;
+}
+
+.mt-notification-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #718096;
+    transition: color 0.2s ease;
+}
+
+.mt-notification-close:hover {
+    color: #4a5568;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ===== PROGRESS INDICATORS ===== */
 .mt-loading-overlay {
     position: fixed;
     top: 0;
@@ -972,560 +867,9 @@
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    max-width: 300px;
-    width: 90%;
 }
 
-/* ===== NOTIFICATION STYLES ===== */
-.mt-notification {
-    position: fixed;
-    top: 32px;
-    right: 20px;
-    background: white;
-    border-left: 4px solid #4299e1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 15px 40px 15px 20px;
-    border-radius: 4px;
-    z-index: 10000;
-    max-width: 400px;
-    animation: slideInRight 0.3s ease;
-    width: auto;
-    min-width: 250px;
-}
-
-.mt-notification-success {
-    border-left-color: #48bb78;
-}
-
-.mt-notification-error {
-    border-left-color: #f56565;
-}
-
-.mt-notification-warning {
-    border-left-color: #ed8936;
-}
-
-.mt-notification-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.mt-notification-icon {
-    flex-shrink: 0;
-}
-
-.mt-notification-message {
-    flex: 1;
-}
-
-.mt-notification-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: #718096;
-    transition: color 0.2s ease;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mt-notification-close:hover {
-    color: #4a5568;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* ===== ERROR AND NO DATA STATES ===== */
-.mt-error-message {
-    background: #fed7d7;
-    border: 1px solid #feb2b2;
-    color: #c53030;
-    padding: 15px;
-    border-radius: 6px;
-    text-align: center;
-    margin: 20px 0;
-}
-
-.mt-no-data,
-.mt-no-results {
-    background: #edf2f7;
-    border: 1px solid #e2e8f0;
-    color: #4a5568;
-    padding: 20px;
-    border-radius: 6px;
-    text-align: center;
-    margin: 10px 0;
-}
-
-.mt-empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #718096;
-}
-
-.mt-empty-state h4 {
-    color: #4a5568;
-    margin-bottom: 10px;
-}
-
-.mt-empty-icon {
-    font-size: 4em;
-    margin-bottom: 20px;
-}
-
-/* ===== HEALTH CHECK STYLES ===== */
-.mt-health-dashboard {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.mt-health-overview {
-    margin-bottom: 20px;
-}
-
-.mt-health-status-card {
-    padding: 20px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-left: 4px solid #48bb78;
-    background: #f7fafc;
-}
-
-.mt-health-status-card.mt-status-degraded {
-    border-left-color: #ed8936;
-    background: #fef5e7;
-}
-
-.mt-health-status-card.mt-status-critical {
-    border-left-color: #e53e3e;
-    background: #fed7d7;
-}
-
-.mt-status-icon {
-    font-size: 32px;
-    flex-shrink: 0;
-}
-
-.mt-status-info h2 {
-    margin: 0 0 5px 0;
-}
-
-.mt-status-info p {
-    margin: 0;
-    color: #718096;
-}
-
-.mt-health-actions {
-    margin-bottom: 30px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.mt-health-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f7fafc;
-    border-radius: 6px;
-}
-
-.mt-health-section h3,
-.mt-health-section h5 {
-    margin-top: 0;
-    color: #2d3748;
-}
-
-.mt-health-good {
-    color: #38a169;
-}
-
-.mt-health-bad {
-    color: #e53e3e;
-}
-
-.mt-health-issues {
-    background: #fed7d7;
-    padding: 10px;
-    border-radius: 4px;
-    margin-top: 10px;
-}
-
-.mt-health-issues ul {
-    margin: 5px 0 0 20px;
-}
-
-.mt-health-results {
-    background: #f7fafc;
-    padding: 15px;
-    border-radius: 6px;
-}
-
-/* ===== SHORTCODE STYLES ===== */
-.mt-jury-dashboard {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin: 20px 0;
-}
-
-.mt-dashboard-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.mt-dashboard-header h2 {
-    color: #2d3748;
-    margin-bottom: 10px;
-}
-
-.mt-dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-}
-
-.mt-stat-card {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-}
-
-.mt-stat-number {
-    font-size: 2em;
-    font-weight: bold;
-    color: #4299e1;
-    margin-bottom: 5px;
-}
-
-.mt-stat-label {
-    font-size: 0.9em;
-    color: #718096;
-    font-weight: 500;
-}
-
-.mt-dashboard-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
-
-.mt-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    line-height: 1.4;
-}
-
-.mt-btn-primary {
-    background-color: #4299e1;
-    color: white;
-    border: 1px solid #4299e1;
-}
-
-.mt-btn-primary:hover {
-    background-color: #3182ce;
-    border-color: #3182ce;
-    color: white;
-    text-decoration: none;
-    transform: translateY(-1px);
-}
-
-.mt-btn-secondary {
-    background-color: #718096;
-    color: white;
-    border: 1px solid #718096;
-}
-
-.mt-btn-secondary:hover {
-    background-color: #4a5568;
-    border-color: #4a5568;
-    color: white;
-    text-decoration: none;
-    transform: translateY(-1px);
-}
-
-.mt-btn-outline {
-    background-color: transparent;
-    color: #4299e1;
-    border: 1px solid #4299e1;
-}
-
-.mt-btn-outline:hover {
-    background-color: #4299e1;
-    color: white;
-    text-decoration: none;
-}
-
-.mt-recent-activity {
-    margin-top: 30px;
-}
-
-.mt-recent-activity h3 {
-    color: #2d3748;
-    margin-bottom: 15px;
-}
-
-.mt-activity-list {
-    list-style: none;
-    padding: 0;
-}
-
-.mt-activity-item {
-    padding: 10px;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 14px;
-    color: #4a5568;
-}
-
-/* ===== VOTING INTERFACE SHORTCODE STYLES ===== */
-.mt-voting-interface {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.mt-voting-progress-header {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    color: white;
-    padding: 40px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.mt-voting-progress-header h2 {
-    margin: 0 0 10px 0;
-    font-size: 2em;
-    font-weight: 700;
-}
-
-.mt-progress-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.mt-progress-stat {
-    text-align: center;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 20px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-}
-
-.mt-progress-stat .number {
-    display: block;
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.mt-progress-stat .label {
-    display: block;
-    font-size: 0.9em;
-    opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.mt-candidates-container {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.mt-voting-candidate-card {
-    margin-bottom: 20px;
-    padding: 20px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: white;
-    transition: all 0.2s ease;
-}
-
-.mt-voting-candidate-card:hover {
-    border-color: #4299e1;
-    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.1);
-}
-
-.mt-voting-status {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    margin: 10px 0;
-}
-
-.mt-voting-status.voted {
-    background: #c6f6d5;
-    color: #22543d;
-}
-
-.mt-voting-status.pending {
-    background: #fed7d7;
-    color: #c53030;
-}
-
-.mt-vote-btn {
-    background: #4299e1;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.mt-vote-btn:hover {
-    background: #3182ce;
-    transform: translateY(-1px);
-}
-
-/* ===== PROGRESS WIDGET STYLES ===== */
-.mt-voting-progress-widget {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin: 20px 0;
-}
-
-.mt-widget-type-mini_widget {
-    padding: 15px;
-}
-
-.mt-mini-progress-widget {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.mt-mini-content {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-}
-
-.mt-mini-icon {
-    font-size: 2em;
-    flex-shrink: 0;
-}
-
-.mt-mini-stats {
-    flex: 1;
-    text-align: center;
-}
-
-.mt-mini-number {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #2d3748;
-}
-
-.mt-mini-label {
-    font-size: 0.85em;
-    color: #718096;
-}
-
-.mt-mini-percentage {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #4299e1;
-    flex-shrink: 0;
-}
-
-.mt-progress-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-}
-
-.mt-progress-item {
-    text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
-
-.mt-progress-number {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #2d3748;
-    margin-bottom: 5px;
-}
-
-.mt-progress-label {
-    font-size: 0.8em;
-    color: #718096;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.mt-deadline-info {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 6px;
-    border-left: 4px solid #4299e1;
-    background: #ebf8ff;
-}
-
-.mt-deadline-info.warning {
-    border-left-color: #ed8936;
-    background: #fef5e7;
-}
-
-.mt-deadline-info.urgent {
-    border-left-color: #f56565;
-    background: #fed7d7;
-}
-
-.mt-deadline-info.expired {
-    border-left-color: #718096;
-    background: #edf2f7;
-}
-
-/* ===== RESPONSIVE DESIGN BREAKPOINTS ===== */
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1200px) {
     .mt-assignment-main {
         grid-template-columns: 1fr;
@@ -1537,7 +881,6 @@
         flex-direction: row;
         justify-content: center;
         padding: 15px;
-        min-width: auto;
     }
     
     .mt-assignment-arrows {
@@ -1549,14 +892,6 @@
         flex-direction: row;
         justify-content: space-around;
         padding: 15px;
-    }
-    
-    .mt-stat {
-        min-width: 80px;
-    }
-    
-    .mt-charts-container {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
 
@@ -1570,31 +905,18 @@
         flex-direction: column;
         align-items: stretch;
         gap: 15px;
-        padding: 15px;
-    }
-    
-    .mt-assignment-actions {
-        justify-content: center;
-        gap: 8px;
-    }
-    
-    .mt-assignment-actions .button {
-        font-size: 12px;
-        padding: 6px 12px;
     }
     
     .mt-assignment-filters {
         flex-direction: column;
         gap: 10px;
-        align-items: stretch;
     }
     
     .mt-search-input {
-        min-width: auto;
         width: 100%;
     }
     
-    .mt-overview-cards {
+    .mt-assignment-overview {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
@@ -1633,14 +955,18 @@
         gap: 10px;
     }
     
-    .mt-form-grid {
+    .mt-charts-container {
         grid-template-columns: 1fr;
+    }
+    
+    .mt-analytics-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
     
     .mt-modal-content {
         width: 95%;
         margin: 10px;
-        max-height: 95vh;
     }
     
     .mt-modal-header,
@@ -1648,148 +974,11 @@
     .mt-modal-footer {
         padding: 15px;
     }
-    
-    .mt-modal-footer {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .mt-modal-footer .button {
-        width: 100%;
-    }
-    
-    .mt-panel-header {
-        padding: 10px 15px;
-    }
-    
-    .mt-panel-header h3 {
-        font-size: 16px;
-    }
-    
-    .mt-candidate-item,
-    .mt-jury-item {
-        padding: 10px;
-        margin-bottom: 6px;
-    }
-    
-    .mt-candidate-header,
-    .mt-jury-header {
-        gap: 8px;
-    }
-    
-    .mt-item-name {
-        font-size: 13px;
-    }
-    
-    .mt-item-meta,
-    .mt-assignment-details {
-        font-size: 11px;
-    }
-    
-    .mt-notification {
-        left: 10px;
-        right: 10px;
-        max-width: none;
-    }
-    
-    .mt-matrix-table {
-        font-size: 12px;
-    }
-    
-    .mt-matrix-cell {
-        width: 30px;
-        height: 30px;
-        padding: 4px;
-    }
-    
-    .mt-dashboard-stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .mt-progress-stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .mt-progress-stat {
-        padding: 15px;
-    }
-    
-    .mt-health-actions {
-        justify-content: center;
-        gap: 8px;
-    }
-    
-    .mt-health-actions .button {
-        font-size: 12px;
-        padding: 6px 12px;
-    }
 }
 
 @media (max-width: 480px) {
-    .mt-assignment-interface {
-        padding: 8px;
-        margin: -8px -8px 0 -2px;
-    }
-    
-    .mt-assignment-header {
-        padding: 12px;
-    }
-    
-    .mt-assignment-actions .button {
-        font-size: 11px;
-        padding: 5px 10px;
-        gap: 4px;
-    }
-    
-    .mt-overview-cards {
+    .mt-assignment-overview {
         grid-template-columns: 1fr;
-    }
-    
-    .mt-overview-card {
-        padding: 12px;
-    }
-    
-    .mt-overview-number {
-        font-size: 1.8em;
-    }
-    
-    .mt-overview-label {
-        font-size: 0.8em;
-    }
-    
-    .mt-assignment-main.mobile-layout {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .mt-assignment-actions-panel {
-        padding: 12px;
-    }
-    
-    .mt-assign-btn,
-    .mt-remove-btn {
-        padding: 10px 14px;
-        font-size: 12px;
-        min-width: 100px;
-    }
-    
-    .mt-assignment-stats {
-        padding: 12px;
-    }
-    
-    .mt-stat .number {
-        font-size: 1.5em;
-    }
-    
-    .mt-stat .label {
-        font-size: 0.75em;
-    }
-    
-    .mt-quick-btn {
-        padding: 6px 10px;
-        font-size: 11px;
     }
     
     .mt-candidates-list,
@@ -1799,160 +988,31 @@
     
     .mt-candidate-item,
     .mt-jury-item {
-        padding: 8px;
-        gap: 6px;
-    }
-    
-    .mt-item-name {
-        font-size: 12px;
-    }
-    
-    .mt-item-meta,
-    .mt-assignment-details {
-        font-size: 10px;
-    }
-    
-    .mt-assignment-count {
-        padding: 2px 6px;
-        font-size: 10px;
-        min-width: 20px;
-    }
-    
-    .mt-modal-content {
-        width: 98%;
-        margin: 5px;
-        max-height: 98vh;
-    }
-    
-    .mt-modal-header,
-    .mt-modal-body,
-    .mt-modal-footer {
-        padding: 12px;
-    }
-    
-    .mt-modal-header h3 {
-        font-size: 1.1em;
-    }
-    
-    .mt-form-row {
-        margin-bottom: 15px;
-    }
-    
-    .mt-form-row label {
-        font-size: 13px;
-        margin-bottom: 6px;
-    }
-    
-    .mt-form-row input,
-    .mt-form-row select,
-    .mt-form-row textarea {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-    
-    .mt-bulk-option {
-        padding: 12px;
+        padding: 10px;
         gap: 8px;
     }
     
-    .mt-bulk-icon {
-        font-size: 1.5em;
-    }
-    
-    .mt-bulk-content h4 {
+    .mt-item-name {
         font-size: 0.9em;
     }
     
-    .mt-bulk-content p {
+    .mt-item-meta {
         font-size: 0.8em;
     }
     
-    .mt-dashboard-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .mt-stat-card {
-        padding: 15px;
-    }
-    
-    .mt-stat-number {
-        font-size: 1.5em;
-    }
-    
-    .mt-btn {
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-    
-    .mt-voting-progress-header {
-        padding: 20px;
-    }
-    
-    .mt-voting-progress-header h2 {
-        font-size: 1.5em;
-    }
-    
-    .mt-progress-stats {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .mt-progress-stat {
-        padding: 12px;
-    }
-    
-    .mt-progress-stat .number {
-        font-size: 1.5em;
-    }
-    
-    .mt-voting-interface {
-        padding: 12px;
-    }
-    
-    .mt-candidates-container {
-        padding: 15px;
-    }
-    
-    .mt-voting-candidate-card {
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .mt-mini-progress-widget {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .mt-mini-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-    }
-    
-    .mt-health-section {
-        padding: 12px;
-    }
-    
-    .mt-health-status-card {
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-        padding: 15px;
-    }
-    
-    .mt-status-icon {
-        font-size: 24px;
+    .mt-notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
     }
 }
 
-/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+/* ===== ACCESSIBILITY ===== */
 .mt-assign-btn:focus,
 .mt-remove-btn:focus,
 .button:focus,
 .mt-search-input:focus,
-.mt-stage-selector:focus,
-.mt-candidate-checkbox:focus,
-.mt-jury-checkbox:focus {
+.mt-stage-selector:focus {
     outline: 2px solid #4299e1;
     outline-offset: 2px;
 }
@@ -1963,67 +1023,6 @@
     outline-offset: 2px;
 }
 
-.mt-modal:focus-within {
-    outline: none;
-}
-
-.mt-modal-content:focus {
-    outline: 2px solid #4299e1;
-    outline-offset: -2px;
-}
-
-/* Screen reader only content */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-/* ===== HIGH CONTRAST MODE SUPPORT ===== */
-@media (prefers-contrast: high) {
-    .mt-assignment-interface {
-        background: white;
-        color: black;
-    }
-    
-    .mt-overview-card,
-    .mt-candidate-item,
-    .mt-jury-item,
-    .mt-assignment-actions-panel {
-        border: 2px solid black;
-        background: white;
-        color: black;
-    }
-    
-    .button {
-        border: 2px solid black;
-        background: white;
-        color: black;
-    }
-    
-    .button:hover {
-        background: black;
-        color: white;
-    }
-    
-    .mt-assign-btn,
-    .mt-remove-btn {
-        border: 2px solid black;
-    }
-    
-    .mt-notification {
-        border: 2px solid black;
-        background: white;
-        color: black;
-    }
-}
-
 /* ===== DARK MODE SUPPORT ===== */
 @media (prefers-color-scheme: dark) {
     .mt-assignment-interface {
@@ -2032,16 +1031,10 @@
     }
     
     .mt-assignment-header,
-    .mt-overview-card,
     .mt-candidates-panel,
     .mt-jury-panel,
-    .mt-assignment-actions-panel,
-    .mt-modal-content,
-    .mt-jury-dashboard,
-    .mt-voting-interface,
-    .mt-voting-progress-widget {
+    .mt-assignment-actions-panel {
         background: #2d3748;
-        color: #e2e8f0;
         border-color: #4a5568;
     }
     
@@ -2052,90 +1045,14 @@
         color: #e2e8f0;
     }
     
-    .mt-candidate-item:hover,
-    .mt-jury-item:hover {
-        border-color: #63b3ed;
-        background: #3c4859;
-    }
-    
-    .mt-panel-header {
-        background: #4a5568;
-        border-color: #718096;
-    }
-    
-    .mt-form-section,
-    .mt-health-section,
-    .mt-stat-card,
-    .mt-progress-item {
-        background: #4a5568;
-        color: #e2e8f0;
-    }
-    
-    .mt-stage-selector,
-    .mt-search-input,
-    .mt-form-row input,
-    .mt-form-row select,
-    .mt-form-row textarea {
-        background: #2d3748;
-        border-color: #4a5568;
-        color: #e2e8f0;
-    }
-    
-    .mt-stage-selector:focus,
-    .mt-search-input:focus,
-    .mt-form-row input:focus,
-    .mt-form-row select:focus,
-    .mt-form-row textarea:focus {
-        border-color: #63b3ed;
-        box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
-    }
-    
-    .mt-notification {
+    .mt-overview-card {
         background: #2d3748;
         color: #e2e8f0;
-        border-left-color: #63b3ed;
-    }
-    
-    .mt-notification-success {
-        border-left-color: #68d391;
-    }
-    
-    .mt-notification-error {
-        border-left-color: #fc8181;
-    }
-    
-    .mt-notification-warning {
-        border-left-color: #f6ad55;
-    }
-}
-
-/* ===== REDUCED MOTION SUPPORT ===== */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-    
-    .mt-spinner {
-        animation: none;
-        border-top-color: #4299e1;
-    }
-    
-    .mt-loading {
-        animation: none;
-    }
-    
-    .mt-modal {
-        animation: none;
     }
     
     .mt-modal-content {
-        animation: none;
-    }
-    
-    .mt-notification {
-        animation: none;
+        background: #2d3748;
+        color: #e2e8f0;
     }
 }
 
@@ -2144,210 +1061,16 @@
     .mt-assignment-actions,
     .mt-assignment-arrows,
     .mt-modal,
-    .mt-notification,
-    .mt-loading-overlay,
-    .button {
+    .mt-notification {
         display: none !important;
     }
     
     .mt-assignment-interface {
         background: white;
         color: black;
-        margin: 0;
-        padding: 10px;
     }
     
     .mt-assignment-main {
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-    
-    .mt-overview-cards {
-        grid-template-columns: repeat(4, 1fr);
-        page-break-inside: avoid;
-    }
-    
-    .mt-overview-card {
-        border: 1px solid #000;
-        box-shadow: none;
-    }
-    
-    .mt-candidate-item,
-    .mt-jury-item {
-        border: 1px solid #000;
-        page-break-inside: avoid;
-        background: white;
-        color: black;
-    }
-    
-    .mt-panel-header {
-        background: #f5f5f5;
-        border-bottom: 2px solid #000;
-    }
-    
-    .mt-health-results,
-    .mt-dashboard-stats {
-        page-break-inside: avoid;
-    }
-}
-
-/* ===== PERFORMANCE OPTIMIZATIONS ===== */
-.mt-assignment-interface * {
-    box-sizing: border-box;
-}
-
-.mt-candidates-list,
-.mt-jury-list {
-    contain: layout style;
-    will-change: scroll-position;
-}
-
-.mt-modal {
-    contain: layout style;
-    will-change: opacity, transform;
-}
-
-.mt-notification {
-    contain: layout style;
-    will-change: transform, opacity;
-}
-
-.mt-spinner {
-    contain: layout style;
-    will-change: transform;
-}
-
-/* ===== CUSTOM SCROLLBARS ===== */
-.mt-candidates-list::-webkit-scrollbar,
-.mt-jury-list::-webkit-scrollbar,
-.mt-modal-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.mt-candidates-list::-webkit-scrollbar-track,
-.mt-jury-list::-webkit-scrollbar-track,
-.mt-modal-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.mt-candidates-list::-webkit-scrollbar-thumb,
-.mt-jury-list::-webkit-scrollbar-thumb,
-.mt-modal-content::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.mt-candidates-list::-webkit-scrollbar-thumb:hover,
-.mt-jury-list::-webkit-scrollbar-thumb:hover,
-.mt-modal-content::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* ===== ADDITIONAL UTILITY CLASSES ===== */
-.mt-text-center { text-align: center; }
-.mt-text-left { text-align: left; }
-.mt-text-right { text-align: right; }
-
-.mt-mb-0 { margin-bottom: 0; }
-.mt-mb-1 { margin-bottom: 0.25rem; }
-.mt-mb-2 { margin-bottom: 0.5rem; }
-.mt-mb-3 { margin-bottom: 0.75rem; }
-.mt-mb-4 { margin-bottom: 1rem; }
-
-.mt-p-0 { padding: 0; }
-.mt-p-1 { padding: 0.25rem; }
-.mt-p-2 { padding: 0.5rem; }
-.mt-p-3 { padding: 0.75rem; }
-.mt-p-4 { padding: 1rem; }
-
-.mt-hidden { display: none !important; }
-.mt-visible { display: block !important; }
-
-.mt-flex { display: flex; }
-.mt-flex-col { flex-direction: column; }
-.mt-flex-row { flex-direction: row; }
-.mt-flex-wrap { flex-wrap: wrap; }
-.mt-flex-nowrap { flex-wrap: nowrap; }
-
-.mt-justify-start { justify-content: flex-start; }
-.mt-justify-center { justify-content: center; }
-.mt-justify-end { justify-content: flex-end; }
-.mt-justify-between { justify-content: space-between; }
-
-.mt-items-start { align-items: flex-start; }
-.mt-items-center { align-items: center; }
-.mt-items-end { align-items: flex-end; }
-
-.mt-w-full { width: 100%; }
-.mt-h-full { height: 100%; }
-
-.mt-rounded { border-radius: 0.375rem; }
-.mt-rounded-lg { border-radius: 0.5rem; }
-.mt-rounded-xl { border-radius: 0.75rem; }
-
-.mt-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
-.mt-shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-
-/* ===== LOADING STATES FOR DIFFERENT COMPONENTS ===== */
-.mt-candidates-list.loading,
-.mt-jury-list.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.mt-overview-card.loading {
-    position: relative;
-    overflow: hidden;
-}
-
-.mt-overview-card.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-}
-
-/* ===== FINAL RESPONSIVE GRID ADJUSTMENTS ===== */
-@media (max-width: 320px) {
-    .mt-assignment-interface {
-        padding: 5px;
-        margin: -5px -5px 0 -2px;
-    }
-    
-    .mt-assignment-header {
-        padding: 10px;
-    }
-    
-    .mt-assignment-actions .button {
-        font-size: 10px;
-        padding: 4px 8px;
-    }
-    
-    .mt-overview-number {
-        font-size: 1.5em;
-    }
-    
-    .mt-assign-btn,
-    .mt-remove-btn {
-        padding: 8px 12px;
-        font-size: 11px;
-        min-width: 80px;
-    }
-    
-    .mt-modal-content {
-        width: 100%;
-        margin: 0;
-        border-radius: 0;
-        max-height: 100vh;
     }
 }

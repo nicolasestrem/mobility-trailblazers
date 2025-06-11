@@ -206,6 +206,8 @@ class MobilityTrailblazers {
             return '<div class="mt-access-denied">Access denied.</div>';
         }
         
+        // Ensure scripts and styles are loaded
+        $this->enqueue_scripts();
         wp_enqueue_script('mt-voting-interface');
         wp_enqueue_style('mt-voting-styles');
         
@@ -240,6 +242,52 @@ class MobilityTrailblazers {
                 </div>
             <?php endif; ?>
         </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            // Load dashboard statistics
+            if ($('#mtDashboardStats').length) {
+                $.ajax({
+                    url: mtVoting.apiUrl + 'jury-stats',
+                    method: 'GET',
+                    headers: {
+                        'X-WP-Nonce': mtVoting.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#mtDashboardStats').html(response.data.html);
+                        } else {
+                            $('#mtDashboardStats').html('<div class="mt-error">' + response.data.message + '</div>');
+                        }
+                    },
+                    error: function() {
+                        $('#mtDashboardStats').html('<div class="mt-error">Failed to load statistics</div>');
+                    }
+                });
+            }
+
+            // Load recent activity
+            if ($('#mtRecentActivity').length) {
+                $.ajax({
+                    url: mtVoting.apiUrl + 'jury-activity',
+                    method: 'GET',
+                    headers: {
+                        'X-WP-Nonce': mtVoting.nonce
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#mtRecentActivity').html(response.data.html);
+                        } else {
+                            $('#mtRecentActivity').html('<div class="mt-error">' + response.data.message + '</div>');
+                        }
+                    },
+                    error: function() {
+                        $('#mtRecentActivity').html('<div class="mt-error">Failed to load recent activity</div>');
+                    }
+                });
+            }
+        });
+        </script>
         <?php
         return ob_get_clean();
     }
@@ -705,36 +753,35 @@ class MobilityTrailblazers {
      * Enqueue Scripts (Frontend)
      */
     public function enqueue_scripts() {
-        // Only enqueue if user has voting permissions or on candidate pages
-        if (current_user_can('vote_on_candidates') || current_user_can('manage_voting_phases') || is_singular('candidate') || is_post_type_archive('candidate')) {
-            
-            wp_enqueue_script(
-                'mt-voting-interface',
-                MT_PLUGIN_URL . 'assets/js/voting-interface.js',
-                array('jquery'),
-                MT_PLUGIN_VERSION,
-                true
-            );
-            
-            wp_enqueue_style(
-                'mt-voting-styles',
-                MT_PLUGIN_URL . 'assets/css/voting-styles.css',
-                array(),
-                MT_PLUGIN_VERSION
-            );
-            
-            wp_localize_script('mt-voting-interface', 'mtVotingData', array(
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'restUrl' => rest_url('mt/v1/'),
-                'nonce' => wp_create_nonce('wp_rest'),
-                'currentUser' => get_current_user_id(),
-                'userCan' => array(
-                    'vote' => current_user_can('vote_on_candidates'),
-                    'manageVoting' => current_user_can('manage_voting_phases'),
-                    'viewResults' => current_user_can('view_voting_results')
-                )
-            ));
-        }
+        // Register and enqueue voting interface scripts
+        wp_register_script(
+            'mt-voting-interface',
+            plugins_url('assets/js/voting-interface.js', __FILE__),
+            array('jquery'),
+            '1.0.0',
+            true
+        );
+
+        // Register and enqueue voting styles
+        wp_register_style(
+            'mt-voting-styles',
+            plugins_url('assets/css/voting-styles.css', __FILE__),
+            array(),
+            '1.0.0'
+        );
+
+        // Add localized script data
+        wp_localize_script('mt-voting-interface', 'mtVoting', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_voting_nonce'),
+            'apiUrl' => rest_url('mt/v1/'),
+            'currentUser' => wp_get_current_user()->ID,
+            'strings' => array(
+                'error' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
+                'success' => __('Vote recorded successfully.', 'mobility-trailblazers'),
+                'confirm' => __('Are you sure you want to submit this vote?', 'mobility-trailblazers')
+            )
+        ));
     }
     
     /**

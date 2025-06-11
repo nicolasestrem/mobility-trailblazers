@@ -53,8 +53,6 @@
             this.isInitialized = false;
             this.autoRefreshInterval = null;
             this.dragDropEnabled = false;
-            this.isMatrixViewActive = false;
-            this.matrixView = null;
             
             // API configuration
             this.apiUrl = (window.mtAssignment && window.mtAssignment.apiUrl) || '/wp-json/mt/v1/';
@@ -135,11 +133,6 @@
             $('#mtAssignmentStatusFilter').on('change', (e) => {
                 this.currentFilters.assignmentStatus = e.target.value;
                 this.filterByAssignmentStatus(e.target.value);
-            });
-            
-            // Matrix view toggle
-            $(document).on('click', '#mtToggleMatrixView', (e) => {
-                this.toggleMatrixView();
             });
             
             // Selection handlers with delegation
@@ -702,50 +695,6 @@
         
         handleWindowResize() {
             // Window resize handling for responsive design
-        }
-
-        /**
-         * Initialize matrix view
-         */
-        initializeMatrixView() {
-            this.matrixView = new AssignmentMatrixView(
-                this.candidates, 
-                this.juryMembers, 
-                this.assignmentData, 
-                this.currentStage
-            );
-        }
-
-        /**
-         * Toggle between matrix and list views
-         */
-        toggleMatrixView() {
-            const matrixContainer = $('#mtMatrixContainer');
-            const mainInterface = $('#mtAssignmentMain');
-            
-            if (this.isMatrixViewActive) {
-                // Switch back to list view
-                matrixContainer.hide();
-                mainInterface.show();
-                $('#mtToggleMatrixView').text('📊 Matrix View');
-                this.isMatrixViewActive = false;
-            } else {
-                // Switch to matrix view
-                if (!this.matrixView) {
-                    this.initializeMatrixView();
-                }
-                
-                // Render matrix view
-                const matrixHtml = this.matrixView.render();
-                matrixContainer.html(matrixHtml).show();
-                mainInterface.hide();
-                
-                // Initialize matrix event handlers
-                this.matrixView.initializeEventHandlers();
-                
-                $('#mtToggleMatrixView').text('📋 List View');
-                this.isMatrixViewActive = true;
-            }
         }
     }
     
