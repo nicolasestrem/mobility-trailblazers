@@ -48,6 +48,10 @@ class MobilityTrailblazersAssignmentInterface {
         
         // Initialize cache group
         wp_cache_add_global_groups(array($this->cache_group));
+        
+        // Register AJAX handlers
+        add_action('wp_ajax_mt_get_candidates_data', array($this, 'ajax_get_candidates'));
+        add_action('wp_ajax_mt_get_jury_data', array($this, 'ajax_get_jury_members'));
     }
     
     /**
@@ -3624,6 +3628,92 @@ class MobilityTrailblazersAssignmentInterface {
         } catch (Exception $e) {
             wp_send_json_error('Operation failed: ' . $e->getMessage());
         }
+    }
+
+    public function inject_element_fix_script() {
+        $screen = get_current_screen();
+        if (!$screen || strpos($screen->id, 'mobility-assignments') === false) {
+            return;
+        }
+        ?>
+        <script>
+        function createMissingAssignmentElements() {
+            const $ = jQuery;
+            
+            if (!$('#mtAssignmentInterface').length) {
+                $('.wrap').append(`
+                    <div id="mtAssignmentInterface" class="mt-assignment-interface">
+                        <div class="mt-assignment-header">
+                            <h1>Advanced Jury Assignment Interface</h1>
+                            <div class="mt-assignment-actions">
+                                <button id="mtAutoAssign" class="button button-primary">Auto-Assign</button>
+                                <button id="mtBulkAssign" class="button">Bulk Operations</button>
+                            </div>
+                        </div>
+                        <div class="mt-assignment-main">
+                            <div class="mt-candidates-panel">
+                                <div id="mtCandidatesList" class="mt-candidates-list"></div>
+                            </div>
+                            <div class="mt-jury-panel">
+                                <div id="mtJuryList" class="mt-jury-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+        }
+        
+        jQuery(document).ready(function($) {
+            createMissingAssignmentElements();
+            // Initialize after elements are created
+            setTimeout(function() {
+                if (window.AssignmentInterface) {
+                    new AssignmentInterface();
+                }
+            }, 500);
+        });
+        </script>
+        <?php
+    }
+
+    public function ajax_get_candidates() {
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
+            wp_send_json_error('Invalid nonce');
+        }
+        
+        global $wpdb;
+        $candidates = $wpdb->get_results("
+            SELECT p.ID, p.post_title as name
+            FROM {$wpdb->posts} p
+            WHERE p.post_type = 'candidate' AND p.post_status = 'publish'
+            ORDER BY p.post_title
+        ");
+        
+        wp_send_json_success($candidates);
+    }
+
+    public function ajax_get_jury_members() {
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
+            wp_send_json_error('Invalid nonce');
+        }
+        
+        global $wpdb;
+        $jury_members = $wpdb->get_results("
+            SELECT u.ID, u.display_name as name, u.user_email as email,
+                   COUNT(DISTINCT a.candidate_id) as assignments
+            FROM {$wpdb->users} u
+            LEFT JOIN {$wpdb->prefix}mt_assignments a ON u.ID = a.jury_id
+            WHERE u.ID IN (
+                SELECT user_id 
+                FROM {$wpdb->usermeta} 
+                WHERE meta_key = '{$wpdb->prefix}capabilities' 
+                AND meta_value LIKE '%jury%'
+            )
+            GROUP BY u.ID
+            ORDER BY u.display_name
+        ");
+        
+        wp_send_json_success($jury_members);
     }
 }
 
