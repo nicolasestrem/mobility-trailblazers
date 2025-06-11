@@ -133,186 +133,14 @@ class MobilityTrailblazersAssignmentInterface {
      * Register comprehensive REST API endpoints with proper error handling
      */
     public function register_assignment_endpoints() {
-        // System health check endpoint
+        // Update health-check endpoint to use public permission
         register_rest_route('mt/v1', '/health-check', array(
             'methods' => 'GET',
             'callback' => array($this, 'health_check_endpoint'),
-            'permission_callback' => array($this, 'check_admin_permission')
+            'permission_callback' => array($this, 'check_public_permission')
         ));
-        
-        // Database status endpoint
-        register_rest_route('mt/v1', '/db-status', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_database_status'),
-            'permission_callback' => array($this, 'check_admin_permission')
-        ));
-        
-        // Jury stats endpoint
-        register_rest_route('mt/v1', '/jury-stats', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_jury_stats'),
-            'permission_callback' => array($this, 'check_jury_permission_flexible'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
-            )
-        ));
-        
-        // Recent activity endpoint
-        register_rest_route('mt/v1', '/recent-activity', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_recent_activity'),
-            'permission_callback' => array($this, 'check_jury_permission_flexible'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
-                'limit' => array('required' => false, 'type' => 'integer', 'default' => 10)
-            )
-        ));
-        
-        // Get candidates with assignment status
-        register_rest_route('mt/v1', '/candidates-assignment-status', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_candidates_assignment_status'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
-                'include_meta' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'include_categories' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'include_votes' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Get jury members with assignment data
-        register_rest_route('mt/v1', '/jury-assignment-status', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_jury_assignment_status'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
-                'include_meta' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'include_expertise' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'include_workload' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Voting progress endpoint
-        register_rest_route('mt/v1', '/voting-progress', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_voting_progress'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
-            )
-        ));
-        
-        // Bulk assignment endpoint
-        register_rest_route('mt/v1', '/bulk-assign', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'bulk_assign_candidates'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'assignments' => array('required' => true, 'type' => 'array'),
-                'stage' => array('required' => true, 'type' => 'string'),
-                'mode' => array('required' => false, 'type' => 'string', 'default' => 'add'),
-                'validate_conflicts' => array('required' => false, 'type' => 'boolean', 'default' => true),
-                'send_notifications' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Auto-assignment endpoint
-        register_rest_route('mt/v1', '/auto-assign', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'auto_assign_candidates'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => true, 'type' => 'string'),
-                'candidates_per_jury' => array('required' => true, 'type' => 'integer'),
-                'distribution_method' => array('required' => false, 'type' => 'string', 'default' => 'balanced'),
-                'clear_existing' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'balance_categories' => array('required' => false, 'type' => 'boolean', 'default' => true),
-                'respect_expertise' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'optimization_level' => array('required' => false, 'type' => 'string', 'default' => 'standard')
-            )
-        ));
-        
-        // Remove assignments endpoint
-        register_rest_route('mt/v1', '/remove-assignments', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'remove_assignments'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'jury_ids' => array('required' => false, 'type' => 'array', 'default' => array()),
-                'candidate_ids' => array('required' => false, 'type' => 'array', 'default' => array()),
-                'stage' => array('required' => true, 'type' => 'string'),
-                'force_remove' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Assignment analytics
-        register_rest_route('mt/v1', '/assignment-analytics', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_assignment_analytics'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
-                'include_trends' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Assignment report generation
-        register_rest_route('mt/v1', '/assignment-report', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'generate_assignment_report'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
-                'date_range' => array('required' => false, 'type' => 'string', 'default' => '30days'),
-                'category' => array('required' => false, 'type' => 'string', 'default' => 'all'),
-                'include_trends' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'include_insights' => array('required' => false, 'type' => 'boolean', 'default' => false)
-            )
-        ));
-        
-        // Clone assignments between stages
-        register_rest_route('mt/v1', '/clone-assignments', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'clone_assignments_between_stages'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'from_stage' => array('required' => true, 'type' => 'string'),
-                'to_stage' => array('required' => true, 'type' => 'string'),
-                'filter_winners' => array('required' => false, 'type' => 'boolean', 'default' => false),
-                'clear_target_assignments' => array('required' => false, 'type' => 'boolean', 'default' => true)
-            )
-        ));
-        
-        // Voting phases management
-        register_rest_route('mt/v1', '/voting-phases', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_voting_phases'),
-            'permission_callback' => array($this, 'check_admin_permission')
-        ));
-        
-        // Assignment conflicts detection
-        register_rest_route('mt/v1', '/assignment-conflicts', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'detect_assignment_conflicts'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
-            )
-        ));
-        
-        // Assignment optimization suggestions
-        register_rest_route('mt/v1', '/assignment-optimization', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_optimization_suggestions'),
-            'permission_callback' => array($this, 'check_admin_permission'),
-            'args' => array(
-                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
-            )
-        ));
-        
-        // MISSING ENDPOINT 1: /jury-members (JavaScript expects this)
+
+        // Register new endpoints with proper permission callbacks
         register_rest_route('mt/v1', '/jury-members', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_jury_members_for_assignment'),
@@ -324,7 +152,6 @@ class MobilityTrailblazersAssignmentInterface {
             )
         ));
 
-        // MISSING ENDPOINT 2: /candidates (JavaScript expects this)
         register_rest_route('mt/v1', '/candidates', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_candidates_for_assignment'),
@@ -336,14 +163,12 @@ class MobilityTrailblazersAssignmentInterface {
             )
         ));
 
-        // MISSING ENDPOINT 3: /voting-phase (singular - JavaScript expects this)
         register_rest_route('mt/v1', '/voting-phase', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_current_voting_phase'),
             'permission_callback' => array($this, 'check_admin_permission')
         ));
 
-        // MISSING ENDPOINT 4: /assignment-overview (JavaScript expects this)
         register_rest_route('mt/v1', '/assignment-overview', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_assignment_overview'),
@@ -352,24 +177,90 @@ class MobilityTrailblazersAssignmentInterface {
                 'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
             )
         ));
+
+        // Add temporary debugging endpoint
+        register_rest_route('mt/v1', '/test-public', array(
+            'methods' => 'GET',
+            'callback' => function() {
+                return array(
+                    'status' => 'success',
+                    'message' => 'Public endpoint working',
+                    'current_user' => get_current_user_id(),
+                    'timestamp' => current_time('mysql')
+                );
+            },
+            'permission_callback' => '__return_true'
+        ));
     }
     
     /**
-     * Enhanced permission checking with fallbacks
+     * Enhanced permission checking with proper fallbacks and debugging
      */
     public function check_admin_permission($request) {
-        // Multiple fallback checks for permissions
-        if (current_user_can('manage_options')) return true;
-        if (current_user_can('assign_candidates_to_jury')) return true;
-        if (current_user_can('manage_voting_phases')) return true;
-        if (current_user_can('view_voting_reports')) return true;
+        // Log the permission check for debugging
+        error_log('MT: Permission check called for user: ' . get_current_user_id());
+        
+        // Allow access for administrators
+        if (current_user_can('manage_options')) {
+            error_log('MT: Permission granted - user has manage_options');
+            return true;
+        }
+        
+        // Allow access for users with specific capabilities
+        $required_caps = [
+            'assign_candidates_to_jury',
+            'manage_voting_phases', 
+            'view_voting_reports',
+            'manage_jury_members'
+        ];
+        
+        foreach ($required_caps as $cap) {
+            if (current_user_can($cap)) {
+                error_log('MT: Permission granted - user has ' . $cap);
+                return true;
+            }
+        }
         
         // Log permission failure for debugging
-        error_log('MT Assignment Interface: Permission denied for user ' . get_current_user_id());
+        error_log('MT: Permission denied for user ' . get_current_user_id() . ' - missing required capabilities');
         
         return false;
     }
-    
+
+    /**
+     * Add a public permission callback for health check
+     */
+    public function check_public_permission($request) {
+        return true; // Always allow public access
+    }
+
+    /**
+     * Add a flexible jury permission callback  
+     */
+    private function check_jury_permission_flexible($request) {
+        if (!is_user_logged_in()) {
+            error_log('User not logged in');
+            return false;
+        }
+
+        $user_id = get_current_user_id();
+        $stage = $request->get_param('stage') ?: 'semifinal';
+        
+        // Check if user is a jury member for the current stage
+        $jury_meta_key = 'jury_' . $stage;
+        $is_jury = get_user_meta($user_id, $jury_meta_key, true);
+        
+        error_log(sprintf(
+            'Checking jury permissions - User ID: %d, Stage: %s, Meta Key: %s, Is Jury: %s',
+            $user_id,
+            $stage,
+            $jury_meta_key,
+            $is_jury ? 'yes' : 'no'
+        ));
+        
+        return !empty($is_jury);
+    }
+
     /**
      * IMPLEMENTED: Health check endpoint
      */
@@ -1334,33 +1225,36 @@ class MobilityTrailblazersAssignmentInterface {
     }
     
     public function get_optimization_suggestions($request) {
-        global $wpdb;
-        
-        $stage_param = $request->get_param('stage');
-        $stage = $stage_param ? sanitize_text_field($stage_param) : 'semifinal';
-        
-        $suggestions = array();
-        
-        // Get assignment count
-        $assignment_count = $wpdb->get_var($wpdb->prepare("
-            SELECT COUNT(*) FROM {$this->assignments_table} WHERE stage = %s
-        ", $stage));
-        
-        if ($assignment_count == 0) {
-            $suggestions[] = array(
-                'type' => 'no_assignments',
-                'priority' => 'high',
-                'title' => 'No Assignments Found',
-                'description' => 'No assignments have been created for this stage.',
-                'action' => 'Use the auto-assign feature to create initial assignments.'
-            );
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            $optimization_type = $request->get_param('type') ?? 'workload';
+            
+            global $wpdb;
+            
+            $suggestions = array();
+            
+            if ($optimization_type === 'workload') {
+                $suggestions = $wpdb->get_results($wpdb->prepare("
+                    SELECT jury_member_id, COUNT(*) as total_assigned,
+                           SUM(CASE WHEN v.id IS NOT NULL THEN 1 ELSE 0 END) as total_voted,
+                           SUM(CASE WHEN v.is_final = 1 THEN 1 ELSE 0 END) as final_votes
+                    FROM {$this->assignments_table} ja
+                    LEFT JOIN {$this->votes_table} v ON ja.candidate_id = v.candidate_id 
+                                                     AND ja.jury_member_id = v.jury_member_id 
+                                                     AND v.stage = %s
+                    WHERE ja.stage = %s
+                    GROUP BY jury_member_id
+                    ORDER BY total_assigned DESC
+                    LIMIT 5", $stage, $stage));
+            }
+            
+            return rest_ensure_response(array(
+                'status' => 'success',
+                'suggestions' => $suggestions
+            ));
+        } catch (Exception $e) {
+            return new WP_Error('optimization_error', $e->getMessage());
         }
-        
-        return rest_ensure_response(array(
-            'stage' => $stage,
-            'suggestions' => $suggestions,
-            'total_suggestions' => count($suggestions)
-        ));
     }
     
     /**
@@ -2957,28 +2851,6 @@ class MobilityTrailblazersAssignmentInterface {
     }
     
     /**
-     * Enqueue assignment scripts for frontend
-     */
-    public function enqueue_assignment_scripts() {
-        // Frontend scripts if needed for public-facing features
-        if (is_user_logged_in() && (current_user_can('vote_on_candidates') || current_user_can('assign_candidates_to_jury') || current_user_can('manage_options'))) {
-            wp_enqueue_script(
-                'mt-assignment-public',
-                defined('MT_PLUGIN_URL') ? MT_PLUGIN_URL . 'assets/js/assignment-public.js' : '',
-                array('jquery'),
-                $this->plugin_version,
-                true
-            );
-            
-            wp_localize_script('mt-assignment-public', 'mtAssignmentPublic', array(
-                'apiUrl' => rest_url('mt/v1/'),
-                'nonce' => wp_create_nonce('wp_rest'),
-                'currentUser' => get_current_user_id()
-            ));
-        }
-    }
-    
-    /**
      * Handle legacy AJAX endpoints for backward compatibility
      */
     public function handle_bulk_assignment() {
@@ -3378,6 +3250,412 @@ class MobilityTrailblazersAssignmentInterface {
         } catch (Exception $e) {
             error_log('Error in get_recent_activity: ' . $e->getMessage());
             return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get jury members formatted for assignment interface
+     */
+    public function get_jury_members_for_assignment($request) {
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            $include_workload = $request->get_param('include_workload') ?? true;
+            
+            // Get all users with jury_member role or administrators
+            $jury_members = get_users(array(
+                'role__in' => array('jury_member', 'administrator'),
+                'meta_key' => 'wp_capabilities',
+                'meta_compare' => 'EXISTS'
+            ));
+            
+            $formatted_jury = array();
+            
+            foreach ($jury_members as $user) {
+                $jury_data = array(
+                    'id' => $user->ID,
+                    'name' => $user->display_name,
+                    'email' => $user->user_email,
+                    'expertise' => get_user_meta($user->ID, 'expertise_areas', true) ?: array(),
+                    'workload_analysis' => array()
+                );
+                
+                if ($include_workload) {
+                    // Get assignment workload for this jury member
+                    global $wpdb;
+                    $assignments = $wpdb->get_results($wpdb->prepare("
+                        SELECT COUNT(*) as total_assigned,
+                               SUM(CASE WHEN v.id IS NOT NULL THEN 1 ELSE 0 END) as total_voted,
+                               SUM(CASE WHEN v.is_final = 1 THEN 1 ELSE 0 END) as final_votes
+                        FROM {$this->assignments_table} ja
+                        LEFT JOIN {$this->votes_table} v ON ja.candidate_id = v.candidate_id 
+                                                         AND ja.jury_member_id = v.jury_member_id 
+                                                         AND v.stage = %s
+                        WHERE ja.jury_member_id = %d AND ja.stage = %s
+                    ", $stage, $user->ID, $stage));
+                    
+                    if (!empty($assignments)) {
+                        $jury_data['workload_analysis'] = array(
+                            'total_assigned' => (int)$assignments[0]->total_assigned,
+                            'total_voted' => (int)$assignments[0]->total_voted,
+                            'final_votes' => (int)$assignments[0]->final_votes,
+                            'completion_rate' => $assignments[0]->total_assigned > 0 
+                                ? round(($assignments[0]->total_voted / $assignments[0]->total_assigned) * 100, 1)
+                                : 0
+                        );
+                    }
+                }
+                
+                $formatted_jury[] = $jury_data;
+            }
+            
+            return new WP_REST_Response(array(
+                'success' => true,
+                'data' => $formatted_jury,
+                'total' => count($formatted_jury)
+            ), 200);
+            
+        } catch (Exception $e) {
+            error_log('Error in get_jury_members_for_assignment: ' . $e->getMessage());
+            return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get candidates formatted for assignment interface
+     */
+    public function get_candidates_for_assignment($request) {
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            $include_assignment_status = $request->get_param('include_assignment_status') ?? true;
+            $include_categories = $request->get_param('include_categories') ?? true;
+            
+            // Get all candidates
+            $candidates = get_posts(array(
+                'post_type' => 'candidate',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'meta_query' => array(
+                    array(
+                        'key' => 'stage',
+                        'value' => $stage,
+                        'compare' => '='
+                    )
+                )
+            ));
+            
+            $formatted_candidates = array();
+            
+            foreach ($candidates as $candidate) {
+                $candidate_data = array(
+                    'id' => $candidate->ID,
+                    'name' => $candidate->post_title,
+                    'company' => get_post_meta($candidate->ID, 'company', true),
+                    'position' => get_post_meta($candidate->ID, 'position', true),
+                    'innovation' => get_post_meta($candidate->ID, 'innovation_description', true),
+                    'category' => array(),
+                    'assignments' => array(),
+                    'assignment_count' => 0,
+                    'average_score' => null
+                );
+                
+                if ($include_categories) {
+                    $category_terms = wp_get_post_terms($candidate->ID, 'candidate_category');
+                    if (!empty($category_terms) && !is_wp_error($category_terms)) {
+                        $candidate_data['category'] = array(
+                            'id' => $category_terms[0]->term_id,
+                            'name' => $category_terms[0]->name,
+                            'slug' => $category_terms[0]->slug
+                        );
+                    }
+                }
+                
+                if ($include_assignment_status) {
+                    // Get assignments for this candidate
+                    global $wpdb;
+                    $assignments = $wpdb->get_results($wpdb->prepare("
+                        SELECT ja.jury_member_id, u.display_name as jury_name,
+                               v.total_score
+                        FROM {$this->assignments_table} ja
+                        LEFT JOIN {$wpdb->users} u ON ja.jury_member_id = u.ID
+                        LEFT JOIN {$this->votes_table} v ON ja.candidate_id = v.candidate_id 
+                                                         AND ja.jury_member_id = v.jury_member_id 
+                                                         AND v.stage = %s
+                        WHERE ja.candidate_id = %d AND ja.stage = %s
+                    ", $stage, $candidate->ID, $stage));
+                    
+                    $candidate_data['assignments'] = array();
+                    $total_score = 0;
+                    $score_count = 0;
+                    
+                    foreach ($assignments as $assignment) {
+                        $candidate_data['assignments'][] = array(
+                            'jury_id' => $assignment->jury_member_id,
+                            'jury_name' => $assignment->jury_name,
+                            'has_vote' => !is_null($assignment->total_score),
+                            'score' => $assignment->total_score
+                        );
+                        
+                        if (!is_null($assignment->total_score)) {
+                            $total_score += $assignment->total_score;
+                            $score_count++;
+                        }
+                    }
+                    
+                    $candidate_data['assignment_count'] = count($assignments);
+                    $candidate_data['average_score'] = $score_count > 0 ? $total_score / $score_count : null;
+                }
+                
+                $formatted_candidates[] = $candidate_data;
+            }
+            
+            return new WP_REST_Response(array(
+                'success' => true,
+                'data' => $formatted_candidates,
+                'total' => count($formatted_candidates)
+            ), 200);
+            
+        } catch (Exception $e) {
+            error_log('Error in get_candidates_for_assignment: ' . $e->getMessage());
+            return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get current voting phase (singular endpoint)
+     */
+    public function get_current_voting_phase($request) {
+        try {
+            global $wpdb;
+            
+            $current_phase = $wpdb->get_row("
+                SELECT * FROM {$this->phases_table} 
+                WHERE is_active = 1 
+                ORDER BY start_date DESC 
+                LIMIT 1
+            ");
+            
+            if (!$current_phase) {
+                // Return a default phase if none exists
+                $current_phase = (object) array(
+                    'id' => 0,
+                    'phase_name' => 'Default Voting Phase',
+                    'stage' => 'semifinal',
+                    'start_date' => current_time('mysql'),
+                    'end_date' => date('Y-m-d H:i:s', strtotime('+30 days')),
+                    'is_active' => 1,
+                    'max_candidates_per_jury' => 50,
+                    'min_votes_required' => 1
+                );
+            }
+            
+            return new WP_REST_Response(array(
+                'success' => true,
+                'data' => $current_phase
+            ), 200);
+            
+        } catch (Exception $e) {
+            error_log('Error in get_current_voting_phase: ' . $e->getMessage());
+            return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get assignment overview data
+     */
+    public function get_assignment_overview($request) {
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            
+            global $wpdb;
+            
+            // Get overall statistics
+            $stats = $wpdb->get_row($wpdb->prepare("
+                SELECT 
+                    COUNT(DISTINCT ja.candidate_id) as total_candidates,
+                    COUNT(DISTINCT ja.jury_member_id) as total_jury_members,
+                    COUNT(*) as total_assignments,
+                    AVG(CASE WHEN ja.jury_member_id IN (
+                        SELECT jury_member_id FROM {$this->assignments_table} 
+                        WHERE stage = %s 
+                        GROUP BY jury_member_id
+                    ) THEN (
+                        SELECT COUNT(*) FROM {$this->assignments_table} sub 
+                        WHERE sub.jury_member_id = ja.jury_member_id AND sub.stage = %s
+                    ) END) as avg_assignments_per_jury
+                FROM {$this->assignments_table} ja
+                WHERE ja.stage = %s
+            ", $stage, $stage, $stage));
+            
+            // Get voting progress
+            $voting_stats = $wpdb->get_row($wpdb->prepare("
+                SELECT 
+                    COUNT(DISTINCT v.candidate_id) as candidates_with_votes,
+                    COUNT(*) as total_votes,
+                    COUNT(CASE WHEN v.is_final = 1 THEN 1 END) as final_votes,
+                    AVG(v.total_score) as average_score
+                FROM {$this->votes_table} v
+                WHERE v.stage = %s
+            ", $stage));
+            
+            $overview_data = array(
+                'assignment_stats' => array(
+                    'total_candidates' => (int)($stats->total_candidates ?? 0),
+                    'total_jury_members' => (int)($stats->total_jury_members ?? 0),
+                    'total_assignments' => (int)($stats->total_assignments ?? 0),
+                    'avg_assignments_per_jury' => round($stats->avg_assignments_per_jury ?? 0, 1)
+                ),
+                'voting_stats' => array(
+                    'candidates_with_votes' => (int)($voting_stats->candidates_with_votes ?? 0),
+                    'total_votes' => (int)($voting_stats->total_votes ?? 0),
+                    'final_votes' => (int)($voting_stats->final_votes ?? 0),
+                    'average_score' => round($voting_stats->average_score ?? 0, 2),
+                    'completion_rate' => $stats->total_assignments > 0 
+                        ? round(($voting_stats->total_votes / $stats->total_assignments) * 100, 1)
+                        : 0
+                ),
+                'stage' => $stage,
+                'last_updated' => current_time('mysql')
+            );
+            
+            return new WP_REST_Response(array(
+                'success' => true,
+                'data' => $overview_data
+            ), 200);
+            
+        } catch (Exception $e) {
+            error_log('Error in get_assignment_overview: ' . $e->getMessage());
+            return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get jury members formatted for assignment interface
+     */
+    public function get_jury_members_for_assignment($request) {
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            $include_workload = $request->get_param('include_workload') ?? true;
+            
+            // Get all users with jury_member role or administrators
+            $jury_members = get_users(array(
+                'role__in' => array('jury_member', 'administrator'),
+                'meta_key' => 'wp_capabilities',
+                'meta_compare' => 'EXISTS'
+            ));
+            
+            $formatted_jury = array();
+            
+            foreach ($jury_members as $user) {
+                $jury_data = array(
+                    'id' => $user->ID,
+                    'name' => $user->display_name,
+                    'email' => $user->user_email,
+                    'expertise' => get_user_meta($user->ID, 'expertise_areas', true) ?: array(),
+                    'workload_analysis' => array()
+                );
+                
+                if ($include_workload) {
+                    // Get assignment workload for this jury member
+                    global $wpdb;
+                    $assignments = $wpdb->get_results($wpdb->prepare("
+                        SELECT COUNT(*) as total_assigned,
+                               SUM(CASE WHEN v.id IS NOT NULL THEN 1 ELSE 0 END) as total_voted,
+                               SUM(CASE WHEN v.is_final = 1 THEN 1 ELSE 0 END) as final_votes
+                        FROM {$this->assignments_table} ja
+                        LEFT JOIN {$this->votes_table} v ON ja.candidate_id = v.candidate_id 
+                                                         AND ja.jury_member_id = v.jury_member_id 
+                                                         AND v.stage = %s
+                        WHERE ja.jury_member_id = %d AND ja.stage = %s
+                    ", $stage, $user->ID, $stage));
+                    
+                    if (!empty($assignments)) {
+                        $jury_data['workload_analysis'] = array(
+                            'total_assigned' => (int)$assignments[0]->total_assigned,
+                            'total_voted' => (int)$assignments[0]->total_voted,
+                            'final_votes' => (int)$assignments[0]->final_votes,
+                            'completion_rate' => $assignments[0]->total_assigned > 0 
+                                ? round(($assignments[0]->total_voted / $assignments[0]->total_assigned) * 100, 1)
+                                : 0
+                        );
+                    }
+                }
+                
+                $formatted_jury[] = $jury_data;
+            }
+            
+            return new WP_REST_Response(array(
+                'success' => true,
+                'data' => $formatted_jury,
+                'total' => count($formatted_jury)
+            ), 200);
+            
+        } catch (Exception $e) {
+            error_log('Error in get_jury_members_for_assignment: ' . $e->getMessage());
+            return new WP_Error('server_error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Add a public permission callback for health check
+     */
+    public function check_public_permission($request) {
+        return true; // Always allow public access
+    }
+
+    /**
+     * Enqueue assignment scripts for frontend
+     */
+    public function enqueue_assignment_scripts() {
+        // Frontend scripts if needed for public-facing features
+        wp_enqueue_script('mt-assignment-interface', plugins_url('js/assignment-interface.js', __FILE__), array('jquery'), '1.0', true);
+        wp_localize_script('mt-assignment-interface', 'mtAssignmentInterface', array(
+            'restUrl' => rest_url('mt/v1/'),
+            'nonce' => wp_create_nonce('wp_rest'),
+            'userId' => get_current_user_id(),
+            'userCan' => array(
+                'manage_options' => current_user_can('manage_options'),
+                'assign_candidates_to_jury' => current_user_can('assign_candidates_to_jury'),
+                'manage_voting_phases' => current_user_can('manage_voting_phases'),
+                'view_voting_reports' => current_user_can('view_voting_reports'),
+                'manage_jury_members' => current_user_can('manage_jury_members'),
+                'vote_on_candidates' => current_user_can('vote_on_candidates')
+            )
+        ));
+    }
+
+    /**
+     * Get optimization suggestions for assignment
+     */
+    public function get_optimization_suggestions($request) {
+        try {
+            $stage = $request->get_param('stage') ?? 'semifinal';
+            $optimization_type = $request->get_param('type') ?? 'workload';
+            
+            global $wpdb;
+            
+            $suggestions = array();
+            
+            if ($optimization_type === 'workload') {
+                $suggestions = $wpdb->get_results($wpdb->prepare("
+                    SELECT jury_member_id, COUNT(*) as total_assigned,
+                           SUM(CASE WHEN v.id IS NOT NULL THEN 1 ELSE 0 END) as total_voted,
+                           SUM(CASE WHEN v.is_final = 1 THEN 1 ELSE 0 END) as final_votes
+                    FROM {$this->assignments_table} ja
+                    LEFT JOIN {$this->votes_table} v ON ja.candidate_id = v.candidate_id 
+                                                     AND ja.jury_member_id = v.jury_member_id 
+                                                     AND v.stage = %s
+                    WHERE ja.stage = %s
+                    GROUP BY jury_member_id
+                    ORDER BY total_assigned DESC
+                    LIMIT 5", $stage, $stage));
+            }
+            
+            return rest_ensure_response(array(
+                'status' => 'success',
+                'suggestions' => $suggestions
+            ));
+        } catch (Exception $e) {
+            return new WP_Error('optimization_error', $e->getMessage());
         }
     }
 }
