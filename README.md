@@ -19,6 +19,29 @@
 
 ---
 
+
+/mnt/dietpi_userdata/docker-files/STAGING/wordpress_data/wp-content/plugins/mobility-trailblazers/
+├── README.md
+├── assets
+│   ├── css
+│   │   ├── assignment-interface.css
+│   │   ├── assignment-matrix.css
+│   │   └── voting-styles.css
+│   └── js
+│       ├── assignment-interface.js
+│       ├── assignment-matrix-view.js
+│       ├── assignment-public.js
+│       └── voting-interface.js
+├── create_dummy_data.sh
+├── create_staging_final.sh
+├── jury-assignment-interface.php
+├── mobility-trailblazers.php
+└── voting-system.php
+
+4 directories, 13 files
+
+
+
 ## 🎯 Platform Overview
 
 The Mobility Trailblazers platform is a sophisticated WordPress-based award management system designed to identify and celebrate 25 mobility innovators in the DACH region annually. The platform orchestrates a multi-stage selection process culminating in an award ceremony at the Smart Mobility Summit in Berlin on October 30, 2025
