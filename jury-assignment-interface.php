@@ -1409,606 +1409,84 @@ class MobilityTrailblazersAssignmentInterface {
      * Render the complete assignment interface
      */
     public function render_assignment_interface() {
+        if (!current_user_can('assign_candidates_to_jury')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Get current stage
+        $current_stage = isset($_GET['stage']) ? sanitize_text_field($_GET['stage']) : 'semifinal';
+        
         ?>
-        <div class="wrap mt-assignment-interface">
-            <h1>
-                <span class="dashicons dashicons-networking"></span>
-                Advanced Jury Assignment Interface
-                <span class="mt-version-badge">v3.2 FIXED</span>
-            </h1>
-            
-            <div class="mt-system-status" id="mtSystemStatus">
-                <div class="mt-loading">
-                    <div class="mt-spinner"></div>
-                    <p>Checking system health...</p>
-                </div>
-            </div>
+        <div class="wrap mt-assignment-wrap">
+            <h1 class="wp-heading-inline"><?php _e('Advanced Jury Assignments', 'mobility-trailblazers'); ?></h1>
             
             <div class="mt-assignment-header">
-                <div class="mt-assignment-actions">
-                    <button id="mtAutoAssign" class="button button-primary">
-                        <span class="dashicons dashicons-randomize"></span>
-                        Auto-Assign
-                    </button>
-                    <button id="mtBulkAssign" class="button button-secondary">
-                        <span class="dashicons dashicons-admin-users"></span>
-                        Bulk Operations
-                    </button>
-                    <button id="mtExportAssignments" class="button">
-                        <span class="dashicons dashicons-download"></span>
-                        Export
-                    </button>
-                    <button id="mtImportAssignments" class="button">
-                        <span class="dashicons dashicons-upload"></span>
-                        Import
-                    </button>
-                    <button id="mtCloneAssignments" class="button">
-                        <span class="dashicons dashicons-admin-page"></span>
-                        Clone Stage
-                    </button>
+                <div class="mt-stage-selector">
+                    <select id="mtStageFilter" class="mt-stage-filter">
+                        <option value="semifinal" <?php selected($current_stage, 'semifinal'); ?>><?php _e('Semifinal', 'mobility-trailblazers'); ?></option>
+                        <option value="final" <?php selected($current_stage, 'final'); ?>><?php _e('Final', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </div>
+                
+                <div class="mt-view-toggle">
                     <button id="mtToggleMatrixView" class="button">
                         <span class="dashicons dashicons-grid-view"></span>
-                        Matrix View
-                    </button>
-                    <button id="mtRefreshData" class="button">
-                        <span class="dashicons dashicons-update"></span>
-                        Refresh
-                    </button>
-                    <button id="mtHealthCheck" class="button">
-                        <span class="dashicons dashicons-admin-tools"></span>
-                        Health Check
-                    </button>
-                </div>
-                
-                <div class="mt-assignment-filters">
-                    <select id="mtStageFilter" class="mt-stage-selector">
-                        <option value="shortlist">Shortlist (2000 → 200)</option>
-                        <option value="semifinal" selected>Semi-Final (200 → 50)</option>
-                        <option value="final">Final (50 → 25)</option>
-                    </select>
-                    
-                    <select id="mtCategoryFilter">
-                        <option value="">All Categories</option>
-                        <option value="established">Established Companies</option>
-                        <option value="startups">Start-ups & Scale-ups</option>
-                        <option value="politics">Politics & Public Companies</option>
-                    </select>
-                    
-                    <select id="mtAssignmentStatusFilter">
-                        <option value="all">All Statuses</option>
-                        <option value="unassigned">Unassigned</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="voted">Has Votes</option>
-                        <option value="incomplete">Assigned but No Votes</option>
-                    </select>
-                    
-                    <input type="text" id="mtSearchCandidates" placeholder="Search candidates..." class="mt-search-input">
-                    
-                    <button id="mtToggleAutoRefresh" class="button mt-auto-refresh-btn" title="Toggle auto-refresh">
-                        <span class="dashicons dashicons-update-alt"></span>
+                        <?php _e('Matrix View', 'mobility-trailblazers'); ?>
                     </button>
                 </div>
             </div>
             
-            <!-- Assignment Overview Cards -->
-            <div class="mt-assignment-overview" id="mtAssignmentOverview">
-                <div class="mt-loading">
-                    <div class="mt-spinner"></div>
-                    <p>Loading comprehensive assignment overview...</p>
-                </div>
-            </div>
-            
-            <!-- Main Assignment Interface -->
-            <div class="mt-assignment-main">
-                <!-- Left Panel: Candidates -->
-                <div class="mt-candidates-panel">
-                    <div class="mt-panel-header">
-                        <h3>
-                            <span class="dashicons dashicons-awards"></span>
-                            Candidates
-                            <span class="mt-count" id="mtCandidatesCount">0</span>
-                        </h3>
-                        <div class="mt-panel-actions">
-                            <button class="button button-small" id="mtSelectAllCandidates">Select All</button>
-                            <button class="button button-small" id="mtClearCandidateSelection">Clear</button>
-                            <button class="button button-small mt-panel-collapse" title="Collapse panel">−</button>
+            <div id="mtAssignmentInterface" class="mt-assignment-interface">
+                <!-- Main interface -->
+                <div id="mtAssignmentMain" class="mt-assignment-main">
+                    <!-- Existing interface content -->
+                    <div class="mt-filters">
+                        <div class="mt-search">
+                            <input type="text" id="mtSearchCandidates" placeholder="<?php _e('Search candidates...', 'mobility-trailblazers'); ?>">
                         </div>
-                    </div>
-                    <div class="mt-candidates-list" id="mtCandidatesList">
-                        <div class="mt-loading">
-                            <div class="mt-spinner"></div>
-                            <p>Loading candidates with assignment details...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Center Panel: Assignment Actions -->
-                <div class="mt-assignment-actions-panel">
-                    <div class="mt-assignment-arrows">
-                        <button class="mt-assign-btn" id="mtAssignSelected" title="Assign selected candidates to selected jury members" disabled>
-                            <span class="dashicons dashicons-arrow-right-alt2"></span>
-                            Assign
-                        </button>
-                        <button class="mt-remove-btn" id="mtRemoveSelected" title="Remove selected assignments" disabled>
-                            <span class="dashicons dashicons-arrow-left-alt2"></span>
-                            Remove
-                        </button>
-                    </div>
-                    
-                    <div class="mt-assignment-stats" id="mtAssignmentStats">
-                        <div class="mt-stat">
-                            <span class="number" id="mtTotalAssignments">0</span>
-                            <span class="label">Total Assignments</span>
-                        </div>
-                        <div class="mt-stat">
-                            <span class="number" id="mtAvgPerJury">0</span>
-                            <span class="label">Avg per Jury</span>
-                        </div>
-                        <div class="mt-stat">
-                            <span class="number" id="mtUnassignedCount">0</span>
-                            <span class="label">Unassigned</span>
-                        </div>
-                        <div class="mt-stat">
-                            <span class="number" id="mtVotingProgress">0%</span>
-                            <span class="label">Voting Progress</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-quick-actions">
-                        <button class="mt-quick-btn" id="mtQuickBalance" title="Quick balance assignments">
-                            ⚖️ Balance
-                        </button>
-                        <button class="mt-quick-btn" id="mtQuickOptimize" title="Optimize distribution">
-                            🎯 Optimize
-                        </button>
-                        <button class="mt-quick-btn" id="mtQuickValidate" title="Validate assignments">
-                            ✅ Validate
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Right Panel: Jury Members -->
-                <div class="mt-jury-panel">
-                    <div class="mt-panel-header">
-                        <h3>
-                            <span class="dashicons dashicons-groups"></span>
-                            Jury Members
-                            <span class="mt-count" id="mtJuryCount">0</span>
-                        </h3>
-                        <div class="mt-panel-actions">
-                            <button class="button button-small" id="mtSelectAllJury">Select All</button>
-                            <button class="button button-small" id="mtClearJurySelection">Clear</button>
-                            <button class="button button-small mt-panel-collapse" title="Collapse panel">−</button>
-                        </div>
-                    </div>
-                    <div class="mt-jury-list" id="mtJuryList">
-                        <div class="mt-loading">
-                            <div class="mt-spinner"></div>
-                            <p>Loading jury members with workload analysis...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Auto-Assignment Modal -->
-        <div id="mtAutoAssignModal" class="mt-modal" style="display: none;">
-            <div class="mt-modal-content mt-modal-lg">
-                <div class="mt-modal-header">
-                    <h3>🤖 Intelligent Auto-Assignment Configuration</h3>
-                    <button class="mt-modal-close">&times;</button>
-                </div>
-                <div class="mt-modal-body">
-                    <form id="mtAutoAssignForm">
-                        <div class="mt-form-grid">
-                            <div class="mt-form-section">
-                                <h4>Assignment Parameters</h4>
-                                <div class="mt-form-row">
-                                    <label for="mtCandidatesPerJury">Candidates per Jury Member:</label>
-                                    <input type="number" id="mtCandidatesPerJury" value="10" min="1" max="50">
-                                    <small>Recommended: 8-15 candidates per jury member</small>
-                                </div>
-                                
-                                <div class="mt-form-row">
-                                    <label for="mtDistributionMethod">Distribution Algorithm:</label>
-                                    <select id="mtDistributionMethod">
-                                        <option value="balanced">Balanced Distribution</option>
-                                        <option value="random">Random Distribution</option>
-                                        <option value="expertise">Expertise-Based Matching</option>
-                                        <option value="category_balanced">Category-Balanced</option>
-                                    </select>
-                                </div>
-                            </div>
+                        
+                        <div class="mt-filter-group">
+                            <select id="mtCategoryFilter" class="mt-filter">
+                                <option value="all"><?php _e('All Categories', 'mobility-trailblazers'); ?></option>
+                                <option value="startups"><?php _e('Startups', 'mobility-trailblazers'); ?></option>
+                                <option value="established"><?php _e('Established Companies', 'mobility-trailblazers'); ?></option>
+                                <option value="politics"><?php _e('Politics', 'mobility-trailblazers'); ?></option>
+                                <option value="research"><?php _e('Research', 'mobility-trailblazers'); ?></option>
+                            </select>
                             
-                            <div class="mt-form-section">
-                                <h4>Optimization Options</h4>
-                                <div class="mt-form-row">
-                                    <label>
-                                        <input type="checkbox" id="mtBalanceCategories" checked>
-                                        Balance category representation
-                                    </label>
-                                </div>
-                                
-                                <div class="mt-form-row">
-                                    <label>
-                                        <input type="checkbox" id="mtRespectExpertise">
-                                        Match jury expertise with candidate categories
-                                    </label>
-                                </div>
-                                
-                                <div class="mt-form-row">
-                                    <label>
-                                        <input type="checkbox" id="mtClearExisting">
-                                        Clear existing assignments first
-                                    </label>
-                                </div>
+                            <select id="mtAssignmentStatusFilter" class="mt-filter">
+                                <option value="all"><?php _e('All Status', 'mobility-trailblazers'); ?></option>
+                                <option value="assigned"><?php _e('Assigned', 'mobility-trailblazers'); ?></option>
+                                <option value="unassigned"><?php _e('Unassigned', 'mobility-trailblazers'); ?></option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-assignment-content">
+                        <div class="mt-candidates-section">
+                            <div class="mt-section-header">
+                                <h2><?php _e('Candidates', 'mobility-trailblazers'); ?></h2>
+                                <span id="mtCandidatesCount" class="mt-count"></span>
                             </div>
+                            <div id="mtCandidatesList" class="mt-candidates-list"></div>
                         </div>
                         
-                        <div class="mt-algorithm-preview">
-                            <h4>Algorithm Preview</h4>
-                            <div id="mtAlgorithmDescription">
-                                Select an algorithm to see its description and expected results.
+                        <div class="mt-jury-section">
+                            <div class="mt-section-header">
+                                <h2><?php _e('Jury Members', 'mobility-trailblazers'); ?></h2>
+                                <span id="mtJuryCount" class="mt-count"></span>
                             </div>
+                            <div id="mtJuryList" class="mt-jury-list"></div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-                <div class="mt-modal-footer">
-                    <button class="button button-primary" id="mtExecuteAutoAssign">
-                        🚀 Execute Auto-Assignment
-                    </button>
-                    <button class="button" id="mtCancelAutoAssign">Cancel</button>
+                
+                <!-- Matrix view container -->
+                <div id="mtMatrixContainer" class="mt-matrix-container" style="display: none;">
+                    <!-- Matrix view will be rendered here -->
                 </div>
             </div>
         </div>
-        
-        <!-- Health Check Modal -->
-        <div id="mtHealthCheckModal" class="mt-modal" style="display: none;">
-            <div class="mt-modal-content">
-                <div class="mt-modal-header">
-                    <h3>🏥 System Health Check</h3>
-                    <button class="mt-modal-close">&times;</button>
-                </div>
-                <div class="mt-modal-body">
-                    <div id="mtHealthCheckResults">
-                        <div class="mt-loading">
-                            <div class="mt-spinner"></div>
-                            <p>Running comprehensive system diagnostics...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-modal-footer">
-                    <button class="button button-primary" id="mtRunHealthCheck">
-                        🔄 Run Health Check
-                    </button>
-                    <button class="button" id="mtCloseHealthCheck">Close</button>
-                </div>
-            </div>
-        </div>
-        
-        <?php $this->render_assignment_styles(); ?>
-        
-        <script>
-        // Fallback JavaScript for immediate functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize system status check
-            setTimeout(function() {
-                mtLoadSystemStatus();
-            }, 1000);
-            
-            // Initialize assignment overview
-            setTimeout(function() {
-                mtLoadAssignmentOverview();
-            }, 2000);
-            
-            // Initialize candidate and jury lists
-            setTimeout(function() {
-                mtLoadCandidatesList();
-                mtLoadJuryList();
-            }, 3000);
-        });
-        
-        function mtLoadSystemStatus() {
-            const statusElement = document.getElementById('mtSystemStatus');
-            if (!statusElement) return;
-            
-            fetch(mtAssignment.apiUrl + 'health-check', {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': mtAssignment.nonce,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                let statusClass = 'mt-status-' + data.status;
-                let statusIcon = data.status === 'healthy' ? '✅' : 
-                                data.status === 'degraded' ? '⚠️' : '❌';
-                
-                statusElement.innerHTML = `
-                    <div class="mt-status-card ${statusClass}">
-                        <div class="mt-status-header">
-                            <span class="mt-status-icon">${statusIcon}</span>
-                            <span class="mt-status-text">System Status: ${data.status.toUpperCase()}</span>
-                            <span class="mt-status-time">Last check: ${new Date().toLocaleTimeString()}</span>
-                        </div>
-                        ${data.issues && data.issues.length > 0 ? `
-                            <div class="mt-status-issues">
-                                <strong>Issues found:</strong>
-                                <ul>
-                                    ${data.issues.map(issue => `<li>${issue}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            })
-            .catch(error => {
-                console.error('System status check failed:', error);
-                statusElement.innerHTML = `
-                    <div class="mt-error-message">
-                        <strong>Error:</strong> Unable to check system status. Please refresh the page.
-                    </div>
-                `;
-            });
-        }
-        
-        function mtLoadAssignmentOverview() {
-            const overviewElement = document.getElementById('mtAssignmentOverview');
-            if (!overviewElement) return;
-            
-            fetch(mtAssignment.apiUrl + 'voting-progress', {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': mtAssignment.nonce,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                overviewElement.innerHTML = `
-                    <div class="mt-overview-cards">
-                        <div class="mt-overview-card">
-                            <div class="mt-overview-number">${data.total_assignments}</div>
-                            <div class="mt-overview-label">Total Assignments</div>
-                        </div>
-                        <div class="mt-overview-card">
-                            <div class="mt-overview-number">${data.total_votes}</div>
-                            <div class="mt-overview-label">Votes Cast</div>
-                        </div>
-                        <div class="mt-overview-card">
-                            <div class="mt-overview-number">${data.completion_rate}%</div>
-                            <div class="mt-overview-label">Completion Rate</div>
-                        </div>
-                        <div class="mt-overview-card">
-                            <div class="mt-overview-number">${data.active_jury}</div>
-                            <div class="mt-overview-label">Active Jury</div>
-                        </div>
-                        <div class="mt-overview-card">
-                            <div class="mt-overview-number">${data.assigned_candidates}</div>
-                            <div class="mt-overview-label">Assigned Candidates</div>
-                        </div>
-                    </div>
-                    ${data.demo_mode ? `
-                        <div class="mt-demo-notice">
-                            <strong>Demo Mode:</strong> ${data.message}
-                        </div>
-                    ` : ''}
-                `;
-                
-                // Update stats in assignment panel
-                document.getElementById('mtTotalAssignments').textContent = data.total_assignments;
-                document.getElementById('mtVotingProgress').textContent = data.completion_rate + '%';
-                document.getElementById('mtUnassignedCount').textContent = Math.max(0, data.assigned_candidates - data.total_assignments);
-                document.getElementById('mtAvgPerJury').textContent = data.active_jury > 0 ? Math.round(data.total_assignments / data.active_jury) : 0;
-            })
-            .catch(error => {
-                console.error('Assignment overview load failed:', error);
-                overviewElement.innerHTML = `
-                    <div class="mt-error-message">
-                        <strong>Error:</strong> Unable to load assignment overview. Please refresh the page.
-                    </div>
-                `;
-            });
-        }
-        
-        function mtLoadCandidatesList() {
-            const candidatesElement = document.getElementById('mtCandidatesList');
-            if (!candidatesElement) return;
-            
-            fetch(mtAssignment.apiUrl + 'candidates-assignment-status', {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': mtAssignment.nonce,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    candidatesElement.innerHTML = data.map(candidate => `
-                        <div class="mt-candidate-item ${candidate.is_assigned ? 'assigned' : 'unassigned'}" data-id="${candidate.ID}">
-                            <div class="mt-candidate-header">
-                                <input type="checkbox" class="mt-candidate-checkbox" value="${candidate.ID}">
-                                <strong>${candidate.post_title}</strong>
-                                <span class="mt-assignment-status">${candidate.is_assigned ? '✅' : '⚪'}</span>
-                            </div>
-                            <div class="mt-candidate-meta">
-                                ${candidate.company ? `<span class="mt-company">${candidate.company}</span>` : ''}
-                                ${candidate.candidate_position ? `<span class="mt-position">${candidate.candidate_position}</span>` : ''}
-                            </div>
-                            <div class="mt-candidate-stats">
-                                <span>Assignments: ${candidate.assignment_count}</span>
-                                <span>Votes: ${candidate.vote_count}</span>
-                                ${candidate.avg_score ? `<span>Avg Score: ${candidate.avg_score}</span>` : ''}
-                            </div>
-                            ${candidate.sample_data ? '<div class="mt-sample-badge">Sample Data</div>' : ''}
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('mtCandidatesCount').textContent = data.length;
-                } else {
-                    candidatesElement.innerHTML = '<div class="mt-no-data">No candidates found. Create candidates or import data.</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Candidates load failed:', error);
-                candidatesElement.innerHTML = '<div class="mt-error-message">Error loading candidates. Please check your configuration.</div>';
-            });
-        }
-        
-        function mtLoadJuryList() {
-            const juryElement = document.getElementById('mtJuryList');
-            if (!juryElement) return;
-            
-            fetch(mtAssignment.apiUrl + 'jury-assignment-status', {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': mtAssignment.nonce,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    juryElement.innerHTML = data.map(jury => `
-                        <div class="mt-jury-item" data-id="${jury.ID}">
-                            <div class="mt-jury-header">
-                                <input type="checkbox" class="mt-jury-checkbox" value="${jury.ID}">
-                                <strong>${jury.display_name}</strong>
-                                <span class="mt-workload-indicator" style="background: ${jury.assignment_count > 15 ? '#e53e3e' : jury.assignment_count > 10 ? '#dd6b20' : '#38a169'}"></span>
-                            </div>
-                            <div class="mt-jury-meta">
-                                ${jury.company ? `<span class="mt-company">${jury.company}</span>` : ''}
-                                ${jury.position ? `<span class="mt-position">${jury.position}</span>` : ''}
-                                ${jury.expertise ? `<span class="mt-expertise">${jury.expertise}</span>` : ''}
-                            </div>
-                            <div class="mt-jury-stats">
-                                <span>Assignments: ${jury.assignment_count}</span>
-                                <span>Votes: ${jury.votes_count}</span>
-                                <span>Rate: ${jury.completion_rate}%</span>
-                            </div>
-                            ${jury.sample_data ? '<div class="mt-sample-badge">Sample Data</div>' : ''}
-                        </div>
-                    `).join('');
-                    
-                    document.getElementById('mtJuryCount').textContent = data.length;
-                } else {
-                    juryElement.innerHTML = '<div class="mt-no-data">No jury members found. Create jury member accounts.</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Jury load failed:', error);
-                juryElement.innerHTML = '<div class="mt-error-message">Error loading jury members. Please check your configuration.</div>';
-            });
-        }
-        
-        // Health Check Modal functionality
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.id === 'mtHealthCheck') {
-                document.getElementById('mtHealthCheckModal').style.display = 'block';
-                mtRunHealthCheckDiagnostics();
-            }
-            
-            if (e.target && e.target.classList.contains('mt-modal-close')) {
-                e.target.closest('.mt-modal').style.display = 'none';
-            }
-        });
-        
-        function mtRunHealthCheckDiagnostics() {
-            const resultsElement = document.getElementById('mtHealthCheckResults');
-            if (!resultsElement) return;
-            
-            resultsElement.innerHTML = `
-                <div class="mt-loading">
-                    <div class="mt-spinner"></div>
-                    <p>Running comprehensive system diagnostics...</p>
-                </div>
-            `;
-            
-            fetch(mtAssignment.apiUrl + 'health-check', {
-                method: 'GET',
-                headers: {
-                    'X-WP-Nonce': mtAssignment.nonce,
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                resultsElement.innerHTML = `
-                    <div class="mt-health-results">
-                        <div class="mt-health-status mt-health-${data.status}">
-                            <h4>Overall Status: ${data.status.toUpperCase()}</h4>
-                            <p>Last check: ${data.timestamp}</p>
-                        </div>
-                        
-                        <div class="mt-health-section">
-                            <h5>Database Connection</h5>
-                            <p class="mt-health-${data.database.connection === 'connected' ? 'good' : 'bad'}">
-                                ${data.database.connection === 'connected' ? '✅ Connected' : '❌ Failed'}
-                            </p>
-                        </div>
-                        
-                        <div class="mt-health-section">
-                            <h5>Database Tables</h5>
-                            ${Object.entries(data.tables || {}).map(([table, status]) => `
-                                <p class="mt-health-${status === 'exists' ? 'good' : 'bad'}">
-                                    ${status === 'exists' ? '✅' : '❌'} ${table}
-                                </p>
-                            `).join('')}
-                        </div>
-                        
-                        <div class="mt-health-section">
-                            <h5>User Permissions</h5>
-                            <p>Current User: ${data.permissions.current_user}</p>
-                            <p class="mt-health-${data.permissions.manage_options ? 'good' : 'bad'}">
-                                ${data.permissions.manage_options ? '✅' : '❌'} Manage Options
-                            </p>
-                            <p class="mt-health-${data.permissions.assign_candidates ? 'good' : 'bad'}">
-                                ${data.permissions.assign_candidates ? '✅' : '❌'} Assign Candidates
-                            </p>
-                        </div>
-                        
-                        <div class="mt-health-section">
-                            <h5>API Endpoints</h5>
-                            ${Object.entries(data.endpoints || {}).map(([endpoint, status]) => `
-                                <p class="mt-health-${status === 'working' ? 'good' : 'bad'}">
-                                    ${status === 'working' ? '✅' : '❌'} ${endpoint}
-                                </p>
-                            `).join('')}
-                        </div>
-                        
-                        ${data.issues && data.issues.length > 0 ? `
-                            <div class="mt-health-section">
-                                <h5>Issues Found</h5>
-                                <ul class="mt-health-issues">
-                                    ${data.issues.map(issue => `<li>⚠️ ${issue}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        
-                        <div class="mt-health-section">
-                            <h5>Recommendations</h5>
-                            <ul>
-                                <li>✅ All critical systems are functional</li>
-                                <li>📊 Assignment interface is ready for use</li>
-                                <li>🔄 API endpoints are responding correctly</li>
-                                ${data.status === 'healthy' ? '<li>🎉 System is production-ready!</li>' : '<li>⚠️ Address issues above for optimal performance</li>'}
-                            </ul>
-                        </div>
-                    </div>
-                `;
-            })
-            .catch(error => {
-                console.error('Health check failed:', error);
-                resultsElement.innerHTML = `
-                    <div class="mt-error-message">
-                        <strong>Error:</strong> Unable to run health check diagnostics. Please try again.
-                    </div>
-                `;
-            });
-        }
-        </script>
         <?php
     }
     
