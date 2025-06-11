@@ -311,6 +311,47 @@ class MobilityTrailblazersAssignmentInterface {
                 'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
             )
         ));
+        
+        // MISSING ENDPOINT 1: /jury-members (JavaScript expects this)
+        register_rest_route('mt/v1', '/jury-members', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_jury_members_for_assignment'),
+            'permission_callback' => array($this, 'check_admin_permission'),
+            'args' => array(
+                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
+                'include_workload' => array('required' => false, 'type' => 'boolean', 'default' => true),
+                'include_expertise' => array('required' => false, 'type' => 'boolean', 'default' => false)
+            )
+        ));
+
+        // MISSING ENDPOINT 2: /candidates (JavaScript expects this)
+        register_rest_route('mt/v1', '/candidates', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_candidates_for_assignment'),
+            'permission_callback' => array($this, 'check_admin_permission'),
+            'args' => array(
+                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal'),
+                'include_assignment_status' => array('required' => false, 'type' => 'boolean', 'default' => true),
+                'include_categories' => array('required' => false, 'type' => 'boolean', 'default' => true)
+            )
+        ));
+
+        // MISSING ENDPOINT 3: /voting-phase (singular - JavaScript expects this)
+        register_rest_route('mt/v1', '/voting-phase', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_current_voting_phase'),
+            'permission_callback' => array($this, 'check_admin_permission')
+        ));
+
+        // MISSING ENDPOINT 4: /assignment-overview (JavaScript expects this)
+        register_rest_route('mt/v1', '/assignment-overview', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_assignment_overview'),
+            'permission_callback' => array($this, 'check_admin_permission'),
+            'args' => array(
+                'stage' => array('required' => false, 'type' => 'string', 'default' => 'semifinal')
+            )
+        ));
     }
     
     /**
