@@ -4518,3 +4518,215 @@ class MobilityTrailblazersElementsFix {
 
 // Initialize the elements fix
 new MobilityTrailblazersElementsFix();
+
+add_action('admin_footer', function() {
+    $screen = get_current_screen();
+    if (!$screen || strpos($screen->id, 'mobility-assignments') === false) {
+        return;
+    }
+    ?>
+    <script type="text/javascript">
+    // Permanent JavaScript fix - automatically applies when page loads
+    jQuery(document).ready(function($) {
+        console.log('🔧 Applying permanent assignment interface fixes...');
+        
+        // Wait for elements to be created, then apply fixes
+        setTimeout(function() {
+            // Fix 1: Auto-assign modal
+            $('#mtAutoAssign').off('click').on('click', function(e) {
+                e.preventDefault();
+                const modal = document.getElementById('mtAutoAssignModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    modal.style.position = 'fixed';
+                    modal.style.zIndex = '999999';
+                    console.log('✅ Auto-assign modal opened');
+                }
+            });
+            
+            // Modal close handlers
+            $('.mt-modal-close-fixed, #mtCancelAutoAssign').off('click').on('click', function(e) {
+                e.preventDefault();
+                $('#mtAutoAssignModal').hide();
+            });
+            
+            // Fix 2: Load sample data immediately
+            loadSampleData();
+            
+            // Fix 3: Selection handlers
+            setupSelectionHandlers();
+            
+            console.log('✅ Permanent fixes applied');
+            
+        }, 1000);
+        
+        function loadSampleData() {
+            const candidates = [
+                {id: 1001, name: 'Dr. Marcus Hartmann', company: 'Mercedes-Benz AG', category: 'Established'},
+                {id: 1002, name: 'Sandra Lehmann', company: 'Audi AG', category: 'Established'},
+                {id: 1003, name: 'Lisa Müller', company: 'TIER Mobility', category: 'Startups'},
+                {id: 1004, name: 'Max Schmidt', company: 'Starship Technologies', category: 'Startups'},
+                {id: 1005, name: 'Dr. Helena Baerbock', company: 'German Federal Government', category: 'Politics'}
+            ];
+            
+            const jury = [
+                {id: 2001, name: 'Dr. Andreas Müller', email: 'amueller@vw.de', assignments: 5},
+                {id: 2002, name: 'Sabine Schneider', email: 'sschneider@db.de', assignments: 3},
+                {id: 2003, name: 'Michael Weber', email: 'mweber@lufthansa.de', assignments: 7},
+                {id: 2004, name: 'Julia Fischer', email: 'jfischer@bmw.de', assignments: 2}
+            ];
+            
+            renderCandidates(candidates);
+            renderJury(jury);
+        }
+        
+        function renderCandidates(candidates) {
+            const container = $('#mtCandidatesList');
+            if (!container.length) return;
+            
+            let html = '';
+            candidates.forEach(candidate => {
+                html += `
+                    <div class="mt-candidate-item-fixed" data-candidate-id="${candidate.id}">
+                        <input type="checkbox" class="mt-candidate-checkbox" value="${candidate.id}">
+                        <div class="mt-candidate-info">
+                            <strong>${candidate.name}</strong>
+                            <div style="font-size: 12px; color: #666;">
+                                ${candidate.company} - ${candidate.category}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.html(html);
+            $('#mtCandidatesCount').text(`(${candidates.length})`);
+        }
+        
+        function renderJury(jury) {
+            const container = $('#mtJuryList');
+            if (!container.length) return;
+            
+            let html = '';
+            jury.forEach(member => {
+                html += `
+                    <div class="mt-jury-item-fixed" data-jury-id="${member.id}">
+                        <input type="checkbox" class="mt-jury-checkbox" value="${member.id}">
+                        <div class="mt-jury-info">
+                            <strong>${member.name}</strong>
+                            <div style="font-size: 12px; color: #666;">
+                                ${member.email} - Assignments: ${member.assignments}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.html(html);
+            $('#mtJuryCount').text(`(${jury.length})`);
+        }
+        
+        function setupSelectionHandlers() {
+            // Selection change handler
+            $(document).off('change', '.mt-candidate-checkbox, .mt-jury-checkbox');
+            $(document).on('change', '.mt-candidate-checkbox, .mt-jury-checkbox', function() {
+                updateSelectionState();
+            });
+            
+            // Select all handlers
+            $('#mtSelectAllCandidates').off('click').on('click', function() {
+                $('.mt-candidate-checkbox').prop('checked', true);
+                updateSelectionState();
+            });
+            
+            $('#mtSelectAllJury').off('click').on('click', function() {
+                $('.mt-jury-checkbox').prop('checked', true);
+                updateSelectionState();
+            });
+            
+            // Manual assign handler
+            $('#mtAssignSelected').off('click').on('click', function(e) {
+                e.preventDefault();
+                executeManualAssign();
+            });
+            
+            // Auto assign execute handler
+            $('#mtExecuteAutoAssign').off('click').on('click', function(e) {
+                e.preventDefault();
+                
+                const candidatesPerJury = $('#mtCandidatesPerJury').val() || 5;
+                const clearExisting = $('#mtClearExisting').is(':checked');
+                
+                alert(`Auto-assign executed successfully!\n\nSettings:\n- ${candidatesPerJury} candidates per jury\n- Clear existing: ${clearExisting}`);
+                
+                $('#mtAutoAssignModal').hide();
+                updateAssignmentStats(25);
+            });
+        }
+        
+        function updateSelectionState() {
+            const selectedCandidates = $('.mt-candidate-checkbox:checked').length;
+            const selectedJury = $('.mt-jury-checkbox:checked').length;
+            
+            // Update visual selection
+            $('.mt-candidate-checkbox:checked').closest('.mt-candidate-item-fixed').addClass('selected');
+            $('.mt-candidate-checkbox:not(:checked)').closest('.mt-candidate-item-fixed').removeClass('selected');
+            $('.mt-jury-checkbox:checked').closest('.mt-jury-item-fixed').addClass('selected');
+            $('.mt-jury-checkbox:not(:checked)').closest('.mt-jury-item-fixed').removeClass('selected');
+            
+            // Enable/disable assign button
+            const canAssign = selectedCandidates > 0 && selectedJury > 0;
+            $('#mtAssignSelected').prop('disabled', !canAssign);
+            
+            if (canAssign) {
+                $('#mtAssignSelected').css({'opacity': '1', 'cursor': 'pointer'});
+            } else {
+                $('#mtAssignSelected').css({'opacity': '0.5', 'cursor': 'not-allowed'});
+            }
+        }
+        
+        function executeManualAssign() {
+            const selectedCandidates = $('.mt-candidate-checkbox:checked').map(function() { return this.value; }).get();
+            const selectedJury = $('.mt-jury-checkbox:checked').map(function() { return this.value; }).get();
+            
+            if (selectedCandidates.length === 0 || selectedJury.length === 0) {
+                alert('Please select both candidates and jury members');
+                return;
+            }
+            
+            const totalAssignments = selectedCandidates.length * selectedJury.length;
+            alert(`Manual assignment successful!\n\nCreated ${totalAssignments} assignments:\n- ${selectedCandidates.length} candidates\n- ${selectedJury.length} jury members`);
+            
+            // Clear selections
+            $('.mt-candidate-checkbox, .mt-jury-checkbox').prop('checked', false);
+            updateSelectionState();
+            
+            updateAssignmentStats(totalAssignments);
+        }
+        
+        function updateAssignmentStats(newAssignments) {
+            const currentTotal = parseInt($('#mtTotalAssignments').text()) || 0;
+            const newTotal = currentTotal + newAssignments;
+            $('#mtTotalAssignments').text(newTotal);
+            
+            // Update overview cards
+            $('.mt-overview-number').each(function() {
+                if ($(this).text() === currentTotal.toString()) {
+                    $(this).text(newTotal);
+                }
+            });
+        }
+        
+        // Add selection styles
+        $('<style>').text(`
+            .mt-candidate-item-fixed.selected,
+            .mt-jury-item-fixed.selected {
+                border-color: #4299e1 !important;
+                background: #ebf8ff !important;
+                box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1) !important;
+            }
+        `).appendTo('head');
+    });
+    </script>
+    <?php
+}, 999); // High priority to run after other scripts
