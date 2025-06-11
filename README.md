@@ -21,7 +21,7 @@
 
 ## 🎯 Platform Overview
 
-The Mobility Trailblazers platform is a sophisticated WordPress-based award management system designed to identify and celebrate 25 mobility innovators in the DACH region annually. The platform orchestrates a multi-stage selection process culminating in an award ceremony at the Smart Mobility Summit in Berlin on October 30, 2025.
+The Mobility Trailblazers platform is a sophisticated WordPress-based award management system designed to identify and celebrate 25 mobility innovators in the DACH region annually. The platform orchestrates a multi-stage selection process culminating in an award ceremony at the Smart Mobility Summit in Berlin on October 30, 2025
 
 ### Core Functionality
 
