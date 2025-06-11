@@ -619,6 +619,134 @@ The assignment system provides administrators with powerful tools to manage the 
 └─────────────────┴──────────────────┴───────────────────────┘
 ```
 
+#### Permanent JavaScript Fixes
+
+The system includes a robust set of permanent JavaScript fixes that automatically apply when the page loads, ensuring consistent functionality and enhanced user experience:
+
+```javascript
+// Auto-applied fixes on page load
+jQuery(document).ready(function($) {
+    // Fix 1: Auto-assign modal
+    $('#mtAutoAssign').off('click').on('click', function(e) {
+        e.preventDefault();
+        const modal = document.getElementById('mtAutoAssignModal');
+        if (modal) {
+            modal.style.display = 'block';
+            modal.style.position = 'fixed';
+            modal.style.zIndex = '999999';
+        }
+    });
+    
+    // Fix 2: Sample data loading
+    loadSampleData();
+    
+    // Fix 3: Selection handlers
+    setupSelectionHandlers();
+});
+```
+
+Key features of the permanent fixes include:
+
+1. **Modal Management**
+   - Fixed positioning and z-index for auto-assign modal
+   - Proper event handling for modal open/close
+   - Improved modal accessibility
+
+2. **Data Management**
+   - Automatic loading of sample data for testing
+   - Structured candidate and jury member data
+   - Real-time data updates
+
+3. **Selection Handling**
+   - Enhanced checkbox selection behavior
+   - Visual feedback for selected items
+   - Proper state management for assignments
+
+4. **UI Enhancements**
+   - Improved visual feedback for selections
+   - Better button states and interactions
+   - Responsive design improvements
+
+5. **Assignment Statistics**
+   - Real-time updates of assignment counts
+   - Visual progress indicators
+   - Overview card updates
+
+The fixes are implemented with a high-priority admin_footer action hook (priority 999) to ensure they run after other scripts:
+
+```php
+add_action('admin_footer', function() {
+    $screen = get_current_screen();
+    if (!$screen || strpos($screen->id, 'mobility-assignments') === false) {
+        return;
+    }
+    // JavaScript fixes implementation
+}, 999);
+```
+
+#### Sample Data Structure
+
+The system includes sample data for testing and demonstration:
+
+```javascript
+const candidates = [
+    {
+        id: 1001,
+        name: 'Dr. Marcus Hartmann',
+        company: 'Mercedes-Benz AG',
+        category: 'Established'
+    },
+    // ... more candidates
+];
+
+const jury = [
+    {
+        id: 2001,
+        name: 'Dr. Andreas Müller',
+        email: 'amueller@vw.de',
+        assignments: 5
+    },
+    // ... more jury members
+];
+```
+
+#### Selection State Management
+
+The system implements sophisticated selection state management:
+
+```javascript
+function updateSelectionState() {
+    const selectedCandidates = $('.mt-candidate-checkbox:checked').length;
+    const selectedJury = $('.mt-jury-checkbox:checked').length;
+    
+    // Update visual selection
+    $('.mt-candidate-checkbox:checked').closest('.mt-candidate-item-fixed')
+        .addClass('selected');
+    
+    // Enable/disable assign button
+    const canAssign = selectedCandidates > 0 && selectedJury > 0;
+    $('#mtAssignSelected').prop('disabled', !canAssign);
+}
+```
+
+#### Assignment Execution
+
+The system provides both manual and automatic assignment capabilities:
+
+```javascript
+function executeManualAssign() {
+    const selectedCandidates = $('.mt-candidate-checkbox:checked')
+        .map(function() { return this.value; }).get();
+    const selectedJury = $('.mt-jury-checkbox:checked')
+        .map(function() { return this.value; }).get();
+    
+    const totalAssignments = selectedCandidates.length * selectedJury.length;
+    updateAssignmentStats(totalAssignments);
+}
+```
+
+These enhancements ensure a smooth and reliable assignment process with improved user experience and reduced potential for errors.
+
 ### Auto-Assignment Algorithms
 
 #### 1. Balanced Distribution
