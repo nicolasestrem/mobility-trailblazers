@@ -1,4 +1,4 @@
-/* Mobility Trailblazers Admin JavaScript */
+/* Mobility Trailblazers Admin JavaScript - FIXED VERSION */
 
 jQuery(document).ready(function($) {
     
@@ -278,21 +278,26 @@ jQuery(document).ready(function($) {
         var input = button.siblings('input');
         var preview = button.siblings('.mt-image-preview');
         
-        var mediaUploader = wp.media({
-            title: 'Select Image',
-            button: {
-                text: 'Use this image'
-            },
-            multiple: false
-        });
-        
-        mediaUploader.on('select', function() {
-            var attachment = mediaUploader.state().get('selection').first().toJSON();
-            input.val(attachment.url);
-            preview.html('<img src="' + attachment.url + '" style="max-width: 150px; height: auto;">');
-        });
-        
-        mediaUploader.open();
+        // Check if wp.media is available
+        if (typeof wp !== 'undefined' && wp.media) {
+            var mediaUploader = wp.media({
+                title: 'Select Image',
+                button: {
+                    text: 'Use this image'
+                },
+                multiple: false
+            });
+            
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                input.val(attachment.url);
+                preview.html('<img src="' + attachment.url + '" style="max-width: 150px; height: auto;">');
+            });
+            
+            mediaUploader.open();
+        } else {
+            alert('WordPress media uploader not available. Please upload images through Media Library.');
+        }
     });
     
     // Voting phase management
@@ -353,8 +358,19 @@ jQuery(document).ready(function($) {
         return ajaxurl.replace('admin-ajax.php', 'admin.php?page=' + page);
     }
     
-    // Initialize tooltips
-    $('.mt-tooltip').tooltip();
+    // Initialize tooltips - FIXED VERSION
+    // Check if jQuery UI tooltip is available before trying to use it
+    if ($.fn.tooltip && typeof $.fn.tooltip === 'function') {
+        $('.mt-tooltip').tooltip();
+    } else {
+        // Fallback: Use native browser tooltips via title attribute
+        $('.mt-tooltip').each(function() {
+            var tooltipText = $(this).data('tooltip') || $(this).attr('data-tooltip');
+            if (tooltipText) {
+                $(this).attr('title', tooltipText);
+            }
+        });
+    }
     
     // Form validation
     $('form').on('submit', function(e) {

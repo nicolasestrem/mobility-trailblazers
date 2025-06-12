@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Mobility Trailblazers Award System
- * Plugin URI: https://mobility-trailblazers.org
+ * Plugin URI: https://mobilitytrailblazers.de
  * Description: Complete award management system for 25 Mobility Trailblazers in 25 - managing candidates, jury members, voting process, and public engagement.
- * Version: 1.0.0
+ * Version: 0.0.1
  * Author: Mobility Trailblazers Team
  * License: GPL v2 or later
  * Text Domain: mobility-trailblazers
@@ -412,20 +412,18 @@ class MobilityTrailblazersPlugin {
      * Enqueue frontend scripts and styles
      */
     public function frontend_enqueue_scripts() {
-        if (is_singular(array('mt_candidate', 'mt_jury', 'mt_award')) || has_shortcode(get_post()->post_content, 'mt_voting_form') || has_shortcode(get_post()->post_content, 'mt_candidate_grid')) {
-            wp_enqueue_script('mt-frontend-js', MT_PLUGIN_URL . 'assets/frontend.js', array('jquery'), MT_PLUGIN_VERSION, true);
-            wp_enqueue_style('mt-frontend-css', MT_PLUGIN_URL . 'assets/frontend.css', array(), MT_PLUGIN_VERSION);
-            
-            wp_localize_script('mt-frontend-js', 'mt_ajax', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('mt_public_nonce'),
-                'strings' => array(
-                    'vote_success' => __('Thank you for your vote!', 'mobility-trailblazers'),
-                    'vote_error' => __('Error submitting vote. Please try again.', 'mobility-trailblazers'),
-                    'already_voted' => __('You have already voted for this candidate.', 'mobility-trailblazers')
-                )
-            ));
-        }
+        wp_enqueue_script('mt-frontend-js', MT_PLUGIN_URL . 'assets/frontend.js', array('jquery'), MT_PLUGIN_VERSION, true);
+        wp_enqueue_style('mt-frontend-css', MT_PLUGIN_URL . 'assets/frontend.css', array(), MT_PLUGIN_VERSION);
+        
+        wp_localize_script('mt-frontend-js', 'mt_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_public_nonce'),
+            'strings' => array(
+                'vote_success' => __('Thank you for your vote!', 'mobility-trailblazers'),
+                'vote_error' => __('Error submitting vote. Please try again.', 'mobility-trailblazers'),
+                'already_voted' => __('You have already voted for this candidate.', 'mobility-trailblazers')
+            )
+        ));
     }
 
     /**
@@ -610,48 +608,48 @@ class MobilityTrailblazersPlugin {
      * Save candidate meta data
      */
     public function save_candidate_meta($post_id) {
-        if (!isset($_POST['mt_candidate_meta_nonce']) || !wp_verify_nonce($_POST['mt_candidate_meta_nonce'], 'mt_candidate_meta_nonce')) {
-            return;
-        }
+        if (isset($_POST['mt_candidate_meta_nonce']) && wp_verify_nonce($_POST['mt_candidate_meta_nonce'], 'mt_candidate_meta_nonce')) {
+            if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+                return;
+            }
 
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
+            if (!current_user_can('edit_post', $post_id)) {
+                return;
+            }
 
-        if (!current_user_can('edit_post', $post_id)) {
-            return;
-        }
+            $fields = array(
+                '_mt_company', '_mt_position', '_mt_location', '_mt_email', '_mt_linkedin', '_mt_website',
+                '_mt_innovation_description', '_mt_impact_metrics', '_mt_courage_story'
+            );
 
-        $fields = array(
-            '_mt_company', '_mt_position', '_mt_location', '_mt_email', '_mt_linkedin', '_mt_website',
-            '_mt_innovation_description', '_mt_impact_metrics', '_mt_courage_story'
-        );
-
-        foreach ($fields as $field) {
-            $key = str_replace('_mt_', 'mt_', $field);
-            if (isset($_POST[$key])) {
-                update_post_meta($post_id, $field, sanitize_text_field($_POST[$key]));
+            foreach ($fields as $field) {
+                $key = str_replace('_mt_', 'mt_', $field);
+                if (isset($_POST[$key])) {
+                    update_post_meta($post_id, $field, sanitize_text_field($_POST[$key]));
+                }
             }
         }
 
         // Handle jury member fields
-        if (get_post_type($post_id) === 'mt_jury') {
-            $jury_fields = array(
-                '_mt_jury_company', '_mt_jury_position', '_mt_jury_expertise', '_mt_jury_bio',
-                '_mt_jury_email', '_mt_jury_linkedin', '_mt_jury_is_president', '_mt_jury_is_vice_president'
-            );
+        if (isset($_POST['mt_jury_meta_nonce']) && wp_verify_nonce($_POST['mt_jury_meta_nonce'], 'mt_jury_meta_nonce')) {
+            if (get_post_type($post_id) === 'mt_jury') {
+                $jury_fields = array(
+                    '_mt_jury_company', '_mt_jury_position', '_mt_jury_expertise', '_mt_jury_bio',
+                    '_mt_jury_email', '_mt_jury_linkedin', '_mt_jury_is_president', '_mt_jury_is_vice_president'
+                );
 
-            foreach ($jury_fields as $field) {
-                $key = str_replace('_mt_jury_', 'mt_jury_', $field);
-                if (isset($_POST[$key])) {
-                    if (in_array($field, array('_mt_jury_is_president', '_mt_jury_is_vice_president'))) {
-                        update_post_meta($post_id, $field, 1);
+                foreach ($jury_fields as $field) {
+                    $key = str_replace('_mt_jury_', 'mt_jury_', $field);
+                    if (isset($_POST[$key])) {
+                        if (in_array($field, array('_mt_jury_is_president', '_mt_jury_is_vice_president'))) {
+                            update_post_meta($post_id, $field, 1);
+                        } else {
+                            update_post_meta($post_id, $field, sanitize_text_field($_POST[$key]));
+                        }
                     } else {
-                        update_post_meta($post_id, $field, sanitize_text_field($_POST[$key]));
-                    }
-                } else {
-                    if (in_array($field, array('_mt_jury_is_president', '_mt_jury_is_vice_president'))) {
-                        delete_post_meta($post_id, $field);
+                        if (in_array($field, array('_mt_jury_is_president', '_mt_jury_is_vice_president'))) {
+                            delete_post_meta($post_id, $field);
+                        }
                     }
                 }
             }
@@ -714,7 +712,9 @@ class MobilityTrailblazersPlugin {
      * Handle jury vote submission
      */
     public function handle_jury_vote() {
-        check_ajax_referer('mt_nonce', 'nonce');
+        if (!check_ajax_referer('mt_nonce', 'nonce', false)) {
+            wp_die(__('Security check failed.', 'mobility-trailblazers'));
+        }
         
         $candidate_id = intval($_POST['candidate_id']);
         $jury_member_id = get_current_user_id();
@@ -758,7 +758,9 @@ class MobilityTrailblazersPlugin {
      * Handle public vote submission
      */
     public function handle_public_vote() {
-        check_ajax_referer('mt_public_nonce', 'nonce');
+        if (!check_ajax_referer('mt_public_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        }
         
         $candidate_id = intval($_POST['candidate_id']);
         $voter_email = sanitize_email($_POST['voter_email']);
