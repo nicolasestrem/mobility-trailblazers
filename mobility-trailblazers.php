@@ -1288,13 +1288,11 @@ class MobilityTrailblazersPlugin {
             'post_award' => 'Post Award'
         );
         
-        // Enqueue required scripts and styles
+        // CRITICAL: Enqueue scripts FIRST
         wp_enqueue_style('mt-assignment-style', plugins_url('assets/assignment.css', __FILE__));
-        
-        // First enqueue the script
         wp_enqueue_script('mt-assignment-script', plugins_url('assets/assignment.js', __FILE__), array('jquery'), '1.0', true);
         
-        // Then localize the script (must be after enqueue)
+        // THEN localize (must be after enqueue)
         wp_localize_script('mt-assignment-script', 'mtAssignmentData', array(
             'candidates' => $candidates_data,
             'jury' => $jury_data,
@@ -1312,143 +1310,36 @@ class MobilityTrailblazersPlugin {
             'nonce' => wp_create_nonce('mt_assignment_nonce')
         ));
         
-        // Render the page content
-        $this->render_assignment_page_content(
-            $current_phase,
-            $phase_names,
-            $total_candidates,
-            $total_jury,
-            $assigned_count,
-            $completion_rate,
-            $avg_per_jury
-        );
-    }
-
-    /**
-     * Render the assignment management page content
-     */
-    private function render_assignment_page_content(
-        $current_phase,
-        $phase_names,
-        $total_candidates,
-        $total_jury,
-        $assigned_count,
-        $completion_rate,
-        $avg_per_jury
-    ) {
+        // Render the HTML content
         ?>
         <div class="wrap">
             <h1><?php _e('Jury Assignment Management', 'mobility-trailblazers'); ?></h1>
             
-            <div class="mt-assignment-interface">
-                
-                <!-- Header -->
-                <div class="mt-assignment-header">
-                    <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0 0 10px 0;">🏆 Jury Assignment System</h1>
-                    <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
-                </div>
-
-                <!-- Status Banner -->
-                <div class="mt-status-banner">
-                    <span style="font-size: 20px;">✅</span>
-                    <div>
-                        <strong>System Status: OPERATIONAL</strong> | Last check: <?php echo date('H:i:s'); ?> | 
-                        Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? $current_phase); ?>
-                    </div>
-                </div>
-
-                <!-- Statistics Grid -->
-                <div class="mt-stats-grid">
-                    <div class="mt-stat-card">
-                        <span class="mt-stat-number"><?php echo $total_candidates; ?></span>
-                        <div class="mt-stat-label">Total Candidates</div>
-                    </div>
-                    <div class="mt-stat-card">
-                        <span class="mt-stat-number"><?php echo $total_jury; ?></span>
-                        <div class="mt-stat-label">Jury Members</div>
-                    </div>
-                    <div class="mt-stat-card">
-                        <span class="mt-stat-number" id="assigned-count"><?php echo $assigned_count; ?></span>
-                        <div class="mt-stat-label">Total Assignments</div>
-                    </div>
-                    <div class="mt-stat-card">
-                        <span class="mt-stat-number" id="completion-rate"><?php echo number_format($completion_rate, 1); ?>%</span>
-                        <div class="mt-stat-label">Completion Rate</div>
-                    </div>
-                    <div class="mt-stat-card">
-                        <span class="mt-stat-number" id="avg-per-jury"><?php echo number_format($avg_per_jury, 1); ?></span>
-                        <div class="mt-stat-label">Avg Per Jury</div>
-                    </div>
-                </div>
-
-                <!-- Assignment Controls -->
-                <div class="mt-assignment-controls">
-                    <h3 style="margin: 0 0 20px 0; color: var(--mt-primary); font-size: 1.3rem;">🔧 Assignment Tools</h3>
-                    
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-                        <button id="mt-auto-assign-btn" class="mt-btn mt-btn-success">⚡ Auto-Assign All</button>
-                        <button id="mt-manual-assign-btn" class="mt-btn mt-btn-warning" disabled>👥 Assign Selected (<span id="selected-count">0</span>)</button>
-                        <button id="mt-clear-assignments-btn" class="mt-btn mt-btn-secondary">🗑️ Clear All Assignments</button>
-                        <button id="mt-export-btn" class="mt-btn mt-btn-primary">📊 Export Assignments</button>
-                        <button id="mt-refresh-btn" class="mt-btn mt-btn-secondary">🔄 Refresh Data</button>
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                        <label>Candidates per Jury Member: 
-                            <input type="number" id="candidates-per-jury" value="<?php echo ceil($total_candidates / max($total_jury, 1)); ?>" min="1" max="50" style="width: 80px; padding: 5px; margin-left: 5px;">
-                        </label>
-                        <label>Algorithm: 
-                            <select id="assignment-algorithm" style="padding: 5px; margin-left: 5px;">
-                                <option value="balanced">Balanced Distribution</option>
-                                <option value="random">Random Assignment</option>
-                                <option value="category">Category Balanced</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Assignment Grid -->
-                <div class="mt-assignment-grid">
-                    <!-- Candidates Panel -->
-                    <div class="mt-panel">
-                        <div class="mt-panel-header">
-                            <h3>📋 Candidates (<?php echo $total_candidates; ?>)</h3>
-                            <div style="display: flex; gap: 10px;">
-                                <button id="select-all-candidates" class="mt-btn mt-btn-secondary" style="padding: 6px 12px; font-size: 12px;">Select All</button>
-                                <button id="clear-selection" class="mt-btn mt-btn-secondary" style="padding: 6px 12px; font-size: 12px;">Clear</button>
-                            </div>
-                        </div>
-                        <div class="mt-panel-content">
-                            <input type="text" id="candidates-search" class="mt-search-box" placeholder="Search candidates...">
-                            
-                            <div style="margin-bottom: 15px;">
-                                <button class="filter-btn" data-filter="all" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #e6fffa; color: #2c5282; cursor: pointer;">All</button>
-                                <button class="filter-btn" data-filter="assigned" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #f7fafc; color: #718096; cursor: pointer;">Assigned</button>
-                                <button class="filter-btn" data-filter="unassigned" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #f7fafc; color: #718096; cursor: pointer;">Unassigned</button>
-                            </div>
-
-                            <div id="candidates-list">
-                                <!-- Candidates will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Jury Panel -->
-                    <div class="mt-panel">
-                        <div class="mt-panel-header">
-                            <h3>👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)</h3>
-                        </div>
-                        <div class="mt-panel-content">
-                            <input type="text" id="jury-search" class="mt-search-box" placeholder="Search jury members...">
-                            
-                            <div id="jury-list">
-                                <!-- Jury members will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
+            <div id="mt-assignment-interface" class="mt-assignment-interface">
+                <!-- Interface will be built by JavaScript -->
+                <div id="loading-message" style="text-align: center; padding: 50px;">
+                    <h2>Loading Assignment Interface...</h2>
+                    <p>If this message persists, check browser console for errors.</p>
                 </div>
             </div>
         </div>
+        
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            // Debug output
+            console.log('Assignment page loaded');
+            console.log('mtAssignmentData:', typeof mtAssignmentData !== 'undefined' ? mtAssignmentData : 'UNDEFINED');
+            
+            // Initialize interface if data is available
+            if (typeof mtAssignmentData !== 'undefined' && typeof initAssignmentInterface === 'function') {
+                initAssignmentInterface();
+                $('#loading-message').hide();
+            } else {
+                console.error('mtAssignmentData or initAssignmentInterface not available');
+                $('#loading-message').html('<h2 style="color: red;">Error: Assignment interface failed to load</h2><p>Check browser console for details.</p>');
+            }
+        });
+        </script>
         <?php
     }
 
@@ -1527,7 +1418,7 @@ class MobilityTrailblazersPlugin {
                 'expertise' => $expertise ?: 'General expertise',
                 'role' => $role,
                 'assignments' => count($assignments),
-                'max_assignments' => 15 // Configurable
+                'max_assignments' => 25 // Configurable
             );
         }
         
