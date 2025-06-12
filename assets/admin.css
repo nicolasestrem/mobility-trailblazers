@@ -1,0 +1,349 @@
+/* Mobility Trailblazers Admin Styles */
+
+/* Dashboard Stats */
+.mt-dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.mt-stat-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mt-stat-box h3 {
+    margin: 0 0 10px 0;
+    color: #2c5282;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mt-stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #2c5282;
+    line-height: 1;
+}
+
+/* Quick Actions */
+.mt-quick-actions {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.mt-quick-actions h2 {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+/* Evaluation Form */
+#mt-evaluation-form {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#mt-evaluation-form p {
+    margin: 10px 0;
+}
+
+#mt-evaluation-form label {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+#mt-evaluation-form select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+#submit-evaluation {
+    margin-top: 15px !important;
+}
+
+/* Candidate Meta Box */
+.form-table th {
+    font-weight: 600;
+    color: #333;
+}
+
+.form-table td input[type="text"],
+.form-table td input[type="email"],
+.form-table td input[type="url"],
+.form-table td textarea {
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-table td textarea {
+    resize: vertical;
+}
+
+/* Evaluation Overview */
+.mt-evaluation-overview {
+    margin: 20px 0;
+}
+
+.mt-candidate-evaluation-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-candidate-evaluation-card h3 {
+    margin: 0 0 5px 0;
+    color: #2c5282;
+}
+
+.mt-candidate-evaluation-card h3 a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.mt-candidate-evaluation-card h3 a:hover {
+    color: #1a365d;
+}
+
+.mt-candidate-evaluation-card p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.evaluated {
+    color: #38a169 !important;
+    font-weight: 600;
+}
+
+.not-evaluated {
+    color: #e53e3e !important;
+    font-weight: 600;
+}
+
+/* Results Section */
+.mt-results-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.mt-results-section h3 {
+    margin: 0 0 20px 0;
+    color: #2c5282;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
+}
+
+.mt-results-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mt-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin: 10px 0;
+    background: #f7fafc;
+    border-radius: 5px;
+    border-left: 4px solid #2c5282;
+}
+
+.mt-candidate-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.mt-result-score {
+    font-weight: 600;
+    color: #2c5282;
+    background: #e6fffa;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+}
+
+/* Settings Form */
+.form-table th {
+    width: 200px;
+}
+
+.form-table select {
+    min-width: 200px;
+}
+
+/* Admin Menu Icon Styling */
+.toplevel_page_mt-award-system .wp-menu-image:before {
+    content: '\f313';
+    color: #a0a5aa;
+}
+
+.toplevel_page_mt-award-system:hover .wp-menu-image:before,
+.toplevel_page_mt-award-system.wp-has-current-submenu .wp-menu-image:before {
+    color: #00b9eb;
+}
+
+/* Loading States */
+.mt-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.mt-loading:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.mt-message {
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+.mt-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mt-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mt-dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-candidate-evaluation-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .mt-candidate-evaluation-card .button {
+        margin-top: 15px;
+        align-self: flex-end;
+    }
+    
+    .mt-result-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .mt-result-score {
+        margin-top: 10px;
+    }
+}
+
+/* Custom Post Type List Tables */
+.post-type-mt_candidate .column-categories,
+.post-type-mt_candidate .column-mt_status {
+    width: 15%;
+}
+
+.post-type-mt_candidate .column-date {
+    width: 10%;
+}
+
+.post-type-mt_jury .column-expertise {
+    width: 20%;
+}
+
+/* Meta Box Styling */
+.postbox .inside {
+    padding: 20px;
+}
+
+.postbox h3 {
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Jury Member Roles */
+.jury-role-indicator {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 10px;
+}
+
+.jury-role-indicator.president {
+    background: #ffd700;
+    color: #8b6914;
+}
+
+.jury-role-indicator.vice-president {
+    background: #e6fffa;
+    color: #2c5282;
+}
+
+/* Taxonomy Admin Styling */
+.taxonomy-mt_category .column-posts,
+.taxonomy-mt_status .column-posts,
+.taxonomy-mt_award_year .column-posts {
+    width: 10%;
+}
+
+/* Admin Footer Branding */
+.mt-admin-footer {
+    margin-top: 50px;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #e1e1e1;
+    color: #666;
+    font-size: 12px;
+}
+
+.mt-admin-footer a {
+    color: #2c5282;
+    text-decoration: none;
+}
+
+.mt-admin-footer a:hover {
+    text-decoration: underline;
+}
