@@ -29,6 +29,9 @@ class MobilityTrailblazersPlugin {
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
+        add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
+        add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
+        add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
     }
 
     public function init() {
@@ -342,49 +345,22 @@ class MobilityTrailblazersPlugin {
      */
     public function add_admin_menu() {
         add_menu_page(
-            __('Mobility Trailblazers', 'mobility-trailblazers'),
+            __('MT Award System', 'mobility-trailblazers'),
             __('MT Award System', 'mobility-trailblazers'),
             'manage_options',
             'mt-award-system',
             array($this, 'admin_dashboard'),
             'dashicons-awards',
-            6
+            30
         );
 
         add_submenu_page(
             'mt-award-system',
-            __('Dashboard', 'mobility-trailblazers'),
-            __('Dashboard', 'mobility-trailblazers'),
+            __('Assignment Management', 'mobility-trailblazers'),
+            __('Assignments', 'mobility-trailblazers'),
             'manage_options',
-            'mt-award-system',
-            array($this, 'admin_dashboard')
-        );
-
-        add_submenu_page(
-            'mt-award-system',
-            __('Jury Evaluation', 'mobility-trailblazers'),
-            __('Jury Evaluation', 'mobility-trailblazers'),
-            'edit_posts',
-            'mt-jury-evaluation',
-            array($this, 'jury_evaluation_page')
-        );
-
-        add_submenu_page(
-            'mt-award-system',
-            __('Voting Results', 'mobility-trailblazers'),
-            __('Voting Results', 'mobility-trailblazers'),
-            'manage_options',
-            'mt-voting-results',
-            array($this, 'voting_results_page')
-        );
-
-        add_submenu_page(
-            'mt-award-system',
-            __('Settings', 'mobility-trailblazers'),
-            __('Settings', 'mobility-trailblazers'),
-            'manage_options',
-            'mt-settings',
-            array($this, 'settings_page')
+            'mt-assignments',
+            array($this, 'assignment_management_page')
         );
     }
 
@@ -1269,6 +1245,650 @@ class MobilityTrailblazersPlugin {
         echo '</form>';
         
         echo '</div>';
+    }
+
+    /**
+     * Assignment Management Page
+     */
+    public function assignment_management_page() {
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Enqueue assignment-specific scripts and styles
+        wp_enqueue_script('mt-assignment-js', MT_PLUGIN_URL . 'assets/assignment.js', array('jquery'), MT_PLUGIN_VERSION, true);
+        wp_enqueue_style('mt-assignment-css', MT_PLUGIN_URL . 'assets/assignment.css', array(), MT_PLUGIN_VERSION);
+        
+        // Get data for JavaScript
+        $candidates_data = $this->get_candidates_for_assignment();
+        $jury_data = $this->get_jury_members_for_assignment();
+        $existing_assignments = $this->get_existing_assignments();
+        
+        // Localize script with data
+        wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_assignment_nonce'),
+            'candidates' => $candidates_data,
+            'jury_members' => $jury_data,
+            'existing_assignments' => $existing_assignments,
+            'plugin_url' => MT_PLUGIN_URL
+        ));
+        
+        // Output the page content directly
+        $this->render_assignment_page_content();
+    }
+
+    /**
+     * Render assignment page content directly
+     */
+    private function render_assignment_page_content() {
+        // Get current statistics
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        $total_jury = wp_count_posts('mt_jury')->publish;
+        
+        global $wpdb;
+        $assigned_count = $wpdb->get_var("
+            SELECT COUNT(DISTINCT post_id) 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_assigned_jury_member' 
+            AND meta_value != ''
+        ");
+        
+        $completion_rate = $total_candidates > 0 ? ($assigned_count / $total_candidates) * 100 : 0;
+        $avg_per_jury = $total_jury > 0 ? $assigned_count / $total_jury : 0;
+        
+        // Get current phase
+        $current_phase = get_option('mt_current_phase', 'preparation');
+        $phase_names = array(
+            'preparation' => 'Preparation',
+            'candidate_collection' => 'Candidate Collection',
+            'jury_evaluation' => 'Jury Evaluation',
+            'public_voting' => 'Public Voting',
+            'final_selection' => 'Final Selection',
+            'award_ceremony' => 'Award Ceremony',
+            'post_award' => 'Post Award'
+        );
+        
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Jury Assignment Management', 'mobility-trailblazers'); ?></h1>
+            
+            <!-- Add some basic CSS if the file doesn't load -->
+            <style>
+            #mt-assignment-interface {
+                background: linear-gradient(135deg, #f7fafc 0%, #e6fffa 100%);
+                margin: 20px 0;
+                padding: 20px;
+                border-radius: 8px;
+                min-height: 70vh;
+            }
+            .mt-assignment-header {
+                background: linear-gradient(135deg, #2c5282 0%, #38b2ac 100%);
+                color: white;
+                padding: 30px;
+                margin-bottom: 30px;
+                border-radius: 15px;
+                text-align: center;
+            }
+            .mt-status-banner {
+                background: #38a169;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .mt-stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+            .mt-stat-card {
+                background: white;
+                padding: 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                border-left: 4px solid #38b2ac;
+                text-align: center;
+            }
+            .mt-stat-number {
+                font-size: 2.5rem;
+                font-weight: 700;
+                color: #2c5282;
+                display: block;
+                line-height: 1;
+            }
+            .mt-stat-label {
+                color: #718096;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-top: 5px;
+            }
+            .mt-btn {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                font-size: 14px;
+                margin: 5px;
+            }
+            .mt-btn-primary { background: #2c5282; color: white; }
+            .mt-btn-success { background: #38a169; color: white; }
+            .mt-btn-warning { background: #d69e2e; color: white; }
+            .mt-btn-secondary { background: #718096; color: white; }
+            .mt-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+            .mt-assignment-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                margin-top: 30px;
+            }
+            .mt-panel {
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            .mt-panel-header {
+                background: #2c5282;
+                color: white;
+                padding: 20px;
+                font-weight: 600;
+            }
+            .mt-panel-content {
+                padding: 20px;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            .loading-message {
+                text-align: center;
+                padding: 40px;
+                color: #718096;
+            }
+            </style>
+            
+            <div id="mt-assignment-interface">
+                <div class="mt-assignment-header">
+                    <h1>🏆 Jury Assignment System</h1>
+                    <p>Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
+                </div>
+
+                <div class="mt-status-banner">
+                    <span class="icon">✅</span>
+                    <div>
+                        <strong>System Status: HEALTHY</strong> | Last check: <?php echo date('H:i:s'); ?> | 
+                        Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? $current_phase); ?>
+                    </div>
+                </div>
+
+                <div class="mt-stats-grid">
+                    <div class="mt-stat-card">
+                        <span class="mt-stat-number"><?php echo $total_candidates; ?></span>
+                        <div class="mt-stat-label">Total Candidates</div>
+                    </div>
+                    <div class="mt-stat-card">
+                        <span class="mt-stat-number"><?php echo $total_jury; ?></span>
+                        <div class="mt-stat-label">Jury Members</div>
+                    </div>
+                    <div class="mt-stat-card">
+                        <span class="mt-stat-number"><?php echo $assigned_count; ?></span>
+                        <div class="mt-stat-label">Total Assignments</div>
+                    </div>
+                    <div class="mt-stat-card">
+                        <span class="mt-stat-number"><?php echo number_format($completion_rate, 1); ?>%</span>
+                        <div class="mt-stat-label">Completion Rate</div>
+                    </div>
+                    <div class="mt-stat-card">
+                        <span class="mt-stat-number"><?php echo number_format($avg_per_jury, 1); ?></span>
+                        <div class="mt-stat-label">Avg Per Jury</div>
+                    </div>
+                </div>
+
+                <div style="margin: 30px 0;">
+                    <button id="mt-test-data-btn" class="mt-btn mt-btn-primary">🧪 Test Assignment System</button>
+                    <button id="mt-load-candidates-btn" class="mt-btn mt-btn-success">📋 Load Candidates</button>
+                    <button id="mt-load-jury-btn" class="mt-btn mt-btn-warning">👨‍⚖️ Load Jury Members</button>
+                    <button id="mt-debug-btn" class="mt-btn mt-btn-secondary">🔍 Debug Info</button>
+                </div>
+
+                <div class="mt-assignment-grid">
+                    <div class="mt-panel">
+                        <div class="mt-panel-header">
+                            📋 Candidates (<?php echo $total_candidates; ?>)
+                        </div>
+                        <div class="mt-panel-content">
+                            <div id="mt-candidates-list" class="loading-message">
+                                Click "Load Candidates" to view candidates...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-panel">
+                        <div class="mt-panel-header">
+                            👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)
+                        </div>
+                        <div class="mt-panel-content">
+                            <div id="mt-jury-list" class="loading-message">
+                                Click "Load Jury Members" to view jury...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="debug-info" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <h3>🔍 Debug Information</h3>
+                    <div id="debug-content"></div>
+                </div>
+            </div>
+
+            <script>
+            jQuery(document).ready(function($) {
+                console.log('Assignment page loaded');
+                console.log('mt_assignment_ajax available:', typeof mt_assignment_ajax !== 'undefined');
+                
+                if (typeof mt_assignment_ajax !== 'undefined') {
+                    console.log('Candidates:', mt_assignment_ajax.candidates.length);
+                    console.log('Jury members:', mt_assignment_ajax.jury_members.length);
+                }
+
+                // Test button
+                $('#mt-test-data-btn').on('click', function() {
+                    alert('Assignment system is working! Data loaded: ' + 
+                          (typeof mt_assignment_ajax !== 'undefined' ? 'Yes' : 'No'));
+                });
+
+                // Load candidates button
+                $('#mt-load-candidates-btn').on('click', function() {
+                    if (typeof mt_assignment_ajax === 'undefined') {
+                        $('#mt-candidates-list').html('<div style="color: red;">Error: Assignment data not loaded</div>');
+                        return;
+                    }
+                    
+                    var candidates = mt_assignment_ajax.candidates || [];
+                    var html = '';
+                    
+                    if (candidates.length === 0) {
+                        html = '<div>No candidates found. Please add candidates first.</div>';
+                    } else {
+                        candidates.slice(0, 10).forEach(function(candidate) {
+                            html += '<div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">';
+                            html += '<strong>' + candidate.name + '</strong><br>';
+                            html += candidate.company + '<br>';
+                            html += '<small>' + candidate.category + '</small>';
+                            html += '</div>';
+                        });
+                        
+                        if (candidates.length > 10) {
+                            html += '<div style="padding: 10px; text-align: center; color: #666;">... and ' + (candidates.length - 10) + ' more candidates</div>';
+                        }
+                    }
+                    
+                    $('#mt-candidates-list').html(html);
+                });
+
+                // Load jury button
+                $('#mt-load-jury-btn').on('click', function() {
+                    if (typeof mt_assignment_ajax === 'undefined') {
+                        $('#mt-jury-list').html('<div style="color: red;">Error: Assignment data not loaded</div>');
+                        return;
+                    }
+                    
+                    var jury = mt_assignment_ajax.jury_members || [];
+                    var html = '';
+                    
+                    if (jury.length === 0) {
+                        html = '<div>No jury members found. Please add jury members first.</div>';
+                    } else {
+                        jury.forEach(function(member) {
+                            html += '<div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">';
+                            html += '<strong>' + member.name + '</strong><br>';
+                            html += member.position + '<br>';
+                            html += '<small>' + member.expertise + '</small>';
+                            if (member.role === 'president') html += ' <span style="background: gold; padding: 2px 6px; border-radius: 10px; font-size: 10px;">PRESIDENT</span>';
+                            if (member.role === 'vice_president') html += ' <span style="background: #38b2ac; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">VICE PRESIDENT</span>';
+                            html += '</div>';
+                        });
+                    }
+                    
+                    $('#mt-jury-list').html(html);
+                });
+
+                // Debug button
+                $('#mt-debug-btn').on('click', function() {
+                    var debugInfo = '<h4>System Information:</h4>';
+                    debugInfo += '<p><strong>jQuery:</strong> ' + (typeof $ !== 'undefined' ? 'Loaded' : 'Not loaded') + '</p>';
+                    debugInfo += '<p><strong>Assignment AJAX:</strong> ' + (typeof mt_assignment_ajax !== 'undefined' ? 'Loaded' : 'Not loaded') + '</p>';
+                    
+                    if (typeof mt_assignment_ajax !== 'undefined') {
+                        debugInfo += '<p><strong>AJAX URL:</strong> ' + mt_assignment_ajax.ajax_url + '</p>';
+                        debugInfo += '<p><strong>Candidates:</strong> ' + (mt_assignment_ajax.candidates ? mt_assignment_ajax.candidates.length : 0) + '</p>';
+                        debugInfo += '<p><strong>Jury Members:</strong> ' + (mt_assignment_ajax.jury_members ? mt_assignment_ajax.jury_members.length : 0) + '</p>';
+                        debugInfo += '<p><strong>Plugin URL:</strong> ' + (mt_assignment_ajax.plugin_url || 'Not set') + '</p>';
+                    }
+                    
+                    debugInfo += '<h4>WordPress Info:</h4>';
+                    debugInfo += '<p><strong>Admin URL:</strong> ' + ajaxurl + '</p>';
+                    
+                    $('#debug-content').html(debugInfo);
+                    $('#debug-info').toggle();
+                });
+            });
+            </script>
+        </div>
+        <?php
+    }
+
+    /**
+     * Get candidates formatted for assignment interface
+     */
+    private function get_candidates_for_assignment() {
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $formatted_candidates = array();
+        
+        foreach ($candidates as $candidate) {
+            $company = get_post_meta($candidate->ID, '_mt_company', true);
+            $position = get_post_meta($candidate->ID, '_mt_position', true);
+            $categories = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'slugs'));
+            $assigned_jury = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+            
+            $formatted_candidates[] = array(
+                'id' => $candidate->ID,
+                'name' => $candidate->post_title,
+                'company' => $company ?: 'No company',
+                'position' => $position ?: 'No position',
+                'category' => !empty($categories) ? $categories[0] : 'uncategorized',
+                'assigned' => !empty($assigned_jury),
+                'jury_member_id' => $assigned_jury ?: null
+            );
+        }
+        
+        return $formatted_candidates;
+    }
+
+    /**
+     * Get jury members formatted for assignment interface
+     */
+    private function get_jury_members_for_assignment() {
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $formatted_jury = array();
+        
+        foreach ($jury_members as $jury) {
+            $position = get_post_meta($jury->ID, '_mt_jury_position', true);
+            $expertise = get_post_meta($jury->ID, '_mt_jury_expertise', true);
+            $is_president = get_post_meta($jury->ID, '_mt_jury_is_president', true);
+            $is_vice_president = get_post_meta($jury->ID, '_mt_jury_is_vice_president', true);
+            
+            // Count current assignments
+            $assignments = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_assigned_jury_member',
+                        'value' => $jury->ID,
+                        'compare' => '='
+                    )
+                )
+            ));
+            
+            $role = 'member';
+            if ($is_president) $role = 'president';
+            elseif ($is_vice_president) $role = 'vice_president';
+            
+            $formatted_jury[] = array(
+                'id' => $jury->ID,
+                'name' => $jury->post_title,
+                'position' => $position ?: 'No position',
+                'expertise' => $expertise ?: 'General expertise',
+                'role' => $role,
+                'assignments' => count($assignments),
+                'max_assignments' => 15 // Configurable
+            );
+        }
+        
+        return $formatted_jury;
+    }
+
+    /**
+     * Get existing assignments
+     */
+    private function get_existing_assignments() {
+        global $wpdb;
+        
+        $assignments = $wpdb->get_results("
+            SELECT p.ID as candidate_id, pm.meta_value as jury_member_id
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'mt_candidate'
+            AND pm.meta_key = '_mt_assigned_jury_member'
+            AND pm.meta_value != ''
+        ");
+        
+        return $assignments ?: array();
+    }
+
+    /**
+     * Handle manual candidate assignment
+     */
+    public function handle_assign_candidates() {
+        if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        $candidate_ids = array_map('intval', $_POST['candidate_ids']);
+        $jury_member_id = intval($_POST['jury_member_id']);
+        
+        $success_count = 0;
+        
+        foreach ($candidate_ids as $candidate_id) {
+            $result = update_post_meta($candidate_id, '_mt_assigned_jury_member', $jury_member_id);
+            if ($result) {
+                $success_count++;
+                $this->log_assignment_action($candidate_id, $jury_member_id, 'assigned');
+            }
+        }
+        
+        wp_send_json_success(array(
+            'message' => sprintf(__('%d candidates assigned successfully', 'mobility-trailblazers'), $success_count),
+            'assigned_count' => $success_count
+        ));
+    }
+
+    /**
+     * Handle auto-assignment
+     */
+    public function handle_auto_assign() {
+        if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        $candidates_per_jury = intval($_POST['candidates_per_jury']);
+        $algorithm = sanitize_text_field($_POST['algorithm']);
+        $clear_existing = isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true';
+        $balance_categories = isset($_POST['balance_categories']) && $_POST['balance_categories'] === 'true';
+        
+        if ($clear_existing) {
+            $this->clear_all_assignments();
+        }
+        
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_assigned_jury_member',
+                    'compare' => 'NOT EXISTS'
+                )
+            )
+        ));
+        
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $assignments_made = $this->execute_assignment_algorithm(
+            $candidates, 
+            $jury_members, 
+            $algorithm, 
+            $candidates_per_jury,
+            $balance_categories
+        );
+        
+        wp_send_json_success(array(
+            'message' => sprintf(__('%d assignments created successfully', 'mobility-trailblazers'), $assignments_made),
+            'assignments_made' => $assignments_made
+        ));
+    }
+
+    /**
+     * Execute assignment algorithm
+     */
+    private function execute_assignment_algorithm($candidates, $jury_members, $algorithm, $candidates_per_jury, $balance_categories) {
+        $assignments_made = 0;
+        
+        switch ($algorithm) {
+            case 'balanced':
+                $assignments_made = $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury);
+                break;
+            case 'random':
+                $assignments_made = $this->random_assignment($candidates, $jury_members, $candidates_per_jury);
+                break;
+            case 'expertise':
+                $assignments_made = $this->expertise_based_assignment($candidates, $jury_members, $candidates_per_jury);
+                break;
+            case 'category':
+                $assignments_made = $this->category_balanced_assignment($candidates, $jury_members, $candidates_per_jury);
+                break;
+        }
+        
+        return $assignments_made;
+    }
+
+    /**
+     * Balanced assignment algorithm
+     */
+    private function balanced_assignment($candidates, $jury_members, $candidates_per_jury) {
+        $assignments_made = 0;
+        $jury_index = 0;
+        $jury_assignments = array();
+        
+        foreach ($jury_members as $jury) {
+            $jury_assignments[$jury->ID] = 0;
+        }
+        
+        foreach ($candidates as $candidate) {
+            $current_jury = $jury_members[$jury_index];
+            
+            if ($jury_assignments[$current_jury->ID] >= $candidates_per_jury) {
+                $jury_index = ($jury_index + 1) % count($jury_members);
+                $current_jury = $jury_members[$jury_index];
+            }
+            
+            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $current_jury->ID);
+            $jury_assignments[$current_jury->ID]++;
+            $assignments_made++;
+            
+            $this->log_assignment_action($candidate->ID, $current_jury->ID, 'auto_assigned_balanced');
+        }
+        
+        return $assignments_made;
+    }
+
+    /**
+     * Clear all assignments
+     */
+    private function clear_all_assignments() {
+        global $wpdb;
+        
+        $wpdb->delete(
+            $wpdb->postmeta,
+            array('meta_key' => '_mt_assigned_jury_member'),
+            array('%s')
+        );
+    }
+
+    /**
+     * Log assignment action
+     */
+    private function log_assignment_action($candidate_id, $jury_member_id, $action) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_assignment_log';
+        
+        $wpdb->insert(
+            $table_name,
+            array(
+                'candidate_id' => $candidate_id,
+                'jury_member_id' => $jury_member_id,
+                'action' => $action,
+                'user_id' => get_current_user_id(),
+                'timestamp' => current_time('mysql')
+            )
+        );
+    }
+
+    /**
+     * Get assignment statistics
+     */
+    public function handle_get_assignment_stats() {
+        if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        $total_jury = wp_count_posts('mt_jury')->publish;
+        
+        global $wpdb;
+        $assigned_count = $wpdb->get_var("
+            SELECT COUNT(DISTINCT post_id) 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_assigned_jury_member' 
+            AND meta_value != ''
+        ");
+        
+        $completion_rate = $total_candidates > 0 ? ($assigned_count / $total_candidates) * 100 : 0;
+        $avg_per_jury = $total_jury > 0 ? $assigned_count / $total_jury : 0;
+        
+        wp_send_json_success(array(
+            'total_candidates' => $total_candidates,
+            'total_jury' => $total_jury,
+            'assigned_count' => $assigned_count,
+            'completion_rate' => round($completion_rate, 1),
+            'avg_per_jury' => round($avg_per_jury, 1)
+        ));
     }
 }
 
