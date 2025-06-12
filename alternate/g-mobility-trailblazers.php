@@ -94,27 +94,16 @@ class MobilityTrailblazers {
     }
 
     public function register_custom_post_types() {
-        add_action('admin_menu', function () {
-            register_post_type('mt_candidate', [
-                'label' => 'Candidates',
-                'public' => false,
-                'show_ui' => true,
-                'show_in_menu' => 'mobility_trailblazers',
-                'capability_type' => 'post',
-                'capabilities' => [
-                    'edit_post' => 'read',
-                    'read_post' => 'read',
-                    'delete_post' => 'delete_posts',
-                    'edit_posts' => 'edit_posts',
-                    'edit_others_posts' => 'edit_others_posts',
-                    'publish_posts' => 'publish_posts',
-                    'read_private_posts' => 'read_private_posts'
-                ],
-                'map_meta_cap' => true,
-                'supports' => ['title', 'editor'],
-                'menu_icon' => 'dashicons-awards',
-            ]);
-        }, 99);
+        register_post_type('mt_candidate', [
+            'label' => 'Candidates',
+            'public' => false,
+            'show_ui' => true,
+            'show_in_menu' => 'mobility_trailblazers',
+            'capability_type' => 'post',
+            'map_meta_cap' => false,
+            'supports' => ['title', 'editor'],
+            'menu_icon' => 'dashicons-awards',
+        ]);
     }
 
     public function admin_menu() {
@@ -343,6 +332,23 @@ class MobilityTrailblazers {
         </script>
         <?php return ob_get_clean();
     }
+
+    public function ensure_roles_exist() {
+        if (!get_role('jury')) {
+            add_role('jury', 'Jury', [
+                'read' => true,
+                'edit_posts' => true,
+            ]);
+        }
+        if (!get_role('candidate')) {
+            add_role('candidate', 'Candidate', [
+                'read' => true,
+            ]);
+        }
+    }
 }
 
-MobilityTrailblazers::get_instance();
+add_action('init', [MobilityTrailblazers::class, 'get_instance']);
+add_action('init', function () {
+    MobilityTrailblazers::get_instance()->ensure_roles_exist();
+});
