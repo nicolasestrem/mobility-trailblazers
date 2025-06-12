@@ -81,7 +81,7 @@ class MobilityTrailblazers {
 
     public function register_custom_post_types() {
         add_action('admin_menu', function () {
-            register_post_type('trailblazer_candidate', [
+            register_post_type('mt_candidate', [
                 'label' => 'Candidates',
                 'public' => false,
                 'show_ui' => true,
