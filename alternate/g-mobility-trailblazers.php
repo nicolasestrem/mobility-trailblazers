@@ -2,8 +2,8 @@
 /**
  * Plugin Name: ALTERNATE Mobility Trailblazers Platform
  * Description: A custom plugin to manage the jury, voting, candidate workflow, and analytics for the 25 Mobility Trailblazers project.
- * Version: 1.0.1
- * Author: Nicolas Estrem
+ * Version: 1.0.2
+ * Author: Nico
  */
 
 if (!defined('ABSPATH')) exit;
@@ -291,7 +291,11 @@ class MobilityTrailblazers {
         global $wpdb;
         $round = isset($_GET['round']) ? intval($_GET['round']) : 1;
         $jury_members = get_users(['role' => 'jury']);
-        $candidates = $wpdb->get_results("SELECT id FROM {$this->candidates_table} ORDER BY RAND()");
+
+        $candidates = $wpdb->get_results("SELECT id FROM {$this->candidates_table} WHERE name IS NOT NULL AND name != '' ORDER BY RAND()");
+        if (!$candidates) {
+            wp_send_json(['message' => '❌ No valid candidates found.']);
+        }
 
         $assignments = [];
         $candidate_index = 0;
@@ -305,7 +309,7 @@ class MobilityTrailblazers {
 
             $assigned_count = 0;
             while ($assigned_count < $candidates_per_jury && isset($candidates[$candidate_index])) {
-                $candidate_id = $candidates[$candidate_index]->id;
+                $candidate_id = intval($candidates[$candidate_index]->id);
                 if (!in_array($candidate_id, $already)) {
                     $assignments[] = $wpdb->prepare("(%d, %d, %d)", $jury->ID, $candidate_id, $round);
                     $assigned_count++;
@@ -316,9 +320,10 @@ class MobilityTrailblazers {
 
         if (!empty($assignments)) {
             $wpdb->query("INSERT INTO {$this->assignments_table} (jury_id, candidate_id, round) VALUES " . implode(",", $assignments));
+            wp_send_json(['message' => '✅ Auto-assignment complete for round ' . $round]);
+        } else {
+            wp_send_json(['message' => 'ℹ️ No new candidates assigned. Perhaps all were already distributed.']);
         }
-
-        wp_send_json(['message' => 'Auto-assignment complete for round ' . $round]);
     }
 
     public function render_voting_form() {
