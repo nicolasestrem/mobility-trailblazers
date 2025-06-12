@@ -1311,13 +1311,29 @@ class MobilityTrailblazersPlugin {
         ));
         
         // Render the page content
-        $this->render_assignment_page_content();
+        $this->render_assignment_page_content(
+            $current_phase,
+            $phase_names,
+            $total_candidates,
+            $total_jury,
+            $assigned_count,
+            $completion_rate,
+            $avg_per_jury
+        );
     }
 
     /**
      * Render the assignment management page content
      */
-    private function render_assignment_page_content() {
+    private function render_assignment_page_content(
+        $current_phase,
+        $phase_names,
+        $total_candidates,
+        $total_jury,
+        $assigned_count,
+        $completion_rate,
+        $avg_per_jury
+    ) {
         ?>
         <div class="wrap">
             <h1><?php _e('Jury Assignment Management', 'mobility-trailblazers'); ?></h1>
