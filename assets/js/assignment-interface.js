@@ -112,76 +112,129 @@
          * Setup all event handlers - Complete implementation
          */
         setupEventHandlers() {
+            console.log('🔧 Setting up event handlers...');
+            
             // Stage filter change
-            $('#mtStageFilter').on('change', (e) => {
+            $(document).on('change', '#mtStageFilter', (e) => {
+                console.log('Stage filter changed:', e.target.value);
                 this.changeStage(e.target.value);
             });
             
-            // Search functionality with debounce - FIXED: Now using proper this.debounce
-            $('#mtSearchCandidates').on('input', debounce((e) => {
+            // Search functionality with debounce
+            $(document).on('input', '#mtSearchCandidates', debounce((e) => {
+                console.log('Search input:', e.target.value);
                 this.currentFilters.search = e.target.value;
                 this.performSearch(e.target.value);
             }, MT_ASSIGNMENT_CONFIG.DEBOUNCE_DELAY));
             
             // Category filter
-            $('#mtCategoryFilter').on('change', (e) => {
+            $(document).on('change', '#mtCategoryFilter', (e) => {
+                console.log('Category filter changed:', e.target.value);
                 this.currentFilters.category = e.target.value;
                 this.filterByCategory(e.target.value);
             });
             
             // Assignment status filter
-            $('#mtAssignmentStatusFilter').on('change', (e) => {
+            $(document).on('change', '#mtAssignmentStatusFilter', (e) => {
+                console.log('Assignment status filter changed:', e.target.value);
                 this.currentFilters.assignmentStatus = e.target.value;
                 this.filterByAssignmentStatus(e.target.value);
             });
             
             // Selection handlers with delegation
             $(document).on('change', '.mt-candidate-checkbox', (e) => {
+                console.log('Candidate selection changed:', e.target.checked);
                 this.handleCandidateSelection(e);
             });
             
             $(document).on('change', '.mt-jury-checkbox', (e) => {
+                console.log('Jury selection changed:', e.target.checked);
                 this.handleJurySelection(e);
             });
             
             // Action button handlers
             $(document).on('click', '[data-action="auto-assign"]', (e) => {
+                console.log('Auto assign clicked');
+                e.preventDefault();
                 this.openAutoAssignModal();
             });
             
             $(document).on('click', '[data-action="bulk-actions"]', (e) => {
+                console.log('Bulk actions clicked');
+                e.preventDefault();
                 this.openBulkActionsModal();
             });
             
-            $(document).on('click', '[data-action="export-csv"]', (e) => {
-                this.exportAssignments();
+            $(document).on('click', '[data-action="refresh-data"]', (e) => {
+                console.log('Refresh data clicked');
+                e.preventDefault();
+                this.refreshAllData();
             });
             
-            $(document).on('click', '[data-action="refresh-data"]', (e) => {
-                this.refreshAllData();
+            $(document).on('click', '[data-action="assign-selected"]', (e) => {
+                console.log('Assign selected clicked');
+                e.preventDefault();
+                this.assignSelected();
+            });
+            
+            $(document).on('click', '[data-action="remove-selected"]', (e) => {
+                console.log('Remove selected clicked');
+                e.preventDefault();
+                this.removeSelected();
+            });
+            
+            // Select all buttons
+            $(document).on('click', '#mtSelectAllCandidates', (e) => {
+                console.log('Select all candidates clicked');
+                e.preventDefault();
+                this.selectAllCandidates();
+            });
+            
+            $(document).on('click', '#mtSelectAllJury', (e) => {
+                console.log('Select all jury clicked');
+                e.preventDefault();
+                this.selectAllJury();
+            });
+            
+            // Clear selection buttons
+            $(document).on('click', '#mtClearCandidates', (e) => {
+                console.log('Clear candidates clicked');
+                e.preventDefault();
+                this.clearCandidateSelection();
+            });
+            
+            $(document).on('click', '#mtClearJury', (e) => {
+                console.log('Clear jury clicked');
+                e.preventDefault();
+                this.clearJurySelection();
             });
             
             // Modal handlers
             $(document).on('click', '.mt-modal-overlay, .mt-modal-close', (e) => {
                 if (e.target === e.currentTarget) {
+                    console.log('Modal close clicked');
                     this.closeModal($(e.target).closest('.mt-modal-overlay'));
                 }
             });
             
             // Auto-assign form submission
             $(document).on('submit', '#mtAutoAssignForm', (e) => {
+                console.log('Auto assign form submitted');
                 e.preventDefault();
                 this.executeAutoAssign();
             });
             
             // Bulk actions form submission
             $(document).on('submit', '#mtBulkActionsForm', (e) => {
+                console.log('Bulk actions form submitted');
                 e.preventDefault();
                 this.executeBulkAction();
             });
             
             // Assignment toggle handlers
             $(document).on('click', '.mt-assignment-toggle', (e) => {
+                console.log('Assignment toggle clicked:', e.target.dataset);
+                e.preventDefault();
                 this.toggleAssignment(e.target.dataset.candidateId, e.target.dataset.juryId);
             });
             
@@ -194,6 +247,8 @@
             $(window).on('resize.mt-assignment', debounce(() => {
                 this.handleWindowResize();
             }, 250));
+            
+            console.log('✅ Event handlers setup complete');
         }
         
         /**
@@ -695,6 +750,83 @@
         
         handleWindowResize() {
             // Window resize handling for responsive design
+        }
+        
+        // Add new methods for selection handling
+        selectAllCandidates() {
+            $('.mt-candidate-checkbox').prop('checked', true).trigger('change');
+        }
+        
+        selectAllJury() {
+            $('.mt-jury-checkbox').prop('checked', true).trigger('change');
+        }
+        
+        clearCandidateSelection() {
+            $('.mt-candidate-checkbox').prop('checked', false).trigger('change');
+        }
+        
+        clearJurySelection() {
+            $('.mt-jury-checkbox').prop('checked', false).trigger('change');
+        }
+        
+        assignSelected() {
+            const selectedCandidates = Array.from(this.selectedCandidates);
+            const selectedJury = Array.from(this.selectedJury);
+            
+            if (selectedCandidates.length === 0 || selectedJury.length === 0) {
+                this.showError('Please select both candidates and jury members to assign');
+                return;
+            }
+            
+            this.showLoading('Assigning selected candidates...');
+            
+            // Make API call to assign candidates
+            this.apiCall('assignments/bulk', 'POST', {
+                candidates: selectedCandidates,
+                jury: selectedJury,
+                stage: this.currentStage
+            }).then(response => {
+                this.hideLoading();
+                if (response.success) {
+                    this.showSuccess('Successfully assigned candidates');
+                    this.refreshAllData();
+                } else {
+                    this.showError(response.data || 'Failed to assign candidates');
+                }
+            }).catch(error => {
+                this.hideLoading();
+                this.showError('Error assigning candidates: ' + error.message);
+            });
+        }
+        
+        removeSelected() {
+            const selectedCandidates = Array.from(this.selectedCandidates);
+            const selectedJury = Array.from(this.selectedJury);
+            
+            if (selectedCandidates.length === 0 || selectedJury.length === 0) {
+                this.showError('Please select both candidates and jury members to remove assignments');
+                return;
+            }
+            
+            this.showLoading('Removing selected assignments...');
+            
+            // Make API call to remove assignments
+            this.apiCall('assignments/remove', 'POST', {
+                candidates: selectedCandidates,
+                jury: selectedJury,
+                stage: this.currentStage
+            }).then(response => {
+                this.hideLoading();
+                if (response.success) {
+                    this.showSuccess('Successfully removed assignments');
+                    this.refreshAllData();
+                } else {
+                    this.showError(response.data || 'Failed to remove assignments');
+                }
+            }).catch(error => {
+                this.hideLoading();
+                this.showError('Error removing assignments: ' + error.message);
+            });
         }
     }
     

@@ -3749,41 +3749,34 @@ class MobilityTrailblazersElementsFix {
         ?>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            console.log('🔧 Fixing missing assignment interface elements...');
+            console.log('🔧 Initializing assignment interface...');
             
-            // Check if elements already exist
-            var missingElements = [];
-            var requiredElements = [
-                '#mtAutoAssign',
-                '#mtBulkAssign', 
-                '#mtAssignSelected',
-                '#mtCandidatesList',
-                '#mtJuryList'
-            ];
+            // Create missing elements first
+            createMissingAssignmentElements();
             
-            requiredElements.forEach(function(selector) {
-                if (!$(selector).length) {
-                    missingElements.push(selector);
-                    console.log('❌ Missing element: ' + selector);
-                }
-            });
-            
-            if (missingElements.length > 0) {
-                console.log('🛠️ Creating missing elements...');
-                mtCreateMissingElements();
-            }
-            
-            // Load data for candidates and jury lists
+            // Initialize the interface after a short delay to ensure DOM is ready
             setTimeout(function() {
-                mtLoadCandidatesData();
-                mtLoadJuryData();
-            }, 1000);
+                if (typeof AssignmentInterface === 'function') {
+                    console.log('🚀 Creating AssignmentInterface instance...');
+                    window.assignmentInterface = new AssignmentInterface();
+                    
+                    // Verify initialization
+                    if (window.assignmentInterface && window.assignmentInterface.isInitialized) {
+                        console.log('✅ AssignmentInterface initialized successfully');
+                    } else {
+                        console.error('❌ AssignmentInterface initialization failed');
+                    }
+                } else {
+                    console.error('❌ AssignmentInterface class not found');
+                }
+            }, 100);
         });
         
-        function mtCreateMissingElements() {
+        function createMissingAssignmentElements() {
             var $ = jQuery;
+            console.log('🛠️ Creating/verifying assignment interface elements...');
             
-            // Find the main content area or create one
+            // Find the main content area
             var $mainContent = $('.mt-assignment-interface');
             if (!$mainContent.length) {
                 $mainContent = $('.wrap');
@@ -3792,22 +3785,22 @@ class MobilityTrailblazersElementsFix {
                 }
             }
             
-            // Create the missing interface structure
+            // Create the interface structure with proper data attributes
             var interfaceHTML = `
-                <div id="mtAssignmentInterface" class="mt-assignment-interface-fixed">
-                    <div class="mt-assignment-header-fixed">
-                        <div class="mt-assignment-actions-fixed">
-                            <button id="mtAutoAssign" class="button button-primary">
+                <div id="mtAssignmentInterface" class="mt-assignment-interface">
+                    <div class="mt-assignment-header">
+                        <div class="mt-assignment-actions">
+                            <button id="mtAutoAssign" class="button button-primary" data-action="auto-assign">
                                 <span class="dashicons dashicons-randomize"></span> Auto Assign
                             </button>
-                            <button id="mtBulkAssign" class="button button-secondary">
+                            <button id="mtBulkAssign" class="button button-secondary" data-action="bulk-actions">
                                 <span class="dashicons dashicons-admin-users"></span> Bulk Operations
                             </button>
-                            <button id="mtRefreshData" class="button">
+                            <button id="mtRefreshData" class="button" data-action="refresh-data">
                                 <span class="dashicons dashicons-update"></span> Refresh
                             </button>
                         </div>
-                        <div class="mt-assignment-filters-fixed">
+                        <div class="mt-assignment-filters">
                             <select id="mtStageFilter">
                                 <option value="semifinal" selected>Semi-Final (200 → 50)</option>
                                 <option value="shortlist">Shortlist (2000 → 200)</option>
@@ -3816,36 +3809,36 @@ class MobilityTrailblazersElementsFix {
                         </div>
                     </div>
                     
-                    <div class="mt-assignment-main-fixed">
+                    <div class="mt-assignment-main">
                         <!-- Candidates Panel -->
-                        <div class="mt-candidates-panel-fixed">
-                            <div class="mt-panel-header-fixed">
+                        <div class="mt-candidates-panel">
+                            <div class="mt-panel-header">
                                 <h3>📋 Candidates <span id="mtCandidatesCount">(0)</span></h3>
-                                <div class="mt-panel-actions-fixed">
+                                <div class="mt-panel-actions">
                                     <button class="button button-small" id="mtSelectAllCandidates">Select All</button>
                                     <button class="button button-small" id="mtClearCandidates">Clear</button>
                                 </div>
                             </div>
-                            <div id="mtCandidatesList" class="mt-candidates-list-fixed">
-                                <div class="mt-loading-fixed">
-                                    <div class="mt-spinner-fixed"></div>
+                            <div id="mtCandidatesList" class="mt-candidates-list">
+                                <div class="mt-loading">
+                                    <div class="mt-spinner"></div>
                                     <p>Loading candidates...</p>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Assignment Actions -->
-                        <div class="mt-assignment-actions-panel-fixed">
-                            <button id="mtAssignSelected" class="mt-assign-btn-fixed" disabled>
+                        <div class="mt-assignment-actions-panel">
+                            <button id="mtAssignSelected" class="mt-assign-btn" data-action="assign-selected" disabled>
                                 <span class="dashicons dashicons-arrow-right-alt2"></span>
                                 Assign Selected
                             </button>
-                            <button id="mtRemoveSelected" class="mt-remove-btn-fixed" disabled>
+                            <button id="mtRemoveSelected" class="mt-remove-btn" data-action="remove-selected" disabled>
                                 <span class="dashicons dashicons-arrow-left-alt2"></span>
                                 Remove Selected
                             </button>
-                            <div class="mt-assignment-stats-fixed">
-                                <div class="mt-stat-fixed">
+                            <div class="mt-assignment-stats">
+                                <div class="mt-stat">
                                     <span class="mt-stat-number" id="mtTotalAssignments">0</span>
                                     <span class="mt-stat-label">Total Assignments</span>
                                 </div>
@@ -3853,475 +3846,53 @@ class MobilityTrailblazersElementsFix {
                         </div>
                         
                         <!-- Jury Panel -->
-                        <div class="mt-jury-panel-fixed">
-                            <div class="mt-panel-header-fixed">
+                        <div class="mt-jury-panel">
+                            <div class="mt-panel-header">
                                 <h3>👥 Jury Members <span id="mtJuryCount">(0)</span></h3>
-                                <div class="mt-panel-actions-fixed">
+                                <div class="mt-panel-actions">
                                     <button class="button button-small" id="mtSelectAllJury">Select All</button>
                                     <button class="button button-small" id="mtClearJury">Clear</button>
                                 </div>
                             </div>
-                            <div id="mtJuryList" class="mt-jury-list-fixed">
-                                <div class="mt-loading-fixed">
-                                    <div class="mt-spinner-fixed"></div>
+                            <div id="mtJuryList" class="mt-jury-list">
+                                <div class="mt-loading">
+                                    <div class="mt-spinner"></div>
                                     <p>Loading jury members...</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Auto Assign Modal -->
-                <div id="mtAutoAssignModal" class="mt-modal-fixed" style="display: none;">
-                    <div class="mt-modal-overlay-fixed">
-                        <div class="mt-modal-content-fixed">
-                            <div class="mt-modal-header-fixed">
-                                <h3>🤖 Auto Assign Configuration</h3>
-                                <button class="mt-modal-close-fixed">&times;</button>
-                            </div>
-                            <div class="mt-modal-body-fixed">
-                                <form id="mtAutoAssignForm">
-                                    <div class="mt-form-row-fixed">
-                                        <label>Candidates per Jury Member:</label>
-                                        <input type="number" id="mtCandidatesPerJury" value="5" min="1" max="20">
-                                    </div>
-                                    <div class="mt-form-row-fixed">
-                                        <label>Distribution Method:</label>
-                                        <select id="mtDistributionMethod">
-                                            <option value="balanced">Balanced Distribution</option>
-                                            <option value="random">Random Distribution</option>
-                                        </select>
-                                    </div>
-                                    <div class="mt-form-row-fixed">
-                                        <label>
-                                            <input type="checkbox" id="mtClearExisting" checked>
-                                            Clear existing assignments first
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="mt-modal-footer-fixed">
-                                <button class="button button-primary" id="mtExecuteAutoAssign">Execute Auto Assign</button>
-                                <button class="button" id="mtCancelAutoAssign">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             `;
             
-            // Add the interface after existing content
-            $mainContent.append(interfaceHTML);
+            // Only append if the interface doesn't exist
+            if (!$('#mtAssignmentInterface').length) {
+                $mainContent.append(interfaceHTML);
+                console.log('✅ Assignment interface elements created');
+            } else {
+                console.log('ℹ️ Assignment interface elements already exist');
+            }
             
-            console.log('✅ Missing elements created successfully');
+            // Verify all required elements are present
+            var requiredElements = [
+                '#mtAutoAssign',
+                '#mtBulkAssign',
+                '#mtRefreshData',
+                '#mtAssignSelected',
+                '#mtRemoveSelected',
+                '#mtCandidatesList',
+                '#mtJuryList'
+            ];
             
-            // Add basic styling
-            mtAddBasicStyling();
-            
-            // Setup event handlers
-            mtSetupEventHandlers();
-        }
-        
-        function mtAddBasicStyling() {
-            var style = `
-                <style id="mt-assignment-fix-styles">
-                .mt-assignment-interface-fixed {
-                    background: #f8f9fa;
-                    padding: 20px;
-                    margin: 20px 0;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                }
-                .mt-assignment-header-fixed {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                    padding: 15px;
-                    background: white;
-                    border-radius: 6px;
-                }
-                .mt-assignment-actions-fixed {
-                    display: flex;
-                    gap: 10px;
-                }
-                .mt-assignment-main-fixed {
-                    display: grid;
-                    grid-template-columns: 1fr auto 1fr;
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-                .mt-candidates-panel-fixed, .mt-jury-panel-fixed {
-                    background: white;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .mt-panel-header-fixed {
-                    padding: 15px;
-                    background: #f7fafc;
-                    border-bottom: 1px solid #e2e8f0;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .mt-panel-actions-fixed {
-                    display: flex;
-                    gap: 5px;
-                }
-                .mt-candidates-list-fixed, .mt-jury-list-fixed {
-                    max-height: 400px;
-                    overflow-y: auto;
-                    padding: 10px;
-                }
-                .mt-assignment-actions-panel-fixed {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 15px;
-                    padding: 20px;
-                    background: white;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-                .mt-assign-btn-fixed, .mt-remove-btn-fixed {
-                    padding: 12px 20px;
-                    border: none;
-                    border-radius: 6px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    transition: all 0.2s ease;
-                    min-width: 150px;
-                    justify-content: center;
-                }
-                .mt-assign-btn-fixed {
-                    background: #48bb78;
-                    color: white;
-                }
-                .mt-assign-btn-fixed:hover:not(:disabled) {
-                    background: #38a169;
-                }
-                .mt-remove-btn-fixed {
-                    background: #e53e3e;
-                    color: white;
-                }
-                .mt-remove-btn-fixed:hover:not(:disabled) {
-                    background: #c53030;
-                }
-                .mt-assign-btn-fixed:disabled, .mt-remove-btn-fixed:disabled {
-                    background: #cbd5e0;
-                    cursor: not-allowed;
-                }
-                .mt-assignment-stats-fixed {
-                    text-align: center;
-                    padding: 15px;
-                    background: #f7fafc;
-                    border-radius: 6px;
-                    width: 100%;
-                }
-                .mt-stat-number {
-                    display: block;
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: #2d3748;
-                }
-                .mt-stat-label {
-                    font-size: 12px;
-                    color: #718096;
-                    text-transform: uppercase;
-                }
-                .mt-candidate-item-fixed, .mt-jury-item-fixed {
-                    padding: 10px;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 6px;
-                    margin-bottom: 8px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .mt-candidate-item-fixed:hover, .mt-jury-item-fixed:hover {
-                    border-color: #4299e1;
-                    background: #f7fafc;
-                }
-                .mt-candidate-item-fixed.selected, .mt-jury-item-fixed.selected {
-                    border-color: #4299e1;
-                    background: #ebf8ff;
-                }
-                .mt-loading-fixed {
-                    text-align: center;
-                    padding: 40px;
-                    color: #718096;
-                }
-                .mt-spinner-fixed {
-                    width: 32px;
-                    height: 32px;
-                    border: 3px solid #e2e8f0;
-                    border-top: 3px solid #4299e1;
-                    border-radius: 50%;
-                    animation: mt-spin 1s linear infinite;
-                    margin: 0 auto 10px;
-                }
-                @keyframes mt-spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .mt-modal-fixed {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    z-index: 10000;
-                }
-                .mt-modal-overlay-fixed {
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.5);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .mt-modal-content-fixed {
-                    background: white;
-                    border-radius: 8px;
-                    max-width: 500px;
-                    width: 90%;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                }
-                .mt-modal-header-fixed {
-                    padding: 20px;
-                    border-bottom: 1px solid #e2e8f0;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                .mt-modal-body-fixed {
-                    padding: 20px;
-                }
-                .mt-modal-footer-fixed {
-                    padding: 15px 20px;
-                    border-top: 1px solid #e2e8f0;
-                    display: flex;
-                    gap: 10px;
-                    justify-content: flex-end;
-                }
-                .mt-form-row-fixed {
-                    margin-bottom: 15px;
-                }
-                .mt-form-row-fixed label {
-                    display: block;
-                    margin-bottom: 5px;
-                    font-weight: 600;
-                }
-                .mt-form-row-fixed input, .mt-form-row-fixed select {
-                    width: 100%;
-                    padding: 8px 12px;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 4px;
-                }
-                .mt-modal-close-fixed {
-                    background: none;
-                    border: none;
-                    font-size: 24px;
-                    cursor: pointer;
-                    color: #718096;
-                }
-                @media (max-width: 768px) {
-                    .mt-assignment-main-fixed {
-                        grid-template-columns: 1fr;
-                        gap: 15px;
-                    }
-                    .mt-assignment-actions-panel-fixed {
-                        order: -1;
-                    }
-                }
-                </style>
-            `;
-            $('head').append(style);
-        }
-        
-        function mtSetupEventHandlers() {
-            var $ = jQuery;
-            
-            // Auto assign button
-            $('#mtAutoAssign').off('click').on('click', function(e) {
-                e.preventDefault();
-                console.log('🎯 Auto assign clicked');
-                $('#mtAutoAssignModal').show();
+            var missingElements = requiredElements.filter(function(selector) {
+                return !$(selector).length;
             });
             
-            // Execute auto assign
-            $('#mtExecuteAutoAssign').off('click').on('click', function(e) {
-                e.preventDefault();
-                mtExecuteAutoAssign();
-            });
-            
-            // Cancel auto assign
-            $('#mtCancelAutoAssign, .mt-modal-close-fixed').off('click').on('click', function(e) {
-                e.preventDefault();
-                $('#mtAutoAssignModal').hide();
-            });
-            
-            // Close modal on overlay click
-            $('.mt-modal-overlay-fixed').off('click').on('click', function(e) {
-                if (e.target === this) {
-                    $('#mtAutoAssignModal').hide();
-                }
-            });
-            
-            // Assign selected button
-            $('#mtAssignSelected').off('click').on('click', function(e) {
-                e.preventDefault();
-                console.log('🎯 Assign selected clicked');
-                mtAssignSelected();
-            });
-            
-            // Selection handlers
-            $(document).off('change', '.mt-candidate-checkbox, .mt-jury-checkbox');
-            $(document).on('change', '.mt-candidate-checkbox, .mt-jury-checkbox', function() {
-                mtUpdateSelectionState();
-            });
-            
-            // Select all handlers
-            $('#mtSelectAllCandidates').off('click').on('click', function() {
-                $('.mt-candidate-checkbox').prop('checked', true).trigger('change');
-            });
-            
-            $('#mtSelectAllJury').off('click').on('click', function() {
-                $('.mt-jury-checkbox').prop('checked', true).trigger('change');
-            });
-            
-            // Clear handlers
-            $('#mtClearCandidates').off('click').on('click', function() {
-                $('.mt-candidate-checkbox').prop('checked', false).trigger('change');
-            });
-            
-            $('#mtClearJury').off('click').on('click', function() {
-                $('.mt-jury-checkbox').prop('checked', false).trigger('change');
-            });
-            
-            // Refresh data
-            $('#mtRefreshData').off('click').on('click', function() {
-                mtLoadCandidatesData();
-                mtLoadJuryData();
-            });
-            
-            console.log('✅ Event handlers setup complete');
-        }
-        
-        function mtLoadCandidatesData() {
-            var $ = jQuery;
-            console.log('📋 Loading candidates data...');
-            
-            $.ajax({
-                url: ajaxurl,
-                method: 'POST',
-                data: {
-                    action: 'mt_get_candidates_data',
-                    nonce: '<?php echo wp_create_nonce('mt_admin_nonce'); ?>'
-                },
-                success: function(response) {
-                    if (response.success && response.data.candidates) {
-                        mtRenderCandidates(response.data.candidates);
-                        $('#mtCandidatesCount').text('(' + response.data.candidates.length + ')');
-                    } else {
-                        $('#mtCandidatesList').html('<div class="mt-no-data">No candidates found</div>');
-                    }
-                },
-                error: function() {
-                    $('#mtCandidatesList').html('<div class="mt-error">Failed to load candidates</div>');
-                }
-            });
-        }
-        
-        function mtLoadJuryData() {
-            var $ = jQuery;
-            console.log('👥 Loading jury data...');
-            
-            $.ajax({
-                url: ajaxurl,
-                method: 'POST',
-                data: {
-                    action: 'mt_get_jury_data',
-                    nonce: '<?php echo wp_create_nonce('mt_admin_nonce'); ?>'
-                },
-                success: function(response) {
-                    if (response.success && response.data.jury) {
-                        mtRenderJury(response.data.jury);
-                        $('#mtJuryCount').text('(' + response.data.jury.length + ')');
-                    } else {
-                        $('#mtJuryList').html('<div class="mt-no-data">No jury members found</div>');
-                    }
-                },
-                error: function() {
-                    $('#mtJuryList').html('<div class="mt-error">Failed to load jury members</div>');
-                }
-            });
-        }
-        
-        function mtRenderCandidates(candidates) {
-            var $ = jQuery;
-            var html = '';
-            
-            candidates.forEach(function(candidate) {
-                html += `
-                    <div class="mt-candidate-item-fixed" data-candidate-id="${candidate.id}">
-                        <input type="checkbox" class="mt-candidate-checkbox" value="${candidate.id}">
-                        <div class="mt-candidate-info">
-                            <strong>${candidate.name}</strong>
-                            <div style="font-size: 12px; color: #666;">
-                                ${candidate.company || 'No company'} - ${candidate.category || 'No category'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            $('#mtCandidatesList').html(html || '<div class="mt-no-data">No candidates available</div>');
-        }
-        
-        function mtRenderJury(jury) {
-            var $ = jQuery;
-            var html = '';
-            
-            jury.forEach(function(member) {
-                html += `
-                    <div class="mt-jury-item-fixed" data-jury-id="${member.id}">
-                        <input type="checkbox" class="mt-jury-checkbox" value="${member.id}">
-                        <div class="mt-jury-info">
-                            <strong>${member.name}</strong>
-                            <div style="font-size: 12px; color: #666;">
-                                ${member.email || 'No email'} - Assignments: ${member.assignments || 0}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            $('#mtJuryList').html(html || '<div class="mt-no-data">No jury members available</div>');
-        }
-        
-        function mtUpdateSelectionState() {
-            var $ = jQuery;
-            var selectedCandidates = $('.mt-candidate-checkbox:checked').length;
-            var selectedJury = $('.mt-jury-checkbox:checked').length;
-            
-            // Update selection visual state
-            $('.mt-candidate-checkbox:checked').closest('.mt-candidate-item-fixed').addClass('selected');
-            $('.mt-candidate-checkbox:not(:checked)').closest('.mt-candidate-item-fixed').removeClass('selected');
-            $('.mt-jury-checkbox:checked').closest('.mt-jury-item-fixed').addClass('selected');
-            $('.mt-jury-checkbox:not(:checked)').closest('.mt-jury-item-fixed').removeClass('selected');
-            
-            // Enable/disable assign button
-            var canAssign = selectedCandidates > 0 && selectedJury > 0;
-            $('#mtAssignSelected').prop('disabled', !canAssign);
-            
-            console.log(`Selection: ${selectedCandidates} candidates, ${selectedJury} jury`);
+            if (missingElements.length > 0) {
+                console.error('❌ Missing elements:', missingElements);
+            } else {
+                console.log('✅ All required elements are present');
+            }
         }
         
         function mtExecuteAutoAssign() {
@@ -4408,201 +3979,6 @@ class MobilityTrailblazersElementsFix {
         }
         </script>
         <?php
-    }
-    
-    /**
-     * Inject assignment JavaScript
-     */
-    public function inject_assignment_javascript() {
-        $screen = get_current_screen();
-        
-        if (!$screen || strpos($screen->id, 'mobility-assignments') === false) {
-            return;
-        }
-        
-        ?>
-        <script type="text/javascript">
-        // Global assignment interface functions
-        window.mtAssignmentInterface = {
-            initialized: false,
-            
-            init: function() {
-                if (this.initialized) return;
-                
-                console.log('🚀 Mobility Trailblazers Assignment Interface v2.0 - Element Fix Version');
-                
-                // Check if we have the required functions
-                if (typeof mtCreateMissingElements === 'function') {
-                    console.log('✅ Element creation functions available');
-                } else {
-                    console.error('❌ Element creation functions missing');
-                }
-                
-                this.initialized = true;
-            }
-        };
-        
-        // Initialize when ready
-        jQuery(document).ready(function() {
-            setTimeout(function() {
-                window.mtAssignmentInterface.init();
-            }, 500);
-        });
-        </script>
-        <?php
-    }
-    
-    /**
-     * Get candidates data via AJAX
-     */
-    public function get_candidates_data() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
-            wp_send_json_error('Invalid nonce');
-            return;
-        }
-        
-        // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error('Insufficient permissions');
-            return;
-        }
-        
-        global $wpdb;
-        
-        // Get real candidates from posts
-        $candidates = $wpdb->get_results("
-            SELECT 
-                p.ID as id,
-                p.post_title as name,
-                pm_company.meta_value as company,
-                pm_position.meta_value as position,
-                tt.name as category
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm_company ON p.ID = pm_company.post_id AND pm_company.meta_key = '_candidate_company'
-            LEFT JOIN {$wpdb->postmeta} pm_position ON p.ID = pm_position.post_id AND pm_position.meta_key = '_candidate_position'
-            LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-            LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'candidate_category'
-            WHERE p.post_type = 'candidate' AND p.post_status = 'publish'
-            ORDER BY p.post_title
-            LIMIT 50
-        ");
-        
-        // If no real candidates, create sample data
-        if (empty($candidates)) {
-            $candidates = $this->create_sample_candidates();
-        }
-        
-        wp_send_json_success(array(
-            'candidates' => $candidates,
-            'total' => count($candidates)
-        ));
-    }
-    
-    /**
-     * Get jury data via AJAX
-     */
-    public function get_jury_data() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
-            wp_send_json_error('Invalid nonce');
-            return;
-        }
-        
-        // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error('Insufficient permissions');
-            return;
-        }
-        
-        global $wpdb;
-        
-        // Get real jury members from users
-        $jury = $wpdb->get_results("
-            SELECT 
-                u.ID as id,
-                u.display_name as name,
-                u.user_email as email,
-                COUNT(ja.id) as assignments
-            FROM {$wpdb->users} u
-            INNER JOIN {$wpdb->usermeta} um ON u.ID = um.user_id
-            LEFT JOIN {$wpdb->prefix}mt_jury_assignments ja ON u.ID = ja.jury_member_id
-            WHERE um.meta_key = 'wp_capabilities' 
-            AND (um.meta_value LIKE '%administrator%' OR um.meta_value LIKE '%jury_member%')
-            GROUP BY u.ID
-            ORDER BY u.display_name
-            LIMIT 20
-        ");
-        
-        // If no real jury, create sample data
-        if (empty($jury)) {
-            $jury = $this->create_sample_jury();
-        }
-        
-        wp_send_json_success(array(
-            'jury' => $jury,
-            'total' => count($jury)
-        ));
-    }
-    
-    /**
-     * Create sample candidates
-     */
-    private function create_sample_candidates() {
-        $sample_data = array(
-            array('name' => 'Dr. Marcus Hartmann', 'company' => 'Mercedes-Benz AG', 'category' => 'Established'),
-            array('name' => 'Sandra Lehmann', 'company' => 'Audi AG', 'category' => 'Established'),
-            array('name' => 'Lisa Müller', 'company' => 'TIER Mobility', 'category' => 'Startups'),
-            array('name' => 'Max Schmidt', 'company' => 'Starship Technologies', 'category' => 'Startups'),
-            array('name' => 'Dr. Helena Baerbock', 'company' => 'German Federal Government', 'category' => 'Politics'),
-            array('name' => 'Thomas Reiter', 'company' => 'City of Munich', 'category' => 'Politics')
-        );
-        
-        $candidates = array();
-        foreach ($sample_data as $index => $data) {
-            $candidate = new stdClass();
-            $candidate->id = 1000 + $index;
-            $candidate->name = $data['name'];
-            $candidate->company = $data['company'];
-            $candidate->category = $data['category'];
-            $candidate->position = 'Innovation Leader';
-            $candidates[] = $candidate;
-        }
-        
-        return $candidates;
-    }
-    
-    /**
-     * Create sample jury
-     */
-    private function create_sample_jury() {
-        $current_user = wp_get_current_user();
-        
-        $jury = array();
-        $member = new stdClass();
-        $member->id = $current_user->ID;
-        $member->name = $current_user->display_name ?: 'Administrator';
-        $member->email = $current_user->user_email;
-        $member->assignments = 0;
-        $jury[] = $member;
-        
-        // Add some sample jury members
-        $sample_jury = array(
-            array('name' => 'Dr. Andreas Müller', 'email' => 'amueller@example.com'),
-            array('name' => 'Sabine Schneider', 'email' => 'sschneider@example.com'),
-            array('name' => 'Michael Weber', 'email' => 'mweber@example.com')
-        );
-        
-        foreach ($sample_jury as $index => $data) {
-            $member = new stdClass();
-            $member->id = 2000 + $index;
-            $member->name = $data['name'];
-            $member->email = $data['email'];
-            $member->assignments = 0;
-            $jury[] = $member;
-        }
-        
-        return $jury;
     }
 }
 
