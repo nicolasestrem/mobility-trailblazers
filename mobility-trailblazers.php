@@ -1708,9 +1708,8 @@ class MobilityTrailblazersPlugin {
         
         foreach ($candidate_ids as $candidate_id) {
             $result = update_post_meta($candidate_id, '_mt_assigned_jury_member', $jury_member_id);
-            if ($result) {
+            if ($result !== false) {
                 $success_count++;
-                $this->log_assignment_action($candidate_id, $jury_member_id, 'assigned');
             }
         }
         
@@ -1734,13 +1733,8 @@ class MobilityTrailblazersPlugin {
         
         $candidates_per_jury = intval($_POST['candidates_per_jury']);
         $algorithm = sanitize_text_field($_POST['algorithm']);
-        $clear_existing = isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true';
-        $balance_categories = isset($_POST['balance_categories']) && $_POST['balance_categories'] === 'true';
         
-        if ($clear_existing) {
-            $this->clear_all_assignments();
-        }
-        
+        // Get unassigned candidates
         $candidates = get_posts(array(
             'post_type' => 'mt_candidate',
             'posts_per_page' => -1,
@@ -1753,111 +1747,32 @@ class MobilityTrailblazersPlugin {
             )
         ));
         
+        // Get jury members
         $jury_members = get_posts(array(
             'post_type' => 'mt_jury',
             'posts_per_page' => -1,
             'post_status' => 'publish'
         ));
         
-        $assignments_made = $this->execute_assignment_algorithm(
-            $candidates, 
-            $jury_members, 
-            $algorithm, 
-            $candidates_per_jury,
-            $balance_categories
-        );
+        $assignments_made = 0;
+        $jury_index = 0;
+        
+        // Simple balanced assignment
+        foreach ($candidates as $candidate) {
+            if ($jury_index >= count($jury_members)) {
+                $jury_index = 0;
+            }
+            
+            $current_jury = $jury_members[$jury_index];
+            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $current_jury->ID);
+            $assignments_made++;
+            $jury_index++;
+        }
         
         wp_send_json_success(array(
             'message' => sprintf(__('%d assignments created successfully', 'mobility-trailblazers'), $assignments_made),
             'assignments_made' => $assignments_made
         ));
-    }
-
-    /**
-     * Execute assignment algorithm
-     */
-    private function execute_assignment_algorithm($candidates, $jury_members, $algorithm, $candidates_per_jury, $balance_categories) {
-        $assignments_made = 0;
-        
-        switch ($algorithm) {
-            case 'balanced':
-                $assignments_made = $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury);
-                break;
-            case 'random':
-                $assignments_made = $this->random_assignment($candidates, $jury_members, $candidates_per_jury);
-                break;
-            case 'expertise':
-                $assignments_made = $this->expertise_based_assignment($candidates, $jury_members, $candidates_per_jury);
-                break;
-            case 'category':
-                $assignments_made = $this->category_balanced_assignment($candidates, $jury_members, $candidates_per_jury);
-                break;
-        }
-        
-        return $assignments_made;
-    }
-
-    /**
-     * Balanced assignment algorithm
-     */
-    private function balanced_assignment($candidates, $jury_members, $candidates_per_jury) {
-        $assignments_made = 0;
-        $jury_index = 0;
-        $jury_assignments = array();
-        
-        foreach ($jury_members as $jury) {
-            $jury_assignments[$jury->ID] = 0;
-        }
-        
-        foreach ($candidates as $candidate) {
-            $current_jury = $jury_members[$jury_index];
-            
-            if ($jury_assignments[$current_jury->ID] >= $candidates_per_jury) {
-                $jury_index = ($jury_index + 1) % count($jury_members);
-                $current_jury = $jury_members[$jury_index];
-            }
-            
-            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $current_jury->ID);
-            $jury_assignments[$current_jury->ID]++;
-            $assignments_made++;
-            
-            $this->log_assignment_action($candidate->ID, $current_jury->ID, 'auto_assigned_balanced');
-        }
-        
-        return $assignments_made;
-    }
-
-    /**
-     * Clear all assignments
-     */
-    private function clear_all_assignments() {
-        global $wpdb;
-        
-        $wpdb->delete(
-            $wpdb->postmeta,
-            array('meta_key' => '_mt_assigned_jury_member'),
-            array('%s')
-        );
-    }
-
-    /**
-     * Log assignment action
-     */
-    private function log_assignment_action($candidate_id, $jury_member_id, $action) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_assignment_log';
-        
-        $wpdb->insert(
-            $table_name,
-            array(
-                'candidate_id' => $candidate_id,
-                'jury_member_id' => $jury_member_id,
-                'action' => $action,
-                'user_id' => get_current_user_id(),
-                'timestamp' => current_time('mysql')
-            )
-        );
     }
 
     /**
