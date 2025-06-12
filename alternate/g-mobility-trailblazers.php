@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ALTERNATE Mobility Trailblazers Platform
  * Description: A custom plugin to manage the jury, voting, candidate workflow, and analytics for the 25 Mobility Trailblazers project.
- * Version: 1.0.5
+ * Version: 1.0.7
  * Author: Nicolas Estrem
  */
 
@@ -35,6 +35,11 @@ class MobilityTrailblazers {
         add_action('admin_menu', [$this, 'admin_menu']);
         add_action('rest_api_init', [$this, 'register_api_endpoints']);
         add_action('init', [$this, 'migrate_old_post_types']);
+
+        add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign_candidates']);
+        add_action('wp_ajax_mt_preview_assignments', [$this, 'preview_auto_assignment']);
+        add_action('wp_ajax_mt_cleanup_invalids', [$this, 'cleanup_invalid_candidates']);
+        add_shortcode('mt_voting_interface', [$this, 'render_voting_form']);
     }
 
     public function ensure_roles_exist() {
@@ -101,12 +106,22 @@ class MobilityTrailblazers {
         }
         echo '</tbody></table>';
 
-        echo '<hr><h2>Usage Examples</h2><p>You can use these shortcodes to embed platform elements:</p><ul style="background:#fff;padding:1em;border:1px solid #ccc;">
+        echo '<hr><h2>Preview Assignment</h2><button id="preview-assignment" class="button">Preview</button><div id="preview-output"></div>';
+
+        echo '<hr><h2>Usage Examples</h2><ul style="background:#fff;padding:1em;border:1px solid #ccc;">
         <li><code>[mt_candidate_grid]</code> - Display candidates in a grid layout</li>
         <li><code>[mt_voting_interface]</code> - Jury voting interface (jury members only)</li>
         <li><code>[mt_jury_dashboard]</code> - Jury member dashboard (jury members only)</li>
         <li><code>[mt_voting_progress]</code> - Display voting progress and stats</li>
         </ul>';
+
+        echo '<script>
+        document.getElementById("preview-assignment").addEventListener("click", async () => {
+            const res = await fetch("/wp-admin/admin-ajax.php?action=mt_preview_assignments");
+            const json = await res.json();
+            document.getElementById("preview-output").innerHTML = `<pre>${JSON.stringify(json.preview, null, 2)}</pre>`;
+        });
+        </script>';
         echo '</div>';
     }
 
@@ -149,8 +164,122 @@ class MobilityTrailblazers {
         dbDelta([$sql1, $sql2, $sql3]);
     }
 
+    public function auto_assign_candidates() {
+        global $wpdb;
+        $round = isset($_GET['round']) ? intval($_GET['round']) : 1;
+        $jury_members = get_users(['role' => 'jury']);
+        $candidates = $wpdb->get_results("SELECT id FROM {$this->candidates_table} WHERE name IS NOT NULL AND name != '' ORDER BY RAND()");
+
+        $assignments = [];
+        $candidate_index = 0;
+        $candidates_per_jury = 10;
+
+        foreach ($jury_members as $jury) {
+            $already = $wpdb->get_col($wpdb->prepare(
+                "SELECT candidate_id FROM {$this->assignments_table} WHERE jury_id = %d AND round = %d",
+                $jury->ID, $round
+            ));
+
+            $assigned_count = 0;
+            while ($assigned_count < $candidates_per_jury && isset($candidates[$candidate_index])) {
+                $candidate_id = $candidates[$candidate_index]->id;
+                if (!in_array($candidate_id, $already)) {
+                    $assignments[] = $wpdb->prepare("(%d, %d, %d)", $jury->ID, $candidate_id, $round);
+                    $assigned_count++;
+                }
+                $candidate_index++;
+            }
+        }
+
+        if (!empty($assignments)) {
+            $wpdb->query("INSERT INTO {$this->assignments_table} (jury_id, candidate_id, round) VALUES " . implode(",", $assignments));
+        }
+
+        wp_send_json(['message' => 'Auto-assignment complete for round ' . $round]);
+    }
+
+    public function preview_auto_assignment() {
+        global $wpdb;
+        $jury_members = get_users(['role' => 'jury']);
+        $candidates = $wpdb->get_results("SELECT id, name FROM {$this->candidates_table} WHERE name IS NOT NULL AND name != '' ORDER BY RAND()");
+
+        $candidate_index = 0;
+        $candidates_per_jury = 10;
+        $preview = [];
+
+        foreach ($jury_members as $jury) {
+            $assigned = [];
+            for ($i = 0; $i < $candidates_per_jury && isset($candidates[$candidate_index]); $i++) {
+                $assigned[] = $candidates[$candidate_index]->name;
+                $candidate_index++;
+            }
+            $preview[$jury->display_name] = $assigned;
+        }
+
+        wp_send_json(['preview' => $preview]);
+    }
+
+    public function cleanup_invalid_candidates() {
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$this->candidates_table} WHERE name IS NULL OR TRIM(name) = ''");
+        wp_send_json(['status' => 'ok']);
+    }
+
+    public function render_voting_form() {
+        ob_start(); ?>
+        <form id="mt-vote-form">
+            <label>Pioneer Spirit: <input type="range" name="pioneer_spirit" min="1" max="10" oninput="this.nextElementSibling.value = this.value"><output>5</output></label><br>
+            <label>Innovation Degree: <input type="range" name="innovation_degree" min="1" max="10" oninput="this.nextElementSibling.value = this.value"><output>5</output></label><br>
+            <label>Implementation Power: <input type="range" name="implementation_power" min="1" max="10" oninput="this.nextElementSibling.value = this.value"><output>5</output></label><br>
+            <label>Role Model Function: <input type="range" name="role_model_function" min="1" max="10" oninput="this.nextElementSibling.value = this.value"><output>5</output></label><br>
+            <input type="hidden" name="candidate_id" value="1">
+            <input type="hidden" name="round" value="1">
+            <input type="hidden" name="status" value="submitted">
+            <button type="submit">Submit Vote</button>
+        </form>
+        <script>
+        document.getElementById('mt-vote-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            const res = await fetch('/wp-json/mobility/v1/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            alert('Vote submitted');
+        });
+        </script>
+        <?php return ob_get_clean();
+    }
+
     public function register_api_endpoints() {
-        // You can add your REST endpoints here later if needed
+        register_rest_route('mobility/v1', '/vote', [
+            'methods' => 'POST',
+            'callback' => [$this, 'submit_vote'],
+            'permission_callback' => function () {
+                return current_user_can('read');
+            }
+        ]);
+    }
+
+    public function submit_vote($request) {
+        global $wpdb;
+        $data = $request->get_json_params();
+
+        $wpdb->insert($this->votes_table, [
+            'jury_id' => get_current_user_id(),
+            'candidate_id' => intval($data['candidate_id']),
+            'pioneer_spirit' => intval($data['pioneer_spirit']),
+            'innovation_degree' => intval($data['innovation_degree']),
+            'implementation_power' => intval($data['implementation_power']),
+            'role_model_function' => intval($data['role_model_function']),
+            'round' => intval($data['round']),
+            'status' => sanitize_text_field($data['status'])
+        ]);
+
+        return ['status' => 'success'];
     }
 }
 
