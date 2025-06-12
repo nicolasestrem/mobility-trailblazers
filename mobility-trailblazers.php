@@ -1256,33 +1256,11 @@ class MobilityTrailblazersPlugin {
             wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
         }
         
-        // Enqueue assignment-specific scripts and styles
-        wp_enqueue_script('mt-assignment-js', MT_PLUGIN_URL . 'assets/assignment.js', array('jquery'), MT_PLUGIN_VERSION, true);
-        wp_enqueue_style('mt-assignment-css', MT_PLUGIN_URL . 'assets/assignment.css', array(), MT_PLUGIN_VERSION);
-        
         // Get data for JavaScript
         $candidates_data = $this->get_candidates_for_assignment();
         $jury_data = $this->get_jury_members_for_assignment();
         $existing_assignments = $this->get_existing_assignments();
         
-        // Localize script with data
-        wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_assignment_nonce'),
-            'candidates' => $candidates_data,
-            'jury_members' => $jury_data,
-            'existing_assignments' => $existing_assignments,
-            'plugin_url' => MT_PLUGIN_URL
-        ));
-        
-        // Output the page content directly
-        $this->render_assignment_page_content();
-    }
-
-    /**
-     * Render assignment page content directly
-     */
-    private function render_assignment_page_content() {
         // Get current statistics
         $total_candidates = wp_count_posts('mt_candidate')->publish;
         $total_jury = wp_count_posts('mt_jury')->publish;
@@ -1310,128 +1288,58 @@ class MobilityTrailblazersPlugin {
             'post_award' => 'Post Award'
         );
         
+        // Enqueue required scripts and styles
+        wp_enqueue_style('mt-assignment-style', plugins_url('assets/assignment.css', __FILE__));
+        wp_enqueue_script('mt-assignment-script', plugins_url('assets/assignment.js', __FILE__), array('jquery'), '1.0', true);
+        
+        // Localize script with data
+        wp_localize_script('mt-assignment-script', 'mtAssignmentData', array(
+            'candidates' => $candidates_data,
+            'jury' => $jury_data,
+            'assignments' => $existing_assignments,
+            'stats' => array(
+                'total_candidates' => $total_candidates,
+                'total_jury' => $total_jury,
+                'assigned_count' => $assigned_count,
+                'completion_rate' => $completion_rate,
+                'avg_per_jury' => $avg_per_jury
+            ),
+            'current_phase' => $current_phase,
+            'phase_names' => $phase_names,
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_assignment_nonce')
+        ));
+        
+        // Render the page content
+        $this->render_assignment_page_content();
+    }
+
+    /**
+     * Render the assignment management page content
+     */
+    private function render_assignment_page_content() {
         ?>
         <div class="wrap">
             <h1><?php _e('Jury Assignment Management', 'mobility-trailblazers'); ?></h1>
             
-            <!-- Add some basic CSS if the file doesn't load -->
-            <style>
-            #mt-assignment-interface {
-                background: linear-gradient(135deg, #f7fafc 0%, #e6fffa 100%);
-                margin: 20px 0;
-                padding: 20px;
-                border-radius: 8px;
-                min-height: 70vh;
-            }
-            .mt-assignment-header {
-                background: linear-gradient(135deg, #2c5282 0%, #38b2ac 100%);
-                color: white;
-                padding: 30px;
-                margin-bottom: 30px;
-                border-radius: 15px;
-                text-align: center;
-            }
-            .mt-status-banner {
-                background: #38a169;
-                color: white;
-                padding: 15px 20px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .mt-stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            .mt-stat-card {
-                background: white;
-                padding: 25px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                border-left: 4px solid #38b2ac;
-                text-align: center;
-            }
-            .mt-stat-number {
-                font-size: 2.5rem;
-                font-weight: 700;
-                color: #2c5282;
-                display: block;
-                line-height: 1;
-            }
-            .mt-stat-label {
-                color: #718096;
-                font-size: 0.9rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-top: 5px;
-            }
-            .mt-btn {
-                padding: 12px 20px;
-                border: none;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                text-decoration: none;
-                font-size: 14px;
-                margin: 5px;
-            }
-            .mt-btn-primary { background: #2c5282; color: white; }
-            .mt-btn-success { background: #38a169; color: white; }
-            .mt-btn-warning { background: #d69e2e; color: white; }
-            .mt-btn-secondary { background: #718096; color: white; }
-            .mt-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-            .mt-assignment-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
-                margin-top: 30px;
-            }
-            .mt-panel {
-                background: white;
-                border-radius: 12px;
-                overflow: hidden;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            }
-            .mt-panel-header {
-                background: #2c5282;
-                color: white;
-                padding: 20px;
-                font-weight: 600;
-            }
-            .mt-panel-content {
-                padding: 20px;
-                max-height: 400px;
-                overflow-y: auto;
-            }
-            .loading-message {
-                text-align: center;
-                padding: 40px;
-                color: #718096;
-            }
-            </style>
-            
-            <div id="mt-assignment-interface">
+            <div class="mt-assignment-interface">
+                
+                <!-- Header -->
                 <div class="mt-assignment-header">
-                    <h1>🏆 Jury Assignment System</h1>
-                    <p>Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
+                    <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0 0 10px 0;">🏆 Jury Assignment System</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
                 </div>
 
+                <!-- Status Banner -->
                 <div class="mt-status-banner">
-                    <span class="icon">✅</span>
+                    <span style="font-size: 20px;">✅</span>
                     <div>
-                        <strong>System Status: HEALTHY</strong> | Last check: <?php echo date('H:i:s'); ?> | 
+                        <strong>System Status: OPERATIONAL</strong> | Last check: <?php echo date('H:i:s'); ?> | 
                         Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? $current_phase); ?>
                     </div>
                 </div>
 
+                <!-- Statistics Grid -->
                 <div class="mt-stats-grid">
                     <div class="mt-stat-card">
                         <span class="mt-stat-number"><?php echo $total_candidates; ?></span>
@@ -1442,149 +1350,86 @@ class MobilityTrailblazersPlugin {
                         <div class="mt-stat-label">Jury Members</div>
                     </div>
                     <div class="mt-stat-card">
-                        <span class="mt-stat-number"><?php echo $assigned_count; ?></span>
+                        <span class="mt-stat-number" id="assigned-count"><?php echo $assigned_count; ?></span>
                         <div class="mt-stat-label">Total Assignments</div>
                     </div>
                     <div class="mt-stat-card">
-                        <span class="mt-stat-number"><?php echo number_format($completion_rate, 1); ?>%</span>
+                        <span class="mt-stat-number" id="completion-rate"><?php echo number_format($completion_rate, 1); ?>%</span>
                         <div class="mt-stat-label">Completion Rate</div>
                     </div>
                     <div class="mt-stat-card">
-                        <span class="mt-stat-number"><?php echo number_format($avg_per_jury, 1); ?></span>
+                        <span class="mt-stat-number" id="avg-per-jury"><?php echo number_format($avg_per_jury, 1); ?></span>
                         <div class="mt-stat-label">Avg Per Jury</div>
                     </div>
                 </div>
 
-                <div style="margin: 30px 0;">
-                    <button id="mt-test-data-btn" class="mt-btn mt-btn-primary">🧪 Test Assignment System</button>
-                    <button id="mt-load-candidates-btn" class="mt-btn mt-btn-success">📋 Load Candidates</button>
-                    <button id="mt-load-jury-btn" class="mt-btn mt-btn-warning">👨‍⚖️ Load Jury Members</button>
-                    <button id="mt-debug-btn" class="mt-btn mt-btn-secondary">🔍 Debug Info</button>
+                <!-- Assignment Controls -->
+                <div class="mt-assignment-controls">
+                    <h3 style="margin: 0 0 20px 0; color: var(--mt-primary); font-size: 1.3rem;">🔧 Assignment Tools</h3>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        <button id="mt-auto-assign-btn" class="mt-btn mt-btn-success">⚡ Auto-Assign All</button>
+                        <button id="mt-manual-assign-btn" class="mt-btn mt-btn-warning" disabled>👥 Assign Selected (<span id="selected-count">0</span>)</button>
+                        <button id="mt-clear-assignments-btn" class="mt-btn mt-btn-secondary">🗑️ Clear All Assignments</button>
+                        <button id="mt-export-btn" class="mt-btn mt-btn-primary">📊 Export Assignments</button>
+                        <button id="mt-refresh-btn" class="mt-btn mt-btn-secondary">🔄 Refresh Data</button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <label>Candidates per Jury Member: 
+                            <input type="number" id="candidates-per-jury" value="<?php echo ceil($total_candidates / max($total_jury, 1)); ?>" min="1" max="50" style="width: 80px; padding: 5px; margin-left: 5px;">
+                        </label>
+                        <label>Algorithm: 
+                            <select id="assignment-algorithm" style="padding: 5px; margin-left: 5px;">
+                                <option value="balanced">Balanced Distribution</option>
+                                <option value="random">Random Assignment</option>
+                                <option value="category">Category Balanced</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
 
+                <!-- Assignment Grid -->
                 <div class="mt-assignment-grid">
+                    <!-- Candidates Panel -->
                     <div class="mt-panel">
                         <div class="mt-panel-header">
-                            📋 Candidates (<?php echo $total_candidates; ?>)
+                            <h3>📋 Candidates (<?php echo $total_candidates; ?>)</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="select-all-candidates" class="mt-btn mt-btn-secondary" style="padding: 6px 12px; font-size: 12px;">Select All</button>
+                                <button id="clear-selection" class="mt-btn mt-btn-secondary" style="padding: 6px 12px; font-size: 12px;">Clear</button>
+                            </div>
                         </div>
                         <div class="mt-panel-content">
-                            <div id="mt-candidates-list" class="loading-message">
-                                Click "Load Candidates" to view candidates...
+                            <input type="text" id="candidates-search" class="mt-search-box" placeholder="Search candidates...">
+                            
+                            <div style="margin-bottom: 15px;">
+                                <button class="filter-btn" data-filter="all" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #e6fffa; color: #2c5282; cursor: pointer;">All</button>
+                                <button class="filter-btn" data-filter="assigned" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #f7fafc; color: #718096; cursor: pointer;">Assigned</button>
+                                <button class="filter-btn" data-filter="unassigned" style="padding: 5px 10px; margin: 2px; border: none; border-radius: 15px; background: #f7fafc; color: #718096; cursor: pointer;">Unassigned</button>
+                            </div>
+
+                            <div id="candidates-list">
+                                <!-- Candidates will be loaded here -->
                             </div>
                         </div>
                     </div>
 
+                    <!-- Jury Panel -->
                     <div class="mt-panel">
                         <div class="mt-panel-header">
-                            👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)
+                            <h3>👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)</h3>
                         </div>
                         <div class="mt-panel-content">
-                            <div id="mt-jury-list" class="loading-message">
-                                Click "Load Jury Members" to view jury...
+                            <input type="text" id="jury-search" class="mt-search-box" placeholder="Search jury members...">
+                            
+                            <div id="jury-list">
+                                <!-- Jury members will be loaded here -->
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div id="debug-info" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; display: none;">
-                    <h3>🔍 Debug Information</h3>
-                    <div id="debug-content"></div>
                 </div>
             </div>
-
-            <script>
-            jQuery(document).ready(function($) {
-                console.log('Assignment page loaded');
-                console.log('mt_assignment_ajax available:', typeof mt_assignment_ajax !== 'undefined');
-                
-                if (typeof mt_assignment_ajax !== 'undefined') {
-                    console.log('Candidates:', mt_assignment_ajax.candidates.length);
-                    console.log('Jury members:', mt_assignment_ajax.jury_members.length);
-                }
-
-                // Test button
-                $('#mt-test-data-btn').on('click', function() {
-                    alert('Assignment system is working! Data loaded: ' + 
-                          (typeof mt_assignment_ajax !== 'undefined' ? 'Yes' : 'No'));
-                });
-
-                // Load candidates button
-                $('#mt-load-candidates-btn').on('click', function() {
-                    if (typeof mt_assignment_ajax === 'undefined') {
-                        $('#mt-candidates-list').html('<div style="color: red;">Error: Assignment data not loaded</div>');
-                        return;
-                    }
-                    
-                    var candidates = mt_assignment_ajax.candidates || [];
-                    var html = '';
-                    
-                    if (candidates.length === 0) {
-                        html = '<div>No candidates found. Please add candidates first.</div>';
-                    } else {
-                        candidates.slice(0, 10).forEach(function(candidate) {
-                            html += '<div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">';
-                            html += '<strong>' + candidate.name + '</strong><br>';
-                            html += candidate.company + '<br>';
-                            html += '<small>' + candidate.category + '</small>';
-                            html += '</div>';
-                        });
-                        
-                        if (candidates.length > 10) {
-                            html += '<div style="padding: 10px; text-align: center; color: #666;">... and ' + (candidates.length - 10) + ' more candidates</div>';
-                        }
-                    }
-                    
-                    $('#mt-candidates-list').html(html);
-                });
-
-                // Load jury button
-                $('#mt-load-jury-btn').on('click', function() {
-                    if (typeof mt_assignment_ajax === 'undefined') {
-                        $('#mt-jury-list').html('<div style="color: red;">Error: Assignment data not loaded</div>');
-                        return;
-                    }
-                    
-                    var jury = mt_assignment_ajax.jury_members || [];
-                    var html = '';
-                    
-                    if (jury.length === 0) {
-                        html = '<div>No jury members found. Please add jury members first.</div>';
-                    } else {
-                        jury.forEach(function(member) {
-                            html += '<div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">';
-                            html += '<strong>' + member.name + '</strong><br>';
-                            html += member.position + '<br>';
-                            html += '<small>' + member.expertise + '</small>';
-                            if (member.role === 'president') html += ' <span style="background: gold; padding: 2px 6px; border-radius: 10px; font-size: 10px;">PRESIDENT</span>';
-                            if (member.role === 'vice_president') html += ' <span style="background: #38b2ac; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">VICE PRESIDENT</span>';
-                            html += '</div>';
-                        });
-                    }
-                    
-                    $('#mt-jury-list').html(html);
-                });
-
-                // Debug button
-                $('#mt-debug-btn').on('click', function() {
-                    var debugInfo = '<h4>System Information:</h4>';
-                    debugInfo += '<p><strong>jQuery:</strong> ' + (typeof $ !== 'undefined' ? 'Loaded' : 'Not loaded') + '</p>';
-                    debugInfo += '<p><strong>Assignment AJAX:</strong> ' + (typeof mt_assignment_ajax !== 'undefined' ? 'Loaded' : 'Not loaded') + '</p>';
-                    
-                    if (typeof mt_assignment_ajax !== 'undefined') {
-                        debugInfo += '<p><strong>AJAX URL:</strong> ' + mt_assignment_ajax.ajax_url + '</p>';
-                        debugInfo += '<p><strong>Candidates:</strong> ' + (mt_assignment_ajax.candidates ? mt_assignment_ajax.candidates.length : 0) + '</p>';
-                        debugInfo += '<p><strong>Jury Members:</strong> ' + (mt_assignment_ajax.jury_members ? mt_assignment_ajax.jury_members.length : 0) + '</p>';
-                        debugInfo += '<p><strong>Plugin URL:</strong> ' + (mt_assignment_ajax.plugin_url || 'Not set') + '</p>';
-                    }
-                    
-                    debugInfo += '<h4>WordPress Info:</h4>';
-                    debugInfo += '<p><strong>Admin URL:</strong> ' + ajaxurl + '</p>';
-                    
-                    $('#debug-content').html(debugInfo);
-                    $('#debug-info').toggle();
-                });
-            });
-            </script>
         </div>
         <?php
     }
