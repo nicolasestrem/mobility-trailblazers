@@ -1290,9 +1290,11 @@ class MobilityTrailblazersPlugin {
         
         // Enqueue required scripts and styles
         wp_enqueue_style('mt-assignment-style', plugins_url('assets/assignment.css', __FILE__));
+        
+        // First enqueue the script
         wp_enqueue_script('mt-assignment-script', plugins_url('assets/assignment.js', __FILE__), array('jquery'), '1.0', true);
         
-        // Localize script with data
+        // Then localize the script (must be after enqueue)
         wp_localize_script('mt-assignment-script', 'mtAssignmentData', array(
             'candidates' => $candidates_data,
             'jury' => $jury_data,
