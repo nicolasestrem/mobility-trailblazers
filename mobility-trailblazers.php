@@ -895,11 +895,15 @@ class MobilityTrailblazersPlugin {
      */
     private function is_jury_member($user_id) {
         if (!$user_id) return false;
-        
         $user = get_user_by('id', $user_id);
         if (!$user) return false;
 
-        // Check if user has jury role or is linked to a jury member post
+        // Check if user has jury role
+        if (in_array('mt_jury_member', (array) $user->roles)) {
+            return true;
+        }
+
+        // Or is linked to a jury member post
         $jury_posts = get_posts(array(
             'post_type' => 'mt_jury',
             'meta_query' => array(
