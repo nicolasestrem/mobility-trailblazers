@@ -80,25 +80,27 @@ class MobilityTrailblazers {
     }
 
     public function register_custom_post_types() {
-        register_post_type('trailblazer_candidate', [
-            'label' => 'Candidates',
-            'public' => false,
-            'show_ui' => true,
-            'show_in_menu' => 'mobility_trailblazers',
-            'capability_type' => 'post',
-            'capabilities' => [
-                'edit_post' => 'read',
-                'read_post' => 'read',
-                'delete_post' => 'delete_posts',
-                'edit_posts' => 'edit_posts',
-                'edit_others_posts' => 'edit_others_posts',
-                'publish_posts' => 'publish_posts',
-                'read_private_posts' => 'read_private_posts'
-            ],
-            'map_meta_cap' => true,
-            'supports' => ['title', 'editor'],
-            'menu_icon' => 'dashicons-awards',
-        ]);
+        add_action('admin_menu', function () {
+            register_post_type('trailblazer_candidate', [
+                'label' => 'Candidates',
+                'public' => false,
+                'show_ui' => true,
+                'show_in_menu' => 'mobility_trailblazers',
+                'capability_type' => 'post',
+                'capabilities' => [
+                    'edit_post' => 'read',
+                    'read_post' => 'read',
+                    'delete_post' => 'delete_posts',
+                    'edit_posts' => 'edit_posts',
+                    'edit_others_posts' => 'edit_others_posts',
+                    'publish_posts' => 'publish_posts',
+                    'read_private_posts' => 'read_private_posts'
+                ],
+                'map_meta_cap' => true,
+                'supports' => ['title', 'editor'],
+                'menu_icon' => 'dashicons-awards',
+            ]);
+        }, 99);
     }
 
     public function admin_menu() {
