@@ -35,6 +35,9 @@ class MobilityTrailblazers {
         add_action('rest_api_init', [$this, 'register_api_endpoints']);
         add_shortcode('mt_voting_form', [$this, 'render_voting_form']);
         add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign_candidates']);
+        add_action('wp_ajax_mt_toggle_vote_status', [$this, 'toggle_vote_status']);
+        add_action('admin_post_mt_import_csv', [$this, 'import_csv_candidates']);
+        add_action('admin_post_mt_export_csv', [$this, 'export_votes_csv']);
     }
 
     public function install() {
@@ -81,8 +84,19 @@ class MobilityTrailblazers {
             'label' => 'Candidates',
             'public' => false,
             'show_ui' => true,
+            'show_in_menu' => 'mobility_trailblazers',
+            'capability_type' => 'post',
+            'capabilities' => [
+                'edit_post' => 'read',
+                'read_post' => 'read',
+                'delete_post' => 'delete_posts',
+                'edit_posts' => 'edit_posts',
+                'edit_others_posts' => 'edit_others_posts',
+                'publish_posts' => 'publish_posts',
+                'read_private_posts' => 'read_private_posts'
+            ],
+            'map_meta_cap' => true,
             'supports' => ['title', 'editor'],
-            'menu_position' => 5,
             'menu_icon' => 'dashicons-awards',
         ]);
     }
@@ -94,7 +108,21 @@ class MobilityTrailblazers {
     }
 
     public function render_admin() {
-        echo '<div class="wrap"><h1>Mobility Trailblazers Dashboard</h1><p>Use the sidebar to manage candidates, assignments, and votes.</p></div>';
+        echo '<div class="wrap"><h1>Mobility Trailblazers Dashboard</h1>
+        <p>Use the sidebar to manage candidates, assignments, and votes.</p>
+
+        <h2>Import Candidates (CSV)</h2>
+        <form method="post" enctype="multipart/form-data" action="' . admin_url('admin-post.php') . '">
+            <input type="hidden" name="action" value="mt_import_csv">
+            <input type="file" name="csv" accept=".csv" required />
+            <input type="submit" value="Import CSV" class="button button-primary" />
+        </form>
+
+        <h2>Export Votes to CSV</h2>
+        <form method="post" action="' . admin_url('admin-post.php') . '">
+            <input type="hidden" name="action" value="mt_export_csv">
+            <input type="submit" value="Export Votes" class="button" />
+        </form></div>';
     }
 
     public function render_assignments_page() {
@@ -134,7 +162,68 @@ class MobilityTrailblazers {
     }
 
     public function render_votes_page() {
-        echo '<div class="wrap"><h1>Votes Overview</h1><p>All jury votes overview will be displayed here.</p></div>';
+        global $wpdb;
+        $votes = $wpdb->get_results("SELECT v.*, c.name AS candidate_name, u.display_name FROM {$this->votes_table} v JOIN {$this->candidates_table} c ON v.candidate_id = c.id JOIN {$wpdb->users} u ON v.jury_id = u.ID ORDER BY v.updated_at DESC LIMIT 100");
+
+        echo '<div class="wrap"><h1>Votes Overview</h1><table class="widefat"><thead><tr><th>Jury</th><th>Candidate</th><th>Scores</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+
+        foreach ($votes as $vote) {
+            echo '<tr><td>' . esc_html($vote->display_name) . '</td><td>' . esc_html($vote->candidate_name) . '</td><td>' .
+                "PS: $vote->pioneer_spirit | ID: $vote->innovation_degree | IP: $vote->implementation_power | RM: $vote->role_model_function" . '</td><td>' . $vote->status . '</td>';
+            echo '<td><button class="toggle-status" data-id="' . $vote->id . '">Toggle Status</button></td></tr>';
+        }
+
+        echo '</tbody></table><script>
+        document.querySelectorAll(".toggle-status").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const id = btn.getAttribute("data-id");
+                const res = await fetch(`/wp-admin/admin-ajax.php?action=mt_toggle_vote_status&id=${id}`);
+                const json = await res.json();
+                alert(json.message);
+                location.reload();
+            });
+        });
+        </script></div>';
+    }
+
+    public function toggle_vote_status() {
+        global $wpdb;
+        $id = intval($_GET['id']);
+        $current = $wpdb->get_var($wpdb->prepare("SELECT status FROM {$this->votes_table} WHERE id = %d", $id));
+        $new = $current === 'final' ? 'draft' : 'final';
+        $wpdb->update($this->votes_table, ['status' => $new], ['id' => $id]);
+        wp_send_json(['message' => "Status updated to $new"]);
+    }
+
+    public function import_csv_candidates() {
+        if (!isset($_FILES['csv']) || $_FILES['csv']['error'] !== UPLOAD_ERR_OK) {
+            wp_die('Upload failed.');
+        }
+        $csv = fopen($_FILES['csv']['tmp_name'], 'r');
+        global $wpdb;
+        while (($row = fgetcsv($csv)) !== false) {
+            $wpdb->insert($this->candidates_table, [
+                'name' => sanitize_text_field($row[0]),
+                'category' => sanitize_text_field($row[1]),
+                'organization' => sanitize_text_field($row[2]),
+                'profile' => sanitize_textarea_field($row[3])
+            ]);
+        }
+        fclose($csv);
+        wp_redirect(admin_url('admin.php?page=mobility_trailblazers'));
+        exit;
+    }
+
+    public function export_votes_csv() {
+        global $wpdb;
+        $rows = $wpdb->get_results("SELECT * FROM {$this->votes_table}", ARRAY_A);
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename=votes_export.csv');
+        $out = fopen('php://output', 'w');
+        fputcsv($out, array_keys($rows[0]));
+        foreach ($rows as $row) fputcsv($out, $row);
+        fclose($out);
+        exit;
     }
 
     public function register_api_endpoints() {
