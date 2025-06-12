@@ -30,7 +30,6 @@ class MobilityTrailblazers {
 
         register_activation_hook(__FILE__, [$this, 'install']);
 
-        add_action('init', [$this, 'register_custom_post_types']);
         add_action('init', [$this, 'ensure_roles_exist']);
         add_action('admin_menu', [$this, 'admin_menu']);
         add_action('rest_api_init', [$this, 'register_api_endpoints']);
@@ -86,19 +85,6 @@ class MobilityTrailblazers {
         ) $charset_collate;";
 
         dbDelta([$sql1, $sql2, $sql3]);
-    }
-
-    public function register_custom_post_types() {
-        register_post_type('mt_candidate', [
-            'label' => 'Candidates',
-            'public' => false,
-            'show_ui' => true,
-            'show_in_menu' => 'mobility_trailblazers',
-            'capability_type' => 'post',
-            'map_meta_cap' => false,
-            'supports' => ['title', 'editor'],
-            'menu_icon' => 'dashicons-awards',
-        ]);
     }
 
     public function ensure_roles_exist() {
@@ -340,4 +326,19 @@ class MobilityTrailblazers {
     }
 }
 
-add_action('init', [MobilityTrailblazers::class, 'get_instance']);
+add_action('init', function () {
+    MobilityTrailblazers::get_instance();
+});
+
+add_action('init', function () {
+    register_post_type('mt_candidate', [
+        'label' => 'Candidates',
+        'public' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
+        'supports' => ['title', 'editor'],
+        'menu_icon' => 'dashicons-awards',
+    ]);
+}, 0);
