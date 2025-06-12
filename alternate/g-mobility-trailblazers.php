@@ -89,6 +89,8 @@ class MobilityTrailblazers {
     public function admin_menu() {
         add_menu_page('Trailblazers', 'Trailblazers', 'manage_options', 'mobility_trailblazers', [$this, 'render_dashboard_page'], 'dashicons-awards');
         add_submenu_page('mobility_trailblazers', 'Dashboard', 'Dashboard', 'manage_options', 'mobility_trailblazers', [$this, 'render_dashboard_page']);
+        add_submenu_page('mobility_trailblazers', 'Assignments', 'Assignments', 'manage_options', 'mobility_assignments', [$this, 'render_assignments_page']);
+        add_submenu_page('mobility_trailblazers', 'Votes', 'Votes', 'manage_options', 'mobility_votes', [$this, 'render_votes_page']);
     }
 
     public function render_dashboard_page() {
@@ -126,6 +128,76 @@ class MobilityTrailblazers {
         });
         </script>';
         echo '</div>';
+    }
+
+    public function render_assignments_page() {
+        global $wpdb;
+        echo '<div class="wrap"><h1>Jury Assignments</h1>';
+        
+        $assignments = $wpdb->get_results("
+            SELECT a.*, c.name as candidate_name, u.display_name as jury_name 
+            FROM {$this->assignments_table} a 
+            JOIN {$this->candidates_table} c ON a.candidate_id = c.id 
+            JOIN {$wpdb->users} u ON a.jury_id = u.ID 
+            ORDER BY a.round DESC, u.display_name
+        ");
+
+        echo '<table class="widefat"><thead><tr>
+            <th>Jury Member</th>
+            <th>Candidate</th>
+            <th>Round</th>
+            <th>Assigned At</th>
+        </tr></thead><tbody>';
+
+        foreach ($assignments as $row) {
+            echo "<tr>
+                <td>" . esc_html($row->jury_name) . "</td>
+                <td>" . esc_html($row->candidate_name) . "</td>
+                <td>" . esc_html($row->round) . "</td>
+                <td>" . esc_html($row->assigned_at) . "</td>
+            </tr>";
+        }
+        echo '</tbody></table></div>';
+    }
+
+    public function render_votes_page() {
+        global $wpdb;
+        echo '<div class="wrap"><h1>Voting Results</h1>';
+        
+        $votes = $wpdb->get_results("
+            SELECT v.*, c.name as candidate_name, u.display_name as jury_name 
+            FROM {$this->votes_table} v 
+            JOIN {$this->candidates_table} c ON v.candidate_id = c.id 
+            JOIN {$wpdb->users} u ON v.jury_id = u.ID 
+            ORDER BY v.round DESC, v.status, c.name
+        ");
+
+        echo '<table class="widefat"><thead><tr>
+            <th>Jury Member</th>
+            <th>Candidate</th>
+            <th>Round</th>
+            <th>Pioneer Spirit</th>
+            <th>Innovation</th>
+            <th>Implementation</th>
+            <th>Role Model</th>
+            <th>Status</th>
+            <th>Updated</th>
+        </tr></thead><tbody>';
+
+        foreach ($votes as $row) {
+            echo "<tr>
+                <td>" . esc_html($row->jury_name) . "</td>
+                <td>" . esc_html($row->candidate_name) . "</td>
+                <td>" . esc_html($row->round) . "</td>
+                <td>" . esc_html($row->pioneer_spirit) . "</td>
+                <td>" . esc_html($row->innovation_degree) . "</td>
+                <td>" . esc_html($row->implementation_power) . "</td>
+                <td>" . esc_html($row->role_model_function) . "</td>
+                <td>" . esc_html($row->status) . "</td>
+                <td>" . esc_html($row->updated_at) . "</td>
+            </tr>";
+        }
+        echo '</tbody></table></div>';
     }
 
     public function install() {
