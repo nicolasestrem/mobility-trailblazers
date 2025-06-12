@@ -1935,11 +1935,12 @@ class MobilityTrailblazersPlugin {
      * Add jury dashboard to admin menu
      */
     public function add_jury_dashboard_menu() {
+        // Add submenu page under MT Award System
         add_submenu_page(
             'mt-award-system',
             __('My Dashboard', 'mobility-trailblazers'),
             __('My Dashboard', 'mobility-trailblazers'),
-            'read',
+            'read', // Basic capability - we'll check jury status inside
             'mt-jury-dashboard',
             array($this, 'jury_dashboard_page')
         );
@@ -1949,6 +1950,7 @@ class MobilityTrailblazersPlugin {
      * Jury dashboard page callback
      */
     public function jury_dashboard_page() {
+        // Include the dashboard template
         include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
     }
 
@@ -1956,12 +1958,14 @@ class MobilityTrailblazersPlugin {
      * Add rewrite rules for pretty jury URLs
      */
     public function add_jury_rewrite_rules() {
+        // Add rewrite rule for jury dashboard
         add_rewrite_rule(
             '^jury-dashboard/?$',
             'index.php?mt_jury_dashboard=1',
             'top'
         );
         
+        // Add rewrite rule for individual jury member pages
         add_rewrite_rule(
             '^jury/([^/]+)/?$',
             'index.php?mt_jury_member=$matches[1]',
@@ -1984,18 +1988,23 @@ class MobilityTrailblazersPlugin {
     public function jury_template_redirect() {
         global $wp_query;
         
+        // Check if jury dashboard
         if (get_query_var('mt_jury_dashboard')) {
+            // Check if user is logged in
             if (!is_user_logged_in()) {
                 wp_redirect(wp_login_url(home_url('/jury-dashboard/')));
                 exit;
             }
             
+            // Load custom template
             include MT_PLUGIN_PATH . 'templates/jury-dashboard-frontend.php';
             exit;
         }
         
+        // Check if individual jury member page
         if (get_query_var('mt_jury_member')) {
             $jury_slug = get_query_var('mt_jury_member');
+            // Load jury member public profile template
             include MT_PLUGIN_PATH . 'templates/jury-member-profile.php';
             exit;
         }
@@ -2005,9 +2014,12 @@ class MobilityTrailblazersPlugin {
      * Create login redirect for jury members
      */
     public function jury_login_redirect($redirect_to, $request, $user) {
+        // Check if user is a jury member
         if (isset($user->ID) && $this->is_jury_member($user->ID)) {
+            // Redirect to jury dashboard
             return home_url('/jury-dashboard/');
         }
+        
         return $redirect_to;
     }
 
@@ -2032,6 +2044,7 @@ class MobilityTrailblazersPlugin {
     public function jury_dashboard_widget() {
         $current_user_id = get_current_user_id();
         
+        // Get jury member post
         $jury_post = get_posts(array(
             'post_type' => 'mt_jury',
             'meta_query' => array(
@@ -2051,6 +2064,7 @@ class MobilityTrailblazersPlugin {
         
         $jury_member_id = $jury_post[0]->ID;
         
+        // Get statistics
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
         
@@ -2134,17 +2148,23 @@ class MobilityTrailblazersPlugin {
      * Create jury member shortcode for frontend
      */
     public function jury_dashboard_shortcode($atts) {
+        // Check if user is logged in
         if (!is_user_logged_in()) {
             return '<p>' . __('Please log in to access your jury dashboard.', 'mobility-trailblazers') . ' <a href="' . wp_login_url(get_permalink()) . '">' . __('Log in', 'mobility-trailblazers') . '</a></p>';
         }
         
+        // Check if user is jury member
         $current_user_id = get_current_user_id();
         if (!$this->is_jury_member($current_user_id)) {
             return '<p>' . __('This dashboard is only accessible to jury members.', 'mobility-trailblazers') . '</p>';
         }
         
+        // Start output buffering
         ob_start();
+        
+        // Include the dashboard template
         include MT_PLUGIN_PATH . 'templates/jury-dashboard-frontend.php';
+        
         return ob_get_clean();
     }
 
@@ -2161,6 +2181,7 @@ class MobilityTrailblazersPlugin {
             wp_send_json_error(array('message' => __('Unauthorized access.', 'mobility-trailblazers')));
         }
         
+        // Get existing evaluation
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
         
@@ -2170,6 +2191,7 @@ class MobilityTrailblazersPlugin {
             $current_user_id
         ));
         
+        // Get candidate details
         $candidate = get_post($candidate_id);
         $company = get_post_meta($candidate_id, '_mt_company', true);
         $position = get_post_meta($candidate_id, '_mt_position', true);
@@ -2201,6 +2223,7 @@ class MobilityTrailblazersPlugin {
      * Email notification for new assignments
      */
     public function notify_jury_member_assignment($jury_member_id, $candidate_ids) {
+        // Get jury member details
         $jury_member = get_post($jury_member_id);
         $jury_email = get_post_meta($jury_member_id, '_mt_jury_email', true);
         
@@ -2208,12 +2231,14 @@ class MobilityTrailblazersPlugin {
             return;
         }
         
+        // Get candidates
         $candidates = get_posts(array(
             'post_type' => 'mt_candidate',
             'post__in' => $candidate_ids,
             'posts_per_page' => -1
         ));
         
+        // Build email content
         $subject = __('New Candidates Assigned for Evaluation - Mobility Trailblazers', 'mobility-trailblazers');
         
         $message = '<h2>' . sprintf(__('Dear %s,', 'mobility-trailblazers'), $jury_member->post_title) . '</h2>';
@@ -2237,6 +2262,7 @@ class MobilityTrailblazersPlugin {
         
         $message .= '<p><em>' . __('The Mobility Trailblazers Team', 'mobility-trailblazers') . '</em></p>';
         
+        // Send email
         mt_send_jury_notification($jury_email, $subject, $message);
     }
 }
