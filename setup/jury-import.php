@@ -364,7 +364,7 @@ function import_mobility_trailblazers_jury() {
                     'display_name' => $member['name'],
                     'first_name' => explode(' ', $member['name'])[0],
                     'last_name' => implode(' ', array_slice(explode(' ', $member['name']), 1)),
-                    'role' => 'editor'
+                    'role' => 'mt_jury_member'
                 ));
                 
                 // Send welcome email (optional)
