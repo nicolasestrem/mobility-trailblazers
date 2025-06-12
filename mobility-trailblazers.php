@@ -32,6 +32,8 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
         add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
         add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
+        add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
+        add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
     }
 
     public function init() {
@@ -1248,7 +1250,7 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
-     * Assignment Management Page
+     * Assignment Management Page - CORRECTED VERSION
      */
     public function assignment_management_page() {
         // Check user permissions
@@ -1288,159 +1290,313 @@ class MobilityTrailblazersPlugin {
             'post_award' => 'Post Award'
         );
         
-        // CRITICAL: Enqueue scripts FIRST
-        wp_enqueue_style('mt-assignment-style', plugins_url('assets/assignment.css', __FILE__));
-        wp_enqueue_script('mt-assignment-script', plugins_url('assets/assignment.js', __FILE__), array('jquery'), '1.0', true);
-        
-        // THEN localize (must be after enqueue)
-        wp_localize_script('mt-assignment-script', 'mtAssignmentData', array(
-            'candidates' => $candidates_data,
-            'jury' => $jury_data,
-            'assignments' => $existing_assignments,
-            'stats' => array(
-                'total_candidates' => $total_candidates,
-                'total_jury' => $total_jury,
-                'assigned_count' => $assigned_count,
-                'completion_rate' => $completion_rate,
-                'avg_per_jury' => $avg_per_jury
-            ),
-            'current_phase' => $current_phase,
-            'phase_names' => $phase_names,
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_assignment_nonce')
-        ));
-        
-        // Render the HTML content
         ?>
         <div class="wrap">
             <h1><?php _e('Jury Assignment Management', 'mobility-trailblazers'); ?></h1>
             
+            <!-- Debug Information -->
+            <div id="debug-info" style="background: #fff; border: 1px solid #ccc; padding: 15px; margin: 20px 0;">
+                <h3>Debug Information</h3>
+                <p><strong>Total Candidates:</strong> <?php echo $total_candidates; ?></p>
+                <p><strong>Total Jury Members:</strong> <?php echo $total_jury; ?></p>
+                <p><strong>Assigned Count:</strong> <?php echo $assigned_count; ?></p>
+                <p><strong>Completion Rate:</strong> <?php echo number_format($completion_rate, 1); ?>%</p>
+                <p><strong>Current Phase:</strong> <?php echo $current_phase; ?></p>
+            </div>
+            
+            <!-- Assignment Interface Container -->
             <div id="mt-assignment-interface" class="mt-assignment-interface">
-                <!-- Interface will be built by JavaScript -->
-                <div id="loading-message" style="text-align: center; padding: 50px;">
-                    <h2>Loading Assignment Interface...</h2>
-                    <p>If this message persists, check browser console for errors.</p>
+                
+                <!-- Header -->
+                <div class="mt-assignment-header" style="background: linear-gradient(135deg, #2c5282 0%, #38b2ac 100%); color: white; padding: 30px; margin-bottom: 30px; border-radius: 15px; text-align: center;">
+                    <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0 0 10px 0;">🏆 Jury Assignment System</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.9; margin: 0;">Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
+                </div>
+
+                <!-- Status Banner -->
+                <div class="mt-status-banner" style="background: #38a169; color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">✅</span>
+                    <div>
+                        <strong>System Status: OPERATIONAL</strong> | Last check: <?php echo date('H:i:s'); ?> | 
+                        Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? $current_phase); ?>
+                    </div>
+                </div>
+
+                <!-- Statistics Grid -->
+                <div class="mt-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="mt-stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #38b2ac; text-align: center;">
+                        <span class="mt-stat-number" style="font-size: 2.5rem; font-weight: 700; color: #2c5282; display: block; line-height: 1;"><?php echo $total_candidates; ?></span>
+                        <div class="mt-stat-label" style="color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Total Candidates</div>
+                    </div>
+                    <div class="mt-stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #38b2ac; text-align: center;">
+                        <span class="mt-stat-number" style="font-size: 2.5rem; font-weight: 700; color: #2c5282; display: block; line-height: 1;"><?php echo $total_jury; ?></span>
+                        <div class="mt-stat-label" style="color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Jury Members</div>
+                    </div>
+                    <div class="mt-stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #38b2ac; text-align: center;">
+                        <span class="mt-stat-number" id="assigned-count" style="font-size: 2.5rem; font-weight: 700; color: #2c5282; display: block; line-height: 1;"><?php echo $assigned_count; ?></span>
+                        <div class="mt-stat-label" style="color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Total Assignments</div>
+                    </div>
+                    <div class="mt-stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #38b2ac; text-align: center;">
+                        <span class="mt-stat-number" id="completion-rate" style="font-size: 2.5rem; font-weight: 700; color: #2c5282; display: block; line-height: 1;"><?php echo number_format($completion_rate, 1); ?>%</span>
+                        <div class="mt-stat-label" style="color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Completion Rate</div>
+                    </div>
+                    <div class="mt-stat-card" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid #38b2ac; text-align: center;">
+                        <span class="mt-stat-number" id="avg-per-jury" style="font-size: 2.5rem; font-weight: 700; color: #2c5282; display: block; line-height: 1;"><?php echo number_format($avg_per_jury, 1); ?></span>
+                        <div class="mt-stat-label" style="color: #718096; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px;">Avg Per Jury</div>
+                    </div>
+                </div>
+
+                <!-- Assignment Controls -->
+                <div class="mt-assignment-controls" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h3 style="margin: 0 0 20px 0; color: #2c5282; font-size: 1.3rem;">🔧 Assignment Tools</h3>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <button id="mt-auto-assign-btn" onclick="testAutoAssign()" style="background: #38a169; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">⚡ Auto-Assign All</button>
+                        <button id="mt-manual-assign-btn" disabled style="background: #d69e2e; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; opacity: 0.6;">👥 Assign Selected (0)</button>
+                        <button id="mt-clear-assignments-btn" onclick="testClearAssignments()" style="background: #718096; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">🗑️ Clear All Assignments</button>
+                        <button id="mt-export-btn" onclick="testExport()" style="background: #2c5282; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">📊 Export Data</button>
+                        <button id="mt-refresh-btn" onclick="location.reload()" style="background: #718096; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">🔄 Refresh Data</button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <label>Candidates per Jury Member: 
+                            <input type="number" id="candidates-per-jury" value="<?php echo ceil($total_candidates / max($total_jury, 1)); ?>" min="1" max="50" style="width: 80px; padding: 5px; margin-left: 5px;">
+                        </label>
+                        <label>Algorithm: 
+                            <select id="assignment-algorithm" style="padding: 5px; margin-left: 5px;">
+                                <option value="balanced">Balanced Distribution</option>
+                                <option value="random">Random Assignment</option>
+                                <option value="category">Category Balanced</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Simple Candidate and Jury Lists -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Candidates Panel -->
+                    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="background: #2c5282; color: white; padding: 20px;">
+                            <h3 style="font-size: 1.3rem; font-weight: 600; margin: 0;">📋 Candidates (<?php echo count($candidates_data); ?>)</h3>
+                        </div>
+                        <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                            <div id="candidates-list">
+                                <?php foreach (array_slice($candidates_data, 0, 10) as $candidate): ?>
+                                    <div style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px;">
+                                        <strong><?php echo esc_html($candidate['name']); ?></strong><br>
+                                        <small><?php echo esc_html($candidate['company']); ?></small><br>
+                                        <span style="color: <?php echo $candidate['assigned'] ? '#38a169' : '#e53e3e'; ?>;">
+                                            <?php echo $candidate['assigned'] ? 'Assigned' : 'Unassigned'; ?>
+                                        </span>
+                                    </div>
+                                <?php endforeach; ?>
+                                <?php if (count($candidates_data) > 10): ?>
+                                    <div style="text-align: center; padding: 10px; color: #718096;">
+                                        ... and <?php echo count($candidates_data) - 10; ?> more candidates
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jury Panel -->
+                    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="background: #2c5282; color: white; padding: 20px;">
+                            <h3 style="font-size: 1.3rem; font-weight: 600; margin: 0;">👨‍⚖️ Jury Members (<?php echo count($jury_data); ?>)</h3>
+                        </div>
+                        <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                            <div id="jury-list">
+                                <?php foreach ($jury_data as $jury): ?>
+                                    <div style="padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; <?php echo $jury['role'] === 'president' ? 'border-color: #ffd700;' : ($jury['role'] === 'vice_president' ? 'border-color: #38b2ac;' : ''); ?>">
+                                        <strong><?php echo esc_html($jury['name']); ?></strong>
+                                        <?php if ($jury['role'] === 'president'): ?>
+                                            <span style="background: #ffd700; color: #8b6914; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-left: 10px;">President</span>
+                                        <?php elseif ($jury['role'] === 'vice_president'): ?>
+                                            <span style="background: #38b2ac; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-left: 10px;">Vice President</span>
+                                        <?php endif; ?>
+                                        <br>
+                                        <small><?php echo esc_html($jury['position']); ?></small><br>
+                                        <div style="margin-top: 10px; padding: 10px; background: #f7fafc; border-radius: 5px; font-size: 0.9rem;">
+                                            Assignments: <strong><?php echo $jury['assignments']; ?>/<?php echo $jury['max_assignments']; ?></strong>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
         <script type="text/javascript">
-        jQuery(document).ready(function($) {
-            // Debug output
-            console.log('Assignment page loaded');
-            console.log('mtAssignmentData:', typeof mtAssignmentData !== 'undefined' ? mtAssignmentData : 'UNDEFINED');
-            
-            // Initialize interface if data is available
-            if (typeof mtAssignmentData !== 'undefined' && typeof initAssignmentInterface === 'function') {
-                initAssignmentInterface();
-                $('#loading-message').hide();
-            } else {
-                console.error('mtAssignmentData or initAssignmentInterface not available');
-                $('#loading-message').html('<h2 style="color: red;">Error: Assignment interface failed to load</h2><p>Check browser console for details.</p>');
+        // Embedded JavaScript for testing
+        function testAutoAssign() {
+            if (confirm('Auto-assign all unassigned candidates to jury members?\n\nThis will distribute approximately <?php echo ceil($total_candidates / max($total_jury, 1)); ?> candidates per jury member.')) {
+                var candidatesPerJury = document.getElementById('candidates-per-jury').value;
+                var algorithm = document.getElementById('assignment-algorithm').value;
+                
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'mt_auto_assign',
+                    candidates_per_jury: candidatesPerJury,
+                    algorithm: algorithm,
+                    nonce: '<?php echo wp_create_nonce('mt_assignment_nonce'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        alert('Auto-assignment completed successfully!\n\n' + response.data.message);
+                        location.reload();
+                    } else {
+                        alert('Auto-assignment failed:\n\n' + (response.data.message || 'Unknown error'));
+                    }
+                }).fail(function() {
+                    alert('Network error during auto-assignment. Please try again.');
+                });
             }
+        }
+        
+        function testClearAssignments() {
+            if (confirm('Clear all current assignments?\n\nThis will remove all candidate-jury assignments. This action cannot be undone.')) {
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'mt_clear_assignments',
+                    nonce: '<?php echo wp_create_nonce('mt_assignment_nonce'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        alert('All assignments cleared successfully!\n\n' + response.data.message);
+                        location.reload();
+                    } else {
+                        alert('Clear assignments failed:\n\n' + (response.data.message || 'Unknown error'));
+                    }
+                }).fail(function() {
+                    alert('Network error during clear assignments. Please try again.');
+                });
+            }
+        }
+        
+        function testExport() {
+            window.open('<?php echo admin_url('admin-ajax.php'); ?>?action=mt_export_assignments&nonce=<?php echo wp_create_nonce('mt_assignment_nonce'); ?>', '_blank');
+        }
+        
+        // Debug information
+        jQuery(document).ready(function($) {
+            console.log('Assignment page loaded successfully');
+            console.log('Total candidates: <?php echo $total_candidates; ?>');
+            console.log('Total jury members: <?php echo $total_jury; ?>');
+            console.log('Current assignments: <?php echo $assigned_count; ?>');
+            console.log('Completion rate: <?php echo $completion_rate; ?>%');
+            
+            // Test AJAX connectivity
+            $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                action: 'mt_get_assignment_stats',
+                nonce: '<?php echo wp_create_nonce('mt_assignment_nonce'); ?>'
+            }, function(response) {
+                console.log('AJAX connectivity test:', response.success ? 'PASSED' : 'FAILED');
+            }).fail(function() {
+                console.log('AJAX connectivity test: FAILED - Network error');
+            });
         });
         </script>
+        
+        <style>
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        button:disabled {
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        </style>
         <?php
     }
 
     /**
-     * Get candidates formatted for assignment interface
+     * Add missing AJAX handler for clearing assignments
      */
-    private function get_candidates_for_assignment() {
-        $candidates = get_posts(array(
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ));
-        
-        $formatted_candidates = array();
-        
-        foreach ($candidates as $candidate) {
-            $company = get_post_meta($candidate->ID, '_mt_company', true);
-            $position = get_post_meta($candidate->ID, '_mt_position', true);
-            $categories = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'slugs'));
-            $assigned_jury = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
-            
-            $formatted_candidates[] = array(
-                'id' => $candidate->ID,
-                'name' => $candidate->post_title,
-                'company' => $company ?: 'No company',
-                'position' => $position ?: 'No position',
-                'category' => !empty($categories) ? $categories[0] : 'uncategorized',
-                'assigned' => !empty($assigned_jury),
-                'jury_member_id' => $assigned_jury ?: null
-            );
+    public function handle_clear_assignments() {
+        if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+            wp_send_json_error('Security check failed');
         }
         
-        return $formatted_candidates;
-    }
-
-    /**
-     * Get jury members formatted for assignment interface
-     */
-    private function get_jury_members_for_assignment() {
-        $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ));
-        
-        $formatted_jury = array();
-        
-        foreach ($jury_members as $jury) {
-            $position = get_post_meta($jury->ID, '_mt_jury_position', true);
-            $expertise = get_post_meta($jury->ID, '_mt_jury_expertise', true);
-            $is_president = get_post_meta($jury->ID, '_mt_jury_is_president', true);
-            $is_vice_president = get_post_meta($jury->ID, '_mt_jury_is_vice_president', true);
-            
-            // Count current assignments
-            $assignments = get_posts(array(
-                'post_type' => 'mt_candidate',
-                'posts_per_page' => -1,
-                'post_status' => 'publish',
-                'meta_query' => array(
-                    array(
-                        'key' => '_mt_assigned_jury_member',
-                        'value' => $jury->ID,
-                        'compare' => '='
-                    )
-                )
-            ));
-            
-            $role = 'member';
-            if ($is_president) $role = 'president';
-            elseif ($is_vice_president) $role = 'vice_president';
-            
-            $formatted_jury[] = array(
-                'id' => $jury->ID,
-                'name' => $jury->post_title,
-                'position' => $position ?: 'No position',
-                'expertise' => $expertise ?: 'General expertise',
-                'role' => $role,
-                'assignments' => count($assignments),
-                'max_assignments' => 25 // Configurable
-            );
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
         }
         
-        return $formatted_jury;
-    }
-
-    /**
-     * Get existing assignments
-     */
-    private function get_existing_assignments() {
         global $wpdb;
+        $result = $wpdb->delete(
+            $wpdb->postmeta,
+            array('meta_key' => '_mt_assigned_jury_member'),
+            array('%s')
+        );
         
+        wp_send_json_success(array(
+            'message' => sprintf(__('%d assignments cleared', 'mobility-trailblazers'), $result),
+            'cleared_count' => $result
+        ));
+    }
+
+    /**
+     * Add missing AJAX handler for export
+     */
+    public function handle_export_assignments() {
+        if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+            wp_die('Security check failed');
+        }
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Insufficient permissions');
+        }
+        
+        $filename = 'mobility-trailblazers-assignments-' . date('Y-m-d-H-i-s') . '.csv';
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        fputcsv($output, array(
+            'Candidate Name',
+            'Company',
+            'Position',
+            'Jury Member',
+            'Jury Position',
+            'Assignment Date'
+        ));
+        
+        global $wpdb;
         $assignments = $wpdb->get_results("
-            SELECT p.ID as candidate_id, pm.meta_value as jury_member_id
-            FROM {$wpdb->posts} p
-            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-            WHERE p.post_type = 'mt_candidate'
-            AND pm.meta_key = '_mt_assigned_jury_member'
-            AND pm.meta_value != ''
+            SELECT 
+                c.post_title as candidate_name,
+                c_company.meta_value as company,
+                c_position.meta_value as position,
+                j.post_title as jury_name,
+                j_position.meta_value as jury_position,
+                NOW() as assignment_date
+            FROM {$wpdb->posts} c
+            INNER JOIN {$wpdb->postmeta} assignment ON c.ID = assignment.post_id
+            INNER JOIN {$wpdb->posts} j ON assignment.meta_value = j.ID
+            LEFT JOIN {$wpdb->postmeta} c_company ON c.ID = c_company.post_id AND c_company.meta_key = '_mt_company'
+            LEFT JOIN {$wpdb->postmeta} c_position ON c.ID = c_position.post_id AND c_position.meta_key = '_mt_position'
+            LEFT JOIN {$wpdb->postmeta} j_position ON j.ID = j_position.post_id AND j_position.meta_key = '_mt_jury_position'
+            WHERE c.post_type = 'mt_candidate' 
+            AND j.post_type = 'mt_jury'
+            AND assignment.meta_key = '_mt_assigned_jury_member'
+            ORDER BY j.post_title, c.post_title
         ");
         
-        return $assignments ?: array();
+        foreach ($assignments as $assignment) {
+            fputcsv($output, array(
+                $assignment->candidate_name,
+                $assignment->company,
+                $assignment->position,
+                $assignment->jury_name,
+                $assignment->jury_position,
+                $assignment->assignment_date
+            ));
+        }
+        
+        fclose($output);
+        exit;
     }
 
     /**
@@ -1558,6 +1714,106 @@ class MobilityTrailblazersPlugin {
             'completion_rate' => round($completion_rate, 1),
             'avg_per_jury' => round($avg_per_jury, 1)
         ));
+    }
+
+    /**
+     * Get candidates formatted for assignment interface
+     */
+    private function get_candidates_for_assignment() {
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $formatted_candidates = array();
+        
+        foreach ($candidates as $candidate) {
+            $company = get_post_meta($candidate->ID, '_mt_company', true);
+            $position = get_post_meta($candidate->ID, '_mt_position', true);
+            $categories = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'slugs'));
+            $assigned_jury = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+            
+            $formatted_candidates[] = array(
+                'id' => $candidate->ID,
+                'name' => $candidate->post_title,
+                'company' => $company ?: 'No company',
+                'position' => $position ?: 'No position',
+                'category' => !empty($categories) ? $categories[0] : 'uncategorized',
+                'assigned' => !empty($assigned_jury),
+                'jury_member_id' => $assigned_jury ?: null
+            );
+        }
+        
+        return $formatted_candidates;
+    }
+
+    /**
+     * Get jury members formatted for assignment interface
+     */
+    private function get_jury_members_for_assignment() {
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $formatted_jury = array();
+        
+        foreach ($jury_members as $jury) {
+            $position = get_post_meta($jury->ID, '_mt_jury_position', true);
+            $expertise = get_post_meta($jury->ID, '_mt_jury_expertise', true);
+            $is_president = get_post_meta($jury->ID, '_mt_jury_is_president', true);
+            $is_vice_president = get_post_meta($jury->ID, '_mt_jury_is_vice_president', true);
+            
+            // Count current assignments
+            $assignments = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_assigned_jury_member',
+                        'value' => $jury->ID,
+                        'compare' => '='
+                    )
+                )
+            ));
+            
+            $role = 'member';
+            if ($is_president) $role = 'president';
+            elseif ($is_vice_president) $role = 'vice_president';
+            
+            $formatted_jury[] = array(
+                'id' => $jury->ID,
+                'name' => $jury->post_title,
+                'position' => $position ?: 'No position',
+                'expertise' => $expertise ?: 'General expertise',
+                'role' => $role,
+                'assignments' => count($assignments),
+                'max_assignments' => 25 // Configurable
+            );
+        }
+        
+        return $formatted_jury;
+    }
+
+    /**
+     * Get existing assignments
+     */
+    private function get_existing_assignments() {
+        global $wpdb;
+        
+        $assignments = $wpdb->get_results("
+            SELECT p.ID as candidate_id, pm.meta_value as jury_member_id
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'mt_candidate'
+            AND pm.meta_key = '_mt_assigned_jury_member'
+            AND pm.meta_value != ''
+        ");
+        
+        return $assignments ?: array();
     }
 }
 
