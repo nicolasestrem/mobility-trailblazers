@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ALTERNATE Mobility Trailblazers Platform
  * Description: A custom plugin to manage the jury, voting, candidate workflow, and analytics for the 25 Mobility Trailblazers project.
- * Version: 1.0.7
+ * Version: 1.1.0
  * Author: Nicolas Estrem
  */
 
@@ -40,6 +40,9 @@ class MobilityTrailblazers {
         add_action('wp_ajax_mt_preview_assignments', [$this, 'preview_auto_assignment']);
         add_action('wp_ajax_mt_cleanup_invalids', [$this, 'cleanup_invalid_candidates']);
         add_shortcode('mt_voting_interface', [$this, 'render_voting_form']);
+        add_shortcode('mt_candidate_grid', [$this, 'shortcode_candidate_grid']);
+        add_shortcode('mt_jury_dashboard', [$this, 'shortcode_jury_dashboard']);
+        add_shortcode('mt_voting_progress', [$this, 'shortcode_voting_progress']);
     }
 
     public function ensure_roles_exist() {
@@ -252,6 +255,40 @@ class MobilityTrailblazers {
         });
         </script>
         <?php return ob_get_clean();
+    }
+
+    public function shortcode_candidate_grid() {
+        $candidates = get_posts(['post_type' => 'mt_candidate', 'numberposts' => -1]);
+        $out = '<div class="candidate-grid" style="display:flex;flex-wrap:wrap;gap:1em">';
+        foreach ($candidates as $c) {
+            $out .= '<div style="border:1px solid #ccc;padding:1em;width:200px">';
+            $out .= '<h3>' . esc_html($c->post_title) . '</h3>';
+            $out .= '<p>' . esc_html(get_post_field('post_content', $c->ID)) . '</p>';
+            $out .= '</div>';
+        }
+        $out .= '</div>';
+        return $out;
+    }
+
+    public function shortcode_jury_dashboard() {
+        if (!current_user_can('jury')) return '<p>You do not have permission to view this.</p>';
+        global $wpdb;
+        $jury_id = get_current_user_id();
+        $assignments = $wpdb->get_results($wpdb->prepare("SELECT c.name FROM {$this->assignments_table} a JOIN {$this->candidates_table} c ON a.candidate_id = c.id WHERE a.jury_id = %d", $jury_id));
+        if (!$assignments) return '<p>No candidates assigned.</p>';
+        $out = '<ul>';
+        foreach ($assignments as $row) {
+            $out .= '<li>' . esc_html($row->name) . '</li>';
+        }
+        $out .= '</ul>';
+        return $out;
+    }
+
+    public function shortcode_voting_progress() {
+        global $wpdb;
+        $total = $wpdb->get_var("SELECT COUNT(*) FROM {$this->votes_table}");
+        $finalized = $wpdb->get_var("SELECT COUNT(*) FROM {$this->votes_table} WHERE status = 'final'");
+        return "<p>Votes submitted: $total<br>Finalized: $finalized</p>";
     }
 
     public function register_api_endpoints() {
