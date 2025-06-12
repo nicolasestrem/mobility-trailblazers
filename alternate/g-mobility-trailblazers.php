@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ALTERNATE Mobility Trailblazers Platform
  * Description: A custom plugin to manage the jury, voting, candidate workflow, and analytics for the 25 Mobility Trailblazers project.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Nicolas Estrem
  */
 
