@@ -31,6 +31,7 @@ class MobilityTrailblazers {
         register_activation_hook(__FILE__, [$this, 'install']);
 
         add_action('init', [$this, 'register_custom_post_types']);
+        add_action('init', [$this, 'ensure_roles_exist']);
         add_action('admin_menu', [$this, 'admin_menu']);
         add_action('rest_api_init', [$this, 'register_api_endpoints']);
         add_shortcode('mt_voting_form', [$this, 'render_voting_form']);
@@ -41,14 +42,8 @@ class MobilityTrailblazers {
 
         add_action('init', function () {
             global $wpdb;
-
-            // Run this only once
             if (!get_option('mt_candidates_migrated')) {
-                $wpdb->query("
-                    UPDATE {$wpdb->posts}
-                    SET post_type = 'mt_candidate'
-                    WHERE post_type = 'trailblazer_candidate'
-                ");
+                $wpdb->query("UPDATE {$wpdb->posts} SET post_type = 'mt_candidate' WHERE post_type = 'trailblazer_candidate'");
                 update_option('mt_candidates_migrated', true);
             }
         });
@@ -106,10 +101,21 @@ class MobilityTrailblazers {
         ]);
     }
 
+    public function ensure_roles_exist() {
+        if (!get_role('jury')) {
+            add_role('jury', 'Jury', ['read' => true]);
+        }
+        if (!get_role('candidate')) {
+            add_role('candidate', 'Candidate', ['read' => true]);
+        }
+    }
+
     public function admin_menu() {
-        add_menu_page('Trailblazers', 'Trailblazers', 'manage_options', 'mobility_trailblazers', [$this, 'render_admin'], 'dashicons-awards');
-        add_submenu_page('mobility_trailblazers', 'Assignments', 'Assignments', 'manage_options', 'mobility_assignments', [$this, 'render_assignments_page']);
-        add_submenu_page('mobility_trailblazers', 'Votes', 'Votes', 'manage_options', 'mobility_votes', [$this, 'render_votes_page']);
+        if (current_user_can('jury') && !current_user_can('manage_options')) return;
+
+        add_menu_page('Trailblazers', 'Trailblazers', 'edit_posts', 'mobility_trailblazers', [$this, 'render_admin'], 'dashicons-awards');
+        add_submenu_page('mobility_trailblazers', 'Assignments', 'Assignments', 'edit_posts', 'mobility_assignments', [$this, 'render_assignments_page']);
+        add_submenu_page('mobility_trailblazers', 'Votes', 'Votes', 'edit_posts', 'mobility_votes', [$this, 'render_votes_page']);
     }
 
     public function render_admin() {
@@ -332,23 +338,6 @@ class MobilityTrailblazers {
         </script>
         <?php return ob_get_clean();
     }
-
-    public function ensure_roles_exist() {
-        if (!get_role('jury')) {
-            add_role('jury', 'Jury', [
-                'read' => true,
-                'edit_posts' => true,
-            ]);
-        }
-        if (!get_role('candidate')) {
-            add_role('candidate', 'Candidate', [
-                'read' => true,
-            ]);
-        }
-    }
 }
 
 add_action('init', [MobilityTrailblazers::class, 'get_instance']);
-add_action('init', function () {
-    MobilityTrailblazers::get_instance()->ensure_roles_exist();
-});
