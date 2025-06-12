@@ -20,7 +20,6 @@
 ---
 
 
-/mnt/dietpi_userdata/docker-files/STAGING/wordpress_data/wp-content/plugins/mobility-trailblazers/
 ├── README.md
 ├── assets
 │   ├── css
@@ -37,6 +36,8 @@
 ├── jury-assignment-interface.php
 ├── mobility-trailblazers.php
 └── voting-system.php
+
+4 directories, 13 files
 
 4 directories, 13 files
 

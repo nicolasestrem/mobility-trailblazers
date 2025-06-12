@@ -299,14 +299,14 @@ class MobilityTrailblazers {
     public function render_voting_form() {
         ob_start(); ?>
         <form id="mt-vote-form">
-            <label>Pioneer Spirit: <input type="range" name="pioneer_spirit" min="1" max="10" /></label><br>
-            <label>Innovation Degree: <input type="range" name="innovation_degree" min="1" max="10" /></label><br>
-            <label>Implementation Power: <input type="range" name="implementation_power" min="1" max="10" /></label><br>
-            <label>Role Model Function: <input type="range" name="role_model_function" min="1" max="10" /></label><br>
+            <label>Pioneer Spirit: <input type="range" name="pioneer_spirit" min="1" max="10" oninput="psValue.value=this.value" /> <output id="psValue">5</output></label><br>
+            <label>Innovation Degree: <input type="range" name="innovation_degree" min="1" max="10" oninput="idValue.value=this.value" /> <output id="idValue">5</output></label><br>
+            <label>Implementation Power: <input type="range" name="implementation_power" min="1" max="10" oninput="ipValue.value=this.value" /> <output id="ipValue">5</output></label><br>
+            <label>Role Model Function: <input type="range" name="role_model_function" min="1" max="10" oninput="rmValue.value=this.value" /> <output id="rmValue">5</output></label><br>
             <input type="hidden" name="candidate_id" value="1">
             <input type="hidden" name="round" value="1">
             <input type="hidden" name="status" value="submitted">
-            <button type="submit">Submit Vote</button>
+            <button type="submit" onclick="return confirm('Are you sure you want to submit this vote?');">Submit Vote</button>
         </form>
         <script>
         document.getElementById('mt-vote-form').addEventListener('submit', async function(e) {
