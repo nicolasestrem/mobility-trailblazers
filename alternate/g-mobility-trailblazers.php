@@ -38,6 +38,20 @@ class MobilityTrailblazers {
         add_action('wp_ajax_mt_toggle_vote_status', [$this, 'toggle_vote_status']);
         add_action('admin_post_mt_import_csv', [$this, 'import_csv_candidates']);
         add_action('admin_post_mt_export_csv', [$this, 'export_votes_csv']);
+
+        add_action('init', function () {
+            global $wpdb;
+
+            // Run this only once
+            if (!get_option('mt_candidates_migrated')) {
+                $wpdb->query("
+                    UPDATE {$wpdb->posts}
+                    SET post_type = 'mt_candidate'
+                    WHERE post_type = 'trailblazer_candidate'
+                ");
+                update_option('mt_candidates_migrated', true);
+            }
+        });
     }
 
     public function install() {
