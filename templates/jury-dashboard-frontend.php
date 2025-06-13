@@ -64,7 +64,9 @@ $assigned_candidates = get_posts(array(
 // Get evaluation statistics
 global $wpdb;
 $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-$evaluated_count = mt_get_user_evaluation_count($current_user_id);
+$evaluated_count = function_exists('mt_get_user_evaluation_count') 
+    ? mt_get_user_evaluation_count($current_user_id) 
+    : 0;
 
 $total_assigned = count($assigned_candidates);
 $completion_rate = $total_assigned > 0 ? ($evaluated_count / $total_assigned) * 100 : 0;
@@ -202,7 +204,10 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                         $category_slug = !empty($categories) ? $categories[0]->slug : '';
                         
                         // Check if already evaluated
-                        $is_evaluated = mt_has_jury_evaluated($current_user_id, $candidate_id);
+                        $is_evaluated = function_exists('mt_has_jury_evaluated')
+                            ? mt_has_jury_evaluated($current_user_id, $candidate_id)
+                            : false;
+                        
                         $total_score = $is_evaluated ? $existing_score->total_score : 0;
                     ?>
                         <div class="mt-candidate-card <?php echo $is_evaluated ? 'mt-evaluated' : 'mt-pending'; ?>" 
