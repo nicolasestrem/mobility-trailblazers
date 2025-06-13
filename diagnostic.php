@@ -98,7 +98,12 @@ echo "<p><strong>User ID:</strong> {$current_user->ID}</p>";
 echo "<p><strong>Email:</strong> {$current_user->user_email}</p>";
 echo "<p><strong>Roles:</strong> " . implode(', ', $current_user->roles) . "</p>";
 
-// Check if current user is jury member
+// Check if current user passes the permission check
+$current_user_id = get_current_user_id();
+$is_jury = false;
+$is_admin = current_user_can('manage_options');
+
+// Check if user is a jury member
 $jury_post = get_posts(array(
     'post_type' => 'mt_jury',
     'meta_query' => array(
@@ -110,16 +115,45 @@ $jury_post = get_posts(array(
         ),
         array(
             'key' => '_mt_jury_user_id', 
-            'value' => $current_user->ID,
+            'value' => $current_user_id,
             'compare' => '='
         )
     )
 ));
+$is_jury = !empty($jury_post);
 
-if ($jury_post) {
-    echo "<p><strong>Jury Status:</strong> ✅ Linked to jury member: {$jury_post[0]->post_title}</p>";
-} else {
-    echo "<p><strong>Jury Status:</strong> ❌ Not linked to any jury member</p>";
+echo "<h3>Permission Check:</h3>";
+echo "<p><strong>Is Jury Member:</strong> " . ($is_jury ? '✅ Yes' : '❌ No') . "</p>";
+echo "<p><strong>Is Admin:</strong> " . ($is_admin ? '✅ Yes' : '❌ No') . "</p>";
+echo "<p><strong>Should see menu:</strong> " . (($is_jury || $is_admin) ? '✅ Yes' : '❌ No') . "</p>";
+
+// Test menu registration directly
+echo "<h3>Direct Menu Registration Test:</h3>";
+if (isset($_POST['test_menu_registration'])) {
+    // Force menu registration
+    if (class_exists('MobilityTrailblazersPlugin')) {
+        $plugin = new MobilityTrailblazersPlugin();
+        $plugin->add_jury_dashboard_menu();
+        echo "<div class='notice notice-success'><p>Attempted to register menu directly.</p></div>";
+        
+        // Check again
+        global $submenu;
+        if (isset($submenu['mt-award-system'])) {
+            $found = false;
+            foreach ($submenu['mt-award-system'] as $item) {
+                if ($item[2] === 'mt-jury-dashboard') {
+                    $found = true;
+                    echo "<p style='color: green;'>✅ Menu successfully registered!</p>";
+                    break;
+                }
+            }
+            if (!$found) {
+                echo "<p style='color: red;'>❌ Menu registration failed</p>";
+            }
+        }
+    } else {
+        echo "<p style='color: red;'>❌ MobilityTrailblazersPlugin class not found</p>";
+    }
 }
 
 // 6. Quick Fix Buttons
@@ -149,7 +183,76 @@ if (isset($_GET['link_current_user'])) {
 echo "<p><a href='?create_test_assignment=1'>Create Test Assignment</a></p>";
 echo "<p><a href='?link_current_user=1'>Link Current User to First Jury Member</a></p>";
 
-echo "<h2>7. Next Steps</h2>";
+// 7. Menu Registration Debug
+echo "<h2>7. Menu Registration Debug</h2>";
+
+// Check if the action is hooked
+global $wp_filter;
+$menu_hook_exists = isset($wp_filter['admin_menu']) && !empty($wp_filter['admin_menu']);
+echo "<p><strong>admin_menu hook registered:</strong> " . ($menu_hook_exists ? '✅ Yes' : '❌ No') . "</p>";
+
+// Check if our specific function is in the admin_menu hook
+if ($menu_hook_exists) {
+    $our_hook_found = false;
+    foreach ($wp_filter['admin_menu'] as $priority => $hooks) {
+        foreach ($hooks as $hook) {
+            if (is_array($hook['function']) && 
+                is_object($hook['function'][0]) && 
+                get_class($hook['function'][0]) === 'MobilityTrailblazersPlugin' &&
+                $hook['function'][1] === 'add_jury_dashboard_menu') {
+                $our_hook_found = true;
+                echo "<p style='color: green;'>✅ add_jury_dashboard_menu is hooked at priority $priority</p>";
+            }
+        }
+    }
+    if (!$our_hook_found) {
+        echo "<p style='color: red;'>❌ add_jury_dashboard_menu is NOT found in admin_menu hooks</p>";
+    }
+}
+
+// Check global submenu
+global $submenu;
+echo "<h3>Submenus under mt-award-system:</h3>";
+if (isset($submenu['mt-award-system'])) {
+    echo "<pre>" . print_r($submenu['mt-award-system'], true) . "</pre>";
+} else {
+    echo "<p style='color: red;'>❌ No submenus found for mt-award-system</p>";
+}
+
+// Check if the parent menu exists
+global $menu;
+$parent_exists = false;
+foreach ($menu as $item) {
+    if ($item[2] === 'mt-award-system') {
+        $parent_exists = true;
+        break;
+    }
+}
+echo "<p><strong>Parent menu (mt-award-system) exists:</strong> " . ($parent_exists ? '✅ Yes' : '❌ No') . "</p>";
+
+// Alternative: Quick fix to force menu registration
+echo "<h3>Quick Fix - Force Menu Registration:</h3>";
+echo "<p>Add this code temporarily to test if menu registration works:</p>";
+echo "<pre style='background: #f0f0f0; padding: 10px; border: 1px solid #ddd;'>";
+echo "// Add this to your theme's functions.php temporarily:
+add_action('admin_menu', function() {
+    if (current_user_can('manage_options')) {
+        add_submenu_page(
+            'mt-award-system',
+            'My Dashboard (Test)',
+            'My Dashboard (Test)',
+            'manage_options',
+            'mt-jury-dashboard-test',
+            function() {
+                echo '<h1>Test Dashboard</h1>';
+                echo '<p>If you see this, menu registration works!</p>';
+            }
+        );
+    }
+}, 99);";
+echo "</pre>";
+
+echo "<h2>8. Next Steps</h2>";
 echo "<ul>";
 echo "<li>✅ Deploy the missing functions to mobility-trailblazers.php</li>";
 echo "<li>✅ Copy jury dashboard templates</li>";
@@ -166,13 +269,4 @@ if ($missing_tables) {
     echo "<li>❌ Create missing database tables: " . implode(', ', $missing_tables) . "</li>";
 }
 echo "</ul>";
-
-// Add menu registration debug
-echo "<h2>10. Menu Registration Debug</h2>";
-global $submenu;
-if (isset($submenu['mt-award-system'])) {
-    echo "<pre>" . print_r($submenu['mt-award-system'], true) . "</pre>";
-} else {
-    echo "<p style='color: red;'>No submenus found for mt-award-system</p>";
-}
 ?>

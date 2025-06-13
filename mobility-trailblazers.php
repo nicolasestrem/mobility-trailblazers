@@ -36,7 +36,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         
         // Add jury dashboard hooks
-        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'));
+        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
         add_action('admin_init', array($this, 'handle_jury_dashboard_direct'));
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
@@ -51,6 +51,7 @@ class MobilityTrailblazersPlugin {
         add_action('admin_post_mt_submit_evaluation', array($this, 'handle_evaluation_submission'));
         
         add_action('admin_menu', array($this, 'add_diagnostic_menu'));
+        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
     }
 
     public function init() {
@@ -1954,14 +1955,50 @@ class MobilityTrailblazersPlugin {
      * Add jury dashboard to admin menu
      */
     public function add_jury_dashboard_menu() {
+        // Debug logging
+        error_log('MT Debug: add_jury_dashboard_menu called');
+        
         $current_user_id = get_current_user_id();
+        error_log('MT Debug: Current user ID: ' . $current_user_id);
         
         // Check if user is a jury member or admin
-        if (!$this->is_jury_member($current_user_id) && !current_user_can('manage_options')) {
+        $is_jury = $this->is_jury_member($current_user_id);
+        $is_admin = current_user_can('manage_options');
+        
+        error_log('MT Debug: Is jury: ' . ($is_jury ? 'yes' : 'no'));
+        error_log('MT Debug: Is admin: ' . ($is_admin ? 'yes' : 'no'));
+        
+        if (!$is_jury && !$is_admin) {
+            error_log('MT Debug: User does not have permission');
             return;
         }
         
-        add_submenu_page(
+        // Check if parent menu exists
+        global $menu;
+        $parent_exists = false;
+        foreach ($menu as $item) {
+            if (isset($item[2]) && $item[2] === 'mt-award-system') {
+                $parent_exists = true;
+                break;
+            }
+        }
+        
+        if (!$parent_exists) {
+            error_log('MT Debug: Parent menu mt-award-system does not exist!');
+            // Try to create it
+            add_menu_page(
+                __('MT Award System', 'mobility-trailblazers'),
+                __('MT Award System', 'mobility-trailblazers'),
+                'read',
+                'mt-award-system',
+                array($this, 'admin_dashboard'),
+                'dashicons-awards',
+                30
+            );
+        }
+        
+        // Add the submenu
+        $result = add_submenu_page(
             'mt-award-system',
             __('My Dashboard', 'mobility-trailblazers'),
             __('My Dashboard', 'mobility-trailblazers'),
@@ -1969,6 +2006,41 @@ class MobilityTrailblazersPlugin {
             'mt-jury-dashboard',
             array($this, 'jury_dashboard_page')
         );
+        
+        error_log('MT Debug: add_submenu_page result: ' . ($result ? 'success' : 'failed'));
+    }
+
+    /**
+     * Ensure jury menu exists (fallback method)
+     */
+    public function ensure_jury_menu_exists() {
+        // This runs later to ensure the menu exists
+        global $submenu;
+        
+        if (!isset($submenu['mt-award-system'])) {
+            return;
+        }
+        
+        // Check if our menu already exists
+        $exists = false;
+        foreach ($submenu['mt-award-system'] as $item) {
+            if ($item[2] === 'mt-jury-dashboard') {
+                $exists = true;
+                break;
+            }
+        }
+        
+        if (!$exists) {
+            $current_user_id = get_current_user_id();
+            if ($this->is_jury_member($current_user_id) || current_user_can('manage_options')) {
+                $submenu['mt-award-system'][] = array(
+                    __('My Dashboard', 'mobility-trailblazers'),
+                    'read',
+                    'mt-jury-dashboard',
+                    __('My Dashboard', 'mobility-trailblazers')
+                );
+            }
+        }
     }
 
     /**
