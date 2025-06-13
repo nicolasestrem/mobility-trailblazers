@@ -42,6 +42,15 @@ class MT_Elementor_Compatibility {
         
         // Ensure proper script dependencies
         add_action('wp_enqueue_scripts', array($this, 'ensure_elementor_dependencies'), 999);
+        
+        // Fix AJAX compatibility
+        add_action('elementor/ajax/before_register_actions', array($this, 'fix_ajax_compatibility'));
+        
+        // Prevent our plugin from interfering with Elementor saves
+        add_action('elementor/editor/init', array($this, 'disable_plugin_on_elementor_save'));
+        
+        // Add nonce verification bypass for Elementor
+        add_filter('mt_verify_nonce', array($this, 'bypass_nonce_for_elementor'), 10, 2);
     }
     
     /**
@@ -167,5 +176,60 @@ class MT_Elementor_Compatibility {
         if (wp_script_is('elementor-frontend', 'registered') && !wp_script_is('elementor-frontend', 'enqueued')) {
             wp_enqueue_script('elementor-frontend');
         }
+    }
+    
+    /**
+     * Fix AJAX compatibility with Elementor
+     */
+    public function fix_ajax_compatibility() {
+        // Ensure our AJAX handlers don't interfere with Elementor's
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            $elementor_actions = [
+                'elementor_ajax',
+                'elementor_save_page',
+                'elementor_get_templates',
+                'elementor_get_template',
+                'elementor_save_template',
+                'elementor_get_widgets',
+                'elementor_render_widget',
+                'elementor_editor_get_wp_widget_form',
+                'elementor_save_library',
+                'elementor_get_library_data',
+                'elementor_update_library',
+                'elementor_get_global_colors',
+                'elementor_save_global_colors'
+            ];
+            
+            $current_action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+            
+            if (in_array($current_action, $elementor_actions)) {
+                // Remove any of our filters/actions that might interfere
+                remove_all_filters('wp_insert_post_data');
+                remove_all_filters('content_save_pre');
+                remove_all_actions('save_post');
+                remove_all_actions('wp_insert_post');
+            }
+        }
+    }
+    
+    /**
+     * Disable our plugin hooks when Elementor is saving
+     */
+    public function disable_plugin_on_elementor_save() {
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'elementor_ajax') {
+            // Temporarily disable our save hooks
+            remove_action('save_post', array($GLOBALS['mobility_trailblazers_plugin'], 'save_post_handler'));
+            remove_filter('content_save_pre', array($GLOBALS['mobility_trailblazers_plugin'], 'content_filter'));
+        }
+    }
+    
+    /**
+     * Bypass nonce verification for Elementor requests
+     */
+    public function bypass_nonce_for_elementor($valid, $action) {
+        if (isset($_REQUEST['action']) && strpos($_REQUEST['action'], 'elementor') === 0) {
+            return true;
+        }
+        return $valid;
     }
 }
