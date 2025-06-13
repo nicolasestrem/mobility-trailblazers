@@ -2216,7 +2216,7 @@ class MobilityTrailblazersPlugin {
                 'implementation_score' => $existing_score->implementation_score,
                 'mobility_relevance_score' => $existing_score->mobility_relevance_score,
                 'visibility_score' => $existing_score->visibility_score,
-                'comments' => $existing_score->comments
+                'comments' => $existing_score->comments ?? ''
             );
         }
         
