@@ -1,10 +1,10 @@
 <?php
 /**
  * Mobility Trailblazers - Permanent Fix for Jury Dashboard Consistency
+ * Version 2.0 - Corrected to avoid fatal errors
  * 
  * This file contains all fixes for the jury evaluation system.
  * Place this file in: /wp-content/plugins/mobility-trailblazers/includes/class-mt-jury-fix.php
- * Then include it in the main plugin file.
  */
 
 if (!defined('ABSPATH')) {
@@ -26,8 +26,9 @@ class MT_Jury_Fix {
         // Initialize fixes
         add_action('init', array($this, 'init_fixes'));
         
-        // Fix rewrite rules on activation
-        register_activation_hook(MT_PLUGIN_FILE, array($this, 'activate_fixes'));
+        // Fix rewrite rules on activation - using plugin_basename instead of MT_PLUGIN_FILE
+        $plugin_file = dirname(dirname(__FILE__)) . '/mobility-trailblazers.php';
+        register_activation_hook($plugin_file, array($this, 'activate_fixes'));
         
         // Add admin notice for migration
         add_action('admin_notices', array($this, 'migration_notice'));
@@ -79,7 +80,16 @@ class MT_Jury_Fix {
         }
         
         ob_start();
-        include MT_PLUGIN_PATH . 'templates/jury-dashboard-frontend.php';
+        
+        // Use dynamic path resolution
+        $template_path = dirname(dirname(__FILE__)) . '/templates/jury-dashboard-frontend.php';
+        
+        if (file_exists($template_path)) {
+            include $template_path;
+        } else {
+            echo '<p>Dashboard template not found.</p>';
+        }
+        
         return ob_get_clean();
     }
     
@@ -138,15 +148,17 @@ class MT_Jury_Fix {
      * Fix 3: Fix AJAX handlers to save evaluations consistently
      */
     private function fix_ajax_handlers() {
-        // Remove original handler and add fixed version
-        remove_action('wp_ajax_mt_submit_vote', array($GLOBALS['mobility_trailblazers_plugin'], 'handle_jury_vote'));
-        add_action('wp_ajax_mt_submit_vote', array($this, 'fixed_handle_jury_vote'));
+        // Don't try to remove the original handler - just add ours with higher priority
+        // This prevents the undefined global variable error
+        add_action('wp_ajax_mt_submit_vote', array($this, 'fixed_handle_jury_vote'), 1);
     }
     
     /**
      * Fixed jury vote handler
      */
     public function fixed_handle_jury_vote() {
+        // Don't try to remove other handlers to avoid undefined variable errors
+        
         // Check nonce
         if (!check_ajax_referer('mt_nonce', 'nonce', false)) {
             wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
@@ -220,6 +232,8 @@ class MT_Jury_Fix {
         } else {
             wp_send_json_error(array('message' => __('Database error. Please try again.', 'mobility-trailblazers')));
         }
+        
+        wp_die(); // Important for AJAX
     }
     
     /**
@@ -238,6 +252,11 @@ class MT_Jury_Fix {
     private function check_migration_needed() {
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Check if table exists first
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_scores'") != $table_scores) {
+            return;
+        }
         
         // Check if there are evaluations with jury post IDs (larger numbers)
         $max_jury_id = $wpdb->get_var("SELECT MAX(jury_member_id) FROM $table_scores");
@@ -392,57 +411,46 @@ class MT_Jury_Fix {
     }
 }
 
-// Initialize the fix class
-MT_Jury_Fix::get_instance();
+// Initialize the fix class only if constants are defined
+if (defined('MT_PLUGIN_PATH')) {
+    MT_Jury_Fix::get_instance();
+}
 
 /**
  * Helper function to get evaluation count for a user
  * This ensures consistency across both dashboards
  */
-function mt_get_user_evaluation_count($user_id) {
-    global $wpdb;
-    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-    
-    // Always query by user ID
-    return $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
-        $user_id
-    ));
+if (!function_exists('mt_get_user_evaluation_count')) {
+    function mt_get_user_evaluation_count($user_id) {
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Always query by user ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
+            $user_id
+        ));
+    }
 }
 
 /**
  * Helper function to get evaluations for a user
  * This ensures consistency across both dashboards
  */
-function mt_get_user_evaluations($user_id, $limit = -1) {
-    global $wpdb;
-    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-    
-    $query = $wpdb->prepare(
-        "SELECT * FROM $table_scores WHERE jury_member_id = %d ORDER BY evaluated_at DESC",
-        $user_id
-    );
-    
-    if ($limit > 0) {
-        $query .= " LIMIT $limit";
-    }
-    
-    return $wpdb->get_results($query);
-}
-
-/**
- * Template override to ensure both dashboards use the same query logic
- */
-add_action('plugins_loaded', function() {
-    // Override the template queries
-    add_filter('mt_evaluation_query', function($query, $user_id) {
+if (!function_exists('mt_get_user_evaluations')) {
+    function mt_get_user_evaluations($user_id, $limit = -1) {
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
         
-        // Always use user ID for queries
-        return $wpdb->prepare(
-            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
+        $query = $wpdb->prepare(
+            "SELECT * FROM $table_scores WHERE jury_member_id = %d ORDER BY evaluated_at DESC",
             $user_id
         );
-    }, 10, 2);
-});
+        
+        if ($limit > 0) {
+            $query .= " LIMIT $limit";
+        }
+        
+        return $wpdb->get_results($query);
+    }
+}

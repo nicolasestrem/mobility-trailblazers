@@ -25,6 +25,11 @@ define('MT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MT_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
+// Define the plugin file constant if not already defined
+if (!defined('MT_PLUGIN_FILE')) {
+    define('MT_PLUGIN_FILE', __FILE__);
+}
+
 // Include the jury system fix
 require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
 
