@@ -145,22 +145,11 @@ class MT_Candidate_Grid_Widget extends \Elementor\Widget_Base {
      * Render widget output
      */
     protected function render() {
-        // Safety check for Elementor
-        if (!class_exists('\Elementor\Plugin')) {
-            return;
-        }
-        
         $settings = $this->get_settings_for_display();
         
         // Check if in editor
         if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
             $this->render_editor_preview();
-            return;
-        }
-        
-        // Additional check for preview mode
-        if (\Elementor\Plugin::$instance->preview->is_preview_mode()) {
-            $this->render_preview_mode();
             return;
         }
         
@@ -176,23 +165,6 @@ class MT_Candidate_Grid_Widget extends \Elementor\Widget_Base {
         echo '<div class="mt-elementor-widget-wrapper">';
         echo do_shortcode($shortcode);
         echo '</div>';
-    }
-    
-    /**
-     * Render preview mode
-     */
-    private function render_preview_mode() {
-        $settings = $this->get_settings_for_display();
-        ?>
-        <div class="mt-elementor-preview" style="background: #f9f9f9; padding: 30px; text-align: center;">
-            <i class="eicon-posts-grid" style="font-size: 48px; color: #999; margin-bottom: 20px;"></i>
-            <h3><?php _e('Candidate Grid (Preview)', 'mobility-trailblazers'); ?></h3>
-            <p><?php printf(__('Showing %d candidates in %d columns', 'mobility-trailblazers'), $settings['limit'], $settings['columns']); ?></p>
-            <p style="font-size: 12px; margin-top: 10px;">
-                <?php _e('The live grid will appear here when viewing the page.', 'mobility-trailblazers'); ?>
-            </p>
-        </div>
-        <?php
     }
     
     /**

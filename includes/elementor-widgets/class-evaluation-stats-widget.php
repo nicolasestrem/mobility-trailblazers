@@ -130,11 +130,6 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
      * Render widget output
      */
     protected function render() {
-        // Safety check for Elementor
-        if (!class_exists('\Elementor\Plugin')) {
-            return;
-        }
-        
         $settings = $this->get_settings_for_display();
         
         // Check if in editor
@@ -143,17 +138,10 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
             return;
         }
         
-        // Additional check for preview mode
-        if (\Elementor\Plugin::$instance->preview->is_preview_mode()) {
-            $this->render_preview_mode();
-            return;
-        }
-        
         // Check permissions for personal stats
         if ($settings['stats_type'] === 'personal' && !is_user_logged_in()) {
             echo '<div class="mt-elementor-login-required">';
             echo '<p>' . __('Please log in to view personal statistics.', 'mobility-trailblazers') . '</p>';
-            echo '<a href="' . wp_login_url(get_permalink()) . '" class="button">' . __('Log In', 'mobility-trailblazers') . '</a>';
             echo '</div>';
             return;
         }
@@ -174,23 +162,6 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
         }
         
         echo '</div>';
-    }
-    
-    /**
-     * Render preview mode
-     */
-    private function render_preview_mode() {
-        $settings = $this->get_settings_for_display();
-        ?>
-        <div class="mt-elementor-preview" style="background: #f9f9f9; padding: 30px; text-align: center;">
-            <i class="eicon-counter" style="font-size: 48px; color: #999; margin-bottom: 20px;"></i>
-            <h3><?php _e('Evaluation Statistics (Preview)', 'mobility-trailblazers'); ?></h3>
-            <p><?php _e('Type:', 'mobility-trailblazers'); ?> <strong><?php echo ucfirst($settings['stats_type']); ?></strong></p>
-            <p style="font-size: 12px; margin-top: 10px;">
-                <?php _e('Live statistics will appear here when viewing the page.', 'mobility-trailblazers'); ?>
-            </p>
-        </div>
-        <?php
     }
     
     /**
