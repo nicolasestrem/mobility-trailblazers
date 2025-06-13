@@ -426,7 +426,17 @@ jQuery(document).ready(function($) {
 
     // Clear all assignments
     function clearAllAssignments() {
-        if (!confirm('Are you sure you want to clear ALL assignments? This cannot be undone.')) {
+        // Use localized string if available
+        const confirmMessage = mt_assignment_ajax.strings?.confirm_clear_all || 
+                              'Are you sure you want to clear ALL assignments? This cannot be undone.';
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        // Validate required data
+        if (!mt_assignment_ajax.nonce || !mt_assignment_ajax.ajax_url) {
+            showNotification('System error: Missing required data', 'error');
             return;
         }
         
@@ -440,9 +450,18 @@ jQuery(document).ready(function($) {
         const originalText = clearButton.text();
         clearButton.prop('disabled', true).text('Clearing...');
         
-        $.post(mt_assignment_ajax.ajax_url, data)
-            .done(function(response) {
-                if (response.success) {
+        // Log the request for debugging
+        console.log('Sending clear assignments request:', data);
+        
+        $.ajax({
+            url: mt_assignment_ajax.ajax_url,
+            type: 'POST',
+            data: data,
+            timeout: 30000, // 30 second timeout
+            success: function(response) {
+                console.log('Clear assignments response:', response);
+                
+                if (response && response.success) {
                     showNotification(response.data.message, 'success');
                     
                     // Update local data
@@ -462,16 +481,35 @@ jQuery(document).ready(function($) {
                     renderJuryMembersList();
                     updateStatistics();
                 } else {
-                    showNotification(response.data.message || 'Failed to clear assignments', 'error');
+                    const errorMessage = response?.data?.message || 'Failed to clear assignments';
+                    showNotification(errorMessage, 'error');
+                    console.error('Clear assignments failed:', response);
                 }
-            })
-            .fail(function(xhr, status, error) {
-                console.error('AJAX error:', status, error);
-                showNotification('Network error. Please try again.', 'error');
-            })
-            .always(function() {
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error details:', {
+                    status: status,
+                    error: error,
+                    responseText: xhr.responseText,
+                    readyState: xhr.readyState,
+                    statusCode: xhr.status
+                });
+                
+                let errorMessage = 'Network error. Please try again.';
+                if (xhr.status === 400) {
+                    errorMessage = 'Bad request. Please check your permissions.';
+                } else if (xhr.status === 403) {
+                    errorMessage = 'Access denied. Please log in again.';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'Server error. Please contact administrator.';
+                }
+                
+                showNotification(errorMessage, 'error');
+            },
+            complete: function() {
                 clearButton.prop('disabled', false).text(originalText);
-            });
+            }
+        });
     }
 
     // Show auto-assign modal

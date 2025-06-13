@@ -1,365 +1,265 @@
-/* Mobility Trailblazers Admin JavaScript - FIXED VERSION */
+/* 
+ * Mobility Trailblazers Admin JavaScript - FIXED VERSION
+ * File: assets/admin.js
+ */
 
 jQuery(document).ready(function($) {
+    console.log('MT Admin JS loading...');
     
-    // Evaluation form submission
-    $('#mt-evaluation-form').on('submit', function(e) {
+    // Skip initialization on assignment management page to avoid conflicts
+    if (window.location.search.includes('page=mt-assignments')) {
+        console.log('Assignment page detected, skipping admin.js initialization');
+        return;
+    }
+    
+    console.log('MT Admin JS initializing...');
+    
+    // Evaluation form handling
+    $('.mt-evaluation-form').on('submit', function(e) {
         e.preventDefault();
         
         var form = $(this);
-        var submitBtn = form.find('button[type="submit"]');
+        var formData = new FormData(form[0]);
         
-        // Collect form data
-        var formData = {
-            action: 'mt_submit_vote',
-            nonce: mt_ajax.nonce || $('#mt_nonce').val(),
-            candidate_id: form.find('input[name="candidate_id"]').val(),
-            courage_score: form.find('input[name="courage_score"]:checked').val(),
-            innovation_score: form.find('input[name="innovation_score"]:checked').val(),
-            implementation_score: form.find('input[name="implementation_score"]:checked').val(),
-            relevance_score: form.find('input[name="relevance_score"]:checked').val() || form.find('input[name="mobility_relevance_score"]:checked').val(),
-            visibility_score: form.find('input[name="visibility_score"]:checked').val(),
-            comments: form.find('textarea[name="comments"]').val()
-        };
+        // Add AJAX action
+        formData.append('action', 'mt_submit_vote');
+        formData.append('nonce', mt_ajax.nonce);
         
-        // Disable button during submission
-        submitBtn.prop('disabled', true).text('Saving...');
+        // Disable submit button
+        var submitBtn = form.find('input[type="submit"]');
+        var originalText = submitBtn.val();
+        submitBtn.prop('disabled', true).val('Submitting...');
         
         $.ajax({
-            url: mt_ajax.ajax_url || ajaxurl,
+            url: mt_ajax.ajax_url,
             type: 'POST',
             data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 if (response.success) {
-                    alert(response.data.message);
-                    // Reload to show updated dashboard
-                    window.location.reload();
+                    alert(mt_ajax.strings.vote_success);
+                    // Optionally redirect or update UI
+                    if (response.data.redirect) {
+                        window.location.href = response.data.redirect;
+                    }
                 } else {
-                    alert('Error: ' + response.data.message);
+                    alert(response.data.message || mt_ajax.strings.vote_error);
                 }
             },
-            error: function() {
-                alert('An error occurred. Please try again.');
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                alert(mt_ajax.strings.vote_error);
             },
             complete: function() {
-                submitBtn.prop('disabled', false).text('Submit Evaluation');
+                // Re-enable submit button
+                submitBtn.prop('disabled', false).val(originalText);
             }
         });
     });
     
-    // Real-time score calculation
-    $('#mt-evaluation-form select').on('change', function() {
-        calculateTotalScore();
+    // Candidate management
+    $('.mt-candidate-actions').on('click', '.mt-edit-candidate', function(e) {
+        e.preventDefault();
+        var candidateId = $(this).data('candidate-id');
+        // Handle candidate editing
+        console.log('Edit candidate:', candidateId);
     });
     
-    function calculateTotalScore() {
-        var total = 0;
-        $('#mt-evaluation-form select').each(function() {
-            total += parseInt($(this).val()) || 0;
-        });
-        
-        $('.mt-total-score').text(total + '/50');
-    }
+    // Jury member management
+    $('.mt-jury-actions').on('click', '.mt-edit-jury', function(e) {
+        e.preventDefault();
+        var juryId = $(this).data('jury-id');
+        // Handle jury editing
+        console.log('Edit jury member:', juryId);
+    });
     
-    function updateTotalScore(score) {
-        if ($('.mt-total-score').length === 0) {
-            $('#mt-evaluation-form').append('<p><strong>Total Score: <span class="mt-total-score">' + score + '/50</span></strong></p>');
+    // FIXED: Filter handling with null check
+    $('.mt-filter-select').on('change', function() {
+        var filterValue = $(this).val();
+        var filterType = $(this).data('filter-type');
+        
+        // FIXED: Add null/undefined check before calling toLowerCase
+        if (filterValue && typeof filterValue === 'string') {
+            filterValue = filterValue.toLowerCase();
         } else {
-            $('.mt-total-score').text(score + '/50');
+            filterValue = '';  // Default to empty string if null/undefined
         }
-    }
-    
-    function showMessage(message, type) {
-        var messageDiv = $('<div class="mt-message ' + type + '">' + message + '</div>');
-        $('#mt-evaluation-form').prepend(messageDiv);
         
-        setTimeout(function() {
-            messageDiv.fadeOut(function() {
-                $(this).remove();
-            });
-        }, 5000);
+        console.log('Filter changed:', filterType, filterValue);
+        
+        // Apply filter logic here
+        applyFilter(filterType, filterValue);
+    });
+    
+    // FIXED: Search handling with proper validation
+    $('.mt-search-input').on('input', function() {
+        var searchTerm = $(this).val();
+        
+        // FIXED: Validate search term before processing
+        if (searchTerm && typeof searchTerm === 'string') {
+            searchTerm = searchTerm.toLowerCase().trim();
+        } else {
+            searchTerm = '';
+        }
+        
+        console.log('Search term:', searchTerm);
+        
+        // Apply search logic
+        applySearch(searchTerm);
+    });
+    
+    // Filter application function
+    function applyFilter(filterType, filterValue) {
+        if (!filterType) return;
+        
+        $('.mt-item').each(function() {
+            var item = $(this);
+            var itemValue = item.data(filterType);
+            
+            // FIXED: Ensure itemValue is a string before comparison
+            if (itemValue && typeof itemValue !== 'string') {
+                itemValue = String(itemValue);
+            }
+            
+            var matches = !filterValue || 
+                         (itemValue && itemValue.toLowerCase().includes(filterValue));
+            
+            item.toggle(matches);
+        });
     }
     
-    // Bulk actions for candidates
-    $('.bulkactions select').on('change', function() {
+    // Search application function
+    function applySearch(searchTerm) {
+        $('.mt-item').each(function() {
+            var item = $(this);
+            var itemText = item.text();
+            
+            // FIXED: Ensure itemText is properly handled
+            if (itemText && typeof itemText === 'string') {
+                itemText = itemText.toLowerCase();
+            } else {
+                itemText = '';
+            }
+            
+            var matches = !searchTerm || itemText.includes(searchTerm);
+            item.toggle(matches);
+        });
+    }
+    
+    // Bulk actions
+    $('.mt-bulk-actions').on('change', function() {
         var action = $(this).val();
-        if (action.startsWith('mt_')) {
-            handleBulkAction(action);
+        if (action) {
+            var selectedItems = $('.mt-item-checkbox:checked');
+            if (selectedItems.length === 0) {
+                alert('Please select items first.');
+                $(this).val('');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to perform this action?')) {
+                performBulkAction(action, selectedItems);
+            }
+            $(this).val('');
         }
     });
     
-    function handleBulkAction(action) {
-        var checkedItems = $('.check-column input[type="checkbox"]:checked');
-        if (checkedItems.length === 0) {
-            alert('Please select at least one candidate.');
-            return;
-        }
-        
-        var candidateIds = [];
-        checkedItems.each(function() {
-            if ($(this).val() !== 'on') {
-                candidateIds.push($(this).val());
-            }
+    // Bulk action performer
+    function performBulkAction(action, items) {
+        var itemIds = [];
+        items.each(function() {
+            itemIds.push($(this).val());
         });
         
-        if (candidateIds.length === 0) {
-            alert('Please select at least one candidate.');
-            return;
-        }
-        
-        var confirmMessage = '';
-        switch(action) {
-            case 'mt_move_to_shortlist':
-                confirmMessage = 'Move selected candidates to shortlist?';
-                break;
-            case 'mt_move_to_finalist':
-                confirmMessage = 'Move selected candidates to finalist status?';
-                break;
-            case 'mt_mark_winner':
-                confirmMessage = 'Mark selected candidates as winners?';
-                break;
-            default:
-                return;
-        }
-        
-        if (confirm(confirmMessage)) {
-            performBulkAction(action, candidateIds);
-        }
-    }
-    
-    function performBulkAction(action, candidateIds) {
         $.ajax({
             url: mt_ajax.ajax_url,
             type: 'POST',
             data: {
                 action: 'mt_bulk_action',
                 bulk_action: action,
-                candidate_ids: candidateIds,
+                item_ids: itemIds,
                 nonce: mt_ajax.nonce
             },
             success: function(response) {
                 if (response.success) {
+                    alert('Bulk action completed successfully.');
                     location.reload();
                 } else {
-                    alert('Error performing bulk action: ' + response.data.message);
+                    alert('Bulk action failed: ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('Error performing bulk action.');
+                alert('Network error. Please try again.');
             }
         });
     }
     
-    // Dashboard statistics auto-refresh
-    if ($('.mt-dashboard-stats').length > 0) {
-        setInterval(refreshDashboardStats, 300000); // Refresh every 5 minutes
-    }
-    
-    function refreshDashboardStats() {
-        $.ajax({
-            url: mt_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'mt_get_stats',
-                nonce: mt_ajax.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    updateStats(response.data);
-                }
-            }
-        });
-    }
-    
-    function updateStats(stats) {
-        $('.mt-stat-box').each(function() {
-            var statType = $(this).data('stat-type');
-            if (stats[statType]) {
-                $(this).find('.mt-stat-number').text(stats[statType]);
-            }
-        });
-    }
-    
-    // Export functionality
-    $('.mt-export-btn').on('click', function(e) {
-        e.preventDefault();
-        
-        var exportType = $(this).data('export-type');
-        var url = ajaxurl + '?action=mt_export_' + exportType + '&nonce=' + mt_ajax.nonce;
-        
-        // Create hidden link and trigger download
-        var link = $('<a>');
-        link.attr('href', url);
-        link.attr('download', '');
-        link[0].click();
+    // Select all/none functionality
+    $('#mt-select-all').on('change', function() {
+        var checked = $(this).prop('checked');
+        $('.mt-item-checkbox').prop('checked', checked);
     });
     
-    // Candidate search and filtering
-    $('#mt-candidate-search').on('input', function() {
-        var searchTerm = $(this).val().toLowerCase();
-        filterCandidates(searchTerm);
-    });
-    
-    $('#mt-category-filter, #mt-status-filter').on('change', function() {
-        var searchTerm = $('#mt-candidate-search').val().toLowerCase();
-        filterCandidates(searchTerm);
-    });
-    
-    function filterCandidates(searchTerm) {
-        var categoryFilter = $('#mt-category-filter').val();
-        var statusFilter = $('#mt-status-filter').val();
+    $('.mt-item-checkbox').on('change', function() {
+        var totalCheckboxes = $('.mt-item-checkbox').length;
+        var checkedCheckboxes = $('.mt-item-checkbox:checked').length;
+        var selectAll = $('#mt-select-all');
         
-        $('.mt-candidate-evaluation-card').each(function() {
-            var card = $(this);
-            var title = card.find('h3').text().toLowerCase();
-            var company = card.find('p').first().text().toLowerCase();
-            
-            var matchesSearch = searchTerm === '' || title.includes(searchTerm) || company.includes(searchTerm);
-            var matchesCategory = categoryFilter === '' || card.data('category') === categoryFilter;
-            var matchesStatus = statusFilter === '' || card.data('status') === statusFilter;
-            
-            if (matchesSearch && matchesCategory && matchesStatus) {
-                card.show();
-            } else {
-                card.hide();
-            }
-        });
-    }
-    
-    // Jury member management
-    $('#mt_jury_is_president').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('#mt_jury_is_vice_president').prop('checked', false);
-        }
-    });
-    
-    $('#mt_jury_is_vice_president').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('#mt_jury_is_president').prop('checked', false);
-        }
-    });
-    
-    // Image upload for candidates and jury
-    $('.mt-upload-image').on('click', function(e) {
-        e.preventDefault();
-        
-        var button = $(this);
-        var input = button.siblings('input');
-        var preview = button.siblings('.mt-image-preview');
-        
-        // Check if wp.media is available
-        if (typeof wp !== 'undefined' && wp.media) {
-            var mediaUploader = wp.media({
-                title: 'Select Image',
-                button: {
-                    text: 'Use this image'
-                },
-                multiple: false
-            });
-            
-            mediaUploader.on('select', function() {
-                var attachment = mediaUploader.state().get('selection').first().toJSON();
-                input.val(attachment.url);
-                preview.html('<img src="' + attachment.url + '" style="max-width: 150px; height: auto;">');
-            });
-            
-            mediaUploader.open();
+        if (checkedCheckboxes === 0) {
+            selectAll.prop('indeterminate', false).prop('checked', false);
+        } else if (checkedCheckboxes === totalCheckboxes) {
+            selectAll.prop('indeterminate', false).prop('checked', true);
         } else {
-            alert('WordPress media uploader not available. Please upload images through Media Library.');
+            selectAll.prop('indeterminate', true);
         }
     });
     
-    // Voting phase management
-    $('#mt-current-phase').on('change', function() {
-        var phase = $(this).val();
-        updatePhaseSettings(phase);
-    });
-    
-    function updatePhaseSettings(phase) {
-        var votingEnabled = $('#voting_enabled');
-        var publicVotingEnabled = $('#public_voting_enabled');
+    // Tab functionality
+    $('.mt-nav-tab').on('click', function(e) {
+        e.preventDefault();
+        var tabId = $(this).attr('href');
         
-        switch(phase) {
-            case 'jury_evaluation':
-                votingEnabled.prop('checked', true);
-                publicVotingEnabled.prop('checked', false);
-                break;
-            case 'public_voting':
-                votingEnabled.prop('checked', true);
-                publicVotingEnabled.prop('checked', true);
-                break;
-            case 'final_selection':
-            case 'award_ceremony':
-            case 'post_award':
-                votingEnabled.prop('checked', false);
-                publicVotingEnabled.prop('checked', false);
-                break;
-        }
-    }
-    
-    // Auto-save evaluations
-    var autoSaveTimer;
-    $('#mt-evaluation-form select').on('change', function() {
-        clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(function() {
-            if (confirm('Auto-save evaluation?')) {
-                $('#submit-evaluation').click();
-            }
-        }, 30000); // Auto-save after 30 seconds of inactivity
-    });
-    
-    // Keyboard shortcuts
-    $(document).on('keydown', function(e) {
-        // Ctrl+S to save evaluation
-        if (e.ctrlKey && e.which === 83) {
-            e.preventDefault();
-            $('#submit-evaluation').click();
-        }
+        // Update active tab
+        $('.mt-nav-tab').removeClass('nav-tab-active');
+        $(this).addClass('nav-tab-active');
         
-        // Ctrl+E to go to evaluation page
-        if (e.ctrlKey && e.which === 69) {
-            e.preventDefault();
-            window.location.href = adminPageUrl('mt-jury-evaluation');
-        }
+        // Show corresponding tab content
+        $('.mt-tab-content').removeClass('active');
+        $(tabId).addClass('active');
     });
     
-    function adminPageUrl(page) {
-        return ajaxurl.replace('admin-ajax.php', 'admin.php?page=' + page);
-    }
-    
-    // Initialize tooltips - FIXED VERSION
-    // Check if jQuery UI tooltip is available before trying to use it
-    if ($.fn.tooltip && typeof $.fn.tooltip === 'function') {
-        $('.mt-tooltip').tooltip();
-    } else {
-        // Fallback: Use native browser tooltips via title attribute
-        $('.mt-tooltip').each(function() {
-            var tooltipText = $(this).data('tooltip') || $(this).attr('data-tooltip');
-            if (tooltipText) {
-                $(this).attr('title', tooltipText);
+    // Sortable tables
+    if ($.fn.sortable) {
+        $('.mt-sortable-table tbody').sortable({
+            handle: '.mt-sort-handle',
+            update: function(event, ui) {
+                var order = $(this).sortable('toArray', {attribute: 'data-id'});
+                
+                $.ajax({
+                    url: mt_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'mt_update_order',
+                        order: order,
+                        nonce: mt_ajax.nonce
+                    },
+                    success: function(response) {
+                        if (!response.success) {
+                            console.error('Failed to update order');
+                        }
+                    }
+                });
             }
         });
     }
     
-    // Form validation
-    $('form').on('submit', function(e) {
-        var form = $(this);
-        var requiredFields = form.find('[required]');
-        var isValid = true;
-        
-        requiredFields.each(function() {
-            var field = $(this);
-            if (field.val().trim() === '') {
-                field.addClass('error');
-                isValid = false;
-            } else {
-                field.removeClass('error');
-            }
-        });
-        
-        if (!isValid) {
+    // Confirmation dialogs
+    $('.mt-confirm-action').on('click', function(e) {
+        var message = $(this).data('confirm-message') || 'Are you sure?';
+        if (!confirm(message)) {
             e.preventDefault();
-            alert('Please fill in all required fields.');
+            return false;
         }
     });
     
@@ -367,37 +267,69 @@ jQuery(document).ready(function($) {
     $('.mt-add-field').on('click', function() {
         var template = $(this).data('template');
         var container = $(this).siblings('.mt-dynamic-fields');
-        var newField = $(template).clone();
         
-        // Update field names and IDs
-        var index = container.children().length;
-        newField.find('input, select, textarea').each(function() {
-            var field = $(this);
-            var name = field.attr('name');
-            var id = field.attr('id');
+        if (template && container.length) {
+            var newField = $(template).clone();
             
-            if (name) {
-                field.attr('name', name.replace('[0]', '[' + index + ']'));
-            }
-            if (id) {
-                field.attr('id', id.replace('_0', '_' + index));
-            }
-        });
-        
-        container.append(newField);
+            // Update field names and IDs
+            var index = container.children().length;
+            newField.find('input, select, textarea').each(function() {
+                var field = $(this);
+                var name = field.attr('name');
+                var id = field.attr('id');
+                
+                if (name) {
+                    field.attr('name', name.replace('[0]', '[' + index + ']'));
+                }
+                if (id) {
+                    field.attr('id', id.replace('_0', '_' + index));
+                }
+            });
+            
+            container.append(newField);
+        }
     });
     
     $(document).on('click', '.mt-remove-field', function() {
         $(this).closest('.mt-field-group').remove();
     });
     
+    // Media uploader
+    if (typeof wp !== 'undefined' && wp.media) {
+        $('.mt-media-upload').on('click', function(e) {
+            e.preventDefault();
+            
+            var button = $(this);
+            var targetInput = button.siblings('input[type="hidden"]');
+            var previewContainer = button.siblings('.mt-media-preview');
+            
+            var mediaUploader = wp.media({
+                title: 'Select Media',
+                button: {
+                    text: 'Use this media'
+                },
+                multiple: false
+            });
+            
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                targetInput.val(attachment.id);
+                previewContainer.html('<img src="' + attachment.url + '" style="max-width: 150px; height: auto;">');
+            });
+            
+            mediaUploader.open();
+        });
+    }
+    
+    console.log('MT Admin JS initialized successfully');
 });
 
-// Global functions
+// Global utility functions
 window.MTAdmin = {
     showNotification: function(message, type) {
+        type = type || 'info';
         var notification = jQuery('<div class="notice notice-' + type + ' is-dismissible"><p>' + message + '</p></div>');
-        jQuery('.wrap h1').after(notification);
+        jQuery('.wrap h1').first().after(notification);
         
         setTimeout(function() {
             notification.fadeOut();
@@ -405,9 +337,13 @@ window.MTAdmin = {
     },
     
     confirmAction: function(message, callback) {
-        if (confirm(message)) {
-            callback();
+        if (confirm(message || 'Are you sure?')) {
+            if (typeof callback === 'function') {
+                callback();
+            }
+            return true;
         }
+        return false;
     },
     
     loadCandidates: function(filters, callback) {
@@ -416,14 +352,41 @@ window.MTAdmin = {
             type: 'POST',
             data: {
                 action: 'mt_get_candidates',
-                filters: filters,
+                filters: filters || {},
                 nonce: mt_ajax.nonce
             },
             success: function(response) {
-                if (response.success && callback) {
+                if (response.success && typeof callback === 'function') {
                     callback(response.data);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to load candidates:', error);
             }
         });
+    },
+    
+    // Safe string operations
+    safeToLowerCase: function(str) {
+        if (str && typeof str === 'string') {
+            return str.toLowerCase();
+        }
+        return '';
+    },
+    
+    safeStringOperation: function(str, operation) {
+        if (str && typeof str === 'string') {
+            switch(operation) {
+                case 'lower':
+                    return str.toLowerCase();
+                case 'upper':
+                    return str.toUpperCase();
+                case 'trim':
+                    return str.trim();
+                default:
+                    return str;
+            }
+        }
+        return '';
     }
 };
