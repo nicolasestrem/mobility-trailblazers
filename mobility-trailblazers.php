@@ -32,6 +32,7 @@ if (!defined('MT_PLUGIN_FILE')) {
 
 // Include the jury system fix
 require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
+require_once MT_PLUGIN_PATH . 'includes/class-mt-ajax-fix.php';
 
 /**
  * Main Plugin Class
@@ -833,45 +834,106 @@ class MobilityTrailblazersPlugin {
      * Handle jury vote submission
      */
     public function handle_jury_vote() {
+        // Verify nonce
         if (!check_ajax_referer('mt_nonce', 'nonce', false)) {
-            wp_die(__('Security check failed.', 'mobility-trailblazers'));
+            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+            return;
         }
         
-        $candidate_id = intval($_POST['candidate_id']);
-        $jury_member_id = get_current_user_id();
+        $candidate_id = intval($_POST['candidate_id'] ?? 0);
+        $current_user_id = get_current_user_id();
         
-        if (!$this->is_jury_member($jury_member_id)) {
-            wp_die(__('Unauthorized access.', 'mobility-trailblazers'));
+        // Verify user is logged in
+        if (!$current_user_id) {
+            wp_send_json_error(array('message' => __('Please log in to submit an evaluation.', 'mobility-trailblazers')));
+            return;
+        }
+        
+        // Verify user is a jury member
+        if (!$this->is_jury_member($current_user_id)) {
+            wp_send_json_error(array('message' => __('Unauthorized access. You must be a jury member.', 'mobility-trailblazers')));
+            return;
         }
 
+        // Validate candidate
+        if (!$candidate_id || get_post_type($candidate_id) !== 'mt_candidate') {
+            wp_send_json_error(array('message' => __('Invalid candidate selected.', 'mobility-trailblazers')));
+            return;
+        }
+
+        // Collect and validate scores
         $scores = array(
-            'courage_score' => intval($_POST['courage_score']),
-            'innovation_score' => intval($_POST['innovation_score']),
-            'implementation_score' => intval($_POST['implementation_score']),
-            'mobility_relevance_score' => intval($_POST['mobility_relevance_score']),
-            'visibility_score' => intval($_POST['visibility_score'])
+            'courage_score' => intval($_POST['courage_score'] ?? 0),
+            'innovation_score' => intval($_POST['innovation_score'] ?? 0),
+            'implementation_score' => intval($_POST['implementation_score'] ?? 0),
+            'relevance_score' => intval($_POST['relevance_score'] ?? $_POST['mobility_relevance_score'] ?? 0),
+            'visibility_score' => intval($_POST['visibility_score'] ?? 0)
         );
 
+        // Validate all scores are between 1-10
+        foreach ($scores as $key => $score) {
+            if ($score < 1 || $score > 10) {
+                wp_send_json_error(array('message' => sprintf(__('Invalid %s. Score must be between 1 and 10.', 'mobility-trailblazers'), str_replace('_', ' ', $key))));
+                return;
+            }
+        }
+
         $total_score = array_sum($scores);
+        $comments = sanitize_textarea_field($_POST['comments'] ?? '');
 
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
 
-        $result = $wpdb->replace(
-            $table_scores,
-            array_merge($scores, array(
-                'candidate_id' => $candidate_id,
-                'jury_member_id' => $jury_member_id,
-                'total_score' => $total_score,
-                'evaluation_round' => 1,
-                'evaluation_date' => current_time('mysql')
-            ))
+        // Check if evaluation already exists
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT id FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d",
+            $candidate_id,
+            $current_user_id
+        ));
+
+        // Prepare data
+        $data = array(
+            'candidate_id' => $candidate_id,
+            'jury_member_id' => $current_user_id,
+            'courage_score' => $scores['courage_score'],
+            'innovation_score' => $scores['innovation_score'],
+            'implementation_score' => $scores['implementation_score'],
+            'relevance_score' => $scores['relevance_score'],
+            'visibility_score' => $scores['visibility_score'],
+            'total_score' => $total_score,
+            'comments' => $comments,
+            'evaluated_at' => current_time('mysql')
         );
 
-        if ($result !== false) {
-            wp_send_json_success(array('message' => __('Evaluation submitted successfully!', 'mobility-trailblazers')));
+        // Save to database
+        if ($existing) {
+            $result = $wpdb->update(
+                $table_scores,
+                $data,
+                array('id' => $existing->id),
+                array('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s'),
+                array('%d')
+            );
         } else {
-            wp_send_json_error(array('message' => __('Error submitting evaluation.', 'mobility-trailblazers')));
+            $result = $wpdb->insert(
+                $table_scores,
+                $data,
+                array('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s')
+            );
+        }
+
+        if ($result !== false) {
+            // Get candidate name for success message
+            $candidate_name = get_the_title($candidate_id);
+            
+            wp_send_json_success(array(
+                'message' => sprintf(__('Evaluation for %s saved successfully! Total score: %d/50', 'mobility-trailblazers'), $candidate_name, $total_score),
+                'total_score' => $total_score,
+                'evaluated' => true
+            ));
+        } else {
+            error_log('MT Database error: ' . $wpdb->last_error);
+            wp_send_json_error(array('message' => __('Database error. Please try again.', 'mobility-trailblazers')));
         }
     }
 
