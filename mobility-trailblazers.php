@@ -3091,6 +3091,8 @@ class MobilityTrailblazersPlugin {
             return;
         }
         
+        ob_start();
+        
         $current_user = wp_get_current_user();
         
         echo '<div style="background: #f0f0f0; padding: 20px; margin: 20px;">';
@@ -3114,6 +3116,11 @@ class MobilityTrailblazersPlugin {
         echo '<p><strong>Linked to jury member:</strong> ' . ($jury_member_id ? 'YES (ID: ' . $jury_member_id . ')' : 'NO') . '</p>';
         
         echo '</div>';
+        
+        $output = ob_get_clean();
+        add_action('admin_notices', function() use ($output) {
+            echo $output;
+        });
     }
 
     /**
@@ -3125,20 +3132,41 @@ class MobilityTrailblazersPlugin {
             return;
         }
         
-        $user_id = get_current_user_id();
-        $jury_member = $this->get_jury_member_for_user($user_id);
+        ob_start();
         
-        if (!$jury_member) {
+        $user_id = get_current_user_id();
+        $jury_member_id = $this->get_jury_member_for_user($user_id);
+        
+        if (!$jury_member_id) {
             echo '<div class="notice notice-error"><p>No jury member found for current user.</p></div>';
+            $output = ob_get_clean();
+            add_action('admin_notices', function() use ($output) {
+                echo $output;
+            });
             return;
         }
         
-        $assigned_candidates = $this->get_assigned_candidates($jury_member->ID);
+        $jury_member = get_post($jury_member_id);
+        if (!$jury_member) {
+            echo '<div class="notice notice-error"><p>Jury member post not found.</p></div>';
+            $output = ob_get_clean();
+            add_action('admin_notices', function() use ($output) {
+                echo $output;
+            });
+            return;
+        }
+        
+        $assigned_candidates = $this->get_assigned_candidates($jury_member_id);
         
         echo '<div class="notice notice-info">';
         echo '<p>Jury Member: ' . esc_html($jury_member->post_title) . '</p>';
         echo '<p>Assigned Candidates: ' . count($assigned_candidates) . '</p>';
         echo '</div>';
+        
+        $output = ob_get_clean();
+        add_action('admin_notices', function() use ($output) {
+            echo $output;
+        });
     }
 
     
