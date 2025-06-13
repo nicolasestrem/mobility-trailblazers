@@ -34,6 +34,8 @@ if (!defined('MT_PLUGIN_FILE')) {
 require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
 require_once MT_PLUGIN_PATH . 'includes/class-mt-ajax-fix.php';
 require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php';
+// Include Elementor frontend fix
+require_once MT_PLUGIN_PATH . 'includes/elementor-frontend-fix.php';
 
 /**
  * Main Plugin Class

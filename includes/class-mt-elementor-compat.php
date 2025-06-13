@@ -40,9 +40,6 @@ class MT_Elementor_Compatibility {
         // Fix shortcode rendering in Elementor
         add_filter('elementor/frontend/the_content', array($this, 'fix_shortcode_rendering'));
         
-        // Fix frontend config issue
-        add_action('elementor/frontend/before_enqueue_scripts', array($this, 'fix_frontend_config'), 5);
-        
         // Ensure proper script dependencies
         add_action('wp_enqueue_scripts', array($this, 'ensure_elementor_dependencies'), 999);
     }
@@ -144,97 +141,6 @@ class MT_Elementor_Compatibility {
     }
     
     /**
-     * Fix frontend config issue
-     */
-    public function fix_frontend_config() {
-        // Only run on frontend, not in admin
-        if (is_admin()) {
-            return;
-        }
-        
-        // Check if Elementor frontend is active
-        if (!\Elementor\Plugin::$instance->frontend->has_elementor_in_page()) {
-            return;
-        }
-        
-        // Ensure frontend config is available
-        wp_add_inline_script('elementor-frontend', '
-            if (typeof elementorFrontendConfig === "undefined") {
-                window.elementorFrontendConfig = {
-                    environmentMode: {
-                        edit: false,
-                        wpPreview: false,
-                        isScriptDebug: false
-                    },
-                    i18n: {
-                        shareButtonsTooltip: "Share"
-                    },
-                    is_rtl: false,
-                    breakpoints: {
-                        xs: 0,
-                        sm: 480,
-                        md: 768,
-                        lg: 1025,
-                        xl: 1440,
-                        xxl: 1600
-                    },
-                    responsive: {
-                        breakpoints: {
-                            mobile: {
-                                label: "Mobile",
-                                value: 767,
-                                direction: "max",
-                                is_enabled: true
-                            },
-                            mobile_extra: {
-                                label: "Mobile Extra",
-                                value: 880,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            tablet: {
-                                label: "Tablet",
-                                value: 1024,
-                                direction: "max",
-                                is_enabled: true
-                            },
-                            tablet_extra: {
-                                label: "Tablet Extra",
-                                value: 1200,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            laptop: {
-                                label: "Laptop",
-                                value: 1366,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            widescreen: {
-                                label: "Widescreen",
-                                value: 2400,
-                                direction: "min",
-                                is_enabled: false
-                            }
-                        }
-                    },
-                    version: "' . ELEMENTOR_VERSION . '",
-                    is_static: false,
-                    experimentalFeatures: {},
-                    urls: {
-                        assets: "' . ELEMENTOR_ASSETS_URL . '"
-                    },
-                    settings: {
-                        page: [],
-                        editorPreferences: []
-                    },
-                    kit: {}
-                };
-            }
-        ', 'before');
-    }
-    
-    /**
      * Ensure proper Elementor dependencies
      */
     public function ensure_elementor_dependencies() {
@@ -249,7 +155,8 @@ class MT_Elementor_Compatibility {
         }
         
         // Check if page uses Elementor
-        if (!\Elementor\Plugin::$instance->documents->get($post_id)->is_built_with_elementor()) {
+        $document = \Elementor\Plugin::$instance->documents->get($post_id);
+        if (!$document || !$document->is_built_with_elementor()) {
             return;
         }
         
