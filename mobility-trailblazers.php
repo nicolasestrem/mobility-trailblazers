@@ -2156,47 +2156,35 @@ class MobilityTrailblazersPlugin {
             <?php if (empty($assigned_candidates)) : ?>
                 <p><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
             <?php else : ?>
-                <div class="mt-candidates-grid">
-                    <?php foreach ($assigned_candidates as $candidate) : 
+                <div class="mt-candidate-grid">
+                    <?php foreach ($assigned_candidates as $candidate): 
                         $evaluated = $this->has_jury_member_evaluated($jury_member_id, $candidate->ID);
-                        $company = get_post_meta($candidate->ID, '_mt_company', true);
-                        $position = get_post_meta($candidate->ID, '_mt_position', true);
                         $category = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'names'));
-                        $category_name = !empty($category) ? $category[0] : '';
+                        $category_name = !empty($category) ? $category[0] : __('Uncategorized', 'mobility-trailblazers');
+                        
+                        // CORRECT URL FORMAT HERE:
+                        $evaluate_url = admin_url('admin.php?page=mt-evaluate&candidate=' . $candidate->ID);
+                        $view_url = get_permalink($candidate->ID);
                     ?>
                         <div class="mt-candidate-card <?php echo $evaluated ? 'evaluated' : 'pending'; ?>">
-                            <div class="mt-candidate-header">
-                                <h3><?php echo esc_html($candidate->post_title); ?></h3>
-                                <span class="mt-status-badge">
-                                    <?php echo $evaluated ? '✅ ' . __('Evaluated', 'mobility-trailblazers') : '⏳ ' . __('Pending', 'mobility-trailblazers'); ?>
-                                </span>
-                            </div>
-                            
-                            <div class="mt-candidate-info">
-                                <?php if ($position) : ?>
-                                    <p><strong><?php echo esc_html($position); ?></strong></p>
-                                <?php endif; ?>
-                                <?php if ($company) : ?>
-                                    <p><?php echo esc_html($company); ?></p>
-                                <?php endif; ?>
-                                <?php if ($category_name) : ?>
-                                    <p class="mt-category"><?php echo esc_html($category_name); ?></p>
+                            <div class="candidate-status">
+                                <?php if ($evaluated): ?>
+                                    <span class="status-badge evaluated">✓ <?php _e('Evaluated', 'mobility-trailblazers'); ?></span>
+                                <?php else: ?>
+                                    <span class="status-badge pending">⏳ <?php _e('Pending', 'mobility-trailblazers'); ?></span>
                                 <?php endif; ?>
                             </div>
                             
-                            <div class="mt-candidate-actions">
-                                <a href="<?php echo get_permalink($candidate->ID); ?>" class="button" target="_blank">
+                            <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                            <p class="candidate-category"><?php echo esc_html($category_name); ?></p>
+                            
+                            <div class="candidate-actions">
+                                <a href="<?php echo esc_url($view_url); ?>" class="button button-secondary" target="_blank">
                                     <?php _e('View Profile', 'mobility-trailblazers'); ?>
                                 </a>
-                                <?php if ($evaluated) : ?>
-                                    <a href="<?php echo admin_url('admin.php?page=mt-evaluate&candidate=' . $candidate->ID . '&edit=1'); ?>" class="button button-secondary">
-                                        <?php _e('Edit Evaluation', 'mobility-trailblazers'); ?>
-                                    </a>
-                                <?php else : ?>
-                                    <a href="<?php echo admin_url('admin.php?page=mt-evaluate&candidate=' . $candidate->ID); ?>" class="button button-primary">
-                                        <?php _e('Evaluate Now', 'mobility-trailblazers'); ?>
-                                    </a>
-                                <?php endif; ?>
+                                <a href="<?php echo esc_url($evaluate_url); ?>" class="button button-primary">
+                                    <?php echo $evaluated ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate Now', 'mobility-trailblazers'); ?>
+                                </a>
                             </div>
                         </div>
                     <?php endforeach; ?>
