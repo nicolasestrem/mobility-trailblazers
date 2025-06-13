@@ -52,6 +52,10 @@ class MobilityTrailblazersPlugin {
         // Initialize plugin
         add_action('plugins_loaded', array($this, 'init'));
         
+        // Register post types and taxonomies on init hook (not plugins_loaded)
+        add_action('init', array($this, 'create_custom_post_types'));
+        add_action('init', array($this, 'create_custom_taxonomies'));
+        
         // Add admin menu
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
@@ -107,8 +111,10 @@ class MobilityTrailblazersPlugin {
         // Include Elementor response fix
         require_once MT_PLUGIN_PATH . 'includes/elementor-response-fix.php';
         
-        $this->create_custom_post_types();
-        $this->create_custom_taxonomies();
+        // DON'T call create_custom_post_types here - it's too early
+        // $this->create_custom_post_types();
+        // $this->create_custom_taxonomies();
+        
         $this->add_hooks();
         $this->load_admin();
         $this->load_frontend();
@@ -234,7 +240,7 @@ class MobilityTrailblazersPlugin {
     /**
      * Register custom post types
      */
-    private function create_custom_post_types() {
+    public function create_custom_post_types() {
         // Register Candidate Post Type
         register_post_type('mt_candidate', array(
             'labels' => array(
@@ -323,6 +329,27 @@ class MobilityTrailblazersPlugin {
             'show_admin_column' => true,
             'query_var' => true,
             'rewrite' => array('slug' => 'phase'),
+            'show_in_rest' => true
+        ));
+        
+        // Register Award Category Taxonomy
+        register_taxonomy('mt_award_category', array('mt_candidate'), array(
+            'labels' => array(
+                'name' => __('Award Categories', 'mobility-trailblazers'),
+                'singular_name' => __('Award Category', 'mobility-trailblazers'),
+                'search_items' => __('Search Award Categories', 'mobility-trailblazers'),
+                'all_items' => __('All Award Categories', 'mobility-trailblazers'),
+                'edit_item' => __('Edit Award Category', 'mobility-trailblazers'),
+                'update_item' => __('Update Award Category', 'mobility-trailblazers'),
+                'add_new_item' => __('Add New Award Category', 'mobility-trailblazers'),
+                'new_item_name' => __('New Award Category Name', 'mobility-trailblazers'),
+                'menu_name' => __('Award Categories', 'mobility-trailblazers')
+            ),
+            'hierarchical' => true,
+            'show_ui' => true,
+            'show_admin_column' => true,
+            'query_var' => true,
+            'rewrite' => array('slug' => 'award-category'),
             'show_in_rest' => true
         ));
     }
