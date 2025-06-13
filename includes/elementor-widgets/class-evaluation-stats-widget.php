@@ -8,11 +8,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Ensure Elementor classes are available
-if (!class_exists('\Elementor\Widget_Base')) {
-    return;
-}
-
 /**
  * Evaluation Stats Widget
  */
