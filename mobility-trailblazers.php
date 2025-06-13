@@ -325,8 +325,7 @@ class MobilityTrailblazersPlugin {
             KEY jury_idx (jury_member_id)
         ) $charset_collate;";
 
-        // Public voting table - commented out as public voting is disabled
-        /*
+        // Public voting table
         $table_public_votes = $wpdb->prefix . 'mt_public_votes';
         $sql_public_votes = "CREATE TABLE $table_public_votes (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -338,7 +337,6 @@ class MobilityTrailblazersPlugin {
             UNIQUE KEY unique_public_vote (candidate_id, voter_email),
             KEY candidate_idx (candidate_id)
         ) $charset_collate;";
-        */
 
         // Evaluation criteria scores table
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
@@ -362,7 +360,7 @@ class MobilityTrailblazersPlugin {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_votes);
-        // dbDelta($sql_public_votes); // Commented out as public voting is disabled
+        dbDelta($sql_public_votes);
         dbDelta($sql_scores);
 
         // Create default categories based on the 3 dimensions from docs
@@ -418,6 +416,8 @@ class MobilityTrailblazersPlugin {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_candidate_meta'));
         add_action('wp_ajax_mt_submit_vote', array($this, 'handle_jury_vote'));
+        add_action('wp_ajax_mt_submit_public_vote', array($this, 'handle_public_vote'));
+        add_action('wp_ajax_nopriv_mt_submit_public_vote', array($this, 'handle_public_vote'));
         add_shortcode('mt_voting_form', array($this, 'voting_form_shortcode'));
         add_shortcode('mt_candidate_grid', array($this, 'candidate_grid_shortcode'));
         add_shortcode('mt_jury_members', array($this, 'jury_members_shortcode'));
@@ -752,8 +752,10 @@ class MobilityTrailblazersPlugin {
         echo '<div class="mt-stat-number">' . $jury_votes . '</div>';
         echo '</div>';
         
-        // Removed public votes stat box
-        
+        echo '<div class="mt-stat-box">';
+        echo '<h3>' . __('Public Votes', 'mobility-trailblazers') . '</h3>';
+        echo '<div class="mt-stat-number">' . $public_votes . '</div>';
+        echo '</div>';
         echo '</div>';
         
         // Quick actions
@@ -954,10 +956,44 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
-     * Voting form shortcode (disabled for public)
+     * Voting form shortcode
      */
     public function voting_form_shortcode($atts) {
-        return '<p>' . __('Public voting is not available for this award.', 'mobility-trailblazers') . '</p>';
+        $atts = shortcode_atts(array(
+            'candidate_id' => 0,
+            'type' => 'public'
+        ), $atts);
+
+        if (!$atts['candidate_id']) {
+            return '<p>' . __('Please specify a candidate ID.', 'mobility-trailblazers') . '</p>';
+        }
+
+        $candidate = get_post($atts['candidate_id']);
+        if (!$candidate || $candidate->post_type !== 'mt_candidate') {
+            return '<p>' . __('Invalid candidate.', 'mobility-trailblazers') . '</p>';
+        }
+
+        ob_start();
+        ?>
+        <div class="mt-voting-form" data-candidate-id="<?php echo $atts['candidate_id']; ?>">
+            <h3><?php _e('Vote for', 'mobility-trailblazers'); ?> <?php echo esc_html($candidate->post_title); ?></h3>
+            
+            <?php if ($atts['type'] === 'public'): ?>
+                <form id="mt-public-vote-form">
+                    <p>
+                        <label for="voter_email"><?php _e('Your Email:', 'mobility-trailblazers'); ?></label>
+                        <input type="email" id="voter_email" name="voter_email" required>
+                    </p>
+                    <p>
+                        <button type="submit" class="button"><?php _e('Submit Vote', 'mobility-trailblazers'); ?></button>
+                    </p>
+                </form>
+            <?php endif; ?>
+            
+            <div id="mt-vote-message"></div>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     /**
@@ -1037,6 +1073,12 @@ class MobilityTrailblazersPlugin {
                         <div class="mt-candidate-excerpt">
                             <?php the_excerpt(); ?>
                         </div>
+                        
+                        <?php if ($atts['show_voting'] === 'true'): ?>
+                            <div class="mt-voting-section">
+                                <?php echo do_shortcode('[mt_voting_form candidate_id="' . get_the_ID() . '"]'); ?>
+                            </div>
+                        <?php endif; ?>
                         
                         <a href="<?php the_permalink(); ?>" class="mt-read-more"><?php _e('Read More', 'mobility-trailblazers'); ?></a>
                     </div>
@@ -1348,7 +1390,8 @@ class MobilityTrailblazersPlugin {
         echo '<tr><th scope="row">' . __('Enable Jury Voting', 'mobility-trailblazers') . '</th>';
         echo '<td><input type="checkbox" name="voting_enabled" value="1"' . checked($voting_enabled, 1, false) . ' /> ' . __('Allow jury members to submit evaluations', 'mobility-trailblazers') . '</td></tr>';
         
-        // Removed public voting setting
+        echo '<tr><th scope="row">' . __('Enable Public Voting', 'mobility-trailblazers') . '</th>';
+        echo '<td><input type="checkbox" name="public_voting_enabled" value="1"' . checked($public_voting_enabled, 1, false) . ' /> ' . __('Allow public to vote for candidates', 'mobility-trailblazers') . '</td></tr>';
         
         echo '</table>';
         
@@ -2808,91 +2851,6 @@ class MobilityTrailblazersPlugin {
             echo '</div>';
             exit;
         }
-    }
-
-    /**
-     * Add jury dashboard menu
-     */
-    public function add_jury_dashboard_menu() {
-        // Check if user should see the jury dashboard
-        $current_user_id = get_current_user_id();
-        $is_jury = false;
-        $is_admin = current_user_can('manage_options');
-        
-        // Check if user is a jury member
-        $jury_post = get_posts(array(
-            'post_type' => 'mt_jury',
-            'meta_query' => array(
-                'relation' => 'OR',
-                array(
-                    'key' => '_mt_jury_email',
-                    'value' => wp_get_current_user()->user_email,
-                    'compare' => '='
-                ),
-                array(
-                    'key' => '_mt_jury_user_id', 
-                    'value' => $current_user_id,
-                    'compare' => '='
-                )
-            ),
-            'posts_per_page' => 1
-        ));
-        $is_jury = !empty($jury_post);
-        
-        // Only add menu if user is jury member or admin
-        if ($is_jury || $is_admin) {
-            add_submenu_page(
-                'mt-award-system',
-                __('My Dashboard', 'mobility-trailblazers'),
-                __('My Dashboard', 'mobility-trailblazers'),
-                'read', // Basic capability that all logged-in users have
-                'mt-jury-dashboard',
-                array($this, 'jury_dashboard_page')
-            );
-        }
-    }
-
-    /**
-     * Jury dashboard page
-     */
-    public function jury_dashboard_page() {
-        // Include the jury dashboard template
-        include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
-    }
-
-    /**
-     * Get jury member ID for a user
-     */
-    public function get_jury_member_for_user($user_id) {
-        $jury_posts = get_posts(array(
-            'post_type' => 'mt_jury',
-            'meta_query' => array(
-                array(
-                    'key' => '_mt_jury_user_id',
-                    'value' => $user_id,
-                    'compare' => '='
-                )
-            ),
-            'posts_per_page' => 1
-        ));
-        
-        return !empty($jury_posts) ? $jury_posts[0]->ID : false;
-    }
-
-    /**
-     * Ensure jury menu exists (fallback)
-     */
-    public function ensure_jury_menu_exists() {
-        // This is a fallback method - implementation can be left empty
-        // or you can add additional menu registration logic here if needed
-    }
-
-    /**
-     * Handle jury dashboard direct access
-     */
-    public function handle_jury_dashboard_direct() {
-        // This is a fallback method - implementation can be left empty
-        // or you can add direct access handling logic here if needed
     }
 }
 
