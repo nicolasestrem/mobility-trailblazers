@@ -231,8 +231,9 @@ class MT_Jury_Consistency {
     
     /**
      * Sync evaluation IDs to use WordPress user IDs
+     * PUBLIC method so it can be called externally
      */
-    private function sync_evaluation_ids() {
+    public function sync_evaluation_ids() {
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
         $synced = 0;
@@ -279,6 +280,11 @@ class MT_Jury_Consistency {
             'message' => sprintf('Successfully synced %d evaluations.', $synced)
         );
     }
+}
+
+// Initialize only if not already done
+if (!class_exists('MT_Jury_Consistency')) {
+    return;
 }
 
 // Initialize
