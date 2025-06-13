@@ -48,6 +48,7 @@ class MT_Jury_Consistency {
         // AJAX handlers
         add_action('wp_ajax_mt_sync_evaluations', array($this, 'ajax_sync_evaluations'));
         add_action('wp_ajax_mt_check_sync_status', array($this, 'ajax_check_sync_status'));
+        add_action('wp_ajax_mt_dismiss_orphaned_notice', array($this, 'ajax_dismiss_orphaned_notice'));
         
         // Handle jury member deletion
         add_action('before_delete_post', array($this, 'handle_jury_deletion'), 10, 2);
@@ -122,12 +123,16 @@ class MT_Jury_Consistency {
     
     /**
      * Check if there are sync issues
+     * Updated to consider accepted orphaned IDs
      * 
      * @return array Array with 'count' and 'details' of sync issues
      */
     public function check_sync_issues() {
         global $wpdb;
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Get accepted orphaned IDs
+        $accepted_orphaned = get_option('mt_accepted_orphaned_ids', array());
         
         // Get all jury mappings
         $mappings = $this->get_all_jury_mappings();
@@ -154,6 +159,12 @@ class MT_Jury_Consistency {
         
         foreach ($all_eval_ids as $eval) {
             $id = intval($eval->jury_member_id);
+            
+            // Skip if this is an accepted orphaned ID
+            if (in_array($id, $accepted_orphaned)) {
+                continue;
+            }
+            
             $type = 'unknown';
             $needs_action = false;
             
@@ -191,6 +202,7 @@ class MT_Jury_Consistency {
     
     /**
      * Display admin notice for sync issues
+     * Updated to not show notice when only orphaned evaluations exist
      */
     public function display_sync_notice() {
         if (!current_user_can('manage_options')) {
@@ -204,7 +216,45 @@ class MT_Jury_Consistency {
         
         $issues = $this->check_sync_issues();
         
-        if ($issues['total'] > 0) {
+        // Don't show notice if there are no real sync issues
+        // (only orphaned records don't require action)
+        if ($issues['high_ids'] == 0 && $issues['orphaned'] >= 0) {
+            // Optionally, show a dismissible info notice about orphaned records
+            if ($issues['orphaned'] > 0 && !get_transient('mt_orphaned_notice_dismissed')) {
+                ?>
+                <div class="notice notice-info is-dismissible mt-orphaned-notice">
+                    <p>
+                        <strong><?php _e('Mobility Trailblazers:', 'mobility-trailblazers'); ?></strong>
+                        <?php 
+                        printf(
+                            _n(
+                                '%d evaluation from a deleted jury member has been preserved for historical records.',
+                                '%d evaluations from deleted jury members have been preserved for historical records.',
+                                $issues['orphaned'],
+                                'mobility-trailblazers'
+                            ),
+                            $issues['orphaned']
+                        );
+                        ?>
+                    </p>
+                    <script>
+                    jQuery(document).ready(function($) {
+                        $('.mt-orphaned-notice').on('click', '.notice-dismiss', function() {
+                            $.post(ajaxurl, {
+                                action: 'mt_dismiss_orphaned_notice',
+                                nonce: '<?php echo wp_create_nonce('mt_dismiss_notice'); ?>'
+                            });
+                        });
+                    });
+                    </script>
+                </div>
+                <?php
+            }
+            return; // Exit early - no sync required
+        }
+        
+        // Only show sync notice if there are actual issues to fix
+        if ($issues['high_ids'] > 0) {
             ?>
             <div class="notice notice-warning mt-sync-notice">
                 <h3><?php _e('Mobility Trailblazers: Evaluation Data Sync Required', 'mobility-trailblazers'); ?></h3>
@@ -212,17 +262,12 @@ class MT_Jury_Consistency {
                     <?php 
                     printf(
                         __('Found %d evaluations that need syncing:', 'mobility-trailblazers'),
-                        $issues['total']
+                        $issues['high_ids']
                     );
                     ?>
                 </p>
                 <ul>
-                    <?php if ($issues['high_ids'] > 0): ?>
                     <li><?php printf(__('%d evaluations using jury post IDs instead of user IDs', 'mobility-trailblazers'), $issues['high_ids']); ?></li>
-                    <?php endif; ?>
-                    <?php if ($issues['orphaned'] > 0): ?>
-                    <li><?php printf(__('%d orphaned evaluations (jury member deleted)', 'mobility-trailblazers'), $issues['orphaned']); ?></li>
-                    <?php endif; ?>
                 </ul>
                 <p>
                     <button class="button button-primary" id="mt-sync-evaluations">
@@ -246,22 +291,22 @@ class MT_Jury_Consistency {
                         </thead>
                         <tbody>
                             <?php foreach ($issues['details'] as $detail): ?>
+                            <?php if ($detail['type'] === 'jury_post_id'): // Only show items that need action ?>
                             <tr>
                                 <td><?php echo $detail['id']; ?></td>
                                 <td><?php echo ucfirst(str_replace('_', ' ', $detail['type'])); ?></td>
                                 <td><?php echo $detail['count']; ?></td>
                                 <td>
                                     <?php 
-                                    if ($detail['type'] === 'jury_post_id' && $detail['mapped_to']) {
+                                    if ($detail['mapped_to']) {
                                         printf(__('Convert to user ID %d', 'mobility-trailblazers'), $detail['mapped_to']);
-                                    } elseif ($detail['type'] === 'orphaned') {
-                                        _e('Will be preserved (orphaned)', 'mobility-trailblazers');
                                     } else {
                                         _e('No action needed', 'mobility-trailblazers');
                                     }
                                     ?>
                                 </td>
                             </tr>
+                            <?php endif; ?>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -770,6 +815,46 @@ class MT_Jury_Consistency {
         }
         
         return $report;
+    }
+
+    /**
+     * AJAX handler for dismissing orphaned notice
+     */
+    public function ajax_dismiss_orphaned_notice() {
+        if (!check_ajax_referer('mt_dismiss_notice', 'nonce', false)) {
+            wp_die();
+        }
+        
+        if (!current_user_can('manage_options')) {
+            wp_die();
+        }
+        
+        // Set transient to hide notice for 30 days
+        set_transient('mt_orphaned_notice_dismissed', true, 30 * DAY_IN_SECONDS);
+        
+        wp_die();
+    }
+
+    /**
+     * Alternative: Add option to permanently accept orphaned evaluations
+     * This method can be added to provide a permanent solution
+     */
+    public function mark_orphaned_as_accepted() {
+        $issues = $this->check_sync_issues();
+        $orphaned_ids = array();
+        
+        foreach ($issues['details'] as $detail) {
+            if ($detail['type'] === 'orphaned') {
+                $orphaned_ids[] = $detail['id'];
+            }
+        }
+        
+        if (!empty($orphaned_ids)) {
+            update_option('mt_accepted_orphaned_ids', $orphaned_ids);
+            return true;
+        }
+        
+        return false;
     }
 }
 
