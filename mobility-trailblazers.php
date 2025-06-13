@@ -1955,8 +1955,60 @@ class MobilityTrailblazersPlugin {
      * Jury dashboard page callback
      */
     public function jury_dashboard_page() {
-        // Include the dashboard template
-        include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
+        $current_user_id = get_current_user_id();
+        
+        if (!$this->is_jury_member($current_user_id)) {
+            echo '<div class="wrap"><h1>' . __('Access Denied', 'mobility-trailblazers') . '</h1>';
+            echo '<p>' . __('You are not authorized to access this page.', 'mobility-trailblazers') . '</p></div>';
+            return;
+        }
+        
+        // Simple dashboard for now
+        echo '<div class="wrap">';
+        echo '<h1>Jury Dashboard</h1>';
+        echo '<p>Welcome to your jury dashboard!</p>';
+        
+        // Get assigned candidates
+        $jury_post = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $current_user_id,
+                    'compare' => '='
+                )
+            ),
+            'posts_per_page' => 1
+        ));
+        
+        if ($jury_post) {
+            $jury_member_id = $jury_post[0]->ID;
+            
+            $assigned_candidates = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => -1,
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_assigned_jury_member',
+                        'value' => $jury_member_id,
+                        'compare' => '='
+                    )
+                )
+            ));
+            
+            echo '<h2>Your Assigned Candidates (' . count($assigned_candidates) . ')</h2>';
+            if ($assigned_candidates) {
+                echo '<ul>';
+                foreach ($assigned_candidates as $candidate) {
+                    echo '<li>' . esc_html($candidate->post_title) . '</li>';
+                }
+                echo '</ul>';
+            } else {
+                echo '<p>No candidates assigned yet.</p>';
+            }
+        }
+        
+        echo '</div>';
     }
 
     /**
