@@ -57,15 +57,9 @@ jQuery(document).ready(function($) {
 
     // Render candidates list with proper selection handling
     function renderCandidatesList() {
-        // Try multiple possible container IDs for backwards compatibility
-        let container = $('#mt-candidates-list');
+        const container = $('#mt-candidates-list');
         if (!container.length) {
-            container = $('#mt-candidates-panel .mt-panel-content #mt-candidates-list');
-        }
-        
-        if (!container.length) {
-            console.error('Candidates container not found. Checked selectors: #mt-candidates-list');
-            showNotification('Candidates container not found in HTML template', 'error');
+            console.warn('Candidates container not found');
             return;
         }
 
@@ -118,15 +112,9 @@ jQuery(document).ready(function($) {
 
     // Render jury members list with proper selection handling
     function renderJuryMembersList() {
-        // Try multiple possible container IDs for backwards compatibility
-        let container = $('#mt-jury-members-list');
+        const container = $('#mt-jury-members-list');
         if (!container.length) {
-            container = $('#mt-jury-list');
-        }
-        
-        if (!container.length) {
-            console.error('Jury members container not found. Checked IDs: #mt-jury-members-list, #mt-jury-list');
-            showNotification('Jury members container not found in HTML template', 'error');
+            console.warn('Jury members container not found');
             return;
         }
 
