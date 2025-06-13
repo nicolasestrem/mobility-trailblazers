@@ -208,7 +208,13 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                             ? mt_has_jury_evaluated($current_user_id, $candidate_id)
                             : false;
                         
-                        $total_score = $is_evaluated ? $existing_score->total_score : 0;
+                        // Get existing scores if evaluated
+                        $existing_score = null;
+                        if ($is_evaluated && function_exists('mt_get_jury_scores')) {
+                            $existing_score = mt_get_jury_scores($current_user_id, $candidate_id);
+                        }
+                        
+                        $total_score = $existing_score ? $existing_score->total_score : 0;
                     ?>
                         <div class="mt-candidate-card <?php echo $is_evaluated ? 'mt-evaluated' : 'mt-pending'; ?>" 
                              data-candidate-id="<?php echo $candidate_id; ?>"
@@ -272,10 +278,10 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                             <?php endif; ?>
                             
                             <!-- Score Display (if evaluated) -->
-                            <?php if ($is_evaluated): ?>
+                            <?php if ($is_evaluated && $existing_score): ?>
                                 <div class="mt-score-summary">
                                     <div class="mt-score-circle">
-                                        <span class="mt-score-value"><?php echo number_format($total_score, 1); ?></span>
+                                        <span class="mt-score-value"><?php echo number_format($existing_score->total_score, 1); ?></span>
                                         <span class="mt-score-max">/50</span>
                                     </div>
                                     <div class="mt-score-details">

@@ -495,6 +495,16 @@ class MobilityTrailblazersPlugin {
             'mt-assignments',
             array($this, 'assignment_management_page')
         );
+
+        // Add voting results page with proper capability check
+        add_submenu_page(
+            'mt-award-system',
+            __('Voting Results', 'mobility-trailblazers'),
+            __('Voting Results', 'mobility-trailblazers'),
+            'mt_manage_voting', // Custom capability for mt_award_admin role
+            'mt-voting-results',
+            array($this, 'voting_results_page')
+        );
     }
 
     /**
@@ -540,6 +550,10 @@ class MobilityTrailblazersPlugin {
             // Get candidates for assignment - FIXED VERSION
             $candidates_data = $this->get_candidates_for_assignment();
             $jury_data = $this->get_jury_members_for_assignment();
+            
+            // Debug output
+            error_log('MT Debug: Candidates data: ' . print_r($candidates_data, true));
+            error_log('MT Debug: Jury data: ' . print_r($jury_data, true));
             
             // Localize script with data
             wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
@@ -1436,6 +1450,11 @@ class MobilityTrailblazersPlugin {
      * Voting results page
      */
     public function voting_results_page() {
+        // Check if user has required capabilities
+        if (!current_user_can('mt_manage_voting') && !current_user_can('administrator')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+
         echo '<div class="wrap">';
         echo '<h1>' . __('Voting Results', 'mobility-trailblazers') . '</h1>';
         
@@ -1772,6 +1791,8 @@ class MobilityTrailblazersPlugin {
      * Get candidates formatted for assignment interface
      */
     private function get_candidates_for_assignment() {
+        error_log('MT Debug: Getting candidates for assignment');
+        
         $candidates = get_posts(array(
             'post_type' => 'mt_candidate',
             'posts_per_page' => -1,
@@ -1780,12 +1801,15 @@ class MobilityTrailblazersPlugin {
             'order' => 'ASC'
         ));
         
+        error_log('MT Debug: Found ' . count($candidates) . ' candidates');
+        
         $candidates_data = array();
         
         if (!empty($candidates)) {
             foreach ($candidates as $candidate) {
                 // Ensure $candidate is an object
                 if (!is_object($candidate) || !isset($candidate->ID)) {
+                    error_log('MT Debug: Invalid candidate object: ' . print_r($candidate, true));
                     continue;
                 }
                 
@@ -1804,6 +1828,7 @@ class MobilityTrailblazersPlugin {
             }
         }
         
+        error_log('MT Debug: Processed ' . count($candidates_data) . ' candidates');
         return $candidates_data;
     }
 
@@ -1811,6 +1836,8 @@ class MobilityTrailblazersPlugin {
      * Get jury members formatted for assignment interface
      */
     private function get_jury_members_for_assignment() {
+        error_log('MT Debug: Getting jury members for assignment');
+        
         $jury_members = get_posts(array(
             'post_type' => 'mt_jury',
             'posts_per_page' => -1,
@@ -1819,12 +1846,15 @@ class MobilityTrailblazersPlugin {
             'order' => 'ASC'
         ));
         
+        error_log('MT Debug: Found ' . count($jury_members) . ' jury members');
+        
         $jury_data = array();
         
         if (!empty($jury_members)) {
             foreach ($jury_members as $jury) {
                 // Ensure $jury is an object
                 if (!is_object($jury) || !isset($jury->ID)) {
+                    error_log('MT Debug: Invalid jury object: ' . print_r($jury, true));
                     continue;
                 }
                 
@@ -1853,6 +1883,7 @@ class MobilityTrailblazersPlugin {
             }
         }
         
+        error_log('MT Debug: Processed ' . count($jury_data) . ' jury members');
         return $jury_data;
     }
 
@@ -3240,6 +3271,52 @@ function mt_has_jury_evaluated($user_id, $candidate_id) {
             $user_id
         )) > 0;
     }
+}
+
+/**
+ * Get jury scores for a candidate
+ * 
+ * @param int $user_id WordPress user ID
+ * @param int $candidate_id Candidate post ID
+ * @return object|null Score object or null if no scores exist
+ */
+function mt_get_jury_scores($user_id, $candidate_id) {
+    global $wpdb;
+    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Get jury post ID for this user
+    $jury_post_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_jury_user_id' AND meta_value = %s",
+        $user_id
+    ));
+    
+    if ($jury_post_id) {
+        // Try to get scores by BOTH user ID and jury post ID
+        $scores = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_scores 
+            WHERE candidate_id = %d 
+            AND jury_member_id IN (%d, %d)
+            ORDER BY evaluated_at DESC
+            LIMIT 1",
+            $candidate_id,
+            $user_id,
+            $jury_post_id
+        ));
+    } else {
+        // Just get by user ID
+        $scores = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_scores 
+            WHERE candidate_id = %d 
+            AND jury_member_id = %d
+            ORDER BY evaluated_at DESC
+            LIMIT 1",
+            $candidate_id,
+            $user_id
+        ));
+    }
+    
+    return $scores;
 }
 
 ?>

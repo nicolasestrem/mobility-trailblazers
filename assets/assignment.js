@@ -15,8 +15,11 @@ jQuery(document).ready(function($) {
 
     // Initialize the assignment interface
     function initAssignmentInterface() {
+        console.log('Initializing assignment interface...');
+        
         // Load data from WordPress localized script
         if (typeof mt_assignment_ajax !== 'undefined') {
+            console.log('mt_assignment_ajax found:', mt_assignment_ajax);
             allCandidates = mt_assignment_ajax.candidates || [];
             allJuryMembers = mt_assignment_ajax.jury_members || [];
             
@@ -36,6 +39,13 @@ jQuery(document).ready(function($) {
             return;
         }
 
+        // Check if containers exist
+        const candidatesContainer = $('#mt-candidates-list');
+        const juryContainer = $('#mt-jury-list');
+        
+        console.log('Candidates container exists:', candidatesContainer.length > 0);
+        console.log('Jury container exists:', juryContainer.length > 0);
+
         renderCandidates();
         renderJuryMembers();
         updateStatistics();
@@ -44,12 +54,17 @@ jQuery(document).ready(function($) {
 
     // Render candidates list
     function renderCandidates() {
+        console.log('Rendering candidates...');
         const container = $('#mt-candidates-list');
-        if (!container.length) return;
+        if (!container.length) {
+            console.error('Candidates container not found!');
+            return;
+        }
 
         container.empty();
 
         let filteredCandidates = filterCandidates(allCandidates);
+        console.log('Filtered candidates:', filteredCandidates.length);
         
         if (filteredCandidates.length === 0) {
             container.append('<div class="mt-no-results">No candidates found matching your criteria.</div>');
@@ -78,12 +93,17 @@ jQuery(document).ready(function($) {
 
         // Update candidates count
         $('.mt-candidates-count').text(filteredCandidates.length);
+        console.log('Candidates rendered successfully');
     }
 
     // Render jury members list
     function renderJuryMembers() {
+        console.log('Rendering jury members...');
         const container = $('#mt-jury-list');
-        if (!container.length) return;
+        if (!container.length) {
+            console.error('Jury container not found!');
+            return;
+        }
 
         container.empty();
 
@@ -109,6 +129,7 @@ jQuery(document).ready(function($) {
             
             container.append(juryHtml);
         });
+        console.log('Jury members rendered successfully');
     }
 
     // Filter candidates based on current filters
@@ -520,4 +541,23 @@ jQuery(document).ready(function($) {
         };
         return categoryMap[category] || category;
     }
+
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Helper function to show notifications
+    function showNotification(message, type = 'info') {
+        console.log('Notification:', type, message);
+        // Implementation of notification system
+    }
+
+    // Initialize the interface
+    initAssignmentInterface();
 });
