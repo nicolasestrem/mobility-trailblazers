@@ -9,6 +9,11 @@
  * Text Domain: mobility-trailblazers
  */
 
+// Suppress PHP 8.2 deprecation warnings for this plugin
+if (version_compare(PHP_VERSION, '8.0', '>=')) {
+    error_reporting(error_reporting() & ~E_DEPRECATED);
+}
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
@@ -499,7 +504,8 @@ class MobilityTrailblazersPlugin {
      * Enqueue admin scripts and styles
      */
     public function admin_enqueue_scripts($hook) {
-        if (strpos($hook, 'mt-') !== false || in_array($hook, array('post.php', 'post-new.php'))) {
+        // Add null check to prevent deprecation warning
+        if (!empty($hook) && (strpos($hook, 'mt-') !== false || in_array($hook, array('post.php', 'post-new.php')))) {
             wp_enqueue_script('mt-admin-js', MT_PLUGIN_URL . 'assets/admin.js', array('jquery'), MT_PLUGIN_VERSION, true);
             wp_enqueue_style('mt-admin-css', MT_PLUGIN_URL . 'assets/admin.css', array(), MT_PLUGIN_VERSION);
             
