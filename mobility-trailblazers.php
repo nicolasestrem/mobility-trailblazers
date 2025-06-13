@@ -571,6 +571,11 @@ class MobilityTrailblazersPlugin {
             wp_enqueue_script('mt-admin-js', MT_PLUGIN_URL . 'assets/admin.js', array('jquery'), MT_PLUGIN_VERSION, true);
             wp_enqueue_style('mt-admin-css', MT_PLUGIN_URL . 'assets/admin.css', array(), MT_PLUGIN_VERSION);
             
+            // Load dashboard styles on jury dashboard page
+            if ($hook === 'mt-award-system_page_mt-jury-dashboard') {
+                wp_enqueue_style('mt-dashboard-css', MT_PLUGIN_URL . 'assets/dashboard.css', array(), MT_PLUGIN_VERSION);
+            }
+            
             wp_localize_script('mt-admin-js', 'mt_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('mt_nonce'),
@@ -2114,32 +2119,58 @@ class MobilityTrailblazersPlugin {
             <h1>🏆 <?php _e('Jury Member Dashboard', 'mobility-trailblazers'); ?></h1>
             
             <div class="mt-dashboard-welcome">
-                <h2><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($jury_name)); ?></h2>
-                <p><?php _e('Thank you for your participation in the 25 Mobility Trailblazers award.', 'mobility-trailblazers'); ?></p>
+                <h2><?php _e('Welcome to Your Jury Dashboard', 'mobility-trailblazers'); ?></h2>
+                <p><?php _e('Here you can view and evaluate your assigned candidates.', 'mobility-trailblazers'); ?></p>
             </div>
             
-            <!-- Statistics Cards -->
+            <?php
+            // Get current user's jury member ID
+            $current_user_id = get_current_user_id();
+            $jury_member_id = $this->get_jury_member_for_user($current_user_id);
+            
+            if (!$jury_member_id) {
+                echo '<div class="notice notice-error">';
+                echo '<p>' . __('You are not associated with any jury member profile. Please contact the administrator.', 'mobility-trailblazers') . '</p>';
+                echo '</div>';
+                return;
+            }
+            
+            // Get assigned candidates
+            $assigned_candidates = $this->get_assigned_candidates($jury_member_id);
+            
+            if (empty($assigned_candidates)) {
+                echo '<div class="notice notice-warning">';
+                echo '<p>' . __('You have no candidates assigned to you yet.', 'mobility-trailblazers') . '</p>';
+                echo '</div>';
+                return;
+            }
+            
+            // Display stats
+            $total_candidates = count($assigned_candidates);
+            $evaluated_count = 0;
+            
+            foreach ($assigned_candidates as $candidate) {
+                if ($this->has_jury_member_evaluated($jury_member_id, $candidate->ID)) {
+                    $evaluated_count++;
+                }
+            }
+            
+            $completion_percentage = $total_candidates > 0 ? round(($evaluated_count / $total_candidates) * 100) : 0;
+            ?>
+            
             <div class="mt-stats-grid">
                 <div class="mt-stat-card">
-                    <h3><?php _e('Assigned', 'mobility-trailblazers'); ?></h3>
-                    <div class="mt-stat-number"><?php echo $total_assigned; ?></div>
-                    <p><?php _e('Total candidates', 'mobility-trailblazers'); ?></p>
+                    <h3><?php _e('Total Assigned', 'mobility-trailblazers'); ?></h3>
+                    <div class="mt-stat-number"><?php echo $total_candidates; ?></div>
                 </div>
                 
                 <div class="mt-stat-card">
                     <h3><?php _e('Evaluated', 'mobility-trailblazers'); ?></h3>
-                    <div class="mt-stat-number"><?php echo $evaluated; ?></div>
-                    <p><?php _e('Completed evaluations', 'mobility-trailblazers'); ?></p>
+                    <div class="mt-stat-number"><?php echo $evaluated_count; ?></div>
                 </div>
                 
                 <div class="mt-stat-card">
-                    <h3><?php _e('Pending', 'mobility-trailblazers'); ?></h3>
-                    <div class="mt-stat-number"><?php echo $pending; ?></div>
-                    <p><?php _e('Awaiting evaluation', 'mobility-trailblazers'); ?></p>
-                </div>
-                
-                <div class="mt-stat-card">
-                    <h3><?php _e('Progress', 'mobility-trailblazers'); ?></h3>
+                    <h3><?php _e('Completion', 'mobility-trailblazers'); ?></h3>
                     <div class="mt-stat-number"><?php echo $completion_percentage; ?>%</div>
                     <div class="mt-progress-bar">
                         <div class="mt-progress-fill" style="width: <?php echo $completion_percentage; ?>%"></div>
@@ -2147,170 +2178,45 @@ class MobilityTrailblazersPlugin {
                 </div>
             </div>
             
-            <!-- Assigned Candidates -->
             <h2><?php _e('Your Assigned Candidates', 'mobility-trailblazers'); ?></h2>
             
-            <?php if (empty($assigned_candidates)) : ?>
-                <p><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
-            <?php else : ?>
-                <div class="mt-candidate-grid">
-                    <?php foreach ($assigned_candidates as $candidate): 
-                        $evaluated = $this->has_jury_member_evaluated($jury_member_id, $candidate->ID);
-                        $category = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'names'));
-                        $category_name = !empty($category) ? $category[0] : __('Uncategorized', 'mobility-trailblazers');
-                        
-                        // CORRECT URL FORMAT HERE:
-                        $evaluate_url = admin_url('admin.php?page=mt-evaluate&candidate=' . $candidate->ID);
-                        $view_url = get_permalink($candidate->ID);
-                    ?>
-                        <div class="mt-candidate-card <?php echo $evaluated ? 'evaluated' : 'pending'; ?>">
-                            <div class="candidate-status">
-                                <?php if ($evaluated): ?>
-                                    <span class="status-badge evaluated">✓ <?php _e('Evaluated', 'mobility-trailblazers'); ?></span>
-                                <?php else: ?>
-                                    <span class="status-badge pending">⏳ <?php _e('Pending', 'mobility-trailblazers'); ?></span>
-                                <?php endif; ?>
-                            </div>
-                            
+            <div class="mt-candidates-grid">
+                <?php foreach ($assigned_candidates as $candidate): 
+                    $is_evaluated = $this->has_jury_member_evaluated($jury_member_id, $candidate->ID);
+                    $evaluation_url = add_query_arg(array(
+                        'page' => 'mt-evaluation',
+                        'candidate_id' => $candidate->ID
+                    ), admin_url('admin.php'));
+                ?>
+                    <div class="mt-candidate-card <?php echo $is_evaluated ? 'evaluated' : ''; ?>">
+                        <div class="mt-candidate-header">
                             <h3><?php echo esc_html($candidate->post_title); ?></h3>
-                            <p class="candidate-category"><?php echo esc_html($category_name); ?></p>
-                            
-                            <div class="candidate-actions">
-                                <a href="<?php echo esc_url($view_url); ?>" class="button button-secondary" target="_blank">
-                                    <?php _e('View Profile', 'mobility-trailblazers'); ?>
-                                </a>
-                                <a href="<?php echo esc_url($evaluate_url); ?>" class="button button-primary">
-                                    <?php echo $evaluated ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate Now', 'mobility-trailblazers'); ?>
-                                </a>
-                            </div>
+                            <span class="mt-status-badge">
+                                <?php echo $is_evaluated ? __('Evaluated', 'mobility-trailblazers') : __('Pending', 'mobility-trailblazers'); ?>
+                            </span>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-            
-            <style>
-                .mt-dashboard-welcome {
-                    background: #f0f0f1;
-                    padding: 20px;
-                    margin: 20px 0;
-                    border-radius: 5px;
-                }
-                
-                .mt-stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 20px;
-                    margin: 30px 0;
-                }
-                
-                .mt-stat-card {
-                    background: white;
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    text-align: center;
-                }
-                
-                .mt-stat-card h3 {
-                    margin: 0 0 10px;
-                    color: #23282d;
-                }
-                
-                .mt-stat-number {
-                    font-size: 36px;
-                    font-weight: bold;
-                    color: #0073aa;
-                    margin: 10px 0;
-                }
-                
-                .mt-stat-card p {
-                    margin: 0;
-                    color: #666;
-                }
-                
-                .mt-progress-bar {
-                    width: 100%;
-                    height: 10px;
-                    background: #f0f0f1;
-                    border-radius: 5px;
-                    margin-top: 10px;
-                    overflow: hidden;
-                }
-                
-                .mt-progress-fill {
-                    height: 100%;
-                    background: #0073aa;
-                    transition: width 0.3s ease;
-                }
-                
-                .mt-candidates-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                    gap: 20px;
-                    margin-top: 20px;
-                }
-                
-                .mt-candidate-card {
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    padding: 20px;
-                    transition: box-shadow 0.3s ease;
-                }
-                
-                .mt-candidate-card:hover {
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                
-                .mt-candidate-card.evaluated {
-                    border-color: #46b450;
-                }
-                
-                .mt-candidate-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: start;
-                    margin-bottom: 15px;
-                }
-                
-                .mt-candidate-header h3 {
-                    margin: 0;
-                    flex: 1;
-                }
-                
-                .mt-status-badge {
-                    font-size: 12px;
-                    padding: 4px 8px;
-                    border-radius: 3px;
-                    background: #f0f0f1;
-                    white-space: nowrap;
-                }
-                
-                .mt-candidate-card.evaluated .mt-status-badge {
-                    background: #d4edda;
-                    color: #155724;
-                }
-                
-                .mt-candidate-info p {
-                    margin: 5px 0;
-                }
-                
-                .mt-category {
-                    color: #666;
-                    font-style: italic;
-                }
-                
-                .mt-candidate-actions {
-                    margin-top: 15px;
-                    display: flex;
-                    gap: 10px;
-                }
-                
-                .mt-candidate-actions .button {
-                    flex: 1;
-                    text-align: center;
-                }
-            </style>
+                        
+                        <div class="mt-candidate-info">
+                            <?php
+                            $category = get_the_terms($candidate->ID, 'mt_category');
+                            if ($category && !is_wp_error($category)) {
+                                echo '<p class="mt-category">' . esc_html($category[0]->name) . '</p>';
+                            }
+                            ?>
+                            <p><?php echo wp_trim_words($candidate->post_content, 20); ?></p>
+                        </div>
+                        
+                        <div class="mt-candidate-actions">
+                            <a href="<?php echo esc_url($evaluation_url); ?>" class="button button-primary">
+                                <?php echo $is_evaluated ? __('Review Evaluation', 'mobility-trailblazers') : __('Evaluate', 'mobility-trailblazers'); ?>
+                            </a>
+                            <a href="<?php echo get_permalink($candidate->ID); ?>" class="button" target="_blank">
+                                <?php _e('View Details', 'mobility-trailblazers'); ?>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
         <?php
     }
