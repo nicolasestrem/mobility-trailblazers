@@ -166,4 +166,13 @@ if ($missing_tables) {
     echo "<li>❌ Create missing database tables: " . implode(', ', $missing_tables) . "</li>";
 }
 echo "</ul>";
+
+// Add menu registration debug
+echo "<h2>10. Menu Registration Debug</h2>";
+global $submenu;
+if (isset($submenu['mt-award-system'])) {
+    echo "<pre>" . print_r($submenu['mt-award-system'], true) . "</pre>";
+} else {
+    echo "<p style='color: red;'>No submenus found for mt-award-system</p>";
+}
 ?>

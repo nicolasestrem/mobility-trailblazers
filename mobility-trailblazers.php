@@ -896,6 +896,7 @@ class MobilityTrailblazersPlugin {
      */
     private function is_jury_member($user_id) {
         if (!$user_id) return false;
+        
         $user = get_user_by('id', $user_id);
         if (!$user) return false;
 
@@ -904,16 +905,23 @@ class MobilityTrailblazersPlugin {
             return true;
         }
 
-        // Or is linked to a jury member post
+        // Check if user is linked to a jury member post
         $jury_posts = get_posts(array(
             'post_type' => 'mt_jury',
             'meta_query' => array(
+                'relation' => 'OR',
                 array(
                     'key' => '_mt_jury_email',
                     'value' => $user->user_email,
                     'compare' => '='
+                ),
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $user_id,
+                    'compare' => '='
                 )
-            )
+            ),
+            'posts_per_page' => 1
         ));
 
         return !empty($jury_posts) || user_can($user_id, 'manage_options');
@@ -1957,18 +1965,17 @@ class MobilityTrailblazersPlugin {
     public function jury_dashboard_page() {
         $current_user_id = get_current_user_id();
         
-        if (!$this->is_jury_member($current_user_id)) {
+        // Allow admins to access for testing
+        if (!$this->is_jury_member($current_user_id) && !current_user_can('manage_options')) {
             echo '<div class="wrap"><h1>' . __('Access Denied', 'mobility-trailblazers') . '</h1>';
             echo '<p>' . __('You are not authorized to access this page.', 'mobility-trailblazers') . '</p></div>';
             return;
         }
         
-        // Simple dashboard for now
         echo '<div class="wrap">';
-        echo '<h1>Jury Dashboard</h1>';
-        echo '<p>Welcome to your jury dashboard!</p>';
+        echo '<h1>🏆 Jury Member Dashboard</h1>';
         
-        // Get assigned candidates
+        // Get jury member info
         $jury_post = get_posts(array(
             'post_type' => 'mt_jury',
             'meta_query' => array(
@@ -1981,31 +1988,132 @@ class MobilityTrailblazersPlugin {
             'posts_per_page' => 1
         ));
         
-        if ($jury_post) {
-            $jury_member_id = $jury_post[0]->ID;
-            
-            $assigned_candidates = get_posts(array(
-                'post_type' => 'mt_candidate',
-                'posts_per_page' => -1,
-                'meta_query' => array(
-                    array(
-                        'key' => '_mt_assigned_jury_member',
-                        'value' => $jury_member_id,
-                        'compare' => '='
-                    )
+        if (empty($jury_post)) {
+            echo '<div class="notice notice-error"><p>Jury member profile not found.</p></div>';
+            echo '</div>';
+            return;
+        }
+        
+        $jury_member = $jury_post[0];
+        $jury_member_id = $jury_member->ID;
+        
+        echo '<h2>Welcome, ' . esc_html($jury_member->post_title) . '</h2>';
+        
+        // Get assigned candidates
+        $assigned_candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_assigned_jury_member',
+                    'value' => $jury_member_id,
+                    'compare' => '='
                 )
-            ));
+            ),
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ));
+        
+        // Get evaluation statistics
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        $evaluated_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
+            $current_user_id
+        ));
+        
+        $total_assigned = count($assigned_candidates);
+        $completion_rate = $total_assigned > 0 ? ($evaluated_count / $total_assigned) * 100 : 0;
+        
+        // Statistics
+        echo '<div style="display: flex; gap: 20px; margin: 20px 0;">';
+        echo '<div style="background: #f0f8ff; padding: 20px; border-radius: 8px; text-align: center; min-width: 120px;">';
+        echo '<div style="font-size: 2em; font-weight: bold; color: #2c5282;">' . $total_assigned . '</div>';
+        echo '<div>Assigned</div>';
+        echo '</div>';
+        
+        echo '<div style="background: #f0fff0; padding: 20px; border-radius: 8px; text-align: center; min-width: 120px;">';
+        echo '<div style="font-size: 2em; font-weight: bold; color: #38a169;">' . $evaluated_count . '</div>';
+        echo '<div>Evaluated</div>';
+        echo '</div>';
+        
+        echo '<div style="background: #fff5f5; padding: 20px; border-radius: 8px; text-align: center; min-width: 120px;">';
+        echo '<div style="font-size: 2em; font-weight: bold; color: #e53e3e;">' . ($total_assigned - $evaluated_count) . '</div>';
+        echo '<div>Pending</div>';
+        echo '</div>';
+        
+        echo '<div style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center; min-width: 120px;">';
+        echo '<div style="font-size: 2em; font-weight: bold; color: #2d3748;">' . number_format($completion_rate, 0) . '%</div>';
+        echo '<div>Complete</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Progress bar
+        echo '<div style="margin: 20px 0;">';
+        echo '<h3>Your Progress</h3>';
+        echo '<div style="background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden;">';
+        echo '<div style="background: linear-gradient(90deg, #38a169, #38b2ac); height: 100%; width: ' . $completion_rate . '%; transition: width 0.5s;"></div>';
+        echo '</div>';
+        echo '<p>' . $evaluated_count . ' of ' . $total_assigned . ' candidates evaluated</p>';
+        echo '</div>';
+        
+        // Candidates list
+        echo '<h2>Your Assigned Candidates</h2>';
+        
+        if (empty($assigned_candidates)) {
+            echo '<div class="notice notice-warning"><p>No candidates have been assigned to you yet.</p></div>';
+        } else {
+            echo '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">';
             
-            echo '<h2>Your Assigned Candidates (' . count($assigned_candidates) . ')</h2>';
-            if ($assigned_candidates) {
-                echo '<ul>';
-                foreach ($assigned_candidates as $candidate) {
-                    echo '<li>' . esc_html($candidate->post_title) . '</li>';
+            foreach ($assigned_candidates as $candidate) {
+                $candidate_id = $candidate->ID;
+                $company = get_post_meta($candidate_id, '_mt_company', true);
+                $position = get_post_meta($candidate_id, '_mt_position', true);
+                
+                // Check if already evaluated
+                $existing_score = $wpdb->get_row($wpdb->prepare(
+                    "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d AND evaluation_round = 1",
+                    $candidate_id,
+                    $current_user_id
+                ));
+                
+                $is_evaluated = !empty($existing_score);
+                $border_color = $is_evaluated ? '#38a169' : '#e2e8f0';
+                $status_color = $is_evaluated ? '#38a169' : '#ed8936';
+                $status_text = $is_evaluated ? '✅ Evaluated' : '⏳ Pending';
+                
+                echo '<div style="border: 2px solid ' . $border_color . '; border-radius: 8px; padding: 20px; background: white;">';
+                echo '<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">';
+                echo '<h3 style="margin: 0; color: #2c5282;">' . esc_html($candidate->post_title) . '</h3>';
+                echo '<span style="color: ' . $status_color . '; font-weight: bold; font-size: 0.9em;">' . $status_text . '</span>';
+                echo '</div>';
+                
+                if ($position) {
+                    echo '<p style="margin: 5px 0; font-weight: 600; color: #4a5568;">' . esc_html($position) . '</p>';
                 }
-                echo '</ul>';
-            } else {
-                echo '<p>No candidates assigned yet.</p>';
+                if ($company) {
+                    echo '<p style="margin: 5px 0; color: #718096;">' . esc_html($company) . '</p>';
+                }
+                
+                if ($is_evaluated) {
+                    echo '<div style="background: #f0fff0; padding: 10px; border-radius: 5px; margin: 10px 0;">';
+                    echo '<strong>Total Score: ' . number_format($existing_score->total_score, 1) . '/50</strong><br>';
+                    echo '<small>Evaluated on ' . date('M j, Y', strtotime($existing_score->evaluation_date)) . '</small>';
+                    echo '</div>';
+                }
+                
+                echo '<div style="margin-top: 15px;">';
+                echo '<a href="' . get_permalink($candidate_id) . '" target="_blank" style="margin-right: 10px;" class="button">View Profile</a>';
+                echo '<a href="' . admin_url('post.php?post=' . $candidate_id . '&action=edit') . '" class="button button-primary">';
+                echo $is_evaluated ? 'Update Evaluation' : 'Evaluate Now';
+                echo '</a>';
+                echo '</div>';
+                
+                echo '</div>';
             }
+            
+            echo '</div>';
         }
         
         echo '</div>';
