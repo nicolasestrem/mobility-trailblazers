@@ -30,6 +30,15 @@ if (!defined('MT_PLUGIN_FILE')) {
     define('MT_PLUGIN_FILE', __FILE__);
 }
 
+// Include the jury system fix
+require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
+require_once MT_PLUGIN_PATH . 'includes/class-mt-ajax-fix.php';
+require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php';
+// Include Elementor frontend fix
+require_once MT_PLUGIN_PATH . 'includes/elementor-frontend-fix.php';
+// Include Elementor AJAX fix
+require_once MT_PLUGIN_PATH . 'includes/elementor-ajax-fix.php';
+
 /**
  * Main Plugin Class
  */
@@ -38,9 +47,6 @@ class MobilityTrailblazersPlugin {
     public function __construct() {
         // Define plugin constants
         $this->define_constants();
-        
-        // Load dependencies
-        $this->load_dependencies();
         
         // Register activation and deactivation hooks
         register_activation_hook(MT_PLUGIN_FILE, array($this, 'activate'));
@@ -98,87 +104,11 @@ class MobilityTrailblazersPlugin {
         add_action('plugins_loaded', array($this, 'load_elementor_compatibility'));
     }
 
-    /**
-     * Define plugin constants
-     */
-    private function define_constants() {
-        // Plugin version
-        if (!defined('MT_VERSION')) {
-            define('MT_VERSION', MT_PLUGIN_VERSION);
-        }
-        
-        // Database version
-        if (!defined('MT_DB_VERSION')) {
-            define('MT_DB_VERSION', '1.0.0');
-        }
-        
-        // Minimum PHP version
-        if (!defined('MT_MIN_PHP_VERSION')) {
-            define('MT_MIN_PHP_VERSION', '7.4');
-        }
-        
-        // Minimum WordPress version
-        if (!defined('MT_MIN_WP_VERSION')) {
-            define('MT_MIN_WP_VERSION', '5.8');
-        }
-        
-        // Table names
-        global $wpdb;
-        if (!defined('MT_TABLE_SCORES')) {
-            define('MT_TABLE_SCORES', $wpdb->prefix . 'mt_candidate_scores');
-        }
-        if (!defined('MT_TABLE_VOTES')) {
-            define('MT_TABLE_VOTES', $wpdb->prefix . 'mt_votes');
-        }
-        if (!defined('MT_TABLE_PUBLIC_VOTES')) {
-            define('MT_TABLE_PUBLIC_VOTES', $wpdb->prefix . 'mt_public_votes');
-        }
-        
-        // Custom post types
-        if (!defined('MT_POST_TYPE_CANDIDATE')) {
-            define('MT_POST_TYPE_CANDIDATE', 'mt_candidate');
-        }
-        if (!defined('MT_POST_TYPE_JURY')) {
-            define('MT_POST_TYPE_JURY', 'mt_jury');
-        }
-        
-        // Capabilities
-        if (!defined('MT_CAP_MANAGE_AWARDS')) {
-            define('MT_CAP_MANAGE_AWARDS', 'mt_manage_awards');
-        }
-        if (!defined('MT_CAP_EVALUATE_CANDIDATES')) {
-            define('MT_CAP_EVALUATE_CANDIDATES', 'mt_evaluate_candidates');
-        }
-        if (!defined('MT_CAP_VIEW_RESULTS')) {
-            define('MT_CAP_VIEW_RESULTS', 'mt_view_results');
-        }
-        
-        // Settings
-        if (!defined('MT_SETTINGS_GROUP')) {
-            define('MT_SETTINGS_GROUP', 'mt_award_settings');
-        }
-        
-        // Debug mode
-        if (!defined('MT_DEBUG')) {
-            define('MT_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
-        }
-    }
-
-    /**
-     * Load plugin dependencies
-     */
-    private function load_dependencies() {
-        // Include required files
-        require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
-        require_once MT_PLUGIN_PATH . 'includes/class-mt-ajax-fix.php';
-        require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php';
-        require_once MT_PLUGIN_PATH . 'includes/elementor-frontend-fix.php';
-        require_once MT_PLUGIN_PATH . 'includes/elementor-ajax-fix.php';
-        require_once MT_PLUGIN_PATH . 'includes/elementor-response-fix.php';
-    }
-
     public function init() {
         $this->load_textdomain();
+        
+        // Include Elementor response fix
+        require_once MT_PLUGIN_PATH . 'includes/elementor-response-fix.php';
         
         $this->create_custom_post_types();
         $this->create_custom_taxonomies();
