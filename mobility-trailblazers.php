@@ -2096,38 +2096,36 @@ class MobilityTrailblazersPlugin {
         // Calculate total score
         $total_score = array_sum($scores);
         
-        // Prepare evaluation data
-        $evaluation_data = apply_filters('mt_before_save_evaluation', array(
+        // Save to database
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mt_candidate_scores';
+        
+        $data = array(
             'candidate_id' => $candidate_id,
             'jury_member_id' => $jury_member_id,
             'courage_score' => $scores['courage_score'],
             'innovation_score' => $scores['innovation_score'],
             'implementation_score' => $scores['implementation_score'],
-            'mobility_relevance_score' => $scores['relevance_score'],
+            'relevance_score' => $scores['relevance_score'],
             'visibility_score' => $scores['visibility_score'],
             'total_score' => $total_score,
             'comments' => sanitize_textarea_field($_POST['comments']),
-            'evaluation_round' => 1,
             'evaluated_at' => current_time('mysql')
-        ));
-        
-        // Save to database
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mt_candidate_scores';
+        );
         
         if ($edit_mode) {
             // Update existing evaluation
             $wpdb->update(
                 $table_name,
-                $evaluation_data,
+                $data,
                 array(
                     'candidate_id' => $candidate_id,
-                    'jury_member_id' => $evaluation_data['jury_member_id']
+                    'jury_member_id' => $jury_member_id
                 )
             );
         } else {
             // Insert new evaluation
-            $wpdb->insert($table_name, $evaluation_data);
+            $wpdb->insert($table_name, $data);
         }
         
         // Redirect back to dashboard with success message
@@ -2299,24 +2297,30 @@ class MobilityTrailblazersPlugin {
 new MobilityTrailblazersPlugin();
 
 /**
- * Unified function to get evaluation count for a user
- * This ensures consistency across all dashboards by checking both user IDs and jury post IDs
- * 
- * @param int $user_id WordPress user ID
- * @return int Number of evaluations
+ * Get evaluation count for a user (unified function)
+ * This ensures consistency across all dashboards
  */
-if (!function_exists('mt_get_user_evaluation_count')) {
-    function mt_get_user_evaluation_count($user_id) {
-        // Use the consistency class if available
-        if (class_exists('MT_Jury_Consistency')) {
-            $consistency = MT_Jury_Consistency::get_instance();
-            return $consistency->get_evaluation_count($user_id);
-        }
-        
-        // Fallback to direct query
-        global $wpdb;
-        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-        
+function mt_get_user_evaluation_count($user_id) {
+    global $wpdb;
+    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Get jury post ID for this user
+    $jury_post_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_jury_user_id' AND meta_value = %s",
+        $user_id
+    ));
+    
+    if ($jury_post_id) {
+        // Count evaluations by BOTH user ID and jury post ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
+            WHERE jury_member_id IN (%d, %d)",
+            $user_id,
+            $jury_post_id
+        ));
+    } else {
+        // Just count by user ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
             WHERE jury_member_id = %d",
@@ -2326,25 +2330,30 @@ if (!function_exists('mt_get_user_evaluation_count')) {
 }
 
 /**
- * Unified function to check if jury member has evaluated a candidate
- * This ensures consistency by checking both user IDs and jury post IDs
- * 
- * @param int $user_id WordPress user ID
- * @param int $candidate_id Candidate post ID
- * @return bool Whether the user has evaluated this candidate
+ * Check if jury member has evaluated a candidate (unified function)
  */
-if (!function_exists('mt_has_jury_evaluated')) {
-    function mt_has_jury_evaluated($user_id, $candidate_id) {
-        // Use the consistency class if available
-        if (class_exists('MT_Jury_Consistency')) {
-            $consistency = MT_Jury_Consistency::get_instance();
-            return $consistency->has_evaluated($user_id, $candidate_id);
-        }
-        
-        // Fallback to direct query
-        global $wpdb;
-        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-        
+function mt_has_jury_evaluated($user_id, $candidate_id) {
+    global $wpdb;
+    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Get jury post ID for this user
+    $jury_post_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_jury_user_id' AND meta_value = %s",
+        $user_id
+    ));
+    
+    if ($jury_post_id) {
+        // Check by BOTH user ID and jury post ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_scores 
+            WHERE candidate_id = %d AND jury_member_id IN (%d, %d)",
+            $candidate_id,
+            $user_id,
+            $jury_post_id
+        )) > 0;
+    } else {
+        // Just check by user ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table_scores 
             WHERE candidate_id = %d AND jury_member_id = %d",
@@ -2353,73 +2362,5 @@ if (!function_exists('mt_has_jury_evaluated')) {
         )) > 0;
     }
 }
-
-/**
- * Get evaluation data for a specific candidate and user
- * 
- * @param int $user_id WordPress user ID
- * @param int $candidate_id Candidate post ID
- * @return object|null Evaluation data or null if not found
- */
-if (!function_exists('mt_get_user_evaluation')) {
-    function mt_get_user_evaluation($user_id, $candidate_id) {
-        global $wpdb;
-        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-        
-        // First try with user ID
-        $evaluation = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_scores 
-            WHERE candidate_id = %d AND jury_member_id = %d 
-            ORDER BY evaluated_at DESC LIMIT 1",
-            $candidate_id,
-            $user_id
-        ));
-        
-        // If not found and consistency class exists, try with jury post ID
-        if (!$evaluation && class_exists('MT_Jury_Consistency')) {
-            $consistency = MT_Jury_Consistency::get_instance();
-            $jury_post_id = $consistency->get_jury_post_id_for_user($user_id);
-            
-            if ($jury_post_id) {
-                $evaluation = $wpdb->get_row($wpdb->prepare(
-                    "SELECT * FROM $table_scores 
-                    WHERE candidate_id = %d AND jury_member_id = %d 
-                    ORDER BY evaluated_at DESC LIMIT 1",
-                    $candidate_id,
-                    $jury_post_id
-                ));
-            }
-        }
-        
-        return $evaluation;
-    }
-}
-
-/**
- * Hook to ensure evaluation data is saved with correct IDs
- * 
- * @param array $data Evaluation data being saved
- * @return array Modified evaluation data
- */
-add_filter('mt_before_save_evaluation', function($data) {
-    // Ensure we're using user ID, not jury post ID
-    if (isset($data['jury_member_id']) && $data['jury_member_id'] > 100) {
-        // This might be a jury post ID, try to get the user ID
-        if (class_exists('MT_Jury_Consistency')) {
-            $consistency = MT_Jury_Consistency::get_instance();
-            $user_id = $consistency->get_user_id_for_jury_post($data['jury_member_id']);
-            if ($user_id) {
-                $data['jury_member_id'] = $user_id;
-            }
-        }
-    }
-    
-    // If no jury_member_id set, use current user
-    if (empty($data['jury_member_id'])) {
-        $data['jury_member_id'] = get_current_user_id();
-    }
-    
-    return $data;
-});
 
 ?>
