@@ -93,33 +93,136 @@ docker-compose up -d
 
 ## 🔧 Recent Updates (Latest Session)
 
-### Bug Fixes
-- ✅ Fixed critical plugin crash caused by duplicate function definitions
-- ✅ Resolved menu registration issues for jury dashboard
-- ✅ Corrected PHP syntax errors at end of main plugin file
+### PHP 8.2 Compatibility & Jury Access Improvements
+- ✅ Fixed PHP 8.2 deprecation warnings with custom configuration
+- ✅ Resolved jury member access and role capabilities
+- ✅ Implemented proper security controls and access patterns
 
-### New Features Implemented
-1. **Jury Dashboard System**
-   - Complete dashboard interface for jury members
-   - Statistics cards showing evaluation progress
-   - Grid view of assigned candidates
-   - Status indicators (Evaluated/Pending)
-   
-2. **Evaluation System**
-   - Individual candidate evaluation pages
-   - Visual score selection (1-10) for each criterion
-   - Comments field for additional feedback
-   - Edit functionality for previously submitted evaluations
-   
-3. **Database Integration**
-   - Properly stores evaluations in `wp_mt_candidate_scores` table
-   - Tracks evaluation timestamps
-   - Prevents duplicate evaluations
+#### Technical Changes
+1. **PHP Configuration**
+   - Custom php.ini with optimized settings
+   - Must-use plugin for warning suppression
+   - Updated wp-config.php debug settings
 
-### System Diagnostic Tool
-- Added comprehensive diagnostic page at: `admin.php?page=mt-diagnostic`
-- Checks database tables, user linking, assignments
-- Quick fix buttons for common issues
+2. **Jury Member Role Capabilities**
+   - Properly configured role with minimal necessary capabilities
+   - Fixed menu registration using 'read' capability
+   - Implemented permission checks in page callbacks
+
+3. **Access Control Architecture**
+   - Jury members access candidates through custom dashboard only
+   - No direct access to WordPress admin candidate list
+   - Each jury member sees only assigned candidates
+   - Secure evaluation URL format: admin.php?page=mt-evaluate&candidate=[ID]
+
+### System Access Documentation
+
+#### For Jury Members
+- **Login URL**: http://192.168.1.7:9989/wp-admin
+- **Dashboard Access**: MT Award System → My Dashboard
+- **Direct Dashboard URL**: http://192.168.1.7:9989/wp-admin/admin.php?page=mt-jury-dashboard
+
+#### For Administrators
+- **Full System Access**: All WordPress admin capabilities
+- **Assignment Management**: http://192.168.1.7:9989/wp-admin/admin.php?page=mt-assignments
+- **Candidate Management**: http://192.168.1.7:9989/wp-admin/edit.php?post_type=mt_candidate
+- **Jury Management**: http://192.168.1.7:9989/wp-admin/edit.php?post_type=mt_jury
+- **Diagnostic Tool**: http://192.168.1.7:9989/wp-admin/admin.php?page=mt-diagnostic
+
+### 🔒 Security & Permissions
+
+#### Role Hierarchy
+- **Administrator**: Full access to all features
+- **MT Award Admin**: Custom role with award management capabilities
+- **MT Jury Member**: Limited access to assigned candidates only
+
+#### Access Control Implementation
+- Menu items use 'read' capability for jury access
+- Permission checks implemented inside page callbacks
+- Jury members cannot access other jury members' assignments
+- Evaluation data stored securely in custom database table
+
+### 🐛 Troubleshooting Guide
+
+#### If Jury Members Can't Access Dashboard
+1. Verify user has mt_jury_member role
+2. Check if user is linked to a jury member post
+3. Run diagnostic tool: admin.php?page=mt-diagnostic
+4. Use WP-CLI to verify capabilities:
+```bash
+docker exec -it mobility_wpcli_STAGING wp user meta get [user_id] wp_capabilities
+```
+
+#### If PHP Warnings Appear
+1. Check if mu-plugin is present: /wp-content/mu-plugins/suppress-php82-warnings.php
+2. Verify php.ini is mounted correctly in docker-compose.yml
+3. Clear browser cache and restart container:
+```bash
+docker-compose restart wordpress
+```
+
+#### If Evaluation Form Doesn't Submit
+1. Check browser console for JavaScript errors
+2. Verify AJAX URL is correct
+3. Check if nonce verification is failing
+4. Review PHP error logs:
+```bash
+docker logs mobility_wordpress_STAGING --tail 50
+```
+
+### 📁 Updated File Structure
+```
+/mnt/dietpi_userdata/docker-files/STAGING/
+├── docker-compose.yml
+├── php.ini (NEW - PHP configuration)
+├── wordpress_data/
+│   ├── wp-config.php (MODIFIED)
+│   └── wp-content/
+│       ├── mu-plugins/ (NEW)
+│       │   └── suppress-php82-warnings.php (NEW)
+│       └── plugins/
+│           └── mobility-trailblazers/
+│               └── mobility-trailblazers.php (Core plugin file)
+```
+
+### 📝 Commands Reference
+
+#### Useful WP-CLI Commands
+```bash
+# Access WP-CLI container
+docker exec -it mobility_wpcli_STAGING bash
+
+# List jury members with role
+wp user list --role=mt_jury_member
+
+# Add jury role to user
+wp user add-role [user_id] mt_jury_member
+
+# Check role capabilities
+wp role get mt_jury_member
+
+# View candidate assignments
+wp db query "SELECT p.post_title, pm.meta_value FROM wp_posts p JOIN wp_postmeta pm ON p.ID = pm.post_id WHERE pm.meta_key = '_mt_assigned_jury_member'"
+
+# Check evaluation scores
+wp db query "SELECT * FROM wp_mt_candidate_scores ORDER BY evaluated_at DESC LIMIT 10"
+```
+
+#### Docker Commands
+```bash
+# Restart WordPress container
+docker-compose restart wordpress
+
+# View container logs
+docker logs mobility_wordpress_STAGING --tail 50 -f
+
+# Execute commands in container
+docker exec -it mobility_wordpress_STAGING bash
+
+# Check PHP version and modules
+docker exec mobility_wordpress_STAGING php -v
+docker exec mobility_wordpress_STAGING php -m
+```
 
 ## 📝 Shortcodes Documentation
 
@@ -263,4 +366,4 @@ This is a private project. For access or contributions, please contact:
 
 **Mobility Trailblazers** - Transforming mobility with courage and innovation in the DACH region 🚀
 
-*Last updated: Current session - Jury dashboard implementation completed*
+*Last updated: Current session - PHP 8.2 compatibility and jury access improvements completed*
