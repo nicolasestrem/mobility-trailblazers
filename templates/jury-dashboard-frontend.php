@@ -208,6 +208,19 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                             ? mt_has_jury_evaluated($current_user_id, $candidate_id)
                             : false;
                         
+                        // Get the evaluation data if it exists
+                        $existing_score = null;
+                        if ($is_evaluated && function_exists('mt_get_user_evaluation')) {
+                            $existing_score = mt_get_user_evaluation($current_user_id, $candidate_id);
+                        } elseif ($is_evaluated) {
+                            // Fallback if function doesn't exist
+                            $existing_score = $wpdb->get_row($wpdb->prepare(
+                                "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d",
+                                $candidate_id,
+                                $current_user_id
+                            ));
+                        }
+                        
                         $total_score = $is_evaluated ? $existing_score->total_score : 0;
                     ?>
                         <div class="mt-candidate-card <?php echo $is_evaluated ? 'mt-evaluated' : 'mt-pending'; ?>" 
