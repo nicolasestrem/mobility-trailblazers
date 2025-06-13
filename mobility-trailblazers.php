@@ -45,6 +45,9 @@ require_once MT_PLUGIN_PATH . 'includes/elementor-ajax-fix.php';
 class MobilityTrailblazersPlugin {
     
     public function __construct() {
+        // Define plugin constants
+        $this->define_constants();
+        
         // Register activation and deactivation hooks
         register_activation_hook(MT_PLUGIN_FILE, array($this, 'activate'));
         register_deactivation_hook(MT_PLUGIN_FILE, array($this, 'deactivate'));
