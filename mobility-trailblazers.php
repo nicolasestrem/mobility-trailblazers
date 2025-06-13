@@ -1501,11 +1501,13 @@ class MobilityTrailblazersPlugin {
      */
     public function add_settings_section($settings) {
         // Add to your existing settings page
-        echo '<tr>';
-        echo '<th scope="row">';
-        echo '<label for="mt_jury_dashboard_page">' . __('Jury Dashboard Page', 'mobility-trailblazers') . '</label>';
-        echo '</th>';
-        echo '<td>';
+        ?>
+        <tr>
+            <th scope="row">
+                <label for="mt_jury_dashboard_page"><?php _e('Jury Dashboard Page', 'mobility-trailblazers'); ?></label>
+            </th>
+            <td>
+                <?php
                 wp_dropdown_pages(array(
                     'name' => 'mt_jury_dashboard_page',
                     'show_option_none' => __('— Select —', 'mobility-trailblazers'),
