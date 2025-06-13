@@ -77,6 +77,9 @@ class MobilityTrailblazersPlugin {
         
         // Debug hook for jury access issues
         add_action('admin_notices', array($this, 'debug_jury_access'));
+        
+        // Add assignment-specific scripts
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_assignment_scripts'));
     }
 
     public function init() {
@@ -422,6 +425,7 @@ class MobilityTrailblazersPlugin {
         add_shortcode('mt_candidate_grid', array($this, 'candidate_grid_shortcode'));
         add_shortcode('mt_jury_members', array($this, 'jury_members_shortcode'));
         add_shortcode('mt_voting_results', array($this, 'voting_results_shortcode'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_assignment_scripts'));
     }
 
     /**
@@ -1755,32 +1759,37 @@ class MobilityTrailblazersPlugin {
      * Handle manual candidate assignment
      */
     public function handle_assign_candidates() {
+        // Check nonce
         if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
             wp_send_json_error('Security check failed');
         }
         
+        // Check permissions
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Insufficient permissions');
         }
         
-        $candidate_ids = array_map('intval', $_POST['candidate_ids']);
-        $jury_member_id = intval($_POST['jury_member_id']);
+        // Get data
+        $candidate_ids = isset($_POST['candidate_ids']) ? array_map('intval', $_POST['candidate_ids']) : array();
+        $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
         
-        $success_count = 0;
+        if (empty($candidate_ids) || empty($jury_member_id)) {
+            wp_send_json_error('Invalid data provided');
+        }
         
+        // Perform assignments
+        $assigned_count = 0;
         foreach ($candidate_ids as $candidate_id) {
-            $result = update_post_meta($candidate_id, '_mt_assigned_jury_member', $jury_member_id);
-            if ($result !== false) {
-                $success_count++;
-            }
+            update_post_meta($candidate_id, '_mt_assigned_jury_member', $jury_member_id);
+            $assigned_count++;
         }
         
         wp_send_json_success(array(
-            'message' => sprintf(__('%d candidates assigned successfully', 'mobility-trailblazers'), $success_count),
-            'assigned_count' => $success_count
+            'message' => sprintf(__('%d candidates assigned successfully', 'mobility-trailblazers'), $assigned_count),
+            'assigned_count' => $assigned_count
         ));
 
-        if ($success_count > 0) {
+        if ($assigned_count > 0) {
             $this->notify_jury_member_assignment($jury_member_id, $candidate_ids);
         }
     }
@@ -1789,18 +1798,32 @@ class MobilityTrailblazersPlugin {
      * Handle auto-assignment
      */
     public function handle_auto_assign() {
+        // Check nonce
         if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
             wp_send_json_error('Security check failed');
         }
         
+        // Check permissions
         if (!current_user_can('manage_options')) {
             wp_send_json_error('Insufficient permissions');
         }
         
-        $candidates_per_jury = intval($_POST['candidates_per_jury']);
-        $algorithm = sanitize_text_field($_POST['algorithm']);
+        // Get parameters
+        $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 20;
+        $algorithm = isset($_POST['algorithm']) ? sanitize_text_field($_POST['algorithm']) : 'balanced';
+        $clear_existing = isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true';
         
-        // Get unassigned candidates
+        // Clear existing assignments if requested
+        if ($clear_existing) {
+            global $wpdb;
+            $wpdb->delete(
+                $wpdb->postmeta,
+                array('meta_key' => '_mt_assigned_jury_member'),
+                array('%s')
+            );
+        }
+        
+        // Get all candidates and jury members
         $candidates = get_posts(array(
             'post_type' => 'mt_candidate',
             'posts_per_page' => -1,
@@ -1810,34 +1833,37 @@ class MobilityTrailblazersPlugin {
                     'key' => '_mt_assigned_jury_member',
                     'compare' => 'NOT EXISTS'
                 )
-            )
+            ),
+            'orderby' => 'rand'
         ));
         
-        // Get jury members
         $jury_members = get_posts(array(
             'post_type' => 'mt_jury',
             'posts_per_page' => -1,
             'post_status' => 'publish'
         ));
         
-        $assignments_made = 0;
+        if (empty($candidates) || empty($jury_members)) {
+            wp_send_json_error('No candidates or jury members available for assignment');
+        }
+        
+        // Perform auto-assignment
+        $assigned_count = 0;
         $jury_index = 0;
         
-        // Simple balanced assignment
         foreach ($candidates as $candidate) {
-            if ($jury_index >= count($jury_members)) {
-                $jury_index = 0;
-            }
+            $jury = $jury_members[$jury_index % count($jury_members)];
+            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $jury->ID);
+            $assigned_count++;
             
-            $current_jury = $jury_members[$jury_index];
-            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $current_jury->ID);
-            $assignments_made++;
-            $jury_index++;
+            if ($assigned_count % $candidates_per_jury == 0) {
+                $jury_index++;
+            }
         }
         
         wp_send_json_success(array(
-            'message' => sprintf(__('%d assignments created successfully', 'mobility-trailblazers'), $assignments_made),
-            'assignments_made' => $assignments_made
+            'message' => sprintf(__('Auto-assignment completed: %d candidates assigned', 'mobility-trailblazers'), $assigned_count),
+            'assigned_count' => $assigned_count
         ));
     }
 
@@ -3250,6 +3276,53 @@ class MobilityTrailblazersPlugin {
             echo '</div>';
             exit;
         }
+    }
+
+    /**
+     * Enqueue assignment page specific scripts
+     */
+    public function enqueue_assignment_scripts($hook) {
+        // Only load on the assignment page
+        if ($hook !== 'mt-award-system_page_mt-assignments') {
+            return;
+        }
+        
+        // Enqueue assignment.js
+        wp_enqueue_script(
+            'mt-assignment-js', 
+            MT_PLUGIN_URL . 'assets/js/assignment.js', 
+            array('jquery'), 
+            MT_PLUGIN_VERSION, 
+            true
+        );
+        
+        // Enqueue assignment.css if you have one
+        wp_enqueue_style(
+            'mt-assignment-css', 
+            MT_PLUGIN_URL . 'assets/css/assignment.css', 
+            array(), 
+            MT_PLUGIN_VERSION
+        );
+        
+        // Get data for JavaScript
+        $candidates_data = $this->get_candidates_for_assignment();
+        $jury_data = $this->get_jury_members_for_assignment();
+        
+        // Localize script with data
+        wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_assignment_nonce'),
+            'candidates' => $candidates_data,
+            'jury_members' => $jury_data,
+            'strings' => array(
+                'confirm_assign' => __('Are you sure you want to assign these candidates?', 'mobility-trailblazers'),
+                'assign_success' => __('Candidates assigned successfully!', 'mobility-trailblazers'),
+                'assign_error' => __('Error assigning candidates. Please try again.', 'mobility-trailblazers'),
+                'no_selection' => __('Please select candidates and a jury member.', 'mobility-trailblazers'),
+                'loading' => __('Loading...', 'mobility-trailblazers'),
+                'assigning' => __('Assigning...', 'mobility-trailblazers')
+            )
+        ));
     }
 }
 
