@@ -3160,11 +3160,9 @@ class MobilityTrailblazersPlugin {
         ), admin_url('admin.php')));
         exit;
     }
-
-    public function jury_dashboard_shortcode($atts) {
-        // ... existing code ...
-    }
 }
 
-?>
+// Instantiate the plugin
+new MobilityTrailblazersPlugin();
+
 ?>
