@@ -122,8 +122,11 @@ class MobilityTrailblazersPlugin {
         flush_rewrite_rules();
     }
 
+    /**
+     * Load plugin text domain for translations
+     */
     private function load_textdomain() {
-        load_plugin_textdomain('mobility-trailblazers', false, dirname(MT_PLUGIN_BASENAME) . '/languages');
+        load_plugin_textdomain('mobility-trailblazers', false, dirname(MT_PLUGIN_BASENAME) . '/languages/');
     }
 
     /**
@@ -208,10 +211,10 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
-     * Create Custom Post Types
+     * Register custom post types
      */
-    public function create_custom_post_types() {
-        // Candidates Post Type
+    private function create_custom_post_types() {
+        // Register Candidate Post Type
         register_post_type('mt_candidate', array(
             'labels' => array(
                 'name' => __('Candidates', 'mobility-trailblazers'),
@@ -226,21 +229,14 @@ class MobilityTrailblazersPlugin {
                 'not_found_in_trash' => __('No candidates found in trash', 'mobility-trailblazers')
             ),
             'public' => true,
-            'publicly_queryable' => true,
-            'show_ui' => true,
-            'show_in_menu' => 'mt-award-system',
-            'query_var' => true,
-            'rewrite' => array('slug' => 'candidate'),
-            'capability_type' => array('mt_candidate', 'mt_candidates'),
-            'map_meta_cap' => true,
             'has_archive' => true,
-            'hierarchical' => false,
-            'menu_position' => null,
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'custom-fields'),
+            'menu_icon' => 'dashicons-groups',
+            'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+            'rewrite' => array('slug' => 'candidates'),
             'show_in_rest' => true
         ));
-
-        // Jury Members Post Type
+        
+        // Register Jury Member Post Type
         register_post_type('mt_jury', array(
             'labels' => array(
                 'name' => __('Jury Members', 'mobility-trailblazers'),
@@ -254,46 +250,11 @@ class MobilityTrailblazersPlugin {
                 'not_found' => __('No jury members found', 'mobility-trailblazers'),
                 'not_found_in_trash' => __('No jury members found in trash', 'mobility-trailblazers')
             ),
-            'public' => true,
-            'publicly_queryable' => true,
+            'public' => false,
             'show_ui' => true,
-            'show_in_menu' => 'mt-award-system',
-            'query_var' => true,
-            'rewrite' => array('slug' => 'jury'),
-            'capability_type' => array('mt_jury', 'mt_jurys'),
-            'map_meta_cap' => true,
-            'has_archive' => true,
-            'hierarchical' => false,
-            'menu_position' => null,
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'custom-fields'),
-            'show_in_rest' => true
-        ));
-
-        // Awards Post Type
-        register_post_type('mt_award', array(
-            'labels' => array(
-                'name' => __('Awards', 'mobility-trailblazers'),
-                'singular_name' => __('Award', 'mobility-trailblazers'),
-                'add_new' => __('Add New Award', 'mobility-trailblazers'),
-                'add_new_item' => __('Add New Award', 'mobility-trailblazers'),
-                'edit_item' => __('Edit Award', 'mobility-trailblazers'),
-                'new_item' => __('New Award', 'mobility-trailblazers'),
-                'view_item' => __('View Award', 'mobility-trailblazers'),
-                'search_items' => __('Search Awards', 'mobility-trailblazers'),
-                'not_found' => __('No awards found', 'mobility-trailblazers'),
-                'not_found_in_trash' => __('No awards found in trash', 'mobility-trailblazers')
-            ),
-            'public' => true,
-            'publicly_queryable' => true,
-            'show_ui' => true,
-            'show_in_menu' => 'mt-award-system',
-            'query_var' => true,
-            'rewrite' => array('slug' => 'award'),
-            'capability_type' => 'post',
-            'has_archive' => true,
-            'hierarchical' => false,
-            'menu_position' => null,
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'custom-fields'),
+            'show_in_menu' => false,
+            'menu_icon' => 'dashicons-businessman',
+            'supports' => array('title', 'thumbnail', 'custom-fields'),
             'show_in_rest' => true
         ));
     }
@@ -302,68 +263,45 @@ class MobilityTrailblazersPlugin {
      * Create Custom Taxonomies
      */
     public function create_custom_taxonomies() {
-        // Category taxonomy for candidates (3 dimensions from docs)
-        register_taxonomy('mt_category', array('mt_candidate'), array(
-            'hierarchical' => true,
+        // Category taxonomy for candidates
+        register_taxonomy('mt_category', 'mt_candidate', array(
             'labels' => array(
                 'name' => __('Categories', 'mobility-trailblazers'),
                 'singular_name' => __('Category', 'mobility-trailblazers'),
                 'search_items' => __('Search Categories', 'mobility-trailblazers'),
                 'all_items' => __('All Categories', 'mobility-trailblazers'),
-                'parent_item' => __('Parent Category', 'mobility-trailblazers'),
-                'parent_item_colon' => __('Parent Category:', 'mobility-trailblazers'),
                 'edit_item' => __('Edit Category', 'mobility-trailblazers'),
                 'update_item' => __('Update Category', 'mobility-trailblazers'),
                 'add_new_item' => __('Add New Category', 'mobility-trailblazers'),
                 'new_item_name' => __('New Category Name', 'mobility-trailblazers'),
-                'menu_name' => __('Categories', 'mobility-trailblazers'),
+                'menu_name' => __('Categories', 'mobility-trailblazers')
             ),
+            'hierarchical' => true,
             'show_ui' => true,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => array('slug' => 'candidate-category'),
+            'rewrite' => array('slug' => 'mobility-category'),
             'show_in_rest' => true
         ));
-
-        // Award Year taxonomy
-        register_taxonomy('mt_award_year', array('mt_candidate', 'mt_award'), array(
-            'hierarchical' => true,
+        
+        // Phase taxonomy for tracking selection phases
+        register_taxonomy('mt_phase', 'mt_candidate', array(
             'labels' => array(
-                'name' => __('Award Years', 'mobility-trailblazers'),
-                'singular_name' => __('Award Year', 'mobility-trailblazers'),
-                'search_items' => __('Search Years', 'mobility-trailblazers'),
-                'all_items' => __('All Years', 'mobility-trailblazers'),
-                'edit_item' => __('Edit Year', 'mobility-trailblazers'),
-                'update_item' => __('Update Year', 'mobility-trailblazers'),
-                'add_new_item' => __('Add New Year', 'mobility-trailblazers'),
-                'new_item_name' => __('New Year Name', 'mobility-trailblazers'),
-                'menu_name' => __('Award Years', 'mobility-trailblazers'),
+                'name' => __('Phases', 'mobility-trailblazers'),
+                'singular_name' => __('Phase', 'mobility-trailblazers'),
+                'search_items' => __('Search Phases', 'mobility-trailblazers'),
+                'all_items' => __('All Phases', 'mobility-trailblazers'),
+                'edit_item' => __('Edit Phase', 'mobility-trailblazers'),
+                'update_item' => __('Update Phase', 'mobility-trailblazers'),
+                'add_new_item' => __('Add New Phase', 'mobility-trailblazers'),
+                'new_item_name' => __('New Phase Name', 'mobility-trailblazers'),
+                'menu_name' => __('Phases', 'mobility-trailblazers')
             ),
+            'hierarchical' => false,
             'show_ui' => true,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => array('slug' => 'award-year'),
-            'show_in_rest' => true
-        ));
-
-        // Selection Status taxonomy
-        register_taxonomy('mt_status', array('mt_candidate'), array(
-            'hierarchical' => true,
-            'labels' => array(
-                'name' => __('Selection Status', 'mobility-trailblazers'),
-                'singular_name' => __('Status', 'mobility-trailblazers'),
-                'search_items' => __('Search Status', 'mobility-trailblazers'),
-                'all_items' => __('All Status', 'mobility-trailblazers'),
-                'edit_item' => __('Edit Status', 'mobility-trailblazers'),
-                'update_item' => __('Update Status', 'mobility-trailblazers'),
-                'add_new_item' => __('Add New Status', 'mobility-trailblazers'),
-                'new_item_name' => __('New Status Name', 'mobility-trailblazers'),
-                'menu_name' => __('Status', 'mobility-trailblazers'),
-            ),
-            'show_ui' => true,
-            'show_admin_column' => true,
-            'query_var' => true,
-            'rewrite' => array('slug' => 'candidate-status'),
+            'rewrite' => array('slug' => 'phase'),
             'show_in_rest' => true
         ));
     }
