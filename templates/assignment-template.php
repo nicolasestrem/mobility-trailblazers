@@ -1,6 +1,6 @@
 <?php
 /**
- * Assignment Management Template
+ * Assignment Management Template - FIXED VERSION
  * File: /wp-content/plugins/mobility-trailblazers/templates/assignment-template.php
  */
 
@@ -38,280 +38,344 @@ $phase_names = array(
 ?>
 
 <div id="mt-assignment-interface" class="mt-assignment-interface">
-    <div class="mt-assignment-container">
+    <!-- Header -->
+    <div class="mt-assignment-header">
+        <h1>🏆 Jury Assignment System</h1>
+        <p>Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="mt-status-banner">
+        <span class="icon">✅</span>
+        <div>
+            <strong>System Status: OPERATIONAL</strong> | Last check: <?php echo date('H:i:s'); ?> | 
+            Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? 'Unknown'); ?>
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="mt-statistics">
+        <div class="mt-stat-card">
+            <div class="mt-stat-value mt-stat-total-candidates"><?php echo $total_candidates; ?></div>
+            <div class="mt-stat-label">Total Candidates</div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-value"><?php echo $total_jury; ?></div>
+            <div class="mt-stat-label">Jury Members</div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-value mt-stat-assigned-candidates"><?php echo $assigned_count; ?></div>
+            <div class="mt-stat-label">Total Assignments</div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-value mt-stat-completion-rate"><?php echo number_format($completion_rate, 1); ?>%</div>
+            <div class="mt-stat-label">Completion Rate</div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-value mt-stat-avg-per-jury"><?php echo number_format($avg_per_jury, 1); ?></div>
+            <div class="mt-stat-label">Avg Per Jury</div>
+        </div>
+    </div>
+
+    <!-- Selection Info -->
+    <div class="mt-selection-info" style="display: none;">
+        <strong>Selection:</strong> <span class="mt-selected-count">0</span> candidates selected, 
+        jury member: <span class="mt-selected-jury-name">None</span>
+    </div>
+
+    <!-- Assignment Controls -->
+    <div class="mt-assignment-controls">
+        <h3>🔧 Assignment Tools</h3>
         
-        <!-- Header -->
-        <div class="mt-assignment-header">
-            <h1>🏆 Jury Assignment System</h1>
-            <p>Advanced Assignment Interface v3.2 - Mobility Trailblazers 2025</p>
-        </div>
-
-        <!-- Status Banner -->
-        <div class="mt-status-banner">
-            <span class="icon">✅</span>
-            <div>
-                <strong>System Status: HEALTHY</strong> | Last check: <?php echo date('H:i:s'); ?> | 
-                Active Phase: <?php echo esc_html($phase_names[$current_phase] ?? $current_phase); ?>
+        <!-- Filter Controls -->
+        <div class="mt-filters">
+            <div class="mt-filter-group">
+                <label>Search:</label>
+                <input type="text" id="mt-search-input" placeholder="Search candidates...">
+            </div>
+            <div class="mt-filter-group">
+                <label>Stage:</label>
+                <select id="mt-stage-filter">
+                    <option value="">All Stages</option>
+                    <option value="round1">Round 1</option>
+                    <option value="round2">Round 2</option>
+                    <option value="final">Final</option>
+                </select>
+            </div>
+            <div class="mt-filter-group">
+                <label>Category:</label>
+                <select id="mt-category-filter">
+                    <option value="">All Categories</option>
+                    <option value="established-companies">Established Companies</option>
+                    <option value="startups-new-makers">Start-ups & New Makers</option>
+                    <option value="infrastructure-politics-public">Infrastructure/Politics/Public</option>
+                </select>
+            </div>
+            <div class="mt-filter-group">
+                <label>Status:</label>
+                <select id="mt-assignment-filter">
+                    <option value="">All Candidates</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="unassigned">Unassigned</option>
+                </select>
             </div>
         </div>
 
-        <!-- Statistics Grid -->
-        <div class="mt-stats-grid">
-            <div class="mt-stat-card">
-                <span class="mt-stat-number mt-stat-total-candidates"><?php echo $total_candidates; ?></span>
-                <div class="mt-stat-label">Total Candidates</div>
-            </div>
-            <div class="mt-stat-card">
-                <span class="mt-stat-number mt-stat-total-jury"><?php echo $total_jury; ?></span>
-                <div class="mt-stat-label">Jury Members</div>
-            </div>
-            <div class="mt-stat-card">
-                <span class="mt-stat-number mt-stat-assigned-count"><?php echo $assigned_count; ?></span>
-                <div class="mt-stat-label">Total Assignments</div>
-            </div>
-            <div class="mt-stat-card">
-                <span class="mt-stat-number mt-stat-completion-rate"><?php echo number_format($completion_rate, 1); ?>%</span>
-                <div class="mt-stat-label">Completion Rate</div>
-            </div>
-            <div class="mt-stat-card">
-                <span class="mt-stat-number mt-stat-avg-per-jury"><?php echo number_format($avg_per_jury, 1); ?></span>
-                <div class="mt-stat-label">Avg Per Jury</div>
-            </div>
+        <!-- Action Buttons -->
+        <div class="mt-controls-row">
+            <button id="mt-select-all-btn" class="mt-btn mt-btn-secondary">
+                ✅ Select All Visible
+            </button>
+            <button id="mt-clear-selection-btn" class="mt-btn mt-btn-secondary" disabled>
+                🗑️ Clear Selection
+            </button>
+            <button id="mt-manual-assign-btn" class="mt-btn mt-btn-primary" disabled>
+                👥 Assign Selected
+            </button>
+            <button id="mt-auto-assign-btn" class="mt-btn mt-btn-success">
+                ⚡ Auto-Assign All
+            </button>
+            <button id="mt-clear-all-btn" class="mt-btn mt-btn-danger">
+                🗑️ Clear All Assignments
+            </button>
         </div>
+    </div>
 
-        <!-- Assignment Controls -->
-        <div class="mt-assignment-controls">
-            <h3>🔧 Assignment Tools</h3>
+    <!-- Main Content Grid -->
+    <div class="mt-assignment-grid">
+        <!-- Candidates Section -->
+        <div class="mt-candidates-section">
+            <h3 id="mt-candidates-header">
+                📋 Candidates (<?php echo $total_candidates; ?>)
+                <span class="count"></span>
+            </h3>
             
-            <div class="mt-controls-row">
-                <button id="mt-auto-assign-btn" class="mt-btn mt-btn-success">
-                    ⚡ Auto-Assign
-                </button>
-                <button id="mt-manual-assign-btn" class="mt-btn mt-btn-warning" disabled>
-                    👥 Assign Selected (<span class="mt-selected-candidates-count">0</span> → <span class="mt-selected-jury-name">None</span>)
-                </button>
-                <button id="mt-export-btn" class="mt-btn mt-btn-primary">
-                    📊 Export Data
-                </button>
-                <button id="mt-import-btn" class="mt-btn mt-btn-secondary">
-                    📥 Import Data
-                </button>
-                <button id="mt-refresh-btn" class="mt-btn mt-btn-secondary">
-                    🔄 Refresh Data
-                </button>
-            </div>
-
-            <div class="mt-controls-row">
-                <div class="mt-control-group">
-                    <label>Stage Filter:</label>
-                    <select id="mt-stage-filter">
-                        <option value="">All Stages</option>
-                        <option value="longlist">Longlist (~200)</option>
-                        <option value="shortlist" selected>Shortlist (50)</option>
-                        <option value="finalist">Finalist (25)</option>
-                    </select>
-                </div>
-                <div class="mt-control-group">
-                    <label>Category Filter:</label>
-                    <select id="mt-category-filter">
-                        <option value="">All Categories</option>
-                        <option value="established-companies">Established Companies</option>
-                        <option value="startups-new-makers">Start-ups & New Makers</option>
-                        <option value="infrastructure-politics-public">Infrastructure/Politics/Public</option>
-                    </select>
-                </div>
-                <div class="mt-control-group">
-                    <label>Assignment Status:</label>
-                    <select id="mt-assignment-filter">
-                        <option value="">All Candidates</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="unassigned">Unassigned</option>
-                    </select>
+            <!-- Candidates List Container - FIXED ID -->
+            <div id="mt-candidates-list">
+                <div style="text-align: center; padding: 20px; color: #718096;">
+                    Loading candidates...
                 </div>
             </div>
         </div>
 
-        <!-- Assignment Grid -->
-        <div class="mt-assignment-grid">
-            <!-- Candidates Panel -->
-            <div class="mt-candidates-panel">
-                <div class="mt-panel-header">
-                    <h3>📋 Candidates (<span class="mt-candidates-count"><?php echo $total_candidates; ?></span>)</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="mt-select-all-candidates" class="mt-btn mt-btn-secondary">Select All</button>
-                        <button id="mt-clear-selection" class="mt-btn mt-btn-secondary">Clear</button>
-                    </div>
+        <!-- Jury Members Section -->
+        <div class="mt-jury-section">
+            <h3>👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)</h3>
+            
+            <!-- Jury Members List Container - FIXED ID -->
+            <div id="mt-jury-members-list">
+                <div style="text-align: center; padding: 20px; color: #718096;">
+                    Loading jury members...
                 </div>
-                <div class="mt-panel-content">
-                    <input type="text" id="mt-candidates-search" class="mt-search-box" placeholder="Search candidates...">
-                    
-                    <div class="mt-filters">
-                        <button class="mt-filter-tag active" data-category="">All</button>
-                        <button class="mt-filter-tag" data-category="established-companies">Established</button>
-                        <button class="mt-filter-tag" data-category="startups-new-makers">Start-ups</button>
-                        <button class="mt-filter-tag" data-category="infrastructure-politics-public">Politics/Public</button>
-                    </div>
-
-                    <div id="mt-candidates-list">
-                        <!-- Candidates will be loaded here via JavaScript -->
-                        <div style="text-align: center; padding: 20px; color: #718096;">
-                            Loading candidates...
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Jury Panel -->
-            <div class="mt-jury-panel">
-                <div class="mt-panel-header">
-                    <h3>👨‍⚖️ Jury Members (<?php echo $total_jury; ?>)</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="mt-matrix-view-btn" class="mt-btn mt-btn-secondary">📊 Matrix View</button>
-                        <button id="mt-health-check-btn" class="mt-btn mt-btn-secondary">🏥 Health Check</button>
-                    </div>
-                </div>
-                <div class="mt-panel-content">
-                    <input type="text" id="mt-jury-search" class="mt-search-box" placeholder="Search jury members...">
-                    
-                    <div id="mt-jury-list">
-                        <!-- Jury members will be loaded here via JavaScript -->
-                        <div style="text-align: center; padding: 20px; color: #718096;">
-                            Loading jury members...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Export Options -->
-        <div class="mt-assignment-controls" style="margin-top: 30px;">
-            <h3>📤 Data Management</h3>
-            <div class="mt-export-options">
-                <button id="mt-export-assignments-btn" class="mt-btn mt-btn-primary">Export Assignments</button>
-                <button id="mt-sync-system-btn" class="mt-btn mt-btn-secondary">Sync System</button>
-                <button id="mt-view-progress-btn" class="mt-btn mt-btn-warning">View Progress Data</button>
-                <button id="mt-reset-assignments-btn" class="mt-btn mt-btn-secondary">Reset All Assignments</button>
             </div>
         </div>
     </div>
 
-    <!-- Auto-Assignment Modal -->
-    <div id="mt-auto-assign-modal" class="mt-assignment-modal">
-        <div class="mt-modal-content">
-            <div class="mt-modal-header">
-                <h3 class="mt-modal-title">🤖 Intelligent Auto-Assignment Configuration</h3>
-                <button class="mt-close-btn">&times;</button>
-            </div>
-            
-            <div class="mt-control-group">
-                <label for="mt-candidates-per-jury">Candidates per Jury Member:</label>
-                <input type="number" id="mt-candidates-per-jury" value="<?php echo floor($total_candidates / max($total_jury, 1)); ?>" min="1" max="25">
-                <small style="color: var(--mt-gray); display: block; margin-top: 5px;">
-                    Recommended: 8-15 candidates per jury member (Current: <?php echo $total_candidates; ?> candidates ÷ <?php echo $total_jury; ?> jury = <?php echo floor($total_candidates / max($total_jury, 1)); ?>)
-                </small>
-            </div>
+    <!-- Export Options -->
+    <div class="mt-assignment-controls" style="margin-top: 30px;">
+        <h3>📤 Data Management</h3>
+        <div class="mt-controls-row">
+            <button id="mt-export-assignments-btn" class="mt-btn mt-btn-primary">
+                📊 Export Assignments
+            </button>
+            <button id="mt-export-matrix-btn" class="mt-btn mt-btn-secondary">
+                📋 Export Assignment Matrix
+            </button>
+            <button id="mt-refresh-data-btn" class="mt-btn mt-btn-secondary">
+                🔄 Refresh Data
+            </button>
+        </div>
+    </div>
+</div>
 
-            <div class="mt-control-group" style="margin-top: 20px;">
-                <label>Distribution Algorithm:</label>
+<!-- Auto-Assign Modal (Hidden by default) -->
+<div id="mt-auto-assign-modal" class="mt-modal" style="display: none;">
+    <div class="mt-modal-content">
+        <div class="mt-modal-header">
+            <h3>⚡ Auto-Assignment Configuration</h3>
+            <button class="mt-close-btn">&times;</button>
+        </div>
+        <div class="mt-modal-body">
+            <p>Configure automatic assignment parameters:</p>
+            
+            <div class="mt-form-group">
+                <label>Assignment Algorithm:</label>
                 <div class="mt-algorithm-options">
                     <div class="mt-algorithm-option selected" data-algorithm="balanced">
                         <strong>Balanced Distribution</strong>
-                        <p>Equal distribution across all jury members</p>
+                        <p>Evenly distribute candidates across all jury members</p>
+                    </div>
+                    <div class="mt-algorithm-option" data-algorithm="category-match">
+                        <strong>Category Matching</strong>
+                        <p>Match candidates to jury members based on expertise</p>
                     </div>
                     <div class="mt-algorithm-option" data-algorithm="random">
-                        <strong>Random Distribution</strong>
-                        <p>Random assignment maintaining balance</p>
-                    </div>
-                    <div class="mt-algorithm-option" data-algorithm="expertise">
-                        <strong>Expertise-Based Matching</strong>
-                        <p>Match jury expertise with candidate categories</p>
-                    </div>
-                    <div class="mt-algorithm-option" data-algorithm="category">
-                        <strong>Category-Balanced</strong>
-                        <p>Ensure category representation per jury member</p>
+                        <strong>Random Assignment</strong>
+                        <p>Randomly assign candidates to available jury members</p>
                     </div>
                 </div>
             </div>
-
-            <div class="mt-control-group" style="margin-top: 20px;">
-                <label>Optimization Options:</label>
-                <div class="mt-optimization-checkboxes">
-                    <div class="mt-checkbox-item">
-                        <input type="checkbox" id="mt-balance-categories" checked>
-                        <label for="mt-balance-categories">Balance category representation</label>
-                    </div>
-                    <div class="mt-checkbox-item">
-                        <input type="checkbox" id="mt-match-expertise">
-                        <label for="mt-match-expertise">Match jury expertise with candidate categories</label>
-                    </div>
-                    <div class="mt-checkbox-item">
-                        <input type="checkbox" id="mt-clear-existing">
-                        <label for="mt-clear-existing">Clear existing assignments first</label>
-                    </div>
-                </div>
+            
+            <div class="mt-form-group">
+                <label>Candidates per Jury Member:</label>
+                <input type="number" id="mt-candidates-per-jury" value="21" min="1" max="50">
             </div>
-
-            <div class="mt-loading" id="mt-assignment-loading">
-                <div class="mt-spinner"></div>
-                <p>Processing assignments...</p>
-            </div>
-
-            <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: flex-end;">
-                <button class="mt-btn mt-btn-secondary mt-close-btn">Cancel</button>
-                <button id="mt-execute-auto-assign" class="mt-btn mt-btn-success">⚡ Execute Auto-Assignment</button>
-            </div>
+        </div>
+        <div class="mt-modal-footer">
+            <button id="mt-execute-auto-assign" class="mt-btn mt-btn-success">
+                ⚡ Execute Auto-Assignment
+            </button>
+            <button class="mt-btn mt-btn-secondary mt-close-btn">
+                Cancel
+            </button>
         </div>
     </div>
-
-    <!-- Notification Container -->
-    <div id="mt-notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 100001;"></div>
 </div>
 
+<style>
+/* Assignment Grid Layout */
+.mt-assignment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+@media (max-width: 968px) {
+    .mt-assignment-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Modal Styles */
+.mt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mt-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.mt-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-modal-header h3 {
+    margin: 0;
+    color: #2d3748;
+}
+
+.mt-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #718096;
+}
+
+.mt-modal-body {
+    padding: 20px;
+}
+
+.mt-modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Form Styles */
+.mt-form-group {
+    margin-bottom: 20px;
+}
+
+.mt-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.mt-algorithm-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mt-algorithm-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mt-algorithm-option:hover {
+    border-color: #4299e1;
+}
+
+.mt-algorithm-option.selected {
+    border-color: #38a169;
+    background: #f0fff4;
+}
+
+.mt-form-group input[type="number"] {
+    width: 100px;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Selection info visibility */
+.mt-selection-info:not([style*="display: none"]) {
+    display: block !important;
+}
+</style>
+
 <script>
-// Add notification system
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('mt-notification-container');
-    if (!container) return;
-    
-    const notification = document.createElement('div');
-    notification.className = `mt-notification mt-notification-${type}`;
-    notification.style.cssText = `
-        background: ${type === 'success' ? '#38a169' : type === 'error' ? '#e53e3e' : type === 'warning' ? '#d69e2e' : '#2c5282'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        max-width: 300px;
-        animation: slideIn 0.3s ease;
-    `;
-    
-    notification.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: 10px;">&times;</button>
-        </div>
-    `;
-    
-    container.appendChild(notification);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
+// Show selection info when candidates are selected
+jQuery(document).ready(function($) {
+    function updateSelectionInfoVisibility() {
+        const selectionInfo = $('.mt-selection-info');
+        const selectedCount = parseInt($('.mt-selected-count').text()) || 0;
+        const hasJurySelected = $('.mt-selected-jury-name').text() !== 'None';
+        
+        if (selectedCount > 0 || hasJurySelected) {
+            selectionInfo.show();
+        } else {
+            selectionInfo.hide();
         }
-    }, 5000);
-}
-
-// Add CSS for notifications
-const notificationCSS = `
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-`;
-
-const style = document.createElement('style');
-style.textContent = notificationCSS;
-document.head.appendChild(style);
+    }
+    
+    // Monitor for changes in selection
+    const observer = new MutationObserver(updateSelectionInfoVisibility);
+    observer.observe(document.querySelector('.mt-selection-info') || document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    // Initial check
+    setTimeout(updateSelectionInfoVisibility, 1000);
+});
 </script>
