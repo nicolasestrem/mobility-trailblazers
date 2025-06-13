@@ -45,14 +45,17 @@ class MobilityTrailblazersPlugin {
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
         
-        // Menu hooks - added WITHOUT conditions
+        // Menu hooks - FIXED to prevent duplicates
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
-        add_action('admin_menu', array($this, 'add_evaluation_page'), 100);
         add_action('admin_menu', array($this, 'add_diagnostic_menu'));
         
+        // Register settings
+        add_action('admin_init', function() {
+            register_setting('mt_award_settings', 'mt_jury_dashboard_page');
+        });
+        
         // Jury dashboard and evaluation hooks
-        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
         add_action('admin_init', array($this, 'handle_jury_dashboard_direct'));
         add_action('admin_init', array($this, 'debug_evaluation_access'));
         
@@ -437,7 +440,6 @@ class MobilityTrailblazersPlugin {
         
         // Jury dashboard hooks
         add_action('admin_menu', array($this, 'add_jury_dashboard_menu'));
-        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
         add_action('template_redirect', array($this, 'jury_template_redirect'));
@@ -526,6 +528,25 @@ class MobilityTrailblazersPlugin {
                     'vote_error' => __('Error submitting evaluation. Please try again.', 'mobility-trailblazers')
                 )
             ));
+        }
+        
+        // Add menu fix for jury members
+        if ($this->is_jury_member(get_current_user_id()) || current_user_can('manage_options')) {
+            $dashboard_url = $this->get_jury_dashboard_page_url();
+            if ($dashboard_url) {
+                wp_add_inline_script('jquery', "
+                    jQuery(document).ready(function($) {
+                        // Fix the dashboard menu link
+                        $('#adminmenu a[href*=\"jury-dashboard-redirect\"]').attr('href', '" . esc_js($dashboard_url) . "');
+                        
+                        // Remove any duplicate My Dashboard entries
+                        var dashboardItems = $('#adminmenu a:contains(\"My Dashboard\")').parent();
+                        if (dashboardItems.length > 1) {
+                            dashboardItems.slice(1).remove();
+                        }
+                    });
+                ");
+            }
         }
         
         // Special handling for assignment page - CORRECTED VERSION
@@ -1474,6 +1495,33 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
+     * Add settings to link to the Jury Dashboard page
+     */
+    public function add_settings_section($settings) {
+        // Add to your existing settings page
+        ?>
+        <tr>
+            <th scope="row">
+                <label for="mt_jury_dashboard_page"><?php _e('Jury Dashboard Page', 'mobility-trailblazers'); ?></label>
+            </th>
+            <td>
+                <?php
+                wp_dropdown_pages(array(
+                    'name' => 'mt_jury_dashboard_page',
+                    'show_option_none' => __('— Select —', 'mobility-trailblazers'),
+                    'option_none_value' => '0',
+                    'selected' => get_option('mt_jury_dashboard_page', 0)
+                ));
+                ?>
+                <p class="description">
+                    <?php _e('Select the page containing the [mt_jury_dashboard] shortcode', 'mobility-trailblazers'); ?>
+                </p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    /**
      * Settings page
      */
     public function settings_page() {
@@ -1482,6 +1530,7 @@ class MobilityTrailblazersPlugin {
             update_option('mt_public_voting_enabled', isset($_POST['public_voting_enabled']));
             update_option('mt_current_phase', sanitize_text_field($_POST['current_phase']));
             update_option('mt_award_year', sanitize_text_field($_POST['award_year']));
+            update_option('mt_jury_dashboard_page', intval($_POST['mt_jury_dashboard_page']));
             
             echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'mobility-trailblazers') . '</p></div>';
         }
@@ -1524,6 +1573,9 @@ class MobilityTrailblazersPlugin {
         
         echo '<tr><th scope="row">' . __('Enable Public Voting', 'mobility-trailblazers') . '</th>';
         echo '<td><input type="checkbox" name="public_voting_enabled" value="1"' . checked($public_voting_enabled, 1, false) . ' /> ' . __('Allow public to vote for candidates', 'mobility-trailblazers') . '</td></tr>';
+        
+        // Add the jury dashboard page setting
+        $this->add_settings_section($settings);
         
         echo '</table>';
         
@@ -1906,14 +1958,10 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
-     * Add jury dashboard to admin menu
+     * Add jury dashboard to admin menu - FIXED VERSION
      */
     public function add_jury_dashboard_menu() {
-        // Debug logging
-        error_log('MT Debug: add_jury_dashboard_menu called');
-        
         $current_user_id = get_current_user_id();
-        error_log('MT Debug: Current user ID: ' . $current_user_id);
         
         // Check if user is a jury member or admin
         $is_jury = $this->is_jury_member($current_user_id);
@@ -1923,12 +1971,7 @@ class MobilityTrailblazersPlugin {
         $user = wp_get_current_user();
         $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
         
-        error_log('MT Debug: Is jury: ' . ($is_jury ? 'yes' : 'no'));
-        error_log('MT Debug: Is admin: ' . ($is_admin ? 'yes' : 'no'));
-        error_log('MT Debug: Has jury role: ' . ($has_jury_role ? 'yes' : 'no'));
-        
         if (!$is_jury && !$is_admin && !$has_jury_role) {
-            error_log('MT Debug: User does not have permission');
             return;
         }
         
@@ -1943,12 +1986,11 @@ class MobilityTrailblazersPlugin {
         }
         
         if (!$parent_exists) {
-            error_log('MT Debug: Parent menu mt-award-system does not exist!');
             // Create parent menu with lower capability
             add_menu_page(
                 __('MT Award System', 'mobility-trailblazers'),
                 __('MT Award System', 'mobility-trailblazers'),
-                'read', // Changed from 'manage_options' to 'read'
+                'read',
                 'mt-award-system',
                 array($this, 'admin_dashboard'),
                 'dashicons-awards',
@@ -1956,50 +1998,79 @@ class MobilityTrailblazersPlugin {
             );
         }
         
-        // Add the submenu with proper capability
-        $result = add_submenu_page(
-            'mt-award-system',
-            __('My Dashboard', 'mobility-trailblazers'),
-            __('My Dashboard', 'mobility-trailblazers'),
-            'read', // Low capability so jury members can access
-            'mt-jury-dashboard',
-            array($this, 'jury_dashboard_page')
-        );
+        // Get the URL of your Jury Dashboard page
+        $dashboard_page_url = $this->get_jury_dashboard_page_url();
         
-        error_log('MT Debug: add_submenu_page result: ' . ($result ? 'success' : 'failed'));
+        if ($dashboard_page_url) {
+            // Add custom menu item that links to the page
+            add_submenu_page(
+                'mt-award-system',
+                __('My Dashboard', 'mobility-trailblazers'),
+                __('My Dashboard', 'mobility-trailblazers'),
+                'read',
+                'jury-dashboard-redirect', // Changed from mt-jury-dashboard
+                function() use ($dashboard_page_url) {
+                    wp_redirect($dashboard_page_url);
+                    exit;
+                }
+            );
+        } else {
+            // Fallback: use the built-in dashboard
+            add_submenu_page(
+                'mt-award-system',
+                __('My Dashboard', 'mobility-trailblazers'),
+                __('My Dashboard', 'mobility-trailblazers'),
+                'read',
+                'mt-jury-dashboard',
+                array($this, 'jury_dashboard_page')
+            );
+        }
     }
 
     /**
-     * Ensure jury menu exists (fallback method)
+     * Get the URL of the Jury Dashboard page (with shortcode)
      */
-    public function ensure_jury_menu_exists() {
-        // This runs later to ensure the menu exists
-        global $submenu;
-        
-        if (!isset($submenu['mt-award-system'])) {
-            return;
+    private function get_jury_dashboard_page_url() {
+        // First check saved setting
+        $page_id = get_option('mt_jury_dashboard_page');
+        if ($page_id) {
+            return get_permalink($page_id);
         }
         
-        // Check if our menu already exists
-        $exists = false;
-        foreach ($submenu['mt-award-system'] as $item) {
-            if ($item[2] === 'mt-jury-dashboard') {
-                $exists = true;
-                break;
+        // Method 1: Look for page by slug
+        $page = get_page_by_path('jury-dashboard');
+        
+        // Method 2: Look for page with specific meta key
+        if (!$page) {
+            $pages = get_posts(array(
+                'post_type' => 'page',
+                'meta_key' => '_mt_is_jury_dashboard',
+                'meta_value' => '1',
+                'posts_per_page' => 1
+            ));
+            if ($pages) {
+                $page = $pages[0];
             }
         }
         
-        if (!$exists) {
-            $current_user_id = get_current_user_id();
-            if ($this->is_jury_member($current_user_id) || current_user_can('manage_options')) {
-                $submenu['mt-award-system'][] = array(
-                    __('My Dashboard', 'mobility-trailblazers'),
-                    'read',
-                    'mt-jury-dashboard',
-                    __('My Dashboard', 'mobility-trailblazers')
-                );
+        // Method 3: Look for page containing the shortcode
+        if (!$page) {
+            global $wpdb;
+            $page_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} 
+                WHERE post_type = 'page' 
+                AND post_status = 'publish' 
+                AND post_content LIKE %s 
+                LIMIT 1",
+                '%[mt_jury_dashboard]%'
+            ));
+            
+            if ($page_id) {
+                $page = get_post($page_id);
             }
         }
+        
+        return $page ? get_permalink($page->ID) : false;
     }
 
     /**
@@ -2495,7 +2566,7 @@ class MobilityTrailblazersPlugin {
         </div>
         
         <div class="mt-widget-actions">
-            <a href="<?php echo admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-primary">
+            <a href="<?php echo $this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-primary">
                 <?php _e('Go to Dashboard', 'mobility-trailblazers'); ?>
             </a>
         </div>
@@ -2647,7 +2718,7 @@ class MobilityTrailblazersPlugin {
         }
         $message .= '</ul>';
         
-        $message .= '<p><a href="' . admin_url('admin.php?page=mt-jury-dashboard') . '" style="background: #2c5282; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">' . __('Go to Dashboard', 'mobility-trailblazers') . '</a></p>';
+        $message .= '<p><a href="' . ($this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard')) . '" style="background: #2c5282; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">' . __('Go to Dashboard', 'mobility-trailblazers') . '</a></p>';
         
         $message .= '<p>' . __('Thank you for your valuable contribution to recognizing mobility innovation in the DACH region.', 'mobility-trailblazers') . '</p>';
         
@@ -2865,7 +2936,7 @@ class MobilityTrailblazersPlugin {
         $candidate_id = isset($_GET['candidate']) ? intval($_GET['candidate']) : 0;
         
         if (!$candidate_id) {
-            wp_redirect(admin_url('admin.php?page=mt-jury-dashboard'));
+            wp_redirect($this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard'));
             exit;
         }
         
@@ -3030,7 +3101,7 @@ class MobilityTrailblazersPlugin {
                             <button type="submit" class="button button-primary button-large">
                                 <?php echo $edit_mode ? __('Update Evaluation', 'mobility-trailblazers') : __('Submit Evaluation', 'mobility-trailblazers'); ?>
                             </button>
-                            <a href="<?php echo admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-secondary button-large">
+                            <a href="<?php echo $this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-secondary button-large">
                                 <?php _e('Cancel', 'mobility-trailblazers'); ?>
                             </a>
                         </div>
