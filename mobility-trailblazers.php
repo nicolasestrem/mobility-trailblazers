@@ -485,10 +485,399 @@ class MobilityTrailblazersPlugin {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_candidate_meta'));
         add_action('wp_ajax_mt_submit_vote', array($this, 'handle_jury_vote'));
+        
+        // Register shortcodes
+        $this->add_shortcodes();
+    }
+
+    /**
+     * Register all shortcodes
+     */
+    public function add_shortcodes() {
+        // Jury Dashboard Shortcode (Frontend)
+        add_shortcode('mt_jury_dashboard', array($this, 'render_jury_dashboard'));
+        
+        // Candidate List Shortcode (Public viewing)
+        add_shortcode('mt_candidates', array($this, 'render_candidates_list'));
+        
+        // Single Candidate Profile Shortcode
+        add_shortcode('mt_candidate_profile', array($this, 'render_candidate_profile'));
+        
+        // Statistics Shortcode
+        add_shortcode('mt_award_stats', array($this, 'render_award_stats'));
+        
+        // Winners Display Shortcode
+        add_shortcode('mt_winners', array($this, 'render_winners'));
+        
+        // Legacy shortcodes (keep for backward compatibility)
         add_shortcode('mt_voting_form', array($this, 'voting_form_shortcode'));
         add_shortcode('mt_candidate_grid', array($this, 'candidate_grid_shortcode'));
         add_shortcode('mt_jury_members', array($this, 'jury_members_shortcode'));
         add_shortcode('mt_voting_results', array($this, 'voting_results_shortcode'));
+    }
+
+    /**
+     * Render jury dashboard for frontend
+     */
+    public function render_jury_dashboard($atts = array()) {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            return '<div class="mt-notice mt-notice-error">' . 
+                   __('Please log in to access the jury dashboard.', 'mobility-trailblazers') . 
+                   '</div>';
+        }
+        
+        // Check if user is a jury member
+        $user_id = get_current_user_id();
+        if (!$this->is_jury_member($user_id)) {
+            return '<div class="mt-notice mt-notice-error">' . 
+                   __('You do not have permission to access this area.', 'mobility-trailblazers') . 
+                   '</div>';
+        }
+        
+        // Start output buffering
+        ob_start();
+        
+        // Include the frontend jury dashboard template
+        $template_path = MT_PLUGIN_PATH . 'templates/jury-dashboard-frontend.php';
+        if (file_exists($template_path)) {
+            include $template_path;
+        } else {
+            echo '<div class="mt-notice mt-notice-error">' . 
+                 __('Dashboard template not found.', 'mobility-trailblazers') . 
+                 '</div>';
+        }
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Render candidates list
+     */
+    public function render_candidates_list($atts = array()) {
+        $atts = shortcode_atts(array(
+            'category' => '',
+            'phase' => '',
+            'limit' => 20,
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ), $atts);
+        
+        ob_start();
+        
+        // Query candidates
+        $args = array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => intval($atts['limit']),
+            'orderby' => $atts['orderby'],
+            'order' => $atts['order'],
+            'post_status' => 'publish'
+        );
+        
+        // Add category filter if specified
+        if (!empty($atts['category'])) {
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => 'mt_category',
+                    'field' => 'slug',
+                    'terms' => $atts['category']
+                )
+            );
+        }
+        
+        // Add phase filter if specified
+        if (!empty($atts['phase'])) {
+            $args['meta_query'] = array(
+                array(
+                    'key' => '_mt_phase',
+                    'value' => $atts['phase'],
+                    'compare' => '='
+                )
+            );
+        }
+        
+        $candidates = new WP_Query($args);
+        
+        if ($candidates->have_posts()) {
+            echo '<div class="mt-candidates-grid">';
+            while ($candidates->have_posts()) {
+                $candidates->the_post();
+                $this->render_candidate_card(get_the_ID());
+            }
+            echo '</div>';
+            wp_reset_postdata();
+        } else {
+            echo '<p>' . __('No candidates found.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Render single candidate profile
+     */
+    public function render_candidate_profile($atts = array()) {
+        $atts = shortcode_atts(array(
+            'id' => 0
+        ), $atts);
+        
+        if (empty($atts['id'])) {
+            return '<p>' . __('No candidate specified.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        ob_start();
+        
+        $candidate = get_post($atts['id']);
+        if ($candidate && $candidate->post_type === 'mt_candidate') {
+            $this->render_candidate_full_profile($candidate->ID);
+        } else {
+            echo '<p>' . __('Candidate not found.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Render award statistics
+     */
+    public function render_award_stats($atts = array()) {
+        ob_start();
+        
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Get total candidates
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        
+        // Get total jury members
+        $total_jury = wp_count_posts('mt_jury')->publish;
+        
+        // Get total evaluations
+        $total_evaluations = $wpdb->get_var("SELECT COUNT(DISTINCT CONCAT(candidate_id, '-', jury_member_id)) FROM $table_scores");
+        
+        // Get evaluation progress
+        $max_evaluations = $total_candidates * $total_jury;
+        $progress_percentage = $max_evaluations > 0 ? round(($total_evaluations / $max_evaluations) * 100, 1) : 0;
+        
+        ?>
+        <div class="mt-stats-container">
+            <div class="mt-stat-box">
+                <h3><?php echo number_format($total_candidates); ?></h3>
+                <p><?php _e('Total Candidates', 'mobility-trailblazers'); ?></p>
+            </div>
+            <div class="mt-stat-box">
+                <h3><?php echo number_format($total_jury); ?></h3>
+                <p><?php _e('Jury Members', 'mobility-trailblazers'); ?></p>
+            </div>
+            <div class="mt-stat-box">
+                <h3><?php echo number_format($total_evaluations); ?></h3>
+                <p><?php _e('Evaluations Completed', 'mobility-trailblazers'); ?></p>
+            </div>
+            <div class="mt-stat-box">
+                <h3><?php echo $progress_percentage; ?>%</h3>
+                <p><?php _e('Overall Progress', 'mobility-trailblazers'); ?></p>
+            </div>
+        </div>
+        <?php
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Render winners
+     */
+    public function render_winners($atts = array()) {
+        $atts = shortcode_atts(array(
+            'year' => date('Y'),
+            'limit' => 25
+        ), $atts);
+        
+        ob_start();
+        
+        // Query winners (candidates marked as winners)
+        $args = array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => intval($atts['limit']),
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_is_winner',
+                    'value' => 'yes',
+                    'compare' => '='
+                ),
+                array(
+                    'key' => '_mt_winner_year',
+                    'value' => $atts['year'],
+                    'compare' => '='
+                )
+            ),
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_mt_winner_rank',
+            'order' => 'ASC'
+        );
+        
+        $winners = new WP_Query($args);
+        
+        if ($winners->have_posts()) {
+            echo '<div class="mt-winners-list">';
+            $rank = 1;
+            while ($winners->have_posts()) {
+                $winners->the_post();
+                $this->render_winner_card(get_the_ID(), $rank);
+                $rank++;
+            }
+            echo '</div>';
+            wp_reset_postdata();
+        } else {
+            echo '<p>' . __('Winners have not been announced yet.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Helper: Check if user is jury member
+     */
+    private function is_jury_member($user_id) {
+        // Check if user has jury member role
+        $user = get_user_by('id', $user_id);
+        if ($user && in_array('mt_jury_member', (array) $user->roles)) {
+            return true;
+        }
+        
+        // Check if user is linked to a jury post
+        $jury_post = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $user_id,
+                    'compare' => '='
+                )
+            ),
+            'posts_per_page' => 1
+        ));
+        
+        return !empty($jury_post);
+    }
+
+    /**
+     * Helper: Render candidate card
+     */
+    private function render_candidate_card($candidate_id) {
+        $candidate = get_post($candidate_id);
+        $company = get_post_meta($candidate_id, '_mt_company', true);
+        $category = wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'names'));
+        
+        ?>
+        <div class="mt-candidate-card">
+            <?php if (has_post_thumbnail($candidate_id)) : ?>
+                <div class="mt-candidate-image">
+                    <?php echo get_the_post_thumbnail($candidate_id, 'medium'); ?>
+                </div>
+            <?php endif; ?>
+            <div class="mt-candidate-info">
+                <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                <?php if ($company) : ?>
+                    <p class="mt-company"><?php echo esc_html($company); ?></p>
+                <?php endif; ?>
+                <?php if (!empty($category)) : ?>
+                    <p class="mt-category"><?php echo esc_html($category[0]); ?></p>
+                <?php endif; ?>
+                <a href="<?php echo get_permalink($candidate_id); ?>" class="mt-btn mt-btn-primary">
+                    <?php _e('View Profile', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Helper: Render full candidate profile
+     */
+    private function render_candidate_full_profile($candidate_id) {
+        $candidate = get_post($candidate_id);
+        $meta_fields = array(
+            'company' => get_post_meta($candidate_id, '_mt_company', true),
+            'website' => get_post_meta($candidate_id, '_mt_website', true),
+            'innovation' => get_post_meta($candidate_id, '_mt_innovation', true),
+            'impact' => get_post_meta($candidate_id, '_mt_impact', true),
+            'linkedin' => get_post_meta($candidate_id, '_mt_linkedin', true),
+        );
+        
+        ?>
+        <div class="mt-candidate-profile">
+            <div class="mt-profile-header">
+                <?php if (has_post_thumbnail($candidate_id)) : ?>
+                    <div class="mt-profile-image">
+                        <?php echo get_the_post_thumbnail($candidate_id, 'large'); ?>
+                    </div>
+                <?php endif; ?>
+                <div class="mt-profile-info">
+                    <h1><?php echo esc_html($candidate->post_title); ?></h1>
+                    <?php if ($meta_fields['company']) : ?>
+                        <h2><?php echo esc_html($meta_fields['company']); ?></h2>
+                    <?php endif; ?>
+                    <?php if ($meta_fields['website']) : ?>
+                        <p><a href="<?php echo esc_url($meta_fields['website']); ?>" target="_blank" rel="noopener">
+                            <?php _e('Visit Website', 'mobility-trailblazers'); ?>
+                        </a></p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <div class="mt-profile-content">
+                <?php if ($candidate->post_content) : ?>
+                    <div class="mt-section">
+                        <h3><?php _e('About', 'mobility-trailblazers'); ?></h3>
+                        <?php echo wpautop($candidate->post_content); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($meta_fields['innovation']) : ?>
+                    <div class="mt-section">
+                        <h3><?php _e('Innovation', 'mobility-trailblazers'); ?></h3>
+                        <?php echo wpautop($meta_fields['innovation']); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($meta_fields['impact']) : ?>
+                    <div class="mt-section">
+                        <h3><?php _e('Impact', 'mobility-trailblazers'); ?></h3>
+                        <?php echo wpautop($meta_fields['impact']); ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Helper: Render winner card
+     */
+    private function render_winner_card($candidate_id, $rank) {
+        $candidate = get_post($candidate_id);
+        $company = get_post_meta($candidate_id, '_mt_company', true);
+        $category = wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'names'));
+        
+        ?>
+        <div class="mt-winner-card mt-rank-<?php echo $rank; ?>">
+            <div class="mt-rank-badge">#<?php echo $rank; ?></div>
+            <?php if (has_post_thumbnail($candidate_id)) : ?>
+                <div class="mt-winner-image">
+                    <?php echo get_the_post_thumbnail($candidate_id, 'medium'); ?>
+                </div>
+            <?php endif; ?>
+            <div class="mt-winner-info">
+                <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                <?php if ($company) : ?>
+                    <p class="mt-company"><?php echo esc_html($company); ?></p>
+                <?php endif; ?>
+                <?php if (!empty($category)) : ?>
+                    <p class="mt-category"><?php echo esc_html($category[0]); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
     }
 
     /**
