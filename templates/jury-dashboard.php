@@ -49,12 +49,7 @@ $assigned_candidates = get_posts(array(
 // Get evaluation statistics
 global $wpdb;
 $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-$evaluated_count = function_exists('mt_get_user_evaluation_count') 
-    ? mt_get_user_evaluation_count($current_user_id) 
-    : $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
-        $current_user_id
-    ));
+$evaluated_count = mt_get_user_evaluation_count($current_user_id);
 
 $total_assigned = count($assigned_candidates);
 $completion_rate = $total_assigned > 0 ? ($evaluated_count / $total_assigned) * 100 : 0;
@@ -157,7 +152,7 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                         $current_user_id
                     ));
                     
-                    $is_evaluated = !empty($existing_score);
+                    $is_evaluated = mt_has_jury_evaluated($current_user_id, $candidate_id);
                     $total_score = $is_evaluated ? $existing_score->total_score : 0;
                 ?>
                     <div class="mt-candidate-card <?php echo $is_evaluated ? 'evaluated' : 'pending'; ?>" 

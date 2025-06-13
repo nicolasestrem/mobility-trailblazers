@@ -64,12 +64,7 @@ $assigned_candidates = get_posts(array(
 // Get evaluation statistics
 global $wpdb;
 $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-$evaluated_count = function_exists('mt_get_user_evaluation_count') 
-    ? mt_get_user_evaluation_count($current_user_id) 
-    : $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
-        $current_user_id
-    ));
+$evaluated_count = mt_get_user_evaluation_count($current_user_id);
 
 $total_assigned = count($assigned_candidates);
 $completion_rate = $total_assigned > 0 ? ($evaluated_count / $total_assigned) * 100 : 0;
@@ -207,13 +202,7 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                         $category_slug = !empty($categories) ? $categories[0]->slug : '';
                         
                         // Check if already evaluated
-                        $existing_score = $wpdb->get_row($wpdb->prepare(
-                            "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d AND evaluation_round = 1",
-                            $candidate_id,
-                            $current_user_id
-                        ));
-                        
-                        $is_evaluated = !empty($existing_score);
+                        $is_evaluated = mt_has_jury_evaluated($current_user_id, $candidate_id);
                         $total_score = $is_evaluated ? $existing_score->total_score : 0;
                     ?>
                         <div class="mt-candidate-card <?php echo $is_evaluated ? 'mt-evaluated' : 'mt-pending'; ?>" 
@@ -299,7 +288,7 @@ $voting_enabled = get_option('mt_voting_enabled', false);
                                         </div>
                                         <div class="mt-score-row">
                                             <span><?php _e('Relevance', 'mobility-trailblazers'); ?>:</span>
-                                            <span><?php echo $existing_score->mobility_relevance_score; ?>/10</span>
+                                            <span><?php echo $existing_score->relevance_score; ?>/10</span>
                                         </div>
                                         <div class="mt-score-row">
                                             <span><?php _e('Visibility', 'mobility-trailblazers'); ?>:</span>

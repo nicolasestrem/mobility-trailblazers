@@ -33,6 +33,7 @@ if (!defined('MT_PLUGIN_FILE')) {
 // Include the jury system fix
 require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-fix.php';
 require_once MT_PLUGIN_PATH . 'includes/class-mt-ajax-fix.php';
+require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php';
 
 /**
  * Main Plugin Class
@@ -3316,5 +3317,72 @@ class MobilityTrailblazersPlugin {
 
 // Instantiate the plugin
 new MobilityTrailblazersPlugin();
+
+/**
+ * Get evaluation count for a user (unified function)
+ * This ensures consistency across all dashboards
+ */
+function mt_get_user_evaluation_count($user_id) {
+    global $wpdb;
+    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Get jury post ID for this user
+    $jury_post_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_jury_user_id' AND meta_value = %s",
+        $user_id
+    ));
+    
+    if ($jury_post_id) {
+        // Count evaluations by BOTH user ID and jury post ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
+            WHERE jury_member_id IN (%d, %d)",
+            $user_id,
+            $jury_post_id
+        ));
+    } else {
+        // Just count by user ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
+            WHERE jury_member_id = %d",
+            $user_id
+        ));
+    }
+}
+
+/**
+ * Check if jury member has evaluated a candidate (unified function)
+ */
+function mt_has_jury_evaluated($user_id, $candidate_id) {
+    global $wpdb;
+    $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Get jury post ID for this user
+    $jury_post_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_jury_user_id' AND meta_value = %s",
+        $user_id
+    ));
+    
+    if ($jury_post_id) {
+        // Check by BOTH user ID and jury post ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_scores 
+            WHERE candidate_id = %d AND jury_member_id IN (%d, %d)",
+            $candidate_id,
+            $user_id,
+            $jury_post_id
+        )) > 0;
+    } else {
+        // Just check by user ID
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_scores 
+            WHERE candidate_id = %d AND jury_member_id = %d",
+            $candidate_id,
+            $user_id
+        )) > 0;
+    }
+}
 
 ?>
