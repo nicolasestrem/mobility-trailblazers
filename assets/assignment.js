@@ -1,6 +1,11 @@
-/* Mobility Trailblazers Assignment System JavaScript */
+/* 
+ * Mobility Trailblazers Assignment System JavaScript - FIXED VERSION
+ * File: assets/assignment.js
+ */
 
 jQuery(document).ready(function($) {
+    console.log('Assignment system initializing...');
+    
     // Global variables
     let selectedCandidates = [];
     let selectedJuryMember = null;
@@ -15,38 +20,50 @@ jQuery(document).ready(function($) {
 
     // Initialize the assignment interface
     function initAssignmentInterface() {
-        // Load data from WordPress localized script
-        if (typeof mt_assignment_ajax !== 'undefined') {
-            allCandidates = mt_assignment_ajax.candidates || [];
-            allJuryMembers = mt_assignment_ajax.jury_members || [];
-            
-            console.log('Loaded candidates from WordPress:', allCandidates.length);
-            console.log('Loaded jury members from WordPress:', allJuryMembers.length);
-            
-            // Validate data structure
-            if (allCandidates.length === 0) {
-                showNotification('No candidates found. Please ensure candidates are properly loaded in WordPress.', 'warning');
-            }
-            if (allJuryMembers.length === 0) {
-                showNotification('No jury members found. Please ensure jury members are properly loaded in WordPress.', 'warning');
-            }
-        } else {
-            console.error('mt_assignment_ajax not found. Check if WordPress localization is working.');
+        console.log('Initializing assignment interface...');
+        
+        // Check if data is available
+        if (typeof mt_assignment_ajax === 'undefined') {
+            console.error('mt_assignment_ajax not found. WordPress localization failed.');
             showNotification('Failed to load assignment data. Please refresh the page.', 'error');
             return;
         }
-
-        renderCandidates();
-        renderJuryMembers();
+        
+        // Load data from WordPress
+        allCandidates = mt_assignment_ajax.candidates || [];
+        allJuryMembers = mt_assignment_ajax.jury_members || [];
+        
+        console.log('Loaded data:', {
+            candidates: allCandidates.length,
+            jury_members: allJuryMembers.length
+        });
+        
+        // Validate data
+        if (allCandidates.length === 0) {
+            showNotification('No candidates found. Please ensure candidates are properly loaded.', 'warning');
+        }
+        if (allJuryMembers.length === 0) {
+            showNotification('No jury members found. Please ensure jury members are properly loaded.', 'warning');
+        }
+        
+        // Initialize interface
+        renderCandidatesList();
+        renderJuryMembersList();
         updateStatistics();
         bindEventHandlers();
+        
+        console.log('Assignment interface initialized successfully');
     }
 
-    // Render candidates list
-    function renderCandidates() {
+    // Render candidates list with proper selection handling
+    function renderCandidatesList() {
         const container = $('#mt-candidates-list');
-        if (!container.length) return;
+        if (!container.length) {
+            console.warn('Candidates container not found');
+            return;
+        }
 
+        console.log('Rendering candidates list...');
         container.empty();
 
         let filteredCandidates = filterCandidates(allCandidates);
@@ -63,45 +80,68 @@ jQuery(document).ready(function($) {
             
             const candidateHtml = `
                 <div class="mt-candidate-item ${isSelected ? 'selected' : ''}" data-candidate-id="${candidate.id}">
-                    <div class="mt-candidate-name">${escapeHtml(candidate.name)}</div>
-                    <div class="mt-candidate-company">${escapeHtml(candidate.company || '')}</div>
-                    <div class="mt-candidate-position">${escapeHtml(candidate.position || '')}</div>
-                    <div class="mt-candidate-category">${formatCategory(candidate.category)}</div>
-                    <span class="mt-assignment-indicator ${candidate.assigned ? 'assigned' : 'unassigned'}">
-                        ${candidate.assigned ? `Assigned${juryMember ? ' to ' + juryMember.name : ''}` : 'Unassigned'}
-                    </span>
+                    <div class="mt-candidate-checkbox">
+                        <input type="checkbox" 
+                               id="candidate-${candidate.id}" 
+                               ${isSelected ? 'checked' : ''}
+                               data-candidate-id="${candidate.id}">
+                    </div>
+                    <div class="mt-candidate-info">
+                        <h4>${candidate.name}</h4>
+                        <p class="company">${candidate.company}</p>
+                        <div class="mt-candidate-meta">
+                            <span class="category">${candidate.category}</span>
+                            <span class="stage">${candidate.stage}</span>
+                        </div>
+                        ${candidate.assigned ? 
+                            `<div class="mt-assigned-to">
+                                <strong>Assigned to:</strong> ${juryMember ? juryMember.name : 'Unknown'}
+                            </div>` : 
+                            '<div class="mt-unassigned">Not assigned</div>'
+                        }
+                    </div>
                 </div>
             `;
             
             container.append(candidateHtml);
         });
-
-        // Update candidates count
-        $('.mt-candidates-count').text(filteredCandidates.length);
+        
+        // Update selection count
+        updateSelectionCount();
     }
 
-    // Render jury members list
-    function renderJuryMembers() {
-        const container = $('#mt-jury-list');
-        if (!container.length) return;
+    // Render jury members list with proper selection handling
+    function renderJuryMembersList() {
+        const container = $('#mt-jury-members-list');
+        if (!container.length) {
+            console.warn('Jury members container not found');
+            return;
+        }
 
+        console.log('Rendering jury members list...');
         container.empty();
 
         allJuryMembers.forEach(jury => {
             const isSelected = selectedJuryMember === jury.id;
-            const progressPercent = (jury.assignments / jury.max_assignments) * 100;
+            const utilizationPercentage = jury.max_assignments > 0 ? 
+                (jury.assignments / jury.max_assignments) * 100 : 0;
             
             const juryHtml = `
-                <div class="mt-jury-item ${isSelected ? 'active' : ''}" data-jury-id="${jury.id}">
-                    <div class="mt-jury-name">${escapeHtml(jury.name)}</div>
-                    <div class="mt-jury-position">${escapeHtml(jury.position || '')}</div>
-                    <div class="mt-jury-expertise">${escapeHtml(jury.expertise || '')}</div>
-                    ${jury.role === 'president' ? '<span class="mt-jury-role president">President</span>' : ''}
-                    ${jury.role === 'vice_president' ? '<span class="mt-jury-role vice-president">Vice President</span>' : ''}
+                <div class="mt-jury-item ${isSelected ? 'selected' : ''}" data-jury-id="${jury.id}">
+                    <div class="mt-jury-header">
+                        <h4>${jury.name}</h4>
+                        <p class="position">${jury.position}</p>
+                        <p class="company">${jury.company}</p>
+                    </div>
                     <div class="mt-jury-stats">
-                        Assignments: <strong>${jury.assignments}/${jury.max_assignments}</strong>
-                        <div class="mt-progress-bar">
-                            <div class="mt-progress-fill" style="width: ${Math.min(progressPercent, 100)}%"></div>
+                        <div class="assignments-count">
+                            <strong>Assignments:</strong> ${jury.assignments}/${jury.max_assignments}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${utilizationPercentage}%"></div>
+                        </div>
+                        <div class="available-slots">
+                            <strong>Available:</strong> ${jury.available_slots}
                         </div>
                     </div>
                 </div>
@@ -114,7 +154,7 @@ jQuery(document).ready(function($) {
     // Filter candidates based on current filters
     function filterCandidates(candidates) {
         return candidates.filter(candidate => {
-            // Stage filter (if implemented)
+            // Stage filter
             if (currentFilters.stage && candidate.stage !== currentFilters.stage) {
                 return false;
             }
@@ -124,20 +164,18 @@ jQuery(document).ready(function($) {
                 return false;
             }
             
-            // Assignment status filter
-            if (currentFilters.assignment) {
-                if (currentFilters.assignment === 'assigned' && !candidate.assigned) {
-                    return false;
-                }
-                if (currentFilters.assignment === 'unassigned' && candidate.assigned) {
-                    return false;
-                }
+            // Assignment filter
+            if (currentFilters.assignment === 'assigned' && !candidate.assigned) {
+                return false;
+            }
+            if (currentFilters.assignment === 'unassigned' && candidate.assigned) {
+                return false;
             }
             
             // Search filter
             if (currentFilters.search) {
                 const searchTerm = currentFilters.search.toLowerCase();
-                const searchableText = `${candidate.name} ${candidate.company} ${candidate.position}`.toLowerCase();
+                const searchableText = `${candidate.name} ${candidate.company}`.toLowerCase();
                 if (!searchableText.includes(searchTerm)) {
                     return false;
                 }
@@ -147,98 +185,59 @@ jQuery(document).ready(function($) {
         });
     }
 
-    // Update statistics
-    function updateStatistics() {
-        const totalCandidates = allCandidates.length;
-        const totalJury = allJuryMembers.length;
-        const assignedCandidates = allCandidates.filter(c => c.assigned).length;
-        const completionRate = totalCandidates > 0 ? (assignedCandidates / totalCandidates * 100).toFixed(1) : 0;
-        const avgPerJury = totalJury > 0 ? (assignedCandidates / totalJury).toFixed(1) : 0;
-
-        $('.mt-stat-total-candidates').text(totalCandidates);
-        $('.mt-stat-total-jury').text(totalJury);
-        $('.mt-stat-assigned-count').text(assignedCandidates);
-        $('.mt-stat-completion-rate').text(completionRate + '%');
-        $('.mt-stat-avg-per-jury').text(avgPerJury);
-    }
-
     // Bind event handlers
     function bindEventHandlers() {
+        console.log('Binding event handlers...');
+        
         // Candidate selection
-        $(document).on('click', '.mt-candidate-item', function() {
+        $(document).on('change', '.mt-candidate-item input[type="checkbox"]', function() {
             const candidateId = parseInt($(this).data('candidate-id'));
             toggleCandidateSelection(candidateId);
         });
-
+        
+        // Candidate item click (alternative to checkbox)
+        $(document).on('click', '.mt-candidate-item', function(e) {
+            if (!$(e.target).is('input[type="checkbox"]')) {
+                const checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
+            }
+        });
+        
         // Jury member selection
         $(document).on('click', '.mt-jury-item', function() {
             const juryId = parseInt($(this).data('jury-id'));
             selectJuryMember(juryId);
         });
-
-        // Search functionality
-        $('#mt-candidates-search').on('input', function() {
-            currentFilters.search = $(this).val();
-            renderCandidates();
-        });
-
-        $('#mt-jury-search').on('input', function() {
-            const searchTerm = $(this).val().toLowerCase();
-            $('.mt-jury-item').each(function() {
-                const name = $(this).find('.mt-jury-name').text().toLowerCase();
-                $(this).toggle(name.includes(searchTerm));
-            });
-        });
-
+        
         // Filter controls
         $('#mt-stage-filter').on('change', function() {
             currentFilters.stage = $(this).val();
-            renderCandidates();
+            renderCandidatesList();
         });
-
+        
         $('#mt-category-filter').on('change', function() {
             currentFilters.category = $(this).val();
-            renderCandidates();
+            renderCandidatesList();
         });
-
+        
         $('#mt-assignment-filter').on('change', function() {
             currentFilters.assignment = $(this).val();
-            renderCandidates();
+            renderCandidatesList();
         });
-
-        // Filter tags
-        $(document).on('click', '.mt-filter-tag', function() {
-            $('.mt-filter-tag').removeClass('active');
-            $(this).addClass('active');
-            
-            const category = $(this).data('category') || '';
-            currentFilters.category = category;
-            renderCandidates();
+        
+        $('#mt-search-input').on('input', function() {
+            currentFilters.search = $(this).val();
+            renderCandidatesList();
         });
-
-        // Button actions
-        $('#mt-select-all-candidates').on('click', selectAllCandidates);
-        $('#mt-clear-selection').on('click', clearSelection);
-        $('#mt-auto-assign-btn').on('click', openAutoAssignModal);
+        
+        // Action buttons
+        $('#mt-select-all-btn').on('click', selectAllCandidates);
+        $('#mt-clear-selection-btn').on('click', clearSelection);
         $('#mt-manual-assign-btn').on('click', performManualAssignment);
-        $('#mt-export-btn').on('click', exportAssignments);
-
-        // Modal controls
-        $('#mt-auto-assign-modal .mt-close-btn').on('click', closeAutoAssignModal);
-        $('#mt-execute-auto-assign').on('click', executeAutoAssignment);
-
-        // Algorithm selection
-        $(document).on('click', '.mt-algorithm-option', function() {
-            $('.mt-algorithm-option').removeClass('selected');
-            $(this).addClass('selected');
-        });
-
-        // Close modal on outside click
-        $('#mt-auto-assign-modal').on('click', function(e) {
-            if (e.target === this) {
-                closeAutoAssignModal();
-            }
-        });
+        $('#mt-auto-assign-btn').on('click', showAutoAssignModal);
+        $('#mt-clear-all-btn').on('click', clearAllAssignments);
+        
+        console.log('Event handlers bound successfully');
     }
 
     // Toggle candidate selection
@@ -251,10 +250,14 @@ jQuery(document).ready(function($) {
         }
         
         // Update visual selection
-        $(`.mt-candidate-item[data-candidate-id="${candidateId}"]`).toggleClass('selected');
+        const candidateElement = $(`.mt-candidate-item[data-candidate-id="${candidateId}"]`);
+        candidateElement.toggleClass('selected');
         
-        // Update selection count
-        updateSelectionInfo();
+        // Update selection count and button states
+        updateSelectionCount();
+        updateActionButtons();
+        
+        console.log('Selected candidates:', selectedCandidates);
     }
 
     // Select jury member
@@ -262,28 +265,40 @@ jQuery(document).ready(function($) {
         selectedJuryMember = selectedJuryMember === juryId ? null : juryId;
         
         // Update visual selection
-        $('.mt-jury-item').removeClass('active');
+        $('.mt-jury-item').removeClass('selected');
         if (selectedJuryMember) {
-            $(`.mt-jury-item[data-jury-id="${selectedJuryMember}"]`).addClass('active');
+            $(`.mt-jury-item[data-jury-id="${selectedJuryMember}"]`).addClass('selected');
         }
         
-        updateSelectionInfo();
+        updateActionButtons();
+        
+        console.log('Selected jury member:', selectedJuryMember);
     }
 
-    // Update selection information
-    function updateSelectionInfo() {
-        const selectedCount = selectedCandidates.length;
-        const selectedJury = selectedJuryMember ? 
-            allJuryMembers.find(j => j.id === selectedJuryMember) : null;
+    // Update selection count display
+    function updateSelectionCount() {
+        const count = selectedCandidates.length;
+        $('.mt-selected-count').text(count);
         
-        $('.mt-selected-candidates-count').text(selectedCount);
-        $('.mt-selected-jury-name').text(selectedJury ? selectedJury.name : 'None');
+        // Update candidate counter in header
+        if ($('#mt-candidates-header .count').length) {
+            $('#mt-candidates-header .count').text(`(${count} selected)`);
+        }
+    }
+
+    // Update action button states
+    function updateActionButtons() {
+        const hasSelectedCandidates = selectedCandidates.length > 0;
+        const hasSelectedJury = selectedJuryMember !== null;
         
         // Enable/disable manual assign button
-        $('#mt-manual-assign-btn').prop('disabled', selectedCount === 0 || !selectedJuryMember);
+        $('#mt-manual-assign-btn').prop('disabled', !hasSelectedCandidates || !hasSelectedJury);
+        
+        // Enable/disable clear selection button
+        $('#mt-clear-selection-btn').prop('disabled', !hasSelectedCandidates && !hasSelectedJury);
     }
 
-    // Select all candidates
+    // Select all visible candidates
     function selectAllCandidates() {
         const visibleCandidates = $('.mt-candidate-item:visible');
         selectedCandidates = [];
@@ -292,67 +307,74 @@ jQuery(document).ready(function($) {
             const candidateId = parseInt($(this).data('candidate-id'));
             selectedCandidates.push(candidateId);
             $(this).addClass('selected');
+            $(this).find('input[type="checkbox"]').prop('checked', true);
         });
         
-        updateSelectionInfo();
+        updateSelectionCount();
+        updateActionButtons();
+        
+        showNotification(`Selected ${selectedCandidates.length} candidates`, 'success');
     }
 
-    // Clear selection
+    // Clear all selections
     function clearSelection() {
         selectedCandidates = [];
         selectedJuryMember = null;
+        
         $('.mt-candidate-item').removeClass('selected');
-        $('.mt-jury-item').removeClass('active');
-        updateSelectionInfo();
-    }
-
-    // Open auto-assign modal
-    function openAutoAssignModal() {
-        $('#mt-auto-assign-modal').addClass('show');
-    }
-
-    // Close auto-assign modal
-    function closeAutoAssignModal() {
-        $('#mt-auto-assign-modal').removeClass('show');
+        $('.mt-candidate-item input[type="checkbox"]').prop('checked', false);
+        $('.mt-jury-item').removeClass('selected');
+        
+        updateSelectionCount();
+        updateActionButtons();
+        
+        showNotification('Selection cleared', 'info');
     }
 
     // Perform manual assignment
     function performManualAssignment() {
-        if (selectedCandidates.length === 0 || !selectedJuryMember) {
-            showNotification('Please select candidates and a jury member.', 'error');
+        if (selectedCandidates.length === 0) {
+            showNotification('Please select at least one candidate', 'error');
             return;
         }
-
+        
+        if (!selectedJuryMember) {
+            showNotification('Please select a jury member', 'error');
+            return;
+        }
+        
         const juryMember = allJuryMembers.find(j => j.id === selectedJuryMember);
         if (!juryMember) {
-            showNotification('Invalid jury member selected.', 'error');
+            showNotification('Invalid jury member selected', 'error');
             return;
         }
-
-        // Check if jury member would exceed their limit
-        const currentAssignments = juryMember.assignments;
-        const newAssignments = selectedCandidates.length;
-        if (currentAssignments + newAssignments > juryMember.max_assignments) {
-            const confirm = window.confirm(
-                `This assignment would give ${juryMember.name} ${currentAssignments + newAssignments} candidates, ` +
-                `exceeding their limit of ${juryMember.max_assignments}. Continue anyway?`
-            );
-            if (!confirm) return;
+        
+        // Check capacity
+        const newTotal = juryMember.assignments + selectedCandidates.length;
+        if (newTotal > juryMember.max_assignments) {
+            const confirmMessage = `This assignment will give ${juryMember.name} ${newTotal} candidates, ` +
+                `exceeding their limit of ${juryMember.max_assignments}. Continue anyway?`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
         }
-
-        // Prepare data for AJAX request
-        const assignmentData = {
+        
+        // Prepare AJAX data
+        const data = {
             action: 'mt_assign_candidates',
             candidate_ids: selectedCandidates,
             jury_member_id: selectedJuryMember,
             nonce: mt_assignment_ajax.nonce
         };
-
+        
         // Show loading state
-        $('#mt-manual-assign-btn').prop('disabled', true).text('Assigning...');
-
+        const assignButton = $('#mt-manual-assign-btn');
+        const originalText = assignButton.text();
+        assignButton.prop('disabled', true).text('Assigning...');
+        
         // Send AJAX request
-        $.post(mt_assignment_ajax.ajax_url, assignmentData)
+        $.post(mt_assignment_ajax.ajax_url, data)
             .done(function(response) {
                 if (response.success) {
                     showNotification(response.data.message, 'success');
@@ -368,156 +390,146 @@ jQuery(document).ready(function($) {
                     
                     // Update jury member assignment count
                     juryMember.assignments += selectedCandidates.length;
+                    juryMember.available_slots = Math.max(0, juryMember.max_assignments - juryMember.assignments);
                     
                     // Refresh displays
                     clearSelection();
-                    renderCandidates();
-                    renderJuryMembers();
+                    renderCandidatesList();
+                    renderJuryMembersList();
                     updateStatistics();
                 } else {
-                    showNotification(response.data.message || 'Assignment failed.', 'error');
+                    showNotification(response.data.message || 'Assignment failed', 'error');
                 }
             })
-            .fail(function() {
+            .fail(function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
                 showNotification('Network error. Please try again.', 'error');
             })
             .always(function() {
-                $('#mt-manual-assign-btn').prop('disabled', false).text('Assign Selected');
+                // Restore button state
+                assignButton.prop('disabled', false).text(originalText);
+                updateActionButtons();
             });
     }
 
-    // Execute auto assignment
-    function executeAutoAssignment() {
-        const candidatesPerJury = parseInt($('#mt-candidates-per-jury').val()) || 10;
-        const algorithm = $('.mt-algorithm-option.selected').data('algorithm') || 'balanced';
-        const balanceCategories = $('#mt-balance-categories').is(':checked');
-        const matchExpertise = $('#mt-match-expertise').is(':checked');
-        const clearExisting = $('#mt-clear-existing').is(':checked');
-
-        // Validate input
-        if (candidatesPerJury < 1 || candidatesPerJury > 50) {
-            showNotification('Please enter a valid number of candidates per jury member (1-50).', 'error');
+    // Clear all assignments
+    function clearAllAssignments() {
+        if (!confirm('Are you sure you want to clear ALL assignments? This cannot be undone.')) {
             return;
         }
-
-        // Show loading state
-        $('#mt-assignment-loading').addClass('show');
-        $('#mt-execute-auto-assign').prop('disabled', true);
-
-        // Prepare data for AJAX request
-        const assignmentData = {
-            action: 'mt_auto_assign',
-            candidates_per_jury: candidatesPerJury,
-            algorithm: algorithm,
-            balance_categories: balanceCategories,
-            match_expertise: matchExpertise,
-            clear_existing: clearExisting,
+        
+        const data = {
+            action: 'mt_clear_all_assignments',
             nonce: mt_assignment_ajax.nonce
         };
-
-        // Send AJAX request
-        $.post(mt_assignment_ajax.ajax_url, assignmentData)
+        
+        // Show loading state
+        const clearButton = $('#mt-clear-all-btn');
+        const originalText = clearButton.text();
+        clearButton.prop('disabled', true).text('Clearing...');
+        
+        $.post(mt_assignment_ajax.ajax_url, data)
             .done(function(response) {
                 if (response.success) {
                     showNotification(response.data.message, 'success');
                     
-                    // Reload data from server or simulate update
-                    if (clearExisting) {
-                        // Reset all assignments
-                        allCandidates.forEach(candidate => {
-                            candidate.assigned = false;
-                            candidate.jury_member_id = null;
-                        });
-                        allJuryMembers.forEach(jury => {
-                            jury.assignments = 0;
-                        });
-                    }
+                    // Update local data
+                    allCandidates.forEach(candidate => {
+                        candidate.assigned = false;
+                        candidate.jury_member_id = null;
+                    });
                     
-                    // Simulate assignment for demo (replace with actual data reload)
-                    simulateAutoAssignment(candidatesPerJury, algorithm);
+                    allJuryMembers.forEach(jury => {
+                        jury.assignments = 0;
+                        jury.available_slots = jury.max_assignments;
+                    });
                     
                     // Refresh displays
                     clearSelection();
-                    renderCandidates();
-                    renderJuryMembers();
+                    renderCandidatesList();
+                    renderJuryMembersList();
                     updateStatistics();
-                    closeAutoAssignModal();
                 } else {
-                    showNotification(response.data.message || 'Auto-assignment failed.', 'error');
+                    showNotification(response.data.message || 'Failed to clear assignments', 'error');
                 }
             })
-            .fail(function() {
+            .fail(function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
                 showNotification('Network error. Please try again.', 'error');
             })
             .always(function() {
-                $('#mt-assignment-loading').removeClass('show');
-                $('#mt-execute-auto-assign').prop('disabled', false);
+                clearButton.prop('disabled', false).text(originalText);
             });
     }
 
-    // Simulate auto assignment for demo purposes
-    function simulateAutoAssignment(candidatesPerJury, algorithm) {
-        const unassignedCandidates = allCandidates.filter(c => !c.assigned);
-        let juryIndex = 0;
+    // Show auto-assign modal
+    function showAutoAssignModal() {
+        // Implementation for auto-assign modal
+        showNotification('Auto-assign feature coming soon!', 'info');
+    }
+
+    // Update statistics display
+    function updateStatistics() {
+        const totalCandidates = allCandidates.length;
+        const assignedCandidates = allCandidates.filter(c => c.assigned).length;
+        const totalJury = allJuryMembers.length;
+        const completionRate = totalCandidates > 0 ? (assignedCandidates / totalCandidates) * 100 : 0;
+        const avgPerJury = totalJury > 0 ? assignedCandidates / totalJury : 0;
         
-        unassignedCandidates.forEach((candidate, index) => {
-            const jury = allJuryMembers[juryIndex];
-            
-            if (jury.assignments < candidatesPerJury) {
-                candidate.assigned = true;
-                candidate.jury_member_id = jury.id;
-                jury.assignments++;
-            }
-            
-            // Move to next jury member when current one is full
-            if (jury.assignments >= candidatesPerJury) {
-                juryIndex = (juryIndex + 1) % allJuryMembers.length;
-            }
+        // Update statistics display
+        $('.mt-stat-total-candidates').text(totalCandidates);
+        $('.mt-stat-assigned-candidates').text(assignedCandidates);
+        $('.mt-stat-completion-rate').text(completionRate.toFixed(1) + '%');
+        $('.mt-stat-avg-per-jury').text(avgPerJury.toFixed(1));
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        console.log(`[${type.toUpperCase()}] ${message}`);
+        
+        // Create notification element
+        const notification = $(`
+            <div class="mt-notification mt-notification-${type}">
+                <span class="message">${message}</span>
+                <button class="close-btn">&times;</button>
+            </div>
+        `);
+        
+        // Add to notification container or create one
+        let container = $('#mt-notifications');
+        if (!container.length) {
+            container = $('<div id="mt-notifications"></div>');
+            $('body').append(container);
+        }
+        
+        container.append(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.fadeOut(() => notification.remove());
+        }, 5000);
+        
+        // Manual close
+        notification.find('.close-btn').on('click', () => {
+            notification.fadeOut(() => notification.remove());
         });
     }
 
-    // Export assignments
-    function exportAssignments() {
-        const assignmentData = {
-            candidates: allCandidates,
-            juryMembers: allJuryMembers,
-            assignments: allCandidates.filter(c => c.assigned).map(c => ({
-                candidateId: c.id,
-                candidateName: c.name,
-                juryMemberId: c.jury_member_id,
-                juryMemberName: allJuryMembers.find(j => j.id === c.jury_member_id)?.name
-            })),
-            exportDate: new Date().toISOString(),
-            statistics: {
-                totalCandidates: allCandidates.length,
-                assignedCandidates: allCandidates.filter(c => c.assigned).length,
-                totalJuryMembers: allJuryMembers.length
-            }
-        };
-        
-        const blob = new Blob([JSON.stringify(assignmentData, null, 2)], {
-            type: 'application/json'
-        });
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mobility-trailblazers-assignments-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showNotification('Assignment data exported successfully!', 'success');
-    }
-
-    // Utility functions
-    function formatCategory(category) {
-        const categoryMap = {
-            'established-companies': 'Established Companies',
-            'startups-new-makers': 'Start-ups & New Makers',
-            'infrastructure-politics-public': 'Infrastructure/Politics/Public'
-        };
-        return categoryMap[category] || category;
-    }
+    // Initialize when DOM is ready
+    initAssignmentInterface();
+    
+    // Make functions available globally for debugging
+    window.mtAssignment = {
+        selectedCandidates: () => selectedCandidates,
+        selectedJuryMember: () => selectedJuryMember,
+        allCandidates: () => allCandidates,
+        allJuryMembers: () => allJuryMembers,
+        refresh: () => {
+            renderCandidatesList();
+            renderJuryMembersList();
+            updateStatistics();
+        }
+    };
+    
+    console.log('Assignment system ready');
 });
