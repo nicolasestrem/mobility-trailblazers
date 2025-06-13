@@ -134,6 +134,9 @@ class MT_Jury_Consistency {
         $valid_user_ids = array_values($mappings);
         $valid_jury_ids = array_keys($mappings);
         
+        // Also get all existing user IDs
+        $all_user_ids = $wpdb->get_col("SELECT ID FROM {$wpdb->users}");
+        
         // Find evaluations with invalid IDs
         $issues = array(
             'high_ids' => 0,
@@ -142,60 +145,46 @@ class MT_Jury_Consistency {
             'details' => array()
         );
         
-        // Check for high IDs (jury post IDs)
-        if (!empty($valid_jury_ids)) {
-            $jury_ids_str = implode(',', array_map('intval', $valid_jury_ids));
-            $high_id_count = $wpdb->get_var(
-                "SELECT COUNT(*) FROM $table_scores 
-                WHERE jury_member_id IN ($jury_ids_str)"
-            );
-            $issues['high_ids'] = intval($high_id_count);
-        }
+        // Get all unique jury_member_ids from evaluations
+        $all_eval_ids = $wpdb->get_results(
+            "SELECT DISTINCT jury_member_id, COUNT(*) as count 
+            FROM $table_scores 
+            GROUP BY jury_member_id"
+        );
         
-        // Check for orphaned evaluations (IDs not matching any current user or jury post)
-        $all_valid_ids = array_merge($valid_user_ids, $valid_jury_ids);
-        if (!empty($all_valid_ids)) {
-            $valid_ids_str = implode(',', array_map('intval', $all_valid_ids));
-            $orphaned_count = $wpdb->get_var(
-                "SELECT COUNT(*) FROM $table_scores 
-                WHERE jury_member_id NOT IN ($valid_ids_str)"
-            );
-            $issues['orphaned'] = intval($orphaned_count);
-        }
-        
-        $issues['total'] = $issues['high_ids'] + $issues['orphaned'];
-        
-        // Get details if there are issues
-        if ($issues['total'] > 0) {
-            $problem_ids = $wpdb->get_results(
-                "SELECT DISTINCT jury_member_id, COUNT(*) as count 
-                FROM $table_scores 
-                GROUP BY jury_member_id 
-                ORDER BY jury_member_id DESC"
-            );
+        foreach ($all_eval_ids as $eval) {
+            $id = intval($eval->jury_member_id);
+            $type = 'unknown';
+            $needs_action = false;
             
-            foreach ($problem_ids as $row) {
-                $id = intval($row->jury_member_id);
-                $type = 'unknown';
-                $mapped_to = null;
-                
-                if (in_array($id, $valid_jury_ids)) {
-                    $type = 'jury_post_id';
-                    $mapped_to = $mappings[$id];
-                } elseif (in_array($id, $valid_user_ids)) {
-                    $type = 'user_id';
-                } else {
-                    $type = 'orphaned';
-                }
-                
+            if (in_array($id, $all_user_ids)) {
+                // It's a valid user ID
+                $type = 'user_id';
+                $needs_action = false;
+            } elseif (in_array($id, $valid_jury_ids)) {
+                // It's a jury post ID that needs conversion
+                $type = 'jury_post_id';
+                $needs_action = true;
+                $issues['high_ids'] += intval($eval->count);
+            } else {
+                // It's orphaned (no matching user or jury post)
+                $type = 'orphaned';
+                $needs_action = false; // We preserve orphaned records
+                $issues['orphaned'] += intval($eval->count);
+            }
+            
+            // Only add to details if it needs action or is orphaned
+            if ($needs_action || $type === 'orphaned') {
                 $issues['details'][] = array(
                     'id' => $id,
                     'type' => $type,
-                    'count' => intval($row->count),
-                    'mapped_to' => $mapped_to
+                    'count' => intval($eval->count),
+                    'mapped_to' => isset($mappings[$id]) ? $mappings[$id] : null
                 );
             }
         }
+        
+        $issues['total'] = $issues['high_ids'] + $issues['orphaned'];
         
         return $issues;
     }
@@ -349,6 +338,7 @@ class MT_Jury_Consistency {
     
     /**
      * Sync all evaluations to use correct user IDs
+     * Handles duplicate entries by merging or keeping the most recent
      * 
      * @return array Result array with success status and message
      */
@@ -357,6 +347,7 @@ class MT_Jury_Consistency {
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
         
         $synced = 0;
+        $duplicates_handled = 0;
         $errors = array();
         
         // Get all jury mappings
@@ -366,48 +357,133 @@ class MT_Jury_Consistency {
         $wpdb->query('START TRANSACTION');
         
         try {
-            // Convert jury post IDs to user IDs
+            // Process each jury post ID to user ID mapping
             foreach ($mappings as $jury_post_id => $user_id) {
-                $result = $wpdb->update(
-                    $table_scores,
-                    array('jury_member_id' => $user_id),
-                    array('jury_member_id' => $jury_post_id),
-                    array('%d'),
-                    array('%d')
-                );
+                // First, check for potential duplicates
+                $duplicates = $wpdb->get_results($wpdb->prepare(
+                    "SELECT j.*, u.id as user_eval_id, u.total_score as user_score, u.evaluated_at as user_evaluated
+                    FROM $table_scores j
+                    LEFT JOIN $table_scores u ON (
+                        u.candidate_id = j.candidate_id 
+                        AND u.jury_member_id = %d 
+                        AND u.evaluation_round = j.evaluation_round
+                    )
+                    WHERE j.jury_member_id = %d",
+                    $user_id,
+                    $jury_post_id
+                ));
                 
-                if ($result !== false) {
-                    $synced += $result;
-                } elseif ($wpdb->last_error) {
-                    $errors[] = $wpdb->last_error;
+                foreach ($duplicates as $dup) {
+                    if ($dup->user_eval_id) {
+                        // Duplicate exists - decide which to keep
+                        $jury_time = strtotime($dup->evaluated_at);
+                        $user_time = strtotime($dup->user_evaluated);
+                        
+                        if ($jury_time > $user_time) {
+                            // Jury post evaluation is newer - update the user ID record
+                            $wpdb->update(
+                                $table_scores,
+                                array(
+                                    'courage_score' => $dup->courage_score,
+                                    'innovation_score' => $dup->innovation_score,
+                                    'implementation_score' => $dup->implementation_score,
+                                    'mobility_relevance_score' => $dup->mobility_relevance_score,
+                                    'visibility_score' => $dup->visibility_score,
+                                    'total_score' => $dup->total_score,
+                                    'comments' => $dup->comments,
+                                    'evaluated_at' => $dup->evaluated_at
+                                ),
+                                array(
+                                    'id' => $dup->user_eval_id
+                                ),
+                                array('%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s'),
+                                array('%d')
+                            );
+                            
+                            // Delete the jury post record
+                            $wpdb->delete(
+                                $table_scores,
+                                array('id' => $dup->id),
+                                array('%d')
+                            );
+                            
+                            $duplicates_handled++;
+                            error_log(sprintf(
+                                'MT Sync: Merged newer jury evaluation (ID %d) into user evaluation (ID %d) for candidate %d',
+                                $dup->id,
+                                $dup->user_eval_id,
+                                $dup->candidate_id
+                            ));
+                        } else {
+                            // User evaluation is newer - just delete the jury post record
+                            $wpdb->delete(
+                                $table_scores,
+                                array('id' => $dup->id),
+                                array('%d')
+                            );
+                            
+                            $duplicates_handled++;
+                            error_log(sprintf(
+                                'MT Sync: Removed older jury evaluation (ID %d) in favor of user evaluation (ID %d) for candidate %d',
+                                $dup->id,
+                                $dup->user_eval_id,
+                                $dup->candidate_id
+                            ));
+                        }
+                    } else {
+                        // No duplicate - safe to convert
+                        $result = $wpdb->update(
+                            $table_scores,
+                            array('jury_member_id' => $user_id),
+                            array('id' => $dup->id),
+                            array('%d'),
+                            array('%d')
+                        );
+                        
+                        if ($result !== false) {
+                            $synced++;
+                        } elseif ($wpdb->last_error) {
+                            $errors[] = $wpdb->last_error;
+                        }
+                    }
                 }
             }
             
-            // Handle orphaned evaluations (optional - could delete or reassign)
-            // For now, we'll leave them as is but log them
-            $orphaned = $wpdb->get_var(
+            // Handle orphaned evaluations
+            $orphaned_count = $wpdb->get_var(
                 "SELECT COUNT(DISTINCT jury_member_id) FROM $table_scores 
-                WHERE jury_member_id NOT IN (SELECT ID FROM {$wpdb->users})"
+                WHERE jury_member_id NOT IN (SELECT ID FROM {$wpdb->users})
+                AND jury_member_id NOT IN (" . implode(',', array_keys($mappings)) . ")"
             );
             
             if (empty($errors)) {
                 $wpdb->query('COMMIT');
                 
-                $message = $orphaned > 0 
-                    ? sprintf(__('%d orphaned evaluations were preserved.', 'mobility-trailblazers'), $orphaned)
-                    : __('All evaluations are now properly linked.', 'mobility-trailblazers');
+                $message = sprintf(
+                    __('Successfully processed evaluations: %d converted, %d duplicates resolved.', 'mobility-trailblazers'),
+                    $synced,
+                    $duplicates_handled
+                );
+                
+                if ($orphaned_count > 0) {
+                    $message .= ' ' . sprintf(
+                        __('%d orphaned evaluations were preserved.', 'mobility-trailblazers'),
+                        $orphaned_count
+                    );
+                }
                 
                 return array(
                     'success' => true,
                     'synced' => $synced,
-                    'orphaned' => $orphaned,
+                    'duplicates' => $duplicates_handled,
+                    'orphaned' => $orphaned_count,
                     'message' => $message
                 );
             } else {
                 $wpdb->query('ROLLBACK');
                 return array(
                     'success' => false,
-                    'message' => __('Database error occurred: ', 'mobility-trailblazers') . implode(', ', $errors)
+                    'message' => __('Database error occurred: ', 'mobility-trailblazers') . implode(', ', array_unique($errors))
                 );
             }
         } catch (Exception $e) {
@@ -586,6 +662,114 @@ class MT_Jury_Consistency {
                 $user_id
             )) > 0;
         }
+    }
+
+    /**
+     * Alternative manual sync method for complex cases
+     * This method provides more control and detailed feedback
+     */
+    public function manual_sync_with_details() {
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        $report = array(
+            'checked' => 0,
+            'converted' => 0,
+            'duplicates_removed' => 0,
+            'errors' => array(),
+            'details' => array()
+        );
+        
+        // Get all jury mappings
+        $mappings = $this->get_all_jury_mappings();
+        
+        foreach ($mappings as $jury_post_id => $user_id) {
+            // Get all evaluations for this jury post ID
+            $jury_evals = $wpdb->get_results($wpdb->prepare(
+                "SELECT * FROM $table_scores WHERE jury_member_id = %d",
+                $jury_post_id
+            ));
+            
+            $report['checked'] += count($jury_evals);
+            
+            foreach ($jury_evals as $eval) {
+                // Check if user already has evaluation for this candidate
+                $existing = $wpdb->get_row($wpdb->prepare(
+                    "SELECT * FROM $table_scores 
+                    WHERE candidate_id = %d 
+                    AND jury_member_id = %d 
+                    AND evaluation_round = %d",
+                    $eval->candidate_id,
+                    $user_id,
+                    $eval->evaluation_round
+                ));
+                
+                if ($existing) {
+                    // Duplicate found - compare and decide
+                    $jury_time = strtotime($eval->evaluated_at);
+                    $user_time = strtotime($existing->evaluated_at);
+                    
+                    $action = '';
+                    if ($jury_time > $user_time) {
+                        // Update existing with jury data
+                        $wpdb->update(
+                            $table_scores,
+                            array(
+                                'courage_score' => $eval->courage_score,
+                                'innovation_score' => $eval->innovation_score,
+                                'implementation_score' => $eval->implementation_score,
+                                'mobility_relevance_score' => $eval->mobility_relevance_score,
+                                'visibility_score' => $eval->visibility_score,
+                                'total_score' => $eval->total_score,
+                                'comments' => $eval->comments,
+                                'evaluated_at' => $eval->evaluated_at
+                            ),
+                            array('id' => $existing->id)
+                        );
+                        $action = 'updated_existing';
+                    } else {
+                        $action = 'kept_existing';
+                    }
+                    
+                    // Delete jury record
+                    $wpdb->delete($table_scores, array('id' => $eval->id));
+                    $report['duplicates_removed']++;
+                    
+                    $report['details'][] = array(
+                        'candidate_id' => $eval->candidate_id,
+                        'jury_post_id' => $jury_post_id,
+                        'user_id' => $user_id,
+                        'action' => $action,
+                        'jury_date' => $eval->evaluated_at,
+                        'user_date' => $existing->evaluated_at
+                    );
+                } else {
+                    // No duplicate - convert
+                    $result = $wpdb->update(
+                        $table_scores,
+                        array('jury_member_id' => $user_id),
+                        array('id' => $eval->id)
+                    );
+                    
+                    if ($result !== false) {
+                        $report['converted']++;
+                        $report['details'][] = array(
+                            'candidate_id' => $eval->candidate_id,
+                            'jury_post_id' => $jury_post_id,
+                            'user_id' => $user_id,
+                            'action' => 'converted'
+                        );
+                    } else {
+                        $report['errors'][] = array(
+                            'eval_id' => $eval->id,
+                            'error' => $wpdb->last_error
+                        );
+                    }
+                }
+            }
+        }
+        
+        return $report;
     }
 }
 
