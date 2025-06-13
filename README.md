@@ -1,62 +1,43 @@
-# Mobility Trailblazers Award Platform
+# Mobility Trailblazers WordPress Plugin
 
-> 🏆 **25 Mobility Trailblazers in 25** - Recognizing courage and innovation in mobility transformation across the DACH region
+A comprehensive award management system for the "25 Mobility Trailblazers in 25" award platform, recognizing the best mobility shapers in the DACH region.
 
-## Overview
+## 🚀 Overview
 
-The Mobility Trailblazers platform is a comprehensive WordPress-based award system designed to identify, evaluate, and celebrate the top 25 individuals driving mobility transformation in Germany, Austria, and Switzerland (DACH region). This platform serves as both a public communication hub and a secure jury evaluation system.
+This WordPress plugin provides a complete solution for managing an awards program with:
+- **Candidate management** (490+ nominees)
+- **Jury evaluation system** (22 jury members)
+- **Multi-criteria scoring** (5 criteria, 1-10 scale each)
+- **Dashboard consistency** across admin and frontend interfaces
+- **Docker-based deployment** with Komodo stack management
 
-**Key Mission**: "Weil mobiler Wandel Mut braucht" (Because mobility transformation requires courage)
+## 🏗️ Architecture
 
-## 🎯 Project Goals
-
-1. **Individual Recognition** - Honor 25 makers and shapers transforming mobility
-2. **Innovation Showcase** - Highlight courageous innovations strengthening DACH's mobility competitiveness  
-3. **Transformation Visibility** - Demonstrate the scope of mobility transformation achievements
-4. **Award Ceremony** - October 30, 2025, in Berlin
-
-## 🛠 Technical Stack
-
-- **WordPress 6.4** with PHP 8.2
-- **MariaDB 11** database
-- **Redis** for caching
-- **Docker** containerization with Komodo management
-- **Custom WordPress Plugin** for award management
-- **phpMyAdmin** for database management
-
-### Docker Environment (STAGING)
-- WordPress: Port 9989
-- MariaDB: Port 9306
-- Redis: Port 9191
-- phpMyAdmin: Port 9081
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Docker and Docker Compose
-- 4GB+ RAM recommended
-- Port availability: 9989, 9306, 9191, 9081
-
-### Installation
-
-1. Navigate to the project directory:
-```bash
-cd /mnt/dietpi_userdata/docker-files/STAGING/
+### Docker Stack Configuration
+```yaml
+services:
+  wordpress:     # Port 9989 - Main WordPress site
+  wpcli:        # WordPress CLI for management
+  db:           # MariaDB 11 database (Port 9306)
+  redis:        # Redis cache (Port 9191)
+  phpmyadmin:   # Database management (Port 9081)
 ```
 
-2. Start the Docker stack:
-```bash
-docker-compose up -d
+### Plugin Structure
 ```
-
-3. Access the platform:
-- WordPress: http://192.168.1.7:9989
-- phpMyAdmin: http://192.168.1.7:9081
-
-4. The plugin is already installed and activated at:
-```
-/wordpress_data/wp-content/plugins/mobility-trailblazers/
+/wp-content/plugins/mobility-trailblazers/
+├── mobility-trailblazers.php      # Main plugin file
+├── includes/
+│   ├── class-mt-core.php          # Core functionality
+│   ├── class-mt-jury-consistency.php  # Dashboard sync handler
+│   └── class-mt-ajax-handler.php  # AJAX evaluation handling
+├── templates/
+│   ├── jury-dashboard.php         # Admin dashboard
+│   ├── jury-dashboard-frontend.php # Frontend dashboard
+│   └── evaluate-candidate.php     # Evaluation interface
+└── assets/
+    ├── css/
+    └── js/
 ```
 
 ## 📋 Features
@@ -67,253 +48,276 @@ docker-compose up -d
   - Established Companies
   - Start-ups & New Makers
   - Infrastructure/Politics/Public Companies
-- **Current Status**: 490+ candidates, 22 jury members in system
+- **Current Status**: 490+ candidates, 22 jury members
 
-### Jury Evaluation Platform ✅ 
-- **Secure jury member dashboard** with personalized access
-- **Real-time statistics**: Assigned, Evaluated, Pending, Progress %
-- **Individual evaluation interface** with visual scoring system
-- **Five evaluation criteria scoring** (1-10 scale):
+### Jury Evaluation Platform ✅
+- **Secure jury member dashboard** with role-based access
+- **Real-time evaluation statistics**
+- **Five evaluation criteria** (1-10 scale each, 50 points total):
   - Mut & Pioniergeist (Courage & Pioneer Spirit)
   - Innovationsgrad (Innovation Degree)
   - Umsetzungskraft & Wirkung (Implementation & Impact)
   - Relevanz für Mobilitätswende (Mobility Transformation Relevance)
   - Vorbildfunktion & Sichtbarkeit (Role Model & Visibility)
-- **100% Dashboard Consistency** - Admin and frontend dashboards show identical data
+- **100% Dashboard Consistency** between admin and frontend views
 
-### Jury Dashboard Access ✅ 
-- **Admin Dashboard**: `http://192.168.1.7:9989/wp-admin/admin.php?page=mt-jury-dashboard`
-- **Frontend Dashboard**: Any page with `[mt_jury_dashboard]` shortcode
-- **Evaluation Page**: `http://192.168.1.7:9989/wp-admin/admin.php?page=mt-evaluate&candidate=[ID]`
+### Dashboard Consistency System ✅
+- **Unified evaluation counting** across all interfaces
+- **Automatic ID synchronization** (jury post IDs → user IDs)
+- **Duplicate evaluation handling** with newest-wins strategy
+- **Orphaned evaluation preservation** for data integrity
+- **Real-time sync status monitoring** with admin notices
 
-## 🔧 Recent Updates
+## 🔧 Recent Implementation (June 13, 2025)
 
-### Dashboard Consistency Implementation (June 13, 2025)
-- ✅ Created unified evaluation counting system
-- ✅ Fixed inconsistent jury member ID usage (user IDs vs post IDs)
-- ✅ Implemented data synchronization for legacy evaluations
-- ✅ Both admin and frontend dashboards now show identical counts
+### Dashboard Consistency Enhancement
 
-#### Technical Implementation
-1. **Consistency Class**: `class-mt-jury-consistency.php`
-   - Handles unified evaluation counting
-   - Provides data synchronization capabilities
-   - Ensures all new evaluations use WordPress user IDs
+#### Problem Solved
+- Admin and frontend dashboards showed different evaluation counts
+- Some evaluations used jury post IDs (549, 555, 558) instead of user IDs
+- Duplicate entries caused database constraint violations
+- Jury member deletion orphaned evaluations
 
-2. **Unified Functions**:
-   - `mt_get_user_evaluation_count($user_id)` - Gets accurate evaluation count
-   - `mt_has_jury_evaluated($user_id, $candidate_id)` - Checks evaluation status
+#### Solution Implemented
 
-3. **Database Improvements**:
+1. **Enhanced Consistency Class** (`class-mt-jury-consistency.php`):
+   ```php
+   // Unified evaluation counting
+   mt_get_user_evaluation_count($user_id)
+   mt_has_jury_evaluated($user_id, $candidate_id)
+   mt_get_user_evaluation($user_id, $candidate_id)
+   ```
+
+2. **Intelligent Sync System**:
+   - Detects evaluations using jury post IDs
+   - Handles duplicate entries (keeps newest)
+   - Preserves orphaned evaluations
+   - Transaction-based sync for data integrity
+
+3. **Admin Interface Integration**:
+   - Real-time sync status notices
+   - One-click sync button
+   - Detailed sync reporting
+   - Handles jury member additions/deletions
+
+4. **Database Improvements**:
    - Fixed missing `comments` column
-   - Changed `total_score` from DECIMAL to INT
-   - Standardized on WordPress user IDs for all evaluations
+   - Standardized on WordPress user IDs
+   - Maintains unique constraints
+   - Preserves historical data
 
-### Previous Updates
+## 🛠️ Installation & Setup
 
-#### Database Schema Fixes (June 13, 2025)
-- ✅ Fixed "Database error. Please try again" issue
-- ✅ Added missing `comments` column to scores table
-- ✅ Fixed `total_score` data type mismatch
-- ✅ Improved AJAX handler field name handling
+### 1. Prerequisites
+- Docker and Docker Compose
+- Komodo for stack management
+- Access to server at 192.168.1.7
 
-#### PHP 8.2 Compatibility (Previous Session)
-- ✅ Fixed PHP 8.2 deprecation warnings
-- ✅ Custom php.ini configuration
-- ✅ Must-use plugin for warning suppression
-
-## 📁 Project Structure
-
-```
-/mnt/dietpi_userdata/docker-files/STAGING/
-├── docker-compose.yml
-├── php.ini
-├── wordpress_data/
-│   ├── wp-config.php
-│   └── wp-content/
-│       ├── mu-plugins/
-│       │   └── suppress-php82-warnings.php
-│       └── plugins/
-│           └── mobility-trailblazers/
-│               ├── mobility-trailblazers.php (Main plugin file)
-│               ├── includes/
-│               │   ├── class-mt-ajax-fix.php
-│               │   ├── class-mt-jury-consistency.php ✨ NEW
-│               │   └── class-mt-jury-fix.php
-│               └── templates/
-│                   ├── jury-dashboard.php (Admin dashboard)
-│                   └── jury-dashboard-frontend.php (Frontend shortcode)
-```
-
-## 📊 Database Schema
-
-### wp_mt_candidate_scores
-```sql
-Field                Type           Null    Key     Default    Extra
-id                   mediumint(9)   NO      PRI     NULL       auto_increment
-candidate_id         bigint(20)     NO      MUL     NULL
-jury_member_id       bigint(20)     NO      MUL     NULL       (WordPress user ID)
-courage_score        tinyint(2)     NO              0
-innovation_score     tinyint(2)     NO              0
-implementation_score tinyint(2)     NO              0
-visibility_score     tinyint(2)     NO              0
-relevance_score      int(11)        NO              0
-total_score          int(11)        NO              NULL
-comments             text           YES             NULL
-evaluation_round     tinyint(1)     NO              1          (unused)
-evaluated_at         datetime       NO              NULL
-```
-
-## 🔒 Security & Permissions
-
-### Role Hierarchy
-- **Administrator**: Full access to all features
-- **MT Award Admin**: Custom role with award management capabilities
-- **MT Jury Member**: Limited access to assigned candidates only
-
-### Access Control
-- Menu items use 'read' capability for jury access
-- Permission checks implemented inside page callbacks
-- Jury members cannot access other jury members' assignments
-- Evaluation data stored securely in custom database table
-
-## 📝 Commands Reference
-
-### Useful WP-CLI Commands
+### 2. Deploy the Stack
 ```bash
-# Access WP-CLI container
-docker exec -it mobility_wpcli_STAGING bash
+cd /mnt/dietpi_userdata/docker-files/STAGING/
+docker-compose up -d
+```
 
-# List jury members with role
+### 3. Access Points
+- **WordPress**: http://192.168.1.7:9989
+- **phpMyAdmin**: http://192.168.1.7:9081
+- **Admin Dashboard**: http://192.168.1.7:9989/wp-admin/admin.php?page=mt-jury-dashboard
+- **Frontend Dashboard**: Any page with `[mt_jury_dashboard]` shortcode
+
+## 📝 Usage Guide
+
+### For Administrators
+
+#### Managing Jury Members
+```bash
+# List all jury members
 docker exec mobility_wpcli_STAGING wp user list --role=mt_jury_member
 
-# Check evaluation counts for all jury members
+# Check evaluation counts
 docker exec mobility_wpcli_STAGING wp eval '
-$jury_users = get_users(array("role" => "mt_jury_member"));
-foreach ($jury_users as $user) {
+$users = get_users(array("role" => "mt_jury_member"));
+foreach ($users as $user) {
     $count = mt_get_user_evaluation_count($user->ID);
     echo "User {$user->ID} ({$user->display_name}): {$count} evaluations\n";
 }
 '
+```
 
-# Check for data sync issues
+#### Sync Evaluation Data
+1. Navigate to any MT admin page
+2. Look for "Evaluation Data Sync Required" notice
+3. Click "Fix Evaluation Data" to sync
+4. Or use WP-CLI:
+   ```bash
+   docker exec mobility_wpcli_STAGING wp eval '
+   if (class_exists("MT_Jury_Consistency")) {
+       $consistency = MT_Jury_Consistency::get_instance();
+       $result = $consistency->sync_all_evaluations();
+       echo $result["message"];
+   }
+   '
+   ```
+
+### For Jury Members
+
+1. **Login** with provided credentials
+2. **Access Dashboard** via admin menu or frontend page
+3. **Review Candidates** in your assigned list
+4. **Evaluate** using the 5-criteria scoring system
+5. **Track Progress** with real-time statistics
+
+## 🔍 Troubleshooting
+
+### Dashboard Count Mismatch
+```bash
+# Check for sync issues
+docker exec mobility_wpcli_STAGING wp eval '
+if (class_exists("MT_Jury_Consistency")) {
+    $consistency = MT_Jury_Consistency::get_instance();
+    $issues = $consistency->check_sync_issues();
+    echo "Sync issues: " . $issues["total"] . "\n";
+    echo "- High IDs: " . $issues["high_ids"] . "\n";
+    echo "- Orphaned: " . $issues["orphaned"] . "\n";
+}
+'
+```
+
+### Database Integrity Check
+```bash
+# Check for duplicate evaluations
 docker exec mobility_wpcli_STAGING wp eval '
 global $wpdb;
 $table = $wpdb->prefix . "mt_candidate_scores";
-$high = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE jury_member_id > 100");
-$low = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE jury_member_id <= 100");
-echo "High IDs (needs sync): $high, Low IDs (correct): $low\n";
+$duplicates = $wpdb->get_results("
+    SELECT candidate_id, jury_member_id, COUNT(*) as count
+    FROM $table
+    GROUP BY candidate_id, jury_member_id, evaluation_round
+    HAVING count > 1
+");
+if ($duplicates) {
+    echo "Found " . count($duplicates) . " duplicate entries\n";
+} else {
+    echo "No duplicates found\n";
+}
 '
-
-# View recent evaluations
-docker exec mobility_wpcli_STAGING wp db query "SELECT * FROM wp_mt_candidate_scores ORDER BY evaluated_at DESC LIMIT 10"
 ```
 
-### Docker Commands
+### Backup Before Major Operations
 ```bash
-# Restart WordPress container
-docker-compose restart wordpress
+# Full database backup
+docker exec mobility_mariadb_STAGING mysqldump -uroot -pRt9mK3nQ8xY7bV5cZ2wE4rT6yU1i wordpress_db > backup_$(date +%Y%m%d_%H%M%S).sql
 
-# View container logs
-docker logs mobility_wordpress_STAGING --tail 50 -f
-
-# Check PHP version and modules
-docker exec mobility_wordpress_STAGING php -v
+# Evaluation table only
+docker exec mobility_mariadb_STAGING mysqldump -uroot -pRt9mK3nQ8xY7bV5cZ2wE4rT6yU1i wordpress_db wp_mt_candidate_scores > scores_backup_$(date +%Y%m%d_%H%M%S).sql
 ```
-
-## 🐛 Troubleshooting Guide
-
-### Dashboard Count Mismatch
-If admin and frontend dashboards show different counts:
-1. Check for high ID evaluations (jury post IDs):
-   ```bash
-   docker exec mobility_wpcli_STAGING wp eval 'global $wpdb; $high = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores WHERE jury_member_id > 100"); echo "High ID evaluations: $high\n";'
-   ```
-2. Run data synchronization if needed
-3. Clear any caching plugins
-4. Verify both dashboards use unified functions
-
-### Evaluation Save Errors
-1. Check browser console for JavaScript errors
-2. Verify AJAX handler accepts both field name variations:
-   - `relevance_score` and `mobility_relevance_score`
-3. Ensure database has all required columns
-4. Check PHP error logs:
-   ```bash
-   docker logs mobility_wordpress_STAGING --tail 50
-   ```
-
-### Jury Access Issues
-1. Verify user has `mt_jury_member` role
-2. Check if user is linked to a jury member post
-3. Run diagnostic tool: `admin.php?page=mt-diagnostic`
-4. Verify capabilities:
-   ```bash
-   docker exec mobility_wpcli_STAGING wp user meta get [user_id] wp_capabilities
-   ```
-
-## 📝 Shortcodes Documentation
-
-### [mt_jury_dashboard]
-Displays the jury dashboard on frontend pages (requires login).
-- Shows evaluation statistics
-- Lists assigned candidates
-- Provides evaluation links
-- **Guaranteed to show same data as admin dashboard**
-
-### [mt_candidate_grid]
-Displays a responsive grid of candidates with filtering options.
-
-**Parameters:**
-- `category` - Filter by category slug
-- `status` - Filter by status: 'longlist', 'shortlist', 'finalist', 'winner'
-- `columns` - Number of columns: 2, 3, or 4 (default: 3)
-- `show_filters` - Display category filter buttons (default: true)
-- `limit` - Maximum number of candidates to display
-
-### [mt_voting_form]
-Renders the voting interface for jury members or public voting.
 
 ## 🚀 Roadmap
 
 ### Phase 1: Foundation ✅
-- [x] Core plugin development
+- [x] Core plugin architecture
 - [x] Candidate management system
 - [x] Jury member management
 - [x] Basic evaluation system
 
 ### Phase 2: Evaluation System ✅
 - [x] Jury dashboard implementation
-- [x] Evaluation interface with 5 criteria
+- [x] 5-criteria evaluation interface
 - [x] Assignment management
-- [x] Dashboard consistency fixes
+- [x] Dashboard consistency across all interfaces
+- [x] Duplicate evaluation handling
+- [x] Orphaned data preservation
 
 ### Phase 3: Advanced Features (In Progress)
 - [ ] Export functionality for evaluations
 - [ ] Advanced analytics dashboard
 - [ ] Multi-round evaluation support
 - [ ] Email notifications for jury
+- [ ] Automated reminder system
 
-### Phase 4: Public Interface
+### Phase 4: Public Interface (Planned)
 - [ ] Public candidate showcase
 - [ ] Winner announcement system
 - [ ] Media kit generation
 - [ ] Social media integration
+- [ ] Award ceremony integration (Oct 30, 2025)
+
+## 📊 System Architecture
+
+### Database Schema
+```sql
+-- Main evaluation table
+CREATE TABLE wp_mt_candidate_scores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    candidate_id INT NOT NULL,
+    jury_member_id INT NOT NULL,
+    evaluation_round INT DEFAULT 1,
+    courage_score INT,
+    innovation_score INT,
+    implementation_score INT,
+    mobility_relevance_score INT,
+    visibility_score INT,
+    total_score INT,
+    comments TEXT,
+    evaluated_at DATETIME,
+    UNIQUE KEY unique_evaluation (candidate_id, jury_member_id, evaluation_round)
+);
+```
+
+### User Roles & Capabilities
+- **Administrator**: Full system access
+- **MT Admin**: Award management capabilities
+- **MT Jury Member**: Limited to assigned candidates
+
+## 🔒 Security Features
+
+- Role-based access control
+- Nonce verification on all AJAX calls
+- Prepared statements for database queries
+- Evaluation data isolation by user
+- Secure session handling
+
+## 📝 Shortcodes
+
+### [mt_jury_dashboard]
+Displays the jury evaluation dashboard on frontend pages.
+- Shows same data as admin dashboard
+- Requires user authentication
+- Responsive design
+
+### [mt_candidate_grid]
+Public candidate display grid.
+```
+[mt_candidate_grid category="startups" columns="3" limit="12"]
+```
+
+### [mt_voting_form]
+Public voting interface (future implementation).
 
 ## 🤝 Contributing
 
-This is a private project. For access or contributions, please contact:
-- Prof. Dr. Andreas Herrmann - andreas.herrmann@unisg.ch
-- Technical Lead: Nicolas Estrem
+This is a private project for the Institut für Mobilität, University of St. Gallen.
+
+### Contact
+- **Prof. Dr. Andreas Herrmann** - andreas.herrmann@unisg.ch
+- **Technical Lead**: Nicolas Estrém
 
 ## 🔗 Links
 
 - [Institut für Mobilität](https://mobility.unisg.ch)
 - [Smart Mobility Summit](https://smart-mobility-summit.de)
-- Media Partner: [Handelsblatt](https://handelsblatt.com)
+- **Award Ceremony**: October 30, 2025, Berlin
+- **Media Partner**: [Handelsblatt](https://handelsblatt.com)
+
+## 📅 Timeline
+
+- **Project Start**: December 2024
+- **Evaluation Phase**: January - September 2025
+- **Finalist Selection**: September 2025
+- **Award Ceremony**: October 30, 2025
 
 ---
 
-**Mobility Trailblazers** - Transforming mobility with courage and innovation in the DACH region 🚀
+**Mobility Trailblazers** - Shaping the future of mobility in the DACH region 🚀
 
-*Last updated: June 13, 2025 - Dashboard consistency implementation completed*
+*Last updated: June 13, 2025 - Enhanced dashboard consistency with intelligent sync system*
