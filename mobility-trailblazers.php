@@ -1975,6 +1975,16 @@ class MobilityTrailblazersPlugin {
             return;
         }
         
+        // Check if menu already exists to prevent duplicates
+        global $submenu;
+        if (isset($submenu['mt-award-system'])) {
+            foreach ($submenu['mt-award-system'] as $existing) {
+                if ($existing[2] === 'mt-jury-dashboard-redirect') {
+                    return; // Menu already exists, don't add again
+                }
+            }
+        }
+        
         // Check if parent menu exists
         global $menu;
         $parent_exists = false;
@@ -1998,32 +2008,30 @@ class MobilityTrailblazersPlugin {
             );
         }
         
+        // Add the dashboard submenu only once
+        add_submenu_page(
+            'mt-award-system',
+            __('My Dashboard', 'mobility-trailblazers'),
+            __('My Dashboard', 'mobility-trailblazers'),
+            'read',
+            'mt-jury-dashboard-redirect',
+            array($this, 'jury_dashboard_redirect')
+        );
+    }
+
+    /**
+     * Handle jury dashboard redirect
+     */
+    public function jury_dashboard_redirect() {
         // Get the URL of your Jury Dashboard page
         $dashboard_page_url = $this->get_jury_dashboard_page_url();
         
         if ($dashboard_page_url) {
-            // Add custom menu item that links to the page
-            add_submenu_page(
-                'mt-award-system',
-                __('My Dashboard', 'mobility-trailblazers'),
-                __('My Dashboard', 'mobility-trailblazers'),
-                'read',
-                'jury-dashboard-redirect', // Changed from mt-jury-dashboard
-                function() use ($dashboard_page_url) {
-                    wp_redirect($dashboard_page_url);
-                    exit;
-                }
-            );
+            wp_redirect($dashboard_page_url);
+            exit;
         } else {
             // Fallback: use the built-in dashboard
-            add_submenu_page(
-                'mt-award-system',
-                __('My Dashboard', 'mobility-trailblazers'),
-                __('My Dashboard', 'mobility-trailblazers'),
-                'read',
-                'mt-jury-dashboard',
-                array($this, 'jury_dashboard_page')
-            );
+            $this->jury_dashboard_page();
         }
     }
 
