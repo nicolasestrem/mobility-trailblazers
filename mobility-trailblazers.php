@@ -29,29 +29,37 @@ class MobilityTrailblazersPlugin {
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-        add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
-        add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
-        add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
-        add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
-        add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         
-        // Add jury dashboard hooks
+        // Jury dashboard and evaluation hooks with proper priorities
         add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
+        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
         add_action('admin_init', array($this, 'handle_jury_dashboard_direct'));
+        
+        // Other jury-related hooks
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
         add_action('template_redirect', array($this, 'jury_template_redirect'));
         add_filter('login_redirect', array($this, 'jury_login_redirect'), 10, 3);
         add_action('wp_dashboard_setup', array($this, 'add_jury_dashboard_widget'));
         add_shortcode('mt_jury_dashboard', array($this, 'jury_dashboard_shortcode'));
+        
+        // AJAX handlers
+        add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
+        add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
+        add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
+        add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
+        add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
         
         // Evaluation page hooks
         add_action('admin_menu', array($this, 'add_evaluation_page'));
         add_action('admin_post_mt_submit_evaluation', array($this, 'handle_evaluation_submission'));
         
+        // Diagnostic menu
         add_action('admin_menu', array($this, 'add_diagnostic_menu'));
-        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
+        
+        // Debug hook for jury access issues
+        add_action('admin_notices', array($this, 'debug_jury_access'));
     }
 
     public function init() {
@@ -901,37 +909,33 @@ class MobilityTrailblazersPlugin {
     /**
      * Check if user is jury member
      */
-    private function is_jury_member($user_id) {
-        if (!$user_id) return false;
-        
+    public function is_jury_member($user_id) {
+        // Check by role first
         $user = get_user_by('id', $user_id);
-        if (!$user) return false;
-
-        // Check if user has jury role
-        if (in_array('mt_jury_member', (array) $user->roles)) {
+        if ($user && in_array('mt_jury_member', (array) $user->roles)) {
             return true;
         }
-
-        // Check if user is linked to a jury member post
-        $jury_posts = get_posts(array(
+        
+        // Then check by jury post assignment
+        $jury_post = get_posts(array(
             'post_type' => 'mt_jury',
+            'posts_per_page' => 1,
             'meta_query' => array(
                 'relation' => 'OR',
-                array(
-                    'key' => '_mt_jury_email',
-                    'value' => $user->user_email,
-                    'compare' => '='
-                ),
                 array(
                     'key' => '_mt_jury_user_id',
                     'value' => $user_id,
                     'compare' => '='
+                ),
+                array(
+                    'key' => '_mt_jury_email',
+                    'value' => $user->user_email,
+                    'compare' => '='
                 )
-            ),
-            'posts_per_page' => 1
+            )
         ));
-
-        return !empty($jury_posts) || user_can($user_id, 'manage_options');
+        
+        return !empty($jury_post);
     }
 
     /**
@@ -1965,10 +1969,15 @@ class MobilityTrailblazersPlugin {
         $is_jury = $this->is_jury_member($current_user_id);
         $is_admin = current_user_can('manage_options');
         
+        // Also check for the custom role
+        $user = wp_get_current_user();
+        $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
+        
         error_log('MT Debug: Is jury: ' . ($is_jury ? 'yes' : 'no'));
         error_log('MT Debug: Is admin: ' . ($is_admin ? 'yes' : 'no'));
+        error_log('MT Debug: Has jury role: ' . ($has_jury_role ? 'yes' : 'no'));
         
-        if (!$is_jury && !$is_admin) {
+        if (!$is_jury && !$is_admin && !$has_jury_role) {
             error_log('MT Debug: User does not have permission');
             return;
         }
@@ -1985,11 +1994,11 @@ class MobilityTrailblazersPlugin {
         
         if (!$parent_exists) {
             error_log('MT Debug: Parent menu mt-award-system does not exist!');
-            // Try to create it
+            // Create parent menu with lower capability
             add_menu_page(
                 __('MT Award System', 'mobility-trailblazers'),
                 __('MT Award System', 'mobility-trailblazers'),
-                'read',
+                'read', // Changed from 'manage_options' to 'read'
                 'mt-award-system',
                 array($this, 'admin_dashboard'),
                 'dashicons-awards',
@@ -1997,7 +2006,7 @@ class MobilityTrailblazersPlugin {
             );
         }
         
-        // Add the submenu
+        // Add the submenu with proper capability
         $result = add_submenu_page(
             'mt-award-system',
             __('My Dashboard', 'mobility-trailblazers'),
@@ -2048,10 +2057,37 @@ class MobilityTrailblazersPlugin {
      */
     public function jury_dashboard_page() {
         $current_user_id = get_current_user_id();
+        $user = wp_get_current_user();
+        $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
+        
+        // Get jury member ID
         $jury_member_id = $this->get_jury_member_for_user($current_user_id);
         
-        if (!$jury_member_id && !current_user_can('manage_options')) {
+        // Allow access if: jury member, has jury role, or is admin
+        if (!$jury_member_id && !$has_jury_role && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // If user has jury role but no jury member post, try to find/create one
+        if (!$jury_member_id && $has_jury_role) {
+            // Try to find jury member by email
+            $jury_posts = get_posts(array(
+                'post_type' => 'mt_jury',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_jury_email',
+                        'value' => $user->user_email,
+                        'compare' => '='
+                    )
+                ),
+                'posts_per_page' => 1
+            ));
+            
+            if ($jury_posts) {
+                $jury_member_id = $jury_posts[0]->ID;
+                // Link the user ID
+                update_post_meta($jury_member_id, '_mt_jury_user_id', $current_user_id);
+            }
         }
         
         // Get jury member details
@@ -2859,14 +2895,22 @@ class MobilityTrailblazersPlugin {
      * Add evaluation page (hidden from menu)
      */
     public function add_evaluation_page() {
-        add_submenu_page(
-            null, // No parent menu (hidden)
-            __('Evaluate Candidate', 'mobility-trailblazers'),
-            __('Evaluate Candidate', 'mobility-trailblazers'),
-            'read',
-            'mt-evaluate',
-            array($this, 'evaluation_page')
-        );
+        $current_user_id = get_current_user_id();
+        
+        // Check if user has access
+        $user = wp_get_current_user();
+        $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
+        
+        if ($this->is_jury_member($current_user_id) || current_user_can('manage_options') || $has_jury_role) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Evaluate Candidate', 'mobility-trailblazers'),
+                __('Evaluate', 'mobility-trailblazers'),
+                'read', // Changed from 'manage_options'
+                'mt-evaluate',
+                array($this, 'evaluation_page')
+            );
+        }
     }
 
     /**
@@ -2874,11 +2918,15 @@ class MobilityTrailblazersPlugin {
      */
     public function evaluation_page() {
         $current_user_id = get_current_user_id();
-        $jury_member_id = $this->get_jury_member_for_user($current_user_id);
+        $user = wp_get_current_user();
+        $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
         
-        if (!$jury_member_id && !current_user_can('manage_options')) {
+        // Check permissions
+        if (!$this->is_jury_member($current_user_id) && !$has_jury_role && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to access this page.', 'mobility-trailblazers'));
         }
+        
+        $jury_member_id = $this->get_jury_member_for_user($current_user_id);
         
         $candidate_id = isset($_GET['candidate']) ? intval($_GET['candidate']) : 0;
         $edit_mode = isset($_GET['edit']) && $_GET['edit'] == '1';
@@ -3231,6 +3279,39 @@ class MobilityTrailblazersPlugin {
             'message' => 'evaluation_saved'
         ), admin_url('admin.php')));
         exit;
+    }
+
+    /**
+     * Debug function to help troubleshoot jury access issues
+     */
+    public function debug_jury_access() {
+        if (!isset($_GET['mt_debug_access'])) {
+            return;
+        }
+        
+        $current_user = wp_get_current_user();
+        
+        echo '<div style="background: #f0f0f0; padding: 20px; margin: 20px;">';
+        echo '<h2>Debug Jury Access</h2>';
+        echo '<p><strong>User ID:</strong> ' . $current_user->ID . '</p>';
+        echo '<p><strong>Email:</strong> ' . $current_user->user_email . '</p>';
+        echo '<p><strong>Roles:</strong> ' . implode(', ', $current_user->roles) . '</p>';
+        echo '<p><strong>Has mt_jury_member role:</strong> ' . (in_array('mt_jury_member', $current_user->roles) ? 'YES' : 'NO') . '</p>';
+        
+        // Check capabilities
+        echo '<h3>Capabilities:</h3>';
+        echo '<ul>';
+        echo '<li>read: ' . (current_user_can('read') ? 'YES' : 'NO') . '</li>';
+        echo '<li>mt_access_jury_dashboard: ' . (current_user_can('mt_access_jury_dashboard') ? 'YES' : 'NO') . '</li>';
+        echo '<li>mt_submit_evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'YES' : 'NO') . '</li>';
+        echo '<li>manage_options: ' . (current_user_can('manage_options') ? 'YES' : 'NO') . '</li>';
+        echo '</ul>';
+        
+        // Check jury member linkage
+        $jury_member_id = $this->get_jury_member_for_user($current_user->ID);
+        echo '<p><strong>Linked to jury member:</strong> ' . ($jury_member_id ? 'YES (ID: ' . $jury_member_id . ')' : 'NO') . '</p>';
+        
+        echo '</div>';
     }
 }
 
