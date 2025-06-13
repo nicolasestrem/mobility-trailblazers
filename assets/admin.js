@@ -3,77 +3,46 @@
 jQuery(document).ready(function($) {
     
     // Evaluation form submission
-    $('#submit-evaluation').on('click', function(e) {
+    $('#mt-evaluation-form').on('submit', function(e) {
         e.preventDefault();
         
-        var button = $(this);
-        var candidateId = $('input[name="post_ID"]').val();
+        var form = $(this);
+        var submitBtn = form.find('button[type="submit"]');
         
-        if (!candidateId) {
-            alert(mt_ajax.strings.vote_error);
-            return;
-        }
-        
-        // Confirm submission
-        if (!confirm(mt_ajax.strings.confirm_vote)) {
-            return;
-        }
-        
-        // Get all scores
-        var scores = {
-            courage_score: $('#courage_score').val(),
-            innovation_score: $('#innovation_score').val(),
-            implementation_score: $('#implementation_score').val(),
-            mobility_relevance_score: $('#mobility_relevance_score').val(),
-            visibility_score: $('#visibility_score').val()
+        // Collect form data
+        var formData = {
+            action: 'mt_submit_vote',
+            nonce: mt_ajax.nonce || $('#mt_nonce').val(),
+            candidate_id: form.find('input[name="candidate_id"]').val(),
+            courage_score: form.find('input[name="courage_score"]:checked').val(),
+            innovation_score: form.find('input[name="innovation_score"]:checked').val(),
+            implementation_score: form.find('input[name="implementation_score"]:checked').val(),
+            relevance_score: form.find('input[name="relevance_score"]:checked').val() || form.find('input[name="mobility_relevance_score"]:checked').val(),
+            visibility_score: form.find('input[name="visibility_score"]:checked').val(),
+            comments: form.find('textarea[name="comments"]').val()
         };
         
-        // Validate scores
-        var isValid = true;
-        $.each(scores, function(key, value) {
-            if (value === '' || value < 0 || value > 10) {
-                isValid = false;
-                return false;
-            }
-        });
+        // Disable button during submission
+        submitBtn.prop('disabled', true).text('Saving...');
         
-        if (!isValid) {
-            alert('Please ensure all scores are between 0 and 10.');
-            return;
-        }
-        
-        // Show loading state
-        button.prop('disabled', true).text('Submitting...');
-        $('#mt-evaluation-form').addClass('mt-loading');
-        
-        // Submit evaluation
         $.ajax({
-            url: mt_ajax.ajax_url,
+            url: mt_ajax.ajax_url || ajaxurl,
             type: 'POST',
-            data: {
-                action: 'mt_submit_vote',
-                candidate_id: candidateId,
-                nonce: mt_ajax.nonce,
-                ...scores
-            },
+            data: formData,
             success: function(response) {
                 if (response.success) {
-                    showMessage(mt_ajax.strings.vote_success, 'success');
-                    button.text('Update Evaluation');
-                    
-                    // Update total score display
-                    var totalScore = Object.values(scores).reduce((a, b) => parseInt(a) + parseInt(b), 0);
-                    updateTotalScore(totalScore);
+                    alert(response.data.message);
+                    // Reload to show updated dashboard
+                    window.location.reload();
                 } else {
-                    showMessage(response.data.message || mt_ajax.strings.vote_error, 'error');
+                    alert('Error: ' + response.data.message);
                 }
             },
             error: function() {
-                showMessage(mt_ajax.strings.vote_error, 'error');
+                alert('An error occurred. Please try again.');
             },
             complete: function() {
-                button.prop('disabled', false);
-                $('#mt-evaluation-form').removeClass('mt-loading');
+                submitBtn.prop('disabled', false).text('Submit Evaluation');
             }
         });
     });
