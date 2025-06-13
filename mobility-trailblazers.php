@@ -44,6 +44,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_dashboard_setup', array($this, 'add_jury_dashboard_widget'));
         add_shortcode('mt_jury_dashboard', array($this, 'jury_dashboard_shortcode'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
+        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
     }
 
     public function init() {
@@ -2268,6 +2269,178 @@ class MobilityTrailblazersPlugin {
         
         // Send email
         mt_send_jury_notification($jury_email, $subject, $message);
+    }
+
+    /**
+     * Add diagnostic menu to admin
+     */
+    public function add_diagnostic_menu() {
+        add_submenu_page(
+            'mt-award-system',
+            'System Diagnostic',
+            'Diagnostic',
+            'manage_options',
+            'mt-diagnostic',
+            array($this, 'diagnostic_page')
+        );
+    }
+
+    /**
+     * Diagnostic page callback
+     */
+    public function diagnostic_page() {
+        echo "<div class='wrap'>";
+        echo "<h1>Mobility Trailblazers Diagnostic</h1>";
+
+        global $wpdb;
+
+        // 1. Check if custom post types exist
+        echo "<h2>1. Post Types Status</h2>";
+        $candidate_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_candidate' AND post_status = 'publish'");
+        $jury_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_jury' AND post_status = 'publish'");
+
+        echo "<p><strong>Candidates:</strong> {$candidate_count}</p>";
+        echo "<p><strong>Jury Members:</strong> {$jury_count}</p>";
+
+        // 2. Check assignments
+        echo "<h2>2. Assignment Status</h2>";
+        $assignment_count = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$wpdb->postmeta} pm
+            JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE pm.meta_key = '_mt_assigned_jury_member'
+            AND p.post_type = 'mt_candidate'
+        ");
+
+        echo "<p><strong>Total Assignments:</strong> {$assignment_count}</p>";
+
+        if ($assignment_count > 0) {
+            $assignments = $wpdb->get_results("
+                SELECT p.post_title as candidate_name, j.post_title as jury_name 
+                FROM {$wpdb->postmeta} pm
+                JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                JOIN {$wpdb->posts} j ON pm.meta_value = j.ID
+                WHERE pm.meta_key = '_mt_assigned_jury_member'
+                AND p.post_type = 'mt_candidate'
+                AND j.post_type = 'mt_jury'
+                LIMIT 5
+            ");
+
+            echo "<h3>Sample Assignments:</h3>";
+            echo "<table class='wp-list-table widefat fixed striped'>";
+            echo "<thead><tr><th>Candidate</th><th>Assigned to Jury</th></tr></thead><tbody>";
+            foreach ($assignments as $assignment) {
+                echo "<tr><td>{$assignment->candidate_name}</td><td>{$assignment->jury_name}</td></tr>";
+            }
+            echo "</tbody></table>";
+        } else {
+            echo "<p style='color: red;'><strong>⚠️ No assignments found!</strong></p>";
+            echo "<p>Jury members won't see any candidates in their dashboard.</p>";
+        }
+
+        // 3. Check jury-user linking
+        echo "<h2>3. Jury-User Linking</h2>";
+        $jury_links = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'mt_jury'
+            AND (pm.meta_key = '_mt_jury_user_id' OR pm.meta_key = '_mt_jury_email')
+        ");
+
+        echo "<p><strong>Jury-User Links:</strong> {$jury_links}</p>";
+
+        if ($jury_links === '0') {
+            echo "<p style='color: red;'><strong>⚠️ No jury-user links found!</strong></p>";
+            echo "<p>Jury members won't be able to access their dashboard.</p>";
+        }
+
+        // 4. Check database tables
+        echo "<h2>4. Database Tables</h2>";
+        $required_tables = [
+            'mt_candidate_scores' => 'Stores jury evaluations',
+            'mt_votes' => 'Stores jury votes', 
+            'mt_public_votes' => 'Stores public votes'
+        ];
+
+        echo "<table class='wp-list-table widefat fixed striped'>";
+        echo "<thead><tr><th>Table</th><th>Status</th><th>Records</th><th>Purpose</th></tr></thead><tbody>";
+        
+        foreach ($required_tables as $table => $purpose) {
+            $full_table_name = $wpdb->prefix . $table;
+            $exists = $wpdb->get_var("SHOW TABLES LIKE '{$full_table_name}'");
+            
+            if ($exists) {
+                $count = $wpdb->get_var("SELECT COUNT(*) FROM {$full_table_name}");
+                echo "<tr><td>{$table}</td><td style='color: green;'>✅ Exists</td><td>{$count}</td><td>{$purpose}</td></tr>";
+            } else {
+                echo "<tr><td>{$table}</td><td style='color: red;'>❌ Missing</td><td>-</td><td>{$purpose}</td></tr>";
+            }
+        }
+        echo "</tbody></table>";
+
+        // 5. Current user status
+        echo "<h2>5. Current User Status</h2>";
+        $current_user = wp_get_current_user();
+        echo "<p><strong>User ID:</strong> {$current_user->ID}</p>";
+        echo "<p><strong>Email:</strong> {$current_user->user_email}</p>";
+        echo "<p><strong>Roles:</strong> " . implode(', ', $current_user->roles) . "</p>";
+
+        // Check if current user is jury member
+        $is_jury = $this->is_jury_member($current_user->ID);
+        echo "<p><strong>Jury Status:</strong> " . ($is_jury ? '✅ Is jury member' : '❌ Not a jury member') . "</p>";
+
+        // 6. Quick fixes
+        echo "<h2>6. Quick Fixes</h2>";
+        
+        if (isset($_POST['create_test_assignment'])) {
+            $this->create_test_assignment();
+            echo "<div class='notice notice-success'><p>Test assignment created!</p></div>";
+        }
+        
+        if (isset($_POST['link_current_user'])) {
+            $this->link_current_user_to_jury();
+            echo "<div class='notice notice-success'><p>Current user linked to jury!</p></div>";
+        }
+
+        echo "<form method='post' style='margin: 10px 0;'>";
+        echo "<input type='submit' name='create_test_assignment' class='button button-secondary' value='Create Test Assignment'>";
+        echo "</form>";
+
+        echo "<form method='post' style='margin: 10px 0;'>";
+        echo "<input type='submit' name='link_current_user' class='button button-secondary' value='Link Current User to First Jury Member'>";
+        echo "</form>";
+
+        echo "</div>";
+    }
+
+    /**
+     * Create test assignment between candidates and jury members
+     */
+    private function create_test_assignment() {
+        $candidates = get_posts(array('post_type' => 'mt_candidate', 'posts_per_page' => 3));
+        $jury_members = get_posts(array('post_type' => 'mt_jury', 'posts_per_page' => -1));
+        
+        if ($candidates && $jury_members) {
+            foreach ($candidates as $index => $candidate) {
+                $jury_index = $index % count($jury_members);
+                update_post_meta($candidate->ID, '_mt_assigned_jury_member', $jury_members[$jury_index]->ID);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Link current user to first jury member
+     */
+    private function link_current_user_to_jury() {
+        $current_user = wp_get_current_user();
+        $jury_members = get_posts(array('post_type' => 'mt_jury', 'posts_per_page' => 1));
+        
+        if ($jury_members) {
+            update_post_meta($jury_members[0]->ID, '_mt_jury_user_id', $current_user->ID);
+            return true;
+        }
+        return false;
     }
 }
 
