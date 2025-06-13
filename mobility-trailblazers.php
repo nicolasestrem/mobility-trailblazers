@@ -413,19 +413,46 @@ class MobilityTrailblazersPlugin {
      * Add WordPress hooks
      */
     private function add_hooks() {
+        // Admin hooks
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
-        add_action('wp_enqueue_scripts', array($this, 'frontend_enqueue_scripts'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_candidate_meta'));
-        add_action('wp_ajax_mt_submit_vote', array($this, 'handle_jury_vote'));
-        add_action('wp_ajax_mt_submit_public_vote', array($this, 'handle_public_vote'));
-        add_action('wp_ajax_nopriv_mt_submit_public_vote', array($this, 'handle_public_vote'));
+        add_action('wp_ajax_mt_jury_vote', array($this, 'handle_jury_vote'));
+        add_action('wp_ajax_mt_public_vote', array($this, 'handle_public_vote'));
+        add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
+        add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
+        add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
+        add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
+        add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
+        add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
+        
+        // Frontend hooks
+        add_action('wp_enqueue_scripts', array($this, 'frontend_enqueue_scripts'));
+        
+        // Shortcodes
         add_shortcode('mt_voting_form', array($this, 'voting_form_shortcode'));
         add_shortcode('mt_candidate_grid', array($this, 'candidate_grid_shortcode'));
         add_shortcode('mt_jury_members', array($this, 'jury_members_shortcode'));
         add_shortcode('mt_voting_results', array($this, 'voting_results_shortcode'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_assignment_scripts'));
+        add_shortcode('mt_jury_dashboard', array($this, 'jury_dashboard_shortcode'));
+        
+        // Jury dashboard hooks
+        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'));
+        add_action('admin_init', array($this, 'ensure_jury_menu_exists'));
+        add_action('wp_ajax_mt_jury_dashboard_direct', array($this, 'handle_jury_dashboard_direct'));
+        add_action('init', array($this, 'add_jury_rewrite_rules'));
+        add_filter('query_vars', array($this, 'add_jury_query_vars'));
+        add_action('template_redirect', array($this, 'jury_template_redirect'));
+        add_filter('login_redirect', array($this, 'jury_login_redirect'), 10, 3);
+        add_action('wp_dashboard_setup', array($this, 'add_jury_dashboard_widget'));
+        
+        // Evaluation page hooks
+        add_action('admin_menu', array($this, 'add_evaluation_page'));
+        add_action('wp_ajax_mt_evaluation_submission', array($this, 'handle_evaluation_submission'));
+        
+        // Diagnostic hooks
+        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
     }
 
     /**
@@ -3363,38 +3390,25 @@ class MobilityTrailblazersPlugin {
      * Debug function to check evaluation access
      */
     public function debug_evaluation_access() {
-        if (isset($_GET['debug_evaluation'])) {
-            $current_user = wp_get_current_user();
-            
-            echo '<div style="background: #f5f5f5; padding: 20px; margin: 20px;">';
-            echo '<h2>Debug Evaluation Access</h2>';
-            echo '<p><strong>User:</strong> ' . $current_user->user_login . ' (ID: ' . $current_user->ID . ')</p>';
-            echo '<p><strong>Roles:</strong> ' . implode(', ', $current_user->roles) . '</p>';
-            echo '<p><strong>Has mt_jury_member role:</strong> ' . (in_array('mt_jury_member', $current_user->roles) ? 'YES' : 'NO') . '</p>';
-            
-            // Check registered pages
-            global $_registered_pages;
-            $evaluation_page_registered = isset($_registered_pages['mt-award-system_page_mt-evaluate']) || 
-                                        isset($_registered_pages['admin_page_mt-evaluate']) ||
-                                        isset($_registered_pages['toplevel_page_mt-evaluate']);
-            
-            echo '<p><strong>Evaluation page registered:</strong> ' . ($evaluation_page_registered ? 'YES' : 'NO') . '</p>';
-            
-            // Check capabilities
-            echo '<h3>Capabilities Check:</h3>';
-            echo '<ul>';
-            echo '<li>read: ' . (current_user_can('read') ? 'YES' : 'NO') . '</li>';
-            echo '<li>mt_access_jury_dashboard: ' . (current_user_can('mt_access_jury_dashboard') ? 'YES' : 'NO') . '</li>';
-            echo '<li>mt_submit_evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'YES' : 'NO') . '</li>';
-            echo '</ul>';
-            
-            // Show all registered admin pages
-            echo '<h3>All Registered Admin Pages:</h3>';
-            echo '<pre>' . print_r(array_keys($_registered_pages), true) . '</pre>';
-            
-            echo '</div>';
-            exit;
+        // Debug code for evaluation access
+        if (!current_user_can('manage_options')) {
+            return;
         }
+        
+        $user_id = get_current_user_id();
+        $jury_member = $this->get_jury_member_for_user($user_id);
+        
+        if (!$jury_member) {
+            echo '<div class="notice notice-error"><p>No jury member found for current user.</p></div>';
+            return;
+        }
+        
+        $assigned_candidates = $this->get_assigned_candidates($jury_member->ID);
+        
+        echo '<div class="notice notice-info">';
+        echo '<p>Jury Member: ' . esc_html($jury_member->post_title) . '</p>';
+        echo '<p>Assigned Candidates: ' . count($assigned_candidates) . '</p>';
+        echo '</div>';
     }
 
     /**
