@@ -81,8 +81,6 @@ class MobilityTrailblazersPlugin {
         // Debug hook for jury access issues
         add_action('admin_notices', array($this, 'debug_jury_access'));
         
-        // Add Elementor compatibility
-        add_action('plugins_loaded', array($this, 'load_elementor_compatibility'));
         
     }
 
@@ -515,11 +513,6 @@ class MobilityTrailblazersPlugin {
      * Enqueue admin scripts and styles
      */
     public function admin_enqueue_scripts($hook) {
-        // Don't load admin scripts in Elementor editor
-        if (isset($_GET['action']) && $_GET['action'] === 'elementor') {
-            return;
-        }
-
         // Load on all MT plugin pages and post edit pages
         if (!empty($hook) && (strpos($hook, 'mt-') !== false || in_array($hook, array('post.php', 'post-new.php')))) {
             // Fix paths: assets/admin.js instead of assets/js/admin.js
@@ -3278,17 +3271,7 @@ class MobilityTrailblazersPlugin {
         });
     }
 
-    /**
-     * Load Elementor compatibility
-     */
-    public function load_elementor_compatibility() {
-        // Check if Elementor is active
-        if (did_action('elementor/loaded')) {
-            require_once MT_PLUGIN_PATH . 'includes/class-mt-elementor-compat.php';
-            new MT_Elementor_Compatibility();
-        }
-    }
-
+    
 }
 
 // Instantiate the plugin
