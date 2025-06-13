@@ -456,8 +456,9 @@ class MobilityTrailblazersPlugin {
      * Enqueue admin scripts and styles
      */
     public function admin_enqueue_scripts($hook) {
-        // Add null check to prevent deprecation warning
+        // Load on all MT plugin pages and post edit pages
         if (!empty($hook) && (strpos($hook, 'mt-') !== false || in_array($hook, array('post.php', 'post-new.php')))) {
+            // Fix paths: assets/admin.js instead of assets/js/admin.js
             wp_enqueue_script('mt-admin-js', MT_PLUGIN_URL . 'assets/admin.js', array('jquery'), MT_PLUGIN_VERSION, true);
             wp_enqueue_style('mt-admin-css', MT_PLUGIN_URL . 'assets/admin.css', array(), MT_PLUGIN_VERSION);
             
@@ -471,14 +472,132 @@ class MobilityTrailblazersPlugin {
                 )
             ));
         }
+        
+        // Special handling for assignment page
+        if ($hook === 'mt-award-system_page_mt-assignments') {
+            // Enqueue assignment.js from correct path
+            wp_enqueue_script(
+                'mt-assignment-js', 
+                MT_PLUGIN_URL . 'assets/assignment.js',
+                array('jquery'), 
+                MT_PLUGIN_VERSION, 
+                true
+            );
+            
+            // Enqueue assignment.css from correct path
+            wp_enqueue_style(
+                'mt-assignment-css', 
+                MT_PLUGIN_URL . 'assets/assignment.css',
+                array(), 
+                MT_PLUGIN_VERSION
+            );
+            
+            // Get candidates for assignment
+            $candidates = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'orderby' => 'title',
+                'order' => 'ASC'
+            ));
+            
+            $candidates_data = array();
+            foreach ($candidates as $candidate) {
+                $assigned_jury = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+                $categories = wp_get_post_terms($candidate->ID, 'mt_category', array('fields' => 'slugs'));
+                
+                $candidates_data[] = array(
+                    'id' => $candidate->ID,
+                    'name' => $candidate->post_title,
+                    'company' => get_post_meta($candidate->ID, '_mt_company', true),
+                    'stage' => get_post_meta($candidate->ID, '_mt_stage', true),
+                    'category' => !empty($categories) ? $categories[0] : '',
+                    'assigned' => !empty($assigned_jury),
+                    'jury_member_id' => $assigned_jury
+                );
+            }
+            
+            // Get jury members for assignment
+            $jury_members = get_posts(array(
+                'post_type' => 'mt_jury',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'orderby' => 'title',
+                'order' => 'ASC'
+            ));
+            
+            $jury_data = array();
+            foreach ($jury_members as $jury) {
+                // Count current assignments
+                $assignments = get_posts(array(
+                    'post_type' => 'mt_candidate',
+                    'posts_per_page' => -1,
+                    'meta_query' => array(
+                        array(
+                            'key' => '_mt_assigned_jury_member',
+                            'value' => $jury->ID,
+                            'compare' => '='
+                        )
+                    ),
+                    'fields' => 'ids'
+                ));
+                
+                $jury_data[] = array(
+                    'id' => $jury->ID,
+                    'name' => $jury->post_title,
+                    'company' => get_post_meta($jury->ID, '_mt_company', true),
+                    'assignments' => count($assignments),
+                    'max_assignments' => 25
+                );
+            }
+            
+            // Localize script with data
+            wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_assignment_nonce'),
+                'candidates' => $candidates_data,
+                'jury_members' => $jury_data,
+                'strings' => array(
+                    'confirm_assign' => __('Are you sure you want to assign these candidates?', 'mobility-trailblazers'),
+                    'assign_success' => __('Candidates assigned successfully!', 'mobility-trailblazers'),
+                    'assign_error' => __('Error assigning candidates. Please try again.', 'mobility-trailblazers'),
+                    'no_selection' => __('Please select candidates and a jury member.', 'mobility-trailblazers')
+                )
+            ));
+        }
+        
+        // Special handling for jury dashboard page
+        if ($hook === 'toplevel_page_mt-award-system' || $hook === 'mt-award-system_page_jury-dashboard') {
+            // If you have specific dashboard scripts
+            wp_enqueue_script(
+                'mt-dashboard-js', 
+                MT_PLUGIN_URL . 'assets/dashboard.js',
+                array('jquery'), 
+                MT_PLUGIN_VERSION, 
+                true
+            );
+        }
     }
 
     /**
      * Enqueue frontend scripts and styles
      */
     public function frontend_enqueue_scripts() {
-        wp_enqueue_script('mt-frontend-js', MT_PLUGIN_URL . 'assets/frontend.js', array('jquery'), MT_PLUGIN_VERSION, true);
-        wp_enqueue_style('mt-frontend-css', MT_PLUGIN_URL . 'assets/frontend.css', array(), MT_PLUGIN_VERSION);
+        // Fix paths for frontend assets
+        wp_enqueue_script(
+            'mt-frontend-js', 
+            MT_PLUGIN_URL . 'assets/frontend.js',
+            array('jquery'), 
+            MT_PLUGIN_VERSION, 
+            true
+        );
+        
+        wp_enqueue_style(
+            'mt-frontend-css', 
+            MT_PLUGIN_URL . 'assets/frontend.css',
+            array(), 
+            MT_PLUGIN_VERSION
+        );
         
         wp_localize_script('mt-frontend-js', 'mt_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
