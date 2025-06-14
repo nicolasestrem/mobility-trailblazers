@@ -45,10 +45,8 @@ class MobilityTrailblazersPlugin {
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
         
-        // Menu hooks - FIXED to prevent duplicates
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
-        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
+        // Menu hooks - Single registration point
+        add_action('admin_menu', array($this, 'register_all_admin_menus'));
         
         // Register settings
         add_action('admin_init', function() {
@@ -417,8 +415,7 @@ class MobilityTrailblazersPlugin {
      * Add WordPress hooks
      */
     private function add_hooks() {
-        // Admin hooks
-        add_action('admin_menu', array($this, 'add_admin_menu'));
+        // Admin hooks (menu registration handled in constructor)
         add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_candidate_meta'));
@@ -440,8 +437,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
         
-        // Jury dashboard hooks
-        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'));
+        // Jury dashboard hooks (menu registration handled in constructor)
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
         add_action('template_redirect', array($this, 'jury_template_redirect'));
@@ -453,8 +449,7 @@ class MobilityTrailblazersPlugin {
         add_action('admin_menu', array($this, 'add_evaluation_page'));
         add_action('wp_ajax_mt_evaluation_submission', array($this, 'handle_evaluation_submission'));
         
-        // Diagnostic hooks
-        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
+        // Diagnostic hooks (menu registration handled in constructor)
 
         // Temporary debug for assignment page
         add_action('admin_footer', function() {
@@ -509,6 +504,29 @@ class MobilityTrailblazersPlugin {
             'mt-voting-results',
             array($this, 'voting_results_page')
         );
+    }
+
+    /**
+     * Register all admin menus in one place
+     */
+    public function register_all_admin_menus() {
+        // Main menu
+        $this->add_admin_menu();
+        
+        // Jury dashboard
+        $this->add_jury_dashboard_menu();
+        
+        // Diagnostic
+        if (current_user_can('manage_options')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Diagnostic', 'mobility-trailblazers'),
+                __('Diagnostic', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-diagnostic',
+                array($this, 'diagnostic_page')
+            );
+        }
     }
 
     /**
@@ -1968,6 +1986,7 @@ class MobilityTrailblazersPlugin {
      * Add jury dashboard to admin menu - FIXED VERSION
      */
     public function add_jury_dashboard_menu() {
+        // This method is now called from register_all_admin_menus() only
         $current_user_id = get_current_user_id();
         
         // Check if user is a jury member or admin
