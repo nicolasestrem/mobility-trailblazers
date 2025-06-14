@@ -130,6 +130,16 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
      * Render widget output
      */
     protected function render() {
+        // Safety check for Elementor
+        if (!class_exists('\Elementor\Plugin')) {
+            return;
+        }
+
+        // Safety check for required functions
+        if (!function_exists('is_user_logged_in') || !function_exists('get_current_user_id')) {
+            return;
+        }
+        
         $settings = $this->get_settings_for_display();
         
         // Check if in editor
@@ -141,7 +151,7 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
         // Check permissions for personal stats
         if ($settings['stats_type'] === 'personal' && !is_user_logged_in()) {
             echo '<div class="mt-elementor-login-required">';
-            echo '<p>' . __('Please log in to view personal statistics.', 'mobility-trailblazers') . '</p>';
+            echo '<p>' . esc_html__('Please log in to view personal statistics.', 'mobility-trailblazers') . '</p>';
             echo '</div>';
             return;
         }
@@ -158,6 +168,9 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
                 break;
             case 'leaderboard':
                 $this->render_leaderboard($settings);
+                break;
+            default:
+                echo '<p>' . esc_html__('Invalid statistics type selected.', 'mobility-trailblazers') . '</p>';
                 break;
         }
         

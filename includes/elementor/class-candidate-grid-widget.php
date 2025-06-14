@@ -145,6 +145,16 @@ class MT_Candidate_Grid_Widget extends \Elementor\Widget_Base {
      * Render widget output
      */
     protected function render() {
+        // Safety check for Elementor
+        if (!class_exists('\Elementor\Plugin')) {
+            return;
+        }
+
+        // Safety check for required functions
+        if (!function_exists('do_shortcode')) {
+            return;
+        }
+        
         $settings = $this->get_settings_for_display();
         
         // Check if in editor
@@ -153,12 +163,12 @@ class MT_Candidate_Grid_Widget extends \Elementor\Widget_Base {
             return;
         }
         
-        // Build shortcode
+        // Build shortcode with proper escaping
         $shortcode = sprintf(
             '[mt_candidate_grid category="%s" columns="%s" limit="%d" show_evaluation="%s"]',
             esc_attr($settings['category']),
             esc_attr($settings['columns']),
-            intval($settings['limit']),
+            absint($settings['limit']),
             $settings['show_evaluation_status'] === 'yes' ? 'true' : 'false'
         );
         

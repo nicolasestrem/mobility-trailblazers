@@ -25,9 +25,6 @@ class MT_Elementor_Compatibility {
             return;
         }
         
-        // Register custom widget category
-        add_action('elementor/elements/categories_registered', array($this, 'add_widget_category'));
-        
         // Prevent conflicts in Elementor editor
         add_action('elementor/editor/before_enqueue_scripts', array($this, 'handle_editor_compatibility'));
         
@@ -42,19 +39,12 @@ class MT_Elementor_Compatibility {
         
         // Fix shortcode rendering in Elementor
         add_filter('elementor/frontend/the_content', array($this, 'fix_shortcode_rendering'));
-    }
-    
-    /**
-     * Add custom widget category
-     */
-    public function add_widget_category($elements_manager) {
-        $elements_manager->add_category(
-            'mobility-trailblazers',
-            [
-                'title' => __('Mobility Trailblazers', 'mobility-trailblazers'),
-                'icon' => 'fa fa-car',
-            ]
-        );
+        
+        // Fix frontend config issue
+        add_action('elementor/frontend/before_enqueue_scripts', array($this, 'fix_frontend_config'), 5);
+        
+        // Ensure proper script dependencies
+        add_action('wp_enqueue_scripts', array($this, 'ensure_elementor_dependencies'), 999);
     }
     
     /**
@@ -151,5 +141,124 @@ class MT_Elementor_Compatibility {
      */
     public static function is_elementor_preview() {
         return isset($_GET['elementor-preview']);
+    }
+    
+    /**
+     * Fix frontend config issue
+     */
+    public function fix_frontend_config() {
+        // Only run on frontend, not in admin
+        if (is_admin()) {
+            return;
+        }
+        
+        // Check if Elementor frontend is active
+        if (!\Elementor\Plugin::$instance->frontend->has_elementor_in_page()) {
+            return;
+        }
+        
+        // Ensure frontend config is available
+        wp_add_inline_script('elementor-frontend', '
+            if (typeof elementorFrontendConfig === "undefined") {
+                window.elementorFrontendConfig = {
+                    environmentMode: {
+                        edit: false,
+                        wpPreview: false,
+                        isScriptDebug: false
+                    },
+                    i18n: {
+                        shareButtonsTooltip: "Share"
+                    },
+                    is_rtl: false,
+                    breakpoints: {
+                        xs: 0,
+                        sm: 480,
+                        md: 768,
+                        lg: 1025,
+                        xl: 1440,
+                        xxl: 1600
+                    },
+                    responsive: {
+                        breakpoints: {
+                            mobile: {
+                                label: "Mobile",
+                                value: 767,
+                                direction: "max",
+                                is_enabled: true
+                            },
+                            mobile_extra: {
+                                label: "Mobile Extra",
+                                value: 880,
+                                direction: "max",
+                                is_enabled: false
+                            },
+                            tablet: {
+                                label: "Tablet",
+                                value: 1024,
+                                direction: "max",
+                                is_enabled: true
+                            },
+                            tablet_extra: {
+                                label: "Tablet Extra",
+                                value: 1200,
+                                direction: "max",
+                                is_enabled: false
+                            },
+                            laptop: {
+                                label: "Laptop",
+                                value: 1366,
+                                direction: "max",
+                                is_enabled: false
+                            },
+                            widescreen: {
+                                label: "Widescreen",
+                                value: 2400,
+                                direction: "min",
+                                is_enabled: false
+                            }
+                        }
+                    },
+                    version: "' . ELEMENTOR_VERSION . '",
+                    is_static: false,
+                    experimentalFeatures: {},
+                    urls: {
+                        assets: "' . ELEMENTOR_ASSETS_URL . '"
+                    },
+                    settings: {
+                        page: [],
+                        editorPreferences: []
+                    },
+                    kit: {}
+                };
+            }
+        ', 'before');
+    }
+    
+    /**
+     * Ensure proper Elementor dependencies
+     */
+    public function ensure_elementor_dependencies() {
+        // Only on pages with Elementor content
+        if (!is_singular() || !class_exists('\Elementor\Plugin')) {
+            return;
+        }
+        
+        $post_id = get_the_ID();
+        if (!$post_id) {
+            return;
+        }
+        
+        // Check if page uses Elementor
+        if (!\Elementor\Plugin::$instance->documents->get($post_id)->is_built_with_elementor()) {
+            return;
+        }
+        
+        // Ensure jQuery is loaded
+        wp_enqueue_script('jquery');
+        
+        // Ensure Elementor frontend scripts are loaded
+        if (wp_script_is('elementor-frontend', 'registered') && !wp_script_is('elementor-frontend', 'enqueued')) {
+            wp_enqueue_script('elementor-frontend');
+        }
     }
 }

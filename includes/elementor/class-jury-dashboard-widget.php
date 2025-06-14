@@ -113,6 +113,16 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
      * Render widget output
      */
     protected function render() {
+        // Safety check for Elementor
+        if (!class_exists('\Elementor\Plugin')) {
+            return;
+        }
+
+        // Safety check for required functions
+        if (!function_exists('is_user_logged_in') || !function_exists('wp_login_url') || !function_exists('get_permalink')) {
+            return;
+        }
+        
         $settings = $this->get_settings_for_display();
         
         // Check if in editor
@@ -121,11 +131,17 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
             return;
         }
         
+        // Additional check for preview mode
+        if (\Elementor\Plugin::$instance->preview->is_preview_mode()) {
+            $this->render_preview_mode();
+            return;
+        }
+        
         // Check if user is logged in
         if (!is_user_logged_in()) {
             echo '<div class="mt-elementor-login-required">';
-            echo '<p>' . __('Please log in to view the jury dashboard.', 'mobility-trailblazers') . '</p>';
-            echo '<a href="' . wp_login_url(get_permalink()) . '" class="button">' . __('Log In', 'mobility-trailblazers') . '</a>';
+            echo '<p>' . esc_html__('Please log in to view the jury dashboard.', 'mobility-trailblazers') . '</p>';
+            echo '<a href="' . esc_url(wp_login_url(get_permalink())) . '" class="button">' . esc_html__('Log In', 'mobility-trailblazers') . '</a>';
             echo '</div>';
             return;
         }
@@ -144,6 +160,19 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
         echo '<div class="mt-elementor-widget-wrapper">';
         echo do_shortcode($shortcode);
         echo '</div>';
+    }
+    
+    /**
+     * Render preview mode
+     */
+    private function render_preview_mode() {
+        ?>
+        <div class="mt-elementor-preview" style="background: #f9f9f9; padding: 30px; text-align: center;">
+            <i class="eicon-dashboard" style="font-size: 48px; color: #999; margin-bottom: 20px;"></i>
+            <h3><?php _e('Jury Dashboard (Preview)', 'mobility-trailblazers'); ?></h3>
+            <p><?php _e('The live dashboard will appear here when viewing the page.', 'mobility-trailblazers'); ?></p>
+        </div>
+        <?php
     }
     
     /**
