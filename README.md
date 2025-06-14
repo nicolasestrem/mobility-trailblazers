@@ -1,5 +1,313 @@
 
 
+🔄 Vote Reset Functionality (New Feature - June 2025)
+Overview
+The Mobility Trailblazers platform now includes comprehensive vote reset capabilities, allowing administrators and jury members to manage voting data with precision and transparency. This feature is essential for managing the multi-phase voting process (200→50→25 candidates) and handling corrections or re-evaluations.
+Key Features
+1. Multi-Level Reset Options
+
+Individual Vote Reset: Jury members can reset their own votes for specific candidates
+Bulk User Reset: Administrators can reset all votes from a specific jury member
+Bulk Candidate Reset: Administrators can reset all votes for a specific candidate
+Phase Transition Reset: Automated reset between voting phases with data archival
+Full System Reset: Complete vote removal with safety confirmations (admin only)
+
+2. Data Integrity & Safety
+
+Soft Delete Architecture: Votes are marked inactive rather than deleted
+Comprehensive Backup System: All votes are backed up before any reset operation
+Audit Trail: Complete logging of who reset what, when, and why
+Transaction Support: Database consistency guaranteed through MySQL transactions
+Multiple Confirmation Steps: Prevents accidental data loss
+
+3. User Interface Components
+Admin Vote Reset Dashboard
+
+Location: WordPress Admin → MT Award System → Vote Reset
+Features:
+
+Real-time statistics display (active votes, candidates, jury members)
+Phase transition management with visual indicators
+Targeted reset controls with dropdown selections
+Recent activity log with detailed reset history
+Full history modal with pagination
+
+
+
+Individual Reset Buttons
+
+Location: Jury evaluation interface (on evaluated candidate cards)
+Features:
+
+"Reset Vote" button with undo icon
+Confirmation dialog with optional reason input
+Real-time UI updates after reset
+Only visible for candidates already evaluated
+
+
+
+Technical Implementation
+Database Schema Extensions
+sql-- Vote Reset Logs Table
+CREATE TABLE wp_vote_reset_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reset_type ENUM('individual', 'bulk_user', 'bulk_candidate', 'phase_transition', 'full_reset'),
+    initiated_by BIGINT(20) UNSIGNED NOT NULL,
+    initiated_by_role ENUM('jury_member', 'admin', 'system'),
+    affected_user_id BIGINT(20) UNSIGNED DEFAULT NULL,
+    affected_candidate_id BIGINT(20) UNSIGNED DEFAULT NULL,
+    voting_phase VARCHAR(50) DEFAULT NULL,
+    votes_affected INT NOT NULL DEFAULT 0,
+    reset_reason TEXT,
+    reset_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    user_agent TEXT
+);
+
+-- Vote History Tables
+CREATE TABLE wp_mt_votes_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    -- Mirrors structure of wp_mt_votes with backup metadata
+);
+
+CREATE TABLE wp_mt_candidate_scores_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    -- Mirrors structure of wp_mt_candidate_scores with backup metadata
+);
+
+-- Soft Delete Columns Added to Existing Tables
+ALTER TABLE wp_mt_votes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE wp_mt_votes ADD COLUMN reset_at TIMESTAMP NULL;
+ALTER TABLE wp_mt_votes ADD COLUMN reset_by BIGINT(20) UNSIGNED DEFAULT NULL;
+
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN reset_at TIMESTAMP NULL;
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN reset_by BIGINT(20) UNSIGNED DEFAULT NULL;
+File Structure
+mobility-trailblazers/
+├── includes/
+│   ├── class-vote-reset-manager.php      # Core reset logic
+│   ├── class-vote-backup-manager.php     # Backup operations
+│   └── class-vote-audit-logger.php       # Audit trail management
+├── admin/
+│   ├── js/
+│   │   └── vote-reset-admin.js          # Admin interface JavaScript
+│   ├── css/
+│   │   └── vote-reset-admin.css         # Admin styles
+│   └── views/
+│       └── vote-reset-interface.php     # Admin dashboard view
+├── templates/
+│   └── jury/
+│       └── vote-reset-button.php        # Individual reset button
+├── api/
+│   └── vote-reset-endpoints.php         # REST API endpoints
+└── mysql-init/
+    └── 02-vote-reset-tables.sql         # Database schema
+REST API Endpoints
+POST   /wp-json/mobility-trailblazers/v1/reset-vote
+       - Reset individual vote (jury members)
+       
+POST   /wp-json/mobility-trailblazers/v1/admin/bulk-reset
+       - Bulk reset operations (admin only)
+       
+GET    /wp-json/mobility-trailblazers/v1/reset-history
+       - Retrieve reset history with pagination
+Installation & Setup
+1. Database Setup
+bash# Copy the schema file to your MySQL init directory
+cp mysql-init/02-vote-reset-tables.sql /mnt/dietpi_userdata/docker-files/STAGING/mysql-init/
+
+# Apply the schema to existing database
+docker exec -i mobility_mariadb_STAGING mariadb -u root -p[password] wordpress_db < /path/to/02-vote-reset-tables.sql
+2. File Deployment
+bash# Copy all vote reset files to the plugin directory
+cp -r includes/class-vote-reset-*.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/includes/
+cp -r admin/js/vote-reset-admin.js /path/to/wordpress/wp-content/plugins/mobility-trailblazers/admin/js/
+cp -r admin/views/vote-reset-interface.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/admin/views/
+cp -r templates/jury/vote-reset-button.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/templates/jury/
+3. Menu Registration
+Add to your main plugin file's register_all_admin_menus() function:
+php// Vote Reset Management submenu
+if (current_user_can('manage_options')) {
+    add_submenu_page(
+        'mt-award-system',
+        __('Vote Reset Management', 'mobility-trailblazers'),
+        __('Vote Reset', 'mobility-trailblazers'),
+        'manage_options',
+        'mt-vote-reset',
+        array($this, 'vote_reset_page')
+    );
+}
+Usage Guide
+For Administrators
+
+Phase Transition (e.g., moving from 200 to 50 candidates):
+
+Navigate to MT Award System → Vote Reset
+Click "Transition to Next Phase"
+Optionally notify jury members via email
+Confirm the transition
+
+
+Targeted Resets:
+
+Select a jury member or candidate from the dropdown
+Click the respective reset button
+Provide a reason (optional but recommended)
+Confirm the action
+
+
+Monitoring:
+
+View recent reset activity in the dashboard
+Click "View Full History" for complete audit trail
+Export history data if needed
+
+
+
+For Jury Members
+
+Resetting Individual Votes:
+
+Go to your evaluation dashboard
+Find the candidate you want to re-evaluate
+Click the "Reset Vote" button
+Confirm the reset
+Submit a new evaluation
+
+
+
+Security Considerations
+
+Permission Checks:
+
+Jury members can only reset their own votes
+Admin functions require manage_options capability
+All actions verified server-side
+
+
+Data Protection:
+
+IP addresses logged for accountability
+User agents recorded for security analysis
+Nonce verification on all AJAX requests
+
+
+Rate Limiting:
+
+Implement rate limiting on reset endpoints
+Monitor for unusual reset patterns
+Alert admins of suspicious activity
+
+
+
+Performance Optimization
+
+Database Indexes:
+sql-- Optimized indexes for vote queries
+CREATE INDEX idx_active_votes ON wp_mt_votes(is_active, candidate_id, jury_member_id);
+CREATE INDEX idx_reset_timestamp ON wp_vote_reset_logs(reset_timestamp);
+
+Caching Strategy:
+
+Redis integration for vote counts
+Cache invalidation on reset operations
+Transient caching for expensive queries
+
+
+Batch Processing:
+
+Bulk operations use single transactions
+Chunked processing for large datasets
+Background processing for heavy operations
+
+
+
+Troubleshooting
+Reset Button Not Appearing
+
+Check menu registration:
+php// Verify in WordPress admin
+global $submenu;
+var_dump($submenu['mt-award-system']);
+
+Verify file paths:
+bash# Check if files exist
+ls -la wp-content/plugins/mobility-trailblazers/admin/views/vote-reset-interface.php
+ls -la wp-content/plugins/mobility-trailblazers/admin/js/vote-reset-admin.js
+
+Check JavaScript console for errors
+
+Database Errors
+
+Verify table creation:
+sqlSHOW TABLES LIKE '%vote_reset%';
+DESCRIBE wp_vote_reset_logs;
+
+Check column additions:
+sqlSHOW COLUMNS FROM wp_mt_votes LIKE 'is_active';
+
+
+Permission Issues
+
+Verify user capabilities:
+php$user = wp_get_current_user();
+var_dump($user->allcaps);
+
+Check role assignments:
+phpvar_dump($user->roles);
+
+
+API Reference
+PHP Classes
+MT_Vote_Reset_Manager
+php// Reset individual vote
+$manager = new MT_Vote_Reset_Manager();
+$result = $manager->reset_individual_vote($candidate_id, $jury_member_id, $reason);
+
+// Bulk reset
+$result = $manager->bulk_reset_votes('phase_transition', [
+    'from_phase' => 'phase_1',
+    'to_phase' => 'phase_2',
+    'notify_jury' => true
+]);
+MT_Vote_Audit_Logger
+php// Log a reset action
+$logger = new MT_Vote_Audit_Logger();
+$logger->log_reset([
+    'reset_type' => 'individual',
+    'initiated_by' => get_current_user_id(),
+    'affected_candidate_id' => $candidate_id,
+    'reset_reason' => $reason
+]);
+
+// Get reset history
+$history = $logger->get_reset_history($page = 1, $per_page = 20);
+JavaScript Functions
+javascript// Trigger individual reset
+VoteResetManager.performIndividualReset(candidateId, reason);
+
+// Trigger phase reset
+VoteResetManager.performPhaseReset(fromPhase, toPhase, notifyJury);
+
+// Load reset history
+VoteResetManager.loadResetHistory();
+Best Practices
+
+Always provide reset reasons for audit trail clarity
+Notify affected parties when performing bulk resets
+Review reset logs regularly for unusual patterns
+Backup database before major reset operations
+Test reset functionality in staging environment first
+
+Future Enhancements
+
+Scheduled Resets: Automatic phase transitions based on timeline
+Selective Restore: Ability to restore specific votes from backup
+Reset Templates: Predefined reset scenarios for common use cases
+Advanced Analytics: Reset pattern analysis and reporting
+Webhook Integration: Notify external systems of reset events
+
 ## 🔧 Recent Updates (June 2025)
 
 ### Data Management Functionality Fixed
