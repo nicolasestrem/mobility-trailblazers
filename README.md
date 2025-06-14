@@ -1432,3 +1432,95 @@ For technical support or questions:
 **Mobility Trailblazers** - Shaping the future of mobility in the DACH region 🚀
 
 *Last updated: June 14, 2025*
+# Recent Updates & Code Cleanup (December 2024)
+
+## 🔧 Code Refactoring & Duplicate Removal
+
+We've performed a comprehensive code cleanup to improve maintainability and fix several issues identified during code review:
+
+### Issues Fixed
+
+#### 1. **Duplicate Menu Registration**
+- **Problem**: Admin menus were being registered in multiple places, potentially causing duplicate menu items
+- **Solution**: 
+  - Consolidated all menu registrations into a single `register_all_admin_menus()` method
+  - Added duplicate detection to prevent multiple "My Dashboard" menu items
+  - Removed scattered `add_action('admin_menu')` calls throughout the codebase
+
+#### 2. **Duplicate Evaluation Functions**
+- **Problem**: Multiple implementations of user evaluation counting functions across different files
+- **Solution**:
+  - Kept single global functions in main plugin file: `mt_get_user_evaluation_count()` and `mt_has_jury_evaluated()`
+  - Removed duplicate implementations from:
+    - `includes/class-mt-jury-fix.php`
+    - `includes/class-mt-jury-consistency.php`
+    - `includes/elementor/class-evaluation-stats-widget.php`
+  - All components now use the same consistent functions
+
+#### 3. **Docker Configuration Issues**
+- **Problem**: Security vulnerabilities and configuration issues in docker-compose.yml
+- **Identified Issues**:
+  - Duplicate version declaration
+  - Hardcoded credentials
+  - Exposed database ports (security risk)
+  - Empty volumes section
+  - WP-CLI container running unnecessarily
+- **Recommendations**: See "Security Improvements" section below
+
+### Code Organization Improvements
+
+1. **Menu Registration**: All admin menus now registered in one location for easier maintenance
+2. **Function Consolidation**: Evaluation-related functions consolidated to prevent inconsistencies
+3. **Better Error Handling**: Added checks to prevent duplicate menu registration
+4. **Cleaner Codebase**: Removed ~200 lines of duplicate code
+
+### Files Modified
+
+- `mobility-trailblazers.php` - Main plugin file
+- `includes/class-mt-jury-fix.php` - Removed duplicate functions
+- `includes/class-mt-jury-consistency.php` - Removed duplicate method
+- `includes/elementor/class-evaluation-stats-widget.php` - Simplified to use global functions
+- `README.md` - Removed duplicate content sections
+
+### Security Improvements Needed
+
+Based on our code review, the following security improvements should be implemented:
+
+1. **Environment Variables**: Move all credentials from docker-compose.yml to .env file
+2. **Database Ports**: Remove external port exposure for MariaDB in production
+3. **Redis Ports**: Remove external port exposure for Redis in production
+4. **Secure Passwords**: Replace all hardcoded passwords with secure generated ones
+
+### Testing After Updates
+
+After applying these updates, please test:
+
+1. **Menu Display**: Verify no duplicate menu items appear
+2. **Jury Dashboard**: Ensure jury members can access their dashboard
+3. **Evaluation Counts**: Confirm evaluation statistics display correctly
+4. **Elementor Widgets**: Test evaluation stats widget if using Elementor
+
+### Migration Notes
+
+No database changes are required. The cleanup only affects PHP code organization. However, if you experience any issues with evaluation counts after the update, you can run:
+
+```bash
+docker exec mobility_wpcli_STAGING wp eval '
+if (class_exists("MT_Jury_Consistency")) {
+    MT_Jury_Consistency::get_instance()->sync_all_evaluations();
+}'
+```
+
+---
+
+## 📝 Changelog
+
+### Version 1.0.1 (December 2024)
+- Fixed duplicate menu registration issues
+- Consolidated evaluation counting functions
+- Removed ~200 lines of duplicate code
+- Improved code organization and maintainability
+- Added security recommendations for Docker configuration
+
+### Version 1.0.0
+- Initial release
