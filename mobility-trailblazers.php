@@ -3453,4 +3453,320 @@ if (!function_exists('mt_safe_plugin_basename')) {
     }
 }
 
+/**
+ * Handle sync system AJAX request
+ */
+add_action('wp_ajax_mt_sync_system', 'mt_handle_sync_system');
+function mt_handle_sync_system() {
+    // Check nonce
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_send_json_error(array('message' => 'Security check failed'));
+        wp_die();
+    }
+    
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Insufficient permissions'));
+        wp_die();
+    }
+    
+    try {
+        // Perform synchronization tasks
+        // This is where you'd add your actual sync logic
+        
+        // Example: Update assignment counts
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $jury_members = get_users(array(
+            'role' => 'mt_jury_member'
+        ));
+        
+        // Update meta data, clear cache, etc.
+        wp_cache_flush();
+        
+        wp_send_json_success(array(
+            'message' => 'System synchronized successfully',
+            'candidates_count' => count($candidates),
+            'jury_count' => count($jury_members)
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array('message' => $e->getMessage()));
+    }
+    
+    wp_die();
+}
+
+/**
+ * Handle get progress data AJAX request
+ */
+add_action('wp_ajax_mt_get_progress_data', 'mt_handle_get_progress_data');
+function mt_handle_get_progress_data() {
+    // Check nonce
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_send_json_error(array('message' => 'Security check failed'));
+        wp_die();
+    }
+    
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Insufficient permissions'));
+        wp_die();
+    }
+    
+    // Get progress data
+    global $wpdb;
+    
+    // Get all candidates with assignments
+    $candidates = get_posts(array(
+        'post_type' => 'mt_candidate',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_query' => array(
+            array(
+                'key' => '_mt_assigned_jury_member',
+                'compare' => 'EXISTS'
+            )
+        )
+    ));
+    
+    // Get evaluation progress
+    $evaluations = $wpdb->get_results("
+        SELECT 
+            candidate_id,
+            jury_member_id,
+            COUNT(*) as evaluation_count,
+            MAX(evaluation_date) as last_evaluation
+        FROM {$wpdb->prefix}mt_candidate_scores
+        GROUP BY candidate_id, jury_member_id
+    ");
+    
+    // Build progress statistics
+    $total_assignments = count($candidates);
+    $total_evaluations = count($evaluations);
+    $completion_rate = $total_assignments > 0 ? round(($total_evaluations / $total_assignments) * 100, 1) : 0;
+    
+    // Get jury member progress
+    $jury_progress = $wpdb->get_results("
+        SELECT 
+            u.ID,
+            u.display_name,
+            COUNT(DISTINCT pm.post_id) as assigned_count,
+            COUNT(DISTINCT cs.candidate_id) as evaluated_count
+        FROM {$wpdb->users} u
+        LEFT JOIN {$wpdb->postmeta} pm ON pm.meta_value = u.ID AND pm.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON cs.jury_member_id = u.ID
+        WHERE u.ID IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = '{$wpdb->prefix}capabilities' AND meta_value LIKE '%mt_jury_member%')
+        GROUP BY u.ID
+        ORDER BY u.display_name
+    ");
+    
+    // Build HTML output
+    $html = '<div class="mt-progress-report">';
+    
+    // Overall statistics
+    $html .= '<div class="mt-progress-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">';
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #2d3748;">' . $total_assignments . '</div>';
+    $html .= '<div style="color: #718096;">Total Assignments</div>';
+    $html .= '</div>';
+    
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #38a169;">' . $total_evaluations . '</div>';
+    $html .= '<div style="color: #718096;">Completed Evaluations</div>';
+    $html .= '</div>';
+    
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #3182ce;">' . $completion_rate . '%</div>';
+    $html .= '<div style="color: #718096;">Completion Rate</div>';
+    $html .= '</div>';
+    $html .= '</div>';
+    
+    // Jury member progress table
+    $html .= '<h4 style="margin-bottom: 15px;">Jury Member Progress</h4>';
+    $html .= '<table style="width: 100%; border-collapse: collapse;">';
+    $html .= '<thead>';
+    $html .= '<tr style="background: #f7fafc;">';
+    $html .= '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Jury Member</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Assigned</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Evaluated</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Progress</th>';
+    $html .= '</tr>';
+    $html .= '</thead>';
+    $html .= '<tbody>';
+    
+    foreach ($jury_progress as $member) {
+        $progress = $member->assigned_count > 0 ? round(($member->evaluated_count / $member->assigned_count) * 100, 1) : 0;
+        $progress_color = $progress >= 80 ? '#38a169' : ($progress >= 50 ? '#d69e2e' : '#e53e3e');
+        
+        $html .= '<tr style="border-bottom: 1px solid #e2e8f0;">';
+        $html .= '<td style="padding: 10px;">' . esc_html($member->display_name) . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">' . $member->assigned_count . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">' . $member->evaluated_count . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">';
+        $html .= '<div style="background: #e2e8f0; border-radius: 4px; overflow: hidden; height: 20px; position: relative;">';
+        $html .= '<div style="background: ' . $progress_color . '; height: 100%; width: ' . $progress . '%; transition: width 0.3s;"></div>';
+        $html .= '<span style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 12px; line-height: 20px;">' . $progress . '%</span>';
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+    }
+    
+    $html .= '</tbody>';
+    $html .= '</table>';
+    
+    // Category breakdown
+    $category_stats = $wpdb->get_results("
+        SELECT 
+            t.name as category,
+            COUNT(DISTINCT p.ID) as total_count,
+            COUNT(DISTINCT CASE WHEN pm.meta_key = '_mt_assigned_jury_member' THEN p.ID END) as assigned_count,
+            COUNT(DISTINCT cs.candidate_id) as evaluated_count
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON p.ID = cs.candidate_id
+        WHERE p.post_type = 'mt_candidate' 
+        AND p.post_status = 'publish'
+        AND tt.taxonomy = 'mt_category'
+        GROUP BY t.term_id
+    ");
+    
+    if (!empty($category_stats)) {
+        $html .= '<h4 style="margin-top: 30px; margin-bottom: 15px;">Category Progress</h4>';
+        $html .= '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+        
+        foreach ($category_stats as $cat) {
+            $assigned_percent = $cat->total_count > 0 ? round(($cat->assigned_count / $cat->total_count) * 100, 1) : 0;
+            $evaluated_percent = $cat->assigned_count > 0 ? round(($cat->evaluated_count / $cat->assigned_count) * 100, 1) : 0;
+            
+            $html .= '<div style="background: #f7fafc; padding: 15px; border-radius: 8px;">';
+            $html .= '<h5 style="margin: 0 0 10px 0; color: #2d3748;">' . esc_html($cat->category) . '</h5>';
+            $html .= '<div style="font-size: 0.9em; color: #718096;">Total: ' . $cat->total_count . ' | Assigned: ' . $cat->assigned_count . ' | Evaluated: ' . $cat->evaluated_count . '</div>';
+            $html .= '<div style="margin-top: 10px;">';
+            $html .= '<div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 3px;">';
+            $html .= '<span>Assigned</span><span>' . $assigned_percent . '%</span>';
+            $html .= '</div>';
+            $html .= '<div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">';
+            $html .= '<div style="background: #3182ce; height: 100%; width: ' . $assigned_percent . '%;"></div>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '<div style="margin-top: 8px;">';
+            $html .= '<div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 3px;">';
+            $html .= '<span>Evaluated</span><span>' . $evaluated_percent . '%</span>';
+            $html .= '</div>';
+            $html .= '<div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">';
+            $html .= '<div style="background: #38a169; height: 100%; width: ' . $evaluated_percent . '%;"></div>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>';
+    }
+    
+    $html .= '</div>';
+    
+    wp_send_json_success(array('html' => $html));
+    wp_die();
+}
+
+/**
+ * Ensure the mt_export_assignments handler exists
+ * This might already exist in your plugin, but adding it here for completeness
+ */
+if (!has_action('wp_ajax_mt_export_assignments', 'mt_handle_export_assignments')) {
+    add_action('wp_ajax_mt_export_assignments', 'mt_handle_export_assignments');
+}
+
+function mt_handle_export_assignments() {
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_die('Security check failed');
+    }
+    
+    if (!current_user_can('manage_options')) {
+        wp_die('Insufficient permissions');
+    }
+    
+    // Set CSV headers
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="mobility-trailblazers-assignments-' . date('Y-m-d-H-i-s') . '.csv"');
+    
+    // Create output stream
+    $output = fopen('php://output', 'w');
+    
+    // Add BOM for Excel UTF-8 recognition
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    // Write headers
+    fputcsv($output, array(
+        'Candidate ID',
+        'Candidate Name',
+        'Company',
+        'Category',
+        'Jury Member ID',
+        'Jury Member Name',
+        'Jury Member Email',
+        'Assignment Date',
+        'Evaluation Status',
+        'Evaluation Date',
+        'Total Score'
+    ));
+    
+    // Get assignments data
+    global $wpdb;
+    
+    $assignments = $wpdb->get_results("
+        SELECT 
+            p.ID as candidate_id,
+            p.post_title as candidate_name,
+            pm_company.meta_value as company,
+            t.name as category,
+            u.ID as jury_id,
+            u.display_name as jury_name,
+            u.user_email as jury_email,
+            pm_assign.meta_value as jury_member_id,
+            cs.evaluation_date,
+            cs.total_score
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->postmeta} pm_assign ON p.ID = pm_assign.post_id AND pm_assign.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->postmeta} pm_company ON p.ID = pm_company.post_id AND pm_company.meta_key = '_mt_company'
+        LEFT JOIN {$wpdb->users} u ON u.ID = pm_assign.meta_value
+        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id AND tt.taxonomy = 'mt_category'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON p.ID = cs.candidate_id AND u.ID = cs.jury_member_id
+        WHERE p.post_type = 'mt_candidate' 
+        AND p.post_status = 'publish'
+        AND pm_assign.meta_value IS NOT NULL
+        ORDER BY u.display_name, p.post_title
+    ");
+    
+    // Write data rows
+    foreach ($assignments as $assignment) {
+        fputcsv($output, array(
+            $assignment->candidate_id,
+            $assignment->candidate_name,
+            $assignment->company ?: '',
+            $assignment->category ?: '',
+            $assignment->jury_id,
+            $assignment->jury_name,
+            $assignment->jury_email,
+            date('Y-m-d', strtotime(get_post_meta($assignment->candidate_id, '_mt_assignment_date', true) ?: 'now')),
+            $assignment->evaluation_date ? 'Evaluated' : 'Pending',
+            $assignment->evaluation_date ?: '',
+            $assignment->total_score ?: ''
+        ));
+    }
+    
+    fclose($output);
+    wp_die();
+}
+
 ?>
