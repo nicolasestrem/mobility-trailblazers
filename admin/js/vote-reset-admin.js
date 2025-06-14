@@ -6,29 +6,47 @@
         
         init: function() {
             this.bindEvents();
-            this.initializeModals();
+            this.checkDependencies();
+        },
+        
+        checkDependencies: function() {
+            if (typeof Swal === 'undefined') {
+                console.error('SweetAlert2 is required for vote reset functionality');
+                return false;
+            }
+            
+            if (typeof mt_vote_reset_ajax === 'undefined') {
+                console.error('Vote reset AJAX configuration is missing');
+                return false;
+            }
+            
+            return true;
         },
         
         bindEvents: function() {
             // Individual reset buttons
-            $(document).on('click', '.mt-reset-vote-btn', this.handleIndividualReset);
+            $(document).on('click', '.mt-reset-vote-btn', this.handleIndividualReset.bind(this));
             
             // Bulk reset buttons
-            $('#mt-bulk-reset-phase').on('click', this.handlePhaseReset);
-            $('#mt-bulk-reset-all').on('click', this.handleFullReset);
+            $('#mt-bulk-reset-phase').on('click', this.handlePhaseReset.bind(this));
+            $('#mt-bulk-reset-all').on('click', this.handleFullReset.bind(this));
             
             // Reset history
-            $('#mt-view-reset-history').on('click', this.loadResetHistory);
+            $('#mt-view-reset-history').on('click', this.loadResetHistory.bind(this));
+            
+            // Refresh stats button
+            $('#mt-refresh-stats').on('click', this.refreshStats.bind(this));
         },
         
         handleIndividualReset: function(e) {
             e.preventDefault();
             
-            const candidateId = $(this).data('candidate-id');
-            const candidateName = $(this).data('candidate-name');
+            const $button = $(e.currentTarget);
+            const candidateId = $button.data('candidate-id');
+            const candidateName = $button.data('candidate-name') || 'this candidate';
             
             Swal.fire({
-                title: 'Reset Vote?',
+                title: mt_vote_reset_ajax.strings.confirm_reset_individual,
                 html: `Are you sure you want to reset your vote for <strong>${candidateName}</strong>?<br><br>
                        <input id="reset-reason" class="swal2-input" placeholder="Reason for reset (optional)">`,
                 icon: 'warning',
@@ -41,51 +59,55 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    this.performIndividualReset(candidateId, result.value);
+                    this.performIndividualReset(candidateId, result.value, $button);
                 }
             });
         },
         
-        performIndividualReset: function(candidateId, reason) {
-            const $button = $(`.mt-reset-vote-btn[data-candidate-id="${candidateId}"]`);
+        performIndividualReset: function(candidateId, reason, $button) {
             $button.prop('disabled', true).addClass('loading');
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/reset-vote',
+                url: mt_vote_reset_ajax.ajax_url,
                 method: 'POST',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
-                },
                 data: {
+                    action: 'mt_reset_individual_vote',
+                    nonce: mt_vote_reset_ajax.nonce,
                     candidate_id: candidateId,
                     reason: reason
                 }
             })
-            .done(function(response) {
+            .done((response) => {
                 if (response.success) {
                     Swal.fire(
                         'Reset!',
-                        'Your vote has been reset.',
+                        response.data.message || mt_vote_reset_ajax.strings.reset_success,
                         'success'
                     );
                     
                     // Update UI
-                    $(`.mt-vote-display[data-candidate-id="${candidateId}"]`)
-                        .removeClass('voted')
-                        .find('.scores').html('Not yet voted');
+                    this.updateCandidateVoteDisplay(candidateId);
+                    this.updateProgressIndicators();
                     
-                    // Update progress indicators
-                    VoteResetManager.updateProgressIndicators();
+                    // Hide the reset button since vote is now reset
+                    $button.closest('.mt-vote-reset-container').hide();
+                    
+                } else {
+                    Swal.fire(
+                        'Error!',
+                        response.data || mt_vote_reset_ajax.strings.reset_error,
+                        'error'
+                    );
                 }
             })
-            .fail(function(xhr) {
+            .fail((xhr) => {
                 Swal.fire(
                     'Error!',
-                    xhr.responseJSON?.message || 'Failed to reset vote',
+                    xhr.responseJSON?.data || mt_vote_reset_ajax.strings.reset_error,
                     'error'
                 );
             })
-            .always(function() {
+            .always(() => {
                 $button.prop('disabled', false).removeClass('loading');
             });
         },
@@ -93,17 +115,14 @@
         handlePhaseReset: function(e) {
             e.preventDefault();
             
-            const currentPhase = $('#current-voting-phase').val();
-            const nextPhase = $('#next-voting-phase').val();
-            
             Swal.fire({
-                title: 'Phase Transition Reset',
-                html: `<p>This will reset all votes from the <strong>${currentPhase}</strong> phase.</p>
-                       <p>Jury members will need to vote again for the <strong>${nextPhase}</strong> phase.</p>
+                title: mt_vote_reset_ajax.strings.confirm_reset_phase,
+                html: `<p>This will reset all votes for the current phase.</p>
+                       <p>Jury members will need to vote again.</p>
                        <hr>
                        <div class="text-left">
                          <label>
-                           <input type="checkbox" id="notify-jury"> 
+                           <input type="checkbox" id="notify-jury" checked> 
                            Send email notifications to jury members
                          </label>
                        </div>`,
@@ -115,53 +134,52 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     const notifyJury = document.getElementById('notify-jury').checked;
-                    this.performPhaseReset(currentPhase, nextPhase, notifyJury);
+                    this.performPhaseReset(notifyJury);
                 }
             });
         },
         
-        performPhaseReset: function(fromPhase, toPhase, notifyJury) {
+        performPhaseReset: function(notifyJury) {
             const $button = $('#mt-bulk-reset-phase');
-            $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+            $button.prop('disabled', true).html('<i class="dashicons dashicons-update-alt"></i> Processing...');
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+                url: mt_vote_reset_ajax.ajax_url,
                 method: 'POST',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
-                },
                 data: {
-                    reset_scope: 'phase_transition',
-                    options: {
-                        from_phase: fromPhase,
-                        to_phase: toPhase,
-                        notify_jury: notifyJury,
-                        reason: `Phase transition from ${fromPhase} to ${toPhase}`
-                    }
+                    action: 'mt_reset_phase_votes',
+                    nonce: mt_vote_reset_ajax.nonce,
+                    notify_jury: notifyJury ? 1 : 0
                 }
             })
-            .done(function(response) {
+            .done((response) => {
                 if (response.success) {
                     Swal.fire({
                         title: 'Phase Reset Complete!',
-                        html: `<p><strong>${response.votes_reset}</strong> votes have been reset.</p>
-                               <p><strong>${response.backup_count}</strong> votes backed up.</p>`,
+                        html: `<p><strong>${response.data.votes_reset}</strong> votes have been reset.</p>
+                               ${response.data.notifications_sent ? `<p><strong>${response.data.notifications_sent}</strong> notifications sent.</p>` : ''}`,
                         icon: 'success'
                     }).then(() => {
                         // Reload page to reflect changes
                         window.location.reload();
                     });
+                } else {
+                    Swal.fire(
+                        'Reset Failed!',
+                        response.data || 'Failed to reset votes',
+                        'error'
+                    );
                 }
             })
-            .fail(function(xhr) {
+            .fail((xhr) => {
                 Swal.fire(
                     'Reset Failed!',
-                    xhr.responseJSON?.message || 'Failed to reset votes',
+                    xhr.responseJSON?.data || 'Failed to reset votes',
                     'error'
                 );
             })
-            .always(function() {
-                $button.prop('disabled', false).html('Reset Phase Votes');
+            .always(() => {
+                $button.prop('disabled', false).html('Reset for Next Phase');
             });
         },
         
@@ -170,23 +188,22 @@
             
             Swal.fire({
                 title: 'Full System Reset',
-                html: `<div class="text-center text-danger">
-                       <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                html: `<div class="text-center" style="color: #dc3545;">
                        <p><strong>WARNING: This action cannot be undone!</strong></p>
-                       <p>This will reset ALL votes in the system.</p>
+                       <p>This will reset ALL votes and evaluations in the system.</p>
                        <hr>
-                       <p>Type <strong>CONFIRM RESET</strong> to proceed:</p>
-                       <input id="confirm-text" class="swal2-input" placeholder="Type confirmation text">
+                       <p>Type <strong>DELETE ALL</strong> to proceed:</p>
+                       <input id="confirm-text" class="swal2-input" placeholder="Type DELETE ALL">
                        </div>`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
+                confirmButtonColor: '#dc3545',
                 confirmButtonText: 'Reset Everything',
                 width: '600px',
                 preConfirm: () => {
                     const confirmText = document.getElementById('confirm-text').value;
-                    if (confirmText !== 'CONFIRM RESET') {
-                        Swal.showValidationMessage('Please type the confirmation text exactly');
+                    if (confirmText !== 'DELETE ALL') {
+                        Swal.showValidationMessage('Please type "DELETE ALL" exactly');
                         return false;
                     }
                     return true;
@@ -202,45 +219,111 @@
             // Show progress modal
             Swal.fire({
                 title: 'Resetting All Votes',
-                html: '<div class="progress"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div></div>',
+                html: '<div style="text-align: center;"><i class="dashicons dashicons-update-alt" style="animation: spin 1s linear infinite; font-size: 2em;"></i><br>Please wait...</div>',
                 allowOutsideClick: false,
                 showConfirmButton: false
             });
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+                url: mt_vote_reset_ajax.ajax_url,
                 method: 'POST',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
-                },
                 data: {
-                    reset_scope: 'full_reset',
-                    options: {
-                        confirm: true,
-                        reason: 'Full system reset initiated by admin'
-                    }
+                    action: 'mt_reset_all_votes',
+                    nonce: mt_vote_reset_ajax.nonce,
+                    confirm: 'DELETE ALL'
                 }
             })
-            .done(function(response) {
+            .done((response) => {
                 if (response.success) {
                     Swal.fire({
                         title: 'System Reset Complete',
                         html: `<p>All votes have been reset.</p>
-                               <p><strong>${response.votes_reset}</strong> votes removed.</p>
-                               <p><strong>${response.backup_count}</strong> votes backed up.</p>`,
+                               <p><strong>${response.data.votes_reset}</strong> votes removed.</p>
+                               <p><strong>${response.data.evaluations_reset}</strong> evaluations removed.</p>`,
                         icon: 'success'
                     }).then(() => {
-                        window.location.href = mt_ajax.admin_url + 'admin.php?page=mobility-trailblazers';
+                        window.location.reload();
                     });
+                } else {
+                    Swal.fire(
+                        'Reset Failed!',
+                        response.data || 'Failed to reset system',
+                        'error'
+                    );
                 }
             })
-            .fail(function(xhr) {
+            .fail((xhr) => {
                 Swal.fire(
                     'Reset Failed!',
-                    xhr.responseJSON?.message || 'Failed to reset system',
+                    xhr.responseJSON?.data || 'Failed to reset system',
                     'error'
                 );
             });
+        },
+        
+        refreshStats: function(e) {
+            e.preventDefault();
+            
+            const $button = $(e.currentTarget);
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: mt_vote_reset_ajax.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'mt_get_vote_stats',
+                    nonce: mt_vote_reset_ajax.nonce
+                }
+            })
+            .done((response) => {
+                if (response.success) {
+                    // Update stats display
+                    $('.mt-total-votes').text(response.data.total_votes);
+                    $('.mt-total-evaluations').text(response.data.total_evaluations);
+                    $('.mt-active-jury').text(response.data.active_jury);
+                }
+            })
+            .always(() => {
+                $button.prop('disabled', false);
+            });
+        },
+        
+        updateCandidateVoteDisplay: function(candidateId) {
+            // Update the candidate card to show vote has been reset
+            const $candidateCard = $(`.mt-candidate-card[data-candidate-id="${candidateId}"]`);
+            $candidateCard.removeClass('evaluated').addClass('pending');
+            $candidateCard.find('.status-badge').removeClass('evaluated').addClass('pending').text('Pending');
+            $candidateCard.find('.mt-evaluation-score').text('Not evaluated');
+        },
+        
+        updateProgressIndicators: function() {
+            // Update progress indicators if they exist
+            $.ajax({
+                url: mt_vote_reset_ajax.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'mt_get_jury_progress',
+                    nonce: mt_vote_reset_ajax.nonce
+                }
+            })
+            .done((response) => {
+                if (response.success) {
+                    $('.mt-progress-bar').css('width', response.data.progress + '%');
+                    $('.mt-progress-text').text(response.data.completed + ' / ' + response.data.total);
+                    $('.mt-completion-percentage').text(response.data.progress + '%');
+                }
+            });
+        },
+        
+        // Utility function to show loading state
+        showLoading: function($element, text = 'Loading...') {
+            $element.prop('disabled', true).data('original-text', $element.text()).text(text);
+        },
+        
+        // Utility function to hide loading state
+        hideLoading: function($element) {
+            const originalText = $element.data('original-text') || 'Button';
+            $element.prop('disabled', false).text(originalText);
         },
         
         loadResetHistory: function(e) {
@@ -311,21 +394,46 @@
                 return `Phase: ${log.voting_phase}`;
             }
             return 'All votes';
-        },
-        
-        updateProgressIndicators: function() {
-            // Update jury member's progress bar
-            $.get(mt_ajax.rest_url + 'mobility-trailblazers/v1/jury-progress', function(data) {
-                if (data.success) {
-                    $('.mt-progress-bar').css('width', data.progress + '%');
-                    $('.mt-progress-text').text(data.completed + ' / ' + data.total);
-                }
-            });
         }
     };
     
+    // Initialize when document is ready
     $(document).ready(function() {
         VoteResetManager.init();
     });
+    
+    // Add CSS for loading animation
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .mt-reset-vote-btn.loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+            .mt-vote-reset-container {
+                margin-top: 10px;
+                padding: 10px;
+                background: #f9f9f9;
+                border-radius: 4px;
+                border-left: 3px solid #dc3545;
+            }
+            .mt-reset-vote-btn {
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            .mt-reset-vote-btn:hover {
+                background: #c82333;
+            }
+        `)
+        .appendTo('head');
     
 })(jQuery);
