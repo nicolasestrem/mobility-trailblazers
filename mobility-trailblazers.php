@@ -330,18 +330,7 @@ class MobilityTrailblazersPlugin {
             KEY jury_idx (jury_member_id)
         ) $charset_collate;";
 
-        // Public voting table
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
-        $sql_public_votes = "CREATE TABLE $table_public_votes (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            candidate_id bigint(20) NOT NULL,
-            voter_email varchar(255) NOT NULL,
-            voter_ip varchar(45) NOT NULL,
-            vote_date datetime DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            UNIQUE KEY unique_public_vote (candidate_id, voter_email),
-            KEY candidate_idx (candidate_id)
-        ) $charset_collate;";
+
 
         // Evaluation criteria scores table
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
@@ -365,7 +354,6 @@ class MobilityTrailblazersPlugin {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_votes);
-        dbDelta($sql_public_votes);
         dbDelta($sql_scores);
 
         // Create default categories based on the 3 dimensions from docs
@@ -429,7 +417,6 @@ class MobilityTrailblazersPlugin {
         
         // AJAX handlers
         add_action('wp_ajax_mt_jury_vote', array($this, 'handle_jury_vote'));
-        add_action('wp_ajax_mt_public_vote', array($this, 'handle_public_vote'));
         add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
         add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
         add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
@@ -651,7 +638,7 @@ class MobilityTrailblazersPlugin {
         
         wp_localize_script('mt-frontend-js', 'mt_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_public_nonce'),
+            'nonce' => wp_create_nonce('mt_nonce'),
             'strings' => array(
                 'vote_success' => __('Thank you for your vote!', 'mobility-trailblazers'),
                 'vote_error' => __('Error submitting vote. Please try again.', 'mobility-trailblazers'),
@@ -901,10 +888,8 @@ class MobilityTrailblazersPlugin {
         $jury_count = wp_count_posts('mt_jury')->publish;
         
         $table_votes = $wpdb->prefix . 'mt_votes';
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
         
         $jury_votes = $wpdb->get_var("SELECT COUNT(*) FROM $table_votes");
-        $public_votes = $wpdb->get_var("SELECT COUNT(*) FROM $table_public_votes");
         
         echo '<div class="wrap">';
         echo '<h1>' . __('Mobility Trailblazers Dashboard', 'mobility-trailblazers') . '</h1>';
@@ -923,11 +908,6 @@ class MobilityTrailblazersPlugin {
         echo '<div class="mt-stat-box">';
         echo '<h3>' . __('Jury Votes', 'mobility-trailblazers') . '</h3>';
         echo '<div class="mt-stat-number">' . $jury_votes . '</div>';
-        echo '</div>';
-        
-        echo '<div class="mt-stat-box">';
-        echo '<h3>' . __('Public Votes', 'mobility-trailblazers') . '</h3>';
-        echo '<div class="mt-stat-number">' . $public_votes . '</div>';
         echo '</div>';
         echo '</div>';
         
@@ -1049,52 +1029,7 @@ class MobilityTrailblazersPlugin {
         }
     }
 
-    /**
-     * Handle public vote submission
-     */
-    public function handle_public_vote() {
-        if (!check_ajax_referer('mt_public_nonce', 'nonce', false)) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
-        }
-        
-        $candidate_id = intval($_POST['candidate_id']);
-        $voter_email = sanitize_email($_POST['voter_email']);
-        $voter_ip = $_SERVER['REMOTE_ADDR'];
 
-        if (!is_email($voter_email)) {
-            wp_send_json_error(array('message' => __('Please provide a valid email address.', 'mobility-trailblazers')));
-        }
-
-        global $wpdb;
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
-
-        // Check if already voted
-        $existing_vote = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $table_public_votes WHERE candidate_id = %d AND voter_email = %s",
-            $candidate_id,
-            $voter_email
-        ));
-
-        if ($existing_vote) {
-            wp_send_json_error(array('message' => __('You have already voted for this candidate.', 'mobility-trailblazers')));
-        }
-
-        $result = $wpdb->insert(
-            $table_public_votes,
-            array(
-                'candidate_id' => $candidate_id,
-                'voter_email' => $voter_email,
-                'voter_ip' => $voter_ip,
-                'vote_date' => current_time('mysql')
-            )
-        );
-
-        if ($result !== false) {
-            wp_send_json_success(array('message' => __('Thank you for your vote!', 'mobility-trailblazers')));
-        } else {
-            wp_send_json_error(array('message' => __('Error submitting vote.', 'mobility-trailblazers')));
-        }
-    }
 
     /**
      * Check if user is jury member
@@ -1347,36 +1282,23 @@ class MobilityTrailblazersPlugin {
      */
     public function voting_results_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'type' => 'public',
+            'type' => 'jury',
             'limit' => 10
         ), $atts);
 
         global $wpdb;
 
-        if ($atts['type'] === 'public') {
-            $table = $wpdb->prefix . 'mt_public_votes';
-            $results = $wpdb->get_results($wpdb->prepare("
-                SELECT p.ID, p.post_title, COUNT(v.id) as vote_count
-                FROM {$wpdb->posts} p
-                LEFT JOIN $table v ON p.ID = v.candidate_id
-                WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
-                GROUP BY p.ID
-                ORDER BY vote_count DESC
-                LIMIT %d
-            ", intval($atts['limit'])));
-        } else {
-            $table = $wpdb->prefix . 'mt_candidate_scores';
-            $results = $wpdb->get_results($wpdb->prepare("
-                SELECT p.ID, p.post_title, AVG(s.total_score) as avg_score, COUNT(s.id) as evaluation_count
-                FROM {$wpdb->posts} p
-                LEFT JOIN $table s ON p.ID = s.candidate_id
-                WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
-                GROUP BY p.ID
-                HAVING evaluation_count > 0
-                ORDER BY avg_score DESC
-                LIMIT %d
-            ", intval($atts['limit'])));
-        }
+        $table = $wpdb->prefix . 'mt_candidate_scores';
+        $results = $wpdb->get_results($wpdb->prepare("
+            SELECT p.ID, p.post_title, AVG(s.total_score) as avg_score, COUNT(s.id) as evaluation_count
+            FROM {$wpdb->posts} p
+            LEFT JOIN $table s ON p.ID = s.candidate_id
+            WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
+            GROUP BY p.ID
+            HAVING evaluation_count > 0
+            ORDER BY avg_score DESC
+            LIMIT %d
+        ", intval($atts['limit'])));
 
         if (empty($results)) {
             return '<p>' . __('No voting results available yet.', 'mobility-trailblazers') . '</p>';
@@ -1385,19 +1307,15 @@ class MobilityTrailblazersPlugin {
         ob_start();
         ?>
         <div class="mt-voting-results">
-            <h3><?php echo $atts['type'] === 'public' ? __('Public Voting Results', 'mobility-trailblazers') : __('Jury Evaluation Results', 'mobility-trailblazers'); ?></h3>
+            <h3><?php _e('Jury Evaluation Results', 'mobility-trailblazers'); ?></h3>
             
             <ol class="mt-results-list">
                 <?php foreach ($results as $result): ?>
                     <li class="mt-result-item">
                         <span class="mt-candidate-name"><?php echo esc_html($result->post_title); ?></span>
                         <span class="mt-result-score">
-                            <?php if ($atts['type'] === 'public'): ?>
-                                <?php echo intval($result->vote_count); ?> <?php _e('votes', 'mobility-trailblazers'); ?>
-                            <?php else: ?>
-                                <?php echo number_format($result->avg_score, 1); ?>/50 
-                                (<?php echo intval($result->evaluation_count); ?> <?php _e('evaluations', 'mobility-trailblazers'); ?>)
-                            <?php endif; ?>
+                            <?php echo number_format($result->avg_score, 1); ?>/50 
+                            (<?php echo intval($result->evaluation_count); ?> <?php _e('evaluations', 'mobility-trailblazers'); ?>)
                         </span>
                     </li>
                 <?php endforeach; ?>
@@ -1509,13 +1427,6 @@ class MobilityTrailblazersPlugin {
         echo do_shortcode('[mt_voting_results type="jury" limit="25"]');
         echo '</div>';
         
-        echo '<hr>';
-        
-        // Public results
-        echo '<div class="mt-results-section">';
-        echo do_shortcode('[mt_voting_results type="public" limit="25"]');
-        echo '</div>';
-        
         echo '</div>';
     }
 
@@ -1552,7 +1463,6 @@ class MobilityTrailblazersPlugin {
     public function settings_page() {
         if (isset($_POST['submit']) && wp_verify_nonce($_POST['mt_settings_nonce'], 'mt_settings')) {
             update_option('mt_voting_enabled', isset($_POST['voting_enabled']));
-            update_option('mt_public_voting_enabled', isset($_POST['public_voting_enabled']));
             update_option('mt_current_phase', sanitize_text_field($_POST['current_phase']));
             update_option('mt_award_year', sanitize_text_field($_POST['award_year']));
             update_option('mt_jury_dashboard_page', intval($_POST['mt_jury_dashboard_page']));
@@ -1561,7 +1471,6 @@ class MobilityTrailblazersPlugin {
         }
 
         $voting_enabled = get_option('mt_voting_enabled', false);
-        $public_voting_enabled = get_option('mt_public_voting_enabled', false);
         $current_phase = get_option('mt_current_phase', 'preparation');
         $award_year = get_option('mt_award_year', date('Y'));
 
@@ -1595,9 +1504,6 @@ class MobilityTrailblazersPlugin {
         
         echo '<tr><th scope="row">' . __('Enable Jury Voting', 'mobility-trailblazers') . '</th>';
         echo '<td><input type="checkbox" name="voting_enabled" value="1"' . checked($voting_enabled, 1, false) . ' /> ' . __('Allow jury members to submit evaluations', 'mobility-trailblazers') . '</td></tr>';
-        
-        echo '<tr><th scope="row">' . __('Enable Public Voting', 'mobility-trailblazers') . '</th>';
-        echo '<td><input type="checkbox" name="public_voting_enabled" value="1"' . checked($public_voting_enabled, 1, false) . ' /> ' . __('Allow public to vote for candidates', 'mobility-trailblazers') . '</td></tr>';
         
         // Add the jury dashboard page setting
         $this->add_settings_section($settings);
@@ -2848,8 +2754,7 @@ class MobilityTrailblazersPlugin {
         echo "<h2>4. Database Tables</h2>";
         $required_tables = [
             'mt_candidate_scores' => 'Stores jury evaluations',
-            'mt_votes' => 'Stores jury votes', 
-            'mt_public_votes' => 'Stores public votes'
+            'mt_votes' => 'Stores jury votes'
         ];
 
         echo "<table class='wp-list-table widefat fixed striped'>";
