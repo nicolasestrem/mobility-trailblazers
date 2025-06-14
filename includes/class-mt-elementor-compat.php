@@ -1,6 +1,7 @@
 <?php
 /**
- * Elementor Compatibility for Mobility Trailblazers
+ * Elementor Compatibility for Mobility Trailblazers - FIXED VERSION
+ * File: includes/class-mt-elementor-compat.php
  *
  * @package MobilityTrailblazers
  * @since 1.0.0
@@ -20,15 +21,33 @@ class MT_Elementor_Compatibility {
      * Constructor
      */
     public function __construct() {
-        // Check if Elementor is active
-        if (!did_action('elementor/loaded')) {
+        // Check if Elementor is active - improved check
+        if (!$this->is_elementor_active()) {
             return;
         }
+        
+        // Hook into Elementor
+        add_action('elementor/init', array($this, 'init_elementor_hooks'));
+    }
+    
+    /**
+     * Check if Elementor is active and loaded
+     */
+    private function is_elementor_active() {
+        return did_action('elementor/loaded') && class_exists('\Elementor\Plugin');
+    }
+    
+    /**
+     * Initialize Elementor hooks
+     */
+    public function init_elementor_hooks() {
+        // Register custom widget category
+        add_action('elementor/elements/categories_registered', array($this, 'add_widget_category'));
         
         // Prevent conflicts in Elementor editor
         add_action('elementor/editor/before_enqueue_scripts', array($this, 'handle_editor_compatibility'));
         
-        // Register custom Elementor widgets
+        // Register custom Elementor widgets - FIXED PATH
         add_action('elementor/widgets/register', array($this, 'register_elementor_widgets'));
         
         // Handle preview mode
@@ -40,11 +59,25 @@ class MT_Elementor_Compatibility {
         // Fix shortcode rendering in Elementor
         add_filter('elementor/frontend/the_content', array($this, 'fix_shortcode_rendering'));
         
-        // Fix frontend config issue
-        add_action('elementor/frontend/before_enqueue_scripts', array($this, 'fix_frontend_config'), 5);
-        
-        // Ensure proper script dependencies
-        add_action('wp_enqueue_scripts', array($this, 'ensure_elementor_dependencies'), 999);
+        // Add error handling
+        add_action('elementor/widgets/widgets_registered', array($this, 'check_widget_registration'));
+    }
+    
+    /**
+     * Add custom widget category
+     */
+    public function add_widget_category($elements_manager) {
+        try {
+            $elements_manager->add_category(
+                'mobility-trailblazers',
+                [
+                    'title' => __('Mobility Trailblazers', 'mobility-trailblazers'),
+                    'icon' => 'fa fa-car',
+                ]
+            );
+        } catch (Exception $e) {
+            error_log('MT Elementor Category Error: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -77,22 +110,95 @@ class MT_Elementor_Compatibility {
                 margin: 0;
                 color: #666;
             }
+            .mt-widget-error {
+                background: #ffebee;
+                color: #c62828;
+                padding: 15px;
+                border-radius: 5px;
+                border: 1px solid #ffcdd2;
+                text-align: center;
+            }
         ');
     }
     
     /**
-     * Register custom Elementor widgets
+     * Register custom Elementor widgets - FIXED PATHS
      */
     public function register_elementor_widgets($widgets_manager) {
-        // Include widget files
-        require_once MT_PLUGIN_PATH . 'includes/elementor-widgets/class-jury-dashboard-widget.php';
-        require_once MT_PLUGIN_PATH . 'includes/elementor-widgets/class-candidate-grid-widget.php';
-        require_once MT_PLUGIN_PATH . 'includes/elementor-widgets/class-evaluation-stats-widget.php';
+        try {
+            // Define the correct paths based on your project structure
+            $widget_files = array(
+                'jury_dashboard' => 'includes/elementor/class-jury-dashboard-widget.php',
+                'candidate_grid' => 'includes/elementor/class-candidate-grid-widget.php', 
+                'evaluation_stats' => 'includes/elementor/class-evaluation-stats-widget.php'
+            );
+            
+            // Get the plugin path - check multiple possible constants
+            $plugin_path = $this->get_plugin_path();
+            
+            foreach ($widget_files as $widget_key => $file_path) {
+                $full_path = $plugin_path . $file_path;
+                
+                if (file_exists($full_path)) {
+                    require_once $full_path;
+                    
+                    // Register the specific widget based on the file
+                    switch ($widget_key) {
+                        case 'jury_dashboard':
+                            if (class_exists('MT_Jury_Dashboard_Widget')) {
+                                $widgets_manager->register(new \MT_Jury_Dashboard_Widget());
+                            }
+                            break;
+                        case 'candidate_grid':
+                            if (class_exists('MT_Candidate_Grid_Widget')) {
+                                $widgets_manager->register(new \MT_Candidate_Grid_Widget());
+                            }
+                            break;
+                        case 'evaluation_stats':
+                            if (class_exists('MT_Evaluation_Stats_Widget')) {
+                                $widgets_manager->register(new \MT_Evaluation_Stats_Widget());
+                            }
+                            break;
+                    }
+                } else {
+                    error_log("MT Widget file not found: $full_path");
+                }
+            }
+            
+        } catch (Exception $e) {
+            error_log('MT Widget Registration Error: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Get the correct plugin path
+     */
+    private function get_plugin_path() {
+        // Try multiple constants that might be defined
+        if (defined('MT_PLUGIN_PATH')) {
+            return MT_PLUGIN_PATH;
+        }
         
-        // Register widgets
-        $widgets_manager->register(new \MT_Jury_Dashboard_Widget());
-        $widgets_manager->register(new \MT_Candidate_Grid_Widget());
-        $widgets_manager->register(new \MT_Evaluation_Stats_Widget());
+        if (defined('MOBILITY_TRAILBLAZERS_PATH')) {
+            return MOBILITY_TRAILBLAZERS_PATH;
+        }
+        
+        // Fallback: calculate from current file
+        return plugin_dir_path(dirname(__FILE__));
+    }
+    
+    /**
+     * Check widget registration (for debugging)
+     */
+    public function check_widget_registration() {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $widgets_manager = \Elementor\Plugin::instance()->widgets_manager;
+            $registered_widgets = $widgets_manager->get_widget_types();
+            
+            if (!isset($registered_widgets['mt_evaluation_stats'])) {
+                error_log('MT Evaluation Stats Widget failed to register');
+            }
+        }
     }
     
     /**
@@ -100,15 +206,50 @@ class MT_Elementor_Compatibility {
      */
     public function enqueue_preview_styles() {
         // Ensure our frontend styles load in preview
-        wp_enqueue_style('mt-frontend-css', MT_PLUGIN_URL . 'assets/frontend.css', array(), MT_PLUGIN_VERSION);
+        $plugin_url = $this->get_plugin_url();
+        
+        if (file_exists($this->get_plugin_path() . 'assets/frontend.css')) {
+            wp_enqueue_style(
+                'mt-frontend-css', 
+                $plugin_url . 'assets/frontend.css', 
+                array(), 
+                $this->get_plugin_version()
+            );
+        }
+    }
+    
+    /**
+     * Get plugin URL
+     */
+    private function get_plugin_url() {
+        if (defined('MT_PLUGIN_URL')) {
+            return MT_PLUGIN_URL;
+        }
+        
+        return plugin_dir_url(dirname(__FILE__));
+    }
+    
+    /**
+     * Get plugin version
+     */
+    private function get_plugin_version() {
+        if (defined('MT_PLUGIN_VERSION')) {
+            return MT_PLUGIN_VERSION;
+        }
+        
+        return '1.0.0';
     }
     
     /**
      * Clear Elementor cache when evaluations are saved
      */
     public function clear_elementor_cache($evaluation_id) {
-        if (class_exists('\Elementor\Plugin')) {
-            \Elementor\Plugin::$instance->files_manager->clear_cache();
+        try {
+            if (class_exists('\Elementor\Plugin')) {
+                \Elementor\Plugin::$instance->files_manager->clear_cache();
+            }
+        } catch (Exception $e) {
+            error_log('MT Clear Cache Error: ' . $e->getMessage());
         }
     }
     
@@ -116,14 +257,29 @@ class MT_Elementor_Compatibility {
      * Fix shortcode rendering in Elementor
      */
     public function fix_shortcode_rendering($content) {
-        // Ensure our shortcodes work properly in Elementor
-        if (has_shortcode($content, 'mt_jury_dashboard')) {
-            // Make sure required scripts are loaded
-            wp_enqueue_script('mt-frontend-js', MT_PLUGIN_URL . 'assets/frontend.js', array('jquery'), MT_PLUGIN_VERSION, true);
-            wp_localize_script('mt-frontend-js', 'mt_ajax', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('mt_nonce')
-            ));
+        try {
+            // Ensure our shortcodes work properly in Elementor
+            if (has_shortcode($content, 'mt_jury_dashboard')) {
+                // Make sure required scripts are loaded
+                $plugin_url = $this->get_plugin_url();
+                
+                if (file_exists($this->get_plugin_path() . 'assets/frontend.js')) {
+                    wp_enqueue_script(
+                        'mt-frontend-js', 
+                        $plugin_url . 'assets/frontend.js', 
+                        array('jquery'), 
+                        $this->get_plugin_version(), 
+                        true
+                    );
+                    
+                    wp_localize_script('mt-frontend-js', 'mt_ajax', array(
+                        'ajax_url' => admin_url('admin-ajax.php'),
+                        'nonce' => wp_create_nonce('mt_nonce')
+                    ));
+                }
+            }
+        } catch (Exception $e) {
+            error_log('MT Shortcode Fix Error: ' . $e->getMessage());
         }
         
         return $content;
@@ -133,7 +289,10 @@ class MT_Elementor_Compatibility {
      * Check if we're in Elementor editor
      */
     public static function is_elementor_editor() {
-        return isset($_GET['action']) && $_GET['action'] === 'elementor';
+        return (
+            class_exists('\Elementor\Plugin') && 
+            \Elementor\Plugin::$instance->editor->is_edit_mode()
+        );
     }
     
     /**
@@ -144,121 +303,29 @@ class MT_Elementor_Compatibility {
     }
     
     /**
-     * Fix frontend config issue
+     * Debug method to check widget status
      */
-    public function fix_frontend_config() {
-        // Only run on frontend, not in admin
-        if (is_admin()) {
+    public function debug_widget_status() {
+        if (!current_user_can('manage_options')) {
             return;
         }
         
-        // Check if Elementor frontend is active
-        if (!\Elementor\Plugin::$instance->frontend->has_elementor_in_page()) {
-            return;
+        $debug_info = array(
+            'elementor_loaded' => did_action('elementor/loaded'),
+            'plugin_class_exists' => class_exists('\Elementor\Plugin'),
+            'widgets_manager_exists' => class_exists('\Elementor\Widgets_Manager'),
+            'mt_widget_class_exists' => class_exists('MT_Evaluation_Stats_Widget'),
+            'plugin_path' => $this->get_plugin_path(),
+            'widget_file_exists' => file_exists($this->get_plugin_path() . 'includes/elementor/class-evaluation-stats-widget.php'),
+        );
+        
+        if (class_exists('\Elementor\Plugin')) {
+            $widgets_manager = \Elementor\Plugin::instance()->widgets_manager;
+            $registered_widgets = $widgets_manager->get_widget_types();
+            $debug_info['registered_widgets'] = array_keys($registered_widgets);
+            $debug_info['mt_stats_widget_registered'] = isset($registered_widgets['mt_evaluation_stats']);
         }
         
-        // Ensure frontend config is available
-        wp_add_inline_script('elementor-frontend', '
-            if (typeof elementorFrontendConfig === "undefined") {
-                window.elementorFrontendConfig = {
-                    environmentMode: {
-                        edit: false,
-                        wpPreview: false,
-                        isScriptDebug: false
-                    },
-                    i18n: {
-                        shareButtonsTooltip: "Share"
-                    },
-                    is_rtl: false,
-                    breakpoints: {
-                        xs: 0,
-                        sm: 480,
-                        md: 768,
-                        lg: 1025,
-                        xl: 1440,
-                        xxl: 1600
-                    },
-                    responsive: {
-                        breakpoints: {
-                            mobile: {
-                                label: "Mobile",
-                                value: 767,
-                                direction: "max",
-                                is_enabled: true
-                            },
-                            mobile_extra: {
-                                label: "Mobile Extra",
-                                value: 880,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            tablet: {
-                                label: "Tablet",
-                                value: 1024,
-                                direction: "max",
-                                is_enabled: true
-                            },
-                            tablet_extra: {
-                                label: "Tablet Extra",
-                                value: 1200,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            laptop: {
-                                label: "Laptop",
-                                value: 1366,
-                                direction: "max",
-                                is_enabled: false
-                            },
-                            widescreen: {
-                                label: "Widescreen",
-                                value: 2400,
-                                direction: "min",
-                                is_enabled: false
-                            }
-                        }
-                    },
-                    version: "' . ELEMENTOR_VERSION . '",
-                    is_static: false,
-                    experimentalFeatures: {},
-                    urls: {
-                        assets: "' . ELEMENTOR_ASSETS_URL . '"
-                    },
-                    settings: {
-                        page: [],
-                        editorPreferences: []
-                    },
-                    kit: {}
-                };
-            }
-        ', 'before');
-    }
-    
-    /**
-     * Ensure proper Elementor dependencies
-     */
-    public function ensure_elementor_dependencies() {
-        // Only on pages with Elementor content
-        if (!is_singular() || !class_exists('\Elementor\Plugin')) {
-            return;
-        }
-        
-        $post_id = get_the_ID();
-        if (!$post_id) {
-            return;
-        }
-        
-        // Check if page uses Elementor
-        if (!\Elementor\Plugin::$instance->documents->get($post_id)->is_built_with_elementor()) {
-            return;
-        }
-        
-        // Ensure jQuery is loaded
-        wp_enqueue_script('jquery');
-        
-        // Ensure Elementor frontend scripts are loaded
-        if (wp_script_is('elementor-frontend', 'registered') && !wp_script_is('elementor-frontend', 'enqueued')) {
-            wp_enqueue_script('elementor-frontend');
-        }
+        error_log('MT Widget Debug Info: ' . print_r($debug_info, true));
     }
 }
