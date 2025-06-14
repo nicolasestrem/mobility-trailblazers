@@ -491,6 +491,16 @@ class MobilityTrailblazersPlugin {
             'mt-voting-results',
             array($this, 'voting_results_page')
         );
+
+        // Add settings page
+        add_submenu_page(
+            'mt-award-system',
+            __('Settings', 'mobility-trailblazers'),
+            __('Settings', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-settings',
+            array($this, 'settings_page')
+        );
     }
 
     /**
@@ -1461,6 +1471,11 @@ class MobilityTrailblazersPlugin {
      * Settings page
      */
     public function settings_page() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Handle form submission
         if (isset($_POST['submit']) && wp_verify_nonce($_POST['mt_settings_nonce'], 'mt_settings')) {
             update_option('mt_voting_enabled', isset($_POST['voting_enabled']));
             update_option('mt_current_phase', sanitize_text_field($_POST['current_phase']));
@@ -1470,6 +1485,22 @@ class MobilityTrailblazersPlugin {
             echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'mobility-trailblazers') . '</p></div>';
         }
 
+        // Check if template file exists, otherwise use inline implementation
+        $template_file = MT_PLUGIN_PATH . 'admin/settings-page.php';
+        
+        if (file_exists($template_file)) {
+            // Include the settings page template
+            require_once $template_file;
+        } else {
+            // Fallback to inline implementation
+            $this->render_settings_page_inline();
+        }
+    }
+
+    /**
+     * Render settings page inline (fallback method)
+     */
+    private function render_settings_page_inline() {
         $voting_enabled = get_option('mt_voting_enabled', false);
         $current_phase = get_option('mt_current_phase', 'preparation');
         $award_year = get_option('mt_award_year', date('Y'));
@@ -1491,7 +1522,6 @@ class MobilityTrailblazersPlugin {
             'preparation' => __('Preparation', 'mobility-trailblazers'),
             'candidate_collection' => __('Candidate Collection', 'mobility-trailblazers'),
             'jury_evaluation' => __('Jury Evaluation', 'mobility-trailblazers'),
-            'public_voting' => __('Public Voting', 'mobility-trailblazers'),
             'final_selection' => __('Final Selection', 'mobility-trailblazers'),
             'award_ceremony' => __('Award Ceremony', 'mobility-trailblazers'),
             'post_award' => __('Post Award', 'mobility-trailblazers')
@@ -1506,7 +1536,7 @@ class MobilityTrailblazersPlugin {
         echo '<td><input type="checkbox" name="voting_enabled" value="1"' . checked($voting_enabled, 1, false) . ' /> ' . __('Allow jury members to submit evaluations', 'mobility-trailblazers') . '</td></tr>';
         
         // Add the jury dashboard page setting
-        $this->add_settings_section($settings);
+        $this->add_settings_section(null);
         
         echo '</table>';
         
