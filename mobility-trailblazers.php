@@ -2919,15 +2919,57 @@ class MobilityTrailblazersPlugin {
      * Add evaluation page (hidden from menu)
      */
     public function add_evaluation_page() {
-        // Don't check user permissions here - let WordPress handle it with capability
-        add_submenu_page(
-            null,  // Hidden from menu
-            __('Evaluate Candidate', 'mobility-trailblazers'),
-            __('Evaluate', 'mobility-trailblazers'),
-            'read',  // Basic read capability that jury members have
-            'mt-evaluate',
-            array($this, 'evaluation_page')
+        // Validate environment first
+        if (!is_admin() || !current_user_can('mt_jury_member')) {
+            return;
+        }
+        
+        // Check if parent menu exists
+        global $menu, $submenu;
+        $parent_exists = false;
+        
+        if (isset($submenu['mt-award-system'])) {
+            $parent_exists = true;
+        }
+        
+        if (!$parent_exists) {
+            error_log('MT Plugin: Parent menu mt-award-system does not exist');
+            return;
+        }
+        
+        // Safe parameters
+        $args = array(
+            'parent_slug' => 'mt-award-system',
+            'page_title'  => esc_html__('Evaluation Interface', 'mobility-trailblazers'),
+            'menu_title'  => esc_html__('My Dashboard', 'mobility-trailblazers'),
+            'capability'  => 'mt_jury_member',
+            'menu_slug'   => 'mt-evaluation',
+            'function'    => array($this, 'evaluation_page')
         );
+        
+        // Validate all required parameters
+        foreach ($args as $key => $value) {
+            if (empty($value) && $key !== 'function') {
+                error_log("MT Plugin: Empty parameter '$key' for add_submenu_page");
+                return false;
+            }
+        }
+        
+        // Call with validated parameters
+        $result = add_submenu_page(
+            $args['parent_slug'],
+            $args['page_title'],
+            $args['menu_title'],
+            $args['capability'],
+            $args['menu_slug'],
+            $args['function']
+        );
+        
+        if (!$result) {
+            error_log('MT Plugin: Failed to add evaluation submenu page');
+        }
+        
+        return $result;
     }
 
     /**
@@ -3413,6 +3455,48 @@ function mt_get_jury_scores($user_id, $candidate_id) {
     }
     
     return $scores;
+}
+
+/**
+ * Null-safe wrapper functions
+ */
+if (!function_exists('mt_safe_strpos')) {
+    function mt_safe_strpos($haystack, $needle, $offset = 0) {
+        if (null === $haystack || null === $needle) {
+            return false;
+        }
+        return strpos((string)$haystack, (string)$needle, $offset);
+    }
+}
+
+if (!function_exists('mt_safe_str_replace')) {
+    function mt_safe_str_replace($search, $replace, $subject) {
+        if (null === $subject) {
+            return '';
+        }
+        if (null === $search) {
+            return $subject;
+        }
+        if (null === $replace) {
+            $replace = '';
+        }
+        return str_replace($search, $replace, $subject);
+    }
+}
+
+if (!function_exists('mt_safe_plugin_basename')) {
+    function mt_safe_plugin_basename($file = null) {
+        if (null === $file) {
+            $file = __FILE__;
+        }
+        
+        // Ensure we have a valid file path
+        if (empty($file) || !is_string($file)) {
+            return '';
+        }
+        
+        return plugin_basename($file);
+    }
 }
 
 ?>
