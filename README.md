@@ -121,12 +121,35 @@ docker exec mobility_wpcli_STAGING wp eval 'do_action("mt_sync_evaluations");'
 - `wp_postmeta` - Candidate/jury metadata
 - `wp_users` - Jury member accounts
 
-## 🚀 Upcoming Features
+## 📈 Development Roadmap
 
-- **Public Results Display** - Post-evaluation phase
-- **Export Functionality** - CSV/PDF reports
-- **Email Notifications** - Automated reminders
-- **Analytics Dashboard** - Advanced insights
+### Phase 1: Foundation ✅
+- [x] Core plugin architecture
+- [x] Candidate management system
+- [x] Jury member management
+- [x] Basic evaluation system
+
+### Phase 2: Evaluation System ✅
+- [x] Jury dashboard implementation
+- [x] 5-criteria evaluation interface
+- [x] Assignment management
+- [x] Dashboard consistency across all interfaces
+- [x] Duplicate evaluation handling
+- [x] Orphaned data preservation
+
+### Phase 3: Advanced Features (In Progress)
+- [ ] Export functionality for evaluations
+- [ ] Advanced analytics dashboard
+- [ ] Multi-round evaluation support
+- [ ] Email notifications for jury
+- [ ] Automated reminder system
+
+### Phase 4: Public Interface (Planned)
+- [ ] Public candidate showcase
+- [ ] Winner announcement system
+- [ ] Media kit generation
+- [ ] Social media integration
+- [ ] Award ceremony integration (Oct 30, 2025)
 
 ## 🤝 Support
 
@@ -142,4 +165,4 @@ docker exec mobility_wpcli_STAGING wp eval 'do_action("mt_sync_evaluations");'
 
 ---
 
-**Version**: 6.0.0 | **Last Updated**: June 2025
+**Version**: 5.0.0 | **Last Updated**: June 2025
