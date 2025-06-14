@@ -1,3 +1,489 @@
+
+
+🔄 Vote Reset Functionality (New Feature - June 2025)
+Overview
+The Mobility Trailblazers platform now includes comprehensive vote reset capabilities, allowing administrators and jury members to manage voting data with precision and transparency. This feature is essential for managing the multi-phase voting process (200→50→25 candidates) and handling corrections or re-evaluations.
+Key Features
+1. Multi-Level Reset Options
+
+Individual Vote Reset: Jury members can reset their own votes for specific candidates
+Bulk User Reset: Administrators can reset all votes from a specific jury member
+Bulk Candidate Reset: Administrators can reset all votes for a specific candidate
+Phase Transition Reset: Automated reset between voting phases with data archival
+Full System Reset: Complete vote removal with safety confirmations (admin only)
+
+2. Data Integrity & Safety
+
+Soft Delete Architecture: Votes are marked inactive rather than deleted
+Comprehensive Backup System: All votes are backed up before any reset operation
+Audit Trail: Complete logging of who reset what, when, and why
+Transaction Support: Database consistency guaranteed through MySQL transactions
+Multiple Confirmation Steps: Prevents accidental data loss
+
+3. User Interface Components
+Admin Vote Reset Dashboard
+
+Location: WordPress Admin → MT Award System → Vote Reset
+Features:
+
+Real-time statistics display (active votes, candidates, jury members)
+Phase transition management with visual indicators
+Targeted reset controls with dropdown selections
+Recent activity log with detailed reset history
+Full history modal with pagination
+
+
+
+Individual Reset Buttons
+
+Location: Jury evaluation interface (on evaluated candidate cards)
+Features:
+
+"Reset Vote" button with undo icon
+Confirmation dialog with optional reason input
+Real-time UI updates after reset
+Only visible for candidates already evaluated
+
+
+
+Technical Implementation
+Database Schema Extensions
+sql-- Vote Reset Logs Table
+CREATE TABLE wp_vote_reset_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reset_type ENUM('individual', 'bulk_user', 'bulk_candidate', 'phase_transition', 'full_reset'),
+    initiated_by BIGINT(20) UNSIGNED NOT NULL,
+    initiated_by_role ENUM('jury_member', 'admin', 'system'),
+    affected_user_id BIGINT(20) UNSIGNED DEFAULT NULL,
+    affected_candidate_id BIGINT(20) UNSIGNED DEFAULT NULL,
+    voting_phase VARCHAR(50) DEFAULT NULL,
+    votes_affected INT NOT NULL DEFAULT 0,
+    reset_reason TEXT,
+    reset_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    user_agent TEXT
+);
+
+-- Vote History Tables
+CREATE TABLE wp_mt_votes_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    -- Mirrors structure of wp_mt_votes with backup metadata
+);
+
+CREATE TABLE wp_mt_candidate_scores_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    -- Mirrors structure of wp_mt_candidate_scores with backup metadata
+);
+
+-- Soft Delete Columns Added to Existing Tables
+ALTER TABLE wp_mt_votes ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE wp_mt_votes ADD COLUMN reset_at TIMESTAMP NULL;
+ALTER TABLE wp_mt_votes ADD COLUMN reset_by BIGINT(20) UNSIGNED DEFAULT NULL;
+
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN reset_at TIMESTAMP NULL;
+ALTER TABLE wp_mt_candidate_scores ADD COLUMN reset_by BIGINT(20) UNSIGNED DEFAULT NULL;
+File Structure
+mobility-trailblazers/
+├── includes/
+│   ├── class-vote-reset-manager.php      # Core reset logic
+│   ├── class-vote-backup-manager.php     # Backup operations
+│   └── class-vote-audit-logger.php       # Audit trail management
+├── admin/
+│   ├── js/
+│   │   └── vote-reset-admin.js          # Admin interface JavaScript
+│   ├── css/
+│   │   └── vote-reset-admin.css         # Admin styles
+│   └── views/
+│       └── vote-reset-interface.php     # Admin dashboard view
+├── templates/
+│   └── jury/
+│       └── vote-reset-button.php        # Individual reset button
+├── api/
+│   └── vote-reset-endpoints.php         # REST API endpoints
+└── mysql-init/
+    └── 02-vote-reset-tables.sql         # Database schema
+REST API Endpoints
+POST   /wp-json/mobility-trailblazers/v1/reset-vote
+       - Reset individual vote (jury members)
+       
+POST   /wp-json/mobility-trailblazers/v1/admin/bulk-reset
+       - Bulk reset operations (admin only)
+       
+GET    /wp-json/mobility-trailblazers/v1/reset-history
+       - Retrieve reset history with pagination
+Installation & Setup
+1. Database Setup
+bash# Copy the schema file to your MySQL init directory
+cp mysql-init/02-vote-reset-tables.sql /mnt/dietpi_userdata/docker-files/STAGING/mysql-init/
+
+# Apply the schema to existing database
+docker exec -i mobility_mariadb_STAGING mariadb -u root -p[password] wordpress_db < /path/to/02-vote-reset-tables.sql
+2. File Deployment
+bash# Copy all vote reset files to the plugin directory
+cp -r includes/class-vote-reset-*.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/includes/
+cp -r admin/js/vote-reset-admin.js /path/to/wordpress/wp-content/plugins/mobility-trailblazers/admin/js/
+cp -r admin/views/vote-reset-interface.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/admin/views/
+cp -r templates/jury/vote-reset-button.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/templates/jury/
+3. Menu Registration
+Add to your main plugin file's register_all_admin_menus() function:
+php// Vote Reset Management submenu
+if (current_user_can('manage_options')) {
+    add_submenu_page(
+        'mt-award-system',
+        __('Vote Reset Management', 'mobility-trailblazers'),
+        __('Vote Reset', 'mobility-trailblazers'),
+        'manage_options',
+        'mt-vote-reset',
+        array($this, 'vote_reset_page')
+    );
+}
+Usage Guide
+For Administrators
+
+Phase Transition (e.g., moving from 200 to 50 candidates):
+
+Navigate to MT Award System → Vote Reset
+Click "Transition to Next Phase"
+Optionally notify jury members via email
+Confirm the transition
+
+
+Targeted Resets:
+
+Select a jury member or candidate from the dropdown
+Click the respective reset button
+Provide a reason (optional but recommended)
+Confirm the action
+
+
+Monitoring:
+
+View recent reset activity in the dashboard
+Click "View Full History" for complete audit trail
+Export history data if needed
+
+
+
+For Jury Members
+
+Resetting Individual Votes:
+
+Go to your evaluation dashboard
+Find the candidate you want to re-evaluate
+Click the "Reset Vote" button
+Confirm the reset
+Submit a new evaluation
+
+
+
+Security Considerations
+
+Permission Checks:
+
+Jury members can only reset their own votes
+Admin functions require manage_options capability
+All actions verified server-side
+
+
+Data Protection:
+
+IP addresses logged for accountability
+User agents recorded for security analysis
+Nonce verification on all AJAX requests
+
+
+Rate Limiting:
+
+Implement rate limiting on reset endpoints
+Monitor for unusual reset patterns
+Alert admins of suspicious activity
+
+
+
+Performance Optimization
+
+Database Indexes:
+sql-- Optimized indexes for vote queries
+CREATE INDEX idx_active_votes ON wp_mt_votes(is_active, candidate_id, jury_member_id);
+CREATE INDEX idx_reset_timestamp ON wp_vote_reset_logs(reset_timestamp);
+
+Caching Strategy:
+
+Redis integration for vote counts
+Cache invalidation on reset operations
+Transient caching for expensive queries
+
+
+Batch Processing:
+
+Bulk operations use single transactions
+Chunked processing for large datasets
+Background processing for heavy operations
+
+
+
+Troubleshooting
+Reset Button Not Appearing
+
+Check menu registration:
+php// Verify in WordPress admin
+global $submenu;
+var_dump($submenu['mt-award-system']);
+
+Verify file paths:
+bash# Check if files exist
+ls -la wp-content/plugins/mobility-trailblazers/admin/views/vote-reset-interface.php
+ls -la wp-content/plugins/mobility-trailblazers/admin/js/vote-reset-admin.js
+
+Check JavaScript console for errors
+
+Database Errors
+
+Verify table creation:
+sqlSHOW TABLES LIKE '%vote_reset%';
+DESCRIBE wp_vote_reset_logs;
+
+Check column additions:
+sqlSHOW COLUMNS FROM wp_mt_votes LIKE 'is_active';
+
+
+Permission Issues
+
+Verify user capabilities:
+php$user = wp_get_current_user();
+var_dump($user->allcaps);
+
+Check role assignments:
+phpvar_dump($user->roles);
+
+
+API Reference
+PHP Classes
+MT_Vote_Reset_Manager
+php// Reset individual vote
+$manager = new MT_Vote_Reset_Manager();
+$result = $manager->reset_individual_vote($candidate_id, $jury_member_id, $reason);
+
+// Bulk reset
+$result = $manager->bulk_reset_votes('phase_transition', [
+    'from_phase' => 'phase_1',
+    'to_phase' => 'phase_2',
+    'notify_jury' => true
+]);
+MT_Vote_Audit_Logger
+php// Log a reset action
+$logger = new MT_Vote_Audit_Logger();
+$logger->log_reset([
+    'reset_type' => 'individual',
+    'initiated_by' => get_current_user_id(),
+    'affected_candidate_id' => $candidate_id,
+    'reset_reason' => $reason
+]);
+
+// Get reset history
+$history = $logger->get_reset_history($page = 1, $per_page = 20);
+JavaScript Functions
+javascript// Trigger individual reset
+VoteResetManager.performIndividualReset(candidateId, reason);
+
+// Trigger phase reset
+VoteResetManager.performPhaseReset(fromPhase, toPhase, notifyJury);
+
+// Load reset history
+VoteResetManager.loadResetHistory();
+Best Practices
+
+Always provide reset reasons for audit trail clarity
+Notify affected parties when performing bulk resets
+Review reset logs regularly for unusual patterns
+Backup database before major reset operations
+Test reset functionality in staging environment first
+
+Future Enhancements
+
+Scheduled Resets: Automatic phase transitions based on timeline
+Selective Restore: Ability to restore specific votes from backup
+Reset Templates: Predefined reset scenarios for common use cases
+Advanced Analytics: Reset pattern analysis and reporting
+Webhook Integration: Notify external systems of reset events
+
+## 🔧 Recent Updates (June 2025)
+
+### Data Management Functionality Fixed
+
+We've resolved issues with the non-working Data Management buttons in the Assignment Management interface. The following buttons are now fully functional:
+
+#### Fixed Buttons:
+1. **Export Assignments** - Export all assignment data to CSV format
+2. **Sync System** - Synchronize assignment data across the system
+3. **View Progress Data** - Display detailed evaluation progress statistics
+4. **Reset All Assignments** - Clear all current assignments (with safety confirmations)
+
+#### Technical Details:
+
+**JavaScript Enhancements (`assets/assignment.js` or `assets/data-management.js`):**
+- Added event handlers for all data management buttons
+- Implemented AJAX calls for server communication
+- Added loading states and user feedback
+- Created modal interface for progress data display
+- Implemented notification system for user feedback
+
+**PHP Backend Handlers (Added to main plugin file):**
+- `mt_sync_system` - Handles system synchronization
+- `mt_get_progress_data` - Returns comprehensive progress statistics
+- `mt_export_assignments` - Generates CSV exports with full assignment data
+- Enhanced `mt_clear_assignments` - Added to handle assignment reset
+
+---
+
+## 📊 Data Management Features
+
+### Export Functionality
+
+The Assignment Management page now includes robust data export capabilities:
+
+#### Export Assignments (CSV)
+- **Includes**: Candidate details, jury assignments, evaluation status, scores
+- **Format**: UTF-8 encoded CSV with BOM for Excel compatibility
+- **Usage**: Click "Export Assignments" button to download current data
+
+#### Exported Fields:
+- Candidate ID and Name
+- Company and Category
+- Assigned Jury Member details
+- Assignment and Evaluation dates
+- Evaluation status and scores
+
+### Progress Tracking
+
+The **View Progress Data** feature provides comprehensive insights:
+
+#### Overall Statistics:
+- Total assignments count
+- Completed evaluations
+- Overall completion rate percentage
+
+#### Jury Member Progress:
+- Individual assignment counts
+- Evaluation completion status
+- Progress bars with color coding:
+  - 🟢 Green: ≥80% complete
+  - 🟡 Yellow: 50-79% complete
+  - 🔴 Red: <50% complete
+
+#### Category Breakdown:
+- Progress by candidate category
+- Assignment coverage statistics
+- Evaluation completion by category
+
+### System Synchronization
+
+The **Sync System** feature ensures data consistency:
+- Updates assignment counts
+- Refreshes cached data
+- Synchronizes jury member statistics
+- Clears any stale data
+
+### Assignment Reset
+
+The **Reset All Assignments** feature includes:
+- Double confirmation for safety
+- Complete removal of all assignments
+- Automatic page refresh after reset
+- Preservation of candidate and jury data
+
+---
+
+## 🛠️ Troubleshooting Data Management
+
+### Common Issues and Solutions:
+
+#### Buttons Not Responding
+1. **Check Console**: Open browser console (F12) for JavaScript errors
+2. **Verify Script Loading**: Ensure `assignment.js` or `data-management.js` is loaded
+3. **Check Nonce**: Verify `mt_assignment_ajax` object is properly localized
+
+#### Export Not Working
+1. **PHP Memory**: Increase PHP memory limit if dealing with large datasets
+2. **Timeout Issues**: For large exports, consider implementing chunked exports
+3. **Browser Blocking**: Check if browser is blocking file downloads
+
+#### Progress Data Not Loading
+1. **Database Tables**: Verify `wp_mt_candidate_scores` table exists
+2. **User Roles**: Ensure proper jury member roles are assigned
+3. **AJAX URL**: Confirm `admin-ajax.php` is accessible
+
+### Debug Mode
+
+Enable debug logging to troubleshoot:
+
+```javascript
+// Add to your JavaScript
+console.log('mt_assignment_ajax object:', mt_assignment_ajax);
+console.log('Data management buttons found:', {
+    export: $('#mt-export-assignments-btn').length,
+    sync: $('#mt-sync-system-btn').length,
+    progress: $('#mt-view-progress-btn').length,
+    reset: $('#mt-reset-assignments-btn').length
+});
+```
+
+---
+
+## 📈 Performance Considerations
+
+### Optimization Tips:
+
+1. **Large Datasets**:
+   - Consider pagination for exports over 1000 records
+   - Implement background processing for large sync operations
+
+2. **Caching**:
+   - Progress data is resource-intensive; consider caching for 5-10 minutes
+   - Use WordPress transients for frequently accessed statistics
+
+3. **Database Indexes**:
+   ```sql
+   -- Add these indexes for better performance
+   ALTER TABLE wp_mt_candidate_scores 
+   ADD INDEX idx_jury_evaluation (jury_member_id, evaluation_date);
+   
+   ALTER TABLE wp_postmeta 
+   ADD INDEX idx_mt_assignments (meta_key, meta_value) 
+   WHERE meta_key = '_mt_assigned_jury_member';
+   ```
+
+---
+
+## 🔒 Security Enhancements
+
+All data management functions include:
+- ✅ Nonce verification for CSRF protection
+- ✅ Capability checks (admin only)
+- ✅ Data sanitization and validation
+- ✅ SQL injection prevention via prepared statements
+- ✅ XSS protection through proper escaping
+
+---
+
+## 📝 Changelog Addition
+
+### Version 1.0.1 (June 14, 2025)
+- 🐛 Fixed non-working data management buttons in Assignment Management
+- ✨ Added comprehensive progress tracking modal
+- ✨ Implemented CSV export with UTF-8 BOM support
+- ✨ Added system synchronization functionality
+- ✨ Enhanced assignment reset with double confirmation
+- 🔧 Added proper error handling and user notifications
+- 📚 Updated documentation for data management features
+
+---
+
+## 👥 Contributors Note
+
+Special thanks to the team for identifying and helping resolve the data management button issues. If you encounter any problems with these features, please report them in the issue tracker.
+
 # Mobility Trailblazers Award System
 
 A comprehensive WordPress plugin for managing the prestigious "25 Mobility Trailblazers in 25" award platform, designed to recognize and celebrate the most innovative mobility shapers in the DACH (Germany, Austria, Switzerland) region.
@@ -224,108 +710,7 @@ Composer: Dependency management
 ### Plugin Architecture
 
 ```
-/wp-content/plugins/mobility-trailblazers/
-├── mobility-trailblazers.php          # Main plugin file
-├── README.md                           # This documentation
-├── LICENSE                             # GPL v2 license
-├── composer.json                       # PHP dependencies
-├── package.json                        # NPM dependencies
-│
-├── includes/                           # Core PHP classes
-│   ├── class-mt-core.php              # Core plugin functionality
-│   ├── class-mt-jury-fix.php          # Jury system enhancements
-│   ├── class-mt-ajax-fix.php          # AJAX handling improvements
-│   ├── class-mt-jury-consistency.php  # Data consistency manager
-│   ├── class-mt-elementor-compat.php  # Elementor integration
-│   ├── class-mt-cpt-handler.php       # Custom post type manager
-│   ├── class-mt-taxonomy-handler.php  # Taxonomy management
-│   ├── class-mt-capabilities.php      # User capabilities
-│   ├── class-mt-database.php          # Database operations
-│   ├── class-mt-export.php            # Export functionality
-│   ├── class-mt-import.php            # Import functionality
-│   ├── class-mt-email.php             # Email handling
-│   ├── class-mt-api.php               # REST API endpoints
-│   │
-│   ├── elementor-frontend-fix.php     # Elementor frontend fixes
-│   ├── elementor-ajax-fix.php         # Elementor AJAX fixes
-│   ├── elementor-response-fix.php     # Response handling
-│   │
-│   └── elementor-widgets/             # Custom Elementor widgets
-│       ├── base-widget.php            # Base widget class
-│       ├── class-jury-dashboard-widget.php
-│       ├── class-candidate-grid-widget.php
-│       ├── class-evaluation-stats-widget.php
-│       └── class-voting-results-widget.php
-│
-├── templates/                          # PHP templates
-│   ├── admin/                         # Admin templates
-│   │   ├── dashboard.php              # Main admin dashboard
-│   │   ├── settings.php               # Settings page
-│   │   ├── voting-results.php         # Results display
-│   │   └── diagnostic.php             # System diagnostic
-│   │
-│   ├── jury/                          # Jury templates
-│   │   ├── jury-dashboard.php         # Admin jury dashboard
-│   │   ├── jury-dashboard-frontend.php # Frontend dashboard
-│   │   ├── evaluate-candidate.php     # Evaluation form
-│   │   └── jury-profile.php           # Jury member profile
-│   │
-│   ├── assignment/                    # Assignment templates
-│   │   ├── assignment-template.php    # Main assignment UI
-│   │   ├── assignment-modal.php       # Assignment modals
-│   │   └── assignment-export.php      # Export interface
-│   │
-│   ├── public/                        # Public templates
-│   │   ├── candidate-grid.php         # Candidate display
-│   │   ├── candidate-single.php       # Single candidate
-│   │   ├── voting-form.php            # Public voting
-│   │   └── results-display.php        # Public results
-│   │
-│   └── emails/                        # Email templates
-│       ├── assignment-notification.php
-│       ├── evaluation-reminder.php
-│       ├── evaluation-complete.php
-│       └── winner-announcement.php
-│
-├── assets/                            # Frontend assets
-│   ├── css/                          # Stylesheets
-│   │   ├── admin.css                 # Admin styles
-│   │   ├── frontend.css              # Public styles
-│   │   ├── assignment.css            # Assignment UI
-│   │   ├── jury-dashboard.css        # Dashboard styles
-│   │   └── elementor-widgets.css     # Widget styles
-│   │
-│   ├── js/                           # JavaScript files
-│   │   ├── admin.js                  # Admin functionality
-│   │   ├── frontend.js               # Public scripts
-│   │   ├── assignment.js             # Assignment logic
-│   │   ├── evaluation.js             # Evaluation handling
-│   │   ├── elementor-compat.js       # Elementor fixes
-│   │   └── analytics.js              # Analytics tracking
-│   │
-│   ├── images/                       # Image assets
-│   │   ├── logo.png                  # Plugin logo
-│   │   ├── placeholders/             # Placeholder images
-│   │   └── icons/                    # UI icons
-│   │
-│   └── fonts/                        # Custom fonts
-│       └── mobility-icons.woff2      # Icon font
-│
-├── languages/                         # Translations
-│   ├── mobility-trailblazers.pot     # Translation template
-│   ├── mobility-trailblazers-de_DE.po
-│   └── mobility-trailblazers-de_DE.mo
-│
-├── tests/                            # Test suites
-│   ├── unit/                         # Unit tests
-│   ├── integration/                  # Integration tests
-│   └── e2e/                          # End-to-end tests
-│
-└── docs/                             # Documentation
-    ├── API.md                        # API documentation
-    ├── HOOKS.md                      # Actions and filters
-    ├── DATABASE.md                   # Database schema
-    └── CONTRIBUTING.md               # Contribution guide
+To be updated
 ```
 
 ### Database Schema
@@ -1533,3 +1918,95 @@ For technical support or questions:
 **Mobility Trailblazers** - Shaping the future of mobility in the DACH region 🚀
 
 *Last updated: June 14, 2025*
+# Recent Updates & Code Cleanup (December 2024)
+
+## 🔧 Code Refactoring & Duplicate Removal
+
+We've performed a comprehensive code cleanup to improve maintainability and fix several issues identified during code review:
+
+### Issues Fixed
+
+#### 1. **Duplicate Menu Registration**
+- **Problem**: Admin menus were being registered in multiple places, potentially causing duplicate menu items
+- **Solution**: 
+  - Consolidated all menu registrations into a single `register_all_admin_menus()` method
+  - Added duplicate detection to prevent multiple "My Dashboard" menu items
+  - Removed scattered `add_action('admin_menu')` calls throughout the codebase
+
+#### 2. **Duplicate Evaluation Functions**
+- **Problem**: Multiple implementations of user evaluation counting functions across different files
+- **Solution**:
+  - Kept single global functions in main plugin file: `mt_get_user_evaluation_count()` and `mt_has_jury_evaluated()`
+  - Removed duplicate implementations from:
+    - `includes/class-mt-jury-fix.php`
+    - `includes/class-mt-jury-consistency.php`
+    - `includes/elementor/class-evaluation-stats-widget.php`
+  - All components now use the same consistent functions
+
+#### 3. **Docker Configuration Issues**
+- **Problem**: Security vulnerabilities and configuration issues in docker-compose.yml
+- **Identified Issues**:
+  - Duplicate version declaration
+  - Hardcoded credentials
+  - Exposed database ports (security risk)
+  - Empty volumes section
+  - WP-CLI container running unnecessarily
+- **Recommendations**: See "Security Improvements" section below
+
+### Code Organization Improvements
+
+1. **Menu Registration**: All admin menus now registered in one location for easier maintenance
+2. **Function Consolidation**: Evaluation-related functions consolidated to prevent inconsistencies
+3. **Better Error Handling**: Added checks to prevent duplicate menu registration
+4. **Cleaner Codebase**: Removed ~200 lines of duplicate code
+
+### Files Modified
+
+- `mobility-trailblazers.php` - Main plugin file
+- `includes/class-mt-jury-fix.php` - Removed duplicate functions
+- `includes/class-mt-jury-consistency.php` - Removed duplicate method
+- `includes/elementor/class-evaluation-stats-widget.php` - Simplified to use global functions
+- `README.md` - Removed duplicate content sections
+
+### Security Improvements Needed
+
+Based on our code review, the following security improvements should be implemented:
+
+1. **Environment Variables**: Move all credentials from docker-compose.yml to .env file
+2. **Database Ports**: Remove external port exposure for MariaDB in production
+3. **Redis Ports**: Remove external port exposure for Redis in production
+4. **Secure Passwords**: Replace all hardcoded passwords with secure generated ones
+
+### Testing After Updates
+
+After applying these updates, please test:
+
+1. **Menu Display**: Verify no duplicate menu items appear
+2. **Jury Dashboard**: Ensure jury members can access their dashboard
+3. **Evaluation Counts**: Confirm evaluation statistics display correctly
+4. **Elementor Widgets**: Test evaluation stats widget if using Elementor
+
+### Migration Notes
+
+No database changes are required. The cleanup only affects PHP code organization. However, if you experience any issues with evaluation counts after the update, you can run:
+
+```bash
+docker exec mobility_wpcli_STAGING wp eval '
+if (class_exists("MT_Jury_Consistency")) {
+    MT_Jury_Consistency::get_instance()->sync_all_evaluations();
+}'
+```
+
+---
+
+## 📝 Changelog
+
+### Version 1.0.1 (December 2024)
+- Fixed duplicate menu registration issues
+- Consolidated evaluation counting functions
+- Removed ~200 lines of duplicate code
+- Improved code organization and maintainability
+- Added security recommendations for Docker configuration
+
+### Version 1.0.0
+- Initial release

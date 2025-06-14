@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
  * Description: Complete award management system for 25 Mobility Trailblazers in 25 - managing candidates, jury members, voting process, and public engagement.
- * Version: 0.0.1
+ * Version: 0.1.1
  * Author: Mobility Trailblazers Team
  * License: GPL v2 or later
  * Text Domain: mobility-trailblazers
@@ -45,10 +45,8 @@ class MobilityTrailblazersPlugin {
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
         
-        // Menu hooks - FIXED to prevent duplicates
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'), 99);
-        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
+        // Menu hooks - Single registration point
+        add_action('admin_menu', array($this, 'register_all_admin_menus'));
         
         // Register settings
         add_action('admin_init', function() {
@@ -332,18 +330,7 @@ class MobilityTrailblazersPlugin {
             KEY jury_idx (jury_member_id)
         ) $charset_collate;";
 
-        // Public voting table
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
-        $sql_public_votes = "CREATE TABLE $table_public_votes (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            candidate_id bigint(20) NOT NULL,
-            voter_email varchar(255) NOT NULL,
-            voter_ip varchar(45) NOT NULL,
-            vote_date datetime DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            UNIQUE KEY unique_public_vote (candidate_id, voter_email),
-            KEY candidate_idx (candidate_id)
-        ) $charset_collate;";
+
 
         // Evaluation criteria scores table
         $table_scores = $wpdb->prefix . 'mt_candidate_scores';
@@ -367,7 +354,6 @@ class MobilityTrailblazersPlugin {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_votes);
-        dbDelta($sql_public_votes);
         dbDelta($sql_scores);
 
         // Create default categories based on the 3 dimensions from docs
@@ -417,8 +403,7 @@ class MobilityTrailblazersPlugin {
      * Add WordPress hooks
      */
     private function add_hooks() {
-        // Admin hooks
-        add_action('admin_menu', array($this, 'add_admin_menu'));
+        // Admin hooks (menu registration handled in constructor)
         add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_candidate_meta'));
@@ -432,7 +417,6 @@ class MobilityTrailblazersPlugin {
         
         // AJAX handlers
         add_action('wp_ajax_mt_jury_vote', array($this, 'handle_jury_vote'));
-        add_action('wp_ajax_mt_public_vote', array($this, 'handle_public_vote'));
         add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_assign_candidates'));
         add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assign'));
         add_action('wp_ajax_mt_get_assignment_stats', array($this, 'handle_get_assignment_stats'));
@@ -440,8 +424,14 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
         
-        // Jury dashboard hooks
-        add_action('admin_menu', array($this, 'add_jury_dashboard_menu'));
+        // Vote Reset AJAX handlers
+        add_action('wp_ajax_mt_reset_individual_vote', array($this, 'handle_reset_individual_vote'));
+        add_action('wp_ajax_mt_reset_phase_votes', array($this, 'handle_reset_phase_votes'));
+        add_action('wp_ajax_mt_reset_all_votes', array($this, 'handle_reset_all_votes'));
+        add_action('wp_ajax_mt_get_vote_stats', array($this, 'handle_get_vote_stats'));
+        add_action('wp_ajax_mt_get_jury_progress', array($this, 'handle_get_jury_progress'));
+        
+        // Jury dashboard hooks (menu registration handled in constructor)
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
         add_action('template_redirect', array($this, 'jury_template_redirect'));
@@ -453,8 +443,7 @@ class MobilityTrailblazersPlugin {
         add_action('admin_menu', array($this, 'add_evaluation_page'));
         add_action('wp_ajax_mt_evaluation_submission', array($this, 'handle_evaluation_submission'));
         
-        // Diagnostic hooks
-        add_action('admin_menu', array($this, 'add_diagnostic_menu'));
+        // Diagnostic hooks (menu registration handled in constructor)
 
         // Temporary debug for assignment page
         add_action('admin_footer', function() {
@@ -509,6 +498,51 @@ class MobilityTrailblazersPlugin {
             'mt-voting-results',
             array($this, 'voting_results_page')
         );
+
+        // Add settings page
+        add_submenu_page(
+            'mt-award-system',
+            __('Settings', 'mobility-trailblazers'),
+            __('Settings', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-settings',
+            array($this, 'settings_page')
+        );
+    }
+
+    /**
+     * Register all admin menus in one place
+     */
+    public function register_all_admin_menus() {
+        // Main menu
+        $this->add_admin_menu();
+        
+        // Jury dashboard
+        $this->add_jury_dashboard_menu();
+        
+        // Vote Reset Management submenu
+        if (current_user_can('manage_options')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Vote Reset Management', 'mobility-trailblazers'),
+                __('Vote Reset', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-vote-reset',
+                array($this, 'vote_reset_page')
+            );
+        }
+        
+        // Diagnostic
+        if (current_user_can('manage_options')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Diagnostic', 'mobility-trailblazers'),
+                __('Diagnostic', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-diagnostic',
+                array($this, 'diagnostic_page')
+            );
+        }
     }
 
     /**
@@ -608,6 +642,68 @@ class MobilityTrailblazersPlugin {
                 MT_PLUGIN_VERSION, 
                 true
             );
+            
+            // Load vote reset functionality for jury members
+            if ($this->is_jury_member(get_current_user_id())) {
+                wp_enqueue_script(
+                    'mt-vote-reset-js',
+                    MT_PLUGIN_URL . 'admin/js/vote-reset-admin.js',
+                    array('jquery'),
+                    MT_PLUGIN_VERSION,
+                    true
+                );
+                
+                // Load SweetAlert2 for nice dialogs
+                wp_enqueue_script(
+                    'sweetalert2',
+                    'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+                    array(),
+                    '11.0.0',
+                    true
+                );
+                
+                wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
+                    'strings' => array(
+                        'confirm_reset_individual' => __('Reset Vote?', 'mobility-trailblazers'),
+                        'reset_success' => __('Your vote has been reset successfully.', 'mobility-trailblazers'),
+                        'reset_error' => __('Error resetting vote. Please try again.', 'mobility-trailblazers')
+                    )
+                ));
+            }
+        }
+        
+        // Load vote reset scripts on the vote reset page
+        if ($hook === 'mt-award-system_page_mt-vote-reset') {
+            wp_enqueue_script(
+                'mt-vote-reset-js',
+                MT_PLUGIN_URL . 'admin/js/vote-reset-admin.js',
+                array('jquery'),
+                MT_PLUGIN_VERSION,
+                true
+            );
+            
+            // Add SweetAlert2 for nice dialogs
+            wp_enqueue_script(
+                'sweetalert2',
+                'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+                array(),
+                '11.0.0',
+                true
+            );
+            
+            wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
+                'strings' => array(
+                    'confirm_reset_individual' => __('Are you sure you want to reset this vote? This action cannot be undone.', 'mobility-trailblazers'),
+                    'confirm_reset_phase' => __('Are you sure you want to reset all votes for the next phase? This action cannot be undone.', 'mobility-trailblazers'),
+                    'confirm_reset_all' => __('WARNING: This will delete ALL votes in the system! This action cannot be undone. Type "DELETE ALL" to confirm.', 'mobility-trailblazers'),
+                    'reset_success' => __('Votes reset successfully!', 'mobility-trailblazers'),
+                    'reset_error' => __('Error resetting votes. Please try again.', 'mobility-trailblazers')
+                )
+            ));
         }
     }
 
@@ -633,7 +729,7 @@ class MobilityTrailblazersPlugin {
         
         wp_localize_script('mt-frontend-js', 'mt_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_public_nonce'),
+            'nonce' => wp_create_nonce('mt_nonce'),
             'strings' => array(
                 'vote_success' => __('Thank you for your vote!', 'mobility-trailblazers'),
                 'vote_error' => __('Error submitting vote. Please try again.', 'mobility-trailblazers'),
@@ -883,10 +979,8 @@ class MobilityTrailblazersPlugin {
         $jury_count = wp_count_posts('mt_jury')->publish;
         
         $table_votes = $wpdb->prefix . 'mt_votes';
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
         
         $jury_votes = $wpdb->get_var("SELECT COUNT(*) FROM $table_votes");
-        $public_votes = $wpdb->get_var("SELECT COUNT(*) FROM $table_public_votes");
         
         echo '<div class="wrap">';
         echo '<h1>' . __('Mobility Trailblazers Dashboard', 'mobility-trailblazers') . '</h1>';
@@ -905,11 +999,6 @@ class MobilityTrailblazersPlugin {
         echo '<div class="mt-stat-box">';
         echo '<h3>' . __('Jury Votes', 'mobility-trailblazers') . '</h3>';
         echo '<div class="mt-stat-number">' . $jury_votes . '</div>';
-        echo '</div>';
-        
-        echo '<div class="mt-stat-box">';
-        echo '<h3>' . __('Public Votes', 'mobility-trailblazers') . '</h3>';
-        echo '<div class="mt-stat-number">' . $public_votes . '</div>';
         echo '</div>';
         echo '</div>';
         
@@ -1031,52 +1120,7 @@ class MobilityTrailblazersPlugin {
         }
     }
 
-    /**
-     * Handle public vote submission
-     */
-    public function handle_public_vote() {
-        if (!check_ajax_referer('mt_public_nonce', 'nonce', false)) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
-        }
-        
-        $candidate_id = intval($_POST['candidate_id']);
-        $voter_email = sanitize_email($_POST['voter_email']);
-        $voter_ip = $_SERVER['REMOTE_ADDR'];
 
-        if (!is_email($voter_email)) {
-            wp_send_json_error(array('message' => __('Please provide a valid email address.', 'mobility-trailblazers')));
-        }
-
-        global $wpdb;
-        $table_public_votes = $wpdb->prefix . 'mt_public_votes';
-
-        // Check if already voted
-        $existing_vote = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $table_public_votes WHERE candidate_id = %d AND voter_email = %s",
-            $candidate_id,
-            $voter_email
-        ));
-
-        if ($existing_vote) {
-            wp_send_json_error(array('message' => __('You have already voted for this candidate.', 'mobility-trailblazers')));
-        }
-
-        $result = $wpdb->insert(
-            $table_public_votes,
-            array(
-                'candidate_id' => $candidate_id,
-                'voter_email' => $voter_email,
-                'voter_ip' => $voter_ip,
-                'vote_date' => current_time('mysql')
-            )
-        );
-
-        if ($result !== false) {
-            wp_send_json_success(array('message' => __('Thank you for your vote!', 'mobility-trailblazers')));
-        } else {
-            wp_send_json_error(array('message' => __('Error submitting vote.', 'mobility-trailblazers')));
-        }
-    }
 
     /**
      * Check if user is jury member
@@ -1329,36 +1373,23 @@ class MobilityTrailblazersPlugin {
      */
     public function voting_results_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'type' => 'public',
+            'type' => 'jury',
             'limit' => 10
         ), $atts);
 
         global $wpdb;
 
-        if ($atts['type'] === 'public') {
-            $table = $wpdb->prefix . 'mt_public_votes';
-            $results = $wpdb->get_results($wpdb->prepare("
-                SELECT p.ID, p.post_title, COUNT(v.id) as vote_count
-                FROM {$wpdb->posts} p
-                LEFT JOIN $table v ON p.ID = v.candidate_id
-                WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
-                GROUP BY p.ID
-                ORDER BY vote_count DESC
-                LIMIT %d
-            ", intval($atts['limit'])));
-        } else {
-            $table = $wpdb->prefix . 'mt_candidate_scores';
-            $results = $wpdb->get_results($wpdb->prepare("
-                SELECT p.ID, p.post_title, AVG(s.total_score) as avg_score, COUNT(s.id) as evaluation_count
-                FROM {$wpdb->posts} p
-                LEFT JOIN $table s ON p.ID = s.candidate_id
-                WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
-                GROUP BY p.ID
-                HAVING evaluation_count > 0
-                ORDER BY avg_score DESC
-                LIMIT %d
-            ", intval($atts['limit'])));
-        }
+        $table = $wpdb->prefix . 'mt_candidate_scores';
+        $results = $wpdb->get_results($wpdb->prepare("
+            SELECT p.ID, p.post_title, AVG(s.total_score) as avg_score, COUNT(s.id) as evaluation_count
+            FROM {$wpdb->posts} p
+            LEFT JOIN $table s ON p.ID = s.candidate_id
+            WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
+            GROUP BY p.ID
+            HAVING evaluation_count > 0
+            ORDER BY avg_score DESC
+            LIMIT %d
+        ", intval($atts['limit'])));
 
         if (empty($results)) {
             return '<p>' . __('No voting results available yet.', 'mobility-trailblazers') . '</p>';
@@ -1367,19 +1398,15 @@ class MobilityTrailblazersPlugin {
         ob_start();
         ?>
         <div class="mt-voting-results">
-            <h3><?php echo $atts['type'] === 'public' ? __('Public Voting Results', 'mobility-trailblazers') : __('Jury Evaluation Results', 'mobility-trailblazers'); ?></h3>
+            <h3><?php _e('Jury Evaluation Results', 'mobility-trailblazers'); ?></h3>
             
             <ol class="mt-results-list">
                 <?php foreach ($results as $result): ?>
                     <li class="mt-result-item">
                         <span class="mt-candidate-name"><?php echo esc_html($result->post_title); ?></span>
                         <span class="mt-result-score">
-                            <?php if ($atts['type'] === 'public'): ?>
-                                <?php echo intval($result->vote_count); ?> <?php _e('votes', 'mobility-trailblazers'); ?>
-                            <?php else: ?>
-                                <?php echo number_format($result->avg_score, 1); ?>/50 
-                                (<?php echo intval($result->evaluation_count); ?> <?php _e('evaluations', 'mobility-trailblazers'); ?>)
-                            <?php endif; ?>
+                            <?php echo number_format($result->avg_score, 1); ?>/50 
+                            (<?php echo intval($result->evaluation_count); ?> <?php _e('evaluations', 'mobility-trailblazers'); ?>)
                         </span>
                     </li>
                 <?php endforeach; ?>
@@ -1491,13 +1518,6 @@ class MobilityTrailblazersPlugin {
         echo do_shortcode('[mt_voting_results type="jury" limit="25"]');
         echo '</div>';
         
-        echo '<hr>';
-        
-        // Public results
-        echo '<div class="mt-results-section">';
-        echo do_shortcode('[mt_voting_results type="public" limit="25"]');
-        echo '</div>';
-        
         echo '</div>';
     }
 
@@ -1532,9 +1552,13 @@ class MobilityTrailblazersPlugin {
      * Settings page
      */
     public function settings_page() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Handle form submission
         if (isset($_POST['submit']) && wp_verify_nonce($_POST['mt_settings_nonce'], 'mt_settings')) {
             update_option('mt_voting_enabled', isset($_POST['voting_enabled']));
-            update_option('mt_public_voting_enabled', isset($_POST['public_voting_enabled']));
             update_option('mt_current_phase', sanitize_text_field($_POST['current_phase']));
             update_option('mt_award_year', sanitize_text_field($_POST['award_year']));
             update_option('mt_jury_dashboard_page', intval($_POST['mt_jury_dashboard_page']));
@@ -1542,8 +1566,23 @@ class MobilityTrailblazersPlugin {
             echo '<div class="notice notice-success"><p>' . __('Settings saved.', 'mobility-trailblazers') . '</p></div>';
         }
 
+        // Check if template file exists, otherwise use inline implementation
+        $template_file = MT_PLUGIN_PATH . 'admin/settings-page.php';
+        
+        if (file_exists($template_file)) {
+            // Include the settings page template
+            require_once $template_file;
+        } else {
+            // Fallback to inline implementation
+            $this->render_settings_page_inline();
+        }
+    }
+
+    /**
+     * Render settings page inline (fallback method)
+     */
+    private function render_settings_page_inline() {
         $voting_enabled = get_option('mt_voting_enabled', false);
-        $public_voting_enabled = get_option('mt_public_voting_enabled', false);
         $current_phase = get_option('mt_current_phase', 'preparation');
         $award_year = get_option('mt_award_year', date('Y'));
 
@@ -1564,7 +1603,6 @@ class MobilityTrailblazersPlugin {
             'preparation' => __('Preparation', 'mobility-trailblazers'),
             'candidate_collection' => __('Candidate Collection', 'mobility-trailblazers'),
             'jury_evaluation' => __('Jury Evaluation', 'mobility-trailblazers'),
-            'public_voting' => __('Public Voting', 'mobility-trailblazers'),
             'final_selection' => __('Final Selection', 'mobility-trailblazers'),
             'award_ceremony' => __('Award Ceremony', 'mobility-trailblazers'),
             'post_award' => __('Post Award', 'mobility-trailblazers')
@@ -1578,11 +1616,8 @@ class MobilityTrailblazersPlugin {
         echo '<tr><th scope="row">' . __('Enable Jury Voting', 'mobility-trailblazers') . '</th>';
         echo '<td><input type="checkbox" name="voting_enabled" value="1"' . checked($voting_enabled, 1, false) . ' /> ' . __('Allow jury members to submit evaluations', 'mobility-trailblazers') . '</td></tr>';
         
-        echo '<tr><th scope="row">' . __('Enable Public Voting', 'mobility-trailblazers') . '</th>';
-        echo '<td><input type="checkbox" name="public_voting_enabled" value="1"' . checked($public_voting_enabled, 1, false) . ' /> ' . __('Allow public to vote for candidates', 'mobility-trailblazers') . '</td></tr>';
-        
         // Add the jury dashboard page setting
-        $this->add_settings_section($settings);
+        $this->add_settings_section(null);
         
         echo '</table>';
         
@@ -1612,6 +1647,229 @@ class MobilityTrailblazersPlugin {
             echo '<div class="notice notice-error"><p>' . __('Assignment template file not found.', 'mobility-trailblazers') . '</p></div>';
             echo '</div>';
         }
+    }
+
+    /**
+     * Vote Reset Management Page
+     */
+    public function vote_reset_page() {
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Include the vote reset interface
+        $interface_file = MT_PLUGIN_PATH . 'admin/views/vote-reset-interface.php';
+        
+        if (file_exists($interface_file)) {
+            include $interface_file;
+        } else {
+            // Use the interface code from the implementation plan
+            ?>
+            <div class="wrap">
+                <h1><?php _e('Vote Reset Management', 'mobility-trailblazers'); ?></h1>
+                
+                <div class="mt-admin-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <!-- Current Status -->
+                    <div class="mt-admin-card" style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2><?php _e('Current Voting Status', 'mobility-trailblazers'); ?></h2>
+                        <table class="form-table">
+                            <tr>
+                                <th><?php _e('Current Phase:', 'mobility-trailblazers'); ?></th>
+                                <td><strong><?php echo get_option('mt_current_phase', 'Phase 1'); ?></strong></td>
+                            </tr>
+                            <tr>
+                                <th><?php _e('Total Active Votes:', 'mobility-trailblazers'); ?></th>
+                                <td><strong><?php echo $this->get_total_active_votes(); ?></strong></td>
+                            </tr>
+                            <tr>
+                                <th><?php _e('Total Evaluations:', 'mobility-trailblazers'); ?></th>
+                                <td><strong><?php echo $this->get_total_evaluations(); ?></strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Individual Reset -->
+                    <div class="mt-admin-card" style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2><?php _e('Reset Individual Votes', 'mobility-trailblazers'); ?></h2>
+                        <p><?php _e('Individual vote reset buttons are available in the jury evaluation interface for each candidate.', 'mobility-trailblazers'); ?></p>
+                        <a href="<?php echo admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-secondary">
+                            <?php _e('Go to Jury Dashboard', 'mobility-trailblazers'); ?>
+                        </a>
+                    </div>
+                    
+                    <!-- Phase Transition Reset -->
+                    <div class="mt-admin-card" style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2><?php _e('Phase Transition Reset', 'mobility-trailblazers'); ?></h2>
+                        <p><?php _e('Reset all votes when transitioning between voting phases. This will mark current votes as inactive and prepare for the next phase.', 'mobility-trailblazers'); ?></p>
+                        <button type="button" id="mt-bulk-reset-phase" class="button button-primary button-large">
+                            <?php _e('Reset for Next Phase', 'mobility-trailblazers'); ?>
+                        </button>
+                    </div>
+                    
+                    <!-- Full System Reset -->
+                    <div class="mt-admin-card mt-danger-zone" style="background: #fff; padding: 20px; border: 2px solid #dc3545; border-radius: 5px;">
+                        <h2 style="color: #dc3545;"><?php _e('Danger Zone', 'mobility-trailblazers'); ?></h2>
+                        <p style="color: #dc3545;"><?php _e('Complete system reset. This will permanently delete ALL votes and evaluations. This action cannot be undone!', 'mobility-trailblazers'); ?></p>
+                        <button type="button" id="mt-bulk-reset-all" class="button button-large" style="background: #dc3545; color: white; border-color: #dc3545;">
+                            <?php _e('Reset All Votes', 'mobility-trailblazers'); ?>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity Log -->
+                <div class="mt-admin-card" style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 20px;">
+                    <h2><?php _e('Recent Vote Activity', 'mobility-trailblazers'); ?></h2>
+                    <?php $this->display_recent_vote_activity(); ?>
+                </div>
+            </div>
+            
+            <style>
+                .mt-admin-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                    margin-top: 20px;
+                }
+                
+                .mt-admin-card {
+                    background: #fff;
+                    padding: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                
+                .mt-danger-zone {
+                    border-color: #dc3545 !important;
+                }
+                
+                .mt-danger-zone h2 {
+                    color: #dc3545;
+                }
+                
+                .mt-danger-zone p {
+                    color: #dc3545;
+                }
+            </style>
+            <?php
+        }
+    }
+
+    /**
+     * Get total active votes count
+     */
+    private function get_total_active_votes() {
+        global $wpdb;
+        $count = $wpdb->get_var("
+            SELECT COUNT(*) 
+            FROM {$wpdb->prefix}mt_votes 
+            WHERE vote_round = 1
+        ");
+        return $count ?: 0;
+    }
+
+    /**
+     * Get total evaluations count
+     */
+    private function get_total_evaluations() {
+        global $wpdb;
+        $count = $wpdb->get_var("
+            SELECT COUNT(*) 
+            FROM {$wpdb->prefix}mt_candidate_scores
+        ");
+        return $count ?: 0;
+    }
+
+    /**
+     * Display recent vote activity
+     */
+    private function display_recent_vote_activity() {
+        global $wpdb;
+        
+        $recent_votes = $wpdb->get_results("
+            SELECT 
+                v.vote_date,
+                p.post_title as candidate_name,
+                u.display_name as jury_name,
+                v.rating
+            FROM {$wpdb->prefix}mt_votes v
+            LEFT JOIN {$wpdb->posts} p ON v.candidate_id = p.ID
+            LEFT JOIN {$wpdb->users} u ON v.jury_member_id = u.ID
+            ORDER BY v.vote_date DESC
+            LIMIT 10
+        ");
+        
+        $recent_evaluations = $wpdb->get_results("
+            SELECT 
+                cs.evaluation_date,
+                p.post_title as candidate_name,
+                u.display_name as jury_name,
+                cs.total_score
+            FROM {$wpdb->prefix}mt_candidate_scores cs
+            LEFT JOIN {$wpdb->posts} p ON cs.candidate_id = p.ID
+            LEFT JOIN {$wpdb->users} u ON cs.jury_member_id = u.ID
+            ORDER BY cs.evaluation_date DESC
+            LIMIT 10
+        ");
+        
+        if (empty($recent_votes) && empty($recent_evaluations)) {
+            echo '<p>' . __('No recent voting activity found.', 'mobility-trailblazers') . '</p>';
+            return;
+        }
+        
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead>';
+        echo '<tr>';
+        echo '<th>' . __('Date', 'mobility-trailblazers') . '</th>';
+        echo '<th>' . __('Type', 'mobility-trailblazers') . '</th>';
+        echo '<th>' . __('Candidate', 'mobility-trailblazers') . '</th>';
+        echo '<th>' . __('Jury Member', 'mobility-trailblazers') . '</th>';
+        echo '<th>' . __('Score', 'mobility-trailblazers') . '</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+        
+        // Combine and sort activities
+        $activities = array();
+        
+        foreach ($recent_evaluations as $eval) {
+            $activities[] = array(
+                'date' => $eval->evaluation_date,
+                'type' => 'Evaluation',
+                'candidate' => $eval->candidate_name,
+                'jury' => $eval->jury_name,
+                'score' => $eval->total_score . '/50'
+            );
+        }
+        
+        foreach ($recent_votes as $vote) {
+            $activities[] = array(
+                'date' => $vote->vote_date,
+                'type' => 'Vote',
+                'candidate' => $vote->candidate_name,
+                'jury' => $vote->jury_name,
+                'score' => $vote->rating . '/10'
+            );
+        }
+        
+        // Sort by date
+        usort($activities, function($a, $b) {
+            return strtotime($b['date']) - strtotime($a['date']);
+        });
+        
+        // Display top 10
+        foreach (array_slice($activities, 0, 10) as $activity) {
+            echo '<tr>';
+            echo '<td>' . date('Y-m-d H:i', strtotime($activity['date'])) . '</td>';
+            echo '<td>' . esc_html($activity['type']) . '</td>';
+            echo '<td>' . esc_html($activity['candidate']) . '</td>';
+            echo '<td>' . esc_html($activity['jury']) . '</td>';
+            echo '<td>' . esc_html($activity['score']) . '</td>';
+            echo '</tr>';
+        }
+        
+        echo '</tbody>';
+        echo '</table>';
     }
 
     /**
@@ -1968,6 +2226,7 @@ class MobilityTrailblazersPlugin {
      * Add jury dashboard to admin menu - FIXED VERSION
      */
     public function add_jury_dashboard_menu() {
+        // This method is now called from register_all_admin_menus() only
         $current_user_id = get_current_user_id();
         
         // Check if user is a jury member or admin
@@ -2222,6 +2481,18 @@ class MobilityTrailblazersPlugin {
                                     <?php echo $evaluated ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate Now', 'mobility-trailblazers'); ?>
                                 </a>
                             </div>
+                            
+                            <?php if ($evaluated): ?>
+                                <div class="mt-vote-reset-container">
+                                    <p><small><?php _e('Need to change your evaluation?', 'mobility-trailblazers'); ?></small></p>
+                                    <button type="button" 
+                                            class="mt-reset-vote-btn" 
+                                            data-candidate-id="<?php echo $candidate->ID; ?>" 
+                                            data-candidate-name="<?php echo esc_attr($candidate->post_title); ?>">
+                                        <?php _e('Reset My Vote', 'mobility-trailblazers'); ?>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -2744,6 +3015,313 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
+     * Handle individual vote reset AJAX request
+     */
+    public function handle_reset_individual_vote() {
+        // Check nonce
+        if (!check_ajax_referer('mt_vote_reset_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        $current_user_id = get_current_user_id();
+        if (!$this->is_jury_member($current_user_id) && !current_user_can('manage_options')) {
+            wp_send_json_error(__('You do not have permission to reset votes.', 'mobility-trailblazers'));
+        }
+        
+        $candidate_id = intval($_POST['candidate_id'] ?? 0);
+        $reason = sanitize_textarea_field($_POST['reason'] ?? '');
+        
+        if (!$candidate_id) {
+            wp_send_json_error(__('Invalid candidate ID.', 'mobility-trailblazers'));
+        }
+        
+        // Get jury member ID
+        $jury_member_id = $this->get_jury_member_for_user($current_user_id);
+        if (!$jury_member_id && !current_user_can('manage_options')) {
+            wp_send_json_error(__('Jury member not found.', 'mobility-trailblazers'));
+        }
+        
+        global $wpdb;
+        
+        // Delete from votes table
+        $votes_deleted = $wpdb->delete(
+            $wpdb->prefix . 'mt_votes',
+            array(
+                'candidate_id' => $candidate_id,
+                'jury_member_id' => $current_user_id
+            ),
+            array('%d', '%d')
+        );
+        
+        // Delete from candidate scores table
+        $scores_deleted = $wpdb->delete(
+            $wpdb->prefix . 'mt_candidate_scores',
+            array(
+                'candidate_id' => $candidate_id,
+                'jury_member_id' => $current_user_id
+            ),
+            array('%d', '%d')
+        );
+        
+        // Log the reset action
+        $this->log_vote_reset('individual', $current_user_id, $candidate_id, $reason);
+        
+        $candidate_name = get_the_title($candidate_id);
+        
+        wp_send_json_success(array(
+            'message' => sprintf(__('Vote for %s has been reset successfully.', 'mobility-trailblazers'), $candidate_name),
+            'votes_deleted' => $votes_deleted,
+            'scores_deleted' => $scores_deleted
+        ));
+    }
+
+    /**
+     * Handle phase votes reset AJAX request
+     */
+    public function handle_reset_phase_votes() {
+        // Check nonce
+        if (!check_ajax_referer('mt_vote_reset_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('You do not have permission to reset phase votes.', 'mobility-trailblazers'));
+        }
+        
+        $notify_jury = intval($_POST['notify_jury'] ?? 0);
+        
+        global $wpdb;
+        
+        // Get current phase
+        $current_phase = get_option('mt_current_phase', 'phase_1');
+        
+        // Count votes to be reset
+        $votes_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE vote_round = 1");
+        $scores_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores");
+        
+        // Create backup before reset
+        $backup_created = $this->create_vote_backup($current_phase);
+        
+        // Reset votes (mark as inactive instead of deleting)
+        $wpdb->update(
+            $wpdb->prefix . 'mt_votes',
+            array('is_active' => 0, 'reset_date' => current_time('mysql')),
+            array('vote_round' => 1),
+            array('%d', '%s'),
+            array('%d')
+        );
+        
+        // Reset scores (mark as inactive)
+        $wpdb->update(
+            $wpdb->prefix . 'mt_candidate_scores',
+            array('is_active' => 0, 'reset_date' => current_time('mysql')),
+            array('evaluation_round' => 1),
+            array('%d', '%s'),
+            array('%d')
+        );
+        
+        // Log the reset action
+        $this->log_vote_reset('phase_transition', get_current_user_id(), null, "Phase transition reset for {$current_phase}");
+        
+        $notifications_sent = 0;
+        if ($notify_jury) {
+            $notifications_sent = $this->notify_jury_phase_reset();
+        }
+        
+        wp_send_json_success(array(
+            'message' => __('Phase votes have been reset successfully.', 'mobility-trailblazers'),
+            'votes_reset' => $votes_count,
+            'scores_reset' => $scores_count,
+            'backup_created' => $backup_created,
+            'notifications_sent' => $notifications_sent
+        ));
+    }
+
+    /**
+     * Handle full system reset AJAX request
+     */
+    public function handle_reset_all_votes() {
+        // Check nonce
+        if (!check_ajax_referer('mt_vote_reset_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('You do not have permission to reset all votes.', 'mobility-trailblazers'));
+        }
+        
+        $confirm = sanitize_text_field($_POST['confirm'] ?? '');
+        if ($confirm !== 'DELETE ALL') {
+            wp_send_json_error(__('Confirmation text does not match.', 'mobility-trailblazers'));
+        }
+        
+        global $wpdb;
+        
+        // Count votes to be reset
+        $votes_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes");
+        $scores_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores");
+        
+        // Create full backup
+        $backup_created = $this->create_vote_backup('full_reset_' . date('Y-m-d_H-i-s'));
+        
+        // Delete all votes
+        $wpdb->query("DELETE FROM {$wpdb->prefix}mt_votes");
+        
+        // Delete all scores
+        $wpdb->query("DELETE FROM {$wpdb->prefix}mt_candidate_scores");
+        
+        // Log the reset action
+        $this->log_vote_reset('full_reset', get_current_user_id(), null, 'Full system reset - all votes and evaluations deleted');
+        
+        wp_send_json_success(array(
+            'message' => __('All votes and evaluations have been reset.', 'mobility-trailblazers'),
+            'votes_reset' => $votes_count,
+            'evaluations_reset' => $scores_count,
+            'backup_created' => $backup_created
+        ));
+    }
+
+    /**
+     * Handle get vote stats AJAX request
+     */
+    public function handle_get_vote_stats() {
+        // Check nonce
+        if (!check_ajax_referer('mt_vote_reset_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        global $wpdb;
+        
+        $stats = array(
+            'total_votes' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes"),
+            'total_evaluations' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores"),
+            'active_jury' => $wpdb->get_var("SELECT COUNT(DISTINCT jury_member_id) FROM {$wpdb->prefix}mt_candidate_scores"),
+            'candidates_evaluated' => $wpdb->get_var("SELECT COUNT(DISTINCT candidate_id) FROM {$wpdb->prefix}mt_candidate_scores")
+        );
+        
+        wp_send_json_success($stats);
+    }
+
+    /**
+     * Handle get jury progress AJAX request
+     */
+    public function handle_get_jury_progress() {
+        // Check nonce
+        if (!check_ajax_referer('mt_vote_reset_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        $current_user_id = get_current_user_id();
+        $jury_member_id = $this->get_jury_member_for_user($current_user_id);
+        
+        if (!$jury_member_id) {
+            wp_send_json_error(__('Jury member not found.', 'mobility-trailblazers'));
+        }
+        
+        // Get assigned candidates
+        $assigned_candidates = $this->get_assigned_candidates($jury_member_id);
+        $total = count($assigned_candidates);
+        
+        // Count evaluated candidates
+        $completed = 0;
+        foreach ($assigned_candidates as $candidate) {
+            if ($this->has_jury_member_evaluated($jury_member_id, $candidate->ID)) {
+                $completed++;
+            }
+        }
+        
+        $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
+        
+        wp_send_json_success(array(
+            'total' => $total,
+            'completed' => $completed,
+            'progress' => $progress
+        ));
+    }
+
+    /**
+     * Log vote reset action
+     */
+    private function log_vote_reset($type, $user_id, $candidate_id = null, $reason = '') {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_vote_reset_log';
+        
+        // Create log table if it doesn't exist
+        $wpdb->query("CREATE TABLE IF NOT EXISTS $table_name (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            reset_type varchar(50) NOT NULL,
+            user_id int(11) NOT NULL,
+            candidate_id int(11) NULL,
+            reason text,
+            reset_timestamp datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        )");
+        
+        $wpdb->insert(
+            $table_name,
+            array(
+                'reset_type' => $type,
+                'user_id' => $user_id,
+                'candidate_id' => $candidate_id,
+                'reason' => $reason,
+                'reset_timestamp' => current_time('mysql')
+            ),
+            array('%s', '%d', '%d', '%s', '%s')
+        );
+    }
+
+    /**
+     * Create backup of votes before reset
+     */
+    private function create_vote_backup($phase) {
+        global $wpdb;
+        
+        $backup_table_votes = $wpdb->prefix . 'mt_votes_backup_' . sanitize_key($phase);
+        $backup_table_scores = $wpdb->prefix . 'mt_candidate_scores_backup_' . sanitize_key($phase);
+        
+        // Backup votes
+        $wpdb->query("CREATE TABLE $backup_table_votes AS SELECT * FROM {$wpdb->prefix}mt_votes");
+        
+        // Backup scores
+        $wpdb->query("CREATE TABLE $backup_table_scores AS SELECT * FROM {$wpdb->prefix}mt_candidate_scores");
+        
+        return true;
+    }
+
+    /**
+     * Notify jury members about phase reset
+     */
+    private function notify_jury_phase_reset() {
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $notifications_sent = 0;
+        
+        foreach ($jury_members as $jury_member) {
+            $email = get_post_meta($jury_member->ID, '_mt_jury_email', true);
+            if ($email) {
+                $subject = __('Voting Phase Reset - Mobility Trailblazers', 'mobility-trailblazers');
+                $message = sprintf(
+                    __('Dear %s,<br><br>The voting phase has been reset. Please log in to your dashboard to continue with the evaluation process.<br><br>Thank you for your participation.', 'mobility-trailblazers'),
+                    $jury_member->post_title
+                );
+                
+                wp_mail($email, $subject, $message, array('Content-Type: text/html; charset=UTF-8'));
+                $notifications_sent++;
+            }
+        }
+        
+        return $notifications_sent;
+    }
+
+    /**
      * Add diagnostic menu to admin
      */
     public function add_diagnostic_menu() {
@@ -2829,8 +3407,7 @@ class MobilityTrailblazersPlugin {
         echo "<h2>4. Database Tables</h2>";
         $required_tables = [
             'mt_candidate_scores' => 'Stores jury evaluations',
-            'mt_votes' => 'Stores jury votes', 
-            'mt_public_votes' => 'Stores public votes'
+            'mt_votes' => 'Stores jury votes'
         ];
 
         echo "<table class='wp-list-table widefat fixed striped'>";
@@ -3497,6 +4074,322 @@ if (!function_exists('mt_safe_plugin_basename')) {
         
         return plugin_basename($file);
     }
+}
+
+/**
+ * Handle sync system AJAX request
+ */
+add_action('wp_ajax_mt_sync_system', 'mt_handle_sync_system');
+function mt_handle_sync_system() {
+    // Check nonce
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_send_json_error(array('message' => 'Security check failed'));
+        wp_die();
+    }
+    
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Insufficient permissions'));
+        wp_die();
+    }
+    
+    try {
+        // Perform synchronization tasks
+        // This is where you'd add your actual sync logic
+        
+        // Example: Update assignment counts
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $jury_members = get_users(array(
+            'role' => 'mt_jury_member'
+        ));
+        
+        // Update meta data, clear cache, etc.
+        wp_cache_flush();
+        
+        wp_send_json_success(array(
+            'message' => 'System synchronized successfully',
+            'candidates_count' => count($candidates),
+            'jury_count' => count($jury_members)
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array('message' => $e->getMessage()));
+    }
+    
+    wp_die();
+}
+
+/**
+ * Handle get progress data AJAX request
+ */
+add_action('wp_ajax_mt_get_progress_data', 'mt_handle_get_progress_data');
+function mt_handle_get_progress_data() {
+    // Check nonce
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_send_json_error(array('message' => 'Security check failed'));
+        wp_die();
+    }
+    
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(array('message' => 'Insufficient permissions'));
+        wp_die();
+    }
+    
+    // Get progress data
+    global $wpdb;
+    
+    // Get all candidates with assignments
+    $candidates = get_posts(array(
+        'post_type' => 'mt_candidate',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_query' => array(
+            array(
+                'key' => '_mt_assigned_jury_member',
+                'compare' => 'EXISTS'
+            )
+        )
+    ));
+    
+    // Get evaluation progress
+    $evaluations = $wpdb->get_results("
+        SELECT 
+            candidate_id,
+            jury_member_id,
+            COUNT(*) as evaluation_count,
+            MAX(evaluation_date) as last_evaluation
+        FROM {$wpdb->prefix}mt_candidate_scores
+        GROUP BY candidate_id, jury_member_id
+    ");
+    
+    // Build progress statistics
+    $total_assignments = count($candidates);
+    $total_evaluations = count($evaluations);
+    $completion_rate = $total_assignments > 0 ? round(($total_evaluations / $total_assignments) * 100, 1) : 0;
+    
+    // Get jury member progress
+    $jury_progress = $wpdb->get_results("
+        SELECT 
+            u.ID,
+            u.display_name,
+            COUNT(DISTINCT pm.post_id) as assigned_count,
+            COUNT(DISTINCT cs.candidate_id) as evaluated_count
+        FROM {$wpdb->users} u
+        LEFT JOIN {$wpdb->postmeta} pm ON pm.meta_value = u.ID AND pm.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON cs.jury_member_id = u.ID
+        WHERE u.ID IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = '{$wpdb->prefix}capabilities' AND meta_value LIKE '%mt_jury_member%')
+        GROUP BY u.ID
+        ORDER BY u.display_name
+    ");
+    
+    // Build HTML output
+    $html = '<div class="mt-progress-report">';
+    
+    // Overall statistics
+    $html .= '<div class="mt-progress-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">';
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #2d3748;">' . $total_assignments . '</div>';
+    $html .= '<div style="color: #718096;">Total Assignments</div>';
+    $html .= '</div>';
+    
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #38a169;">' . $total_evaluations . '</div>';
+    $html .= '<div style="color: #718096;">Completed Evaluations</div>';
+    $html .= '</div>';
+    
+    $html .= '<div class="mt-stat-box" style="background: #f7fafc; padding: 20px; border-radius: 8px; text-align: center;">';
+    $html .= '<div style="font-size: 2em; font-weight: bold; color: #3182ce;">' . $completion_rate . '%</div>';
+    $html .= '<div style="color: #718096;">Completion Rate</div>';
+    $html .= '</div>';
+    $html .= '</div>';
+    
+    // Jury member progress table
+    $html .= '<h4 style="margin-bottom: 15px;">Jury Member Progress</h4>';
+    $html .= '<table style="width: 100%; border-collapse: collapse;">';
+    $html .= '<thead>';
+    $html .= '<tr style="background: #f7fafc;">';
+    $html .= '<th style="padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0;">Jury Member</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Assigned</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Evaluated</th>';
+    $html .= '<th style="padding: 10px; text-align: center; border-bottom: 2px solid #e2e8f0;">Progress</th>';
+    $html .= '</tr>';
+    $html .= '</thead>';
+    $html .= '<tbody>';
+    
+    foreach ($jury_progress as $member) {
+        $progress = $member->assigned_count > 0 ? round(($member->evaluated_count / $member->assigned_count) * 100, 1) : 0;
+        $progress_color = $progress >= 80 ? '#38a169' : ($progress >= 50 ? '#d69e2e' : '#e53e3e');
+        
+        $html .= '<tr style="border-bottom: 1px solid #e2e8f0;">';
+        $html .= '<td style="padding: 10px;">' . esc_html($member->display_name) . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">' . $member->assigned_count . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">' . $member->evaluated_count . '</td>';
+        $html .= '<td style="padding: 10px; text-align: center;">';
+        $html .= '<div style="background: #e2e8f0; border-radius: 4px; overflow: hidden; height: 20px; position: relative;">';
+        $html .= '<div style="background: ' . $progress_color . '; height: 100%; width: ' . $progress . '%; transition: width 0.3s;"></div>';
+        $html .= '<span style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 12px; line-height: 20px;">' . $progress . '%</span>';
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+    }
+    
+    $html .= '</tbody>';
+    $html .= '</table>';
+    
+    // Category breakdown
+    $category_stats = $wpdb->get_results("
+        SELECT 
+            t.name as category,
+            COUNT(DISTINCT p.ID) as total_count,
+            COUNT(DISTINCT CASE WHEN pm.meta_key = '_mt_assigned_jury_member' THEN p.ID END) as assigned_count,
+            COUNT(DISTINCT cs.candidate_id) as evaluated_count
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON p.ID = cs.candidate_id
+        WHERE p.post_type = 'mt_candidate' 
+        AND p.post_status = 'publish'
+        AND tt.taxonomy = 'mt_category'
+        GROUP BY t.term_id
+    ");
+    
+    if (!empty($category_stats)) {
+        $html .= '<h4 style="margin-top: 30px; margin-bottom: 15px;">Category Progress</h4>';
+        $html .= '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">';
+        
+        foreach ($category_stats as $cat) {
+            $assigned_percent = $cat->total_count > 0 ? round(($cat->assigned_count / $cat->total_count) * 100, 1) : 0;
+            $evaluated_percent = $cat->assigned_count > 0 ? round(($cat->evaluated_count / $cat->assigned_count) * 100, 1) : 0;
+            
+            $html .= '<div style="background: #f7fafc; padding: 15px; border-radius: 8px;">';
+            $html .= '<h5 style="margin: 0 0 10px 0; color: #2d3748;">' . esc_html($cat->category) . '</h5>';
+            $html .= '<div style="font-size: 0.9em; color: #718096;">Total: ' . $cat->total_count . ' | Assigned: ' . $cat->assigned_count . ' | Evaluated: ' . $cat->evaluated_count . '</div>';
+            $html .= '<div style="margin-top: 10px;">';
+            $html .= '<div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 3px;">';
+            $html .= '<span>Assigned</span><span>' . $assigned_percent . '%</span>';
+            $html .= '</div>';
+            $html .= '<div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">';
+            $html .= '<div style="background: #3182ce; height: 100%; width: ' . $assigned_percent . '%;"></div>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '<div style="margin-top: 8px;">';
+            $html .= '<div style="display: flex; justify-content: space-between; font-size: 0.8em; margin-bottom: 3px;">';
+            $html .= '<span>Evaluated</span><span>' . $evaluated_percent . '%</span>';
+            $html .= '</div>';
+            $html .= '<div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">';
+            $html .= '<div style="background: #38a169; height: 100%; width: ' . $evaluated_percent . '%;"></div>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>';
+    }
+    
+    $html .= '</div>';
+    
+    wp_send_json_success(array('html' => $html));
+    wp_die();
+}
+
+/**
+ * Ensure the mt_export_assignments handler exists
+ * This might already exist in your plugin, but adding it here for completeness
+ */
+if (!has_action('wp_ajax_mt_export_assignments', 'mt_handle_export_assignments')) {
+    add_action('wp_ajax_mt_export_assignments', 'mt_handle_export_assignments');
+}
+
+function mt_handle_export_assignments() {
+    if (!check_ajax_referer('mt_assignment_nonce', 'nonce', false)) {
+        wp_die('Security check failed');
+    }
+    
+    if (!current_user_can('manage_options')) {
+        wp_die('Insufficient permissions');
+    }
+    
+    // Set CSV headers
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="mobility-trailblazers-assignments-' . date('Y-m-d-H-i-s') . '.csv"');
+    
+    // Create output stream
+    $output = fopen('php://output', 'w');
+    
+    // Add BOM for Excel UTF-8 recognition
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+    
+    // Write headers
+    fputcsv($output, array(
+        'Candidate ID',
+        'Candidate Name',
+        'Company',
+        'Category',
+        'Jury Member ID',
+        'Jury Member Name',
+        'Jury Member Email',
+        'Assignment Date',
+        'Evaluation Status',
+        'Evaluation Date',
+        'Total Score'
+    ));
+    
+    // Get assignments data
+    global $wpdb;
+    
+    $assignments = $wpdb->get_results("
+        SELECT 
+            p.ID as candidate_id,
+            p.post_title as candidate_name,
+            pm_company.meta_value as company,
+            t.name as category,
+            u.ID as jury_id,
+            u.display_name as jury_name,
+            u.user_email as jury_email,
+            pm_assign.meta_value as jury_member_id,
+            cs.evaluation_date,
+            cs.total_score
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->postmeta} pm_assign ON p.ID = pm_assign.post_id AND pm_assign.meta_key = '_mt_assigned_jury_member'
+        LEFT JOIN {$wpdb->postmeta} pm_company ON p.ID = pm_company.post_id AND pm_company.meta_key = '_mt_company'
+        LEFT JOIN {$wpdb->users} u ON u.ID = pm_assign.meta_value
+        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id AND tt.taxonomy = 'mt_category'
+        LEFT JOIN {$wpdb->prefix}mt_candidate_scores cs ON p.ID = cs.candidate_id AND u.ID = cs.jury_member_id
+        WHERE p.post_type = 'mt_candidate' 
+        AND p.post_status = 'publish'
+        AND pm_assign.meta_value IS NOT NULL
+        ORDER BY u.display_name, p.post_title
+    ");
+    
+    // Write data rows
+    foreach ($assignments as $assignment) {
+        fputcsv($output, array(
+            $assignment->candidate_id,
+            $assignment->candidate_name,
+            $assignment->company ?: '',
+            $assignment->category ?: '',
+            $assignment->jury_id,
+            $assignment->jury_name,
+            $assignment->jury_email,
+            date('Y-m-d', strtotime(get_post_meta($assignment->candidate_id, '_mt_assignment_date', true) ?: 'now')),
+            $assignment->evaluation_date ? 'Evaluated' : 'Pending',
+            $assignment->evaluation_date ?: '',
+            $assignment->total_score ?: ''
+        ));
+    }
+    
+    fclose($output);
+    wp_die();
 }
 
 ?>

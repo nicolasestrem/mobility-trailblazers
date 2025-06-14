@@ -288,32 +288,13 @@ class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
     }
     
     /**
-     * Get user evaluation count - with fallback
+     * Get user evaluation count - simplified to use global function
      */
     private function get_user_evaluation_count($user_id) {
-        global $wpdb;
-        
-        try {
-            // Try the function first
-            if (function_exists('mt_get_user_evaluation_count')) {
-                return (int) mt_get_user_evaluation_count($user_id);
-            }
-            
-            // Fallback: Calculate directly
-            $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-            if (!$wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_scores))) {
-                return 0;
-            }
-            
-            return (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT candidate_id) FROM `$table_scores` WHERE jury_member_id = %d",
-                $user_id
-            ));
-            
-        } catch (Exception $e) {
-            error_log('MT User Evaluation Count Error: ' . $e->getMessage());
-            return 0;
-        }
+        // Just use the global function
+        return function_exists('mt_get_user_evaluation_count') 
+            ? (int) mt_get_user_evaluation_count($user_id) 
+            : 0;
     }
     
     /**

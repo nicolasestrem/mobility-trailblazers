@@ -637,39 +637,7 @@ class MT_Jury_Consistency {
         return $data;
     }
     
-    /**
-     * Get consistent evaluation count for a user
-     * This checks both user ID and any linked jury post IDs
-     * 
-     * @param int $user_id WordPress user ID
-     * @return int Number of evaluations
-     */
-    public function get_evaluation_count($user_id) {
-        global $wpdb;
-        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
-        
-        // Get jury post ID if exists
-        $jury_post_id = $this->get_jury_post_id_for_user($user_id);
-        
-        if ($jury_post_id) {
-            // Count evaluations with either user ID or jury post ID
-            return $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT candidate_id) 
-                FROM $table_scores 
-                WHERE jury_member_id IN (%d, %d)",
-                $user_id,
-                $jury_post_id
-            ));
-        } else {
-            // Just count by user ID
-            return $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT candidate_id) 
-                FROM $table_scores 
-                WHERE jury_member_id = %d",
-                $user_id
-            ));
-        }
-    }
+
     
     /**
      * Check if a user has evaluated a specific candidate
