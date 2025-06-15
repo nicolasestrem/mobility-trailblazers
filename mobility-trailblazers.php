@@ -41,6 +41,9 @@ require_once MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php';
 class MobilityTrailblazersPlugin {
     
     public function __construct() {
+        // Load dependencies first
+        $this->load_dependencies();
+        
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
@@ -61,6 +64,12 @@ class MobilityTrailblazersPlugin {
         add_action('rest_api_init', array($this, 'register_rest_routes'));
         add_action('wp_ajax_mt_export_backup_history', array($this, 'handle_export_backup_history'));
         
+        // Backup and reset AJAX handlers
+        add_action('wp_ajax_mt_reset_vote', array($this, 'handle_ajax_reset_vote'));
+        add_action('wp_ajax_mt_bulk_reset_candidate', array($this, 'handle_ajax_bulk_reset'));
+        add_action('wp_ajax_mt_get_reset_history', array($this, 'handle_ajax_get_reset_history'));
+        add_action('wp_ajax_mt_get_jury_stats', array($this, 'handle_ajax_get_jury_stats'));
+        
         // Other jury-related hooks
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
@@ -76,7 +85,6 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
-        add_action('wp_ajax_mt_export_backup_history', array($this, 'handle_export_backup_history'));
         
         // Evaluation submission handler
         add_action('admin_post_mt_submit_evaluation', array($this, 'handle_evaluation_submission'));
@@ -86,9 +94,34 @@ class MobilityTrailblazersPlugin {
         
         // Add Elementor compatibility
         add_action('plugins_loaded', array($this, 'load_elementor_compatibility'));
+    }
+
+    /**
+     * Load required classes
+     */
+    private function load_dependencies() {
+        // Define constants if not already defined
+        if (!defined('MT_PLUGIN_PATH')) {
+            define('MT_PLUGIN_PATH', plugin_dir_path(__FILE__));
+        }
         
-        // Register REST API routes
-        add_action('rest_api_init', array($this, 'register_rest_routes'));
+        // Define the classes we need to load
+        $classes = array(
+            'includes/class-vote-backup-manager.php',
+            'includes/class-vote-audit-logger.php',
+            'includes/class-vote-reset-manager.php'
+        );
+        
+        // Load each class file if it exists
+        foreach ($classes as $class_file) {
+            $file_path = plugin_dir_path(__FILE__) . $class_file;
+            if (file_exists($file_path)) {
+                require_once $file_path;
+            } else {
+                // Log error if file doesn't exist
+                error_log('Mobility Trailblazers: Missing file ' . $file_path);
+            }
+        }
     }
 
     public function init() {
@@ -4189,21 +4222,113 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
+     * Handle AJAX reset vote request
+     */
+    public function handle_ajax_reset_vote() {
+        check_ajax_referer('mt_vote_reset_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $vote_id = intval($_POST['vote_id']);
+        
+        // Load reset manager if needed
+        if (!class_exists('MT_Vote_Reset_Manager')) {
+            wp_send_json_error('Reset manager not available');
+        }
+        
+        $reset_manager = new MT_Vote_Reset_Manager();
+        $result = $reset_manager->reset_individual_vote($vote_id);
+        
+        if ($result) {
+            wp_send_json_success(array('message' => 'Vote reset successfully'));
+        } else {
+            wp_send_json_error('Failed to reset vote');
+        }
+    }
+
+    /**
+     * Handle AJAX bulk reset request
+     */
+    public function handle_ajax_bulk_reset() {
+        check_ajax_referer('mt_vote_reset_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $candidate_id = intval($_POST['candidate_id']);
+        
+        // Load reset manager if needed
+        if (!class_exists('MT_Vote_Reset_Manager')) {
+            wp_send_json_error('Reset manager not available');
+        }
+        
+        $reset_manager = new MT_Vote_Reset_Manager();
+        $result = $reset_manager->bulk_reset_candidate($candidate_id);
+        
+        if ($result) {
+            wp_send_json_success(array('message' => 'All votes for candidate reset successfully'));
+        } else {
+            wp_send_json_error('Failed to reset votes');
+        }
+    }
+
+    /**
+     * Handle AJAX get reset history request
+     */
+    public function handle_ajax_get_reset_history() {
+        check_ajax_referer('mt_vote_reset_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        // Load audit logger if needed
+        if (!class_exists('MT_Vote_Audit_Logger')) {
+            wp_send_json_error('Audit logger not available');
+        }
+        
+        $audit_logger = new MT_Vote_Audit_Logger();
+        $history = $audit_logger->get_reset_history(1, 50);
+        
+        wp_send_json_success(array('history' => $history));
+    }
+
+    /**
+     * Handle AJAX get jury stats request
+     */
+    public function handle_ajax_get_jury_stats() {
+        check_ajax_referer('mt_vote_reset_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        global $wpdb;
+        
+        // Get total votes
+        $total_votes = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE deleted_at IS NULL");
+        
+        // Get active jury members (those who have voted)
+        $active_jury = $wpdb->get_var("SELECT COUNT(DISTINCT jury_member_id) FROM {$wpdb->prefix}mt_votes WHERE deleted_at IS NULL");
+        
+        // Calculate completion rate (example: assume 50 jury members total)
+        $total_jury_members = 50; // You should get this from your jury members table
+        $completion_rate = $total_jury_members > 0 ? round(($active_jury / $total_jury_members) * 100) . '%' : '0%';
+        
+        wp_send_json_success(array(
+            'total_votes' => $total_votes,
+            'active_jury' => $active_jury,
+            'completion_rate' => $completion_rate
+        ));
+    }
+
+    /**
      * Register REST API routes
      */
     public function register_rest_routes() {
-        // Load and initialize API endpoint classes
-        require_once MT_PLUGIN_PATH . 'api/vote-reset-endpoints.php';
-        require_once MT_PLUGIN_PATH . 'api/backup-endpoints.php';
-        
-        // Initialize vote reset API
-        $vote_reset_api = new MT_Vote_Reset_API();
-        $vote_reset_api->register_routes();
-        
-        // Initialize backup API
-        $backup_api = new MT_Backup_API();
-        $backup_api->register_routes();
-        
         // Register backup API endpoints directly
         // Create backup endpoint
         register_rest_route('mobility-trailblazers/v1', '/admin/create-backup', array(
