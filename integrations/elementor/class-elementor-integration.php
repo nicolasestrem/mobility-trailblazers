@@ -175,8 +175,8 @@ class MT_Elementor_Compatibility {
      */
     private function get_plugin_path() {
         // Try multiple constants that might be defined
-        if (defined('MT_PLUGIN_DIR')) {
-            return MT_PLUGIN_DIR;
+        if (defined('MT_PLUGIN_PATH')) {
+            return MT_PLUGIN_PATH;
         }
         
         if (defined('MOBILITY_TRAILBLAZERS_PATH')) {
@@ -233,8 +233,8 @@ class MT_Elementor_Compatibility {
      * Get plugin version
      */
     private function get_plugin_version() {
-        if (defined('MT_VERSION')) {
-            return MT_VERSION;
+        if (defined('MT_PLUGIN_VERSION')) {
+            return MT_PLUGIN_VERSION;
         }
         
         return '1.0.0';

@@ -544,7 +544,7 @@ class MT_Vote_Backup_Manager {
                 'votes' => $wpdb->get_results("SELECT * FROM {$this->tables['votes_history']}", ARRAY_A),
                 'scores' => $wpdb->get_results("SELECT * FROM {$this->tables['scores_history']}", ARRAY_A),
                 'export_date' => current_time('mysql'),
-                'export_version' => MT_VERSION
+                'export_version' => MT_PLUGIN_VERSION
             );
             
             if ($format === 'json') {
