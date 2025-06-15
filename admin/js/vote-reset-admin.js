@@ -191,12 +191,11 @@
             $.ajax({
                 url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
                 method: 'POST',
-                contentType: 'application/json',
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader('X-WP-Nonce', mt_ajax.rest_nonce || mt_ajax.nonce);
                     console.log('Setting nonce header:', mt_ajax.rest_nonce || mt_ajax.nonce);
                 },
-                data: JSON.stringify(requestData)
+                data: requestData
             })
             .done(function(response) {
                 console.log('Full reset response:', response);

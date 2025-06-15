@@ -1471,7 +1471,7 @@ class MobilityTrailblazersPlugin {
         $results = $wpdb->get_results($wpdb->prepare("
             SELECT p.ID, p.post_title, AVG(s.total_score) as avg_score, COUNT(s.id) as evaluation_count
             FROM {$wpdb->posts} p
-            LEFT JOIN $table s ON p.ID = s.candidate_id
+            LEFT JOIN $table s ON p.ID = s.candidate_id AND s.is_active = 1
             WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
             GROUP BY p.ID
             HAVING evaluation_count > 0
@@ -1561,7 +1561,7 @@ class MobilityTrailblazersPlugin {
         
         foreach ($candidates as $candidate) {
             $existing_score = $wpdb->get_row($wpdb->prepare(
-                "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d AND evaluation_round = 1",
+                "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d AND evaluation_round = 1 AND is_active = 1",
                 $candidate->ID,
                 $current_user_id
             ));
@@ -1851,7 +1851,7 @@ class MobilityTrailblazersPlugin {
         $count = $wpdb->get_var("
             SELECT COUNT(*) 
             FROM {$wpdb->prefix}mt_votes 
-            WHERE vote_round = 1
+            WHERE vote_round = 1 AND is_active = 1
         ");
         return $count ?: 0;
     }
@@ -1864,6 +1864,7 @@ class MobilityTrailblazersPlugin {
         $count = $wpdb->get_var("
             SELECT COUNT(*) 
             FROM {$wpdb->prefix}mt_candidate_scores
+            WHERE is_active = 1
         ");
         return $count ?: 0;
     }
@@ -1883,6 +1884,7 @@ class MobilityTrailblazersPlugin {
             FROM {$wpdb->prefix}mt_votes v
             LEFT JOIN {$wpdb->posts} p ON v.candidate_id = p.ID
             LEFT JOIN {$wpdb->users} u ON v.jury_member_id = u.ID
+            WHERE v.is_active = 1
             ORDER BY v.vote_date DESC
             LIMIT 10
         ");
@@ -1896,6 +1898,7 @@ class MobilityTrailblazersPlugin {
             FROM {$wpdb->prefix}mt_candidate_scores cs
             LEFT JOIN {$wpdb->posts} p ON cs.candidate_id = p.ID
             LEFT JOIN {$wpdb->users} u ON cs.jury_member_id = u.ID
+            WHERE cs.is_active = 1
             ORDER BY cs.evaluation_date DESC
             LIMIT 10
         ");
@@ -2782,7 +2785,7 @@ class MobilityTrailblazersPlugin {
         
         $score_exists = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table_name 
-            WHERE jury_member_id = %d AND candidate_id = %d",
+            WHERE jury_member_id = %d AND candidate_id = %d AND is_active = 1",
             $jury_member_id,
             $candidate_id
         ));
@@ -2917,7 +2920,7 @@ class MobilityTrailblazersPlugin {
         )));
         
         $evaluated_count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d",
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores WHERE jury_member_id = %d AND is_active = 1",
             $current_user_id
         ));
         
@@ -4762,7 +4765,7 @@ class MobilityTrailblazersPlugin {
         global $wpdb;
         $table_name = $wpdb->prefix . 'mt_candidate_scores';
         return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT candidate_id) FROM $table_name WHERE jury_member_id = %d",
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_name WHERE jury_member_id = %d AND is_active = 1",
             $user_id
         ));
     }
@@ -4904,6 +4907,7 @@ class MobilityTrailblazersPlugin {
             FROM {$table_name} cs
             LEFT JOIN {$wpdb->users} u ON cs.jury_member_id = u.ID
             LEFT JOIN {$wpdb->posts} p ON cs.candidate_id = p.ID
+            WHERE cs.is_active = 1
             ORDER BY cs.evaluation_date DESC
         ");
         
@@ -4967,7 +4971,7 @@ function mt_get_user_evaluation_count($user_id) {
         // Count evaluations by BOTH user ID and jury post ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
-            WHERE jury_member_id IN (%d, %d)",
+            WHERE jury_member_id IN (%d, %d) AND is_active = 1",
             $user_id,
             $jury_post_id
         ));
@@ -4975,7 +4979,7 @@ function mt_get_user_evaluation_count($user_id) {
         // Just count by user ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(DISTINCT candidate_id) FROM $table_scores 
-            WHERE jury_member_id = %d",
+            WHERE jury_member_id = %d AND is_active = 1",
             $user_id
         ));
     }
@@ -4999,7 +5003,7 @@ function mt_has_jury_evaluated($user_id, $candidate_id) {
         // Check by BOTH user ID and jury post ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table_scores 
-            WHERE candidate_id = %d AND jury_member_id IN (%d, %d)",
+            WHERE candidate_id = %d AND jury_member_id IN (%d, %d) AND is_active = 1",
             $candidate_id,
             $user_id,
             $jury_post_id
@@ -5008,7 +5012,7 @@ function mt_has_jury_evaluated($user_id, $candidate_id) {
         // Just check by user ID
         return $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table_scores 
-            WHERE candidate_id = %d AND jury_member_id = %d",
+            WHERE candidate_id = %d AND jury_member_id = %d AND is_active = 1",
             $candidate_id,
             $user_id
         )) > 0;
@@ -5039,6 +5043,7 @@ function mt_get_jury_scores($user_id, $candidate_id) {
             "SELECT * FROM $table_scores 
             WHERE candidate_id = %d 
             AND jury_member_id IN (%d, %d)
+            AND is_active = 1
             ORDER BY evaluated_at DESC
             LIMIT 1",
             $candidate_id,
@@ -5051,6 +5056,7 @@ function mt_get_jury_scores($user_id, $candidate_id) {
             "SELECT * FROM $table_scores 
             WHERE candidate_id = %d 
             AND jury_member_id = %d
+            AND is_active = 1
             ORDER BY evaluated_at DESC
             LIMIT 1",
             $candidate_id,
