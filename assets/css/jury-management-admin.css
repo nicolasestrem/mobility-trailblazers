@@ -1,0 +1,308 @@
+/**
+ * Jury Management Admin Styles
+ * File: /wp-content/plugins/mobility-trailblazers/assets/css/jury-management-admin.css
+ */
+
+/* Statistics Dashboard */
+.mt-jury-stats-container {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin: 20px 0;
+    padding: 20px;
+}
+
+.mt-jury-stats-container h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.mt-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-box {
+    background: #f8f9fa;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5em;
+    font-weight: 600;
+    color: #1e1e1e;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Table Styles */
+#jury-members-table {
+    margin-top: 20px;
+}
+
+#jury-members-table th {
+    font-weight: 600;
+}
+
+#jury-members-table td {
+    vertical-align: middle;
+}
+
+.jury-actions a {
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.jury-actions a:hover {
+    text-decoration: underline;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: #d4f4dd;
+    color: #1e7e34;
+}
+
+.status-inactive {
+    background: #ffeaa7;
+    color: #856404;
+}
+
+.status-pending {
+    background: #e3e8ef;
+    color: #3d4752;
+}
+
+/* Form Styles */
+#jury-member-dialog .form-group {
+    margin-bottom: 15px;
+}
+
+#jury-member-dialog label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+#jury-member-dialog input[type="text"],
+#jury-member-dialog input[type="email"],
+#jury-member-dialog input[type="url"],
+#jury-member-dialog select,
+#jury-member-dialog textarea {
+    width: 100%;
+}
+
+#jury-member-dialog textarea {
+    resize: vertical;
+}
+
+/* Activity Log */
+.mt-jury-activity-log {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin: 20px 0;
+    padding: 20px;
+}
+
+.mt-jury-activity-log h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.activity-log-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    padding: 10px;
+    background: #f8f9fa;
+}
+
+.activity-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.activity-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e4e7;
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    color: #646970;
+    font-size: 0.9em;
+}
+
+.activity-message {
+    color: #1e1e1e;
+}
+
+/* Bulk Actions */
+.bulkactions {
+    margin-right: 20px;
+}
+
+#bulk-action-selector {
+    margin-right: 5px;
+}
+
+/* Filter Bar */
+.tablenav .alignleft select {
+    margin-right: 5px;
+}
+
+#filter-button {
+    vertical-align: top;
+}
+
+/* Export Button */
+#export-jury-data {
+    line-height: 26px;
+}
+
+#export-jury-data .dashicons {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* Loading State */
+.text-center {
+    text-align: center;
+}
+
+.spinner {
+    float: none;
+    margin: 0 auto;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .mt-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #jury-members-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .tablenav .alignleft,
+    .tablenav .alignright {
+        float: none;
+        margin-bottom: 10px;
+    }
+}
+
+/* Dialog Customization */
+.ui-dialog .ui-dialog-titlebar {
+    background: #1d2327;
+    color: #fff;
+    border: none;
+}
+
+.ui-dialog .ui-dialog-title {
+    color: #fff;
+}
+
+.ui-dialog .ui-dialog-titlebar-close {
+    color: #fff;
+}
+
+.ui-dialog .ui-dialog-content {
+    padding: 20px;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    background: #f6f7f7;
+    border-top: 1px solid #dcdcde;
+}
+
+/* Notice Styles */
+.mt-jury-management .notice {
+    margin: 10px 0;
+}
+
+/* Enhanced Table Hover */
+#jury-members-table tbody tr:hover {
+    background: #f6f7f7;
+}
+
+/* Checkbox Column */
+.column-cb {
+    width: 2.2em;
+}
+
+/* Action Links */
+.jury-actions {
+    white-space: nowrap;
+}
+
+/* Category Column Styling */
+td[data-value="infrastructure"] {
+    color: #0073aa;
+}
+
+td[data-value="startups"] {
+    color: #23792d;
+}
+
+td[data-value="established"] {
+    color: #a36200;
+}
+
+/* Progress Indicators */
+.completion-progress {
+    display: inline-block;
+    width: 100px;
+    height: 8px;
+    background: #e2e4e7;
+    border-radius: 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.completion-progress-bar {
+    height: 100%;
+    background: #0073aa;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}

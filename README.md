@@ -1,3 +1,212 @@
+Update 3 15/06/2025:
+
+# Recent Updates & New Features (December 2024)
+
+## 🚀 Major Update: Enhanced Jury Management System v2.0
+
+We've implemented a comprehensive jury management system that significantly enhances the administrative capabilities for managing jury members. This update introduces advanced features for administrators and mt_award_admin users while maintaining full compatibility with existing functionality.
+
+### 🎯 New Features Overview
+
+#### 1. **Advanced Jury Management Dashboard**
+- **Comprehensive Statistics Panel**: Real-time metrics showing total jury members, active members, evaluations completed, and average completion rates
+- **Visual Analytics**: Grid-based statistics with hover effects for better data visualization
+- **Activity Monitoring**: Live activity log showing recent actions and changes
+- **Auto-refresh**: Statistics and activity log update every 30 seconds
+
+#### 2. **Enhanced Jury Member Profiles**
+- **Extended Information Fields**:
+  - Organization and position tracking
+  - Category expertise selection (Infrastructure/Politics, Startups/New Makers, Established Companies, General)
+  - LinkedIn profile integration
+  - Biography/description section
+  - Status management (Active/Inactive/Pending)
+- **Automated User Management**:
+  - One-click WordPress user creation with mt_jury_member role
+  - Automatic password generation and email notification
+  - Seamless integration with existing user system
+
+#### 3. **Powerful Administrative Tools**
+- **Bulk Operations**:
+  - Select multiple jury members for batch actions
+  - Bulk delete, activate, deactivate functionality
+  - Mass email reminders to selected jury members
+- **Smart Assignment System**:
+  - Optimize candidate assignments based on jury expertise
+  - Automatic distribution algorithm for balanced workload
+  - Category-based matching for relevant evaluations
+- **Communication Hub**:
+  - Built-in email system for jury communications
+  - Customizable email templates
+  - Invitation and reminder automation
+  - Personalized message tokens ([name], [first_name])
+
+#### 4. **Data Management & Reporting**
+- **Export Functionality**:
+  - One-click CSV export of all jury data
+  - UTF-8 encoding with BOM for Excel compatibility
+  - Comprehensive data including assignments and completion rates
+- **Advanced Filtering**:
+  - Filter by status (Active/Inactive/Pending)
+  - Filter by category expertise
+  - Quick search functionality
+- **Performance Tracking**:
+  - Individual completion rates
+  - Category-wise performance metrics
+  - Top performer identification
+  - Last activity tracking
+
+#### 5. **User Interface Enhancements**
+- **Modern Admin Design**:
+  - Clean, professional interface matching WordPress admin standards
+  - Responsive design for mobile and tablet access
+  - jQuery UI integration for smooth interactions
+  - Status badges with color coding
+- **Intuitive Controls**:
+  - Inline editing capabilities
+  - Modal dialogs for add/edit operations
+  - Confirmation prompts for destructive actions
+  - Success/error notifications
+
+### 📁 New Files Added
+
+```
+/wp-content/plugins/mobility-trailblazers/
+├── admin/
+│   └── class-jury-management-admin.php    # Core jury management functionality
+├── assets/
+│   ├── js/
+│   │   └── jury-management-admin.js       # Frontend interactions and AJAX
+│   └── css/
+│       └── jury-management-admin.css      # Admin interface styling
+```
+
+### 🔧 Technical Implementation
+
+#### Database Schema Updates
+No database table changes required. All new fields are stored as post meta:
+- `_mt_jury_organization` - Jury member's organization
+- `_mt_jury_position` - Professional position
+- `_mt_jury_category` - Expertise category
+- `_mt_jury_linkedin` - LinkedIn profile URL
+- `_mt_jury_status` - Member status (active/inactive/pending)
+- `_mt_jury_created_date` - Creation timestamp
+
+#### New AJAX Endpoints
+- `mt_get_jury_list` - Retrieve filtered jury members
+- `mt_create_jury_member` - Create new jury member
+- `mt_update_jury_member` - Update existing member
+- `mt_delete_jury_member` - Remove jury member
+- `mt_bulk_jury_action` - Perform bulk operations
+- `mt_get_jury_stats` - Get dashboard statistics
+- `mt_export_jury_data` - Export to CSV
+- `mt_send_jury_invitation` - Send email invitations
+- `mt_get_jury_activity` - Retrieve activity log
+
+#### Security Enhancements
+- All AJAX calls protected with nonce verification
+- Capability checks ensure proper permissions
+- Data sanitization for all inputs
+- SQL injection prevention through prepared statements
+- XSS protection via proper escaping
+
+### 📊 Performance Improvements
+
+- **Optimized Queries**: Reduced database calls through efficient querying
+- **Caching Strategy**: Transient caching for activity logs
+- **Lazy Loading**: Data loaded on-demand to improve initial page load
+- **Batch Processing**: Bulk operations processed efficiently
+
+### 🛠️ Installation Instructions
+
+1. **Update Plugin Files**:
+   ```bash
+   # Copy the new admin class
+   cp admin/class-jury-management-admin.php /path/to/wordpress/wp-content/plugins/mobility-trailblazers/admin/
+   
+   # Copy JavaScript file
+   cp assets/js/jury-management-admin.js /path/to/wordpress/wp-content/plugins/mobility-trailblazers/assets/js/
+   
+   # Copy CSS file
+   cp assets/css/jury-management-admin.css /path/to/wordpress/wp-content/plugins/mobility-trailblazers/assets/css/
+   ```
+
+2. **Update Main Plugin File**:
+   Add to `mobility-trailblazers.php` in the `init()` method:
+   ```php
+   require_once MT_PLUGIN_PATH . 'admin/class-jury-management-admin.php';
+   ```
+
+3. **Clear Caches**:
+   - Clear any caching plugins
+   - Clear browser cache
+   - Refresh permalinks if needed
+
+### 👥 User Access
+
+The new jury management features are available to:
+- **Administrators**: Full access to all features
+- **MT Award Admin**: Full access to jury management
+- **MT Jury Members**: No access (existing dashboard remains unchanged)
+
+### 🔄 Backward Compatibility
+
+- All existing functionality remains intact
+- No breaking changes to current features
+- Existing jury data automatically compatible
+- Current workflows unaffected
+
+### 📈 Usage Statistics
+
+After implementation, administrators can track:
+- Total jury members registered
+- Active participation rates
+- Evaluation completion percentages
+- Category distribution
+- Communication effectiveness
+
+### 🐛 Bug Fixes Included
+
+- Fixed duplicate menu registration issues
+- Resolved user ID consistency in evaluations
+- Corrected AJAX handler conflicts
+- Improved error handling for edge cases
+
+### 📝 Documentation Updates
+
+- Comprehensive implementation guide included
+- API reference for developers
+- Troubleshooting section added
+- Code examples for customization
+
+### 🔮 Future Roadmap
+
+Planned enhancements for next release:
+- Jury availability calendar
+- Evaluation deadline automation
+- Video conferencing integration
+- Mobile app for evaluations
+- Advanced analytics dashboard
+- Multi-language support
+
+### ⚡ Quick Start
+
+1. Navigate to **MT Award System → Jury Management**
+2. Click **Add New Jury Member** to create your first enhanced profile
+3. Use bulk actions to manage multiple members efficiently
+4. Export data anytime for external analysis
+
+### 🆘 Support
+
+For issues with the new jury management system:
+1. Check the browser console for JavaScript errors
+2. Verify user permissions are correctly set
+3. Ensure all files are properly uploaded
+4. Contact support with error messages and steps to reproduce
+
+---
+
+*This update represents a significant enhancement to the Mobility Trailblazers plugin, providing administrators with powerful tools to manage jury members effectively while maintaining the simplicity and reliability of the existing system.*
 
 
 # README.md Update - Backup Features & UI Enhancements

@@ -109,7 +109,8 @@ class MobilityTrailblazersPlugin {
         $classes = array(
             'includes/class-vote-backup-manager.php',
             'includes/class-vote-audit-logger.php',
-            'includes/class-vote-reset-manager.php'
+            'includes/class-vote-reset-manager.php',
+            'admin/class-jury-management-admin.php'
         );
         
         // Load each class file if it exists
@@ -132,6 +133,12 @@ class MobilityTrailblazersPlugin {
         require_once MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php';
         require_once MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php';
         require_once MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php';
+        require_once MT_PLUGIN_PATH . 'admin/class-jury-management-admin.php';
+        
+        // Initialize jury management admin
+        if (is_admin()) {
+            new MT_Jury_Management_Admin();
+        }
         
         // Add hooks
         $this->add_hooks();
@@ -568,6 +575,18 @@ class MobilityTrailblazersPlugin {
         
         // Jury dashboard
         $this->add_jury_dashboard_menu();
+        
+        // Enhanced Jury Management submenu
+        if (current_user_can('manage_options')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Jury Management', 'mobility-trailblazers'),
+                __('Jury Management', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-jury-management',
+                array('MT_Jury_Management_Admin', 'display_jury_management_page')
+            );
+        }
         
         // Vote Reset Management submenu
         if (current_user_can('manage_options')) {
@@ -4368,6 +4387,383 @@ class MobilityTrailblazersPlugin {
                 return current_user_can('manage_options');
             }
         ));
+    }
+
+    /**
+     * Enhanced jury member creation with additional fields
+     */
+    public function create_enhanced_jury_member($data) {
+        // Create the jury post
+        $jury_id = wp_insert_post(array(
+            'post_title' => sanitize_text_field($data['name']),
+            'post_type' => 'mt_jury',
+            'post_status' => 'publish',
+            'post_content' => isset($data['bio']) ? wp_kses_post($data['bio']) : ''
+        ));
+        
+        if (!is_wp_error($jury_id)) {
+            // Store additional meta fields
+            update_post_meta($jury_id, '_mt_jury_email', sanitize_email($data['email']));
+            update_post_meta($jury_id, '_mt_jury_organization', sanitize_text_field($data['organization']));
+            update_post_meta($jury_id, '_mt_jury_position', sanitize_text_field($data['position']));
+            update_post_meta($jury_id, '_mt_jury_category', sanitize_text_field($data['category']));
+            update_post_meta($jury_id, '_mt_jury_linkedin', esc_url_raw($data['linkedin']));
+            update_post_meta($jury_id, '_mt_jury_status', 'active');
+            update_post_meta($jury_id, '_mt_jury_created_date', current_time('mysql'));
+            
+            // Create WordPress user if requested
+            if (!empty($data['create_user'])) {
+                $user_id = $this->create_jury_wordpress_user($data['email'], $data['name']);
+                if ($user_id) {
+                    update_post_meta($jury_id, '_mt_jury_user_id', $user_id);
+                }
+            }
+            
+            return $jury_id;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Create WordPress user for jury member
+     */
+    private function create_jury_wordpress_user($email, $name) {
+        $username = sanitize_user(strtolower(str_replace(' ', '', $name)));
+        
+        // Ensure unique username
+        $original_username = $username;
+        $i = 1;
+        while (username_exists($username)) {
+            $username = $original_username . $i;
+            $i++;
+        }
+        
+        $password = wp_generate_password(12, true, false);
+        
+        $user_id = wp_create_user($username, $password, $email);
+        
+        if (!is_wp_error($user_id)) {
+            $user = new WP_User($user_id);
+            $user->set_role('mt_jury_member');
+            
+            // Update user details
+            wp_update_user(array(
+                'ID' => $user_id,
+                'display_name' => $name,
+                'first_name' => explode(' ', $name)[0],
+                'last_name' => implode(' ', array_slice(explode(' ', $name), 1))
+            ));
+            
+            // Send welcome email
+            $this->send_jury_welcome_email($user_id, $password);
+            
+            return $user_id;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Send welcome email to new jury member
+     */
+    private function send_jury_welcome_email($user_id, $password) {
+        $user = get_user_by('id', $user_id);
+        $login_url = wp_login_url();
+        $dashboard_url = admin_url('admin.php?page=mt-jury-dashboard');
+        
+        $subject = sprintf(__('Welcome to %s Jury Panel', 'mobility-trailblazers'), get_bloginfo('name'));
+        
+        $message = sprintf(
+            __("Dear %s,\n\nWelcome to the Mobility Trailblazers jury panel!\n\nYour account has been created with the following credentials:\n\nUsername: %s\nPassword: %s\n\nPlease log in here: %s\n\nOnce logged in, you can access your jury dashboard here: %s\n\nWe recommend changing your password after your first login.\n\nThank you for joining our distinguished panel.\n\nBest regards,\nThe Mobility Trailblazers Team", 'mobility-trailblazers'),
+            $user->display_name,
+            $user->user_login,
+            $password,
+            $login_url,
+            $dashboard_url
+        );
+        
+        wp_mail($user->user_email, $subject, $message);
+    }
+
+    /**
+     * Enhanced jury statistics for dashboard
+     */
+    public function get_jury_statistics() {
+        global $wpdb;
+        
+        $stats = array(
+            'total_jury' => wp_count_posts('mt_jury')->publish,
+            'active_jury' => 0,
+            'total_candidates' => wp_count_posts('mt_candidate')->publish,
+            'total_evaluations' => 0,
+            'completion_by_category' => array(),
+            'top_performers' => array()
+        );
+        
+        // Active jury count
+        $active_jury = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_key' => '_mt_jury_status',
+            'meta_value' => 'active',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ));
+        $stats['active_jury'] = count($active_jury);
+        
+        // Total evaluations
+        $table_name = $wpdb->prefix . 'mt_candidate_scores';
+        $stats['total_evaluations'] = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+        
+        // Completion by category
+        $categories = array('infrastructure', 'startups', 'established');
+        foreach ($categories as $category) {
+            $jury_in_category = get_posts(array(
+                'post_type' => 'mt_jury',
+                'meta_key' => '_mt_jury_category',
+                'meta_value' => $category,
+                'posts_per_page' => -1
+            ));
+            
+            $total_assigned = 0;
+            $total_completed = 0;
+            
+            foreach ($jury_in_category as $jury) {
+                $assigned = $this->get_assigned_candidates_count($jury->ID);
+                $user_id = get_post_meta($jury->ID, '_mt_jury_user_id', true);
+                $completed = $this->get_completed_evaluations_count($user_id);
+                
+                $total_assigned += $assigned;
+                $total_completed += $completed;
+            }
+            
+            $stats['completion_by_category'][$category] = array(
+                'assigned' => $total_assigned,
+                'completed' => $total_completed,
+                'rate' => $total_assigned > 0 ? round(($total_completed / $total_assigned) * 100) : 0
+            );
+        }
+        
+        // Top performers
+        $top_performers = $wpdb->get_results("
+            SELECT 
+                u.ID as user_id,
+                u.display_name,
+                COUNT(DISTINCT cs.candidate_id) as evaluations_count
+            FROM {$wpdb->users} u
+            INNER JOIN {$table_name} cs ON u.ID = cs.jury_member_id
+            GROUP BY u.ID
+            ORDER BY evaluations_count DESC
+            LIMIT 5
+        ");
+        
+        $stats['top_performers'] = $top_performers;
+        
+        return $stats;
+    }
+
+    /**
+     * Get assigned candidates count for a jury member
+     */
+    private function get_assigned_candidates_count($jury_id) {
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'meta_key' => '_mt_assigned_jury_member',
+            'meta_value' => $jury_id,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ));
+        return count($candidates);
+    }
+
+    /**
+     * Get completed evaluations count for a user
+     */
+    private function get_completed_evaluations_count($user_id) {
+        if (!$user_id) return 0;
+        
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mt_candidate_scores';
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT candidate_id) FROM $table_name WHERE jury_member_id = %d",
+            $user_id
+        ));
+    }
+
+    /**
+     * Jury assignment optimizer
+     */
+    public function optimize_jury_assignments() {
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_key' => '_mt_jury_status',
+            'meta_value' => 'active',
+            'posts_per_page' => -1
+        ));
+        
+        if (empty($jury_members)) {
+            return array('error' => __('No active jury members found', 'mobility-trailblazers'));
+        }
+        
+        // Group candidates by category
+        $candidates_by_category = array();
+        foreach ($candidates as $candidate) {
+            $category = get_post_meta($candidate->ID, '_mt_candidate_category', true) ?: 'general';
+            if (!isset($candidates_by_category[$category])) {
+                $candidates_by_category[$category] = array();
+            }
+            $candidates_by_category[$category][] = $candidate;
+        }
+        
+        // Group jury by expertise
+        $jury_by_category = array();
+        foreach ($jury_members as $jury) {
+            $category = get_post_meta($jury->ID, '_mt_jury_category', true) ?: 'general';
+            if (!isset($jury_by_category[$category])) {
+                $jury_by_category[$category] = array();
+            }
+            $jury_by_category[$category][] = $jury;
+        }
+        
+        // Clear existing assignments
+        foreach ($candidates as $candidate) {
+            delete_post_meta($candidate->ID, '_mt_assigned_jury_member');
+        }
+        
+        // Assign candidates to jury members based on expertise
+        $assignments = array();
+        foreach ($candidates_by_category as $category => $category_candidates) {
+            $relevant_jury = isset($jury_by_category[$category]) ? $jury_by_category[$category] : $jury_members;
+            
+            if (empty($relevant_jury)) {
+                continue;
+            }
+            
+            $jury_index = 0;
+            foreach ($category_candidates as $candidate) {
+                $assigned_jury = $relevant_jury[$jury_index % count($relevant_jury)];
+                update_post_meta($candidate->ID, '_mt_assigned_jury_member', $assigned_jury->ID);
+                
+                $assignments[] = array(
+                    'candidate' => $candidate->post_title,
+                    'jury' => $assigned_jury->post_title,
+                    'category' => $category
+                );
+                
+                $jury_index++;
+            }
+        }
+        
+        return array(
+            'success' => true,
+            'assignments' => count($assignments),
+            'details' => $assignments
+        );
+    }
+
+    /**
+     * Bulk email sender for jury communications
+     */
+    public function send_bulk_jury_email($subject, $message, $jury_ids = array()) {
+        $sent_count = 0;
+        
+        if (empty($jury_ids)) {
+            // Send to all active jury members
+            $jury_members = get_posts(array(
+                'post_type' => 'mt_jury',
+                'meta_key' => '_mt_jury_status',
+                'meta_value' => 'active',
+                'posts_per_page' => -1
+            ));
+        } else {
+            $jury_members = get_posts(array(
+                'post_type' => 'mt_jury',
+                'post__in' => $jury_ids,
+                'posts_per_page' => -1
+            ));
+        }
+        
+        foreach ($jury_members as $jury) {
+            $email = get_post_meta($jury->ID, '_mt_jury_email', true);
+            $name = $jury->post_title;
+            
+            if (!empty($email)) {
+                // Personalize message
+                $personalized_message = str_replace(
+                    array('[name]', '[first_name]'),
+                    array($name, explode(' ', $name)[0]),
+                    $message
+                );
+                
+                if (wp_mail($email, $subject, $personalized_message)) {
+                    $sent_count++;
+                }
+            }
+        }
+        
+        return $sent_count;
+    }
+
+    /**
+     * Export jury evaluation report
+     */
+    public function export_jury_evaluation_report() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Get all evaluations with jury and candidate details
+        $evaluations = $wpdb->get_results("
+            SELECT 
+                cs.*,
+                u.display_name as jury_name,
+                u.user_email as jury_email,
+                p.post_title as candidate_name
+            FROM {$table_name} cs
+            LEFT JOIN {$wpdb->users} u ON cs.jury_member_id = u.ID
+            LEFT JOIN {$wpdb->posts} p ON cs.candidate_id = p.ID
+            ORDER BY cs.evaluation_date DESC
+        ");
+        
+        $csv_data = array();
+        $csv_data[] = array(
+            'Evaluation ID',
+            'Jury Member',
+            'Jury Email',
+            'Candidate',
+            'Innovation Score',
+            'Impact Score',
+            'Implementation Score',
+            'Team Score',
+            'Market Score',
+            'Total Score',
+            'Comments',
+            'Evaluation Date'
+        );
+        
+        foreach ($evaluations as $eval) {
+            $csv_data[] = array(
+                $eval->id,
+                $eval->jury_name,
+                $eval->jury_email,
+                $eval->candidate_name,
+                $eval->score_innovation,
+                $eval->score_impact,
+                $eval->score_implementation,
+                $eval->score_team,
+                $eval->score_market,
+                $eval->total_score,
+                $eval->comments,
+                $eval->evaluation_date
+            );
+        }
+        
+        return $csv_data;
     }
 
 }
