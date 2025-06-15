@@ -87,10 +87,19 @@ class MobilityTrailblazersPlugin {
     }
 
     public function init() {
+        // Load text domain
         $this->load_textdomain();
+        
+        // Include required classes
+        require_once MT_PLUGIN_DIR . 'includes/class-vote-reset-manager.php';
+        require_once MT_PLUGIN_DIR . 'includes/class-vote-backup-manager.php';
+        require_once MT_PLUGIN_DIR . 'includes/class-vote-audit-logger.php';
+        
+        // Add hooks
+        $this->add_hooks();
+        
         $this->create_custom_post_types();
         $this->create_custom_taxonomies();
-        $this->add_hooks();
         $this->load_admin();
         $this->load_frontend();
     }
