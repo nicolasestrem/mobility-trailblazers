@@ -267,6 +267,32 @@ class MobilityTrailblazersPlugin {
             MT_PLUGIN_VERSION
         );
         
+        // Special handling for assignment page
+        if ($hook === 'mt-award-system_page_mt-assignments') {
+            // Add version number with timestamp to force refresh
+            $version = MT_PLUGIN_VERSION . '.' . time();
+            
+            // Enqueue assignment.js from correct path
+            wp_enqueue_script(
+                'mt-assignment-js', 
+                MT_PLUGIN_URL . 'assets/assignment.js',
+                array('jquery'), 
+                $version, // Force refresh
+                true
+            );
+            
+            // Enqueue assignment.css from correct path
+            wp_enqueue_style(
+                'mt-assignment-css', 
+                MT_PLUGIN_URL . 'assets/assignment.css',
+                array(), 
+                $version // Force refresh
+            );
+            
+            // Debug: Log that files are being enqueued
+            error_log('MT Assignment files enqueued with version: ' . $version);
+        }
+        
         // Page-specific scripts
         if (strpos($hook, 'mt-') !== false) {
             // jQuery UI for sortable

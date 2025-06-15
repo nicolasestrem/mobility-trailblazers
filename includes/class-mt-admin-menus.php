@@ -220,13 +220,24 @@ class MT_Admin_Menus {
      * Assignment management page
      */
     public function assignment_management_page() {
-        // Load the assignment management template
-        $template = MT_PLUGIN_PATH . 'admin/views/assignment-management.php';
-        if (file_exists($template)) {
-            include $template;
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Debug: Check which template is being loaded
+        $template_file = plugin_dir_path(__FILE__) . '../templates/assignment-template.php';
+        error_log('MT Assignment template path: ' . $template_file);
+        error_log('MT Assignment template exists: ' . (file_exists($template_file) ? 'YES' : 'NO'));
+        
+        // Include the template file
+        if (file_exists($template_file)) {
+            include $template_file;
         } else {
-            echo '<div class="wrap"><h1>' . __('Assignment Management', 'mobility-trailblazers') . '</h1>';
-            echo '<p>' . __('Assignment management interface coming soon.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Assignment Management', 'mobility-trailblazers') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . __('Assignment template file not found at: ' . $template_file, 'mobility-trailblazers') . '</p></div>';
+            echo '</div>';
         }
     }
     

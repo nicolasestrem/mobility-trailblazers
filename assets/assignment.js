@@ -1,4 +1,4 @@
-/* Enhanced Mobility Trailblazers Assignment System JavaScript */
+/* Complete Mobility Trailblazers Assignment System JavaScript */
 
 jQuery(document).ready(function($) {
     // Global variables
@@ -158,7 +158,7 @@ jQuery(document).ready(function($) {
         console.log('Jury members rendered successfully');
     }
 
-    // Enhanced filter function
+    // Filter candidates based on current filters
     function filterCandidates(candidates) {
         return candidates.filter(candidate => {
             // Stage filter
@@ -202,27 +202,88 @@ jQuery(document).ready(function($) {
         const completionRate = totalCandidates > 0 ? (assignedCandidates / totalCandidates * 100).toFixed(1) : 0;
         const avgPerJury = totalJury > 0 ? (assignedCandidates / totalJury).toFixed(1) : 0;
 
-        // Animate number changes
-        animateNumber('.mt-stat-total-candidates', totalCandidates);
-        animateNumber('.mt-stat-total-jury', totalJury);
-        animateNumber('.mt-stat-assigned-count', assignedCandidates);
-        animateNumber('.mt-stat-completion-rate', completionRate, '%');
-        animateNumber('.mt-stat-avg-per-jury', avgPerJury);
+        $('.mt-stat-total-candidates').text(totalCandidates);
+        $('.mt-stat-total-jury').text(totalJury);
+        $('.mt-stat-assigned-count').text(assignedCandidates);
+        $('.mt-stat-completion-rate').text(completionRate + '%');
+        $('.mt-stat-avg-per-jury').text(avgPerJury);
     }
 
-    // Animate number changes
-    function animateNumber(selector, newValue, suffix = '') {
-        const element = $(selector);
-        const currentValue = parseFloat(element.text()) || 0;
-        
-        $({value: currentValue}).animate({value: newValue}, {
-            duration: 600,
-            easing: 'swing',
-            step: function() {
-                element.text(Math.round(this.value) + suffix);
-            },
-            complete: function() {
-                element.text(newValue + suffix);
+    // Bind standard event handlers
+    function bindEventHandlers() {
+        // Candidate selection
+        $(document).on('click', '.mt-candidate-item', function() {
+            const candidateId = parseInt($(this).data('candidate-id'));
+            toggleCandidateSelection(candidateId);
+        });
+
+        // Jury member selection
+        $(document).on('click', '.mt-jury-item', function() {
+            const juryId = parseInt($(this).data('jury-id'));
+            selectJuryMember(juryId);
+        });
+
+        // Search functionality
+        $('#mt-candidates-search').on('input', function() {
+            currentFilters.search = $(this).val();
+            renderCandidates();
+        });
+
+        $('#mt-jury-search').on('input', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('.mt-jury-item').each(function() {
+                const name = $(this).find('.mt-jury-name').text().toLowerCase();
+                $(this).toggle(name.includes(searchTerm));
+            });
+        });
+
+        // Filter controls
+        $('#mt-stage-filter').on('change', function() {
+            currentFilters.stage = $(this).val();
+            renderCandidates();
+        });
+
+        $('#mt-category-filter').on('change', function() {
+            currentFilters.category = $(this).val();
+            renderCandidates();
+        });
+
+        $('#mt-assignment-filter').on('change', function() {
+            currentFilters.assignment = $(this).val();
+            renderCandidates();
+        });
+
+        // Filter tags
+        $(document).on('click', '.mt-filter-tag', function() {
+            $('.mt-filter-tag').removeClass('active');
+            $(this).addClass('active');
+            
+            const category = $(this).data('category') || '';
+            currentFilters.category = category;
+            renderCandidates();
+        });
+
+        // Button actions
+        $('#mt-select-all-candidates').on('click', selectAllCandidates);
+        $('#mt-clear-selection').on('click', clearSelection);
+        $('#mt-auto-assign-btn').on('click', openAutoAssignModal);
+        $('#mt-manual-assign-btn').on('click', performManualAssignment);
+        $('#mt-export-btn').on('click', exportAssignments);
+
+        // Modal controls
+        $('#mt-auto-assign-modal .mt-close-btn').on('click', closeAutoAssignModal);
+        $('#mt-execute-auto-assign').on('click', executeAutoAssignment);
+
+        // Algorithm selection
+        $(document).on('click', '.mt-algorithm-option', function() {
+            $('.mt-algorithm-option').removeClass('selected');
+            $(this).addClass('selected');
+        });
+
+        // Close modal on outside click
+        $('#mt-auto-assign-modal').on('click', function(e) {
+            if (e.target === this) {
+                closeAutoAssignModal();
             }
         });
     }
@@ -258,8 +319,270 @@ jQuery(document).ready(function($) {
         // Import data
         $('#mt-import-btn').on('click', openImportDialog);
 
-        // Handle keyboard shortcuts
-        $(document).on('keydown', handleKeyboardShortcuts);
+        // Data Management buttons
+        $('#mt-export-assignments-btn').on('click', exportAssignmentsToCSV);
+        $('#mt-sync-system-btn').on('click', syncSystem);
+        $('#mt-view-progress-btn').on('click', viewProgressData);
+        $('#mt-reset-assignments-btn').on('click', resetAllAssignments);
+    }
+
+    // Toggle candidate selection
+    function toggleCandidateSelection(candidateId) {
+        const index = selectedCandidates.indexOf(candidateId);
+        if (index > -1) {
+            selectedCandidates.splice(index, 1);
+        } else {
+            selectedCandidates.push(candidateId);
+        }
+        
+        // Update visual selection
+        $(`.mt-candidate-item[data-candidate-id="${candidateId}"]`).toggleClass('selected');
+        
+        // Update selection count
+        updateSelectionInfo();
+    }
+
+    // Select jury member
+    function selectJuryMember(juryId) {
+        selectedJuryMember = selectedJuryMember === juryId ? null : juryId;
+        
+        // Update visual selection
+        $('.mt-jury-item').removeClass('active');
+        if (selectedJuryMember) {
+            $(`.mt-jury-item[data-jury-id="${selectedJuryMember}"]`).addClass('active');
+        }
+        
+        updateSelectionInfo();
+    }
+
+    // Update selection information
+    function updateSelectionInfo() {
+        const selectedCount = selectedCandidates.length;
+        const selectedJury = selectedJuryMember ? 
+            allJuryMembers.find(j => j.id === selectedJuryMember) : null;
+        
+        $('.mt-selected-candidates-count').text(selectedCount);
+        $('.mt-selected-jury-name').text(selectedJury ? selectedJury.name : 'None');
+        
+        // Enable/disable manual assign button
+        $('#mt-manual-assign-btn').prop('disabled', selectedCount === 0 || !selectedJuryMember);
+    }
+
+    // Select all candidates
+    function selectAllCandidates() {
+        const visibleCandidates = $('.mt-candidate-item:visible');
+        selectedCandidates = [];
+        
+        visibleCandidates.each(function() {
+            const candidateId = parseInt($(this).data('candidate-id'));
+            selectedCandidates.push(candidateId);
+            $(this).addClass('selected');
+        });
+        
+        updateSelectionInfo();
+    }
+
+    // Clear selection
+    function clearSelection() {
+        selectedCandidates = [];
+        selectedJuryMember = null;
+        $('.mt-candidate-item').removeClass('selected');
+        $('.mt-jury-item').removeClass('active');
+        updateSelectionInfo();
+    }
+
+    // Open auto-assign modal
+    function openAutoAssignModal() {
+        $('#mt-auto-assign-modal').addClass('show');
+    }
+
+    // Close auto-assign modal
+    function closeAutoAssignModal() {
+        $('#mt-auto-assign-modal').removeClass('show');
+    }
+
+    // Perform manual assignment
+    function performManualAssignment() {
+        if (selectedCandidates.length === 0 || !selectedJuryMember) {
+            showNotification('Please select candidates and a jury member.', 'error');
+            return;
+        }
+
+        const juryMember = allJuryMembers.find(j => j.id === selectedJuryMember);
+        if (!juryMember) {
+            showNotification('Invalid jury member selected.', 'error');
+            return;
+        }
+
+        // Check if jury member would exceed their limit
+        const currentAssignments = juryMember.assignments;
+        const newAssignments = selectedCandidates.length;
+        if (currentAssignments + newAssignments > juryMember.max_assignments) {
+            const confirm = window.confirm(
+                `This assignment would give ${juryMember.name} ${currentAssignments + newAssignments} candidates, ` +
+                `exceeding their limit of ${juryMember.max_assignments}. Continue anyway?`
+            );
+            if (!confirm) return;
+        }
+
+        // Prepare data for AJAX request
+        const assignmentData = {
+            action: 'mt_assign_candidates',
+            candidate_ids: selectedCandidates,
+            jury_member_id: selectedJuryMember,
+            nonce: mt_assignment_ajax.nonce
+        };
+
+        // Show loading state
+        $('#mt-manual-assign-btn').prop('disabled', true).text('Assigning...');
+
+        // Send AJAX request
+        $.post(mt_assignment_ajax.ajax_url, assignmentData)
+            .done(function(response) {
+                if (response.success) {
+                    showNotification(response.data.message, 'success');
+                    
+                    // Update local data
+                    selectedCandidates.forEach(candidateId => {
+                        const candidate = allCandidates.find(c => c.id === candidateId);
+                        if (candidate) {
+                            candidate.assigned = true;
+                            candidate.jury_member_id = selectedJuryMember;
+                        }
+                    });
+                    
+                    // Update jury member assignment count
+                    juryMember.assignments += selectedCandidates.length;
+                    
+                    // Refresh displays
+                    clearSelection();
+                    renderCandidates();
+                    renderJuryMembers();
+                    updateStatistics();
+                } else {
+                    showNotification(response.data.message || 'Assignment failed.', 'error');
+                }
+            })
+            .fail(function() {
+                showNotification('Network error. Please try again.', 'error');
+            })
+            .always(function() {
+                $('#mt-manual-assign-btn').prop('disabled', false).text('Assign Selected');
+            });
+    }
+
+    // Execute auto assignment
+    function executeAutoAssignment() {
+        const candidatesPerJury = parseInt($('#mt-candidates-per-jury').val()) || 10;
+        const algorithm = $('.mt-algorithm-option.selected').data('algorithm') || 'balanced';
+        const balanceCategories = $('#mt-balance-categories').is(':checked');
+        const matchExpertise = $('#mt-match-expertise').is(':checked');
+        const clearExisting = $('#mt-clear-existing').is(':checked');
+
+        // Validate input
+        if (candidatesPerJury < 1 || candidatesPerJury > 50) {
+            showNotification('Please enter a valid number of candidates per jury member (1-50).', 'error');
+            return;
+        }
+
+        // Show loading state
+        $('#mt-assignment-loading').addClass('show');
+        $('#mt-execute-auto-assign').prop('disabled', true);
+
+        // Prepare data for AJAX request
+        const assignmentData = {
+            action: 'mt_auto_assign',
+            candidates_per_jury: candidatesPerJury,
+            algorithm: algorithm,
+            balance_categories: balanceCategories,
+            match_expertise: matchExpertise,
+            clear_existing: clearExisting,
+            nonce: mt_assignment_ajax.nonce
+        };
+
+        // Send AJAX request
+        $.post(mt_assignment_ajax.ajax_url, assignmentData)
+            .done(function(response) {
+                if (response.success) {
+                    showNotification(response.data.message, 'success');
+                    
+                    // Reload data from server or simulate update
+                    if (clearExisting) {
+                        // Reset all assignments
+                        allCandidates.forEach(candidate => {
+                            candidate.assigned = false;
+                            candidate.jury_member_id = null;
+                        });
+                        allJuryMembers.forEach(jury => {
+                            jury.assignments = 0;
+                        });
+                    }
+                    
+                    // Simulate assignment for demo (replace with actual data reload)
+                    simulateAutoAssignment(candidatesPerJury, algorithm);
+                    
+                    // Refresh displays
+                    clearSelection();
+                    renderCandidates();
+                    renderJuryMembers();
+                    updateStatistics();
+                    closeAutoAssignModal();
+                } else {
+                    showNotification(response.data.message || 'Auto-assignment failed.', 'error');
+                }
+            })
+            .fail(function() {
+                showNotification('Network error. Please try again.', 'error');
+            })
+            .always(function() {
+                $('#mt-assignment-loading').removeClass('show');
+                $('#mt-execute-auto-assign').prop('disabled', false);
+            });
+    }
+
+    // Simulate auto assignment for demo purposes
+    function simulateAutoAssignment(candidatesPerJury, algorithm, previewOnly = false) {
+        const unassignedCandidates = allCandidates.filter(c => !c.assigned);
+        const preview = [];
+        let juryIndex = 0;
+        
+        if (algorithm === 'balanced') {
+            const tempAssignments = {};
+            
+            unassignedCandidates.forEach((candidate, index) => {
+                const jury = allJuryMembers[juryIndex];
+                
+                if (!tempAssignments[jury.id]) {
+                    tempAssignments[jury.id] = {
+                        jury: jury.name,
+                        count: jury.assignments
+                    };
+                }
+                
+                if (tempAssignments[jury.id].count < candidatesPerJury) {
+                    if (!previewOnly) {
+                        candidate.assigned = true;
+                        candidate.jury_member_id = jury.id;
+                        jury.assignments++;
+                    }
+                    tempAssignments[jury.id].count++;
+                }
+                
+                // Move to next jury member when current one is full
+                if (tempAssignments[jury.id].count >= candidatesPerJury) {
+                    juryIndex = (juryIndex + 1) % allJuryMembers.length;
+                }
+            });
+            
+            return Object.values(tempAssignments);
+        }
+        
+        return preview;
+    }
+
+    // Export assignments
+    function exportAssignments() {
+        window.location.href = mt_assignment_ajax.ajax_url + '?action=mt_export_assignments&nonce=' + mt_assignment_ajax.nonce;
     }
 
     // Handle quick actions
@@ -282,30 +605,56 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Open matrix view
+    // Quick action implementations
+    function assignAllUnassigned() {
+        const unassigned = allCandidates.filter(c => !c.assigned);
+        if (unassigned.length === 0) {
+            showNotification('All candidates are already assigned.', 'info');
+            return;
+        }
+        
+        const message = `This will automatically assign ${unassigned.length} unassigned candidates to jury members. Continue?`;
+        if (confirm(message)) {
+            $('#mt-auto-assign-btn').click();
+        }
+    }
+
+    function balanceAssignments() {
+        showNotification('Balancing assignments... (Feature coming soon)', 'info');
+    }
+
+    function generateAssignmentReport() {
+        showNotification('Generating report... (Feature coming soon)', 'info');
+    }
+
+    function openEmailJuryDialog() {
+        showNotification('Email jury feature coming soon', 'info');
+    }
+
+    // Matrix view functions
     function openMatrixView() {
         $('#mt-matrix-view-modal').addClass('show');
         loadMatrixView();
     }
 
-    // Load matrix view content
+    function closeMatrixView() {
+        $('#mt-matrix-view-modal').removeClass('show');
+    }
+
     function loadMatrixView() {
         const container = $('#mt-matrix-container');
         container.html('<div class="mt-loading"><div class="mt-spinner"></div><p>Loading matrix view...</p></div>');
         
-        // Create matrix table
         setTimeout(() => {
             let matrixHtml = '<table class="mt-matrix-table">';
             matrixHtml += '<thead><tr><th>Jury Member</th>';
             
-            // Add category headers
             const categories = [...new Set(allCandidates.map(c => c.category))].filter(Boolean);
             categories.forEach(category => {
                 matrixHtml += `<th>${formatCategory(category)}</th>`;
             });
             matrixHtml += '<th>Total</th></tr></thead><tbody>';
             
-            // Add jury rows
             allJuryMembers.forEach(jury => {
                 matrixHtml += `<tr><td>${escapeHtml(jury.name)}</td>`;
                 
@@ -324,12 +673,7 @@ jQuery(document).ready(function($) {
         }, 500);
     }
 
-    // Close matrix view
-    function closeMatrixView() {
-        $('#mt-matrix-view-modal').removeClass('show');
-    }
-
-    // Perform health check
+    // Health check functions
     function performHealthCheck() {
         $('#mt-health-check-modal').addClass('show');
         
@@ -339,7 +683,6 @@ jQuery(document).ready(function($) {
         setTimeout(() => {
             const issues = [];
             
-            // Check for overloaded jury members
             const overloadedJury = allJuryMembers.filter(j => j.assignments > j.max_assignments);
             if (overloadedJury.length > 0) {
                 issues.push({
@@ -349,7 +692,6 @@ jQuery(document).ready(function($) {
                 });
             }
             
-            // Check for unassigned candidates
             const unassignedCount = allCandidates.filter(c => !c.assigned).length;
             if (unassignedCount > 0) {
                 issues.push({
@@ -358,7 +700,6 @@ jQuery(document).ready(function($) {
                 });
             }
             
-            // Check for jury with no assignments
             const idleJury = allJuryMembers.filter(j => j.assignments === 0);
             if (idleJury.length > 0) {
                 issues.push({
@@ -368,15 +709,6 @@ jQuery(document).ready(function($) {
                 });
             }
             
-            // Check for category imbalance
-            const categoryDistribution = {};
-            allCandidates.forEach(c => {
-                if (c.category) {
-                    categoryDistribution[c.category] = (categoryDistribution[c.category] || 0) + 1;
-                }
-            });
-            
-            // Display results
             let resultsHtml = '<h4>Health Check Results</h4>';
             
             if (issues.length === 0) {
@@ -394,19 +726,10 @@ jQuery(document).ready(function($) {
                 resultsHtml += '</div>';
             }
             
-            // Add statistics
-            resultsHtml += '<h4>Distribution Statistics</h4>';
-            resultsHtml += '<div class="mt-health-stats">';
-            for (const [category, count] of Object.entries(categoryDistribution)) {
-                resultsHtml += `<div>${formatCategory(category)}: ${count} candidates</div>`;
-            }
-            resultsHtml += '</div>';
-            
             container.html(resultsHtml);
         }, 1000);
     }
 
-    // Close health check
     function closeHealthCheck() {
         $('#mt-health-check-modal').removeClass('show');
     }
@@ -461,105 +784,159 @@ jQuery(document).ready(function($) {
         $('#mt-preview-content').html(previewHtml);
     }
 
-    // Simulate auto assignment (enhanced version)
-    function simulateAutoAssignment(candidatesPerJury, algorithm, previewOnly = false) {
-        const unassignedCandidates = allCandidates.filter(c => !c.assigned);
-        const preview = [];
-        
-        if (algorithm === 'balanced') {
-            let juryIndex = 0;
-            const tempAssignments = {};
-            
-            unassignedCandidates.forEach((candidate, index) => {
-                const jury = allJuryMembers[juryIndex];
-                
-                if (!tempAssignments[jury.id]) {
-                    tempAssignments[jury.id] = {
-                        jury: jury.name,
-                        count: jury.assignments
-                    };
-                }
-                
-                if (tempAssignments[jury.id].count < candidatesPerJury) {
-                    if (!previewOnly) {
-                        candidate.assigned = true;
-                        candidate.jury_member_id = jury.id;
-                        jury.assignments++;
-                    }
-                    tempAssignments[jury.id].count++;
-                }
-                
-                // Move to next jury member when current one is full
-                if (tempAssignments[jury.id].count >= candidatesPerJury) {
-                    juryIndex = (juryIndex + 1) % allJuryMembers.length;
-                }
-            });
-            
-            return Object.values(tempAssignments);
-        }
-        
-        // Add other algorithms here...
-        
-        return preview;
+    // Data management functions
+    function exportAssignmentsToCSV() {
+        window.location.href = mt_assignment_ajax.ajax_url + '?action=mt_export_assignments&nonce=' + mt_assignment_ajax.nonce;
     }
 
-    // Refresh data from server
-    function refreshData() {
-        const btn = $('#mt-refresh-btn');
-        btn.prop('disabled', true).html('<span class="dashicons dashicons-update spinning"></span> Refreshing...');
+    function syncSystem() {
+        if (!confirm('This will synchronize all assignment data. Continue?')) {
+            return;
+        }
+        
+        $('#mt-sync-system-btn').prop('disabled', true).text('Syncing...');
         
         $.ajax({
             url: mt_assignment_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'mt_refresh_assignment_data',
+                action: 'mt_sync_system',
                 nonce: mt_assignment_ajax.nonce
             },
             success: function(response) {
                 if (response.success) {
-                    allCandidates = response.data.candidates || [];
-                    allJuryMembers = response.data.jury_members || [];
-                    
-                    renderCandidates();
-                    renderJuryMembers();
-                    updateStatistics();
-                    
-                    showNotification('Data refreshed successfully!', 'success');
+                    showNotification('System synchronized successfully!', 'success');
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    showNotification('Failed to refresh data: ' + (response.data.message || 'Unknown error'), 'error');
+                    showNotification('Sync failed: ' + (response.data.message || 'Unknown error'), 'error');
                 }
             },
             error: function() {
-                showNotification('Network error while refreshing data', 'error');
+                showNotification('Network error while syncing', 'error');
             },
             complete: function() {
-                btn.prop('disabled', false).html('<span class="dashicons dashicons-image-rotate"></span> Refresh Data');
+                $('#mt-sync-system-btn').prop('disabled', false).text('Sync System');
             }
         });
     }
 
-    // Keyboard shortcuts
-    function handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + A: Select all visible candidates
-        if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !$(e.target).is('input, textarea')) {
-            e.preventDefault();
-            selectAllCandidates();
-        }
+    function viewProgressData() {
+        const modalHtml = `
+            <div id="mt-progress-modal" class="mt-assignment-modal show">
+                <div class="mt-modal-content" style="max-width: 800px;">
+                    <div class="mt-modal-header">
+                        <h3 class="mt-modal-title">📊 Assignment Progress Data</h3>
+                        <button class="mt-close-btn" onclick="jQuery('#mt-progress-modal').remove();">&times;</button>
+                    </div>
+                    <div class="mt-modal-body">
+                        <div id="mt-progress-loading" style="text-align: center;">
+                            <div class="mt-spinner"></div>
+                            <p>Loading progress data...</p>
+                        </div>
+                        <div id="mt-progress-content" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        // Ctrl/Cmd + D: Deselect all
-        if ((e.ctrlKey || e.metaKey) && e.key === 'd' && !$(e.target).is('input, textarea')) {
-            e.preventDefault();
-            clearSelection();
-        }
+        $('body').append(modalHtml);
         
-        // Ctrl/Cmd + S: Save/Export
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-            e.preventDefault();
-            exportAssignments();
-        }
+        $.ajax({
+            url: mt_assignment_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'mt_get_progress_data',
+                nonce: mt_assignment_ajax.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#mt-progress-loading').hide();
+                    $('#mt-progress-content').html(response.data.html).show();
+                } else {
+                    $('#mt-progress-loading').html('<p style="color: red;">Error loading progress data</p>');
+                }
+            },
+            error: function() {
+                $('#mt-progress-loading').html('<p style="color: red;">Failed to load progress data</p>');
+            }
+        });
     }
 
-    // Enhanced notification system
+    function resetAllAssignments() {
+        if (!confirm('⚠️ WARNING: This will remove ALL current assignments. This action cannot be undone. Continue?')) {
+            return;
+        }
+        
+        if (!confirm('Are you absolutely sure? All jury assignments will be permanently deleted.')) {
+            return;
+        }
+        
+        $('#mt-reset-assignments-btn').prop('disabled', true).text('Resetting...');
+        
+        $.ajax({
+            url: mt_assignment_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'mt_clear_assignments',
+                nonce: mt_assignment_ajax.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    showNotification('All assignments have been reset!', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showNotification('Reset failed: ' + (response.data.message || 'Unknown error'), 'error');
+                }
+            },
+            error: function() {
+                showNotification('Network error while resetting', 'error');
+            },
+            complete: function() {
+                $('#mt-reset-assignments-btn').prop('disabled', false).text('Reset All Assignments');
+            }
+        });
+    }
+
+    function refreshData() {
+        const btn = $('#mt-refresh-btn');
+        btn.prop('disabled', true).html('<span class="dashicons dashicons-update spinning"></span> Refreshing...');
+        
+        // For now, just reload the page
+        location.reload();
+    }
+
+    function openImportDialog() {
+        showNotification('Import feature coming soon', 'info');
+    }
+
+    // Utility functions
+    function formatCategory(category) {
+        const categoryMap = {
+            'established-companies': 'Established Companies',
+            'startups-new-makers': 'Start-ups & New Makers',
+            'infrastructure-politics-public': 'Infrastructure/Politics/Public'
+        };
+        return categoryMap[category] || category || 'Uncategorized';
+    }
+
+    function formatStage(stage) {
+        const stageMap = {
+            'longlist': 'Longlist',
+            'shortlist': 'Shortlist',
+            'finalist': 'Finalist'
+        };
+        return stageMap[stage] || stage || '';
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     function showNotification(message, type = 'info', duration = 5000) {
         const container = $('#mt-notification-container');
         
@@ -573,14 +950,12 @@ jQuery(document).ready(function($) {
         container.append(notification);
         notification.slideDown(300);
         
-        // Close button
         notification.find('.mt-notification-close').on('click', function() {
             notification.slideUp(300, function() {
                 $(this).remove();
             });
         });
         
-        // Auto-close
         if (duration > 0) {
             setTimeout(function() {
                 notification.slideUp(300, function() {
@@ -590,7 +965,6 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Show modal helper
     function showModal(title, content, buttons = []) {
         const modal = $(`
             <div class="mt-assignment-modal show">
@@ -607,7 +981,6 @@ jQuery(document).ready(function($) {
             </div>
         `);
         
-        // Add buttons if provided
         if (buttons.length > 0) {
             const footer = modal.find('.mt-modal-footer');
             buttons.forEach(btn => {
@@ -615,7 +988,6 @@ jQuery(document).ready(function($) {
             });
         }
         
-        // Close handlers
         modal.find('.mt-close-btn').on('click', function() {
             modal.removeClass('show');
             setTimeout(() => modal.remove(), 300);
@@ -631,26 +1003,6 @@ jQuery(document).ready(function($) {
         $('body').append(modal);
     }
 
-    // Format category name
-    function formatCategory(category) {
-        const categoryMap = {
-            'established-companies': 'Established Companies',
-            'startups-new-makers': 'Start-ups & New Makers',
-            'infrastructure-politics-public': 'Infrastructure/Politics/Public'
-        };
-        return categoryMap[category] || category || 'Uncategorized';
-    }
-
-    // Format stage name
-    function formatStage(stage) {
-        const stageMap = {
-            'longlist': 'Longlist',
-            'shortlist': 'Shortlist',
-            'finalist': 'Finalist'
-        };
-        return stageMap[stage] || stage || '';
-    }
-
     // Initialize everything
     initAssignmentInterface();
 
@@ -658,13 +1010,4 @@ jQuery(document).ready(function($) {
     $('<style>')
         .text('@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .spinning { animation: spin 1s linear infinite; }')
         .appendTo('head');
-        
-    // Keep existing functionality...
-    bindEventHandlers();
-
-    // All the existing functions remain the same...
-    // (toggleCandidateSelection, selectJuryMember, etc.)
-    
-    // Keep all existing event handlers and functions from the original file
-    // Just enhance them with the new features
 });
