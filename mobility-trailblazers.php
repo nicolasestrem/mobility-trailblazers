@@ -72,6 +72,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_clear_assignments', array($this, 'handle_clear_assignments'));
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
         add_action('wp_ajax_mt_get_candidate_details', array($this, 'ajax_get_candidate_details'));
+        add_action('wp_ajax_mt_export_backup_history', array($this, 'handle_export_backup_history'));
         
         // Evaluation submission handler
         add_action('admin_post_mt_submit_evaluation', array($this, 'handle_evaluation_submission'));
@@ -91,9 +92,9 @@ class MobilityTrailblazersPlugin {
         $this->load_textdomain();
         
         // Include required classes
-        require_once MT_PLUGIN_DIR . 'includes/class-vote-reset-manager.php';
-        require_once MT_PLUGIN_DIR . 'includes/class-vote-backup-manager.php';
-        require_once MT_PLUGIN_DIR . 'includes/class-vote-audit-logger.php';
+        require_once MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php';
+        require_once MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php';
+        require_once MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php';
         
         // Add hooks
         $this->add_hooks();
@@ -667,6 +668,8 @@ class MobilityTrailblazersPlugin {
                 wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
                     'ajax_url' => admin_url('admin-ajax.php'),
                     'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
+                    'rest_url' => rest_url(''),
+                    'admin_url' => admin_url(''),
                     'strings' => array(
                         'confirm_reset_individual' => __('Reset Vote?', 'mobility-trailblazers'),
                         'reset_success' => __('Your vote has been reset successfully.', 'mobility-trailblazers'),
@@ -689,6 +692,8 @@ class MobilityTrailblazersPlugin {
             wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
+                'rest_url' => rest_url(''),
+                'admin_url' => admin_url(''),
                 'strings' => array(
                     'confirm_reset_individual' => __('Are you sure you want to reset this vote? This action cannot be undone.', 'mobility-trailblazers'),
                     'confirm_reset_phase' => __('Are you sure you want to reset all votes for the next phase? This action cannot be undone.', 'mobility-trailblazers'),
@@ -3910,6 +3915,158 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
+     * Handle create backup REST API request
+     */
+    public function handle_create_backup($request) {
+        $backup_manager = new MT_Vote_Backup_Manager();
+        $reason = $request->get_param('reason') ?: 'Manual backup';
+        
+        // Get all active votes for backup
+        $where_conditions = array('is_active' => 1);
+        
+        // Create backup
+        $result = $backup_manager->bulk_backup($where_conditions, $reason);
+        
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(array(
+                'success' => false,
+                'message' => $result->get_error_message()
+            ), 400);
+        }
+        
+        // Get updated statistics
+        $stats = $backup_manager->get_backup_statistics();
+        
+        return new WP_REST_Response(array(
+            'success' => true,
+            'votes_backed_up' => $result['votes'],
+            'scores_backed_up' => $result['scores'],
+            'total_backed_up' => $result['count'],
+            'storage_size' => $stats['storage_size'],
+            'message' => sprintf(__('Successfully backed up %d items', 'mobility-trailblazers'), $result['count'])
+        ), 200);
+    }
+
+    /**
+     * Get backup history REST API request
+     */
+    public function get_backup_history($request) {
+        global $wpdb;
+        
+        $page = $request->get_param('page') ?: 1;
+        $per_page = $request->get_param('per_page') ?: 100;
+        $offset = ($page - 1) * $per_page;
+        
+        // Get combined backup history
+        $query = "
+            SELECT 
+                'vote' as type,
+                history_id,
+                candidate_id,
+                jury_member_id,
+                backed_up_at,
+                backup_reason,
+                restored_at,
+                1 as items_count
+            FROM {$wpdb->prefix}mt_votes_history
+            
+            UNION ALL
+            
+            SELECT 
+                'score' as type,
+                history_id,
+                candidate_id,
+                jury_member_id,
+                backed_up_at,
+                backup_reason,
+                restored_at,
+                1 as items_count
+            FROM {$wpdb->prefix}mt_candidate_scores_history
+            
+            ORDER BY backed_up_at DESC
+            LIMIT %d OFFSET %d
+        ";
+        
+        $backups = $wpdb->get_results($wpdb->prepare($query, $per_page, $offset));
+        
+        return new WP_REST_Response(array(
+            'success' => true,
+            'data' => array(
+                'backups' => $backups
+            )
+        ), 200);
+    }
+
+    /**
+     * Handle restore backup REST API request
+     */
+    public function handle_restore_backup($request) {
+        $backup_manager = new MT_Vote_Backup_Manager();
+        
+        $backup_id = $request->get_param('backup_id');
+        $type = $request->get_param('type');
+        
+        $result = $backup_manager->restore_from_backup($backup_id, $type);
+        
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(array(
+                'success' => false,
+                'message' => $result->get_error_message()
+            ), 400);
+        }
+        
+        return new WP_REST_Response(array(
+            'success' => true,
+            'message' => __('Backup successfully restored', 'mobility-trailblazers')
+        ), 200);
+    }
+
+    /**
+     * Handle export backup history AJAX request
+     */
+    public function handle_export_backup_history() {
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized', 'mobility-trailblazers'));
+        }
+        
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_nonce')) {
+            wp_die(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        $format = sanitize_text_field($_POST['format']);
+        $backup_manager = new MT_Vote_Backup_Manager();
+        
+        // Export backups
+        $result = $backup_manager->export_backups($format);
+        
+        if (is_wp_error($result)) {
+            wp_die($result->get_error_message());
+        }
+        
+        // Set headers for download
+        $filename = basename($result);
+        
+        if ($format === 'csv') {
+            header('Content-Type: text/csv; charset=utf-8');
+        } else {
+            header('Content-Type: application/json');
+        }
+        
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . filesize($result));
+        
+        // Output file
+        readfile($result);
+        
+        // Clean up
+        @unlink($result);
+        
+        exit;
+    }
+
+    /**
      * Register REST API routes
      */
     public function register_rest_routes() {
@@ -3924,6 +4081,46 @@ class MobilityTrailblazersPlugin {
         // Initialize backup API
         $backup_api = new MT_Backup_API();
         $backup_api->register_routes();
+        
+        // Register backup API endpoints directly
+        // Create backup endpoint
+        register_rest_route('mobility-trailblazers/v1', '/admin/create-backup', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_create_backup'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
+            'args' => array(
+                'reason' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field'
+                ),
+                'type' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => 'full'
+                )
+            )
+        ));
+        
+        // Get backup history endpoint
+        register_rest_route('mobility-trailblazers/v1', '/backup-history', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_backup_history'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            }
+        ));
+        
+        // Restore backup endpoint
+        register_rest_route('mobility-trailblazers/v1', '/admin/restore-backup', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_restore_backup'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            }
+        ));
     }
 
 }
