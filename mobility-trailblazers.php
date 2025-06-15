@@ -527,8 +527,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_dashboard_setup', array($this, 'add_jury_dashboard_widget'));
         add_shortcode('mt_jury_dashboard', array($this, 'jury_dashboard_shortcode'));
         
-        // Evaluation page hooks
-        add_action('admin_menu', array($this, 'add_evaluation_page'));
+        // Evaluation submission hook
         add_action('wp_ajax_mt_evaluation_submission', array($this, 'handle_evaluation_submission'));
         
         // Diagnostic hooks (menu registration handled in constructor)
