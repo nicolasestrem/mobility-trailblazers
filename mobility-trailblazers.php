@@ -4381,6 +4381,9 @@ class MobilityTrailblazersPlugin {
      * Register REST API routes
      */
     public function register_rest_routes() {
+        // Register vote reset routes
+        $this->register_vote_reset_routes();
+        
         // Register backup API endpoints directly
         // Create backup endpoint
         register_rest_route('mobility-trailblazers/v1', '/admin/create-backup', array(
@@ -4420,6 +4423,147 @@ class MobilityTrailblazersPlugin {
                 return current_user_can('manage_options');
             }
         ));
+    }
+
+    /**
+     * Register REST API routes for vote reset functionality
+     */
+    public function register_vote_reset_routes() {
+        // Individual reset endpoint
+        register_rest_route('mobility-trailblazers/v1', '/reset-vote', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_reset_vote'),
+            'permission_callback' => function() {
+                return is_user_logged_in() && (current_user_can('mt_jury_member') || current_user_can('manage_options'));
+            },
+            'args' => array(
+                'candidate_id' => array(
+                    'required' => true,
+                    'validate_callback' => function($param) {
+                        return is_numeric($param);
+                    }
+                ),
+                'reason' => array(
+                    'required' => false,
+                    'sanitize_callback' => 'sanitize_text_field'
+                )
+            )
+        ));
+        
+        // Bulk reset endpoint
+        register_rest_route('mobility-trailblazers/v1', '/admin/bulk-reset', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'handle_bulk_reset'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
+            'args' => array(
+                'reset_scope' => array(
+                    'required' => true,
+                    'validate_callback' => function($param) {
+                        return in_array($param, array(
+                            'phase_transition',
+                            'all_user_votes',
+                            'all_candidate_votes',
+                            'full_reset'
+                        ));
+                    }
+                ),
+                'options' => array(
+                    'required' => false,
+                    'type' => 'object'
+                )
+            )
+        ));
+        
+        // Reset history endpoint
+        register_rest_route('mobility-trailblazers/v1', '/reset-history', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_reset_history'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
+            'args' => array(
+                'page' => array(
+                    'default' => 1,
+                    'validate_callback' => function($param) {
+                        return is_numeric($param) && $param > 0;
+                    }
+                ),
+                'per_page' => array(
+                    'default' => 20,
+                    'validate_callback' => function($param) {
+                        return is_numeric($param) && $param > 0 && $param <= 100;
+                    }
+                )
+            )
+        ));
+    }
+
+    /**
+     * Handle individual vote reset
+     */
+    public function handle_reset_vote($request) {
+        $reset_manager = new MT_Vote_Reset_Manager();
+        
+        $result = $reset_manager->reset_individual_vote(
+            $request['candidate_id'],
+            get_current_user_id(),
+            $request['reason'] ?? ''
+        );
+        
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(array(
+                'success' => false,
+                'message' => $result->get_error_message()
+            ), 400);
+        }
+        
+        return new WP_REST_Response($result, 200);
+    }
+
+    /**
+     * Handle bulk reset operations
+     */
+    public function handle_bulk_reset($request) {
+        $reset_manager = new MT_Vote_Reset_Manager();
+        
+        $result = $reset_manager->bulk_reset_votes(
+            $request['reset_scope'],
+            $request['options'] ?? array()
+        );
+        
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(array(
+                'success' => false,
+                'message' => $result->get_error_message()
+            ), 400);
+        }
+        
+        return new WP_REST_Response($result, 200);
+    }
+
+    /**
+     * Get reset history
+     */
+    public function get_reset_history($request) {
+        $audit_logger = new MT_Vote_Audit_Logger();
+        
+        $history = $audit_logger->get_reset_history(
+            $request['page'],
+            $request['per_page']
+        );
+        
+        return new WP_REST_Response(array(
+            'success' => true,
+            'data' => $history['data'],
+            'pagination' => array(
+                'total' => $history['total'],
+                'pages' => $history['pages'],
+                'current_page' => $history['current_page'],
+                'per_page' => $history['per_page']
+            )
+        ), 200);
     }
 
     /**
