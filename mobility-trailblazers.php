@@ -609,14 +609,15 @@ class MobilityTrailblazersPlugin {
         $this->add_jury_dashboard_menu();
         
         // Enhanced Jury Management submenu
-        if (current_user_can('manage_options')) {
+        if (current_user_can('manage_options') && class_exists('MT_Jury_Management_Admin')) {
+            $jury_admin_instance = MT_Jury_Management_Admin::get_instance();
             add_submenu_page(
                 'mt-award-system',
                 __('Jury Management', 'mobility-trailblazers'),
                 __('Jury Management', 'mobility-trailblazers'),
                 'manage_options',
                 'mt-jury-management',
-                array('MT_Jury_Management_Admin', 'render_jury_management_page')
+                array($jury_admin_instance, 'render_jury_management_page')
             );
         }
         
