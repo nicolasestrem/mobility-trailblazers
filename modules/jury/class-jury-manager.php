@@ -68,7 +68,7 @@ class MT_Jury_Management_Admin {
             'mt-jury-management-admin',
             plugin_dir_url(dirname(__FILE__)) . 'assets/css/jury-management-admin.css',
             array(),
-            MT_PLUGIN_VERSION
+            MT_VERSION
         );
         
         // Enqueue scripts
@@ -76,7 +76,7 @@ class MT_Jury_Management_Admin {
             'mt-jury-management-admin',
             plugin_dir_url(dirname(__FILE__)) . 'assets/js/jury-management-admin.js',
             array('jquery', 'wp-api', 'jquery-ui-dialog'),
-            MT_PLUGIN_VERSION,
+            MT_VERSION,
             true
         );
         

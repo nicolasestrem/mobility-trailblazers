@@ -13,7 +13,14 @@ if (!defined('ABSPATH')) {
 // Get current voting statistics
 $current_phase = get_option('mt_current_voting_phase', 'phase_1');
 $phase_status = get_option("mt_voting_phase_{$current_phase}_status", 'open');
-$total_votes = $this->get_total_active_votes();
+
+// Get total active votes from database
+global $wpdb;
+$total_votes = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE is_active = 1");
+if (!$total_votes) {
+    $total_votes = 0;
+}
+
 $total_candidates = wp_count_posts('mt_candidate')->publish;
 $total_jury = count(get_users(array('role' => 'mt_jury_member')));
 
@@ -253,8 +260,18 @@ $recent_resets = $wpdb->get_results("
             
             <div class="mt-backup-stats">
                 <?php
-                $backup_manager = new MT_Vote_Backup_Manager();
-                $stats = $backup_manager->get_backup_statistics();
+                if (class_exists('MT_Vote_Backup_Manager')) {
+                    $backup_manager = new MT_Vote_Backup_Manager();
+                    $stats = $backup_manager->get_backup_statistics();
+                } else {
+                    // Fallback stats when backup manager is not available
+                    $stats = array(
+                        'total_backups' => 0,
+                        'recent_backups' => 0,
+                        'storage_size' => '0 KB',
+                        'restorations' => 0
+                    );
+                }
                 ?>
                 <table class="form-table">
                     <tr>

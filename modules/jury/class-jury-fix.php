@@ -412,7 +412,7 @@ class MT_Jury_Fix {
 }
 
 // Initialize the fix class only if constants are defined
-if (defined('MT_PLUGIN_PATH')) {
+if (defined('MT_PLUGIN_DIR')) {
     MT_Jury_Fix::get_instance();
 }
 
