@@ -1,1 +1,673 @@
-/* Vote Reset Admin CSS - To be populated later */ 
+/**
+ * Vote Reset Admin Styles
+ * Mobility Trailblazers Plugin
+ * 
+ * @package MobilityTrailblazers
+ * @subpackage Admin/CSS
+ */
+
+/* ===================================
+   Reset Page Layout
+   =================================== */
+
+   .mt-vote-reset-page {
+    max-width: 1400px;
+    margin: 20px 0;
+}
+
+.mt-vote-reset-page .wp-heading-inline {
+    display: flex;
+    align-items: center;
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+/* ===================================
+   Admin Cards Grid
+   =================================== */
+
+.mt-admin-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0 30px;
+}
+
+.mt-admin-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    padding: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.mt-admin-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+}
+
+.mt-admin-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.mt-admin-card h2 .dashicons {
+    color: #50575e;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+/* ===================================
+   Status Cards
+   =================================== */
+
+.mt-status-card {
+    text-align: center;
+    padding: 30px 20px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mt-status-card .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #007cba;
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.mt-status-card .mt-card-content h3 {
+    font-size: 32px;
+    margin: 0 0 5px;
+    color: #1e1e1e;
+    font-weight: 600;
+}
+
+.mt-status-card .mt-card-content p {
+    margin: 0;
+    color: #50575e;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Phase Status Badges */
+.mt-phase-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.mt-status-open {
+    background: #d4f4dd;
+    color: #00a32a;
+}
+
+.mt-status-locked {
+    background: #f0f0f1;
+    color: #50575e;
+}
+
+/* ===================================
+   Reset Grid Layout
+   =================================== */
+
+.mt-reset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media screen and (max-width: 782px) {
+    .mt-reset-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================================
+   Phase Info Section
+   =================================== */
+
+.mt-phase-info {
+    background: #f6f7f7;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.mt-phase-info .form-table {
+    margin: 0;
+}
+
+.mt-phase-info .form-table th {
+    padding: 10px 10px 10px 0;
+    width: 120px;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.mt-phase-info .form-table td {
+    padding: 10px;
+}
+
+.mt-phase-info .dashicons-lock {
+    color: #50575e;
+    margin-left: 5px;
+}
+
+/* ===================================
+   Buttons and Controls
+   =================================== */
+
+.mt-button-wrapper {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.button-hero {
+    font-size: 16px !important;
+    line-height: 28px !important;
+    height: auto !important;
+    padding: 8px 16px !important;
+}
+
+.button-hero .dashicons {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.button-danger {
+    background: #d63638 !important;
+    border-color: #d63638 !important;
+    color: #fff !important;
+}
+
+.button-danger:hover {
+    background: #a02222 !important;
+    border-color: #a02222 !important;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+/* ===================================
+   Reset Options
+   =================================== */
+
+.mt-reset-options {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.mt-reset-option {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.mt-reset-option h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #1e1e1e;
+}
+
+.mt-reset-option .description {
+    margin: 0 0 15px;
+    color: #646970;
+    font-size: 13px;
+}
+
+.mt-select-field {
+    min-width: 250px;
+    margin-right: 10px;
+    padding: 6px 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #fff;
+}
+
+@media screen and (max-width: 782px) {
+    .mt-select-field {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .mt-reset-option button {
+        width: 100%;
+    }
+}
+
+/* ===================================
+   Info Box
+   =================================== */
+
+.mt-info-box {
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.mt-info-box h4 {
+    margin: 0 0 10px;
+    color: #1e1e1e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mt-info-box ol {
+    margin: 10px 0 0 20px;
+    color: #50575e;
+}
+
+.mt-info-box li {
+    margin-bottom: 8px;
+}
+
+/* ===================================
+   Danger Zone
+   =================================== */
+
+.mt-danger-zone {
+    border-color: #d63638;
+    background: #fcf0f1;
+    border-width: 2px;
+}
+
+.mt-danger-title {
+    color: #d63638;
+}
+
+.mt-danger-title .dashicons {
+    color: #d63638;
+}
+
+.mt-danger-content {
+    margin-top: 20px;
+}
+
+.mt-danger-warning {
+    background: #fff;
+    border-left: 4px solid #d63638;
+    padding: 12px 15px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.mt-danger-warning strong {
+    color: #d63638;
+}
+
+.mt-danger-effects {
+    margin: 20px 0;
+}
+
+.mt-danger-effects h4 {
+    margin-bottom: 10px;
+    color: #1e1e1e;
+}
+
+.mt-danger-effects ul {
+    list-style: disc;
+    margin-left: 20px;
+    color: #50575e;
+}
+
+.mt-danger-effects li {
+    margin-bottom: 5px;
+}
+
+/* ===================================
+   Warning and Error Messages
+   =================================== */
+
+.mt-warning-text {
+    color: #d63638;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.mt-warning-text .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ===================================
+   Reset History
+   =================================== */
+
+.mt-reset-history-card {
+    margin-top: 30px;
+}
+
+.mt-full-width {
+    grid-column: 1 / -1;
+}
+
+.mt-float-right {
+    float: right;
+}
+
+.mt-reset-history-card h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-reset-history-card table {
+    margin-top: 15px;
+}
+
+.mt-no-activity {
+    text-align: center;
+    color: #50575e;
+    padding: 40px;
+    font-style: italic;
+}
+
+/* Reset Type Badges */
+.mt-reset-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.mt-reset-type-individual {
+    background: #dfe8ff;
+    color: #2271b1;
+}
+
+.mt-reset-type-bulk_user {
+    background: #e7f5ff;
+    color: #0073aa;
+}
+
+.mt-reset-type-bulk_candidate {
+    background: #f0e5ff;
+    color: #826eb4;
+}
+
+.mt-reset-type-phase_transition {
+    background: #f0f6fc;
+    color: #0073aa;
+}
+
+.mt-reset-type-full_reset {
+    background: #fcf0f1;
+    color: #d63638;
+}
+
+/* ===================================
+   Modal Styles
+   =================================== */
+
+.mt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.mt-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    animation: fadeIn 0.3s ease;
+}
+
+.mt-modal-dialog {
+    position: relative;
+    background: #fff;
+    max-width: 90%;
+    width: 1000px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 3px 30px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    animation: slideIn 0.3s ease;
+}
+
+.mt-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    background: #f6f7f7;
+}
+
+.mt-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.mt-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: #666;
+    transition: color 0.2s ease;
+}
+
+.mt-modal-close:hover {
+    color: #000;
+}
+
+.mt-modal-close .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.mt-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px);
+}
+
+/* ===================================
+   Loading States
+   =================================== */
+
+.mt-loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.mt-loading .spinner {
+    float: none;
+    margin: 0 auto 20px;
+}
+
+.mt-loading p {
+    color: #50575e;
+    font-style: italic;
+}
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ===================================
+   Animations
+   =================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===================================
+   SweetAlert2 Customizations
+   =================================== */
+
+.swal2-popup {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.swal2-popup .swal2-input {
+    margin: 20px auto 0;
+    width: 90%;
+}
+
+.swal2-popup .text-danger {
+    color: #d63638;
+}
+
+.swal2-popup .fa-exclamation-triangle {
+    color: #dba617;
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+
+@media screen and (max-width: 1200px) {
+    .mt-reset-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .mt-admin-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .mt-status-card {
+        padding: 20px 15px;
+        min-height: 120px;
+    }
+    
+    .mt-status-card .dashicons {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .mt-status-card .mt-card-content h3 {
+        font-size: 24px;
+    }
+    
+    .mt-modal-dialog {
+        width: 100%;
+        max-width: 100%;
+        margin: 10px;
+    }
+}
+
+/* ===================================
+   Print Styles
+   =================================== */
+
+@media print {
+    .mt-button-wrapper,
+    .button,
+    .mt-modal,
+    .mt-float-right {
+        display: none !important;
+    }
+    
+    .mt-admin-card {
+        page-break-inside: avoid;
+    }
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+.mt-admin-card:focus-within {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+.button:focus,
+.mt-select-field:focus {
+    box-shadow: 0 0 0 2px #2271b1;
+    outline: 2px solid transparent;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .mt-admin-card {
+        border-width: 2px;
+    }
+    
+    .mt-reset-type {
+        border: 1px solid currentColor;
+    }
+}

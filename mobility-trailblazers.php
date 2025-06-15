@@ -82,6 +82,8 @@ class MobilityTrailblazersPlugin {
         // Add Elementor compatibility
         add_action('plugins_loaded', array($this, 'load_elementor_compatibility'));
         
+        // Register REST API routes
+        add_action('rest_api_init', array($this, 'register_rest_routes'));
     }
 
     public function init() {
@@ -653,15 +655,6 @@ class MobilityTrailblazersPlugin {
                     true
                 );
                 
-                // Load SweetAlert2 for nice dialogs
-                wp_enqueue_script(
-                    'sweetalert2',
-                    'https://cdn.jsdelivr.net/npm/sweetalert2@11',
-                    array(),
-                    '11.0.0',
-                    true
-                );
-                
                 wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
                     'ajax_url' => admin_url('admin-ajax.php'),
                     'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
@@ -681,15 +674,6 @@ class MobilityTrailblazersPlugin {
                 MT_PLUGIN_URL . 'admin/js/vote-reset-admin.js',
                 array('jquery'),
                 MT_PLUGIN_VERSION,
-                true
-            );
-            
-            // Add SweetAlert2 for nice dialogs
-            wp_enqueue_script(
-                'sweetalert2',
-                'https://cdn.jsdelivr.net/npm/sweetalert2@11',
-                array(),
-                '11.0.0',
                 true
             );
             
@@ -3916,6 +3900,23 @@ class MobilityTrailblazersPlugin {
         }
     }
 
+    /**
+     * Register REST API routes
+     */
+    public function register_rest_routes() {
+        // Load and initialize API endpoint classes
+        require_once MT_PLUGIN_PATH . 'api/vote-reset-endpoints.php';
+        require_once MT_PLUGIN_PATH . 'api/backup-endpoints.php';
+        
+        // Initialize vote reset API
+        $vote_reset_api = new MT_Vote_Reset_API();
+        $vote_reset_api->register_routes();
+        
+        // Initialize backup API
+        $backup_api = new MT_Backup_API();
+        $backup_api->register_routes();
+    }
+
 }
 
 // Instantiate the plugin
@@ -4390,6 +4391,53 @@ function mt_handle_export_assignments() {
     
     fclose($output);
     wp_die();
+}
+
+/**
+ * Add AJAX handler for export (for non-REST download)
+ */
+add_action('wp_ajax_mt_export_backup_history', 'mt_handle_export_backup_history');
+
+function mt_handle_export_backup_history() {
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_die(__('Unauthorized', 'mobility-trailblazers'));
+    }
+    
+    // Verify nonce
+    if (!wp_verify_nonce($_POST['nonce'], 'mt_nonce')) {
+        wp_die(__('Security check failed', 'mobility-trailblazers'));
+    }
+    
+    $format = sanitize_text_field($_POST['format']);
+    $backup_manager = new MT_Vote_Backup_Manager();
+    
+    // Export backups
+    $result = $backup_manager->export_backups($format);
+    
+    if (is_wp_error($result)) {
+        wp_die($result->get_error_message());
+    }
+    
+    // Set headers for download
+    $filename = basename($result);
+    
+    if ($format === 'csv') {
+        header('Content-Type: text/csv; charset=utf-8');
+    } else {
+        header('Content-Type: application/json');
+    }
+    
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . filesize($result));
+    
+    // Output file
+    readfile($result);
+    
+    // Clean up
+    @unlink($result);
+    
+    exit;
 }
 
 ?>

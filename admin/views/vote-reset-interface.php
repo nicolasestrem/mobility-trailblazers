@@ -241,6 +241,78 @@ $recent_resets = $wpdb->get_results("
             </p>
         </div>
         
+        <!-- Backup Management -->
+        <div class="mt-admin-card">
+            <h2>
+                <span class="dashicons dashicons-backup"></span>
+                <?php _e('Backup Management', 'mobility-trailblazers'); ?>
+            </h2>
+            <p class="description">
+                <?php _e('Create manual backups of all voting data or manage existing backups. Backups are automatically created before any reset operation.', 'mobility-trailblazers'); ?>
+            </p>
+            
+            <div class="mt-backup-stats">
+                <?php
+                $backup_manager = new MT_Vote_Backup_Manager();
+                $stats = $backup_manager->get_backup_statistics();
+                ?>
+                <table class="form-table">
+                    <tr>
+                        <th><?php _e('Total Backups:', 'mobility-trailblazers'); ?></th>
+                        <td><strong><?php echo number_format($stats['total_backups']); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <th><?php _e('Recent Backups (7 days):', 'mobility-trailblazers'); ?></th>
+                        <td><strong><?php echo number_format($stats['recent_backups']); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <th><?php _e('Storage Size:', 'mobility-trailblazers'); ?></th>
+                        <td><strong><?php echo esc_html($stats['storage_size']); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <th><?php _e('Restorations:', 'mobility-trailblazers'); ?></th>
+                        <td><strong><?php echo number_format($stats['restorations']); ?></strong></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="mt-backup-actions">
+                <p class="mt-button-wrapper">
+                    <button type="button" 
+                            id="mt-create-backup" 
+                            class="button button-primary">
+                        <span class="dashicons dashicons-download"></span>
+                        <?php _e('Create Full Backup Now', 'mobility-trailblazers'); ?>
+                    </button>
+                    
+                    <button type="button" 
+                            id="mt-export-backups" 
+                            class="button button-secondary">
+                        <span class="dashicons dashicons-media-spreadsheet"></span>
+                        <?php _e('Export Backup History', 'mobility-trailblazers'); ?>
+                    </button>
+                    
+                    <button type="button" 
+                            id="mt-view-backups" 
+                            class="button button-secondary">
+                        <span class="dashicons dashicons-list-view"></span>
+                        <?php _e('View All Backups', 'mobility-trailblazers'); ?>
+                    </button>
+                </p>
+                
+                <p class="description">
+                    <span class="dashicons dashicons-info"></span>
+                    <?php 
+                    $retention_days = apply_filters('mt_vote_backup_retention_days', 365);
+                    printf(
+                        __('Backups are automatically retained for %d days. Restored backups are kept indefinitely.', 'mobility-trailblazers'),
+                        $retention_days
+                    ); 
+                    ?>
+                </p>
+            </div>
+        </div>
+        
         <!-- Full System Reset - Danger Zone -->
         <div class="mt-admin-card mt-danger-zone">
             <h2 class="mt-danger-title">
