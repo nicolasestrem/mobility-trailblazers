@@ -174,33 +174,46 @@
         performFullReset: function() {
             // Show loading message
             const $button = $('#mt-bulk-reset-all');
-            $button.prop('disabled', true).html('Resetting All Votes...');
+            const originalText = $button.html();
+            $button.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Resetting All Votes...');
+            
+            // Prepare the data payload
+            const requestData = {
+                reset_scope: 'full_reset',
+                options: {
+                    confirm: true,  // THIS IS REQUIRED
+                    reason: 'Full system reset initiated by admin'
+                }
+            };
+            
+            console.log('Sending full reset request with data:', requestData);
             
             $.ajax({
                 url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
                 method: 'POST',
+                contentType: 'application/json',
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader('X-WP-Nonce', mt_ajax.rest_nonce || mt_ajax.nonce);
+                    console.log('Setting nonce header:', mt_ajax.rest_nonce || mt_ajax.nonce);
                 },
-                data: {
-                    reset_scope: 'full_reset',
-                    options: {
-                        confirm: true,
-                        reason: 'Full system reset initiated by admin'
-                    }
-                }
+                data: JSON.stringify(requestData)
             })
             .done(function(response) {
+                console.log('Full reset response:', response);
                 if (response.success) {
                     alert(`System Reset Complete\n\nAll votes have been reset.\n${response.votes_reset} votes removed.\n${response.backup_count} votes backed up.`);
                     window.location.href = mt_ajax.admin_url + 'admin.php?page=mobility-trailblazers';
+                } else {
+                    alert('Reset Failed: ' + (response.message || 'Unknown error'));
                 }
             })
             .fail(function(xhr) {
+                console.error('Full reset error:', xhr.responseJSON || xhr.statusText);
+                console.error('Full XHR object:', xhr);
                 alert('Reset Failed: ' + (xhr.responseJSON?.message || 'Failed to reset system'));
             })
             .always(function() {
-                $button.prop('disabled', false).html('Reset All Votes');
+                $button.prop('disabled', false).html(originalText);
             });
         },
         
