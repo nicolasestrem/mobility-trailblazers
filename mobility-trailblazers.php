@@ -148,19 +148,10 @@ class MobilityTrailblazersPlugin {
         // Create custom taxonomies
         $this->create_custom_taxonomies();
         
-        // Initialize other components
-        if (class_exists('MT_Vote_Reset_Manager')) {
-            new MT_Vote_Reset_Manager();
-        }
-        
-        if (class_exists('MT_Vote_Backup_Manager')) {
-            MT_Vote_Backup_Manager::get_instance();
-        }
-        
-        // Initialize the jury consistency fix
-        if (class_exists('MT_Jury_Consistency')) {
-            MT_Jury_Consistency::get_instance();
-        }
+        // Initialize other components using helper function
+        $this->init_class('MT_Vote_Reset_Manager');
+        $this->init_class('MT_Vote_Backup_Manager');
+        $this->init_class('MT_Jury_Consistency');
         
         // Add custom image sizes
         add_image_size('candidate-thumbnail', 300, 300, true);
@@ -172,6 +163,22 @@ class MobilityTrailblazersPlugin {
         // Load admin and frontend components
         $this->load_admin();
         $this->load_frontend();
+    }
+
+    /**
+     * Helper function to safely initialize classes whether they use singleton or not
+     */
+    private function init_class($class_name) {
+        if (!class_exists($class_name)) {
+            return false;
+        }
+        
+        // Check if class uses singleton pattern
+        if (method_exists($class_name, 'get_instance')) {
+            return $class_name::get_instance();
+        } else {
+            return new $class_name();
+        }
     }
 
     public function activate() {
