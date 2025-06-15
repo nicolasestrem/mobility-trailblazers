@@ -616,7 +616,7 @@ class MobilityTrailblazersPlugin {
                 __('Jury Management', 'mobility-trailblazers'),
                 'manage_options',
                 'mt-jury-management',
-                array('MT_Jury_Management_Admin', 'display_jury_management_page')
+                array('MT_Jury_Management_Admin', 'render_jury_management_page')
             );
         }
         
