@@ -693,19 +693,19 @@ class MobilityTrailblazersPlugin {
                 true
             );
             
-            wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
+            // Use consistent variable name 'mt_ajax' to match JavaScript
+            wp_localize_script('mt-vote-reset-js', 'mt_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'rest_url' => rest_url(''),
                 'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
-                'rest_url' => rest_url(''),
                 'admin_url' => admin_url(''),
-                'strings' => array(
-                    'confirm_reset_individual' => __('Are you sure you want to reset this vote? This action cannot be undone.', 'mobility-trailblazers'),
-                    'confirm_reset_phase' => __('Are you sure you want to reset all votes for the next phase? This action cannot be undone.', 'mobility-trailblazers'),
-                    'confirm_reset_all' => __('WARNING: This will delete ALL votes in the system! This action cannot be undone. Type "DELETE ALL" to confirm.', 'mobility-trailblazers'),
-                    'reset_success' => __('Votes reset successfully!', 'mobility-trailblazers'),
-                    'reset_error' => __('Error resetting votes. Please try again.', 'mobility-trailblazers')
-                )
+                'confirm_reset' => __('Are you sure you want to reset this vote? This action cannot be undone.', 'mobility-trailblazers'),
+                'confirm_bulk_reset' => __('Are you sure you want to reset all votes for this candidate? This action cannot be undone.', 'mobility-trailblazers'),
+                'confirm_delete' => __('Are you sure you want to permanently delete this item? This action cannot be undone.', 'mobility-trailblazers'),
+                'processing' => __('Processing...', 'mobility-trailblazers'),
+                'error_occurred' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
+                'success' => __('Operation completed successfully.', 'mobility-trailblazers')
             ));
         }
     }
@@ -4108,40 +4108,84 @@ class MobilityTrailblazersPlugin {
             wp_die(__('Unauthorized', 'mobility-trailblazers'));
         }
         
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], 'mt_nonce')) {
+        // Verify nonce - check both GET and POST
+        $nonce = $_GET['nonce'] ?? $_POST['nonce'] ?? '';
+        if (!wp_verify_nonce($nonce, 'mt_vote_reset_nonce')) {
             wp_die(__('Security check failed', 'mobility-trailblazers'));
         }
         
-        $format = sanitize_text_field($_POST['format']);
-        $backup_manager = new MT_Vote_Backup_Manager();
+        $format = sanitize_text_field($_GET['format'] ?? $_POST['format'] ?? 'csv');
         
-        // Export backups
-        $result = $backup_manager->export_backups($format);
+        // Simple export without backup manager dependency
+        global $wpdb;
         
-        if (is_wp_error($result)) {
-            wp_die($result->get_error_message());
+        // Get backup data from both tables
+        $votes_history_table = $wpdb->prefix . 'mt_votes_history';
+        $scores_history_table = $wpdb->prefix . 'mt_candidate_scores_history';
+        
+        $backups = array();
+        
+        // Get vote backups
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$votes_history_table}'") == $votes_history_table) {
+            $vote_backups = $wpdb->get_results("
+                SELECT 'vote' as type, id, vote_id as item_id, created_at, created_by, reason, restored_at 
+                FROM {$votes_history_table}
+                ORDER BY created_at DESC
+            ");
+            $backups = array_merge($backups, $vote_backups);
         }
         
-        // Set headers for download
-        $filename = basename($result);
+        // Get score backups
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$scores_history_table}'") == $scores_history_table) {
+            $score_backups = $wpdb->get_results("
+                SELECT 'score' as type, id, candidate_id as item_id, created_at, created_by, reason, restored_at
+                FROM {$scores_history_table}
+                ORDER BY created_at DESC
+            ");
+            $backups = array_merge($backups, $score_backups);
+        }
+        
+        // Add user names
+        foreach ($backups as &$backup) {
+            $user = get_userdata($backup->created_by);
+            $backup->created_by_name = $user ? $user->display_name : 'Unknown';
+        }
+        
+        $filename = 'backup-history-' . date('Y-m-d-His');
         
         if ($format === 'csv') {
             header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
+            
+            // Output CSV
+            $output = fopen('php://output', 'w');
+            fputcsv($output, array('ID', 'Type', 'Item ID', 'Created At', 'Created By', 'Reason', 'Restored At'));
+            
+            foreach ($backups as $backup) {
+                fputcsv($output, array(
+                    $backup->id,
+                    $backup->type,
+                    $backup->item_id,
+                    $backup->created_at,
+                    $backup->created_by_name,
+                    $backup->reason,
+                    $backup->restored_at
+                ));
+            }
+            
+            fclose($output);
         } else {
             header('Content-Type: application/json');
+            header('Content-Disposition: attachment; filename="' . $filename . '.json"');
+            
+            echo json_encode(array(
+                'export_date' => current_time('mysql'),
+                'total_backups' => count($backups),
+                'backups' => $backups
+            ), JSON_PRETTY_PRINT);
         }
         
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($result));
-        
-        // Output file
-        readfile($result);
-        
-        // Clean up
-        @unlink($result);
-        
-        exit;
+        wp_die();
     }
 
     /**
