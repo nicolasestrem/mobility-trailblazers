@@ -133,18 +133,43 @@ class MobilityTrailblazersPlugin {
         require_once MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php';
         require_once MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php';
         require_once MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php';
+        
+        // Include the new jury management admin class
         require_once MT_PLUGIN_PATH . 'admin/class-jury-management-admin.php';
         
-        // Initialize jury management admin
-        if (is_admin()) {
-            new MT_Jury_Management_Admin();
+        // Initialize the jury management admin using the singleton pattern
+        if (is_admin() && class_exists('MT_Jury_Management_Admin')) {
+            MT_Jury_Management_Admin::get_instance();
         }
+        
+        // Register custom post types
+        $this->create_custom_post_types();
+        
+        // Create custom taxonomies
+        $this->create_custom_taxonomies();
+        
+        // Initialize other components
+        if (class_exists('MT_Vote_Reset_Manager')) {
+            new MT_Vote_Reset_Manager();
+        }
+        
+        if (class_exists('MT_Vote_Backup_Manager')) {
+            MT_Vote_Backup_Manager::get_instance();
+        }
+        
+        // Initialize the jury consistency fix
+        if (class_exists('MT_Jury_Consistency')) {
+            MT_Jury_Consistency::get_instance();
+        }
+        
+        // Add custom image sizes
+        add_image_size('candidate-thumbnail', 300, 300, true);
+        add_image_size('candidate-full', 800, 600, true);
         
         // Add hooks
         $this->add_hooks();
         
-        $this->create_custom_post_types();
-        $this->create_custom_taxonomies();
+        // Load admin and frontend components
         $this->load_admin();
         $this->load_frontend();
     }
