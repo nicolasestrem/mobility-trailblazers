@@ -28,11 +28,8 @@ define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MT_PLUGIN_BASENAME', plugin_basename(__FILE__));
 define('MT_VERSION', '2.0.0');
 
-// Autoloader (optional - fallback to manual loading if not available)
-$autoloader_path = MT_PLUGIN_DIR . 'vendor/autoload.php';
-if (file_exists($autoloader_path)) {
-    require_once $autoloader_path;
-}
+// Autoloader
+require_once MT_PLUGIN_DIR . 'vendor/autoload.php';
 
 // Load the main plugin class
 require_once MT_PLUGIN_DIR . 'includes/class-plugin.php';
@@ -41,7 +38,7 @@ require_once MT_PLUGIN_DIR . 'includes/class-plugin.php';
  * Initialize the plugin
  */
 function mobility_trailblazers_init() {
-    $plugin = MT_Plugin::get_instance();
+    $plugin = MobilityTrailblazers\Plugin::get_instance();
     $plugin->run();
 }
 add_action('plugins_loaded', 'mobility_trailblazers_init');
@@ -50,8 +47,8 @@ add_action('plugins_loaded', 'mobility_trailblazers_init');
  * Plugin activation hook
  */
 function mobility_trailblazers_activate() {
-    // Basic activation - just flush rewrite rules
-    flush_rewrite_rules();
+    require_once MT_PLUGIN_DIR . 'includes/class-activator.php';
+    MobilityTrailblazers\Activator::activate();
 }
 register_activation_hook(__FILE__, 'mobility_trailblazers_activate');
 
@@ -59,8 +56,8 @@ register_activation_hook(__FILE__, 'mobility_trailblazers_activate');
  * Plugin deactivation hook
  */
 function mobility_trailblazers_deactivate() {
-    // Basic deactivation - just flush rewrite rules
-    flush_rewrite_rules();
+    require_once MT_PLUGIN_DIR . 'includes/class-deactivator.php';
+    MobilityTrailblazers\Deactivator::deactivate();
 }
 register_deactivation_hook(__FILE__, 'mobility_trailblazers_deactivate');
 
