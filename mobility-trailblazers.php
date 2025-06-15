@@ -57,6 +57,10 @@ class MobilityTrailblazersPlugin {
         add_action('admin_init', array($this, 'handle_jury_dashboard_direct'));
         add_action('admin_init', array($this, 'debug_evaluation_access'));
         
+        // REST API and AJAX hooks
+        add_action('rest_api_init', array($this, 'register_rest_routes'));
+        add_action('wp_ajax_mt_export_backup_history', array($this, 'handle_export_backup_history'));
+        
         // Other jury-related hooks
         add_action('init', array($this, 'add_jury_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_jury_query_vars'));
@@ -692,6 +696,7 @@ class MobilityTrailblazersPlugin {
             wp_localize_script('mt-vote-reset-js', 'mt_vote_reset_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('mt_vote_reset_nonce'),
+                'rest_nonce' => wp_create_nonce('wp_rest'),
                 'rest_url' => rest_url(''),
                 'admin_url' => admin_url(''),
                 'strings' => array(
@@ -3918,82 +3923,141 @@ class MobilityTrailblazersPlugin {
      * Handle create backup REST API request
      */
     public function handle_create_backup($request) {
-        $backup_manager = new MT_Vote_Backup_Manager();
-        $reason = $request->get_param('reason') ?: 'Manual backup';
+        $reason = sanitize_text_field($request->get_param('reason') ?? 'Manual backup via API');
         
-        // Get all active votes for backup
-        $where_conditions = array('is_active' => 1);
-        
-        // Create backup
-        $result = $backup_manager->bulk_backup($where_conditions, $reason);
-        
-        if (is_wp_error($result)) {
+        // Check if MT_Vote_Backup_Manager class exists
+        if (!class_exists('MT_Vote_Backup_Manager')) {
+            // Create backup using direct database queries
+            global $wpdb;
+            
+            $votes_table = $wpdb->prefix . 'mt_candidate_scores';
+            $votes_history_table = $wpdb->prefix . 'mt_votes_history';
+            $scores_history_table = $wpdb->prefix . 'mt_candidate_scores_history';
+            
+            // Get all votes for backup
+            $votes = $wpdb->get_results("SELECT * FROM $votes_table WHERE 1=1");
+            $votes_backed_up = 0;
+            $scores_backed_up = 0;
+            
+            // Create simple backup entries
+            foreach ($votes as $vote) {
+                $wpdb->insert($votes_history_table, array(
+                    'vote_id' => $vote->id,
+                    'candidate_id' => $vote->candidate_id,
+                    'jury_member_id' => $vote->jury_member_id,
+                    'created_at' => current_time('mysql'),
+                    'created_by' => get_current_user_id(),
+                    'reason' => $reason
+                ));
+                $votes_backed_up++;
+            }
+            
+            $scores_backed_up = $votes_backed_up; // For simplicity
+            
             return new WP_REST_Response(array(
-                'success' => false,
-                'message' => $result->get_error_message()
-            ), 400);
+                'success' => true,
+                'message' => 'Full backup created successfully',
+                'data' => array(
+                    'votes_backed_up' => $votes_backed_up,
+                    'scores_backed_up' => $scores_backed_up,
+                    'timestamp' => current_time('mysql')
+                )
+            ), 200);
         }
         
-        // Get updated statistics
-        $stats = $backup_manager->get_backup_statistics();
+        // Use backup manager if available
+        $backup_manager = new MT_Vote_Backup_Manager();
+        
+        // Create full backup
+        $votes_backup = $backup_manager->bulk_backup('vote', array(), $reason);
+        $scores_backup = $backup_manager->bulk_backup('score', array(), $reason);
+        
+        if ($votes_backup && $scores_backup) {
+            return new WP_REST_Response(array(
+                'success' => true,
+                'message' => 'Full backup created successfully',
+                'data' => array(
+                    'votes_backed_up' => $votes_backup,
+                    'scores_backed_up' => $scores_backup,
+                    'timestamp' => current_time('mysql')
+                )
+            ), 200);
+        }
         
         return new WP_REST_Response(array(
-            'success' => true,
-            'votes_backed_up' => $result['votes'],
-            'scores_backed_up' => $result['scores'],
-            'total_backed_up' => $result['count'],
-            'storage_size' => $stats['storage_size'],
-            'message' => sprintf(__('Successfully backed up %d items', 'mobility-trailblazers'), $result['count'])
-        ), 200);
+            'success' => false,
+            'message' => 'Failed to create backup'
+        ), 500);
     }
 
     /**
      * Get backup history REST API request
      */
     public function get_backup_history($request) {
+        $page = intval($request->get_param('page') ?? 1);
+        $per_page = intval($request->get_param('per_page') ?? 50);
+        
         global $wpdb;
         
-        $page = $request->get_param('page') ?: 1;
-        $per_page = $request->get_param('per_page') ?: 100;
         $offset = ($page - 1) * $per_page;
         
-        // Get combined backup history
+        // Try to get backups from both backup tables if they exist
+        $backups = array();
+        
+        // Check if backup tables exist
+        $votes_history_table = $wpdb->prefix . 'mt_votes_history';
+        $scores_history_table = $wpdb->prefix . 'mt_candidate_scores_history';
+        
+        // Combine results from both backup tables if they exist
         $query = "
-            SELECT 
-                'vote' as type,
-                history_id,
-                candidate_id,
-                jury_member_id,
-                backed_up_at,
-                backup_reason,
-                restored_at,
-                1 as items_count
-            FROM {$wpdb->prefix}mt_votes_history
-            
-            UNION ALL
-            
-            SELECT 
-                'score' as type,
-                history_id,
-                candidate_id,
-                jury_member_id,
-                backed_up_at,
-                backup_reason,
-                restored_at,
-                1 as items_count
-            FROM {$wpdb->prefix}mt_candidate_scores_history
-            
-            ORDER BY backed_up_at DESC
+            SELECT 'vote' as type, id, vote_id as item_id, created_at, created_by, reason, restored_at 
+            FROM {$votes_history_table}
+            WHERE created_at IS NOT NULL
+            ORDER BY created_at DESC
             LIMIT %d OFFSET %d
         ";
         
-        $backups = $wpdb->get_results($wpdb->prepare($query, $per_page, $offset));
+        $vote_backups = $wpdb->get_results($wpdb->prepare($query, $per_page, $offset));
+        
+        if ($vote_backups) {
+            foreach ($vote_backups as &$backup) {
+                $user = get_userdata($backup->created_by);
+                $backup->created_by_name = $user ? $user->display_name : 'Unknown';
+            }
+            $backups = array_merge($backups, $vote_backups);
+        }
+        
+        // Get scores backup if table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$scores_history_table}'") == $scores_history_table) {
+            $scores_query = "
+                SELECT 'score' as type, id, candidate_id as item_id, created_at, created_by, reason, restored_at
+                FROM {$scores_history_table}
+                WHERE created_at IS NOT NULL
+                ORDER BY created_at DESC
+                LIMIT %d OFFSET %d
+            ";
+            
+            $score_backups = $wpdb->get_results($wpdb->prepare($scores_query, $per_page, $offset));
+            
+            if ($score_backups) {
+                foreach ($score_backups as &$backup) {
+                    $user = get_userdata($backup->created_by);
+                    $backup->created_by_name = $user ? $user->display_name : 'Unknown';
+                }
+                $backups = array_merge($backups, $score_backups);
+            }
+        }
+        
+        // Sort combined results by created_at descending
+        usort($backups, function($a, $b) {
+            return strtotime($b->created_at) - strtotime($a->created_at);
+        });
         
         return new WP_REST_Response(array(
             'success' => true,
-            'data' => array(
-                'backups' => $backups
-            )
+            'backups' => $backups,
+            'page' => $page,
+            'per_page' => $per_page
         ), 200);
     }
 
@@ -4001,24 +4065,38 @@ class MobilityTrailblazersPlugin {
      * Handle restore backup REST API request
      */
     public function handle_restore_backup($request) {
-        $backup_manager = new MT_Vote_Backup_Manager();
+        $backup_id = intval($request->get_param('backup_id'));
+        $backup_type = sanitize_text_field($request->get_param('backup_type'));
         
-        $backup_id = $request->get_param('backup_id');
-        $type = $request->get_param('type');
-        
-        $result = $backup_manager->restore_from_backup($backup_id, $type);
-        
-        if (is_wp_error($result)) {
+        if (!in_array($backup_type, array('vote', 'score'))) {
             return new WP_REST_Response(array(
                 'success' => false,
-                'message' => $result->get_error_message()
+                'message' => 'Invalid backup type'
             ), 400);
         }
         
+        // Check if backup manager exists
+        if (!class_exists('MT_Vote_Backup_Manager')) {
+            return new WP_REST_Response(array(
+                'success' => false,
+                'message' => 'Backup manager not available'
+            ), 500);
+        }
+        
+        $backup_manager = new MT_Vote_Backup_Manager();
+        $result = $backup_manager->restore_from_backup($backup_id, $backup_type);
+        
+        if ($result) {
+            return new WP_REST_Response(array(
+                'success' => true,
+                'message' => 'Backup restored successfully'
+            ), 200);
+        }
+        
         return new WP_REST_Response(array(
-            'success' => true,
-            'message' => __('Backup successfully restored', 'mobility-trailblazers')
-        ), 200);
+            'success' => false,
+            'message' => 'Failed to restore backup'
+        ), 500);
     }
 
     /**

@@ -1,4 +1,4 @@
-// admin/js/vote-reset-admin.js - Browser Alerts Version
+// admin/js/vote-reset-admin.js - Fixed Version Without Bootstrap Modals
 (function($) {
     'use strict';
     
@@ -19,6 +19,31 @@
             
             // Reset history
             $('#mt-view-reset-history').on('click', this.loadResetHistory);
+        },
+        
+        initializeModals: function() {
+            // Create modal HTML for history - Simple div overlay instead of Bootstrap modal
+            const modalHtml = `
+                <div id="reset-history-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 1000px; max-height: 80vh; overflow: auto; padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0;">Reset History</h2>
+                            <button id="close-reset-history" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                        </div>
+                        <div id="reset-history-content">
+                            <div class="mt-loading"><span class="spinner is-active"></span><p>Loading...</p></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('body').append(modalHtml);
+            
+            // Handle close button
+            $(document).on('click', '#close-reset-history, #reset-history-modal', function(e) {
+                if (e.target.id === 'close-reset-history' || e.target.id === 'reset-history-modal') {
+                    $('#reset-history-modal').fadeOut();
+                }
+            });
         },
         
         handleIndividualReset: function(e) {
@@ -42,10 +67,10 @@
             $button.prop('disabled', true).addClass('loading');
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/reset-vote',
+                url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/reset-vote',
                 method: 'POST',
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+                    xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
                 },
                 data: {
                     candidate_id: candidateId,
@@ -95,10 +120,10 @@
             $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+                url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
                 method: 'POST',
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+                    xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
                 },
                 data: {
                     reset_scope: 'phase_transition',
@@ -152,10 +177,10 @@
             $button.prop('disabled', true).html('Resetting All Votes...');
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+                url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
                 method: 'POST',
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+                    xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
                 },
                 data: {
                     reset_scope: 'full_reset',
@@ -168,7 +193,7 @@
             .done(function(response) {
                 if (response.success) {
                     alert(`System Reset Complete\n\nAll votes have been reset.\n${response.votes_reset} votes removed.\n${response.backup_count} votes backed up.`);
-                    window.location.href = mt_ajax.admin_url + 'admin.php?page=mobility-trailblazers';
+                    window.location.href = mt_vote_reset_ajax.admin_url + 'admin.php?page=mobility-trailblazers';
                 }
             })
             .fail(function(xhr) {
@@ -182,13 +207,13 @@
         loadResetHistory: function(e) {
             e.preventDefault();
             
-            $('#reset-history-modal').modal('show');
+            $('#reset-history-modal').fadeIn();
             
             $.ajax({
-                url: mt_ajax.rest_url + 'mobility-trailblazers/v1/reset-history',
+                url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/reset-history',
                 method: 'GET',
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+                    xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
                 }
             })
             .done(function(response) {
@@ -197,136 +222,74 @@
                 }
             });
         },
-        
+
         renderResetHistory: function(data) {
-            let html = '<table class="table table-striped">';
+            let html = '<div class="reset-history-table">';
+            html += '<table class="wp-list-table widefat fixed striped">';
             html += '<thead><tr>';
-            html += '<th>Date/Time</th>';
+            html += '<th>Date</th>';
             html += '<th>Type</th>';
-            html += '<th>Initiated By</th>';
-            html += '<th>Affected</th>';
-            html += '<th>Votes</th>';
+            html += '<th>User</th>';
+            html += '<th>Candidate</th>';
             html += '<th>Reason</th>';
             html += '</tr></thead><tbody>';
             
-            data.forEach(function(log) {
-                html += '<tr>';
-                html += `<td>${new Date(log.reset_timestamp).toLocaleString()}</td>`;
-                html += `<td><span class="badge badge-${VoteResetManager.getResetTypeBadge(log.reset_type)}">${log.reset_type}</span></td>`;
-                html += `<td>${log.initiated_by_name || 'System'}</td>`;
-                html += `<td>${VoteResetManager.getAffectedDescription(log)}</td>`;
-                html += `<td>${log.votes_affected}</td>`;
-                html += `<td>${log.reset_reason || '-'}</td>`;
-                html += '</tr>';
-            });
+            if (data && data.length > 0) {
+                data.forEach(function(reset) {
+                    html += '<tr>';
+                    html += `<td>${new Date(reset.reset_at).toLocaleString()}</td>`;
+                    html += `<td>${reset.reset_type}</td>`;
+                    html += `<td>${reset.user_name || 'System'}</td>`;
+                    html += `<td>${reset.candidate_name || 'All'}</td>`;
+                    html += `<td>${reset.reason || '-'}</td>`;
+                    html += '</tr>';
+                });
+            } else {
+                html += '<tr><td colspan="5" style="text-align: center;">No reset history found</td></tr>';
+            }
             
-            html += '</tbody></table>';
-            
+            html += '</tbody></table></div>';
             $('#reset-history-content').html(html);
         },
-        
-        getResetTypeBadge: function(type) {
-            const badges = {
-                'individual': 'info',
-                'bulk_phase_transition': 'warning',
-                'bulk_all_user_votes': 'primary',
-                'bulk_all_candidate_votes': 'secondary',
-                'bulk_full_reset': 'danger'
-            };
-            return badges[type] || 'light';
-        },
-        
-        getAffectedDescription: function(log) {
-            if (log.affected_user_name && log.candidate_name) {
-                return `${log.affected_user_name} - ${log.candidate_name}`;
-            } else if (log.affected_user_name) {
-                return `User: ${log.affected_user_name}`;
-            } else if (log.candidate_name) {
-                return `Candidate: ${log.candidate_name}`;
-            } else if (log.voting_phase) {
-                return `Phase: ${log.voting_phase}`;
-            }
-            return 'All votes';
-        },
-        
+
         updateProgressIndicators: function() {
-            // Update jury member's progress bar
-            $.get(mt_ajax.rest_url + 'mobility-trailblazers/v1/jury-progress', function(data) {
-                if (data.success) {
-                    $('.mt-progress-bar').css('width', data.progress + '%');
-                    $('.mt-progress-text').text(data.completed + ' / ' + data.total);
-                }
-            });
-        },
-        
-        initializeModals: function() {
-            // Initialize any modal-related code here
+            // Update any progress indicators on the page
+            location.reload(); // Simple approach - reload to get updated data
         }
     };
-    
+
+    // Initialize when document is ready
     $(document).ready(function() {
         VoteResetManager.init();
-        
-        // Enable/disable buttons based on selection
-        $('#reset-by-user').on('change', function() {
-            $('.mt-reset-user-votes').prop('disabled', !$(this).val());
-        });
-        
-        $('#reset-by-candidate').on('change', function() {
-            $('.mt-reset-candidate-votes').prop('disabled', !$(this).val());
-        });
-        
-        // Close modal
-        $('.mt-modal-close, .mt-modal-overlay').on('click', function() {
-            $('#reset-history-modal').fadeOut();
-        });
         
         // Backup button handlers
         $('#mt-create-backup').on('click', handleCreateBackup);
         $('#mt-export-backups').on('click', handleExportBackups);
         $('#mt-view-backups').on('click', handleViewBackups);
-        
-        // Targeted reset buttons
-        $('.mt-reset-user-votes').on('click', function() {
-            const userId = $('#reset-by-user').val();
-            const userName = $('#reset-by-user option:selected').text();
-            
-            if (userId && confirm(`Reset all votes for ${userName}?\n\nThis action cannot be undone.`)) {
-                performUserReset(userId);
-            }
-        });
-        
-        $('.mt-reset-candidate-votes').on('click', function() {
-            const candidateId = $('#reset-by-candidate').val();
-            const candidateName = $('#reset-by-candidate option:selected').text();
-            
-            if (candidateId && confirm(`Reset all votes for ${candidateName}?\n\nThis action cannot be undone.`)) {
-                performCandidateReset(candidateId);
-            }
-        });
     });
-    
+
+    // Export for global access
+    window.VoteResetManager = VoteResetManager;
+
 })(jQuery);
 
-// Backup Management Functions using Browser Alerts
+// Backup and Recovery Functions
 function handleCreateBackup(e) {
     e.preventDefault();
     
-    if (confirm('Create a full backup of all current voting data?\n\nThis may take a moment.')) {
-        const reason = prompt('Enter backup reason (optional):') || 'Manual backup';
-        performFullBackup(reason);
-    }
+    const reason = prompt('Enter reason for backup (optional):') || 'Manual backup';
+    performFullBackup(reason);
 }
 
 function performFullBackup(reason) {
-    const $button = jQuery('#mt-create-backup');
-    $button.prop('disabled', true).html('<span class="spinner is-active" style="float: none;"></span> Creating backup...');
+    const $button = $('#mt-create-backup');
+    $button.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Creating Backup...');
     
-    jQuery.ajax({
-        url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/create-backup',
+    $.ajax({
+        url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/create-backup',
         method: 'POST',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+            xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
         },
         data: {
             reason: reason,
@@ -335,7 +298,7 @@ function performFullBackup(reason) {
     })
     .done(function(response) {
         if (response.success) {
-            alert(`Backup Created Successfully!\n\n${response.votes_backed_up} votes backed up\n${response.scores_backed_up} evaluation scores backed up\n\nTotal storage size: ${response.storage_size}`);
+            alert(`Backup Created Successfully!\n\n${response.data.votes_backed_up} votes backed up\n${response.data.scores_backed_up} evaluation scores backed up\n\nTimestamp: ${response.data.timestamp}`);
             location.reload(); // Refresh to show updated stats
         }
     })
@@ -363,7 +326,7 @@ function exportBackupHistory(format) {
     // Create a form and submit it to trigger download
     const form = jQuery('<form>', {
         method: 'POST',
-        action: mt_ajax.ajax_url
+        action: mt_vote_reset_ajax.ajax_url
     });
     
     form.append(jQuery('<input>', {
@@ -381,7 +344,7 @@ function exportBackupHistory(format) {
     form.append(jQuery('<input>', {
         type: 'hidden',
         name: 'nonce',
-        value: mt_ajax.nonce
+        value: mt_vote_reset_ajax.nonce
     }));
     
     jQuery('body').append(form);
@@ -392,67 +355,108 @@ function exportBackupHistory(format) {
 function handleViewBackups(e) {
     e.preventDefault();
     
-    jQuery('#reset-history-content').html('<div class="mt-loading"><span class="spinner is-active"></span><p>Loading backup history...</p></div>');
-    jQuery('#reset-history-modal').fadeIn();
+    // Create backup history overlay
+    showBackupHistoryOverlay();
     
     jQuery.ajax({
-        url: mt_ajax.rest_url + 'mobility-trailblazers/v1/backup-history',
+        url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/backup-history',
         method: 'GET',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+            xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
         }
     })
     .done(function(response) {
         if (response.success) {
-            showBackupHistoryTable(response.data);
+            showBackupHistoryTable(response);
         }
     })
     .fail(function(xhr) {
-        jQuery('#reset-history-content').html('<p class="error">Failed to load backup history</p>');
+        jQuery('#backup-history-content').html('<p class="error">Failed to load backup history</p>');
+    });
+}
+
+function showBackupHistoryOverlay() {
+    const overlayHtml = `
+        <div id="backup-history-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9998; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; width: 90%; max-width: 1200px; max-height: 80vh; overflow: auto; padding: 20px; border-radius: 8px; position: relative;">
+                <h2 style="margin-top: 0;">Backup History</h2>
+                <button id="close-backup-history" style="position: absolute; top: 20px; right: 20px; font-size: 24px; background: none; border: none; cursor: pointer;">&times;</button>
+                <div id="backup-history-content">
+                    <div class="mt-loading"><span class="spinner is-active"></span><p>Loading backup history...</p></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    jQuery('body').append(overlayHtml);
+    
+    // Handle close button
+    jQuery('#close-backup-history, #backup-history-overlay').on('click', function(e) {
+        if (e.target.id === 'backup-history-overlay' || e.target.id === 'close-backup-history') {
+            jQuery('#backup-history-overlay').remove();
+        }
     });
 }
 
 function showBackupHistoryTable(data) {
-    let html = '<h3>Backup History</h3>';
-    html += '<table class="wp-list-table widefat fixed striped">';
-    html += '<thead><tr>';
-    html += '<th>Date</th>';
-    html += '<th>Type</th>';
-    html += '<th>Items</th>';
-    html += '<th>Reason</th>';
-    html += '<th>Action</th>';
-    html += '</tr></thead><tbody>';
+    let html = `
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Created By</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>`;
     
     if (data.backups && data.backups.length > 0) {
-        data.backups.forEach(function(backup) {
-            html += '<tr>';
-            html += `<td>${new Date(backup.backed_up_at).toLocaleString()}</td>`;
-            html += `<td>${backup.type}</td>`;
-            html += `<td>${backup.items_count}</td>`;
-            html += `<td>${backup.backup_reason || '-'}</td>`;
-            html += `<td>`;
-            if (!backup.restored_at) {
-                html += `<button class="button button-small restore-backup" data-id="${backup.history_id}" data-type="${backup.type}">Restore</button>`;
-            } else {
-                html += `<span class="restored">Restored ${new Date(backup.restored_at).toLocaleDateString()}</span>`;
-            }
-            html += `</td>`;
-            html += '</tr>';
+        data.backups.forEach(backup => {
+            const date = new Date(backup.created_at).toLocaleString();
+            const statusBadge = backup.restored_at ? 
+                '<span style="color: green; font-weight: bold;">Restored</span>' : 
+                '<span style="color: blue; font-weight: bold;">Available</span>';
+            
+            html += `
+                <tr>
+                    <td>${backup.id}</td>
+                    <td>${backup.type === 'vote' ? 'Individual Vote' : 'Candidate Score'}</td>
+                    <td>${date}</td>
+                    <td>${backup.created_by_name || 'System'}</td>
+                    <td>${backup.reason || '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${!backup.restored_at ? 
+                            `<button class="button button-small restore-backup" 
+                                data-backup-id="${backup.id}" 
+                                data-backup-type="${backup.type}">
+                                Restore
+                            </button>` : 
+                            '-'
+                        }
+                    </td>
+                </tr>`;
         });
     } else {
-        html += '<tr><td colspan="5" style="text-align: center;">No backups found</td></tr>';
+        html += '<tr><td colspan="7" style="text-align: center;">No backups found</td></tr>';
     }
     
-    html += '</tbody></table>';
+    html += `
+            </tbody>
+        </table>`;
     
-    jQuery('#reset-history-content').html(html);
+    jQuery('#backup-history-content').html(html);
     
-    // Add restore handlers
+    // Handle restore clicks
     jQuery('.restore-backup').on('click', function() {
-        const backupId = jQuery(this).data('id');
-        const backupType = jQuery(this).data('type');
+        const backupId = jQuery(this).data('backup-id');
+        const backupType = jQuery(this).data('backup-type');
         
-        if (confirm(`Restore this backup?\n\nWarning: Current data for the affected vote(s) will be replaced.\n\nContinue?`)) {
+        if (confirm('Are you sure you want to restore from this backup?\n\nThis will replace current data with the backup data.')) {
             performRestore(backupId, backupType);
         }
     });
@@ -460,19 +464,20 @@ function showBackupHistoryTable(data) {
 
 function performRestore(backupId, backupType) {
     jQuery.ajax({
-        url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/restore-backup',
+        url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/restore-backup',
         method: 'POST',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+            xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
         },
         data: {
             backup_id: backupId,
-            type: backupType
+            backup_type: backupType
         }
     })
     .done(function(response) {
         if (response.success) {
             alert('Success! The backup has been restored.');
+            jQuery('#backup-history-overlay').remove();
             location.reload();
         }
     })
@@ -484,10 +489,10 @@ function performRestore(backupId, backupType) {
 // Targeted reset functions
 function performUserReset(userId) {
     jQuery.ajax({
-        url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+        url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
         method: 'POST',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+            xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
         },
         data: {
             reset_scope: 'all_user_votes',
@@ -510,10 +515,10 @@ function performUserReset(userId) {
 
 function performCandidateReset(candidateId) {
     jQuery.ajax({
-        url: mt_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
+        url: mt_vote_reset_ajax.rest_url + 'mobility-trailblazers/v1/admin/bulk-reset',
         method: 'POST',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader('X-WP-Nonce', mt_ajax.nonce);
+            xhr.setRequestHeader('X-WP-Nonce', mt_vote_reset_ajax.nonce);
         },
         data: {
             reset_scope: 'all_candidate_votes',
