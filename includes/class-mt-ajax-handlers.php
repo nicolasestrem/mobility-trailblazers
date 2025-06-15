@@ -107,7 +107,7 @@ class MT_AJAX_Handlers {
         }
         
         $candidates_per_jury = intval($_POST['candidates_per_jury']);
-        $overlap = intval($_POST['overlap']);
+        $overlap = isset($_POST['overlap']) ? intval($_POST['overlap']) : 0;
         
         if ($candidates_per_jury < 1) {
             wp_send_json_error('Invalid number of candidates per jury');

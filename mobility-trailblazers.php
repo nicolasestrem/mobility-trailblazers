@@ -134,6 +134,7 @@ class MobilityTrailblazersPlugin {
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-rest-api.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-jury-system.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-diagnostic.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-diagnostic-fix.php');
         
         // Vote management
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php');
