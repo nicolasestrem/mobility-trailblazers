@@ -532,6 +532,7 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_evaluation_submission', array($this, 'handle_evaluation_submission'));
         
         // Diagnostic hooks (menu registration handled in constructor)
+        add_action('wp_ajax_mt_diagnostic_action', array($this, 'handle_diagnostic_ajax'));
 
         // Temporary debug for assignment page
         add_action('admin_footer', function() {
@@ -3427,34 +3428,711 @@ class MobilityTrailblazersPlugin {
     }
 
     /**
-     * Diagnostic page callback
+     * Enhanced Diagnostic page callback with comprehensive checks and fixes
      */
     public function diagnostic_page() {
-        echo "<div class='wrap'>";
-        echo "<h1>Mobility Trailblazers Diagnostic</h1>";
+        // Handle AJAX actions first
+        if (isset($_POST['action']) && wp_verify_nonce($_POST['nonce'], 'mt_diagnostic_nonce')) {
+            $this->handle_diagnostic_action($_POST['action'], $_POST);
+        }
+        
+        ?>
+        <div class="wrap mt-diagnostic-page">
+            <h1 class="wp-heading-inline">
+                <span class="dashicons dashicons-admin-tools" style="font-size: 36px; width: 36px; height: 36px; margin-right: 10px;"></span>
+                <?php _e('Mobility Trailblazers System Diagnostic', 'mobility-trailblazers'); ?>
+            </h1>
+            
+            <hr class="wp-header-end">
+            
+            <!-- System Overview Cards -->
+            <div class="mt-diagnostic-overview">
+                <?php $this->render_system_overview(); ?>
+            </div>
+            
+            <!-- Diagnostic Sections -->
+            <div class="mt-diagnostic-sections">
+                
+                <!-- WordPress Environment -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-wordpress"></span> WordPress Environment</h2>
+                    <?php $this->check_wordpress_environment(); ?>
+                </div>
+                
+                <!-- Plugin Status -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-admin-plugins"></span> Plugin Status</h2>
+                    <?php $this->check_plugin_status(); ?>
+                </div>
+                
+                <!-- Database Status -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-database"></span> Database Status</h2>
+                    <?php $this->check_database_status(); ?>
+                </div>
+                
+                <!-- Post Types & Content -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-admin-post"></span> Content Status</h2>
+                    <?php $this->check_content_status(); ?>
+                </div>
+                
+                <!-- User Roles & Permissions -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-admin-users"></span> User Roles & Permissions</h2>
+                    <?php $this->check_user_permissions(); ?>
+                </div>
+                
+                <!-- Assignments & Evaluations -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-networking"></span> Assignments & Evaluations</h2>
+                    <?php $this->check_assignments_evaluations(); ?>
+                </div>
+                
+                <!-- Menu & Navigation -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-menu"></span> Menu & Navigation</h2>
+                    <?php $this->check_menu_navigation(); ?>
+                </div>
+                
+                <!-- API & Endpoints -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-rest-api"></span> API & Endpoints</h2>
+                    <?php $this->check_api_endpoints(); ?>
+                </div>
+                
+                <!-- File System -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-media-code"></span> File System</h2>
+                    <?php $this->check_file_system(); ?>
+                </div>
+                
+                <!-- Performance & Caching -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-performance"></span> Performance & Caching</h2>
+                    <?php $this->check_performance_caching(); ?>
+                </div>
+                
+                <!-- Security -->
+                <div class="mt-diagnostic-section">
+                    <h2><span class="dashicons dashicons-shield"></span> Security</h2>
+                    <?php $this->check_security(); ?>
+                </div>
+                
+            </div>
+            
+            <!-- Quick Fixes Section -->
+            <div class="mt-diagnostic-section">
+                <h2><span class="dashicons dashicons-admin-tools"></span> Quick Fixes</h2>
+                <?php $this->render_quick_fixes(); ?>
+            </div>
+            
+            <!-- System Logs -->
+            <div class="mt-diagnostic-section">
+                <h2><span class="dashicons dashicons-media-text"></span> System Logs</h2>
+                <?php $this->render_system_logs(); ?>
+            </div>
+            
+            <!-- Export Options -->
+            <div class="mt-diagnostic-section">
+                <h2><span class="dashicons dashicons-download"></span> Export Diagnostic Report</h2>
+                <?php $this->render_export_options(); ?>
+            </div>
+            
+        </div>
+        
+        <!-- CSS Styles -->
+        <style>
+        .mt-diagnostic-page {
+            max-width: 1200px;
+        }
+        
+        .mt-diagnostic-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .mt-overview-card {
+            background: #fff;
+            border: 1px solid #ccd0d4;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+        }
+        
+        .mt-overview-card h3 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            color: #23282d;
+        }
+        
+        .mt-overview-card.status-good h3 { color: #46b450; }
+        .mt-overview-card.status-warning h3 { color: #ffb900; }
+        .mt-overview-card.status-error h3 { color: #dc3232; }
+        
+        .mt-diagnostic-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .mt-diagnostic-section {
+            background: #fff;
+            border: 1px solid #ccd0d4;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 1px rgba(0,0,0,.04);
+        }
+        
+        .mt-diagnostic-section h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .mt-check-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f1;
+        }
+        
+        .mt-check-item:last-child {
+            border-bottom: none;
+        }
+        
+        .mt-check-label {
+            font-weight: 600;
+            color: #23282d;
+        }
+        
+        .mt-check-details {
+            font-size: 0.9em;
+            color: #646970;
+            margin-top: 2px;
+        }
+        
+        .mt-check-status {
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .mt-status-good {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .mt-status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .mt-status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .mt-diagnostic-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .mt-diagnostic-table th,
+        .mt-diagnostic-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .mt-diagnostic-table th {
+            background: #f9f9f9;
+            font-weight: 600;
+        }
+        
+        .mt-fix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .mt-fix-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background: #fafafa;
+        }
+        
+        .mt-fix-item h4 {
+            margin: 0 0 8px 0;
+            color: #23282d;
+        }
+        
+        .mt-fix-item p {
+            margin: 0 0 12px 0;
+            color: #646970;
+            font-size: 0.9em;
+        }
+        
+        .mt-quick-fix-btn {
+            width: 100%;
+        }
+        
+        .mt-log-viewer {
+            background: #23282d;
+            color: #f0f0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .mt-export-actions {
+            margin: 15px 0;
+        }
+        
+        .mt-export-actions .button {
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .mt-diagnostic-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .mt-diagnostic-overview {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+        </style>
+        
+        <!-- JavaScript -->
+        <script>
+        jQuery(document).ready(function($) {
+            // Handle quick fix buttons
+            $('.mt-quick-fix-btn').on('click', function(e) {
+                e.preventDefault();
+                
+                var $button = $(this);
+                var action = $button.data('action');
+                var originalText = $button.text();
+                
+                $button.prop('disabled', true).text('Processing...');
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'mt_diagnostic_action',
+                        diagnostic_action: action,
+                        nonce: '<?php echo wp_create_nonce('mt_diagnostic_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $button.text('✓ Done').removeClass('button-primary button-secondary').addClass('button-disabled');
+                            alert('Success: ' + response.data.message);
+                            
+                            // Refresh page after 2 seconds
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            $button.prop('disabled', false).text(originalText);
+                            alert('Error: ' + response.data.message);
+                        }
+                    },
+                    error: function() {
+                        $button.prop('disabled', false).text(originalText);
+                        alert('An error occurred while processing the request.');
+                    }
+                });
+            });
+        });
+        </script>
+        
+        <?php
+    }
 
+    /**
+     * Handle diagnostic AJAX actions
+     */
+    public function handle_diagnostic_ajax() {
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+        }
+        
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_diagnostic_nonce')) {
+            wp_send_json_error(array('message' => 'Security check failed'));
+        }
+        
+        $action = sanitize_text_field($_POST['diagnostic_action']);
+        
+        switch ($action) {
+            case 'create_test_assignment':
+                $result = $this->create_test_assignment();
+                if ($result) {
+                    wp_send_json_success(array('message' => 'Test assignments created successfully'));
+                } else {
+                    wp_send_json_error(array('message' => 'Failed to create test assignments'));
+                }
+                break;
+                
+            case 'link_current_user':
+                $result = $this->link_current_user_to_jury();
+                if ($result) {
+                    wp_send_json_success(array('message' => 'Current user linked to jury member'));
+                } else {
+                    wp_send_json_error(array('message' => 'Failed to link user to jury member'));
+                }
+                break;
+                
+            case 'create_missing_tables':
+                $this->create_database_tables();
+                wp_send_json_success(array('message' => 'Database tables created/updated'));
+                break;
+                
+            case 'flush_rewrite_rules':
+                flush_rewrite_rules();
+                wp_send_json_success(array('message' => 'Rewrite rules flushed'));
+                break;
+                
+            case 'clear_all_caches':
+                $this->clear_all_caches();
+                wp_send_json_success(array('message' => 'All caches cleared'));
+                break;
+                
+            case 'fix_user_roles':
+                $this->fix_user_roles();
+                wp_send_json_success(array('message' => 'User roles fixed'));
+                break;
+                
+            case 'sync_jury_users':
+                $synced = $this->sync_jury_users();
+                wp_send_json_success(array('message' => "Synced {$synced} jury members with users"));
+                break;
+                
+            case 'regenerate_assignments':
+                $assigned = $this->regenerate_assignments();
+                if ($assigned) {
+                    wp_send_json_success(array('message' => "Regenerated {$assigned} assignments"));
+                } else {
+                    wp_send_json_error(array('message' => 'Failed to regenerate assignments'));
+                }
+                break;
+                
+            default:
+                wp_send_json_error(array('message' => 'Unknown action'));
+        }
+    }
+
+    /**
+     * Render system overview cards
+     */
+    private function render_system_overview() {
         global $wpdb;
-
-        // 1. Check if custom post types exist
-        echo "<h2>1. Post Types Status</h2>";
+        
+        // Get basic counts
         $candidate_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_candidate' AND post_status = 'publish'");
         $jury_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_jury' AND post_status = 'publish'");
-
-        echo "<p><strong>Candidates:</strong> {$candidate_count}</p>";
-        echo "<p><strong>Jury Members:</strong> {$jury_count}</p>";
-
-        // 2. Check assignments
-        echo "<h2>2. Assignment Status</h2>";
         $assignment_count = $wpdb->get_var("
             SELECT COUNT(*) FROM {$wpdb->postmeta} pm
             JOIN {$wpdb->posts} p ON pm.post_id = p.ID
             WHERE pm.meta_key = '_mt_assigned_jury_member'
             AND p.post_type = 'mt_candidate'
         ");
+        $evaluation_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores");
+        
+        // Determine overall system health
+        $health_score = 0;
+        $health_issues = array();
+        
+        if ($candidate_count > 0) $health_score += 25;
+        else $health_issues[] = 'No candidates';
+        
+        if ($jury_count > 0) $health_score += 25;
+        else $health_issues[] = 'No jury members';
+        
+        if ($assignment_count > 0) $health_score += 25;
+        else $health_issues[] = 'No assignments';
+        
+        if ($evaluation_count > 0) $health_score += 25;
+        else $health_issues[] = 'No evaluations';
+        
+        $health_status = $health_score >= 75 ? 'good' : ($health_score >= 50 ? 'warning' : 'error');
+        
+        ?>
+        <div class="mt-overview-card status-<?php echo $health_status; ?>">
+            <h3><?php echo $health_score; ?>%</h3>
+            <p>System Health</p>
+        </div>
+        
+        <div class="mt-overview-card">
+            <h3><?php echo number_format($candidate_count); ?></h3>
+            <p>Candidates</p>
+        </div>
+        
+        <div class="mt-overview-card">
+            <h3><?php echo number_format($jury_count); ?></h3>
+            <p>Jury Members</p>
+        </div>
+        
+        <div class="mt-overview-card">
+            <h3><?php echo number_format($assignment_count); ?></h3>
+            <p>Assignments</p>
+        </div>
+        
+        <div class="mt-overview-card">
+            <h3><?php echo number_format($evaluation_count); ?></h3>
+            <p>Evaluations</p>
+        </div>
+        <?php
+    }
 
-        echo "<p><strong>Total Assignments:</strong> {$assignment_count}</p>";
+    /**
+     * Check WordPress environment
+     */
+    private function check_wordpress_environment() {
+        global $wp_version;
+        
+        $checks = array(
+            'WordPress Version' => array(
+                'value' => $wp_version,
+                'status' => version_compare($wp_version, '5.0', '>=') ? 'good' : 'warning',
+                'details' => version_compare($wp_version, '5.0', '>=') ? 'Current' : 'Consider updating'
+            ),
+            'PHP Version' => array(
+                'value' => PHP_VERSION,
+                'status' => version_compare(PHP_VERSION, '7.4', '>=') ? 'good' : 'error',
+                'details' => version_compare(PHP_VERSION, '7.4', '>=') ? 'Compatible' : 'Requires PHP 7.4+'
+            ),
+            'Memory Limit' => array(
+                'value' => ini_get('memory_limit'),
+                'status' => $this->parse_size(ini_get('memory_limit')) >= 128 * 1024 * 1024 ? 'good' : 'warning',
+                'details' => $this->parse_size(ini_get('memory_limit')) >= 128 * 1024 * 1024 ? 'Sufficient' : 'Consider increasing'
+            ),
+            'Max Execution Time' => array(
+                'value' => ini_get('max_execution_time') . 's',
+                'status' => ini_get('max_execution_time') >= 30 ? 'good' : 'warning',
+                'details' => ini_get('max_execution_time') >= 30 ? 'Adequate' : 'May cause timeouts'
+            ),
+            'Debug Mode' => array(
+                'value' => WP_DEBUG ? 'Enabled' : 'Disabled',
+                'status' => WP_DEBUG ? 'warning' : 'good',
+                'details' => WP_DEBUG ? 'Disable in production' : 'Good for production'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
 
+    /**
+     * Check plugin status
+     */
+    private function check_plugin_status() {
+        $checks = array(
+            'Plugin Active' => array(
+                'value' => is_plugin_active(plugin_basename(__FILE__)) ? 'Yes' : 'No',
+                'status' => is_plugin_active(plugin_basename(__FILE__)) ? 'good' : 'error',
+                'details' => is_plugin_active(plugin_basename(__FILE__)) ? 'Plugin is active' : 'Plugin not active'
+            ),
+            'Custom Post Types' => array(
+                'value' => post_type_exists('mt_candidate') && post_type_exists('mt_jury') ? 'Registered' : 'Missing',
+                'status' => post_type_exists('mt_candidate') && post_type_exists('mt_jury') ? 'good' : 'error',
+                'details' => post_type_exists('mt_candidate') && post_type_exists('mt_jury') ? 'All registered' : 'Some missing'
+            ),
+            'Custom Roles' => array(
+                'value' => get_role('mt_jury_member') ? 'Created' : 'Missing',
+                'status' => get_role('mt_jury_member') ? 'good' : 'error',
+                'details' => get_role('mt_jury_member') ? 'Jury role exists' : 'Role not created'
+            ),
+            'Taxonomies' => array(
+                'value' => taxonomy_exists('mt_category') ? 'Registered' : 'Missing',
+                'status' => taxonomy_exists('mt_category') ? 'good' : 'error',
+                'details' => taxonomy_exists('mt_category') ? 'Categories available' : 'Taxonomy missing'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
+
+    /**
+     * Check database status
+     */
+    private function check_database_status() {
+        global $wpdb;
+        
+        $required_tables = array(
+            'mt_candidate_scores' => 'Stores jury evaluations',
+            'mt_votes' => 'Stores jury votes',
+            'mt_public_votes' => 'Stores public votes',
+            'vote_reset_logs' => 'Vote reset audit trail',
+            'vote_backups' => 'Vote backup storage'
+        );
+        
+        echo '<table class="mt-diagnostic-table">';
+        echo '<thead><tr><th>Table</th><th>Status</th><th>Records</th><th>Purpose</th><th>Actions</th></tr></thead>';
+        echo '<tbody>';
+        
+        foreach ($required_tables as $table => $purpose) {
+            $full_table_name = $wpdb->prefix . $table;
+            $exists = $wpdb->get_var("SHOW TABLES LIKE '{$full_table_name}'");
+            
+            if ($exists) {
+                $count = $wpdb->get_var("SELECT COUNT(*) FROM {$full_table_name}");
+                $status = 'good';
+                $status_text = '✅ Exists';
+                $actions = '<button class="button button-small" onclick="alert(\'Table: ' . $table . '\\nRecords: ' . $count . '\')">View Info</button>';
+            } else {
+                $count = '-';
+                $status = 'error';
+                $status_text = '❌ Missing';
+                $actions = '<button class="button button-small mt-quick-fix-btn" data-action="create_missing_tables">Create</button>';
+            }
+            
+            echo "<tr>";
+            echo "<td><strong>{$table}</strong></td>";
+            echo "<td class='mt-status-{$status}'>{$status_text}</td>";
+            echo "<td>{$count}</td>";
+            echo "<td>{$purpose}</td>";
+            echo "<td>{$actions}</td>";
+            echo "</tr>";
+        }
+        
+        echo '</tbody></table>';
+    }
+
+    /**
+     * Check content status
+     */
+    private function check_content_status() {
+        global $wpdb;
+        
+        $candidate_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_candidate' AND post_status = 'publish'");
+        $jury_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_jury' AND post_status = 'publish'");
+        $draft_candidates = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_candidate' AND post_status = 'draft'");
+        $categories = wp_count_terms('mt_category');
+        
+        $checks = array(
+            'Published Candidates' => array(
+                'value' => $candidate_count,
+                'status' => $candidate_count > 0 ? 'good' : 'warning',
+                'details' => $candidate_count > 0 ? 'Candidates available' : 'No published candidates'
+            ),
+            'Draft Candidates' => array(
+                'value' => $draft_candidates,
+                'status' => 'good',
+                'details' => $draft_candidates . ' candidates in draft'
+            ),
+            'Jury Members' => array(
+                'value' => $jury_count,
+                'status' => $jury_count > 0 ? 'good' : 'warning',
+                'details' => $jury_count > 0 ? 'Jury members available' : 'No jury members'
+            ),
+            'Categories' => array(
+                'value' => $categories,
+                'status' => $categories > 0 ? 'good' : 'warning',
+                'details' => $categories > 0 ? 'Categories defined' : 'No categories'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
+
+    /**
+     * Check user permissions
+     */
+    private function check_user_permissions() {
+        $current_user = wp_get_current_user();
+        $jury_role = get_role('mt_jury_member');
+        $jury_users = get_users(array('role' => 'mt_jury_member'));
+        
+        $checks = array(
+            'Current User Role' => array(
+                'value' => implode(', ', $current_user->roles),
+                'status' => current_user_can('manage_options') ? 'good' : 'warning',
+                'details' => current_user_can('manage_options') ? 'Admin access' : 'Limited access'
+            ),
+            'Jury Role Exists' => array(
+                'value' => $jury_role ? 'Yes' : 'No',
+                'status' => $jury_role ? 'good' : 'error',
+                'details' => $jury_role ? 'Role properly defined' : 'Role missing'
+            ),
+            'Jury Users' => array(
+                'value' => count($jury_users),
+                'status' => count($jury_users) > 0 ? 'good' : 'warning',
+                'details' => count($jury_users) . ' users with jury role'
+            ),
+            'Current User Jury Status' => array(
+                'value' => $this->is_jury_member($current_user->ID) ? 'Yes' : 'No',
+                'status' => $this->is_jury_member($current_user->ID) ? 'good' : 'warning',
+                'details' => $this->is_jury_member($current_user->ID) ? 'Can access jury features' : 'No jury access'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
+
+    /**
+     * Check assignments and evaluations
+     */
+    private function check_assignments_evaluations() {
+        global $wpdb;
+        
+        $assignment_count = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$wpdb->postmeta} pm
+            JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE pm.meta_key = '_mt_assigned_jury_member'
+            AND p.post_type = 'mt_candidate'
+        ");
+        
+        $evaluation_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores");
+        $jury_links = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$wpdb->posts} p
+            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'mt_jury'
+            AND (pm.meta_key = '_mt_jury_user_id' OR pm.meta_key = '_mt_jury_email')
+        ");
+        
+        $checks = array(
+            'Candidate Assignments' => array(
+                'value' => $assignment_count,
+                'status' => $assignment_count > 0 ? 'good' : 'error',
+                'details' => $assignment_count > 0 ? 'Candidates assigned to jury' : 'No assignments found'
+            ),
+            'Jury-User Links' => array(
+                'value' => $jury_links,
+                'status' => $jury_links > 0 ? 'good' : 'error',
+                'details' => $jury_links > 0 ? 'Jury members linked to users' : 'No jury-user links'
+            ),
+            'Completed Evaluations' => array(
+                'value' => $evaluation_count,
+                'status' => $evaluation_count > 0 ? 'good' : 'warning',
+                'details' => $evaluation_count . ' evaluations completed'
+            )
+        );
+        
+        $this->render_check_items($checks);
+        
+        // Show sample assignments if they exist
         if ($assignment_count > 0) {
+            echo '<h4>Sample Assignments</h4>';
             $assignments = $wpdb->get_results("
                 SELECT p.post_title as candidate_name, j.post_title as jury_name 
                 FROM {$wpdb->postmeta} pm
@@ -3465,91 +4143,473 @@ class MobilityTrailblazersPlugin {
                 AND j.post_type = 'mt_jury'
                 LIMIT 5
             ");
-
-            echo "<h3>Sample Assignments:</h3>";
-            echo "<table class='wp-list-table widefat fixed striped'>";
-            echo "<thead><tr><th>Candidate</th><th>Assigned to Jury</th></tr></thead><tbody>";
+            
+            echo '<table class="mt-diagnostic-table">';
+            echo '<thead><tr><th>Candidate</th><th>Assigned to Jury</th></tr></thead><tbody>';
             foreach ($assignments as $assignment) {
                 echo "<tr><td>{$assignment->candidate_name}</td><td>{$assignment->jury_name}</td></tr>";
             }
-            echo "</tbody></table>";
-        } else {
-            echo "<p style='color: red;'><strong>⚠️ No assignments found!</strong></p>";
-            echo "<p>Jury members won't see any candidates in their dashboard.</p>";
+            echo '</tbody></table>';
         }
+    }
 
-        // 3. Check jury-user linking
-        echo "<h2>3. Jury-User Linking</h2>";
-        $jury_links = $wpdb->get_var("
-            SELECT COUNT(*) FROM {$wpdb->posts} p
-            JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-            WHERE p.post_type = 'mt_jury'
-            AND (pm.meta_key = '_mt_jury_user_id' OR pm.meta_key = '_mt_jury_email')
-        ");
-
-        echo "<p><strong>Jury-User Links:</strong> {$jury_links}</p>";
-
-        if ($jury_links === '0') {
-            echo "<p style='color: red;'><strong>⚠️ No jury-user links found!</strong></p>";
-            echo "<p>Jury members won't be able to access their dashboard.</p>";
-        }
-
-        // 4. Check database tables
-        echo "<h2>4. Database Tables</h2>";
-        $required_tables = [
-            'mt_candidate_scores' => 'Stores jury evaluations',
-            'mt_votes' => 'Stores jury votes'
-        ];
-
-        echo "<table class='wp-list-table widefat fixed striped'>";
-        echo "<thead><tr><th>Table</th><th>Status</th><th>Records</th><th>Purpose</th></tr></thead><tbody>";
+    /**
+     * Check menu and navigation
+     */
+    private function check_menu_navigation() {
+        global $menu, $submenu;
         
-        foreach ($required_tables as $table => $purpose) {
-            $full_table_name = $wpdb->prefix . $table;
-            $exists = $wpdb->get_var("SHOW TABLES LIKE '{$full_table_name}'");
-            
-            if ($exists) {
-                $count = $wpdb->get_var("SELECT COUNT(*) FROM {$full_table_name}");
-                echo "<tr><td>{$table}</td><td style='color: green;'>✅ Exists</td><td>{$count}</td><td>{$purpose}</td></tr>";
-            } else {
-                echo "<tr><td>{$table}</td><td style='color: red;'>❌ Missing</td><td>-</td><td>{$purpose}</td></tr>";
+        $parent_menu_exists = false;
+        foreach ($menu as $item) {
+            if ($item[2] === 'mt-award-system') {
+                $parent_menu_exists = true;
+                break;
             }
         }
-        echo "</tbody></table>";
-
-        // 5. Current user status
-        echo "<h2>5. Current User Status</h2>";
-        $current_user = wp_get_current_user();
-        echo "<p><strong>User ID:</strong> {$current_user->ID}</p>";
-        echo "<p><strong>Email:</strong> {$current_user->user_email}</p>";
-        echo "<p><strong>Roles:</strong> " . implode(', ', $current_user->roles) . "</p>";
-
-        // Check if current user is jury member
-        $is_jury = $this->is_jury_member($current_user->ID);
-        echo "<p><strong>Jury Status:</strong> " . ($is_jury ? '✅ Is jury member' : '❌ Not a jury member') . "</p>";
-
-        // 6. Quick fixes
-        echo "<h2>6. Quick Fixes</h2>";
         
-        if (isset($_POST['create_test_assignment'])) {
-            $this->create_test_assignment();
-            echo "<div class='notice notice-success'><p>Test assignment created!</p></div>";
+        $jury_dashboard_exists = false;
+        if (isset($submenu['mt-award-system'])) {
+            foreach ($submenu['mt-award-system'] as $item) {
+                if ($item[2] === 'mt-jury-dashboard') {
+                    $jury_dashboard_exists = true;
+                    break;
+                }
+            }
         }
         
-        if (isset($_POST['link_current_user'])) {
-            $this->link_current_user_to_jury();
-            echo "<div class='notice notice-success'><p>Current user linked to jury!</p></div>";
+        $checks = array(
+            'Main Menu' => array(
+                'value' => $parent_menu_exists ? 'Registered' : 'Missing',
+                'status' => $parent_menu_exists ? 'good' : 'error',
+                'details' => $parent_menu_exists ? 'MT Award System menu exists' : 'Main menu not registered'
+            ),
+            'Jury Dashboard Menu' => array(
+                'value' => $jury_dashboard_exists ? 'Registered' : 'Missing',
+                'status' => $jury_dashboard_exists ? 'good' : 'error',
+                'details' => $jury_dashboard_exists ? 'Jury dashboard accessible' : 'Dashboard menu missing'
+            ),
+            'Submenu Count' => array(
+                'value' => isset($submenu['mt-award-system']) ? count($submenu['mt-award-system']) : 0,
+                'status' => 'good',
+                'details' => 'Available submenus'
+            )
+        );
+        
+        $this->render_check_items($checks);
+        
+        // Show all submenus
+        if (isset($submenu['mt-award-system'])) {
+            echo '<h4>Available Submenus</h4>';
+            echo '<ul>';
+            foreach ($submenu['mt-award-system'] as $item) {
+                echo '<li><strong>' . $item[0] . '</strong> (' . $item[2] . ')</li>';
+            }
+            echo '</ul>';
         }
+    }
 
-        echo "<form method='post' style='margin: 10px 0;'>";
-        echo "<input type='submit' name='create_test_assignment' class='button button-secondary' value='Create Test Assignment'>";
-        echo "</form>";
+    /**
+     * Check API endpoints
+     */
+    private function check_api_endpoints() {
+        $rest_url = get_rest_url();
+        $endpoints = array(
+            'REST API Base' => $rest_url,
+            'Vote Reset API' => $rest_url . 'mobility-trailblazers/v1/reset-vote',
+            'Bulk Reset API' => $rest_url . 'mobility-trailblazers/v1/admin/bulk-reset',
+            'Reset History API' => $rest_url . 'mobility-trailblazers/v1/reset-history'
+        );
+        
+        echo '<table class="mt-diagnostic-table">';
+        echo '<thead><tr><th>Endpoint</th><th>URL</th><th>Status</th></tr></thead><tbody>';
+        
+        foreach ($endpoints as $name => $url) {
+            $status = $this->test_endpoint($url);
+            $status_class = $status ? 'good' : 'warning';
+            $status_text = $status ? '✅ Available' : '⚠️ Check manually';
+            
+            echo "<tr>";
+            echo "<td><strong>{$name}</strong></td>";
+            echo "<td><code>{$url}</code></td>";
+            echo "<td class='mt-status-{$status_class}'>{$status_text}</td>";
+            echo "</tr>";
+        }
+        
+        echo '</tbody></table>';
+    }
 
-        echo "<form method='post' style='margin: 10px 0;'>";
-        echo "<input type='submit' name='link_current_user' class='button button-secondary' value='Link Current User to First Jury Member'>";
-        echo "</form>";
+    /**
+     * Check file system
+     */
+    private function check_file_system() {
+        $plugin_dir = plugin_dir_path(__FILE__);
+        $upload_dir = wp_upload_dir();
+        
+        $files_to_check = array(
+            'Main Plugin File' => __FILE__,
+            'Admin CSS' => $plugin_dir . 'admin/css/vote-reset-admin.css',
+            'Admin JS' => $plugin_dir . 'admin/js/vote-reset-admin.js',
+            'Frontend CSS' => $plugin_dir . 'assets/frontend.css',
+            'Frontend JS' => $plugin_dir . 'assets/frontend.js',
+            'Jury Dashboard Template' => $plugin_dir . 'templates/jury-dashboard.php'
+        );
+        
+        $checks = array(
+            'Plugin Directory Writable' => array(
+                'value' => is_writable($plugin_dir) ? 'Yes' : 'No',
+                'status' => is_writable($plugin_dir) ? 'good' : 'warning',
+                'details' => is_writable($plugin_dir) ? 'Can write files' : 'Limited write access'
+            ),
+            'Upload Directory Writable' => array(
+                'value' => is_writable($upload_dir['basedir']) ? 'Yes' : 'No',
+                'status' => is_writable($upload_dir['basedir']) ? 'good' : 'error',
+                'details' => is_writable($upload_dir['basedir']) ? 'Can upload files' : 'Cannot upload files'
+            )
+        );
+        
+        $this->render_check_items($checks);
+        
+        echo '<h4>File Existence Check</h4>';
+        echo '<table class="mt-diagnostic-table">';
+        echo '<thead><tr><th>File</th><th>Status</th><th>Size</th></tr></thead><tbody>';
+        
+        foreach ($files_to_check as $name => $path) {
+            $exists = file_exists($path);
+            $size = $exists ? size_format(filesize($path)) : '-';
+            $status_class = $exists ? 'good' : 'error';
+            $status_text = $exists ? '✅ Exists' : '❌ Missing';
+            
+            echo "<tr>";
+            echo "<td><strong>{$name}</strong></td>";
+            echo "<td class='mt-status-{$status_class}'>{$status_text}</td>";
+            echo "<td>{$size}</td>";
+            echo "</tr>";
+        }
+        
+        echo '</tbody></table>';
+    }
 
-        echo "</div>";
+    /**
+     * Check performance and caching
+     */
+    private function check_performance_caching() {
+        $object_cache = wp_using_ext_object_cache();
+        $opcache_enabled = function_exists('opcache_get_status') && opcache_get_status();
+        
+        $checks = array(
+            'Object Cache' => array(
+                'value' => $object_cache ? 'Active' : 'Not Active',
+                'status' => $object_cache ? 'good' : 'warning',
+                'details' => $object_cache ? 'External object cache in use' : 'Using default cache'
+            ),
+            'OPcache' => array(
+                'value' => $opcache_enabled ? 'Enabled' : 'Disabled',
+                'status' => $opcache_enabled ? 'good' : 'warning',
+                'details' => $opcache_enabled ? 'PHP bytecode cache active' : 'Consider enabling OPcache'
+            ),
+            'Query Count' => array(
+                'value' => get_num_queries(),
+                'status' => get_num_queries() < 50 ? 'good' : 'warning',
+                'details' => get_num_queries() . ' queries on this page'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
+
+    /**
+     * Check security
+     */
+    private function check_security() {
+        $checks = array(
+            'SSL/HTTPS' => array(
+                'value' => is_ssl() ? 'Enabled' : 'Disabled',
+                'status' => is_ssl() ? 'good' : 'warning',
+                'details' => is_ssl() ? 'Secure connection' : 'Consider enabling HTTPS'
+            ),
+            'File Editing' => array(
+                'value' => defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT ? 'Disabled' : 'Enabled',
+                'status' => defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT ? 'good' : 'warning',
+                'details' => defined('DISALLOW_FILE_EDIT') && DISALLOW_FILE_EDIT ? 'File editing disabled' : 'Consider disabling file editing'
+            ),
+            'Database Prefix' => array(
+                'value' => $GLOBALS['wpdb']->prefix !== 'wp_' ? 'Custom' : 'Default',
+                'status' => $GLOBALS['wpdb']->prefix !== 'wp_' ? 'good' : 'warning',
+                'details' => $GLOBALS['wpdb']->prefix !== 'wp_' ? 'Using custom prefix' : 'Consider custom prefix'
+            )
+        );
+        
+        $this->render_check_items($checks);
+    }
+
+    /**
+     * Render quick fixes section
+     */
+    private function render_quick_fixes() {
+        ?>
+        <div class="mt-fix-grid">
+            <div class="mt-fix-item">
+                <h4>Create Test Assignment</h4>
+                <p>Creates sample assignments between candidates and jury members for testing.</p>
+                <button class="button button-primary mt-quick-fix-btn" data-action="create_test_assignment">
+                    Create Test Assignment
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Link Current User</h4>
+                <p>Links your current user account to the first jury member for testing access.</p>
+                <button class="button button-primary mt-quick-fix-btn" data-action="link_current_user">
+                    Link Current User
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Create Missing Tables</h4>
+                <p>Creates any missing database tables required by the plugin.</p>
+                <button class="button button-primary mt-quick-fix-btn" data-action="create_missing_tables">
+                    Create Tables
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Flush Rewrite Rules</h4>
+                <p>Refreshes WordPress URL rewrite rules to fix routing issues.</p>
+                <button class="button button-secondary mt-quick-fix-btn" data-action="flush_rewrite_rules">
+                    Flush Rules
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Clear All Caches</h4>
+                <p>Clears WordPress transients and object cache to resolve caching issues.</p>
+                <button class="button button-secondary mt-quick-fix-btn" data-action="clear_all_caches">
+                    Clear Caches
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Fix User Roles</h4>
+                <p>Recreates the jury member role with proper capabilities.</p>
+                <button class="button button-secondary mt-quick-fix-btn" data-action="fix_user_roles">
+                    Fix Roles
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Sync Jury Users</h4>
+                <p>Synchronizes jury post records with WordPress user accounts.</p>
+                <button class="button button-secondary mt-quick-fix-btn" data-action="sync_jury_users">
+                    Sync Users
+                </button>
+            </div>
+            
+            <div class="mt-fix-item">
+                <h4>Regenerate Assignments</h4>
+                <p>Automatically assigns all candidates to jury members using round-robin.</p>
+                <button class="button button-secondary mt-quick-fix-btn" data-action="regenerate_assignments">
+                    Auto Assign
+                </button>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render system logs
+     */
+    private function render_system_logs() {
+        $log_file = WP_CONTENT_DIR . '/debug.log';
+        
+        if (file_exists($log_file) && is_readable($log_file)) {
+            $log_content = file_get_contents($log_file);
+            $lines = explode("\n", $log_content);
+            $recent_lines = array_slice($lines, -50); // Last 50 lines
+            
+            echo '<h4>Recent Debug Log (Last 50 lines)</h4>';
+            echo '<div class="mt-log-viewer">';
+            echo esc_html(implode("\n", $recent_lines));
+            echo '</div>';
+        } else {
+            echo '<p>Debug log not available or not readable.</p>';
+            echo '<p>To enable logging, add these lines to wp-config.php:</p>';
+            echo '<pre>define(\'WP_DEBUG\', true);
+define(\'WP_DEBUG_LOG\', true);
+define(\'WP_DEBUG_DISPLAY\', false);</pre>';
+        }
+    }
+
+    /**
+     * Render export options
+     */
+    private function render_export_options() {
+        ?>
+        <p>Export a comprehensive diagnostic report for troubleshooting or support.</p>
+        <div class="mt-export-actions">
+            <button class="button button-primary" onclick="exportDiagnosticReport('json')">
+                Export as JSON
+            </button>
+            <button class="button button-secondary" onclick="exportDiagnosticReport('txt')">
+                Export as Text
+            </button>
+        </div>
+        
+        <script>
+        function exportDiagnosticReport(format) {
+            var data = {
+                timestamp: new Date().toISOString(),
+                wordpress_version: '<?php echo $GLOBALS["wp_version"]; ?>',
+                php_version: '<?php echo PHP_VERSION; ?>',
+                plugin_version: '1.0.0',
+                site_url: '<?php echo site_url(); ?>',
+                checks: {}
+            };
+            
+            // Collect all diagnostic data
+            jQuery('.mt-check-item').each(function() {
+                var label = jQuery(this).find('.mt-check-label').text();
+                var value = jQuery(this).find('.mt-check-status').text();
+                data.checks[label] = value;
+            });
+            
+            var content = format === 'json' ? JSON.stringify(data, null, 2) : formatAsText(data);
+            var filename = 'mt-diagnostic-' + new Date().toISOString().split('T')[0] + '.' + format;
+            
+            downloadFile(content, filename, format === 'json' ? 'application/json' : 'text/plain');
+        }
+        
+        function formatAsText(data) {
+            var text = 'Mobility Trailblazers Diagnostic Report\n';
+            text += '=====================================\n\n';
+            text += 'Generated: ' + data.timestamp + '\n';
+            text += 'WordPress: ' + data.wordpress_version + '\n';
+            text += 'PHP: ' + data.php_version + '\n';
+            text += 'Site: ' + data.site_url + '\n\n';
+            text += 'System Checks:\n';
+            text += '--------------\n';
+            
+            for (var check in data.checks) {
+                text += check + ': ' + data.checks[check] + '\n';
+            }
+            
+            return text;
+        }
+        
+        function downloadFile(content, filename, contentType) {
+            var blob = new Blob([content], { type: contentType });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        </script>
+        <?php
+    }
+
+    /**
+     * Helper method to render check items
+     */
+    private function render_check_items($checks) {
+        foreach ($checks as $label => $check) {
+            echo '<div class="mt-check-item">';
+            echo '<div>';
+            echo '<div class="mt-check-label">' . esc_html($label) . '</div>';
+            if (isset($check['details'])) {
+                echo '<div class="mt-check-details">' . esc_html($check['details']) . '</div>';
+            }
+            echo '</div>';
+            echo '<div class="mt-check-status mt-status-' . esc_attr($check['status']) . '">';
+            echo esc_html($check['value']);
+            echo '</div>';
+            echo '</div>';
+        }
+    }
+
+    /**
+     * Helper methods for diagnostic functions
+     */
+    private function parse_size($size) {
+        $unit = preg_replace('/[^bkmgtpezy]/i', '', $size);
+        $size = preg_replace('/[^0-9\.]/', '', $size);
+        if ($unit) {
+            return round($size * pow(1024, stripos('bkmgtpezy', $unit[0])));
+        }
+        return round($size);
+    }
+
+    private function test_endpoint($url) {
+        // Simple check - in a real implementation, you might want to make an actual HTTP request
+        return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+    }
+
+    private function clear_all_caches() {
+        // Clear WordPress transients
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_%'");
+        
+        // Clear object cache if available
+        if (function_exists('wp_cache_flush')) {
+            wp_cache_flush();
+        }
+        
+        return true;
+    }
+
+    private function fix_user_roles() {
+        // Recreate the jury member role
+        remove_role('mt_jury_member');
+        add_role('mt_jury_member', 'Jury Member', array(
+            'read' => true,
+            'mt_jury_member' => true,
+            'edit_posts' => false,
+            'delete_posts' => false
+        ));
+        return true;
+    }
+
+    private function sync_jury_users() {
+        // Get all jury posts
+        $jury_posts = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $synced = 0;
+        foreach ($jury_posts as $jury_post) {
+            $email = get_post_meta($jury_post->ID, '_mt_jury_email', true);
+            if ($email) {
+                $user = get_user_by('email', $email);
+                if ($user) {
+                    update_post_meta($jury_post->ID, '_mt_jury_user_id', $user->ID);
+                    $synced++;
+                }
+            }
+        }
+        
+        return $synced;
+    }
+
+    private function regenerate_assignments() {
+        $candidates = get_posts(array('post_type' => 'mt_candidate', 'posts_per_page' => -1));
+        $jury_members = get_posts(array('post_type' => 'mt_jury', 'posts_per_page' => -1));
+        
+        if (empty($candidates) || empty($jury_members)) {
+            return false;
+        }
+        
+        $assigned = 0;
+        foreach ($candidates as $index => $candidate) {
+            $jury_index = $index % count($jury_members);
+            update_post_meta($candidate->ID, '_mt_assigned_jury_member', $jury_members[$jury_index]->ID);
+            $assigned++;
+        }
+        
+        return $assigned;
     }
 
     /**
@@ -3581,260 +4641,6 @@ class MobilityTrailblazersPlugin {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Add evaluation page (hidden from menu)
-     */
-    public function add_evaluation_page() {
-        // Validate environment first
-        if (!is_admin() || !current_user_can('mt_jury_member')) {
-            return;
-        }
-        
-        // Check if parent menu exists
-        global $menu, $submenu;
-        $parent_exists = false;
-        
-        if (isset($submenu['mt-award-system'])) {
-            $parent_exists = true;
-        }
-        
-        if (!$parent_exists) {
-            error_log('MT Plugin: Parent menu mt-award-system does not exist');
-            return;
-        }
-        
-        // Safe parameters
-        $args = array(
-            'parent_slug' => 'mt-award-system',
-            'page_title'  => esc_html__('Evaluation Interface', 'mobility-trailblazers'),
-            'menu_title'  => esc_html__('My Dashboard', 'mobility-trailblazers'),
-            'capability'  => 'mt_jury_member',
-            'menu_slug'   => 'mt-evaluation',
-            'function'    => array($this, 'evaluation_page')
-        );
-        
-        // Validate all required parameters
-        foreach ($args as $key => $value) {
-            if (empty($value) && $key !== 'function') {
-                error_log("MT Plugin: Empty parameter '$key' for add_submenu_page");
-                return false;
-            }
-        }
-        
-        // Call with validated parameters
-        $result = add_submenu_page(
-            $args['parent_slug'],
-            $args['page_title'],
-            $args['menu_title'],
-            $args['capability'],
-            $args['menu_slug'],
-            $args['function']
-        );
-        
-        if (!$result) {
-            error_log('MT Plugin: Failed to add evaluation submenu page');
-        }
-        
-        return $result;
-    }
-
-    /**
-     * Render the evaluation page
-     */
-    public function evaluation_page() {
-        // Check permissions inside the page callback
-        $current_user_id = get_current_user_id();
-        $user = wp_get_current_user();
-        
-        // Allow if user has jury role OR is admin OR is linked jury member
-        $has_jury_role = in_array('mt_jury_member', (array) $user->roles);
-        $is_jury_member = $this->is_jury_member($current_user_id);
-        $is_admin = current_user_can('manage_options');
-        
-        if (!$has_jury_role && !$is_jury_member && !$is_admin) {
-            wp_die(__('You do not have permission to access this page.', 'mobility-trailblazers'));
-        }
-        
-        // Get candidate ID
-        $candidate_id = isset($_GET['candidate']) ? intval($_GET['candidate']) : 0;
-        
-        if (!$candidate_id) {
-            wp_redirect($this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard'));
-            exit;
-        }
-        
-        $jury_member_id = $this->get_jury_member_for_user($current_user_id);
-        $edit_mode = isset($_GET['edit']) && $_GET['edit'] == '1';
-        
-        $candidate = get_post($candidate_id);
-        if (!$candidate || $candidate->post_type !== 'mt_candidate') {
-            wp_die(__('Invalid candidate.', 'mobility-trailblazers'));
-        }
-        
-        // Check if candidate is assigned to this jury member
-        $assigned_jury = get_post_meta($candidate_id, '_mt_assigned_jury_member', true);
-        if ($assigned_jury != $jury_member_id && !$is_admin) {
-            wp_die(__('You are not assigned to evaluate this candidate.', 'mobility-trailblazers'));
-        }
-        
-        // Get existing scores if in edit mode
-        $existing_scores = array();
-        if ($edit_mode) {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'mt_candidate_scores';
-            $existing_scores = $wpdb->get_row($wpdb->prepare(
-                "SELECT * FROM $table_name WHERE jury_member_id = %d AND candidate_id = %d",
-                $jury_member_id,
-                $candidate_id
-            ), ARRAY_A);
-        }
-        
-        // Get candidate details
-        $company = get_post_meta($candidate_id, '_mt_company', true);
-        $position = get_post_meta($candidate_id, '_mt_position', true);
-        $bio = get_post_meta($candidate_id, '_mt_bio', true);
-        $achievements = get_post_meta($candidate_id, '_mt_achievements', true);
-        
-        ?>
-        <div class="wrap">
-            <h1><?php echo $edit_mode ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate Candidate', 'mobility-trailblazers'); ?></h1>
-            
-            <div class="mt-evaluation-container">
-                <!-- Candidate Information -->
-                <div class="mt-candidate-details">
-                    <h2><?php echo esc_html($candidate->post_title); ?></h2>
-                    <?php if ($position) : ?>
-                        <p><strong><?php echo esc_html($position); ?></strong></p>
-                    <?php endif; ?>
-                    <?php if ($company) : ?>
-                        <p><?php echo esc_html($company); ?></p>
-                    <?php endif; ?>
-                    
-                    <?php if ($bio) : ?>
-                        <div class="mt-bio">
-                            <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
-                            <p><?php echo wp_kses_post($bio); ?></p>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if ($achievements) : ?>
-                        <div class="mt-achievements">
-                            <h3><?php _e('Key Achievements', 'mobility-trailblazers'); ?></h3>
-                            <div><?php echo wp_kses_post($achievements); ?></div>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                
-                <!-- Evaluation Form -->
-                <div class="mt-evaluation-form">
-                    <h2><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h2>
-                    <p class="description"><?php _e('Please rate the candidate on each criterion from 1 (lowest) to 10 (highest).', 'mobility-trailblazers'); ?></p>
-                    
-                    <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-                        <?php wp_nonce_field('mt_evaluation', 'mt_evaluation_nonce'); ?>
-                        <input type="hidden" name="action" value="mt_submit_evaluation">
-                        <input type="hidden" name="candidate_id" value="<?php echo $candidate_id; ?>">
-                        <input type="hidden" name="jury_member_id" value="<?php echo $jury_member_id; ?>">
-                        <input type="hidden" name="edit_mode" value="<?php echo $edit_mode ? '1' : '0'; ?>">
-                        
-                        <!-- Mut & Pioniergeist -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Mut & Pioniergeist', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Wurde gegen Widerstände gehandelt? Gab es neue Wege? Persönliches Risiko?', 'mobility-trailblazers'); ?></p>
-                            <div class="mt-score-selector">
-                                <?php for ($i = 1; $i <= 10; $i++) : ?>
-                                    <label class="mt-score-option">
-                                        <input type="radio" name="courage_score" value="<?php echo $i; ?>" 
-                                               <?php checked($existing_scores['courage_score'] ?? 0, $i); ?> required>
-                                        <span><?php echo $i; ?></span>
-                                    </label>
-                                <?php endfor; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Innovationsgrad -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Innovationsgrad', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Inwiefern stellt der Beitrag eine echte Neuerung dar (Technologie, Business Modell)?', 'mobility-trailblazers'); ?></p>
-                            <div class="mt-score-selector">
-                                <?php for ($i = 1; $i <= 10; $i++) : ?>
-                                    <label class="mt-score-option">
-                                        <input type="radio" name="innovation_score" value="<?php echo $i; ?>" 
-                                               <?php checked($existing_scores['innovation_score'] ?? 0, $i); ?> required>
-                                        <span><?php echo $i; ?></span>
-                                    </label>
-                                <?php endfor; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Umsetzungskraft & Wirkung -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Umsetzungskraft & Wirkung', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Welche Resultate wurden erzielt (z.B. Skalierung, Impact)?', 'mobility-trailblazers'); ?></p>
-                            <div class="mt-score-selector">
-                                <?php for ($i = 1; $i <= 10; $i++) : ?>
-                                    <label class="mt-score-option">
-                                        <input type="radio" name="implementation_score" value="<?php echo $i; ?>" 
-                                               <?php checked($existing_scores['implementation_score'] ?? 0, $i); ?> required>
-                                        <span><?php echo $i; ?></span>
-                                    </label>
-                                <?php endfor; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Relevanz für Mobilitätswende -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Relevanz für Mobilitätswende', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Trägt die Initiative zur Transformation der Mobilität im DACH-Raum bei?', 'mobility-trailblazers'); ?></p>
-                            <div class="mt-score-selector">
-                                <?php for ($i = 1; $i <= 10; $i++) : ?>
-                                    <label class="mt-score-option">
-                                        <input type="radio" name="relevance_score" value="<?php echo $i; ?>" 
-                                               <?php checked($existing_scores['relevance_score'] ?? 0, $i); ?> required>
-                                        <span><?php echo $i; ?></span>
-                                    </label>
-                                <?php endfor; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Vorbildfunktion & Sichtbarkeit -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Ist die Person ein inspirierendes Role Model mit öffentlicher Wirkung?', 'mobility-trailblazers'); ?></p>
-                            <div class="mt-score-selector">
-                                <?php for ($i = 1; $i <= 10; $i++) : ?>
-                                    <label class="mt-score-option">
-                                        <input type="radio" name="visibility_score" value="<?php echo $i; ?>" 
-                                               <?php checked($existing_scores['visibility_score'] ?? 0, $i); ?> required>
-                                        <span><?php echo $i; ?></span>
-                                    </label>
-                                <?php endfor; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Comments -->
-                        <div class="mt-criterion">
-                            <h3><?php _e('Additional Comments', 'mobility-trailblazers'); ?></h3>
-                            <p class="description"><?php _e('Optional: Provide any additional feedback or context for your evaluation.', 'mobility-trailblazers'); ?></p>
-                            <textarea name="comments" rows="5" class="large-text"><?php echo esc_textarea($existing_scores['comments'] ?? ''); ?></textarea>
-                        </div>
-                        
-                        <!-- Submit buttons -->
-                        <div class="mt-form-actions">
-                            <button type="submit" class="button button-primary button-large">
-                                <?php echo $edit_mode ? __('Update Evaluation', 'mobility-trailblazers') : __('Submit Evaluation', 'mobility-trailblazers'); ?>
-                            </button>
-                            <a href="<?php echo $this->get_jury_dashboard_page_url() ?: admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button button-secondary button-large">
-                                <?php _e('Cancel', 'mobility-trailblazers'); ?>
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <?php
     }
 
     /**
