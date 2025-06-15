@@ -3731,6 +3731,11 @@ class MobilityTrailblazersPlugin {
                 var action = $button.data('action');
                 var originalText = $button.text();
                 
+                if (action === 'show_user_jury_linker') {
+                    showUserJuryLinker();
+                    return;
+                }
+                
                 $button.prop('disabled', true).text('Processing...');
                 
                 $.ajax({
@@ -3761,8 +3766,237 @@ class MobilityTrailblazersPlugin {
                     }
                 });
             });
+            
+            // Handle individual link/unlink buttons
+            $(document).on('click', '.mt-link-user-btn', function() {
+                var juryId = $(this).data('jury-id');
+                showUserJuryLinker(juryId);
+            });
+            
+            $(document).on('click', '.mt-unlink-user-btn', function() {
+                var juryId = $(this).data('jury-id');
+                var userId = $(this).data('user-id');
+                
+                if (confirm('Are you sure you want to unlink this user from the jury member?')) {
+                    unlinkUserFromJury(juryId);
+                }
+            });
+            
+            function showUserJuryLinker(preselectedJuryId) {
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'mt_diagnostic_action',
+                            diagnostic_action: 'show_user_jury_linker',
+                            nonce: '<?php echo wp_create_nonce('mt_diagnostic_nonce'); ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                displayUserJuryLinker(response.data, preselectedJuryId);
+                            } else {
+                                alert('Error loading data: ' + response.data.message);
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred while loading the user-jury linker.');
+                        }
+                    });
+                }
+                
+                function displayUserJuryLinker(data, preselectedJuryId) {
+                    var modalHtml = '<div class="mt-user-jury-modal">';
+                    modalHtml += '<div class="mt-user-jury-modal-content">';
+                    modalHtml += '<h3>Link User to Jury Member</h3>';
+                    modalHtml += '<div class="mt-user-jury-form">';
+                    
+                    // Jury member dropdown
+                    modalHtml += '<label for="jury-select">Select Jury Member:</label>';
+                    modalHtml += '<select id="jury-select">';
+                    modalHtml += '<option value="">Choose a jury member...</option>';
+                    data.jury_members.forEach(function(jury) {
+                        var selected = preselectedJuryId && jury.jury_id == preselectedJuryId ? ' selected' : '';
+                        var linkedText = jury.linked_user_id ? ' (Currently linked)' : '';
+                        modalHtml += '<option value="' + jury.jury_id + '"' + selected + '>' + jury.jury_name + linkedText + '</option>';
+                    });
+                    modalHtml += '</select>';
+                    
+                    // User dropdown
+                    modalHtml += '<label for="user-select">Select User:</label>';
+                    modalHtml += '<select id="user-select">';
+                    modalHtml += '<option value="">Choose a user...</option>';
+                    data.users.forEach(function(user) {
+                        modalHtml += '<option value="' + user.ID + '">' + user.display_name + ' (' + user.user_login + ') - ' + user.user_email + '</option>';
+                    });
+                    modalHtml += '</select>';
+                    
+                    modalHtml += '<div style="margin-top: 20px;">';
+                    modalHtml += '<button type="button" class="button button-primary" id="link-user-submit">Link User</button>';
+                    modalHtml += '<button type="button" class="button" id="link-user-cancel">Cancel</button>';
+                    modalHtml += '</div>';
+                    
+                    modalHtml += '</div>';
+                    modalHtml += '</div>';
+                    modalHtml += '</div>';
+                    
+                    $('body').append(modalHtml);
+                    $('.mt-user-jury-modal').fadeIn();
+                    
+                    // Handle modal actions
+                    $('#link-user-cancel, .mt-user-jury-modal').on('click', function(e) {
+                        if (e.target === this) {
+                            $('.mt-user-jury-modal').fadeOut(function() {
+                                $(this).remove();
+                            });
+                        }
+                    });
+                    
+                    $('#link-user-submit').on('click', function() {
+                        var juryId = $('#jury-select').val();
+                        var userId = $('#user-select').val();
+                        
+                        if (!juryId || !userId) {
+                            alert('Please select both a jury member and a user.');
+                            return;
+                        }
+                        
+                        linkUserToJury(userId, juryId);
+                    });
+                }
+                
+                function linkUserToJury(userId, juryId) {
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'mt_diagnostic_action',
+                            diagnostic_action: 'link_user_to_jury',
+                            user_id: userId,
+                            jury_id: juryId,
+                            nonce: '<?php echo wp_create_nonce('mt_diagnostic_nonce'); ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert('Success: ' + response.data.message);
+                                $('.mt-user-jury-modal').fadeOut(function() {
+                                    $(this).remove();
+                                });
+                                location.reload();
+                            } else {
+                                alert('Error: ' + response.data.message);
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred while linking the user.');
+                        }
+                    });
+                }
+                
+                function unlinkUserFromJury(juryId) {
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'mt_diagnostic_action',
+                            diagnostic_action: 'unlink_user_from_jury',
+                            jury_id: juryId,
+                            nonce: '<?php echo wp_create_nonce('mt_diagnostic_nonce'); ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert('Success: ' + response.data.message);
+                                location.reload();
+                            } else {
+                                alert('Error: ' + response.data.message);
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred while unlinking the user.');
+                        }
+                    });
+                }
         });
         </script>
+        
+        <style>
+        /* User-Jury Linking Styles */
+        .mt-user-jury-table .mt-status-good {
+            color: #00a32a;
+            font-weight: 600;
+        }
+        
+        .mt-user-jury-table .mt-status-warning {
+            color: #dba617;
+            font-weight: 600;
+        }
+        
+        .mt-unlinked-users {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .mt-unlinked-users ul {
+            margin: 10px 0 0 20px;
+        }
+        
+        .mt-unlinked-users li {
+            margin-bottom: 5px;
+        }
+        
+        /* User-Jury Linker Modal */
+        .mt-user-jury-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 100000;
+            display: none;
+        }
+        
+        .mt-user-jury-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .mt-user-jury-modal h3 {
+            margin-top: 0;
+        }
+        
+        .mt-user-jury-form {
+            margin: 20px 0;
+        }
+        
+        .mt-user-jury-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .mt-user-jury-form select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .mt-user-jury-form .button {
+            margin-right: 10px;
+        }
+        </style>
         
         <?php
     }
@@ -3833,6 +4067,32 @@ class MobilityTrailblazersPlugin {
                     wp_send_json_success(array('message' => "Regenerated {$assigned} assignments"));
                 } else {
                     wp_send_json_error(array('message' => 'Failed to regenerate assignments'));
+                }
+                break;
+                
+            case 'show_user_jury_linker':
+                $data = $this->get_user_jury_linker_data();
+                wp_send_json_success($data);
+                break;
+                
+            case 'link_user_to_jury':
+                $user_id = intval($_POST['user_id']);
+                $jury_id = intval($_POST['jury_id']);
+                $result = $this->link_user_to_jury($user_id, $jury_id);
+                if ($result) {
+                    wp_send_json_success(array('message' => 'User successfully linked to jury member'));
+                } else {
+                    wp_send_json_error(array('message' => 'Failed to link user to jury member'));
+                }
+                break;
+                
+            case 'unlink_user_from_jury':
+                $jury_id = intval($_POST['jury_id']);
+                $result = $this->unlink_user_from_jury($jury_id);
+                if ($result) {
+                    wp_send_json_success(array('message' => 'User successfully unlinked from jury member'));
+                } else {
+                    wp_send_json_error(array('message' => 'Failed to unlink user from jury member'));
                 }
                 break;
                 
@@ -4086,6 +4346,98 @@ class MobilityTrailblazersPlugin {
         );
         
         $this->render_check_items($checks);
+        
+        // Show detailed user-jury linkings
+        $this->render_user_jury_management();
+    }
+
+    /**
+     * Render user-jury management section
+     */
+    private function render_user_jury_management() {
+        global $wpdb;
+        
+        echo '<h4>User-Jury Linkings</h4>';
+        
+        // Get all jury members with their linked users
+        $jury_members = $wpdb->get_results("
+            SELECT p.ID as jury_id, p.post_title as jury_name,
+                   pm_user.meta_value as user_id,
+                   pm_email.meta_value as jury_email,
+                   u.user_login, u.display_name, u.user_email
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm_user ON p.ID = pm_user.post_id AND pm_user.meta_key = '_mt_jury_user_id'
+            LEFT JOIN {$wpdb->postmeta} pm_email ON p.ID = pm_email.post_id AND pm_email.meta_key = '_mt_jury_email'
+            LEFT JOIN {$wpdb->users} u ON pm_user.meta_value = u.ID
+            WHERE p.post_type = 'mt_jury' AND p.post_status = 'publish'
+            ORDER BY p.post_title
+        ");
+        
+        if ($jury_members) {
+            echo '<table class="mt-diagnostic-table mt-user-jury-table">';
+            echo '<thead><tr>';
+            echo '<th>Jury Member</th>';
+            echo '<th>Linked User</th>';
+            echo '<th>User Email</th>';
+            echo '<th>Status</th>';
+            echo '<th>Actions</th>';
+            echo '</tr></thead><tbody>';
+            
+            foreach ($jury_members as $jury) {
+                $status_class = $jury->user_id ? 'good' : 'warning';
+                $status_text = $jury->user_id ? '✅ Linked' : '⚠️ Not Linked';
+                
+                echo '<tr>';
+                echo '<td><strong>' . esc_html($jury->jury_name) . '</strong></td>';
+                
+                if ($jury->user_id && $jury->user_login) {
+                    echo '<td>' . esc_html($jury->display_name) . ' (' . esc_html($jury->user_login) . ')</td>';
+                    echo '<td>' . esc_html($jury->user_email) . '</td>';
+                } else {
+                    echo '<td>-</td>';
+                    echo '<td>' . esc_html($jury->jury_email ?: '-') . '</td>';
+                }
+                
+                echo '<td class="mt-status-' . $status_class . '">' . $status_text . '</td>';
+                echo '<td>';
+                
+                if ($jury->user_id) {
+                    echo '<button class="button button-small mt-unlink-user-btn" data-jury-id="' . $jury->jury_id . '" data-user-id="' . $jury->user_id . '">Unlink</button>';
+                } else {
+                    echo '<button class="button button-primary button-small mt-link-user-btn" data-jury-id="' . $jury->jury_id . '">Link User</button>';
+                }
+                
+                echo '</td>';
+                echo '</tr>';
+            }
+            
+            echo '</tbody></table>';
+        } else {
+            echo '<p>No jury members found.</p>';
+        }
+        
+        // Add unlinked users section
+        $unlinked_users = $wpdb->get_results("
+            SELECT u.ID, u.user_login, u.display_name, u.user_email
+            FROM {$wpdb->users} u
+            LEFT JOIN {$wpdb->postmeta} pm ON u.ID = pm.meta_value AND pm.meta_key = '_mt_jury_user_id'
+            WHERE pm.meta_value IS NULL
+            AND u.ID NOT IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = 'wp_capabilities' AND meta_value LIKE '%administrator%')
+            ORDER BY u.display_name
+            LIMIT 20
+        ");
+        
+        if ($unlinked_users) {
+            echo '<h4>Unlinked Users (Available for Linking)</h4>';
+            echo '<div class="mt-unlinked-users">';
+            echo '<p>These users are not currently linked to any jury member:</p>';
+            echo '<ul>';
+            foreach ($unlinked_users as $user) {
+                echo '<li><strong>' . esc_html($user->display_name) . '</strong> (' . esc_html($user->user_login) . ') - ' . esc_html($user->user_email) . '</li>';
+            }
+            echo '</ul>';
+            echo '</div>';
+        }
     }
 
     /**
@@ -4410,6 +4762,14 @@ class MobilityTrailblazersPlugin {
                     Auto Assign
                 </button>
             </div>
+            
+            <div class="mt-fix-item">
+                <h4>Link User to Jury</h4>
+                <p>Link any WordPress user account to a jury member for access management.</p>
+                <button class="button button-primary mt-quick-fix-btn" data-action="show_user_jury_linker">
+                    Link User to Jury
+                </button>
+            </div>
         </div>
         <?php
     }
@@ -4639,6 +4999,125 @@ define(\'WP_DEBUG_DISPLAY\', false);</pre>';
             update_post_meta($jury_members[0]->ID, '_mt_jury_user_id', $current_user->ID);
             return true;
         }
+        return false;
+    }
+
+    /**
+     * Get data for user-jury linker modal
+     */
+    private function get_user_jury_linker_data() {
+        global $wpdb;
+        
+        // Get all jury members
+        $jury_members = $wpdb->get_results("
+            SELECT p.ID as jury_id, p.post_title as jury_name,
+                   pm.meta_value as linked_user_id
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_jury_user_id'
+            WHERE p.post_type = 'mt_jury' AND p.post_status = 'publish'
+            ORDER BY p.post_title
+        ");
+        
+        // Get all users (excluding administrators)
+        $users = $wpdb->get_results("
+            SELECT u.ID, u.user_login, u.display_name, u.user_email
+            FROM {$wpdb->users} u
+            WHERE u.ID NOT IN (
+                SELECT user_id FROM {$wpdb->usermeta} 
+                WHERE meta_key = 'wp_capabilities' 
+                AND meta_value LIKE '%administrator%'
+            )
+            ORDER BY u.display_name
+        ");
+        
+        return array(
+            'jury_members' => $jury_members,
+            'users' => $users
+        );
+    }
+
+    /**
+     * Link a user to a jury member
+     */
+    private function link_user_to_jury($user_id, $jury_id) {
+        if (!$user_id || !$jury_id) {
+            return false;
+        }
+        
+        // Verify user exists
+        $user = get_user_by('id', $user_id);
+        if (!$user) {
+            return false;
+        }
+        
+        // Verify jury member exists
+        $jury_post = get_post($jury_id);
+        if (!$jury_post || $jury_post->post_type !== 'mt_jury') {
+            return false;
+        }
+        
+        // Check if user is already linked to another jury member
+        global $wpdb;
+        $existing_link = $wpdb->get_var($wpdb->prepare("
+            SELECT post_id FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_jury_user_id' AND meta_value = %d
+        ", $user_id));
+        
+        if ($existing_link && $existing_link != $jury_id) {
+            // Unlink from previous jury member
+            delete_post_meta($existing_link, '_mt_jury_user_id');
+        }
+        
+        // Link user to jury member
+        update_post_meta($jury_id, '_mt_jury_user_id', $user_id);
+        
+        // Also update the jury member's email if not set
+        $jury_email = get_post_meta($jury_id, '_mt_jury_email', true);
+        if (!$jury_email) {
+            update_post_meta($jury_id, '_mt_jury_email', $user->user_email);
+        }
+        
+        // Add jury role to user if they don't have it
+        if (!in_array('mt_jury_member', $user->roles)) {
+            $user->add_role('mt_jury_member');
+        }
+        
+        return true;
+    }
+
+    /**
+     * Unlink a user from a jury member
+     */
+    private function unlink_user_from_jury($jury_id) {
+        if (!$jury_id) {
+            return false;
+        }
+        
+        // Get the linked user ID
+        $user_id = get_post_meta($jury_id, '_mt_jury_user_id', true);
+        
+        if ($user_id) {
+            // Remove the link
+            delete_post_meta($jury_id, '_mt_jury_user_id');
+            
+            // Check if user is linked to any other jury members
+            global $wpdb;
+            $other_links = $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(*) FROM {$wpdb->postmeta} 
+                WHERE meta_key = '_mt_jury_user_id' AND meta_value = %d
+            ", $user_id));
+            
+            // If no other links, remove jury role
+            if (!$other_links) {
+                $user = get_user_by('id', $user_id);
+                if ($user && in_array('mt_jury_member', $user->roles)) {
+                    $user->remove_role('mt_jury_member');
+                }
+            }
+            
+            return true;
+        }
+        
         return false;
     }
 
