@@ -268,73 +268,24 @@ class MobilityTrailblazersPlugin {
         );
         
         // Special handling for assignment page
-        if ($hook === 'mt-award-system_page_mt-assignments') {
-            // Add version number with timestamp to force refresh
-            $version = MT_PLUGIN_VERSION . '.' . time();
-            
-            // Enqueue assignment.js from correct path
-            wp_enqueue_script(
-                'mt-assignment-js', 
-                MT_PLUGIN_URL . 'assets/assignment.js',
-                array('jquery'), 
-                $version, // Force refresh
-                true
-            );
+        if ($hook === 'mt-award-system_page_mt-assignments' || $hook === 'mt-awards_page_mt-assignment-management') {
+            // Force refresh with timestamp
+            $version = time(); // Use timestamp for development, filemtime() for production
             
             // Enqueue assignment.css from correct path
             wp_enqueue_style(
                 'mt-assignment-css', 
                 MT_PLUGIN_URL . 'assets/assignment.css',
                 array(), 
-                $version // Force refresh
+                $version
             );
             
-            // Debug: Log that files are being enqueued
-            error_log('MT Assignment files enqueued with version: ' . $version);
-        }
-        
-        // Page-specific scripts
-        if (strpos($hook, 'mt-') !== false) {
-            // jQuery UI for sortable
-            wp_enqueue_script('jquery-ui-sortable');
-            
-            // Chart.js for analytics
+            // Enqueue assignment.js from correct path
             wp_enqueue_script(
-                'chartjs',
-                'https://cdn.jsdelivr.net/npm/chart.js',
-                array(),
-                '3.9.1'
-            );
-            
-            // Main admin script
-            wp_enqueue_script(
-                'mt-admin-script',
-                MT_PLUGIN_URL . 'assets/admin.js',
-                array('jquery', 'chartjs'),
-                MT_PLUGIN_VERSION,
-                true
-            );
-            
-            // Localize script
-            wp_localize_script('mt-admin-script', 'mt_ajax', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('mt_ajax_nonce'),
-                'strings' => array(
-                    'confirm_reset' => __('Are you sure you want to reset this vote?', 'mobility-trailblazers'),
-                    'confirm_bulk_reset' => __('Are you sure you want to reset all votes for this candidate?', 'mobility-trailblazers'),
-                    'processing' => __('Processing...', 'mobility-trailblazers'),
-                    'error' => __('An error occurred. Please try again.', 'mobility-trailblazers')
-                )
-            ));
-        }
-        
-        // Assignment management specific
-        if ($hook === 'mt-awards_page_mt-assignment-management') {
-            wp_enqueue_script(
-                'mt-assignment-script',
+                'mt-assignment-js', 
                 MT_PLUGIN_URL . 'assets/assignment.js',
-                array('jquery', 'jquery-ui-sortable'),
-                MT_PLUGIN_VERSION,
+                array('jquery', 'jquery-ui-sortable'), 
+                $version,
                 true
             );
             
@@ -397,11 +348,50 @@ class MobilityTrailblazersPlugin {
                 }
             }
             
-            wp_localize_script('mt-assignment-script', 'mt_assignment_ajax', array(
+            // Localize script with data
+            wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('mt_assignment_nonce'),
                 'candidates' => $candidates_data,
                 'jury_members' => $jury_data
+            ));
+            
+            // Debug: Log that files are being enqueued
+            error_log('MT Assignment files enqueued with version: ' . $version);
+        }
+        
+        // Page-specific scripts
+        if (strpos($hook, 'mt-') !== false) {
+            // jQuery UI for sortable
+            wp_enqueue_script('jquery-ui-sortable');
+            
+            // Chart.js for analytics
+            wp_enqueue_script(
+                'chartjs',
+                'https://cdn.jsdelivr.net/npm/chart.js',
+                array(),
+                '3.9.1'
+            );
+            
+            // Main admin script
+            wp_enqueue_script(
+                'mt-admin-script',
+                MT_PLUGIN_URL . 'assets/admin.js',
+                array('jquery', 'chartjs'),
+                MT_PLUGIN_VERSION,
+                true
+            );
+            
+            // Localize script
+            wp_localize_script('mt-admin-script', 'mt_ajax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_ajax_nonce'),
+                'strings' => array(
+                    'confirm_reset' => __('Are you sure you want to reset this vote?', 'mobility-trailblazers'),
+                    'confirm_bulk_reset' => __('Are you sure you want to reset all votes for this candidate?', 'mobility-trailblazers'),
+                    'processing' => __('Processing...', 'mobility-trailblazers'),
+                    'error' => __('An error occurred. Please try again.', 'mobility-trailblazers')
+                )
             ));
         }
         
