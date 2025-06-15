@@ -6,35 +6,42 @@
  * @subpackage Includes
  */
 
-namespace MobilityTrailblazers;
-
-use MobilityTrailblazers\Core\Traits\Singleton;
-use MobilityTrailblazers\Core\PostTypes\Candidate_Post_Type;
-use MobilityTrailblazers\Core\PostTypes\Jury_Post_Type;
-use MobilityTrailblazers\Core\Taxonomies\Category_Taxonomy;
-use MobilityTrailblazers\Core\Taxonomies\Phase_Taxonomy;
-use MobilityTrailblazers\Core\Taxonomies\Status_Taxonomy;
-use MobilityTrailblazers\Core\Roles\Roles_Manager;
-use MobilityTrailblazers\Modules\Voting\Voting_Manager;
-use MobilityTrailblazers\Modules\Evaluation\Evaluation_Manager;
-use MobilityTrailblazers\Modules\Jury\Jury_Manager;
-use MobilityTrailblazers\Modules\Candidates\Candidate_Manager;
-use MobilityTrailblazers\Modules\Assignments\Assignment_Manager;
-use MobilityTrailblazers\Modules\Reset\Reset_Manager;
-use MobilityTrailblazers\Modules\Reports\Reports_Manager;
-use MobilityTrailblazers\Admin\Admin;
-use MobilityTrailblazers\PublicFrontend\PublicFrontend;
-use MobilityTrailblazers\Api\Api_Manager;
-use MobilityTrailblazers\Integrations\Elementor\Elementor_Integration;
-use MobilityTrailblazers\Integrations\Ajax\Ajax_Manager;
-use MobilityTrailblazers\Database\Database_Manager;
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Main plugin class
  */
-class Plugin {
+class MT_Plugin {
     
-    use Singleton;
+    /**
+     * Instance of the class
+     *
+     * @var MT_Plugin
+     */
+    private static $instance = null;
+    
+    /**
+     * Get instance of the class
+     *
+     * @return MT_Plugin
+     */
+    public static function get_instance() {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+        
+        return self::$instance;
+    }
+    
+    /**
+     * Private constructor to prevent direct instantiation
+     */
+    private function __construct() {
+        // Constructor logic here
+    }
     
     /**
      * Plugin version
@@ -67,50 +74,29 @@ class Plugin {
      * @return void
      */
     private function load_dependencies() {
-        // Load core abstracts and interfaces
-        require_once MT_PLUGIN_DIR . 'core/interfaces/interface-registrable.php';
-        require_once MT_PLUGIN_DIR . 'core/interfaces/interface-hookable.php';
-        require_once MT_PLUGIN_DIR . 'core/traits/trait-singleton.php';
-        require_once MT_PLUGIN_DIR . 'core/traits/trait-ajax-handler.php';
-        require_once MT_PLUGIN_DIR . 'core/abstracts/class-abstract-post-type.php';
-        require_once MT_PLUGIN_DIR . 'core/abstracts/class-abstract-taxonomy.php';
-        
-        // Load post types
-        require_once MT_PLUGIN_DIR . 'core/post-types/class-candidate-post-type.php';
-        require_once MT_PLUGIN_DIR . 'core/post-types/class-jury-post-type.php';
-        
-        // Load taxonomies
-        require_once MT_PLUGIN_DIR . 'core/taxonomies/class-category-taxonomy.php';
-        require_once MT_PLUGIN_DIR . 'core/taxonomies/class-phase-taxonomy.php';
-        require_once MT_PLUGIN_DIR . 'core/taxonomies/class-status-taxonomy.php';
-        
-        // Load roles
-        require_once MT_PLUGIN_DIR . 'core/roles/class-roles-manager.php';
-        
-        // Load modules
-        require_once MT_PLUGIN_DIR . 'modules/voting/class-voting-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/evaluation/class-evaluation-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/jury/class-jury-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/candidates/class-candidate-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/assignments/class-assignment-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/reset/class-reset-manager.php';
-        require_once MT_PLUGIN_DIR . 'modules/reports/class-reports-manager.php';
-        
-        // Load admin
-        require_once MT_PLUGIN_DIR . 'admin/class-admin.php';
-        
-        // Load public
-        require_once MT_PLUGIN_DIR . 'public/class-public.php';
-        
-        // Load API
-        require_once MT_PLUGIN_DIR . 'api/class-api-manager.php';
+        // Load existing modules that are available
+        $this->load_if_exists(MT_PLUGIN_DIR . 'modules/jury/class-jury-manager.php');
+        $this->load_if_exists(MT_PLUGIN_DIR . 'modules/reset/class-reset-manager.php');
+        $this->load_if_exists(MT_PLUGIN_DIR . 'modules/reset/class-backup-manager.php');
+        $this->load_if_exists(MT_PLUGIN_DIR . 'modules/reset/class-audit-logger.php');
         
         // Load integrations
-        require_once MT_PLUGIN_DIR . 'integrations/elementor/class-elementor-integration.php';
-        require_once MT_PLUGIN_DIR . 'integrations/ajax/class-ajax-manager.php';
-        
-        // Load database
-        require_once MT_PLUGIN_DIR . 'database/class-database-manager.php';
+        $this->load_if_exists(MT_PLUGIN_DIR . 'integrations/elementor/class-elementor-integration.php');
+        $this->load_if_exists(MT_PLUGIN_DIR . 'integrations/ajax/class-ajax-fix.php');
+    }
+    
+    /**
+     * Load file if it exists
+     *
+     * @param string $file_path Path to the file
+     * @return bool True if loaded, false if not found
+     */
+    private function load_if_exists($file_path) {
+        if (file_exists($file_path)) {
+            require_once $file_path;
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -119,51 +105,34 @@ class Plugin {
      * @return void
      */
     private function init_components() {
-        // Initialize core components
-        $this->components['post_types'] = array(
-            'candidate' => new Candidate_Post_Type(),
-            'jury' => new Jury_Post_Type(),
-        );
-        
-        $this->components['taxonomies'] = array(
-            'category' => new Category_Taxonomy(),
-            'phase' => new Phase_Taxonomy(),
-            'status' => new Status_Taxonomy(),
-        );
-        
-        $this->components['roles'] = new Roles_Manager();
-        
-        // Initialize modules
-        $this->components['modules'] = array(
-            'voting' => new Voting_Manager(),
-            'evaluation' => new Evaluation_Manager(),
-            'jury' => new Jury_Manager(),
-            'candidates' => new Candidate_Manager(),
-            'assignments' => new Assignment_Manager(),
-            'reset' => new Reset_Manager(),
-            'reports' => new Reports_Manager(),
-        );
-        
-        // Initialize admin and public
+        // Initialize basic admin functionality
         if (is_admin()) {
-            $this->components['admin'] = new Admin();
+            // Create a basic admin menu for now
+            add_action('admin_menu', array($this, 'add_basic_admin_menu'));
         }
         
-        if (!is_admin() || wp_doing_ajax()) {
-            $this->components['public'] = new PublicFrontend();
+        // Initialize available modules
+        $this->components['modules'] = array();
+        
+        // Only initialize modules that exist
+        if (class_exists('MT_Jury_Management_Admin')) {
+            $this->components['modules']['jury'] = MT_Jury_Management_Admin::get_instance();
         }
         
-        // Initialize API
-        $this->components['api'] = new Api_Manager();
+        if (class_exists('MT_Vote_Reset_Manager')) {
+            $this->components['modules']['reset'] = new MT_Vote_Reset_Manager();
+        }
         
-        // Initialize integrations
-        $this->components['integrations'] = array(
-            'elementor' => new Elementor_Integration(),
-            'ajax' => new Ajax_Manager(),
-        );
+        // Initialize integrations if available
+        $this->components['integrations'] = array();
         
-        // Initialize database
-        $this->components['database'] = new Database_Manager();
+        if (class_exists('MT_Elementor_Compatibility')) {
+            $this->components['integrations']['elementor'] = new MT_Elementor_Compatibility();
+        }
+        
+        if (class_exists('MT_Ajax_Fix')) {
+            $this->components['integrations']['ajax'] = MT_Ajax_Fix::get_instance();
+        }
     }
     
     /**
@@ -174,10 +143,6 @@ class Plugin {
     private function init_hooks() {
         add_action('init', array($this, 'register_components'));
         add_action('plugins_loaded', array($this, 'load_textdomain'));
-        
-        // Register activation and deactivation hooks
-        register_activation_hook(MT_PLUGIN_FILE, array($this, 'activate'));
-        register_deactivation_hook(MT_PLUGIN_FILE, array($this, 'deactivate'));
     }
     
     /**
@@ -186,44 +151,105 @@ class Plugin {
      * @return void
      */
     public function register_components() {
-        // Register post types
-        foreach ($this->components['post_types'] as $post_type) {
-            $post_type->register();
-        }
-        
-        // Register taxonomies
-        foreach ($this->components['taxonomies'] as $taxonomy) {
-            $taxonomy->register();
-        }
-        
-        // Register roles
-        $this->components['roles']->register();
-        
         // Initialize modules
-        foreach ($this->components['modules'] as $module) {
-            if (method_exists($module, 'init')) {
-                $module->init();
+        if (isset($this->components['modules'])) {
+            foreach ($this->components['modules'] as $module) {
+                if (method_exists($module, 'init')) {
+                    $module->init();
+                }
             }
         }
         
-        // Initialize other components
-        if (isset($this->components['admin'])) {
-            $this->components['admin']->init();
-        }
-        
-        if (isset($this->components['public'])) {
-            $this->components['public']->init();
-        }
-        
-        $this->components['api']->init();
-        
-        foreach ($this->components['integrations'] as $integration) {
-            if (method_exists($integration, 'init')) {
-                $integration->init();
+        // Initialize integrations
+        if (isset($this->components['integrations'])) {
+            foreach ($this->components['integrations'] as $integration) {
+                if (method_exists($integration, 'init')) {
+                    $integration->init();
+                } elseif (method_exists($integration, 'init_elementor_hooks')) {
+                    $integration->init_elementor_hooks();
+                } elseif (method_exists($integration, 'init_fixes')) {
+                    $integration->init_fixes();
+                }
             }
         }
+    }
+    
+    /**
+     * Add basic admin menu
+     *
+     * @return void
+     */
+    public function add_basic_admin_menu() {
+        add_menu_page(
+            __('MT Award System', 'mobility-trailblazers'),
+            __('MT Award System', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-award-system',
+            array($this, 'render_basic_admin_page'),
+            'dashicons-awards',
+            30
+        );
         
-        $this->components['database']->init();
+        // Add submenu for existing functionality
+        if (class_exists('MT_Jury_Management_Admin')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Jury Management', 'mobility-trailblazers'),
+                __('Jury Management', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-jury-management',
+                array(MT_Jury_Management_Admin::get_instance(), 'render_jury_management_page')
+            );
+        }
+        
+        // Add vote reset page if available
+        if (file_exists(MT_PLUGIN_DIR . 'admin/pages/vote-reset.php')) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Vote Reset', 'mobility-trailblazers'),
+                __('Vote Reset', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-vote-reset',
+                array($this, 'render_vote_reset_page')
+            );
+        }
+    }
+    
+    /**
+     * Render basic admin page
+     *
+     * @return void
+     */
+    public function render_basic_admin_page() {
+        echo '<div class="wrap">';
+        echo '<h1>' . __('Mobility Trailblazers Award System', 'mobility-trailblazers') . '</h1>';
+        echo '<p>' . __('Welcome to the Mobility Trailblazers Award System. Use the menu items to manage your award competition.', 'mobility-trailblazers') . '</p>';
+        
+        // Show system status
+        echo '<h2>' . __('System Status', 'mobility-trailblazers') . '</h2>';
+        echo '<ul>';
+        echo '<li><strong>' . __('Plugin Version:', 'mobility-trailblazers') . '</strong> ' . $this->version . '</li>';
+        echo '<li><strong>' . __('Composer Autoloader:', 'mobility-trailblazers') . '</strong> ' . (file_exists(MT_PLUGIN_DIR . 'vendor/autoload.php') ? __('Available', 'mobility-trailblazers') : __('Not Available (using manual loading)', 'mobility-trailblazers')) . '</li>';
+        echo '<li><strong>' . __('Loaded Components:', 'mobility-trailblazers') . '</strong> ' . count($this->components) . '</li>';
+        echo '</ul>';
+        
+        echo '</div>';
+    }
+    
+    /**
+     * Render vote reset page
+     *
+     * @return void
+     */
+    public function render_vote_reset_page() {
+        if (file_exists(MT_PLUGIN_DIR . 'admin/pages/vote-reset.php')) {
+            include MT_PLUGIN_DIR . 'admin/pages/vote-reset.php';
+        } else {
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Vote Reset', 'mobility-trailblazers') . '</h1>';
+            echo '<p>' . __('Vote reset functionality is not available in this installation.', 'mobility-trailblazers') . '</p>';
+            echo '</div>';
+        }
     }
     
     /**
@@ -245,17 +271,11 @@ class Plugin {
      * @return void
      */
     public function activate() {
-        // Create database tables
-        $this->components['database']->create_tables();
-        
-        // Register post types and taxonomies for rewrite rules
-        $this->register_components();
+        // Set default options
+        $this->set_default_options();
         
         // Flush rewrite rules
         flush_rewrite_rules();
-        
-        // Set default options
-        $this->set_default_options();
     }
     
     /**
