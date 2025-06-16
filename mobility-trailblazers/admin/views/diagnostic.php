@@ -23,6 +23,23 @@ $system_info = $diagnostic->get_system_info();
         <p><?php _e('This page displays comprehensive system health checks and diagnostic information for the Mobility Trailblazers plugin.', 'mobility-trailblazers'); ?></p>
         <button class="button button-primary" id="refresh-diagnostic"><?php _e('Refresh Diagnostic', 'mobility-trailblazers'); ?></button>
         <button class="button" id="export-diagnostic"><?php _e('Export Report', 'mobility-trailblazers'); ?></button>
+        <?php
+        // Check if there are capability issues
+        $has_capability_issues = false;
+        if (isset($results['roles'])) {
+            foreach ($results['roles'] as $check) {
+                if ($check['name'] === __('Admin Capabilities', 'mobility-trailblazers') && $check['status'] !== 'success') {
+                    $has_capability_issues = true;
+                    break;
+                }
+            }
+        }
+        if ($has_capability_issues && current_user_can('manage_options')):
+        ?>
+            <a href="<?php echo admin_url('admin.php?page=mt-fix-capabilities'); ?>" class="button button-secondary">
+                <?php _e('Fix Capabilities', 'mobility-trailblazers'); ?>
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- System Information -->

@@ -112,6 +112,16 @@ class MT_Admin_Menus {
             array($this, 'render_diagnostic_page')
         );
         
+        // Fix Capabilities (temporary, can be removed after fixing)
+        add_submenu_page(
+            'mt-award-system',
+            __('Fix Capabilities', 'mobility-trailblazers'),
+            __('Fix Capabilities', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-fix-capabilities',
+            array($this, 'render_fix_capabilities_page')
+        );
+        
         // Jury Dashboard (for jury members)
         if (mt_is_jury_member()) {
             add_menu_page(
@@ -286,6 +296,19 @@ class MT_Admin_Menus {
         
         // Include template
         include MT_PLUGIN_DIR . 'admin/views/jury-dashboard.php';
+    }
+    
+    /**
+     * Render fix capabilities page
+     */
+    public function render_fix_capabilities_page() {
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'admin/views/fix-capabilities.php';
     }
     
     /**
