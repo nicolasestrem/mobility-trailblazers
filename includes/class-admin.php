@@ -177,21 +177,12 @@ class Admin {
     }
 
     public function assignment_management_page() {
-        // Enqueue required scripts and styles
+        // Call the enhanced enqueue function
+        $this->enqueue_assignment_assets();
+        
+        // Enqueue required scripts and styles (fallback)
         wp_enqueue_script('mt-assignment-js', MT_PLUGIN_URL . 'assets/js/assignment.js', array('jquery'), MT_PLUGIN_VERSION, true);
         wp_enqueue_style('mt-assignment-css', MT_PLUGIN_URL . 'assets/css/assignment.css', array(), MT_PLUGIN_VERSION);
-
-        // Localize script with necessary data
-        wp_localize_script('mt-assignment-js', 'mtAssignment', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_assignment_nonce'),
-            'i18n' => array(
-                'confirm_clear' => __('Are you sure you want to clear all assignments?', 'mobility-trailblazers'),
-                'confirm_export' => __('Are you sure you want to export assignments?', 'mobility-trailblazers'),
-                'success' => __('Operation completed successfully', 'mobility-trailblazers'),
-                'error' => __('An error occurred', 'mobility-trailblazers')
-            )
-        ));
 
         // Get initial data
         $total_candidates = wp_count_posts('mt_candidate')->publish;
@@ -275,6 +266,90 @@ class Admin {
         }
     }
 
+    /**
+     * Enhanced assignment assets enqueue function
+     */
+    public function enqueue_assignment_assets() {
+        // Enqueue enhanced CSS
+        wp_enqueue_style(
+            'mt-assignment-style',
+            MT_PLUGIN_URL . 'assets/css/assignment.css',
+            array(),
+            '2.0.0'
+        );
+        
+        // Enqueue enhanced JS
+        wp_enqueue_script(
+            'mt-assignment-script',
+            MT_PLUGIN_URL . 'assets/js/assignment.js',
+            array('jquery'),
+            '2.0.0',
+            true
+        );
+        
+        // Prepare candidates data
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        // Prepare data for JavaScript
+        $candidates_data = array();
+        foreach ($candidates as $candidate) {
+            $jury_id = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+            $categories = wp_get_post_terms($candidate->ID, 'mt_category');
+            
+            $candidates_data[] = array(
+                'id' => $candidate->ID,
+                'name' => $candidate->post_title,
+                'company' => get_post_meta($candidate->ID, '_mt_company', true),
+                'position' => get_post_meta($candidate->ID, '_mt_position', true),
+                'category' => !empty($categories) ? $categories[0]->slug : '',
+                'assigned' => !empty($jury_id),
+                'jury_member_id' => $jury_id
+            );
+        }
+        
+        $jury_data = array();
+        foreach ($jury_members as $jury) {
+            // Count assignments
+            $assignments = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_assigned_jury_member',
+                        'value' => $jury->ID
+                    )
+                ),
+                'posts_per_page' => -1
+            ));
+            
+            $jury_data[] = array(
+                'id' => $jury->ID,
+                'name' => $jury->post_title,
+                'position' => get_post_meta($jury->ID, '_mt_position', true),
+                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true),
+                'assignments' => count($assignments),
+                'maxAssignments' => 15,
+                'role' => get_post_meta($jury->ID, '_mt_jury_role', true)
+            );
+        }
+        
+        wp_localize_script('mt-assignment-script', 'mt_assignment_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_nonce'),
+            'candidates' => $candidates_data,
+            'jury_members' => $jury_data
+        ));
+    }
+    
     /**
      * Enqueue admin scripts and styles
      */

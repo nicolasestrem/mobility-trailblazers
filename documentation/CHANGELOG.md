@@ -1,5 +1,94 @@
 # Mobility Trailblazers Plugin Changelog
 
+## Version 2.3.0 - Enhanced AJAX Assignment System (June 16th 2025)
+
+### 🎯 Assignment Management System Overhaul
+- **Enhanced AJAX Handlers**: Completely restructured assignment AJAX functionality
+  - Updated `mt_assign_candidates` handler with improved security and validation
+  - Enhanced `mt_auto_assign` handler with multiple assignment algorithms (balanced, expertise-based, random)
+  - Improved `mt_export_assignments` handler with comprehensive CSV export functionality
+  - Standardized nonce verification using `mt_nonce` across all handlers
+- **New AJAX Handlers File**: Created dedicated `includes/ajax-handlers.php` for better code organization
+  - Implemented singleton pattern for consistent architecture
+  - Proper namespace integration with `MobilityTrailblazers\AjaxHandlers`
+  - Centralized AJAX functionality for easier maintenance and debugging
+
+### 🔧 Admin Interface Enhancements
+- **Enhanced Assignment Assets Function**: Added `enqueue_assignment_assets()` method to Admin class
+  - Version 2.0.0 asset loading with proper cache busting
+  - Comprehensive data localization with complete candidate and jury member information
+  - Real-time assignment counting and status tracking
+  - Enhanced JavaScript data structure for improved frontend functionality
+- **Improved Data Methods**: Updated candidate and jury member data preparation
+  - Enhanced `get_candidates_for_js()` with proper meta field integration
+  - Updated `get_jury_members_for_js()` with real-time assignment counting
+  - Consistent use of `_mt_assigned_jury_member` meta key throughout system
+
+### 📊 Assignment Algorithm Improvements
+- **Balanced Distribution**: Improved round-robin assignment algorithm
+  - Even distribution of candidates across all jury members
+  - Configurable candidates per jury member limit
+  - Automatic overflow handling for optimal balance
+- **Expertise-Based Assignment**: Enhanced matching system
+  - Category-based jury expertise matching
+  - Fallback to balanced distribution for unmatched candidates
+  - Priority assignment for specialized expertise areas
+- **Random Assignment**: Shuffled candidate distribution
+  - Randomized candidate order before assignment
+  - Maintains balanced distribution principles
+  - Useful for eliminating selection bias
+
+### 🛡️ Security & Validation Enhancements
+- **Unified Nonce System**: Standardized security across all AJAX handlers
+  - Consistent use of `mt_nonce` for all assignment operations
+  - Proper `wp_die()` implementation for critical security failures
+  - Enhanced input validation and sanitization
+- **Data Integrity Checks**: Improved validation throughout assignment process
+  - Jury member existence validation before assignment
+  - Candidate post validation before processing
+  - Assignment limit enforcement and overflow protection
+
+### 📈 Export & Reporting Features
+- **Enhanced CSV Export**: Comprehensive assignment data export
+  - Includes: Candidate Name, Company, Category, Assigned Jury Member, Assignment Date
+  - Proper CSV formatting with headers and data sanitization
+  - Timestamped filename generation for easy file management
+  - Direct download functionality with proper MIME types
+- **Real-time Assignment Statistics**: Live data updates in admin interface
+  - Current assignment counts per jury member
+  - Assignment completion percentage tracking
+  - Unassigned candidate identification and counting
+
+### 🎨 Frontend Data Structure
+- **Enhanced Candidate Data**: Comprehensive candidate information for JavaScript
+  - ID, name, company, position, category, assignment status
+  - Real-time assignment status updates
+  - Category-based filtering and organization support
+- **Improved Jury Member Data**: Complete jury member information structure
+  - ID, name, position, expertise, role, current assignments
+  - Maximum assignment limits and availability status
+  - Assignment capacity tracking and visual indicators
+
+### 🚀 Performance & Architecture
+- **Modular AJAX Architecture**: Separated AJAX handlers for better maintainability
+  - Dedicated class structure with proper initialization
+  - Singleton pattern implementation for consistent behavior
+  - Improved error handling and logging capabilities
+- **Optimized Database Queries**: Enhanced assignment data retrieval
+  - Efficient meta query structures for assignment counting
+  - Reduced database calls through improved data caching
+  - Optimized post queries with proper field selection
+
+### 🔄 Integration Improvements
+- **Main Plugin Integration**: Seamless integration with existing plugin architecture
+  - Proper class loading in `load_core_dependencies()`
+  - Maintained backward compatibility with existing functionality
+  - Enhanced admin menu integration with assignment page
+- **Template Compatibility**: Improved assignment template integration
+  - Enhanced data passing to assignment template
+  - Proper asset enqueuing for assignment page
+  - Consistent styling and functionality across admin interface
+
 ## Version 2.2.0 - Jury Synchronization & Bug Fixes (January 2025)
 
 ### 🔄 Jury Synchronization System
