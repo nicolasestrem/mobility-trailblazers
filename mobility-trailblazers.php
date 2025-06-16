@@ -7,7 +7,7 @@ use MobilityTrailblazers\Integrations\IntegrationsLoader;
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
  * Description: Complete award management system for 25 Mobility Trailblazers in 25 - managing candidates, jury members, voting process, and public engagement.
- * Version: 0.1.1
+ * Version: 0.2.1
  * Author: Mobility Trailblazers Team
  * License: GPL v2 or later
  * Text Domain: mobility-trailblazers
@@ -68,9 +68,74 @@ spl_autoload_register(function ($class) {
 class MobilityTrailblazersPlugin {
     
     /**
-     * Plugin instance
+     * @var MobilityTrailblazersPlugin
      */
     private static $instance = null;
+    
+    /**
+     * @var \MobilityTrailblazers\Core\Evaluation
+     */
+    private $evaluation;
+    
+    /**
+     * @var \MobilityTrailblazers\Core\JuryMember
+     */
+    private $jury_member;
+    
+    /**
+     * @var \MobilityTrailblazers\Core\Candidate
+     */
+    private $candidate;
+    
+    /**
+     * @var \MobilityTrailblazers\Core\Statistics
+     */
+    private $statistics;
+    
+    /**
+     * @var \MobilityTrailblazers\Admin\Admin
+     */
+    private $admin;
+    
+    /**
+     * @var \MobilityTrailblazers\Frontend\Frontend
+     */
+    private $frontend;
+    
+    /**
+     * @var \MobilityTrailblazers\Shortcodes\ShortcodeHandler
+     */
+    private $shortcode_handler;
+    
+    /**
+     * @var \MobilityTrailblazers\Integrations\IntegrationsLoader
+     */
+    private $integrations_loader;
+    
+    /**
+     * @var \MobilityTrailblazers\Diagnostic\Diagnostic
+     */
+    private $diagnostic;
+    
+    /**
+     * @var \MobilityTrailblazers\Database\Database
+     */
+    private $database;
+    
+    /**
+     * @var \MobilityTrailblazers\Roles\Roles
+     */
+    private $roles;
+    
+    /**
+     * @var \MobilityTrailblazers\Taxonomies\Taxonomies
+     */
+    private $taxonomies;
+    
+    /**
+     * @var \MobilityTrailblazers\PostTypes\PostTypes
+     */
+    private $post_types;
     
     /**
      * Get plugin instance
@@ -141,6 +206,12 @@ class MobilityTrailblazersPlugin {
         // Load post types handler
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-post-types.php');
 
+        // Load core classes
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-jury-member.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-candidate.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-statistics.php');
+
         // Initialize core classes
         $this->evaluation = new \MobilityTrailblazers\Core\Evaluation();
         $this->jury_member = new \MobilityTrailblazers\Core\JuryMember();
@@ -170,53 +241,43 @@ class MobilityTrailblazersPlugin {
      * Load plugin dependencies
      */
     private function load_dependencies() {
-        // Core functionality (Post Types and Taxonomies already loaded in core dependencies)
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-shortcodes.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-meta-boxes.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-admin-menus.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-ajax-handlers.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-rest-api.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-jury-system.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-diagnostic.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-diagnostic-fix.php');
-        
-        // Vote management
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php');
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-jury-consistency.php');
-        
-        // Admin classes
-        $this->safe_require(MT_PLUGIN_PATH . 'admin/class-jury-management-admin.php');
+        // Load utility functions first
+        require_once plugin_dir_path(__FILE__) . 'includes/mt-utility-functions.php';
+
+        // Load core classes
+        require_once plugin_dir_path(__FILE__) . 'includes/class-database.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-roles.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-taxonomies.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-post-types.php';
+        require_once plugin_dir_path(__FILE__) . 'includes/class-shortcodes.php';
+
+        // Load admin classes if in admin area
+        if (is_admin()) {
+            require_once plugin_dir_path(__FILE__) . 'includes/class-mt-admin-menus.php';
+            require_once plugin_dir_path(__FILE__) . 'includes/class-mt-diagnostic.php';
+        }
+
+        // Load frontend classes
+        require_once plugin_dir_path(__FILE__) . 'includes/class-mt-jury-system.php';
+
+        // Load integrations
+        require_once plugin_dir_path(__FILE__) . 'includes/integrations/class-integrations-loader.php';
     }
     
     /**
      * Initialize plugin components
      */
     private function init_components() {
-        // Initialize post types and taxonomies first (they will register on init hook with priority 0)
-        $this->init_class('MT_Post_Types');
-        $this->init_class('MT_Taxonomies');
-        
         // Initialize core components
-        $this->init_class('MT_Shortcodes');
-        $this->init_class('MT_Meta_Boxes');
-        $this->init_class('MT_Admin_Menus');
-        $this->init_class('MT_AJAX_Handlers');
-        $this->init_class('MT_REST_API');
-        $this->init_class('MT_Jury_System');
-        $this->init_class('MT_Diagnostic');
-        
-        // Initialize vote management components using helper function
-        $this->init_class('MT_Vote_Reset_Manager');
-        $this->init_class('MT_Vote_Backup_Manager');
-        $this->init_class('MT_Vote_Audit_Logger');
-        $this->init_class('MT_Jury_Consistency');
-        
-        // Initialize admin components
-        if (is_admin()) {
-            $this->init_class('MT_Jury_Management_Admin');
-        }
+        $this->init_class('Shortcodes');
+        $this->init_class('Admin');
+        $this->init_class('Frontend');
+        $this->init_class('IntegrationsLoader');
+        $this->init_class('Diagnostic');
+        $this->init_class('Database');
+        $this->init_class('Roles');
+        $this->init_class('Taxonomies');
+        $this->init_class('PostTypes');
     }
     
     /**
@@ -258,25 +319,25 @@ class MobilityTrailblazersPlugin {
      */
     public function activate() {
         // Load and register post types first
-        if (class_exists('MT_Post_Types')) {
-            $post_types = new MT_Post_Types();
+        if (class_exists('\MobilityTrailblazers\PostTypes')) {
+            $post_types = new \MobilityTrailblazers\PostTypes();
             $post_types->register_post_types();
         }
         
         // Load and register taxonomies
-        if (class_exists('MT_Taxonomies')) {
-            $taxonomies = new MT_Taxonomies();
+        if (class_exists('\MobilityTrailblazers\Taxonomies')) {
+            $taxonomies = new \MobilityTrailblazers\Taxonomies();
             $taxonomies->register_taxonomies();
         }
         
         // Create database tables
-        MT_Database::create_tables();
+        \MobilityTrailblazers\Database::create_tables();
         
         // Create roles
-        MT_Roles::create_roles();
+        \MobilityTrailblazers\Roles::create_roles();
         
         // Create default terms
-        MT_Taxonomies::create_default_terms();
+        \MobilityTrailblazers\Taxonomies::create_default_terms();
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -287,7 +348,7 @@ class MobilityTrailblazersPlugin {
      */
     public function deactivate() {
         // Remove roles
-        MT_Roles::remove_roles();
+        \MobilityTrailblazers\Roles::remove_roles();
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -525,7 +586,6 @@ class MobilityTrailblazersPlugin {
      * Load integrations
      */
     private function load_integrations() {
-        require_once MT_PLUGIN_PATH . 'includes/integrations/class-integrations-loader.php';
         IntegrationsLoader::get_instance();
     }
     

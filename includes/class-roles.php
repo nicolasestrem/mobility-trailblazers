@@ -6,16 +6,18 @@
  * @since 1.0.0
  */
 
+namespace MobilityTrailblazers;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
- * Class MT_Roles
+ * Class Roles
  * Handles user roles and capabilities
  */
-class MT_Roles {
+class Roles {
     
     /**
      * Create custom roles for the plugin

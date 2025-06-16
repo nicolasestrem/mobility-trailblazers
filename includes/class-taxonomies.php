@@ -6,16 +6,18 @@
  * @since 1.0.0
  */
 
+namespace MobilityTrailblazers;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
- * Class MT_Taxonomies
+ * Class Taxonomies
  * Handles registration of custom taxonomies
  */
-class MT_Taxonomies {
+class Taxonomies {
     
     /**
      * Initialize the class

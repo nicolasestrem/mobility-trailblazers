@@ -25,16 +25,18 @@ class IntegrationsLoader {
      * Constructor
      */
     private function __construct() {
-        // Load Elementor widgets after Elementor is fully loaded
-        add_action('elementor/init', [$this, 'load_elementor_widgets']);
+        // Only load Elementor widgets if Elementor is active
+        if (did_action('elementor/loaded')) {
+            add_action('elementor/widgets/register', [$this, 'load_elementor_widgets']);
+        }
     }
 
     /**
      * Load Elementor widgets
      */
-    public function load_elementor_widgets() {
+    public function load_elementor_widgets($widgets_manager) {
         // Check if Elementor is active and loaded
-        if (!did_action('elementor/loaded')) {
+        if (!class_exists('\Elementor\Widget_Base')) {
             return;
         }
 
@@ -53,13 +55,6 @@ class IntegrationsLoader {
         }
 
         // Register widgets
-        add_action('elementor/widgets/register', [$this, 'register_widgets']);
-    }
-
-    /**
-     * Register Elementor widgets
-     */
-    public function register_widgets($widgets_manager) {
         $widgets = [
             'MobilityTrailblazers\Integrations\Elementor\Widgets\JuryDashboardWidget',
             'MobilityTrailblazers\Integrations\Elementor\Widgets\CandidateGridWidget',

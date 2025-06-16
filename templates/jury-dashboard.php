@@ -1,164 +1,294 @@
 <?php
 /**
- * Jury Dashboard Shortcode Template
- * File: templates/shortcodes/jury-dashboard.php
- * 
- * Available variables:
- * - $atts: Shortcode attributes
- * - $assignments: Array of assigned candidates
- * - $total_assigned: Total number of assigned candidates
- * - $evaluated_count: Number of evaluated candidates
- * - $pending_count: Number of pending evaluations
- * - $completion_percentage: Completion percentage
- * - $current_user_id: Current user ID
- * - $jury_member_id: Jury member post ID
+ * Jury Dashboard Template
  */
 
+// Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
 }
 
-use MobilityTrailblazers\Core\Evaluation;
+// Ensure required objects are available
+if (!isset($this->jury_member) || !isset($this->statistics) || !isset($this->candidate)) {
+    return '<p>' . __('Error: Required components are not properly initialized.', 'mobility-trailblazers') . '</p>';
+}
+
+// Get current user
+$current_user = wp_get_current_user();
+if (!$current_user->exists()) {
+    return '<p>' . __('Please log in to view the jury dashboard.', 'mobility-trailblazers') . '</p>';
+}
+
+// Get jury member ID
+$jury_member_id = $this->jury_member->get_jury_member_id_for_user($current_user->ID);
+if (!$jury_member_id) {
+    return '<p>' . __('You do not have jury member access.', 'mobility-trailblazers') . '</p>';
+}
+
+// Get assigned candidates
+$assigned_candidates = $this->jury_member->get_assigned_candidates($jury_member_id);
+
+// Get evaluation progress
+$progress = $this->statistics->get_evaluation_progress();
+
+// Get jury member stats
+$stats = $this->statistics->get_jury_member_stats($current_user->ID);
+
+// Get top candidates
+$top_candidates = $this->statistics->get_top_candidates(5);
+
+// Get categories
+$categories = get_terms(array(
+    'taxonomy' => 'candidate_category',
+    'hide_empty' => true
+));
+
+// Get rounds
+$rounds = get_terms(array(
+    'taxonomy' => 'vote_round',
+    'hide_empty' => true
+));
+
+// Get statuses
+$statuses = get_terms(array(
+    'taxonomy' => 'candidate_status',
+    'hide_empty' => true
+));
+
+// Get current filters
+$current_category = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+$current_round = isset($_GET['round']) ? sanitize_text_field($_GET['round']) : '';
+$current_status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+$current_search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+$current_sort = isset($_GET['sort']) ? sanitize_text_field($_GET['sort']) : '';
+$current_page = isset($_GET['page']) ? absint($_GET['page']) : 1;
+
+// Get candidates based on filters
+$candidates = $this->candidate->get_all_candidates(array(
+    'category' => $current_category,
+    'round' => $current_round,
+    'status' => $current_status,
+    'search' => $current_search,
+    'sort' => $current_sort,
+    'page' => $current_page,
+    'per_page' => $atts['items_per_page']
+));
+
+// Get total pages
+$total_pages = ceil(count($candidates) / $atts['items_per_page']);
+
+// Start output
 ?>
 
 <div class="mt-jury-dashboard">
-    <?php if ($atts['show_stats'] === 'true'): ?>
+    <?php if ($atts['show_stats']): ?>
     <div class="mt-dashboard-stats">
-        <div class="mt-stat-card">
-            <div class="mt-stat-icon">
-                <span class="dashicons dashicons-portfolio"></span>
+        <h2><?php _e('Your Statistics', 'mobility-trailblazers'); ?></h2>
+        <div class="mt-stats-grid">
+            <div class="mt-stat-box">
+                <h3><?php _e('Total Votes', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-value"><?php echo esc_html($stats['total_votes']); ?></p>
             </div>
-            <h3><?php _e('Assigned', 'mobility-trailblazers'); ?></h3>
-            <div class="mt-stat-number"><?php echo $total_assigned; ?></div>
-            <p><?php _e('Total candidates', 'mobility-trailblazers'); ?></p>
-        </div>
-        
-        <div class="mt-stat-card">
-            <div class="mt-stat-icon">
-                <span class="dashicons dashicons-yes-alt"></span>
+            <div class="mt-stat-box">
+                <h3><?php _e('Assigned Candidates', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-value"><?php echo esc_html($stats['assigned_candidates']); ?></p>
             </div>
-            <h3><?php _e('Evaluated', 'mobility-trailblazers'); ?></h3>
-            <div class="mt-stat-number"><?php echo $evaluated_count; ?></div>
-            <p><?php _e('Completed evaluations', 'mobility-trailblazers'); ?></p>
-        </div>
-        
-        <div class="mt-stat-card">
-            <div class="mt-stat-icon">
-                <span class="dashicons dashicons-clock"></span>
+            <div class="mt-stat-box">
+                <h3><?php _e('Average Score', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-value"><?php echo esc_html(number_format($stats['average_score'], 1)); ?></p>
             </div>
-            <h3><?php _e('Pending', 'mobility-trailblazers'); ?></h3>
-            <div class="mt-stat-number"><?php echo $pending_count; ?></div>
-            <p><?php _e('Awaiting evaluation', 'mobility-trailblazers'); ?></p>
-        </div>
-        
-        <?php if ($atts['show_progress'] === 'true'): ?>
-        <div class="mt-stat-card">
-            <div class="mt-stat-icon">
-                <span class="dashicons dashicons-chart-pie"></span>
-            </div>
-            <h3><?php _e('Progress', 'mobility-trailblazers'); ?></h3>
-            <div class="mt-stat-number"><?php echo $completion_percentage; ?>%</div>
-            <div class="mt-progress-bar">
-                <div class="mt-progress-fill" style="width: <?php echo $completion_percentage; ?>%"></div>
+            <div class="mt-stat-box">
+                <h3><?php _e('Evaluation Progress', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-value"><?php echo esc_html($progress['percentage']); ?>%</p>
             </div>
         </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($atts['show_assignments']): ?>
+    <div class="mt-assigned-candidates">
+        <h2><?php _e('Your Assigned Candidates', 'mobility-trailblazers'); ?></h2>
+        <?php if (!empty($assigned_candidates)): ?>
+            <div class="mt-candidates-grid">
+                <?php foreach ($assigned_candidates as $candidate): ?>
+                    <div class="mt-candidate-card">
+                        <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                        <p class="mt-candidate-category">
+                            <?php
+                            $categories = get_the_terms($candidate->ID, 'candidate_category');
+                            if ($categories && !is_wp_error($categories)) {
+                                echo esc_html($categories[0]->name);
+                            }
+                            ?>
+                        </p>
+                        <div class="mt-candidate-actions">
+                            <a href="<?php echo esc_url(get_permalink($candidate->ID)); ?>" class="button">
+                                <?php _e('View Details', 'mobility-trailblazers'); ?>
+                            </a>
+                            <a href="<?php echo esc_url(add_query_arg('candidate_id', $candidate->ID, get_permalink())); ?>" class="button">
+                                <?php _e('Evaluate', 'mobility-trailblazers'); ?>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
         <?php endif; ?>
     </div>
     <?php endif; ?>
-    
-    <?php if ($atts['show_assignments'] === 'true' && !empty($assignments)): ?>
-    <div class="mt-assignments-section">
-        <h2><?php _e('Your Assigned Candidates', 'mobility-trailblazers'); ?></h2>
-        
-        <div class="mt-filters">
-            <button class="mt-filter-btn active" data-filter="all">
-                <?php _e('All', 'mobility-trailblazers'); ?> (<?php echo $total_assigned; ?>)
-            </button>
-            <button class="mt-filter-btn" data-filter="evaluated">
-                <?php _e('Evaluated', 'mobility-trailblazers'); ?> (<?php echo $evaluated_count; ?>)
-            </button>
-            <button class="mt-filter-btn" data-filter="pending">
-                <?php _e('Pending', 'mobility-trailblazers'); ?> (<?php echo $pending_count; ?>)
-            </button>
+
+    <?php if ($atts['show_evaluations']): ?>
+    <div class="mt-evaluation-progress">
+        <h2><?php _e('Evaluation Progress', 'mobility-trailblazers'); ?></h2>
+        <div class="mt-progress-bar">
+            <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress['percentage']); ?>%"></div>
         </div>
-        
-        <div class="mt-candidate-list">
-            <?php foreach ($assignments as $candidate): 
-                $evaluation = new Evaluation();
-                $evaluated = $evaluation->has_evaluated($current_user_id, $candidate->ID);
-                $company = get_post_meta($candidate->ID, '_mt_company', true);
-                $position = get_post_meta($candidate->ID, '_mt_position', true);
-                $categories = wp_get_post_terms($candidate->ID, 'mt_category');
-                $category_name = !empty($categories) ? $categories[0]->name : '';
+        <p class="mt-progress-text">
+            <?php
+            printf(
+                __('%d of %d evaluations completed (%d%%)', 'mobility-trailblazers'),
+                $progress['completed_votes'],
+                $progress['total_votes'],
+                $progress['percentage']
+            );
             ?>
-            <div class="mt-candidate-item <?php echo $evaluated ? 'evaluated' : 'pending'; ?>" data-status="<?php echo $evaluated ? 'evaluated' : 'pending'; ?>">
-                <div class="mt-candidate-header">
-                    <h3><?php echo esc_html($candidate->post_title); ?></h3>
-                    <span class="mt-status-badge <?php echo $evaluated ? 'evaluated' : 'pending'; ?>">
-                        <?php echo $evaluated ? __('Evaluated', 'mobility-trailblazers') : __('Pending', 'mobility-trailblazers'); ?>
-                    </span>
-                </div>
-                
-                <div class="mt-candidate-meta">
-                    <?php if ($position): ?>
-                    <p class="mt-position">
-                        <span class="dashicons dashicons-businessman"></span>
-                        <?php echo esc_html($position); ?>
-                    </p>
-                    <?php endif; ?>
-                    
-                    <?php if ($company): ?>
-                    <p class="mt-company">
-                        <span class="dashicons dashicons-building"></span>
-                        <?php echo esc_html($company); ?>
-                    </p>
-                    <?php endif; ?>
-                    
-                    <?php if ($category_name): ?>
-                    <p class="mt-category">
-                        <span class="dashicons dashicons-category"></span>
-                        <?php echo esc_html($category_name); ?>
-                    </p>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="mt-candidate-actions">
-                    <a href="<?php echo get_permalink($candidate->ID); ?>" class="button button-secondary" target="_blank">
-                        <span class="dashicons dashicons-visibility"></span>
-                        <?php _e('View Details', 'mobility-trailblazers'); ?>
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=mt-evaluate&candidate=' . $candidate->ID); ?>" class="button button-primary">
-                        <span class="dashicons dashicons-<?php echo $evaluated ? 'edit' : 'star-empty'; ?>"></span>
-                        <?php echo $evaluated ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate Now', 'mobility-trailblazers'); ?>
-                    </a>
-                </div>
-                
-                <?php if ($evaluated): 
-                    $scores = $evaluation->get_evaluation($current_user_id, $candidate->ID);
-                    if ($scores):
-                ?>
-                <div class="mt-evaluation-summary">
-                    <h4><?php _e('Your Evaluation', 'mobility-trailblazers'); ?></h4>
-                    <div class="mt-score-display">
-                        <span class="mt-total-score"><?php echo $scores->total_score; ?>/50</span>
-                        <span class="mt-evaluation-date">
-                            <?php echo sprintf(
-                                __('Evaluated on %s', 'mobility-trailblazers'),
-                                date_i18n(get_option('date_format'), strtotime($scores->evaluated_at))
-                            ); ?>
-                        </span>
-                    </div>
-                </div>
-                <?php endif; endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php elseif ($atts['show_assignments'] === 'true'): ?>
-    <div class="mt-no-assignments">
-        <p><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
+        </p>
     </div>
     <?php endif; ?>
+
+    <?php if ($atts['show_public_voting']): ?>
+    <div class="mt-public-voting">
+        <h2><?php _e('Public Voting Results', 'mobility-trailblazers'); ?></h2>
+        <?php if (!empty($top_candidates)): ?>
+            <div class="mt-top-candidates">
+                <?php foreach ($top_candidates as $candidate): ?>
+                    <div class="mt-candidate-card">
+                        <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                        <p class="mt-candidate-score">
+                            <?php
+                            printf(
+                                __('Score: %s (%d votes)', 'mobility-trailblazers'),
+                                number_format($candidate->average_score, 1),
+                                $candidate->vote_count
+                            );
+                            ?>
+                        </p>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p><?php _e('No public voting results available yet.', 'mobility-trailblazers'); ?></p>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($atts['show_round_selector'] || $atts['show_category_filter'] || $atts['show_search'] || $atts['show_sort']): ?>
+    <div class="mt-filters">
+        <form method="get" class="mt-filter-form">
+            <?php if ($atts['show_round_selector']): ?>
+            <div class="mt-filter-group">
+                <label for="round"><?php _e('Round', 'mobility-trailblazers'); ?></label>
+                <select name="round" id="round">
+                    <option value=""><?php _e('All Rounds', 'mobility-trailblazers'); ?></option>
+                    <?php foreach ($rounds as $round): ?>
+                        <option value="<?php echo esc_attr($round->slug); ?>" <?php selected($current_round, $round->slug); ?>>
+                            <?php echo esc_html($round->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($atts['show_category_filter']): ?>
+            <div class="mt-filter-group">
+                <label for="category"><?php _e('Category', 'mobility-trailblazers'); ?></label>
+                <select name="category" id="category">
+                    <option value=""><?php _e('All Categories', 'mobility-trailblazers'); ?></option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?php echo esc_attr($category->slug); ?>" <?php selected($current_category, $category->slug); ?>>
+                            <?php echo esc_html($category->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($atts['show_search']): ?>
+            <div class="mt-filter-group">
+                <label for="search"><?php _e('Search', 'mobility-trailblazers'); ?></label>
+                <input type="text" name="search" id="search" value="<?php echo esc_attr($current_search); ?>" placeholder="<?php esc_attr_e('Search candidates...', 'mobility-trailblazers'); ?>">
+            </div>
+            <?php endif; ?>
+
+            <?php if ($atts['show_sort']): ?>
+            <div class="mt-filter-group">
+                <label for="sort"><?php _e('Sort By', 'mobility-trailblazers'); ?></label>
+                <select name="sort" id="sort">
+                    <option value="date_desc" <?php selected($current_sort, 'date_desc'); ?>><?php _e('Newest First', 'mobility-trailblazers'); ?></option>
+                    <option value="date_asc" <?php selected($current_sort, 'date_asc'); ?>><?php _e('Oldest First', 'mobility-trailblazers'); ?></option>
+                    <option value="title_asc" <?php selected($current_sort, 'title_asc'); ?>><?php _e('Title A-Z', 'mobility-trailblazers'); ?></option>
+                    <option value="title_desc" <?php selected($current_sort, 'title_desc'); ?>><?php _e('Title Z-A', 'mobility-trailblazers'); ?></option>
+                    <option value="score_desc" <?php selected($current_sort, 'score_desc'); ?>><?php _e('Highest Score', 'mobility-trailblazers'); ?></option>
+                    <option value="score_asc" <?php selected($current_sort, 'score_asc'); ?>><?php _e('Lowest Score', 'mobility-trailblazers'); ?></option>
+                </select>
+            </div>
+            <?php endif; ?>
+
+            <div class="mt-filter-actions">
+                <button type="submit" class="button"><?php _e('Apply Filters', 'mobility-trailblazers'); ?></button>
+                <a href="<?php echo esc_url(remove_query_arg(array('category', 'round', 'status', 'search', 'sort', 'page'))); ?>" class="button">
+                    <?php _e('Reset Filters', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+
+    <div class="mt-candidates-list">
+        <?php if (!empty($candidates)): ?>
+            <div class="mt-candidates-grid">
+                <?php foreach ($candidates as $candidate): ?>
+                    <div class="mt-candidate-card">
+                        <h3><?php echo esc_html($candidate->post_title); ?></h3>
+                        <p class="mt-candidate-category">
+                            <?php
+                            $categories = get_the_terms($candidate->ID, 'candidate_category');
+                            if ($categories && !is_wp_error($categories)) {
+                                echo esc_html($categories[0]->name);
+                            }
+                            ?>
+                        </p>
+                        <div class="mt-candidate-actions">
+                            <a href="<?php echo esc_url(get_permalink($candidate->ID)); ?>" class="button">
+                                <?php _e('View Details', 'mobility-trailblazers'); ?>
+                            </a>
+                            <a href="<?php echo esc_url(add_query_arg('candidate_id', $candidate->ID, get_permalink())); ?>" class="button">
+                                <?php _e('Evaluate', 'mobility-trailblazers'); ?>
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if ($atts['show_pagination'] && $total_pages > 1): ?>
+            <div class="mt-pagination">
+                <?php
+                echo paginate_links(array(
+                    'base' => add_query_arg('page', '%#%'),
+                    'format' => '',
+                    'prev_text' => __('&laquo; Previous', 'mobility-trailblazers'),
+                    'next_text' => __('Next &raquo;', 'mobility-trailblazers'),
+                    'total' => $total_pages,
+                    'current' => $current_page
+                ));
+                ?>
+            </div>
+            <?php endif; ?>
+        <?php else: ?>
+            <p><?php _e('No candidates found matching your criteria.', 'mobility-trailblazers'); ?></p>
+        <?php endif; ?>
+    </div>
 </div>
 
 <style>

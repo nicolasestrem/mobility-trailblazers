@@ -6,16 +6,18 @@
  * @since 1.0.0
  */
 
+namespace MobilityTrailblazers;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
- * Class MT_Post_Types
+ * Class PostTypes
  * Handles registration of custom post types
  */
-class MT_Post_Types {
+class PostTypes {
     
     /**
      * Initialize the class

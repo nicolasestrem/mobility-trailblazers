@@ -77,21 +77,70 @@ class ShortcodeHandler {
      * Jury Dashboard Shortcode
      */
     public function jury_dashboard_shortcode($atts) {
+        // Check if user is logged in
         if (!is_user_logged_in()) {
             return '<p>' . __('Please log in to access the jury dashboard.', 'mobility-trailblazers') . '</p>';
         }
+
+        // Get current user
+        $current_user = wp_get_current_user();
         
-        $user_id = get_current_user_id();
-        if (!$this->jury_member->is_jury_member($user_id)) {
+        // Initialize core classes if not already initialized
+        if (!isset($this->jury_member)) {
+            $this->jury_member = new \MobilityTrailblazers\Core\JuryMember();
+        }
+        if (!isset($this->statistics)) {
+            $this->statistics = new \MobilityTrailblazers\Core\Statistics();
+        }
+        if (!isset($this->candidate)) {
+            $this->candidate = new \MobilityTrailblazers\Core\Candidate();
+        }
+
+        // Check if user is a jury member
+        if (!$this->jury_member->is_jury_member($current_user->ID)) {
             return '<p>' . __('You do not have permission to access the jury dashboard.', 'mobility-trailblazers') . '</p>';
         }
-        
-        $jury_member_id = $this->jury_member->get_jury_member_id_for_user($user_id);
-        $assigned_candidates = $this->jury_member->get_assigned_candidates($jury_member_id);
-        $stats = $this->statistics->get_jury_member_stats($user_id);
-        
+
+        // Parse attributes with defaults
+        $atts = shortcode_atts(array(
+            'show_stats' => 'yes',
+            'show_assignments' => 'yes',
+            'show_evaluations' => 'yes',
+            'show_public_voting' => 'yes',
+            'show_round_selector' => 'yes',
+            'show_category_filter' => 'yes',
+            'show_search' => 'yes',
+            'show_sort' => 'yes',
+            'show_pagination' => 'yes',
+            'items_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'category' => '',
+            'round' => '',
+            'status' => '',
+            'search' => '',
+            'sort' => '',
+            'page' => 1
+        ), $atts, 'jury_dashboard');
+
+        // Convert yes/no strings to booleans
+        $atts['show_stats'] = filter_var($atts['show_stats'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_assignments'] = filter_var($atts['show_assignments'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_evaluations'] = filter_var($atts['show_evaluations'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_public_voting'] = filter_var($atts['show_public_voting'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_round_selector'] = filter_var($atts['show_round_selector'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_category_filter'] = filter_var($atts['show_category_filter'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_search'] = filter_var($atts['show_search'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_sort'] = filter_var($atts['show_sort'], FILTER_VALIDATE_BOOLEAN);
+        $atts['show_pagination'] = filter_var($atts['show_pagination'], FILTER_VALIDATE_BOOLEAN);
+
+        // Start output buffering
         ob_start();
-        include MT_PLUGIN_PATH . 'templates/shortcodes/jury-dashboard.php';
+
+        // Include the template with required variables
+        include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
+
+        // Return the buffered content
         return ob_get_clean();
     }
     

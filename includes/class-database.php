@@ -14,10 +14,10 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Class MT_Database
+ * Class Database
  * Handles database table creation and management
  */
-class MT_Database {
+class Database {
     
     /**
      * Create all plugin database tables

@@ -6,16 +6,18 @@
  * @since 1.0.0
  */
 
+namespace MobilityTrailblazers;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
- * Class MT_Shortcodes
+ * Class Shortcodes
  * Handles all plugin shortcodes
  */
-class MT_Shortcodes {
+class Shortcodes {
     
     /**
      * Initialize the class
@@ -45,7 +47,7 @@ class MT_Shortcodes {
         ), $atts);
         
         // Check if user is logged in and is a jury member
-        if (!is_user_logged_in() || !MT_Roles::is_jury_member()) {
+        if (!is_user_logged_in() || !Roles::is_jury_member()) {
             return '<p>' . __('You must be a logged-in jury member to vote.', 'mobility-trailblazers') . '</p>';
         }
         
@@ -292,7 +294,7 @@ class MT_Shortcodes {
      */
     public function jury_dashboard_shortcode($atts) {
         // Check if user is logged in and is a jury member
-        if (!is_user_logged_in() || !MT_Roles::is_jury_member()) {
+        if (!is_user_logged_in() || !Roles::is_jury_member()) {
             return '<p>' . __('You must be a logged-in jury member to access the dashboard.', 'mobility-trailblazers') . '</p>';
         }
         
