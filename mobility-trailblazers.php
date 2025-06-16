@@ -262,6 +262,13 @@ class MobilityTrailblazersPlugin {
 
         // Load integrations
         require_once plugin_dir_path(__FILE__) . 'includes/integrations/class-integrations-loader.php';
+
+        // Initialize core classes with proper namespaces
+        $this->database = new \MobilityTrailblazers\Database();
+        $this->roles = new \MobilityTrailblazers\Roles();
+        $this->taxonomies = new \MobilityTrailblazers\Taxonomies();
+        $this->post_types = new \MobilityTrailblazers\PostTypes();
+        $this->shortcode_handler = new \MobilityTrailblazers\Shortcodes();
     }
     
     /**
@@ -586,7 +593,7 @@ class MobilityTrailblazersPlugin {
      * Load integrations
      */
     private function load_integrations() {
-        IntegrationsLoader::get_instance();
+        $this->integrations_loader = \MobilityTrailblazers\Integrations\IntegrationsLoader::get_instance();
     }
     
     /**
