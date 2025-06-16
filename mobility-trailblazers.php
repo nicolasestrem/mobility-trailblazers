@@ -191,6 +191,10 @@ class MobilityTrailblazersPlugin {
         add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
         add_action('wp_enqueue_scripts', array($this, 'frontend_enqueue_scripts'));
         
+        // Register assets
+        add_action('wp_enqueue_scripts', array($this, 'register_assets'), 5);
+        add_action('admin_enqueue_scripts', array($this, 'register_assets'), 5);
+        
         // Activation/Deactivation hooks
         register_activation_hook(MT_PLUGIN_FILE, array($this, 'activate'));
         register_deactivation_hook(MT_PLUGIN_FILE, array($this, 'deactivate'));
@@ -444,6 +448,81 @@ class MobilityTrailblazersPlugin {
     }
     
     /**
+     * Register all plugin assets
+     */
+    public function register_assets() {
+        // Register CSS files
+        wp_register_style(
+            'mt-frontend-css',
+            MT_PLUGIN_URL . 'assets/css/frontend.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        wp_register_style(
+            'mt-admin-css',
+            MT_PLUGIN_URL . 'assets/css/admin.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        wp_register_style(
+            'mt-assignment-css',
+            MT_PLUGIN_URL . 'assets/css/assignment.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        wp_register_style(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        // Register JavaScript files
+        wp_register_script(
+            'mt-frontend-js',
+            MT_PLUGIN_URL . 'assets/js/frontend.js',
+            array('jquery'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_register_script(
+            'mt-admin-js',
+            MT_PLUGIN_URL . 'assets/js/admin.js',
+            array('jquery'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_register_script(
+            'mt-assignment-js',
+            MT_PLUGIN_URL . 'assets/js/assignment.js',
+            array('jquery', 'jquery-ui-draggable', 'jquery-ui-droppable'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_register_script(
+            'mt-dashboard-js',
+            MT_PLUGIN_URL . 'assets/js/dashboard.js',
+            array('jquery'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        wp_register_script(
+            'mt-jury-evaluation',
+            MT_PLUGIN_URL . 'assets/js/jury-evaluation.js',
+            array('jquery'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+    }
+    
+    /**
      * Enqueue admin scripts and styles
      */
     public function admin_enqueue_scripts($hook) {
@@ -452,39 +531,14 @@ class MobilityTrailblazersPlugin {
             return;
         }
 
-        // Enqueue admin styles
-        wp_enqueue_style(
-            'mt-admin-css',
-            MT_PLUGIN_URL . 'assets/css/admin.css',
-            array(),
-            MT_PLUGIN_VERSION
-        );
-
-        // Enqueue admin scripts
-        wp_enqueue_script(
-            'mt-admin-js',
-            MT_PLUGIN_URL . 'assets/js/admin.js',
-            array('jquery'),
-            MT_PLUGIN_VERSION,
-            true
-        );
+        // Enqueue admin styles and scripts
+        wp_enqueue_style('mt-admin-css');
+        wp_enqueue_script('mt-admin-js');
 
         // Enqueue assignment interface scripts and styles
         if (strpos($hook, 'mt-assignments') !== false) {
-            wp_enqueue_style(
-                'mt-assignment-css',
-                MT_PLUGIN_URL . 'assets/css/assignment.css',
-                array(),
-                MT_PLUGIN_VERSION
-            );
-
-            wp_enqueue_script(
-                'mt-assignment-js',
-                MT_PLUGIN_URL . 'assets/js/assignment.js',
-                array('jquery', 'jquery-ui-draggable', 'jquery-ui-droppable'),
-                MT_PLUGIN_VERSION,
-                true
-            );
+            wp_enqueue_style('mt-assignment-css');
+            wp_enqueue_script('mt-assignment-js');
 
             // Localize script with data
             wp_localize_script('mt-assignment-js', 'mt_assignment_ajax', array(
@@ -497,13 +551,7 @@ class MobilityTrailblazersPlugin {
 
         // Enqueue dashboard scripts
         if (strpos($hook, 'mt-dashboard') !== false) {
-            wp_enqueue_script(
-                'mt-dashboard-js',
-                MT_PLUGIN_URL . 'assets/js/dashboard.js',
-                array('jquery'),
-                MT_PLUGIN_VERSION,
-                true
-            );
+            wp_enqueue_script('mt-dashboard-js');
         }
 
         // Localize admin script
@@ -517,28 +565,85 @@ class MobilityTrailblazersPlugin {
      * Enqueue frontend scripts and styles
      */
     public function frontend_enqueue_scripts() {
-        // Enqueue frontend styles
-        wp_enqueue_style(
-            'mt-frontend-css',
-            MT_PLUGIN_URL . 'assets/css/frontend.css',
-            array(),
-            MT_PLUGIN_VERSION
-        );
-
-        // Enqueue frontend scripts
-        wp_enqueue_script(
-            'mt-frontend-js',
-            MT_PLUGIN_URL . 'assets/js/frontend.js',
-            array('jquery'),
-            MT_PLUGIN_VERSION,
-            true
-        );
+        // Enqueue frontend styles and scripts
+        wp_enqueue_style('mt-frontend-css');
+        wp_enqueue_script('mt-frontend-js');
 
         // Localize frontend script
         wp_localize_script('mt-frontend-js', 'mtFrontend', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_frontend_nonce')
         ));
+        
+        // Check if we're on a page that needs jury evaluation functionality
+        if ($this->is_jury_dashboard_page()) {
+            // Enqueue jury dashboard styles and scripts
+            wp_enqueue_style('mt-jury-dashboard');
+            wp_enqueue_script('mt-jury-evaluation');
+            
+            // Localize jury evaluation script
+            wp_localize_script('mt-jury-evaluation', 'mt_jury_dashboard', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_jury_dashboard'),
+                'i18n' => array(
+                    'loading_evaluation' => __('Loading evaluation...', 'mobility-trailblazers'),
+                    'evaluation_loaded' => __('Evaluation loaded successfully', 'mobility-trailblazers'),
+                    'error_loading' => __('Error loading evaluation', 'mobility-trailblazers'),
+                    'submitting' => __('Submitting evaluation...', 'mobility-trailblazers'),
+                    'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
+                    'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
+                    'error_submitting' => __('Error submitting evaluation', 'mobility-trailblazers'),
+                    'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
+                    'evaluated' => __('Evaluated', 'mobility-trailblazers'),
+                    'please_rate_all' => __('Please rate all criteria before submitting', 'mobility-trailblazers'),
+                    'saving' => __('Saving draft...', 'mobility-trailblazers'),
+                    'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
+                    'draft_saved' => __('Draft saved successfully!', 'mobility-trailblazers'),
+                    'error_saving' => __('Error saving draft', 'mobility-trailblazers'),
+                    'all_complete' => __('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'),
+                    'preparing_export' => __('Preparing export...', 'mobility-trailblazers'),
+                    'export_complete' => __('Export ready! Download will start shortly.', 'mobility-trailblazers'),
+                    'export_error' => __('Error preparing export', 'mobility-trailblazers'),
+                    'unsaved_changes' => __('You have unsaved changes. Are you sure you want to leave?', 'mobility-trailblazers'),
+                    'confirm_submit' => __('Are you sure you want to submit this evaluation?', 'mobility-trailblazers'),
+                    'confirm_export' => __('Are you sure you want to export your evaluations?', 'mobility-trailblazers')
+                )
+            ));
+        }
+    }
+    
+    /**
+     * Check if current page needs jury dashboard functionality
+     */
+    private function is_jury_dashboard_page() {
+        global $post;
+        
+        // Check if we're on a page with jury dashboard shortcode
+        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'mt_jury_dashboard')) {
+            return true;
+        }
+        
+        // Check if current user is a jury member (for Elementor widgets or other dynamic content)
+        if (is_user_logged_in()) {
+            $current_user_id = get_current_user_id();
+            $jury_post = get_posts(array(
+                'post_type' => 'mt_jury',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_jury_user_id',
+                        'value' => $current_user_id,
+                        'compare' => '='
+                    )
+                ),
+                'posts_per_page' => 1
+            ));
+            
+            if (!empty($jury_post)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -589,6 +694,12 @@ class MobilityTrailblazersPlugin {
         add_action('wp_ajax_mt_assign_candidates', array($this, 'handle_candidate_assignment'));
         add_action('wp_ajax_mt_auto_assign', array($this, 'handle_auto_assignment'));
         add_action('wp_ajax_mt_export_assignments', array($this, 'handle_export_assignments'));
+        
+        // Jury evaluation handlers
+        add_action('wp_ajax_mt_submit_evaluation', array($this, 'handle_evaluation_submission'));
+        add_action('wp_ajax_mt_save_draft', array($this, 'handle_draft_save'));
+        add_action('wp_ajax_mt_get_evaluation', array($this, 'handle_get_evaluation'));
+        add_action('wp_ajax_mt_export_evaluations', array($this, 'handle_export_evaluations'));
     }
     
     /**
@@ -932,6 +1043,295 @@ class MobilityTrailblazersPlugin {
                 $category,
                 $jury_name,
                 get_the_date('Y-m-d', $candidate->ID)
+            ));
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Handle jury evaluation submission
+     */
+    public function handle_evaluation_submission() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+        }
+        
+        // Check if user is a jury member
+        $current_user_id = get_current_user_id();
+        $jury_post = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $current_user_id,
+                    'compare' => '='
+                )
+            ),
+            'posts_per_page' => 1
+        ));
+        
+        if (empty($jury_post)) {
+            wp_send_json_error(array('message' => __('Access denied. You are not authorized to submit evaluations.', 'mobility-trailblazers')));
+        }
+        
+        $jury_member_id = $jury_post[0]->ID;
+        
+        // Get and sanitize data
+        $candidate_id = intval($_POST['candidate_id']);
+        $courage = intval($_POST['courage']);
+        $innovation = intval($_POST['innovation']);
+        $implementation = intval($_POST['implementation']);
+        $relevance = intval($_POST['relevance']);
+        $visibility = intval($_POST['visibility']);
+        $comments = sanitize_textarea_field($_POST['comments']);
+        
+        // Validate required fields
+        if (!$candidate_id || $courage < 1 || $courage > 10 || $innovation < 1 || $innovation > 10 || 
+            $implementation < 1 || $implementation > 10 || $relevance < 1 || $relevance > 10 || 
+            $visibility < 1 || $visibility > 10) {
+            wp_send_json_error(array('message' => __('Invalid evaluation data. All scores must be between 1 and 10.', 'mobility-trailblazers')));
+        }
+        
+        // Verify candidate is assigned to this jury member
+        $assigned_jury = get_post_meta($candidate_id, '_mt_assigned_jury_member', true);
+        if ($assigned_jury != $jury_member_id) {
+            wp_send_json_error(array('message' => __('You are not assigned to evaluate this candidate.', 'mobility-trailblazers')));
+        }
+        
+        // Save evaluation to database
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        // Check if evaluation already exists
+        $existing = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d",
+            $candidate_id,
+            $jury_member_id
+        ));
+        
+        $data = array(
+            'candidate_id' => $candidate_id,
+            'jury_member_id' => $jury_member_id,
+            'courage_score' => $courage,
+            'innovation_score' => $innovation,
+            'implementation_score' => $implementation,
+            'relevance_score' => $relevance,
+            'visibility_score' => $visibility,
+            'comments' => $comments,
+            'evaluation_date' => current_time('mysql')
+        );
+        
+        if ($existing) {
+            // Update existing evaluation
+            $result = $wpdb->update(
+                $table_scores,
+                $data,
+                array('id' => $existing),
+                array('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s'),
+                array('%d')
+            );
+        } else {
+            // Insert new evaluation
+            $result = $wpdb->insert(
+                $table_scores,
+                $data,
+                array('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s')
+            );
+        }
+        
+        if ($result !== false) {
+            // Remove any draft for this candidate
+            delete_user_meta($current_user_id, "mt_evaluation_draft_{$candidate_id}");
+            
+            wp_send_json_success(array(
+                'message' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
+                'total_score' => $courage + $innovation + $implementation + $relevance + $visibility
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('Failed to save evaluation. Please try again.', 'mobility-trailblazers')));
+        }
+    }
+    
+    /**
+     * Handle draft save
+     */
+    public function handle_draft_save() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+        }
+        
+        $current_user_id = get_current_user_id();
+        $candidate_id = intval($_POST['candidate_id']);
+        
+        // Prepare draft data
+        $draft_data = array(
+            'courage' => intval($_POST['courage']),
+            'innovation' => intval($_POST['innovation']),
+            'implementation' => intval($_POST['implementation']),
+            'relevance' => intval($_POST['relevance']),
+            'visibility' => intval($_POST['visibility']),
+            'comments' => sanitize_textarea_field($_POST['comments']),
+            'saved_at' => current_time('mysql')
+        );
+        
+        // Save draft as user meta
+        $result = update_user_meta($current_user_id, "mt_evaluation_draft_{$candidate_id}", $draft_data);
+        
+        if ($result !== false) {
+            wp_send_json_success(array(
+                'message' => __('Draft saved successfully!', 'mobility-trailblazers')
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('Failed to save draft.', 'mobility-trailblazers')));
+        }
+    }
+    
+    /**
+     * Handle get evaluation
+     */
+    public function handle_get_evaluation() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+        }
+        
+        $current_user_id = get_current_user_id();
+        $candidate_id = intval($_POST['candidate_id']);
+        
+        // Get jury member ID
+        $jury_post = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $current_user_id,
+                    'compare' => '='
+                )
+            ),
+            'posts_per_page' => 1
+        ));
+        
+        if (empty($jury_post)) {
+            wp_send_json_error(array('message' => __('Access denied.', 'mobility-trailblazers')));
+        }
+        
+        $jury_member_id = $jury_post[0]->ID;
+        
+        // Get existing evaluation
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        $evaluation = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_scores WHERE candidate_id = %d AND jury_member_id = %d ORDER BY evaluation_date DESC LIMIT 1",
+            $candidate_id,
+            $jury_member_id
+        ), ARRAY_A);
+        
+        if ($evaluation) {
+            wp_send_json_success(array(
+                'evaluation' => $evaluation,
+                'is_draft' => false
+            ));
+        } else {
+            // Check for draft
+            $draft = get_user_meta($current_user_id, "mt_evaluation_draft_{$candidate_id}", true);
+            if ($draft) {
+                wp_send_json_success(array(
+                    'evaluation' => $draft,
+                    'is_draft' => true
+                ));
+            } else {
+                wp_send_json_success(array(
+                    'evaluation' => null,
+                    'is_draft' => false
+                ));
+            }
+        }
+    }
+    
+    /**
+     * Handle export evaluations
+     */
+    public function handle_export_evaluations() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+        }
+        
+        $current_user_id = get_current_user_id();
+        
+        // Get jury member ID
+        $jury_post = get_posts(array(
+            'post_type' => 'mt_jury',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_jury_user_id',
+                    'value' => $current_user_id,
+                    'compare' => '='
+                )
+            ),
+            'posts_per_page' => 1
+        ));
+        
+        if (empty($jury_post)) {
+            wp_send_json_error(array('message' => __('Access denied.', 'mobility-trailblazers')));
+        }
+        
+        $jury_member_id = $jury_post[0]->ID;
+        $jury_name = $jury_post[0]->post_title;
+        
+        // Set CSV headers
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="my-evaluations-' . sanitize_file_name($jury_name) . '-' . date('Y-m-d') . '.csv"');
+        
+        // Create CSV
+        $output = fopen('php://output', 'w');
+        
+        // Header row
+        fputcsv($output, array(
+            'Candidate Name', 
+            'Company', 
+            'Courage', 
+            'Innovation', 
+            'Implementation', 
+            'Relevance', 
+            'Visibility', 
+            'Total Score', 
+            'Comments', 
+            'Evaluation Date'
+        ));
+        
+        // Get evaluations
+        global $wpdb;
+        $table_scores = $wpdb->prefix . 'mt_candidate_scores';
+        
+        $evaluations = $wpdb->get_results($wpdb->prepare(
+            "SELECT cs.*, p.post_title as candidate_name 
+             FROM $table_scores cs 
+             JOIN {$wpdb->posts} p ON cs.candidate_id = p.ID 
+             WHERE cs.jury_member_id = %d 
+             ORDER BY cs.evaluation_date DESC",
+            $jury_member_id
+        ));
+        
+        foreach ($evaluations as $evaluation) {
+            $company = get_post_meta($evaluation->candidate_id, '_mt_company', true);
+            
+            fputcsv($output, array(
+                $evaluation->candidate_name,
+                $company,
+                $evaluation->courage_score,
+                $evaluation->innovation_score,
+                $evaluation->implementation_score,
+                $evaluation->relevance_score,
+                $evaluation->visibility_score,
+                $evaluation->total_score,
+                $evaluation->comments,
+                $evaluation->evaluation_date
             ));
         }
         

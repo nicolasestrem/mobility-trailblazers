@@ -69,6 +69,30 @@ class Database {
             KEY user_id (user_id),
             KEY timestamp (timestamp)
         ) $charset_collate;";
+        
+        // Candidate scores table for jury evaluations
+        $sql .= "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mt_candidate_scores (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            candidate_id bigint(20) NOT NULL,
+            jury_member_id bigint(20) NOT NULL,
+            courage_score tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Mut & Pioniergeist (1-10)',
+            innovation_score tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Innovationsgrad (1-10)',
+            implementation_score tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Umsetzungskraft & Wirkung (1-10)',
+            relevance_score tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Relevanz für Mobilitätswende (1-10)',
+            visibility_score tinyint(2) NOT NULL DEFAULT 0 COMMENT 'Vorbildfunktion & Sichtbarkeit (1-10)',
+            total_score decimal(4,2) DEFAULT 0 COMMENT 'Calculated total score (max 50)',
+            evaluation_round tinyint(1) NOT NULL DEFAULT 1,
+            evaluation_date datetime DEFAULT CURRENT_TIMESTAMP,
+            comments text,
+            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+            updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY unique_evaluation (candidate_id, jury_member_id, evaluation_round),
+            KEY candidate_id (candidate_id),
+            KEY jury_member_id (jury_member_id),
+            KEY total_score (total_score),
+            KEY evaluation_round (evaluation_round)
+        ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);

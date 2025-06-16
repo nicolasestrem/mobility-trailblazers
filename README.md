@@ -210,6 +210,12 @@ We successfully transformed a monolithic 6,759-line plugin file into a modern, m
 - **Jury Dashboard (Admin Panel)**: Personal assignment view with evaluation interface
 - **Jury Dashboard (Frontend)**: Public-facing, mobile-responsive interface with offline capability
 - **Auto-Save Feature**: Never lose progress with automatic saving
+- **Complete Backend Integration**: Full AJAX handler system with comprehensive localization
+  - Real-time evaluation submission and validation
+  - Draft saving system with user metadata storage
+  - Evaluation loading for editing existing assessments
+  - Individual CSV export functionality for jury members
+  - Intelligent script loading for performance optimization
 
 ### 5. Elementor Page Builder Integration
 - **Custom Widgets**: MT Jury Dashboard, MT Candidate Grid, MT Evaluation Statistics
@@ -307,9 +313,13 @@ wp_mt_votes (
 )
 
 wp_mt_candidate_scores (
-    id, candidate_id, total_score, evaluation_count,
-    average_score, is_active, reset_at, reset_by,
-    voting_phase, last_updated
+    id, candidate_id, jury_member_id,
+    courage_score, innovation_score, implementation_score,
+    relevance_score, visibility_score, total_score,
+    evaluation_round, evaluation_date, comments,
+    created_at, updated_at
+    -- Unique constraint: (candidate_id, jury_member_id, evaluation_round)
+    -- Automatic total_score calculation via database triggers
 )
 
 wp_vote_reset_logs (
@@ -546,6 +556,29 @@ GET  /wp-json/mt/v1/export-assignments
 
 ### AJAX Actions
 
+#### Jury Evaluation System
+```javascript
+// Submit jury evaluation
+wp_ajax_mt_submit_evaluation
+// Parameters: candidate_id, courage, innovation, implementation, relevance, visibility, comments, nonce
+// Returns: success/error with total_score
+
+// Save evaluation draft
+wp_ajax_mt_save_draft
+// Parameters: candidate_id, courage, innovation, implementation, relevance, visibility, comments, nonce
+// Returns: success/error confirmation
+
+// Get existing evaluation or draft
+wp_ajax_mt_get_evaluation
+// Parameters: candidate_id, nonce
+// Returns: evaluation data with is_draft flag
+
+// Export jury member evaluations
+wp_ajax_mt_export_evaluations
+// Parameters: nonce
+// Returns: CSV file download with all evaluations
+```
+
 #### Assignment Management
 ```javascript
 // Assign candidates to jury member
@@ -577,6 +610,40 @@ wp_ajax_mt_reset_full_system
 wp_ajax_mt_create_full_backup
 wp_ajax_mt_export_votes
 wp_ajax_mt_export_evaluations
+```
+
+### JavaScript Localization
+
+#### Jury Dashboard Localization
+```javascript
+// Available via mt_jury_dashboard global object
+mt_jury_dashboard = {
+    ajax_url: '/wp-admin/admin-ajax.php',
+    nonce: 'security_nonce_value',
+    i18n: {
+        loading_evaluation: 'Loading evaluation...',
+        evaluation_loaded: 'Evaluation loaded successfully',
+        error_loading: 'Error loading evaluation',
+        submitting: 'Submitting evaluation...',
+        submit_evaluation: 'Submit Evaluation',
+        evaluation_submitted: 'Evaluation submitted successfully!',
+        error_submitting: 'Error submitting evaluation',
+        network_error: 'Network error. Please try again.',
+        evaluated: 'Evaluated',
+        please_rate_all: 'Please rate all criteria before submitting',
+        saving: 'Saving draft...',
+        save_draft: 'Save as Draft',
+        draft_saved: 'Draft saved successfully!',
+        error_saving: 'Error saving draft',
+        all_complete: 'Congratulations! You have completed all evaluations!',
+        preparing_export: 'Preparing export...',
+        export_complete: 'Export ready! Download will start shortly.',
+        export_error: 'Error preparing export',
+        unsaved_changes: 'You have unsaved changes. Are you sure you want to leave?',
+        confirm_submit: 'Are you sure you want to submit this evaluation?',
+        confirm_export: 'Are you sure you want to export your evaluations?'
+    }
+};
 ```
 
 ### PHP Hooks
@@ -672,6 +739,28 @@ docker exec mobility_wpcli_STAGING wp db query "SELECT COUNT(*) FROM wp_mt_votes
 
 # Check reset permissions
 docker exec mobility_wpcli_STAGING wp user get {user_id} --field=roles
+```
+
+#### Jury Evaluation Issues
+```bash
+# Check candidate scores table
+docker exec mobility_wpcli_STAGING wp db query "DESCRIBE wp_mt_candidate_scores"
+
+# Verify evaluation data
+docker exec mobility_wpcli_STAGING wp db query "SELECT COUNT(*) FROM wp_mt_candidate_scores"
+
+# Check jury member assignments
+docker exec mobility_wpcli_STAGING wp db query "SELECT candidate_id, jury_member_id FROM wp_postmeta WHERE meta_key = '_mt_assigned_jury_member'"
+
+# Test AJAX endpoints
+curl -X POST "http://your-site.com/wp-admin/admin-ajax.php" \
+  -d "action=mt_get_evaluation&candidate_id=123&nonce=YOUR_NONCE"
+
+# Check JavaScript localization
+# Verify mt_jury_dashboard object is available in browser console
+
+# Verify draft functionality
+docker exec mobility_wpcli_STAGING wp db query "SELECT * FROM wp_usermeta WHERE meta_key LIKE 'mt_evaluation_draft_%'"
 ```
 
 #### Menu and Navigation Issues
