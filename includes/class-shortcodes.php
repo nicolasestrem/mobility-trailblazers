@@ -47,7 +47,7 @@ class Shortcodes {
         ), $atts);
         
         // Check if user is logged in and is a jury member
-        if (!is_user_logged_in() || !Roles::is_jury_member()) {
+        if (!is_user_logged_in() || !\MobilityTrailblazers\Roles::is_jury_member()) {
             return '<p>' . __('You must be a logged-in jury member to vote.', 'mobility-trailblazers') . '</p>';
         }
         
@@ -294,8 +294,30 @@ class Shortcodes {
      */
     public function jury_dashboard_shortcode($atts) {
         // Check if user is logged in and is a jury member
-        if (!is_user_logged_in() || !Roles::is_jury_member()) {
+        if (!is_user_logged_in() || !\MobilityTrailblazers\Roles::is_jury_member()) {
             return '<p>' . __('You must be a logged-in jury member to access the dashboard.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        // Parse attributes with defaults
+        $atts = shortcode_atts(array(
+            'show_stats' => true,
+            'show_assignments' => true,
+            'show_evaluations' => true,
+            'show_public_voting' => true,
+            'show_round_selector' => true,
+            'show_category_filter' => true,
+            'show_search' => true,
+            'show_sort' => true,
+            'show_pagination' => true,
+            'items_per_page' => 10,
+            'show_progress' => true
+        ), $atts, 'jury_dashboard');
+        
+        // Convert string values to booleans for template compatibility
+        foreach (['show_stats', 'show_assignments', 'show_evaluations', 'show_public_voting', 'show_round_selector', 'show_category_filter', 'show_search', 'show_sort', 'show_pagination', 'show_progress'] as $key) {
+            if (is_string($atts[$key])) {
+                $atts[$key] = filter_var($atts[$key], FILTER_VALIDATE_BOOLEAN);
+            }
         }
         
         // Get jury member data
@@ -306,8 +328,60 @@ class Shortcodes {
             return '<p>' . __('Your jury member profile could not be found. Please contact the administrator.', 'mobility-trailblazers') . '</p>';
         }
         
+        // Initialize core classes for template
+        $this->jury_member = class_exists('\MobilityTrailblazers\Core\JuryMember') ? new \MobilityTrailblazers\Core\JuryMember() : null;
+        $this->statistics = class_exists('\MobilityTrailblazers\Core\Statistics') ? new \MobilityTrailblazers\Core\Statistics() : null;
+        $this->candidate = class_exists('\MobilityTrailblazers\Core\Candidate') ? new \MobilityTrailblazers\Core\Candidate() : null;
+        
+        // Check if core classes are available
+        if (!$this->jury_member || !$this->statistics || !$this->candidate) {
+            return '<p>' . __('Error: Required components are not properly initialized.', 'mobility-trailblazers') . '</p>';
+        }
+        
+        // Try to load the template, but provide fallback if it fails
         ob_start();
-        include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
+        try {
+            if (file_exists(MT_PLUGIN_PATH . 'templates/jury-dashboard.php')) {
+                include MT_PLUGIN_PATH . 'templates/jury-dashboard.php';
+            } else {
+                // Fallback simple dashboard
+                echo '<div class="mt-jury-dashboard">';
+                echo '<h2>' . __('Jury Dashboard', 'mobility-trailblazers') . '</h2>';
+                $current_user = wp_get_current_user();
+                echo '<p>' . sprintf(__('Welcome, %s!', 'mobility-trailblazers'), $current_user->display_name) . '</p>';
+                
+                if ($atts['show_stats']) {
+                    $stats = $this->statistics->get_jury_member_stats($user_id);
+                    echo '<div class="mt-dashboard-stats">';
+                    echo '<h3>' . __('Your Statistics', 'mobility-trailblazers') . '</h3>';
+                    echo '<p>' . sprintf(__('Total Votes: %d', 'mobility-trailblazers'), $stats['total_votes']) . '</p>';
+                    echo '<p>' . sprintf(__('Assigned Candidates: %d', 'mobility-trailblazers'), $stats['assigned_candidates']) . '</p>';
+                    echo '<p>' . sprintf(__('Average Score: %.1f', 'mobility-trailblazers'), $stats['average_score']) . '</p>';
+                    echo '</div>';
+                }
+                
+                if ($atts['show_assignments']) {
+                    $jury_member_id = $this->jury_member->get_jury_member_id_for_user($user_id);
+                    $assigned_candidates = $this->jury_member->get_assigned_candidates($jury_member_id);
+                    echo '<div class="mt-assigned-candidates">';
+                    echo '<h3>' . __('Your Assigned Candidates', 'mobility-trailblazers') . '</h3>';
+                    if (!empty($assigned_candidates)) {
+                        echo '<ul>';
+                        foreach ($assigned_candidates as $candidate) {
+                            echo '<li><a href="' . get_permalink($candidate->ID) . '">' . esc_html($candidate->post_title) . '</a></li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<p>' . __('No candidates have been assigned to you yet.', 'mobility-trailblazers') . '</p>';
+                    }
+                    echo '</div>';
+                }
+                
+                echo '</div>';
+            }
+        } catch (Exception $e) {
+            echo '<p>' . __('Error loading jury dashboard: ', 'mobility-trailblazers') . esc_html($e->getMessage()) . '</p>';
+        }
         return ob_get_clean();
     }
     

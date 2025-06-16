@@ -24,8 +24,17 @@ class Statistics {
         
         $jury_member_id = $this->get_jury_member_id_for_user($user_id);
         if (!$jury_member_id) {
-            return array();
+            return array(
+                'total_votes' => 0,
+                'assigned_candidates' => 0,
+                'average_score' => 0
+            );
         }
+        
+        $average_score = $wpdb->get_var($wpdb->prepare(
+            "SELECT AVG(score) FROM {$wpdb->prefix}mt_votes WHERE jury_member_id = %d",
+            $jury_member_id
+        ));
         
         return array(
             'total_votes' => $wpdb->get_var($wpdb->prepare(
@@ -33,10 +42,7 @@ class Statistics {
                 $jury_member_id
             )),
             'assigned_candidates' => count($this->get_assigned_candidates($jury_member_id)),
-            'average_score' => $wpdb->get_var($wpdb->prepare(
-                "SELECT AVG(score) FROM {$wpdb->prefix}mt_votes WHERE jury_member_id = %d",
-                $jury_member_id
-            ))
+            'average_score' => $average_score ? floatval($average_score) : 0
         );
     }
 
@@ -46,14 +52,23 @@ class Statistics {
     public function get_top_candidates($limit = 10) {
         global $wpdb;
         
-        return $wpdb->get_results($wpdb->prepare(
-            "SELECT candidate_id, AVG(score) as avg_score, COUNT(*) as vote_count
-            FROM {$wpdb->prefix}mt_votes
-            GROUP BY candidate_id
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT v.candidate_id, AVG(v.score) as avg_score, COUNT(*) as vote_count, p.post_title
+            FROM {$wpdb->prefix}mt_votes v
+            JOIN {$wpdb->posts} p ON v.candidate_id = p.ID
+            WHERE p.post_type = 'mt_candidate' AND p.post_status = 'publish'
+            GROUP BY v.candidate_id
             ORDER BY avg_score DESC
             LIMIT %d",
             $limit
         ));
+        
+        // Add aliases for template compatibility
+        foreach ($results as $result) {
+            $result->average_score = $result->avg_score;
+        }
+        
+        return $results;
     }
 
     /**
@@ -71,6 +86,8 @@ class Statistics {
         return array(
             'total_possible' => $total_possible_votes,
             'total_completed' => $total_votes,
+            'completed_votes' => $total_votes, // Alias for template compatibility
+            'total_votes' => $total_possible_votes, // Alias for template compatibility
             'percentage' => $total_possible_votes > 0 ? 
                 round(($total_votes / $total_possible_votes) * 100, 2) : 0
         );

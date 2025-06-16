@@ -28,7 +28,20 @@ class JuryMember {
      * Get assigned candidates for a jury member
      */
     public function get_assigned_candidates($jury_member_id) {
-        $assigned_candidates = get_post_meta($jury_member_id, 'assigned_candidates', true);
-        return is_array($assigned_candidates) ? $assigned_candidates : array();
+        $assigned_candidate_ids = get_post_meta($jury_member_id, 'assigned_candidates', true);
+        if (!is_array($assigned_candidate_ids) || empty($assigned_candidate_ids)) {
+            return array();
+        }
+        
+        // Get the actual post objects
+        $candidates = array();
+        foreach ($assigned_candidate_ids as $candidate_id) {
+            $post = get_post($candidate_id);
+            if ($post && $post->post_type === 'mt_candidate' && $post->post_status === 'publish') {
+                $candidates[] = $post;
+            }
+        }
+        
+        return $candidates;
     }
 } 
