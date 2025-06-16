@@ -108,6 +108,11 @@
     --mt-z-80: 80;
     --mt-z-90: 90;
     --mt-z-100: 100;
+    
+    /* Additional variables for compatibility */
+    --mt-radius: 0.5rem;
+    --mt-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --mt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Beautiful Background Pattern */
@@ -584,7 +589,18 @@
 
 /* Data Management Buttons */
 .mt-data-btn {
-    background: linear-gradient(135deg, var(--mt-gray-50) 0%, white 100%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--mt-gray-300);
+    border-radius: var(--mt-radius);
+    background: white;
+    color: var(--mt-gray-700);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--mt-transition);
     position: relative;
     overflow: hidden;
 }
@@ -600,13 +616,32 @@
     transition: left 0.5s ease;
 }
 
+.mt-data-btn:hover {
+    border-color: var(--mt-primary-500);
+    color: var(--mt-primary-500);
+    transform: translateY(-1px);
+    box-shadow: var(--mt-shadow-sm);
+}
+
 .mt-data-btn:hover::before {
     left: 100%;
 }
 
+.mt-data-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.mt-data-btn-danger {
+    border-color: var(--mt-error);
+    color: var(--mt-error);
+    background: white;
+}
+
 .mt-data-btn-danger:hover {
-    background: linear-gradient(135deg, var(--mt-error) 0%, var(--mt-error-dark) 100%);
+    background: var(--mt-error);
     color: white;
+    border-color: var(--mt-error);
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
