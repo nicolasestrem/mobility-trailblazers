@@ -7,7 +7,7 @@ use MobilityTrailblazers\Integrations\IntegrationsLoader;
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
  * Description: Complete award management system for 25 Mobility Trailblazers in 25 - managing candidates, jury members, voting process, and public engagement.
- * Version: 0.2.1
+ * Version: 2.0.0
  * Author: Mobility Trailblazers Team
  * License: GPL v2 or later
  * Text Domain: mobility-trailblazers
