@@ -14,61 +14,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mt_vote_reset_nonce']
     $reset_type = sanitize_text_field($_POST['reset_type']);
     $reset_reason = sanitize_textarea_field($_POST['reset_reason']);
     $affected_user_id = isset($_POST['affected_user_id']) ? intval($_POST['affected_user_id']) : null;
+    $round = isset($_POST['round']) ? intval($_POST['round']) : null;
 
-    // Log the reset action
-    global $wpdb;
-    $wpdb->insert(
-        $wpdb->prefix . 'vote_reset_logs',
-        array(
-            'initiated_by' => get_current_user_id(),
-            'affected_user_id' => $affected_user_id,
-            'reset_type' => $reset_type,
-            'reset_reason' => $reset_reason,
-            'created_at' => current_time('mysql')
-        )
-    );
+    // Initialize vote reset manager
+    $reset_manager = new \MobilityTrailblazers\VoteResetManager();
 
     // Perform the reset based on type
     switch ($reset_type) {
         case 'all_votes':
-            // Reset all votes
-            $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}mt_votes");
+            $result = $reset_manager->bulk_reset_votes('full_reset', [
+                'confirm' => true,
+                'reason' => $reset_reason
+            ]);
             break;
 
         case 'user_votes':
             if ($affected_user_id) {
-                // Reset votes for specific user
-                $wpdb->delete(
-                    $wpdb->prefix . 'mt_votes',
-                    array('jury_member_id' => $affected_user_id)
-                );
+                $result = $reset_manager->bulk_reset_votes('all_user_votes', [
+                    'user_id' => $affected_user_id,
+                    'reason' => $reset_reason
+                ]);
             }
             break;
 
         case 'round_votes':
-            $round = intval($_POST['round']);
-            // Reset votes for specific round
-            $wpdb->delete(
-                $wpdb->prefix . 'mt_votes',
-                array('vote_round' => $round)
-            );
+            if ($round) {
+                $result = $reset_manager->bulk_reset_votes('round_votes', [
+                    'round' => $round,
+                    'reason' => $reset_reason
+                ]);
+            }
             break;
     }
 
-    // Show success message
-    echo '<div class="notice notice-success"><p>' . __('Votes have been reset successfully.', 'mobility-trailblazers') . '</p></div>';
+    if (isset($result) && !is_wp_error($result)) {
+        echo '<div class="notice notice-success"><p>' . __('Votes have been reset successfully.', 'mobility-trailblazers') . '</p></div>';
+    } else {
+        $error_message = is_wp_error($result) ? $result->get_error_message() : __('An error occurred while resetting votes.', 'mobility-trailblazers');
+        echo '<div class="notice notice-error"><p>' . esc_html($error_message) . '</p></div>';
+    }
 }
 
 // Get current round
 $current_round = get_option('mt_current_vote_round', 1);
 
 // Get jury members
-$jury_members = get_posts(array(
-    'post_type' => 'mt_jury',
-    'posts_per_page' => -1,
-    'orderby' => 'title',
-    'order' => 'ASC'
-));
+$jury_members = get_users(['role' => 'mt_jury_member']);
 ?>
 
 <div class="wrap">
@@ -98,7 +89,7 @@ $jury_members = get_posts(array(
                         <option value=""><?php _e('Select Jury Member', 'mobility-trailblazers'); ?></option>
                         <?php foreach ($jury_members as $jury): ?>
                             <option value="<?php echo esc_attr($jury->ID); ?>">
-                                <?php echo esc_html($jury->post_title); ?>
+                                <?php echo esc_html($jury->display_name); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

@@ -4,6 +4,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+global $wpdb;
+
 // Check if user has permission
 if (!current_user_can('manage_options')) {
     wp_die(__('You do not have permission to access this page.', 'mobility-trailblazers'));

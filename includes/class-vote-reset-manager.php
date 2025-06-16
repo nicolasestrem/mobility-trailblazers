@@ -1,4 +1,6 @@
 <?php
+namespace MobilityTrailblazers;
+
 /**
  * Vote Reset Manager Class
  * 
@@ -14,19 +16,19 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-class MT_Vote_Reset_Manager {
+class VoteResetManager {
     
     /**
      * Backup manager instance
      * 
-     * @var MT_Vote_Backup_Manager
+     * @var VoteBackupManager
      */
     private $backup_manager;
     
     /**
      * Audit logger instance
      * 
-     * @var MT_Vote_Audit_Logger
+     * @var VoteAuditLogger
      */
     private $audit_logger;
     
@@ -34,8 +36,8 @@ class MT_Vote_Reset_Manager {
      * Constructor
      */
     public function __construct() {
-        $this->backup_manager = new MT_Vote_Backup_Manager();
-        $this->audit_logger = new MT_Vote_Audit_Logger();
+        $this->backup_manager = new VoteBackupManager();
+        $this->audit_logger = new VoteAuditLogger();
     }
     
     /**
