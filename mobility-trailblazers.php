@@ -231,7 +231,7 @@ class MobilityTrailblazersPlugin {
         
         // Initialize jury sync
         if (class_exists('\MobilityTrailblazers\JurySync')) {
-            $this->components['jury_sync'] = \MobilityTrailblazers\JurySync::get_instance();
+            $this->components['jury_sync'] = new \MobilityTrailblazers\JurySync();
         }
         
         // Initialize Elementor compatibility
@@ -247,7 +247,7 @@ class MobilityTrailblazersPlugin {
      */
     private function load_ajax_handlers() {
         if (class_exists('\MobilityTrailblazers\AjaxHandlers')) {
-            $this->components['ajax_handlers'] = \MobilityTrailblazers\AjaxHandlers::get_instance();
+            $this->components['ajax_handlers'] = new \MobilityTrailblazers\AjaxHandlers();
         }
     }
     
