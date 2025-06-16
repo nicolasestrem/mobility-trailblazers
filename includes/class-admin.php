@@ -14,7 +14,7 @@ class Admin {
     private function __construct() {
         // Initialize admin functionality
         add_action('admin_menu', array($this, 'register_admin_menus'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
     public function register_admin_menus() {
@@ -250,21 +250,31 @@ class Admin {
         }
     }
 
-    public function enqueue_admin_scripts($hook) {
-        // Enqueue admin scripts and styles
+    /**
+     * Enqueue admin scripts and styles
+     */
+    public function enqueue_scripts($hook) {
+        // Admin styles
         wp_enqueue_style(
-            'mt-admin-style',
-            MT_PLUGIN_URL . 'assets/admin.css',
+            'mt-admin-css',
+            MT_PLUGIN_URL . 'assets/css/admin.css',
             array(),
             MT_PLUGIN_VERSION
         );
 
+        // Admin scripts
         wp_enqueue_script(
-            'mt-admin-script',
-            MT_PLUGIN_URL . 'assets/admin.js',
+            'mt-admin-js',
+            MT_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery'),
             MT_PLUGIN_VERSION,
             true
         );
+
+        // Localize script
+        wp_localize_script('mt-admin-js', 'mtAdmin', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_admin_nonce')
+        ));
     }
 } 

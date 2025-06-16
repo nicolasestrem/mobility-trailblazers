@@ -337,4 +337,35 @@ class ElementorIntegration {
     public static function is_elementor_preview() {
         return isset($_GET['elementor-preview']);
     }
+
+    /**
+     * Register widget styles
+     */
+    public function register_styles() {
+        // Register frontend styles
+        if (file_exists(MT_PLUGIN_PATH . 'assets/css/frontend.css')) {
+            wp_register_style(
+                'mt-frontend-css',
+                MT_PLUGIN_URL . 'assets/css/frontend.css',
+                array(),
+                MT_PLUGIN_VERSION
+            );
+        }
+    }
+
+    /**
+     * Register widget scripts
+     */
+    public function register_scripts() {
+        // Register frontend scripts
+        if (file_exists(MT_PLUGIN_PATH . 'assets/js/frontend.js')) {
+            wp_register_script(
+                'mt-frontend-js',
+                MT_PLUGIN_URL . 'assets/js/frontend.js',
+                array('jquery'),
+                MT_PLUGIN_VERSION,
+                true
+            );
+        }
+    }
 }

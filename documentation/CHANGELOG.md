@@ -50,6 +50,18 @@
   - Fixed class loading issues
   - Improved error handling
 
+### Changed
+- Reorganized asset files into proper directories:
+  - Moved CSS files to `assets/css/`
+  - Moved JavaScript files to `assets/js/`
+- Updated all asset references in PHP files to use new paths
+- Improved asset loading with proper dependencies
+- Added proper versioning for all assets
+
+### Removed
+- Removed duplicate asset files from root assets directory
+- Removed old asset paths from documentation
+
 ## Technical Details
 
 ### Property Declarations

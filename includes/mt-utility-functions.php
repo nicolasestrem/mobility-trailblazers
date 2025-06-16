@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!function_exists('mt_get_current_vote_round')):
 /**
  * Get the current voting round
  *
@@ -17,7 +18,9 @@ if (!defined('ABSPATH')) {
 function mt_get_current_vote_round() {
     return (int) get_option('mt_current_vote_round', 1);
 }
+endif;
 
+if (!function_exists('mt_is_voting_active')):
 /**
  * Check if voting is currently active
  *
@@ -34,7 +37,9 @@ function mt_is_voting_active() {
     $now = current_time('mysql');
     return ($now >= $start && $now <= $end);
 }
+endif;
 
+if (!function_exists('mt_get_evaluation_criteria')):
 /**
  * Get evaluation criteria
  *
@@ -60,7 +65,9 @@ function mt_get_evaluation_criteria() {
         )
     ));
 }
+endif;
 
+if (!function_exists('mt_get_jury_assignments')):
 /**
  * Get jury member assignments
  *
@@ -80,7 +87,9 @@ function mt_get_jury_assignments($jury_member_id) {
         $jury_member_id
     ));
 }
+endif;
 
+if (!function_exists('mt_log_action')):
 /**
  * Log an action to the audit log
  *
@@ -107,7 +116,9 @@ function mt_log_action($action, $details, $user_id = null) {
         array('%s', '%s', '%d', '%s')
     );
 }
+endif;
 
+if (!function_exists('mt_get_recent_activity')):
 /**
  * Get recent activity from audit log
  *
@@ -126,21 +137,9 @@ function mt_get_recent_activity($limit = 10) {
         $limit
     ));
 }
+endif;
 
-/**
- * Check if user is a jury member
- *
- * @param int $user_id
- * @return bool
- */
-function mt_is_jury_member($user_id = null) {
-    if (!$user_id) {
-        $user_id = get_current_user_id();
-    }
-    
-    return user_can($user_id, 'mt_jury_member');
-}
-
+if (!function_exists('mt_is_admin')):
 /**
  * Check if user is an admin
  *
@@ -154,7 +153,9 @@ function mt_is_admin($user_id = null) {
     
     return user_can($user_id, 'mt_admin');
 }
+endif;
 
+if (!function_exists('mt_get_candidate_evaluation')):
 /**
  * Get candidate evaluation
  *
@@ -173,7 +174,9 @@ function mt_get_candidate_evaluation($candidate_id, $jury_member_id) {
         $jury_member_id
     ));
 }
+endif;
 
+if (!function_exists('mt_save_candidate_evaluation')):
 /**
  * Save candidate evaluation
  *
@@ -217,4 +220,5 @@ function mt_save_candidate_evaluation($candidate_id, $jury_member_id, $scores, $
             array('%d', '%d', '%s', '%s', '%s')
         );
     }
-} 
+}
+endif; 
