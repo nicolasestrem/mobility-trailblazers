@@ -589,6 +589,167 @@ class MT_Jury_Management {
     }
     
     /**
+     * Render professional info meta box
+     */
+    public function render_professional_info_meta_box($post) {
+        $organization = get_post_meta($post->ID, '_mt_organization', true);
+        $position = get_post_meta($post->ID, '_mt_position', true);
+        $expertise = get_post_meta($post->ID, '_mt_expertise', true);
+        
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><label for="mt_organization"><?php _e('Organization', 'mobility-trailblazers'); ?></label></th>
+                <td><input type="text" id="mt_organization" name="mt_organization" value="<?php echo esc_attr($organization); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="mt_position"><?php _e('Position/Title', 'mobility-trailblazers'); ?></label></th>
+                <td><input type="text" id="mt_position" name="mt_position" value="<?php echo esc_attr($position); ?>" class="regular-text"></td>
+            </tr>
+            <tr>
+                <th><label for="mt_expertise"><?php _e('Areas of Expertise', 'mobility-trailblazers'); ?></label></th>
+                <td>
+                    <textarea id="mt_expertise" name="mt_expertise" rows="4" class="large-text" placeholder="<?php _e('Describe areas of expertise, specializations, and relevant experience...', 'mobility-trailblazers'); ?>"><?php echo esc_textarea($expertise); ?></textarea>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+    
+    /**
+     * Render jury settings meta box
+     */
+    public function render_jury_settings_meta_box($post) {
+        $status = get_post_meta($post->ID, '_mt_jury_status', true) ?: 'active';
+        $jury_role = get_post_meta($post->ID, '_mt_jury_role', true) ?: 'member';
+        $voting_weight = get_post_meta($post->ID, '_mt_voting_weight', true) ?: 1;
+        $max_assignments = get_post_meta($post->ID, '_mt_max_assignments', true) ?: 15;
+        
+        ?>
+        <table class="form-table">
+            <tr>
+                <th><label for="mt_jury_status"><?php _e('Status', 'mobility-trailblazers'); ?></label></th>
+                <td>
+                    <select id="mt_jury_status" name="mt_jury_status">
+                        <option value="active" <?php selected($status, 'active'); ?>><?php _e('Active', 'mobility-trailblazers'); ?></option>
+                        <option value="inactive" <?php selected($status, 'inactive'); ?>><?php _e('Inactive', 'mobility-trailblazers'); ?></option>
+                        <option value="pending" <?php selected($status, 'pending'); ?>><?php _e('Pending', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="mt_jury_role"><?php _e('Jury Role', 'mobility-trailblazers'); ?></label></th>
+                <td>
+                    <select id="mt_jury_role" name="mt_jury_role">
+                        <option value="member" <?php selected($jury_role, 'member'); ?>><?php _e('Jury Member', 'mobility-trailblazers'); ?></option>
+                        <option value="lead" <?php selected($jury_role, 'lead'); ?>><?php _e('Lead Jury', 'mobility-trailblazers'); ?></option>
+                        <option value="guest" <?php selected($jury_role, 'guest'); ?>><?php _e('Guest Jury', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="mt_voting_weight"><?php _e('Voting Weight', 'mobility-trailblazers'); ?></label></th>
+                <td>
+                    <input type="number" id="mt_voting_weight" name="mt_voting_weight" value="<?php echo esc_attr($voting_weight); ?>" min="1" max="10" class="small-text">
+                    <p class="description"><?php _e('Weight of this jury member\'s vote (1-10)', 'mobility-trailblazers'); ?></p>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="mt_max_assignments"><?php _e('Max Assignments', 'mobility-trailblazers'); ?></label></th>
+                <td>
+                    <input type="number" id="mt_max_assignments" name="mt_max_assignments" value="<?php echo esc_attr($max_assignments); ?>" min="1" max="50" class="small-text">
+                    <p class="description"><?php _e('Maximum number of candidates this jury member can evaluate', 'mobility-trailblazers'); ?></p>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+    
+    /**
+     * Render activity meta box
+     */
+    public function render_activity_meta_box($post) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mt_jury_activity_log';
+        
+        // Check if table exists
+        $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table));
+        
+        if ($table_exists != $table) {
+            echo '<p>' . __('Activity log not available yet.', 'mobility-trailblazers') . '</p>';
+            return;
+        }
+        
+        $activities = $wpdb->get_results($wpdb->prepare("
+            SELECT al.*, u.display_name as user_name
+            FROM {$wpdb->prefix}mt_jury_activity_log al
+            LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
+            WHERE al.jury_id = %d
+            ORDER BY al.created_at DESC
+            LIMIT 20
+        ", $post->ID));
+        
+        if (empty($activities)) {
+            echo '<p>' . __('No activity recorded yet.', 'mobility-trailblazers') . '</p>';
+            return;
+        }
+        
+        ?>
+        <div class="mt-activity-log">
+            <?php foreach ($activities as $activity): ?>
+            <div class="activity-item">
+                <div class="activity-header">
+                    <strong><?php echo esc_html(ucfirst(str_replace('_', ' ', $activity->action))); ?></strong>
+                    <span class="activity-date"><?php echo esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $activity->created_at)); ?></span>
+                </div>
+                <?php if (!empty($activity->details)): ?>
+                <div class="activity-details">
+                    <?php echo esc_html($activity->details); ?>
+                </div>
+                <?php endif; ?>
+                <div class="activity-meta">
+                    <?php if ($activity->user_name): ?>
+                        <small><?php printf(__('by %s', 'mobility-trailblazers'), esc_html($activity->user_name)); ?></small>
+                    <?php else: ?>
+                        <small><?php _e('by System', 'mobility-trailblazers'); ?></small>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <style>
+        .mt-activity-log .activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .mt-activity-log .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .activity-date {
+            font-size: 12px;
+            color: #666;
+        }
+        .activity-details {
+            margin: 5px 0;
+            color: #333;
+        }
+        .activity-meta {
+            font-size: 11px;
+            color: #999;
+        }
+        </style>
+        <?php
+    }
+    
+    /**
      * Save jury meta data
      */
     public function save_jury_meta($post_id) {
