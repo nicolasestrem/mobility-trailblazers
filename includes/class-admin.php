@@ -99,6 +99,16 @@ class Admin {
             array($this, 'diagnostic_page')
         );
         
+        // Test Data (temporary)
+        add_submenu_page(
+            'mt-award-system',
+            __('Test Data', 'mobility-trailblazers'),
+            __('Test Data', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-test-data',
+            array($this, 'test_data_page')
+        );
+        
         // Add Jury Dashboard menu for jury members
         if (\MobilityTrailblazers\Roles::is_jury_member() && !current_user_can('manage_options')) {
             add_menu_page(
@@ -233,6 +243,166 @@ class Admin {
     public function diagnostic_page() {
         // Load the diagnostic template
         require_once MT_PLUGIN_PATH . 'templates/diagnostic.php';
+    }
+
+    public function test_data_page() {
+        $candidates = get_posts(array('post_type' => 'mt_candidate', 'posts_per_page' => -1));
+        $jury = get_posts(array('post_type' => 'mt_jury', 'posts_per_page' => -1));
+        
+        echo '<div class="wrap">';
+        echo '<h1>Data Check</h1>';
+        echo '<p>Candidates found: ' . count($candidates) . '</p>';
+        echo '<p>Jury members found: ' . count($jury) . '</p>';
+        
+        if (count($candidates) > 0) {
+            echo '<h2>Sample Candidate Data:</h2>';
+            $candidate = $candidates[0];
+            echo '<pre>';
+            echo 'Title: ' . esc_html($candidate->post_title) . "\n";
+            echo 'Company: ' . esc_html(get_post_meta($candidate->ID, '_mt_company', true)) . "\n";
+            echo 'Position: ' . esc_html(get_post_meta($candidate->ID, '_mt_position', true)) . "\n";
+            echo 'Assigned Jury: ' . esc_html(get_post_meta($candidate->ID, '_mt_assigned_jury_member', true)) . "\n";
+            echo '</pre>';
+            
+            // Show all candidates with assignment status
+            echo '<h3>All Candidates:</h3>';
+            echo '<table class="wp-list-table widefat fixed striped">';
+            echo '<thead><tr><th>Name</th><th>Company</th><th>Position</th><th>Assigned Jury ID</th></tr></thead>';
+            echo '<tbody>';
+            foreach ($candidates as $candidate) {
+                $jury_id = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+                echo '<tr>';
+                echo '<td>' . esc_html($candidate->post_title) . '</td>';
+                echo '<td>' . esc_html(get_post_meta($candidate->ID, '_mt_company', true)) . '</td>';
+                echo '<td>' . esc_html(get_post_meta($candidate->ID, '_mt_position', true)) . '</td>';
+                echo '<td>' . ($jury_id ? esc_html($jury_id) : 'Not assigned') . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
+        }
+        
+        if (count($jury) > 0) {
+            echo '<h2>Sample Jury Data:</h2>';
+            $jury_member = $jury[0];
+            echo '<pre>';
+            echo 'Title: ' . esc_html($jury_member->post_title) . "\n";
+            echo 'Position: ' . esc_html(get_post_meta($jury_member->ID, '_mt_position', true)) . "\n";
+            echo 'Expertise: ' . esc_html(get_post_meta($jury_member->ID, '_mt_expertise', true)) . "\n";
+            echo 'Role: ' . esc_html(get_post_meta($jury_member->ID, '_mt_jury_role', true)) . "\n";
+            echo '</pre>';
+            
+            // Show all jury members with assignment counts
+            echo '<h3>All Jury Members:</h3>';
+            echo '<table class="wp-list-table widefat fixed striped">';
+            echo '<thead><tr><th>Name</th><th>Position</th><th>Expertise</th><th>Assigned Candidates</th></tr></thead>';
+            echo '<tbody>';
+            foreach ($jury as $jury_member) {
+                // Count assignments
+                $assignments = get_posts(array(
+                    'post_type' => 'mt_candidate',
+                    'meta_query' => array(
+                        array(
+                            'key' => '_mt_assigned_jury_member',
+                            'value' => $jury_member->ID
+                        )
+                    ),
+                    'posts_per_page' => -1
+                ));
+                
+                echo '<tr>';
+                echo '<td>' . esc_html($jury_member->post_title) . '</td>';
+                echo '<td>' . esc_html(get_post_meta($jury_member->ID, '_mt_position', true)) . '</td>';
+                echo '<td>' . esc_html(get_post_meta($jury_member->ID, '_mt_expertise', true)) . '</td>';
+                echo '<td>' . count($assignments) . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
+        }
+        
+        // Test AJAX data - need to get the main plugin instance
+        $plugin = \MobilityTrailblazers\MobilityTrailblazersPlugin::get_instance();
+        
+        echo '<h2>AJAX Data Test:</h2>';
+        echo '<h3>Candidates for JS:</h3>';
+        $candidates_js = $this->get_candidates_for_js();
+        echo '<pre>' . esc_html(json_encode($candidates_js, JSON_PRETTY_PRINT)) . '</pre>';
+        
+        echo '<h3>Jury Members for JS:</h3>';
+        $jury_js = $this->get_jury_members_for_js();
+        echo '<pre>' . esc_html(json_encode($jury_js, JSON_PRETTY_PRINT)) . '</pre>';
+        
+        echo '</div>';
+    }
+    
+    /**
+     * Get candidates data for JavaScript (copied from main plugin)
+     */
+    private function get_candidates_for_js() {
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ));
+        
+        $candidates_data = array();
+        foreach ($candidates as $candidate) {
+            $jury_id = get_post_meta($candidate->ID, '_mt_assigned_jury_member', true);
+            $categories = wp_get_post_terms($candidate->ID, 'mt_category');
+            
+            $candidates_data[] = array(
+                'id' => $candidate->ID,
+                'name' => $candidate->post_title,
+                'company' => get_post_meta($candidate->ID, '_mt_company', true),
+                'position' => get_post_meta($candidate->ID, '_mt_position', true),
+                'category' => !empty($categories) ? $categories[0]->slug : '',
+                'assigned' => !empty($jury_id),
+                'jury_member_id' => $jury_id
+            );
+        }
+        
+        return $candidates_data;
+    }
+    
+    /**
+     * Get jury members data for JavaScript (copied from main plugin)
+     */
+    private function get_jury_members_for_js() {
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ));
+        
+        $jury_data = array();
+        foreach ($jury_members as $jury) {
+            // Count assignments
+            $assignments = get_posts(array(
+                'post_type' => 'mt_candidate',
+                'meta_query' => array(
+                    array(
+                        'key' => '_mt_assigned_jury_member',
+                        'value' => $jury->ID
+                    )
+                ),
+                'posts_per_page' => -1
+            ));
+            
+            $jury_data[] = array(
+                'id' => $jury->ID,
+                'name' => $jury->post_title,
+                'position' => get_post_meta($jury->ID, '_mt_position', true),
+                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true),
+                'assignments' => count($assignments),
+                'maxAssignments' => 15,
+                'role' => get_post_meta($jury->ID, '_mt_jury_role', true)
+            );
+        }
+        
+        return $jury_data;
     }
 
     public function jury_dashboard_redirect() {

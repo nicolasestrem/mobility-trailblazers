@@ -20,6 +20,24 @@ if (!defined('ABSPATH')) {
 class Shortcodes {
     
     /**
+     * Jury member instance
+     * @var \MobilityTrailblazers\Core\JuryMember|null
+     */
+    private $jury_member;
+    
+    /**
+     * Statistics instance
+     * @var \MobilityTrailblazers\Core\Statistics|null
+     */
+    private $statistics;
+    
+    /**
+     * Candidate instance
+     * @var \MobilityTrailblazers\Core\Candidate|null
+     */
+    private $candidate;
+    
+    /**
      * Initialize the class
      */
     public function __construct() {
@@ -276,7 +294,7 @@ class Shortcodes {
                                     </a>
                                 </td>
                                 <td><?php echo intval($result->vote_count); ?></td>
-                                <td><?php echo number_format($result->avg_rating, 2); ?>/10</td>
+                                <td><?php echo number_format($result->avg_rating ?? 0, 2); ?>/10</td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
