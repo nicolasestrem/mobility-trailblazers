@@ -28,7 +28,7 @@ class VoteResetManager {
     /**
      * Audit logger instance
      * 
-     * @var VoteAuditLogger
+     * @var \MT_Vote_Audit_Logger
      */
     private $audit_logger;
     
@@ -37,7 +37,7 @@ class VoteResetManager {
      */
     public function __construct() {
         $this->backup_manager = new VoteBackupManager();
-        $this->audit_logger = new VoteAuditLogger();
+        $this->audit_logger = new \MT_Vote_Audit_Logger();
     }
     
     /**
@@ -53,12 +53,12 @@ class VoteResetManager {
         
         // Validate permissions
         if (!$this->can_reset_vote($jury_member_id, $candidate_id)) {
-            return new WP_Error('permission_denied', __('You do not have permission to reset this vote', 'mobility-trailblazers'));
+            return new \WP_Error('permission_denied', __('You do not have permission to reset this vote', 'mobility-trailblazers'));
         }
         
         // Check if voting is locked
         if ($this->is_voting_locked($candidate_id)) {
-            return new WP_Error('voting_locked', __('Voting is currently locked for this phase', 'mobility-trailblazers'));
+            return new \WP_Error('voting_locked', __('Voting is currently locked for this phase', 'mobility-trailblazers'));
         }
         
         // Begin transaction
@@ -141,7 +141,7 @@ class VoteResetManager {
             
         } catch (Exception $e) {
             $wpdb->query('ROLLBACK');
-            return new WP_Error('reset_failed', $e->getMessage());
+            return new \WP_Error('reset_failed', $e->getMessage());
         }
     }
     
@@ -157,7 +157,7 @@ class VoteResetManager {
         
         // Validate admin permissions
         if (!current_user_can('manage_options')) {
-            return new WP_Error('permission_denied', __('Admin access required', 'mobility-trailblazers'));
+            return new \WP_Error('permission_denied', __('Admin access required', 'mobility-trailblazers'));
         }
         
         $wpdb->query('START TRANSACTION');
@@ -305,7 +305,7 @@ class VoteResetManager {
             
         } catch (Exception $e) {
             $wpdb->query('ROLLBACK');
-            return new WP_Error('bulk_reset_failed', $e->getMessage());
+            return new \WP_Error('bulk_reset_failed', $e->getMessage());
         }
     }
     

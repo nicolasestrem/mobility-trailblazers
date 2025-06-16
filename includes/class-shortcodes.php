@@ -113,7 +113,7 @@ class Shortcodes {
             $args['tax_query'] = $tax_query;
         }
         
-        $candidates = new WP_Query($args);
+        $candidates = new \WP_Query($args);
         
         ob_start();
         ?>
@@ -177,7 +177,7 @@ class Shortcodes {
             'order' => 'ASC'
         );
         
-        $jury_members = new WP_Query($args);
+        $jury_members = new \WP_Query($args);
         
         ob_start();
         ?>

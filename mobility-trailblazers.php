@@ -235,6 +235,11 @@ class MobilityTrailblazersPlugin {
         
         // Load post types handler
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-post-types.php');
+        
+        // Load vote management classes (needed for audit logging)
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php');
 
         // Load core classes
         $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
@@ -288,6 +293,11 @@ class MobilityTrailblazersPlugin {
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-taxonomies.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-post-types.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-shortcodes.php');
+        
+        // Load vote management classes
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php');
 
         // Load core functionality
         $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
@@ -666,8 +676,8 @@ class MobilityTrailblazersPlugin {
         // Check if we need to update the database
         if (version_compare($db_version, $current_version, '<')) {
             // Update tables for vote reset functionality
-            if (class_exists('MT_Database')) {
-                MT_Database::update_tables_for_reset();
+            if (class_exists('\MobilityTrailblazers\Database')) {
+                \MobilityTrailblazers\Database::update_tables_for_reset();
             }
             
             // Update the database version

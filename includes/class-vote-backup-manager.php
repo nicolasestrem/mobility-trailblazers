@@ -125,8 +125,7 @@ class VoteBackupManager {
             }
             
             // Log the restoration
-            $audit_logger = new VoteAuditLogger();
-            $audit_logger->log_action(
+            mt_log_action(
                 'vote_restored',
                 sprintf(
                     'Restored vote for candidate %d by jury member %d from backup %d',

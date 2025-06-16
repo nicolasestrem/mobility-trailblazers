@@ -48,14 +48,23 @@ class Database {
         // Vote reset logs table
         $sql .= "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}vote_reset_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            initiated_by bigint(20) NOT NULL,
-            affected_user_id bigint(20) DEFAULT NULL,
             reset_type varchar(50) NOT NULL,
-            reset_reason text NOT NULL,
+            initiated_by bigint(20) NOT NULL,
+            initiated_by_role varchar(50) DEFAULT NULL,
+            affected_user_id bigint(20) DEFAULT NULL,
+            affected_candidate_id bigint(20) DEFAULT NULL,
+            voting_phase varchar(50) DEFAULT NULL,
+            votes_affected int(11) DEFAULT 0,
+            reset_reason text DEFAULT NULL,
             reset_timestamp datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY  (id),
+            ip_address varchar(45) DEFAULT NULL,
+            user_agent varchar(255) DEFAULT NULL,
+            PRIMARY KEY (id),
             KEY initiated_by (initiated_by),
-            KEY affected_user_id (affected_user_id)
+            KEY affected_user_id (affected_user_id),
+            KEY affected_candidate_id (affected_candidate_id),
+            KEY reset_type (reset_type),
+            KEY reset_timestamp (reset_timestamp)
         ) $charset_collate;";
 
         // Vote audit log table
@@ -150,6 +159,19 @@ class Database {
 
         // Add unique constraint
         $wpdb->query("ALTER TABLE {$wpdb->prefix}mt_votes ADD UNIQUE KEY IF NOT EXISTS unique_vote (candidate_id, jury_member_id, vote_round)");
+        
+        // Update vote_reset_logs table to add missing columns
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS initiated_by_role varchar(50) DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS affected_candidate_id bigint(20) DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS voting_phase varchar(50) DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS votes_affected int(11) DEFAULT 0");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS ip_address varchar(45) DEFAULT NULL");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD COLUMN IF NOT EXISTS user_agent varchar(255) DEFAULT NULL");
+        
+        // Add indexes for new columns
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD INDEX IF NOT EXISTS idx_affected_candidate_id (affected_candidate_id)");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD INDEX IF NOT EXISTS idx_reset_type (reset_type)");
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}vote_reset_logs ADD INDEX IF NOT EXISTS idx_reset_timestamp (reset_timestamp)");
     }
 
     /**
