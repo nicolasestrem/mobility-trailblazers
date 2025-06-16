@@ -58,6 +58,18 @@ class Database {
             KEY affected_user_id (affected_user_id)
         ) $charset_collate;";
 
+        // Vote audit log table
+        $sql .= "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}mt_vote_audit_log (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            action varchar(50) NOT NULL,
+            details text,
+            user_id bigint(20) NOT NULL,
+            timestamp datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY timestamp (timestamp)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
@@ -74,7 +86,8 @@ class Database {
         $tables = array(
             $wpdb->prefix . 'mt_votes',
             $wpdb->prefix . 'mt_candidate_scores',
-            $wpdb->prefix . 'vote_reset_logs'
+            $wpdb->prefix . 'vote_reset_logs',
+            $wpdb->prefix . 'mt_vote_audit_log'
         );
         
         foreach ($tables as $table) {
@@ -90,11 +103,13 @@ class Database {
         
         $votes_table = $wpdb->prefix . 'mt_votes';
         $scores_table = $wpdb->prefix . 'mt_candidate_scores';
+        $audit_log_table = $wpdb->prefix . 'mt_vote_audit_log';
         
         $votes_exists = $wpdb->get_var("SHOW TABLES LIKE '$votes_table'") === $votes_table;
         $scores_exists = $wpdb->get_var("SHOW TABLES LIKE '$scores_table'") === $scores_table;
+        $audit_log_exists = $wpdb->get_var("SHOW TABLES LIKE '$audit_log_table'") === $audit_log_table;
         
-        return $votes_exists && $scores_exists;
+        return $votes_exists && $scores_exists && $audit_log_exists;
     }
     
     /**
