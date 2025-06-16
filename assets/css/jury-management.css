@@ -1,0 +1,440 @@
+/* ===================================
+   Mobility Trailblazers - Jury Management Styles
+   File: assets/css/jury-management.css
+   =================================== */
+
+/* Dashboard Statistics */
+.mt-jury-stats-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+}
+
+.stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 600;
+    color: #0073aa;
+    margin-bottom: 5px;
+}
+
+.stat-card .stat-label {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Tabs */
+.mt-tabs {
+    margin-top: 20px;
+}
+
+.mt-tabs .ui-tabs-nav {
+    background: #f1f1f1;
+    border: 1px solid #ccd0d4;
+    border-bottom: none;
+}
+
+.mt-tabs .ui-tabs-panel {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px;
+}
+
+/* Filters */
+.mt-jury-filters {
+    background: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mt-jury-filters input[type="text"],
+.mt-jury-filters select {
+    margin: 0;
+}
+
+/* Jury List Table */
+.mt-jury-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f0f0f0;
+}
+
+.mt-jury-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #0073aa;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Status and Role Badges */
+.mt-jury-status,
+.mt-jury-role {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.mt-status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.mt-status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.mt-status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.mt-role-lead {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.mt-role-member {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.mt-role-guest {
+    background: #f5c6cb;
+    color: #721c24;
+}
+
+/* Assignments Grid */
+#mt-jury-assignments-grid {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.mt-assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mt-assignments-table th,
+.mt-assignments-table td {
+    border: 1px solid #e1e1e1;
+    padding: 10px;
+    text-align: center;
+}
+
+.mt-assignments-table th {
+    background: #f4f4f4;
+    font-weight: 600;
+}
+
+.mt-assignment-cell {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mt-assignment-cell:hover {
+    background: #f0f0f0;
+}
+
+.mt-assignment-cell.assigned {
+    background: #d4edda;
+}
+
+.mt-assignments-count {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Assignment Actions */
+.mt-assignment-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Invitation Form */
+.mt-invitation-form {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.mt-invitation-template label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.mt-invitation-template .description {
+    color: #666;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Activity Log */
+.mt-activity-log {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e1e1e1;
+    padding: 15px;
+    background: #fafafa;
+}
+
+.mt-activity-entry {
+    padding: 10px 0;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.mt-activity-entry:last-child {
+    border-bottom: none;
+}
+
+.mt-activity-time {
+    color: #666;
+    font-size: 12px;
+}
+
+.mt-activity-action {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.mt-activity-details {
+    color: #555;
+    margin-top: 5px;
+}
+
+/* Photo Upload Preview */
+#mt_photo_preview img {
+    max-width: 150px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Bulk Actions */
+.mt-jury-bulk-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Import/Export Page */
+.mt-import-export-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.mt-import-export-section h3 {
+    margin-top: 0;
+    color: #23282d;
+}
+
+.mt-import-dropzone {
+    border: 2px dashed #0073aa;
+    border-radius: 4px;
+    padding: 40px;
+    text-align: center;
+    background: #f7f7f7;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mt-import-dropzone:hover {
+    background: #f0f0f0;
+    border-color: #005177;
+}
+
+.mt-import-dropzone.dragover {
+    background: #e8f5e9;
+    border-color: #4caf50;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .mt-jury-stats-dashboard {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-jury-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .mt-jury-filters > * {
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
+    
+    .wp-list-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .mt-assignment-actions {
+        flex-direction: column;
+    }
+    
+    .mt-assignment-actions button {
+        width: 100%;
+    }
+}
+
+/* Loading States */
+.mt-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.mt-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0073aa;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.mt-message {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+
+.mt-message.success {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.mt-message.error {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.mt-message.warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+/* Modal Styles */
+.mt-modal {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.mt-modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.mt-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.mt-modal-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.mt-modal-close:hover,
+.mt-modal-close:focus {
+    color: #000;
+}
+
+/* Print Styles */
+@media print {
+    .mt-jury-filters,
+    .mt-jury-bulk-actions,
+    .mt-assignment-actions,
+    .button,
+    .page-title-action {
+        display: none !important;
+    }
+    
+    .mt-jury-stats-dashboard {
+        page-break-inside: avoid;
+    }
+    
+    .wp-list-table {
+        border: 1px solid #000;
+    }
+    
+    .wp-list-table th,
+    .wp-list-table td {
+        border: 1px solid #000;
+    }
+}

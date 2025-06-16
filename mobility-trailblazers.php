@@ -26,6 +26,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('MT_PLUGIN_VERSION', '1.0.0');
 define('MT_PLUGIN_PATH', plugin_dir_path(__FILE__));
+define('MT_PLUGIN_DIR', plugin_dir_path(__FILE__)); // Alias for MT_PLUGIN_PATH
 define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MT_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
@@ -244,6 +245,9 @@ class MobilityTrailblazersPlugin {
         // Load jury synchronization class
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-jury-sync.php');
         
+        // Load jury management module
+        $this->safe_require(MT_PLUGIN_DIR . 'includes/modules/class-mt-jury-management.php');
+        
         // Load AJAX handlers
         $this->safe_require(MT_PLUGIN_PATH . 'includes/ajax-handlers.php');
 
@@ -356,6 +360,11 @@ class MobilityTrailblazersPlugin {
         $this->init_class('\MobilityTrailblazers\Taxonomies');
         $this->init_class('\MobilityTrailblazers\PostTypes');
         $this->init_class('\MobilityTrailblazers\JurySync');
+        
+        // Initialize jury management module
+        if (class_exists('\MobilityTrailblazers\Modules\MT_Jury_Management')) {
+            \MobilityTrailblazers\Modules\MT_Jury_Management::get_instance();
+        }
     }
     
     /**
