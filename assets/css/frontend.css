@@ -1,62 +1,564 @@
-/*
+/**
  * Mobility Trailblazers Frontend Styles
- * Version: 1.0.0
+ * Version: 2.5.0
  */
 
-/* Basic frontend styles for the plugin */
-.mt-frontend {
-    /* Add any general frontend styles here */
+/* ===========================
+   Base Styles
+   =========================== */
+
+   .mt-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Voting interface styles */
-.mt-voting-interface {
+/* ===========================
+   Candidate Grid
+   =========================== */
+
+.mt-candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.mt-candidate-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    border-color: #4a7c59;
+}
+
+.mt-candidate-photo {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.mt-candidate-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.mt-candidate-company {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.mt-candidate-category {
+    display: inline-block;
+    background: #4a7c59;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
+.mt-candidate-innovation {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.mt-candidate-innovation h4 {
+    font-size: 1rem;
+    color: #4a7c59;
+    margin-bottom: 8px;
+}
+
+/* ===========================
+   Voting Form
+   =========================== */
+
+.mt-voting-form {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 30px 0;
+}
+
+.mt-voting-criteria {
     margin: 20px 0;
 }
 
-.mt-voting-interface .mt-vote-buttons {
+.mt-criterion {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.mt-criterion-header {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.mt-criterion-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.mt-criterion-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4a7c59;
+}
+
+.mt-criterion-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.mt-score-slider {
+    width: 100%;
     margin: 10px 0;
 }
 
-.mt-voting-interface .mt-vote-button {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    background: #f7f7f7;
-    cursor: pointer;
-    border-radius: 4px;
+.mt-score-indicators {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 5px;
+}
+
+/* ===========================
+   Jury Dashboard
+   =========================== */
+
+.mt-jury-dashboard {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mt-jury-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.mt-jury-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.mt-jury-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.mt-evaluation-progress {
+    margin: 30px 0;
+}
+
+.mt-progress-bar {
+    background: #e0e0e0;
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mt-progress-fill {
+    background: linear-gradient(90deg, #4a7c59 0%, #63a375 100%);
+    height: 100%;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mt-progress-text {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.mt-assigned-candidates {
+    display: grid;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.mt-assigned-candidate {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
     transition: all 0.3s ease;
 }
 
-.mt-voting-interface .mt-vote-button:hover {
-    background: #e7e7e7;
+.mt-assigned-candidate:hover {
+    background: #f0f0f0;
+    border-color: #4a7c59;
 }
 
-.mt-voting-interface .mt-vote-button.selected {
-    background: #0073aa;
+.mt-assigned-candidate.evaluated {
+    background: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.mt-candidate-info {
+    flex: 1;
+}
+
+.mt-candidate-status {
+    margin-left: 20px;
+}
+
+.mt-status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mt-status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.mt-status-badge.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ===========================
+   Evaluation Form
+   =========================== */
+
+.mt-evaluation-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.mt-evaluation-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.mt-evaluation-criteria {
+    margin: 30px 0;
+}
+
+.mt-criterion-input {
+    margin-bottom: 30px;
+}
+
+.mt-criterion-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.mt-score-input {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.mt-score-button {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.mt-score-button:hover {
+    border-color: #4a7c59;
+    background: #f0f0f0;
+}
+
+.mt-score-button.selected {
+    background: #4a7c59;
     color: white;
-    border-color: #0073aa;
+    border-color: #4a7c59;
 }
 
-/* Candidate display styles */
-.mt-candidate-display {
-    margin: 20px 0;
-    padding: 20px;
-    border: 1px solid #ddd;
+.mt-evaluation-comments {
+    margin-top: 40px;
+}
+
+.mt-comments-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
 }
 
-.mt-candidate-display h3 {
-    margin-top: 0;
+.mt-evaluation-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 2px solid #e0e0e0;
 }
 
-/* Responsive design */
+.mt-button {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mt-button-primary {
+    background: #4a7c59;
+    color: white;
+}
+
+.mt-button-primary:hover {
+    background: #3a5c49;
+}
+
+.mt-button-secondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.mt-button-secondary:hover {
+    background: #d0d0d0;
+}
+
+.mt-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ===========================
+   Voting Results
+   =========================== */
+
+.mt-voting-results {
+    margin: 40px 0;
+}
+
+.mt-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.mt-results-title {
+    font-size: 1.75rem;
+    color: #333;
+}
+
+.mt-export-button {
+    background: #4a7c59;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.mt-export-button:hover {
+    background: #3a5c49;
+}
+
+.mt-results-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-results-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mt-results-table th {
+    background: #4a7c59;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.mt-results-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.mt-results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.mt-results-table tr:hover {
+    background: #f9f9f9;
+}
+
+.mt-score-cell {
+    font-weight: 600;
+    color: #4a7c59;
+}
+
+/* ===========================
+   Messages and Notifications
+   =========================== */
+
+.mt-message {
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mt-message-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mt-message-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.mt-message-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.mt-message-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+
 @media (max-width: 768px) {
-    .mt-voting-interface .mt-vote-buttons {
+    .mt-candidates-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .mt-jury-dashboard {
+        padding: 20px;
+    }
+    
+    .mt-evaluation-actions {
         flex-direction: column;
     }
     
-    .mt-candidate-display {
-        padding: 15px;
+    .mt-button {
+        width: 100%;
     }
-} 
+    
+    .mt-results-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    
+    .mt-results-table {
+        overflow-x: auto;
+    }
+    
+    .mt-results-table table {
+        min-width: 600px;
+    }
+}
+
+/* ===========================
+   Loading States
+   =========================== */
+
+.mt-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.mt-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f0f0f0;
+    border-top: 4px solid #4a7c59;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===========================
+   Utility Classes
+   =========================== */
+
+.mt-text-center { text-align: center; }
+.mt-text-right { text-align: right; }
+.mt-text-left { text-align: left; }
+
+.mt-mt-0 { margin-top: 0; }
+.mt-mt-1 { margin-top: 10px; }
+.mt-mt-2 { margin-top: 20px; }
+.mt-mt-3 { margin-top: 30px; }
+.mt-mt-4 { margin-top: 40px; }
+
+.mt-mb-0 { margin-bottom: 0; }
+.mt-mb-1 { margin-bottom: 10px; }
+.mt-mb-2 { margin-bottom: 20px; }
+.mt-mb-3 { margin-bottom: 30px; }
+.mt-mb-4 { margin-bottom: 40px; }
+
+.mt-hidden { display: none; }
+.mt-visible { display: block; }
+
+.mt-text-muted { color: #666; }
+.mt-text-primary { color: #4a7c59; }
+.mt-text-danger { color: #dc3545; }
+.mt-text-success { color: #28a745; }
