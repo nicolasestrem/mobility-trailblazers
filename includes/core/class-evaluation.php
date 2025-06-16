@@ -37,53 +37,32 @@ class Evaluation {
     }
     
     /**
-     * Check if a jury member has evaluated a candidate
-     *
-     * @param int $user_id User ID
-     * @param int $candidate_id Candidate post ID
-     * @return bool
+     * Check if user has evaluated a candidate
      */
     public function has_evaluated($user_id, $candidate_id) {
         global $wpdb;
         
-        // Check both by user ID and jury member post ID
-        $jury_member_id = $this->get_jury_member_id_for_user($user_id);
-        
-        $count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$this->table_scores} 
-            WHERE candidate_id = %d 
-            AND (jury_member_id = %d OR jury_member_id = %d)
-            AND is_active = 1",
-            $candidate_id,
+        $result = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes 
+            WHERE jury_member_id = %d AND candidate_id = %d",
             $user_id,
-            $jury_member_id
+            $candidate_id
         ));
         
-        return $count > 0;
+        return $result > 0;
     }
     
     /**
-     * Get evaluation data for a specific user and candidate
-     *
-     * @param int $user_id User ID
-     * @param int $candidate_id Candidate post ID
-     * @return object|null
+     * Get evaluation for a user and candidate
      */
     public function get_evaluation($user_id, $candidate_id) {
         global $wpdb;
         
-        $jury_member_id = $this->get_jury_member_id_for_user($user_id);
-        
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$this->table_scores} 
-            WHERE candidate_id = %d 
-            AND (jury_member_id = %d OR jury_member_id = %d)
-            AND is_active = 1
-            ORDER BY evaluated_at DESC
-            LIMIT 1",
-            $candidate_id,
+            "SELECT * FROM {$wpdb->prefix}mt_votes 
+            WHERE jury_member_id = %d AND candidate_id = %d",
             $user_id,
-            $jury_member_id
+            $candidate_id
         ));
     }
     
@@ -149,70 +128,52 @@ class Evaluation {
     }
     
     /**
-     * Get top candidates by average score
-     *
-     * @param int $limit Number of results
-     * @param string $category Category slug (optional)
-     * @param int $min_votes Minimum number of votes required
-     * @return array
+     * Get top candidates by score
      */
-    public function get_top_candidates_by_score($limit = 10, $category = '', $min_votes = 1) {
+    public function get_top_candidates_by_score($limit = 10, $category = null, $min_votes = 1) {
         global $wpdb;
         
-        $query = "
-            SELECT 
-                p.ID as candidate_id,
-                p.post_title as candidate_name,
-                AVG(s.total_score) as avg_score,
-                COUNT(s.id) as evaluation_count,
-                m1.meta_value as company,
-                m2.meta_value as position
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$this->table_scores} s ON p.ID = s.candidate_id AND s.is_active = 1
-            LEFT JOIN {$wpdb->postmeta} m1 ON p.ID = m1.post_id AND m1.meta_key = '_mt_company'
-            LEFT JOIN {$wpdb->postmeta} m2 ON p.ID = m2.post_id AND m2.meta_key = '_mt_position'
-        ";
+        $query = "SELECT v.candidate_id, AVG(v.score) as avg_score, COUNT(*) as vote_count
+                 FROM {$wpdb->prefix}mt_votes v";
         
         if ($category) {
-            $query .= "
-                LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-                LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-                LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-            ";
+            $query .= " INNER JOIN {$wpdb->term_relationships} tr ON v.candidate_id = tr.object_id
+                       INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                       WHERE tt.taxonomy = 'mt_category' AND tt.term_id = %d";
         }
         
-        $query .= "
-            WHERE p.post_type = 'mt_candidate' 
-            AND p.post_status = 'publish'
-        ";
+        $query .= " GROUP BY v.candidate_id
+                   HAVING vote_count >= %d
+                   ORDER BY avg_score DESC
+                   LIMIT %d";
         
-        if ($category) {
-            $query .= $wpdb->prepare(" AND t.slug = %s AND tt.taxonomy = 'mt_category'", $category);
-        }
+        $params = $category ? [$category, $min_votes, $limit] : [$min_votes, $limit];
         
-        $query .= "
-            GROUP BY p.ID
-            HAVING COUNT(s.id) >= %d
-            ORDER BY avg_score DESC
-            LIMIT %d
-        ";
-        
-        return $wpdb->get_results($wpdb->prepare($query, $min_votes, $limit));
+        return $wpdb->get_results($wpdb->prepare($query, $params));
     }
     
     /**
      * Get public voting results
-     *
-     * @param int $limit Number of results
-     * @param string $category Category slug (optional)
-     * @return array
      */
-    public function get_public_voting_results($limit = 10, $category = '') {
+    public function get_public_voting_results($limit = 10, $category = null) {
         global $wpdb;
         
-        // For now, return the same as jury results
-        // You can implement a separate public voting table later
-        return $this->get_top_candidates_by_score($limit, $category, 0);
+        $query = "SELECT v.candidate_id, COUNT(*) as vote_count
+                 FROM {$wpdb->prefix}mt_votes v";
+        
+        if ($category) {
+            $query .= " INNER JOIN {$wpdb->term_relationships} tr ON v.candidate_id = tr.object_id
+                       INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                       WHERE tt.taxonomy = 'mt_category' AND tt.term_id = %d";
+        }
+        
+        $query .= " GROUP BY v.candidate_id
+                   ORDER BY vote_count DESC
+                   LIMIT %d";
+        
+        $params = $category ? [$category, $limit] : [$limit];
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
     }
     
     /**

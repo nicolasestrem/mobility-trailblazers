@@ -35,6 +35,34 @@ if (!defined('MT_PLUGIN_FILE')) {
 }
 
 /**
+ * Autoloader for plugin classes
+ */
+spl_autoload_register(function ($class) {
+    // Project-specific namespace prefix
+    $prefix = 'MobilityTrailblazers\\';
+    
+    // Base directory for the namespace prefix
+    $base_dir = MT_PLUGIN_PATH . 'includes/';
+    
+    // Check if the class uses the namespace prefix
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+    
+    // Get the relative class name
+    $relative_class = substr($class, $len);
+    
+    // Replace namespace separators with directory separators
+    $file = $base_dir . str_replace('\\', '/', strtolower($relative_class)) . '.php';
+    
+    // If the file exists, require it
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+/**
  * Main Plugin Class
  */
 class MobilityTrailblazersPlugin {
@@ -112,6 +140,12 @@ class MobilityTrailblazersPlugin {
         
         // Load post types handler
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-post-types.php');
+
+        // Initialize core classes
+        $this->evaluation = new \MobilityTrailblazers\Core\Evaluation();
+        $this->jury_member = new \MobilityTrailblazers\Core\JuryMember();
+        $this->candidate = new \MobilityTrailblazers\Core\Candidate();
+        $this->statistics = new \MobilityTrailblazers\Core\Statistics();
     }
     
     /**
