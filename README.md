@@ -256,6 +256,61 @@ We successfully transformed a monolithic 6,759-line plugin file into a modern, m
 - **Export Functionality**: JSON and CSV formats with automatic file download
 - **Browser-Based UI**: No external dependencies required
 
+#### Vote Reset Management
+- Access **MT Award System → Vote Reset**
+- Choose from multiple reset options:
+  - **Individual Vote Reset**: Reset specific candidate-jury combinations
+  - **Bulk Candidate Reset**: Reset all votes for a candidate
+  - **Bulk Jury Reset**: Reset all votes by a jury member
+  - **Phase Transition Reset**: Reset for phase changes
+  - **Full System Reset**: Complete system reset with backup
+- All operations include automatic backups and audit logging
+
+### 4. Vote Backup & Reset System
+
+#### Comprehensive Backup Management
+- **Automatic Backup Creation**: All reset operations automatically create backups before execution
+- **Manual Backup Operations**: Create on-demand backups for specific scenarios
+- **Bulk Backup Functionality**: Backup multiple votes/scores based on conditions
+- **Backup Analytics**: Detailed statistics on backup storage, activity, and trends
+
+#### Backup Features
+- **Transactional Safety**: All backup operations use database transactions with rollback on failure
+- **Data Integrity**: Comprehensive backup of both votes and candidate scores
+- **Audit Trail**: Complete logging of backup creation, restoration, and deletion activities
+- **Storage Optimization**: Efficient storage with metadata tracking and size monitoring
+
+#### Reset Operations
+- **Individual Vote Reset**: Reset specific candidate-jury member combinations with automatic backup
+- **Bulk Reset Options**: 
+  - All votes for a specific candidate
+  - All votes by a specific jury member
+  - Phase transition resets with backup preservation
+  - Full system reset with comprehensive backup
+- **Soft Delete Architecture**: Uses `is_active` flags instead of hard deletion for data preservation
+- **Permission-Based Access**: Role-based permissions for different reset operations
+
+#### Restoration System
+- **Selective Restoration**: Restore votes, scores, or both from specific backups
+- **Conflict Resolution**: Automatic handling of existing data during restoration
+- **Audit Integration**: All restoration activities logged with user attribution
+- **Transaction Safety**: Restoration operations use database transactions for consistency
+
+#### Database Structure
+The backup system uses several database tables:
+- **`mt_vote_backups`**: Primary backup storage for votes and scores
+- **`mt_votes`**: Enhanced with `is_active`, `reset_at`, `reset_by` columns
+- **`mt_candidate_scores`**: Enhanced with soft delete and audit columns
+- **`vote_reset_logs`**: Comprehensive audit trail for all reset operations
+
+#### API Integration
+- **REST API Endpoints**: Full API support for backup operations
+  - `POST /wp-json/mobility-trailblazers/v1/backup-create`
+  - `GET /wp-json/mobility-trailblazers/v1/backup-history`
+  - `POST /wp-json/mobility-trailblazers/v1/admin/restore-backup`
+- **Statistics API**: Real-time backup analytics and storage metrics
+- **Security**: Admin-only access with proper capability checks and nonce verification
+
 ## 🏗️ Architecture
 
 ### Plugin Structure
@@ -538,6 +593,24 @@ GET  /wp-json/mobility-trailblazers/v1/export-votes
 GET  /wp-json/mobility-trailblazers/v1/export-evaluations
 ```
 
+#### Backup Management Endpoints
+```
+POST /wp-json/mobility-trailblazers/v1/backup-create
+     Parameters: reason (string), type (string: 'full'|'partial')
+     Returns: backup statistics and success confirmation
+
+GET  /wp-json/mobility-trailblazers/v1/backup-history
+     Parameters: page (int), per_page (int, max 200)
+     Returns: paginated backup history with metadata
+
+POST /wp-json/mobility-trailblazers/v1/admin/restore-backup
+     Parameters: backup_id (int), type (string: 'votes'|'scores'|'both')
+     Returns: restoration success confirmation
+
+GET  /wp-json/mobility-trailblazers/v1/backup-statistics
+     Returns: comprehensive backup analytics and storage metrics
+```
+
 #### Evaluations Endpoint
 ```
 GET  /wp-json/mt/v1/evaluations
@@ -739,6 +812,37 @@ docker exec mobility_wpcli_STAGING wp db query "SELECT COUNT(*) FROM wp_mt_votes
 
 # Check reset permissions
 docker exec mobility_wpcli_STAGING wp user get {user_id} --field=roles
+```
+
+#### Backup System Issues
+```bash
+# Check backup table structure
+docker exec mobility_wpcli_STAGING wp db query "DESCRIBE wp_mt_vote_backups"
+
+# Verify backup functionality
+docker exec mobility_wpcli_STAGING wp db query "SELECT COUNT(*) FROM wp_mt_vote_backups"
+
+# Check backup statistics
+docker exec mobility_wpcli_STAGING wp db query "SELECT backup_reason, COUNT(*) as count FROM wp_mt_vote_backups GROUP BY backup_reason"
+
+# Test backup API endpoints
+curl -X POST "http://your-site.com/wp-admin/admin-ajax.php" \
+  -d "action=mt_create_backup&nonce=YOUR_NONCE&reason=test_backup"
+
+# Verify soft delete columns exist
+docker exec mobility_wpcli_STAGING wp db query "SHOW COLUMNS FROM wp_mt_votes LIKE 'is_active'"
+docker exec mobility_wpcli_STAGING wp db query "SHOW COLUMNS FROM wp_mt_candidate_scores LIKE 'reset_at'"
+
+# Check backup storage size
+docker exec mobility_wpcli_STAGING wp db query "SELECT SUM(LENGTH(COALESCE(comments, '')) + LENGTH(COALESCE(backup_reason, '')) + 50) as storage_bytes FROM wp_mt_vote_backups"
+
+# Test restoration functionality
+curl -X POST "http://your-site.com/wp-json/mobility-trailblazers/v1/admin/restore-backup" \
+  -H "Content-Type: application/json" \
+  -d '{"backup_id": 123, "type": "votes"}'
+
+# Check VoteBackupManager class loading
+docker exec mobility_wpcli_STAGING wp eval "echo class_exists('MobilityTrailblazers\\VoteBackupManager') ? 'EXISTS' : 'NOT FOUND';"
 ```
 
 #### Jury Evaluation Issues

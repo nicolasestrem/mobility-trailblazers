@@ -1,5 +1,94 @@
 # Mobility Trailblazers Plugin Changelog
 
+## Version 2.4.0 - Vote Backup System & Database Fixes (January 2025)
+
+### 🔧 Critical Bug Fixes
+- **Fixed Fatal Error**: Resolved "Call to undefined method MobilityTrailblazers\VoteBackupManager::bulk_backup()" error
+  - Added missing `bulk_backup()` method to VoteBackupManager class
+  - Added missing `get_backup_statistics()` method for backup analytics
+  - Added missing `restore_from_backup()` method for backup restoration
+- **Class Name Corrections**: Fixed incorrect class instantiation in API endpoints
+  - Updated `MT_Vote_Backup_Manager` to `\MobilityTrailblazers\VoteBackupManager`
+  - Fixed `MT_Vote_Audit_Logger` namespace reference in backup endpoints
+
+### 🗄️ Database Structure Enhancements
+- **Vote Backup Table**: Added missing `mt_vote_backups` table to database schema
+  - Comprehensive backup storage with candidate, jury member, and vote data
+  - Backup reason tracking and audit trail functionality
+  - Support for both vote and score backup operations
+- **Reset Functionality Columns**: Added essential columns to existing tables
+  - Added `is_active`, `reset_at`, `reset_by` columns to `mt_votes` table
+  - Added `is_active`, `reset_at`, `reset_by` columns to `mt_candidate_scores` table
+  - Enhanced indexing for improved query performance
+- **Migration Support**: Updated `update_tables_for_reset()` method for existing installations
+  - Automatic column addition for existing databases
+  - Proper index creation for new columns
+  - Backward compatibility maintained
+
+### 🔄 Backup System Implementation
+- **Bulk Backup Operations**: Implemented comprehensive bulk backup functionality
+  - Conditional backup based on WHERE clauses (user, candidate, phase-specific)
+  - Transactional backup operations with rollback on failure
+  - Separate backup handling for votes and candidate scores
+  - Detailed backup statistics and reporting
+- **Backup Analytics**: Added comprehensive backup statistics system
+  - Total backup counts and storage size calculations
+  - Backup activity tracking (last 30 days)
+  - Backup categorization by reason and user
+  - Human-readable storage size formatting
+- **Restoration System**: Implemented flexible backup restoration
+  - Support for restoring votes, scores, or both
+  - Transactional restoration with conflict resolution
+  - Audit logging for all restoration operations
+  - Error handling with detailed error messages
+
+### 🛡️ Data Integrity & Security
+- **Transaction Safety**: All backup and restoration operations use database transactions
+  - Automatic rollback on any operation failure
+  - Data consistency guaranteed across related tables
+  - Proper error handling and logging throughout
+- **Audit Trail**: Enhanced logging for all backup operations
+  - Backup creation logging with detailed metadata
+  - Restoration activity tracking with user attribution
+  - Integration with existing audit logging system
+- **Permission Validation**: Proper authorization checks for backup operations
+  - Admin-only access for bulk backup operations
+  - User-specific backup permissions for individual operations
+  - API endpoint security with proper capability checks
+
+### 🚀 API Integration
+- **Backup Endpoints**: Fixed and enhanced backup-related API endpoints
+  - `/backup-create` endpoint for manual backup creation
+  - `/backup-history` endpoint for backup listing and pagination
+  - `/restore-backup` endpoint for backup restoration
+  - Proper error handling and response formatting
+- **Statistics Integration**: Backup statistics available through API
+  - Real-time storage size calculations
+  - Backup activity metrics and trends
+  - User-specific backup analytics
+
+### 📊 Reset System Integration
+- **Vote Reset Manager**: Enhanced integration with backup system
+  - Automatic backup creation before bulk reset operations
+  - Support for phase transitions with backup preservation
+  - User-specific and candidate-specific reset operations
+  - Comprehensive reset logging and audit trails
+- **Reset Scope Support**: Multiple reset operation types
+  - Full system resets with confirmation requirements
+  - Phase transition resets with backup preservation
+  - User-specific vote resets with targeted backups
+  - Candidate-specific resets with selective backup
+
+### 🔧 Code Quality Improvements
+- **Error Handling**: Enhanced error handling throughout backup system
+  - Proper WordPress error objects for API responses
+  - Detailed error messages for debugging and user feedback
+  - Graceful degradation on backup operation failures
+- **Code Organization**: Improved code structure and documentation
+  - Comprehensive PHPDoc comments for all new methods
+  - Consistent coding standards and naming conventions
+  - Proper namespace usage and class organization
+
 ## Version 2.3.0 - Enhanced AJAX Assignment System (June 16th 2025)
 
 ### 🎯 Assignment Management System Overhaul

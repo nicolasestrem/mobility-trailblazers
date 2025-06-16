@@ -76,7 +76,7 @@ class MT_Backup_API {
      * Handle create backup request
      */
     public function handle_create_backup($request) {
-        $backup_manager = new MT_Vote_Backup_Manager();
+        $backup_manager = new \MobilityTrailblazers\VoteBackupManager();
         $reason = $request->get_param('reason') ?: 'Manual backup';
         $type = $request->get_param('type');
         
@@ -175,7 +175,7 @@ class MT_Backup_API {
      * Handle restore backup request
      */
     public function handle_restore_backup($request) {
-        $backup_manager = new MT_Vote_Backup_Manager();
+        $backup_manager = new \MobilityTrailblazers\VoteBackupManager();
         
         $backup_id = $request->get_param('backup_id');
         $type = $request->get_param('type');
@@ -191,7 +191,7 @@ class MT_Backup_API {
         }
         
         // Log the restoration
-        $audit_logger = new MT_Vote_Audit_Logger();
+        $audit_logger = new \MT_Vote_Audit_Logger();
         $audit_logger->log_reset(array(
             'reset_type' => 'restore',
             'reset_reason' => sprintf('Restored from backup #%d', $backup_id),
