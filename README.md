@@ -44,10 +44,10 @@ We successfully transformed a monolithic 6,759-line plugin file into a modern, m
 #### **Phase 2: Modular Architecture Implementation**
 
 **Core Components Created:**
-- `includes/class-mt-post-types.php` - Custom post type registration (candidates, jury members, backups)
-- `includes/class-mt-taxonomies.php` - Taxonomy management (categories, phases, statuses, award years)
-- `includes/class-mt-database.php` - Database table creation and management
-- `includes/class-mt-roles.php` - User roles and capabilities management
+- `includes/class-post-types.php` - Custom post type registration (candidates, jury members, backups)
+- `includes/class-taxonomies.php` - Taxonomy management (categories, phases, statuses, award years)
+- `includes/class-database.php` - Database table creation and management
+- `includes/class-roles.php` - User roles and capabilities management
 
 **Functionality Components:**
 - `includes/class-mt-shortcodes.php` - All plugin shortcodes (voting forms, candidate grids, jury dashboard)
@@ -254,10 +254,10 @@ We successfully transformed a monolithic 6,759-line plugin file into a modern, m
 mobility-trailblazers/
 ├── mobility-trailblazers.php          # Main plugin file (345 lines)
 ├── includes/                          # Core functionality
-│   ├── class-mt-post-types.php       # Post type registration
-│   ├── class-mt-taxonomies.php       # Taxonomy management
-│   ├── class-mt-database.php         # Database operations
-│   ├── class-mt-roles.php            # User roles & capabilities
+│   ├── class-post-types.php       # Post type registration
+│   ├── class-taxonomies.php       # Taxonomy management
+│   ├── class-database.php         # Database operations
+│   ├── class-roles.php            # User roles & capabilities
 │   ├── class-mt-shortcodes.php       # Shortcode handlers
 │   ├── class-mt-meta-boxes.php       # Custom meta boxes
 │   ├── class-mt-admin-menus.php      # Admin menu system

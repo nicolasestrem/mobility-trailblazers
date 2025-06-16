@@ -10,22 +10,22 @@ The main plugin file `mobility-trailblazers.php` has been successfully refactore
 
 ### Includes Directory - New Classes Created
 
-1. **class-mt-post-types.php** - Handles all custom post type registrations
+1. **class-post-types.php** - Handles all custom post type registrations
    - Candidates
    - Jury Members
    - Backups
 
-2. **class-mt-taxonomies.php** - Handles all custom taxonomy registrations
+2. **class-taxonomies.php** - Handles all custom taxonomy registrations
    - Categories
    - Phases
    - Statuses
    - Award Years
 
-3. **class-mt-database.php** - Handles database table creation and management
+3. **class-database.php** - Handles database table creation and management
    - Votes table
    - Candidate scores table
 
-4. **class-mt-roles.php** - Handles user roles and capabilities
+4. **class-roles.php** - Handles user roles and capabilities
    - MT Jury Member role
    - MT Award Admin role
    - Role management functions

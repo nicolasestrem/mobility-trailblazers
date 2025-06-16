@@ -53,12 +53,38 @@ spl_autoload_register(function ($class) {
     // Get the relative class name
     $relative_class = substr($class, $len);
     
-    // Replace namespace separators with directory separators
-    $file = $base_dir . str_replace('\\', '/', strtolower($relative_class)) . '.php';
+    // Split the class name into parts
+    $parts = explode('\\', $relative_class);
+    
+    // The last part is the class name
+    $class_name = array_pop($parts);
+    
+    // Convert class name to file name format
+    // First, split the class name into words (e.g., IntegrationsLoader -> Integrations Loader)
+    $words = preg_split('/(?=[A-Z])/', $class_name, -1, PREG_SPLIT_NO_EMPTY);
+    // Then convert to lowercase and join with hyphens
+    $file_name = 'class-' . strtolower(implode('-', $words)) . '.php';
+    
+    // Build the directory path from namespace parts
+    $dir_path = '';
+    if (!empty($parts)) {
+        $dir_path = strtolower(implode('/', $parts)) . '/';
+    }
+    
+    // Build the full path
+    $file = $base_dir . $dir_path . $file_name;
+    
+    // Debug logging
+    error_log("Mobility Trailblazers: Autoloader trying to load class: $class");
+    error_log("Mobility Trailblazers: Autoloader looking for file: $file");
+    error_log("Mobility Trailblazers: MT_PLUGIN_PATH is: " . MT_PLUGIN_PATH);
     
     // If the file exists, require it
     if (file_exists($file)) {
         require $file;
+        error_log("Mobility Trailblazers: Successfully loaded file: $file");
+    } else {
+        error_log("Mobility Trailblazers: Autoloader could not find file: $file");
     }
 });
 
@@ -93,49 +119,49 @@ class MobilityTrailblazersPlugin {
     private $statistics;
     
     /**
-     * @var \MobilityTrailblazers\Admin\Admin
+     * @var \MobilityTrailblazers\Database
+     */
+    private $database;
+    
+    /**
+     * @var \MobilityTrailblazers\Roles
+     */
+    private $roles;
+    
+    /**
+     * @var \MobilityTrailblazers\Taxonomies
+     */
+    private $taxonomies;
+    
+    /**
+     * @var \MobilityTrailblazers\PostTypes
+     */
+    private $post_types;
+    
+    /**
+     * @var \MobilityTrailblazers\Shortcodes
+     */
+    private $shortcode_handler;
+    
+    /**
+     * @var \MobilityTrailblazers\Admin
      */
     private $admin;
     
     /**
-     * @var \MobilityTrailblazers\Frontend\Frontend
+     * @var \MobilityTrailblazers\Frontend
      */
     private $frontend;
     
     /**
-     * @var \MobilityTrailblazers\Shortcodes\ShortcodeHandler
+     * @var \MobilityTrailblazers\Diagnostic
      */
-    private $shortcode_handler;
+    private $diagnostic;
     
     /**
      * @var \MobilityTrailblazers\Integrations\IntegrationsLoader
      */
     private $integrations_loader;
-    
-    /**
-     * @var \MobilityTrailblazers\Diagnostic\Diagnostic
-     */
-    private $diagnostic;
-    
-    /**
-     * @var \MobilityTrailblazers\Database\Database
-     */
-    private $database;
-    
-    /**
-     * @var \MobilityTrailblazers\Roles\Roles
-     */
-    private $roles;
-    
-    /**
-     * @var \MobilityTrailblazers\Taxonomies\Taxonomies
-     */
-    private $taxonomies;
-    
-    /**
-     * @var \MobilityTrailblazers\PostTypes\PostTypes
-     */
-    private $post_types;
     
     /**
      * Get plugin instance
@@ -195,16 +221,16 @@ class MobilityTrailblazersPlugin {
         $this->safe_require(MT_PLUGIN_PATH . 'includes/mt-utility-functions.php');
         
         // Load database handler
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-database.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-database.php');
         
         // Load roles handler
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-roles.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-roles.php');
         
         // Load taxonomies handler
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-taxonomies.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-taxonomies.php');
         
         // Load post types handler
-        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-mt-post-types.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-post-types.php');
 
         // Load core classes
         $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
@@ -242,33 +268,49 @@ class MobilityTrailblazersPlugin {
      */
     private function load_dependencies() {
         // Load utility functions first
-        require_once plugin_dir_path(__FILE__) . 'includes/mt-utility-functions.php';
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/mt-utility-functions.php');
 
         // Load core classes
-        require_once plugin_dir_path(__FILE__) . 'includes/class-database.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-roles.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-taxonomies.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-post-types.php';
-        require_once plugin_dir_path(__FILE__) . 'includes/class-shortcodes.php';
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-database.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-roles.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-taxonomies.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-post-types.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-shortcodes.php');
+
+        // Load core functionality
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-jury-member.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-candidate.php');
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-statistics.php');
 
         // Load admin classes if in admin area
         if (is_admin()) {
-            require_once plugin_dir_path(__FILE__) . 'includes/class-mt-admin-menus.php';
-            require_once plugin_dir_path(__FILE__) . 'includes/class-mt-diagnostic.php';
+            $this->safe_require(MT_PLUGIN_PATH . 'includes/class-admin.php');
+            $this->safe_require(MT_PLUGIN_PATH . 'includes/class-diagnostic.php');
         }
 
         // Load frontend classes
-        require_once plugin_dir_path(__FILE__) . 'includes/class-mt-jury-system.php';
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-frontend.php');
 
         // Load integrations
-        require_once plugin_dir_path(__FILE__) . 'includes/integrations/class-integrations-loader.php';
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/integrations/class-integrations-loader.php');
 
         // Initialize core classes with proper namespaces
-        $this->database = new \MobilityTrailblazers\Database();
-        $this->roles = new \MobilityTrailblazers\Roles();
-        $this->taxonomies = new \MobilityTrailblazers\Taxonomies();
-        $this->post_types = new \MobilityTrailblazers\PostTypes();
-        $this->shortcode_handler = new \MobilityTrailblazers\Shortcodes();
+        if (class_exists('\MobilityTrailblazers\Database')) {
+            $this->database = new \MobilityTrailblazers\Database();
+        }
+        if (class_exists('\MobilityTrailblazers\Roles')) {
+            $this->roles = new \MobilityTrailblazers\Roles();
+        }
+        if (class_exists('\MobilityTrailblazers\Taxonomies')) {
+            $this->taxonomies = new \MobilityTrailblazers\Taxonomies();
+        }
+        if (class_exists('\MobilityTrailblazers\PostTypes')) {
+            $this->post_types = new \MobilityTrailblazers\PostTypes();
+        }
+        if (class_exists('\MobilityTrailblazers\Shortcodes')) {
+            $this->shortcode_handler = new \MobilityTrailblazers\Shortcodes();
+        }
     }
     
     /**
@@ -276,15 +318,15 @@ class MobilityTrailblazersPlugin {
      */
     private function init_components() {
         // Initialize core components
-        $this->init_class('Shortcodes');
-        $this->init_class('Admin');
-        $this->init_class('Frontend');
-        $this->init_class('IntegrationsLoader');
-        $this->init_class('Diagnostic');
-        $this->init_class('Database');
-        $this->init_class('Roles');
-        $this->init_class('Taxonomies');
-        $this->init_class('PostTypes');
+        $this->init_class('\MobilityTrailblazers\Shortcodes');
+        $this->init_class('\MobilityTrailblazers\Admin');
+        $this->init_class('\MobilityTrailblazers\Frontend');
+        $this->init_class('\MobilityTrailblazers\Integrations\IntegrationsLoader');
+        $this->init_class('\MobilityTrailblazers\Diagnostic');
+        $this->init_class('\MobilityTrailblazers\Database');
+        $this->init_class('\MobilityTrailblazers\Roles');
+        $this->init_class('\MobilityTrailblazers\Taxonomies');
+        $this->init_class('\MobilityTrailblazers\PostTypes');
     }
     
     /**
@@ -310,14 +352,13 @@ class MobilityTrailblazersPlugin {
     }
     
     /**
-     * Safely require a file
+     * Safely require a file if it exists
      */
     private function safe_require($file) {
         if (file_exists($file)) {
             require_once $file;
         } else {
-            // Log error but don't break the site
-            error_log('Mobility Trailblazers: Missing file ' . $file);
+            error_log("Mobility Trailblazers: Missing file $file");
         }
     }
     
@@ -325,26 +366,45 @@ class MobilityTrailblazersPlugin {
      * Plugin activation
      */
     public function activate() {
+        // Load core dependencies first
+        $this->load_core_dependencies();
+        
         // Load and register post types first
         if (class_exists('\MobilityTrailblazers\PostTypes')) {
             $post_types = new \MobilityTrailblazers\PostTypes();
             $post_types->register_post_types();
+        } else {
+            error_log('Mobility Trailblazers: PostTypes class not found during activation');
         }
         
         // Load and register taxonomies
         if (class_exists('\MobilityTrailblazers\Taxonomies')) {
             $taxonomies = new \MobilityTrailblazers\Taxonomies();
             $taxonomies->register_taxonomies();
+        } else {
+            error_log('Mobility Trailblazers: Taxonomies class not found during activation');
         }
         
         // Create database tables
-        \MobilityTrailblazers\Database::create_tables();
+        if (class_exists('\MobilityTrailblazers\Database')) {
+            \MobilityTrailblazers\Database::create_tables();
+        } else {
+            error_log('Mobility Trailblazers: Database class not found during activation');
+        }
         
         // Create roles
-        \MobilityTrailblazers\Roles::create_roles();
+        if (class_exists('\MobilityTrailblazers\Roles')) {
+            \MobilityTrailblazers\Roles::create_roles();
+        } else {
+            error_log('Mobility Trailblazers: Roles class not found during activation');
+        }
         
         // Create default terms
-        \MobilityTrailblazers\Taxonomies::create_default_terms();
+        if (class_exists('\MobilityTrailblazers\Taxonomies')) {
+            \MobilityTrailblazers\Taxonomies::create_default_terms();
+        } else {
+            error_log('Mobility Trailblazers: Taxonomies class not found during activation');
+        }
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -354,8 +414,15 @@ class MobilityTrailblazersPlugin {
      * Plugin deactivation
      */
     public function deactivate() {
+        // Load core dependencies first
+        $this->load_core_dependencies();
+        
         // Remove roles
-        \MobilityTrailblazers\Roles::remove_roles();
+        if (class_exists('\MobilityTrailblazers\Roles')) {
+            \MobilityTrailblazers\Roles::remove_roles();
+        } else {
+            error_log('Mobility Trailblazers: Roles class not found during deactivation');
+        }
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -559,14 +626,9 @@ class MobilityTrailblazersPlugin {
      * Load Elementor compatibility
      */
     public function load_elementor_compatibility() {
-        if (did_action('elementor/loaded')) {
-            $elementor_compat_file = MT_PLUGIN_PATH . 'includes/class-mt-elementor-compat.php';
-            if (file_exists($elementor_compat_file)) {
-                require_once $elementor_compat_file;
-                if (class_exists('MT_Elementor_Compat')) {
-                    new MT_Elementor_Compat();
-                }
-            }
+        $elementor_compat_file = MT_PLUGIN_PATH . 'includes/integrations/elementor/class-elementor-compat.php';
+        if (file_exists($elementor_compat_file)) {
+            require_once $elementor_compat_file;
         }
     }
     
