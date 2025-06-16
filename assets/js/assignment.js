@@ -3,6 +3,10 @@
 (function($) {
     'use strict';
 
+    // Global data storage
+    let allCandidates = [];
+    let allJuryMembers = [];
+
     // Configuration
     const CONFIG = {
         animationDuration: 300,
@@ -39,6 +43,13 @@
 
     // Initialize when DOM is ready
     $(document).ready(function() {
+        // Debug data availability
+        console.log('MT Assignment Ajax object:', typeof mt_assignment_ajax !== 'undefined' ? 'Available' : 'Not found');
+        if (typeof mt_assignment_ajax !== 'undefined') {
+            console.log('Candidates:', mt_assignment_ajax.candidates);
+            console.log('Jury members:', mt_assignment_ajax.jury_members);
+        }
+        
         initializeInterface();
         bindEventHandlers();
         loadInitialData();
@@ -157,15 +168,83 @@
     function loadInitialData() {
         showLoadingState();
 
-        // Simulate loading data (replace with actual AJAX call)
-        setTimeout(() => {
-            const mockData = generateMockData();
-            renderCandidates(mockData.candidates);
-            renderJuryMembers(mockData.juryMembers);
-            updateStatistics(mockData.statistics);
+        // Check if WordPress data is available and properly populated
+        if (typeof mt_assignment_ajax !== 'undefined' && 
+            mt_assignment_ajax.candidates && 
+            mt_assignment_ajax.jury_members &&
+            mt_assignment_ajax.candidates.length > 0) {
+            
+            console.log('Using WordPress data:', mt_assignment_ajax.candidates.length + ' candidates');
+            
+            // Store the data globally for other functions
+            allCandidates = mt_assignment_ajax.candidates;
+            allJuryMembers = mt_assignment_ajax.jury_members;
+            
+            renderCandidates(allCandidates);
+            renderJuryMembers(allJuryMembers);
+            
+            // Calculate statistics
+            const stats = {
+                totalCandidates: allCandidates.length,
+                totalJury: allJuryMembers.length,
+                assignedCount: allCandidates.filter(c => c.assigned).length,
+                completionRate: '0%',
+                avgPerJury: '0'
+            };
+            
+            if (stats.totalCandidates > 0) {
+                stats.completionRate = ((stats.assignedCount / stats.totalCandidates) * 100).toFixed(1) + '%';
+            }
+            
+            if (stats.totalJury > 0) {
+                stats.avgPerJury = (stats.assignedCount / stats.totalJury).toFixed(1);
+            }
+            
+            updateStatistics(stats);
             hideLoadingState();
             showNotification('Data loaded successfully', 'success');
-        }, 1000);
+            
+        } else {
+            console.warn('WordPress data not available, falling back to AJAX load');
+            
+            // Try to load via AJAX
+            if (typeof mt_assignment_ajax !== 'undefined' && mt_assignment_ajax.ajax_url) {
+                $.ajax({
+                    url: mt_assignment_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'mt_get_assignment_data',
+                        nonce: mt_assignment_ajax.nonce
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            allCandidates = response.data.candidates || [];
+                            allJuryMembers = response.data.jury_members || [];
+                            
+                            renderCandidates(allCandidates);
+                            renderJuryMembers(allJuryMembers);
+                            updateStatistics(response.data.statistics);
+                            hideLoadingState();
+                            showNotification('Data loaded via AJAX', 'success');
+                        } else {
+                            console.error('Failed to load data:', response);
+                            // As a last resort, show empty state
+                            hideLoadingState();
+                            showNotification('No data available. Please add candidates and jury members.', 'warning');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error:', status, error);
+                        hideLoadingState();
+                        showNotification('Failed to load data. Please refresh the page.', 'error');
+                    }
+                });
+            } else {
+                console.error('AJAX configuration not available');
+                hideLoadingState();
+                showNotification('Configuration error. Please refresh the page.', 'error');
+            }
+        }
     }
 
     // Render Candidates
@@ -644,7 +723,6 @@
     function refreshData() {
         showNotification('Refreshing data...', 'info');
         
-        // Add spinning animation to refresh button
         elements.buttons.refresh.html(`
             <svg class="spin" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M14 8C14 11.3137 11.3137 14 8 14C5.68629 14 3.72708 12.6176 2.78549 10.6479" stroke="currentColor" stroke-width="2"/>
@@ -653,12 +731,15 @@
             Refreshing...
         `);
         
-        // Simulate refresh
+        // Don't reload mock data - fetch real data
+        loadInitialData(); // This will now use the real data flow
+        
+        // Reset button after loading
         setTimeout(() => {
-            loadInitialData();
             elements.buttons.refresh.html(`
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M14 8C14 11.3137 11.3137 14 8 14C5.68629 14 3.72708 12.6176 2.78549 10.6479" stroke="currentColor" stroke-width="2"/>
+                    <path d="M2 8C2 4.68629 4.68629 2 8 2C10.2958 2 12.2729 3.38235 13.2145 5.35206" stroke="currentColor" stroke-width="2"/>
                 </svg>
                 Refresh
             `);
@@ -966,7 +1047,7 @@
                             <p>Are you absolutely sure you want to continue?</p>
                             <div class="mt-confirm-input">
                                 <label>Type "RESET" to confirm:</label>
-                                <input type="text" id="mt-reset-confirm" placeholder="Type RESET">
+                                <input type="text" id="mt-reset-confirm" placeholder="Type RESET" style="text-transform: uppercase;">
                             </div>
                         </div>
                         <div class="mt-modal-footer">
@@ -984,7 +1065,7 @@
         
         // Enable confirm button when user types RESET
         $('#mt-reset-confirm').on('input', function() {
-            const value = $(this).val();
+            const value = $(this).val().toUpperCase(); // Convert to uppercase for comparison
             $('#mt-confirm-reset').prop('disabled', value !== 'RESET');
         });
         

@@ -354,11 +354,15 @@ class Admin {
             $candidates_data[] = array(
                 'id' => $candidate->ID,
                 'name' => $candidate->post_title,
-                'company' => get_post_meta($candidate->ID, '_mt_company', true),
-                'position' => get_post_meta($candidate->ID, '_mt_position', true),
+                'company' => get_post_meta($candidate->ID, '_mt_company', true) ?: '',
+                'position' => get_post_meta($candidate->ID, '_mt_position', true) ?: '',
                 'category' => !empty($categories) ? $categories[0]->slug : '',
                 'assigned' => !empty($jury_id),
-                'jury_member_id' => $jury_id
+                'jury_member_id' => $jury_id ?: null,
+                'avatar' => get_the_post_thumbnail_url($candidate->ID, 'thumbnail') ?: null,
+                'stage' => get_post_meta($candidate->ID, '_mt_stage', true) ?: 'pending',
+                'description' => wp_trim_words($candidate->post_content, 20, '...'),
+                'date_created' => get_the_date('Y-m-d H:i:s', $candidate->ID)
             );
         }
         
@@ -394,11 +398,15 @@ class Admin {
             $jury_data[] = array(
                 'id' => $jury->ID,
                 'name' => $jury->post_title,
-                'position' => get_post_meta($jury->ID, '_mt_position', true),
-                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true),
+                'position' => get_post_meta($jury->ID, '_mt_position', true) ?: '',
+                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true) ?: '',
                 'assignments' => count($assignments),
-                'maxAssignments' => 15,
-                'role' => get_post_meta($jury->ID, '_mt_jury_role', true)
+                'maxAssignments' => intval(get_post_meta($jury->ID, '_mt_max_assignments', true)) ?: 15,
+                'role' => get_post_meta($jury->ID, '_mt_jury_role', true) ?: 'member',
+                'avatar' => get_the_post_thumbnail_url($jury->ID, 'thumbnail') ?: null,
+                'organization' => get_post_meta($jury->ID, '_mt_organization', true) ?: '',
+                'status' => get_post_meta($jury->ID, '_mt_jury_status', true) ?: 'active',
+                'voting_weight' => floatval(get_post_meta($jury->ID, '_mt_voting_weight', true)) ?: 1.0
             );
         }
         
@@ -479,11 +487,15 @@ class Admin {
             $candidates_data[] = array(
                 'id' => $candidate->ID,
                 'name' => $candidate->post_title,
-                'company' => get_post_meta($candidate->ID, '_mt_company', true),
-                'position' => get_post_meta($candidate->ID, '_mt_position', true),
+                'company' => get_post_meta($candidate->ID, '_mt_company', true) ?: '',
+                'position' => get_post_meta($candidate->ID, '_mt_position', true) ?: '',
                 'category' => !empty($categories) ? $categories[0]->slug : '',
                 'assigned' => !empty($jury_id),
-                'jury_member_id' => $jury_id
+                'jury_member_id' => $jury_id ?: null,
+                'avatar' => get_the_post_thumbnail_url($candidate->ID, 'thumbnail') ?: null,
+                'stage' => get_post_meta($candidate->ID, '_mt_stage', true) ?: 'pending',
+                'description' => wp_trim_words($candidate->post_content, 20, '...'),
+                'date_created' => get_the_date('Y-m-d H:i:s', $candidate->ID)
             );
         }
         
@@ -504,11 +516,15 @@ class Admin {
             $jury_data[] = array(
                 'id' => $jury->ID,
                 'name' => $jury->post_title,
-                'position' => get_post_meta($jury->ID, '_mt_position', true),
-                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true),
+                'position' => get_post_meta($jury->ID, '_mt_position', true) ?: '',
+                'expertise' => get_post_meta($jury->ID, '_mt_expertise', true) ?: '',
                 'assignments' => count($assignments),
-                'maxAssignments' => 15,
-                'role' => get_post_meta($jury->ID, '_mt_jury_role', true)
+                'maxAssignments' => intval(get_post_meta($jury->ID, '_mt_max_assignments', true)) ?: 15,
+                'role' => get_post_meta($jury->ID, '_mt_jury_role', true) ?: 'member',
+                'avatar' => get_the_post_thumbnail_url($jury->ID, 'thumbnail') ?: null,
+                'organization' => get_post_meta($jury->ID, '_mt_organization', true) ?: '',
+                'status' => get_post_meta($jury->ID, '_mt_jury_status', true) ?: 'active',
+                'voting_weight' => floatval(get_post_meta($jury->ID, '_mt_voting_weight', true)) ?: 1.0
             );
         }
         
