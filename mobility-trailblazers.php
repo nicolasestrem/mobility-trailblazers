@@ -1,4 +1,8 @@
 <?php
+namespace MobilityTrailblazers;
+
+use MobilityTrailblazers\Integrations\IntegrationsLoader;
+
 /**
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
@@ -74,6 +78,12 @@ class MobilityTrailblazersPlugin {
         
         // Load Elementor compatibility
         add_action('plugins_loaded', array($this, 'load_elementor_compatibility'));
+        
+        // Load integrations
+        $this->load_integrations();
+        
+        // Register AJAX handlers
+        $this->register_ajax_handlers();
     }
     
     /**
@@ -475,6 +485,83 @@ class MobilityTrailblazersPlugin {
             // Update the database version
             update_option('mt_db_version', $current_version);
         }
+    }
+    
+    /**
+     * Load integrations
+     */
+    private function load_integrations() {
+        require_once MT_PLUGIN_PATH . 'includes/integrations/class-integrations-loader.php';
+        IntegrationsLoader::get_instance();
+    }
+    
+    /**
+     * Register AJAX handlers
+     */
+    private function register_ajax_handlers() {
+        add_action('wp_ajax_mt_submit_vote', array($this, 'handle_vote_submission'));
+        add_action('wp_ajax_nopriv_mt_submit_vote', array($this, 'handle_vote_submission'));
+    }
+    
+    /**
+     * Handle vote submission
+     */
+    public function handle_vote_submission() {
+        // Verify nonce
+        check_ajax_referer('mt_vote_nonce', 'mt_vote_nonce');
+        
+        // Get and sanitize data
+        $candidate_id = intval($_POST['candidate_id']);
+        $vote_type = sanitize_text_field($_POST['vote_type']);
+        $comments = sanitize_textarea_field($_POST['comments']);
+        $criteria = isset($_POST['criteria']) ? array_map('intval', $_POST['criteria']) : array();
+        
+        // Validate required fields
+        if (!$candidate_id || !$vote_type) {
+            wp_send_json_error(array(
+                'message' => __('Missing required fields.', 'mobility-trailblazers')
+            ));
+        }
+        
+        // Check if user has already voted
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            if ($this->has_user_voted($user_id, $candidate_id)) {
+                wp_send_json_error(array(
+                    'message' => __('You have already voted for this candidate.', 'mobility-trailblazers')
+                ));
+            }
+        }
+        
+        // Process vote
+        $vote_id = $this->save_vote($candidate_id, $vote_type, $criteria, $comments);
+        
+        if ($vote_id) {
+            wp_send_json_success(array(
+                'message' => __('Vote submitted successfully!', 'mobility-trailblazers'),
+                'reset_form' => true
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => __('Failed to submit vote. Please try again.', 'mobility-trailblazers')
+            ));
+        }
+    }
+    
+    /**
+     * Check if user has already voted
+     */
+    private function has_user_voted($user_id, $candidate_id) {
+        // Implementation depends on your voting system
+        return false; // Placeholder
+    }
+    
+    /**
+     * Save vote to database
+     */
+    private function save_vote($candidate_id, $vote_type, $criteria, $comments) {
+        // Implementation depends on your voting system
+        return true; // Placeholder
     }
 }
 

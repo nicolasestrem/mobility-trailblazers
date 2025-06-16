@@ -2,6 +2,51 @@
 
 jQuery(document).ready(function($) {
     
+    // Handle voting form submission
+    $('.mt-vote-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var $form = $(this);
+        var $message = $form.find('.mt-vote-message');
+        var $submitButton = $form.find('.mt-submit-vote');
+        
+        // Disable submit button
+        $submitButton.prop('disabled', true);
+        
+        // Clear previous messages
+        $message.empty();
+        
+        $.ajax({
+            url: mt_frontend.ajax_url,
+            type: 'POST',
+            data: $form.serialize() + '&action=mt_submit_vote',
+            success: function(response) {
+                if (response.success) {
+                    $message.html(
+                        '<div class="mt-success">' + response.data.message + '</div>'
+                    );
+                    // Reset form if needed
+                    if (response.data.reset_form) {
+                        $form[0].reset();
+                    }
+                } else {
+                    $message.html(
+                        '<div class="mt-error">' + response.data.message + '</div>'
+                    );
+                }
+            },
+            error: function() {
+                $message.html(
+                    '<div class="mt-error">' + mt_frontend.strings.error + '</div>'
+                );
+            },
+            complete: function() {
+                // Re-enable submit button
+                $submitButton.prop('disabled', false);
+            }
+        });
+    });
+    
     // Public voting form submission
     $(document).on('submit', '#mt-public-vote-form', function(e) {
         e.preventDefault();
