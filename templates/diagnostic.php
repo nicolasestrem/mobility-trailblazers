@@ -11,6 +11,11 @@ if (!current_user_can('manage_options')) {
     wp_die(__('You do not have permission to access this page.', 'mobility-trailblazers'));
 }
 
+// Debug information
+error_log('Starting diagnostic page');
+error_log('MT_PLUGIN_PATH: ' . MT_PLUGIN_PATH);
+error_log('MT_PLUGIN_VERSION: ' . MT_PLUGIN_VERSION);
+
 // Get system information
 $system_info = array(
     'WordPress Version' => get_bloginfo('version'),
@@ -24,6 +29,8 @@ $system_info = array(
     'Max Execution Time' => ini_get('max_execution_time') . ' seconds'
 );
 
+error_log('System info collected: ' . print_r($system_info, true));
+
 // Check database tables
 $tables = array(
     'mt_votes' => $wpdb->prefix . 'mt_votes',
@@ -33,28 +40,36 @@ $tables = array(
 
 $table_status = array();
 foreach ($tables as $name => $table) {
-    $table_status[$name] = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+    $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+    $table_status[$name] = $exists;
+    error_log("Table $name ($table) exists: " . ($exists ? 'yes' : 'no'));
 }
 
 // Check post types
 $post_types = array('mt_candidate', 'mt_jury');
 $post_type_status = array();
 foreach ($post_types as $post_type) {
-    $post_type_status[$post_type] = post_type_exists($post_type);
+    $exists = post_type_exists($post_type);
+    $post_type_status[$post_type] = $exists;
+    error_log("Post type $post_type exists: " . ($exists ? 'yes' : 'no'));
 }
 
 // Check taxonomies
 $taxonomies = array('mt_category', 'mt_phase', 'mt_status', 'mt_award_year');
 $taxonomy_status = array();
 foreach ($taxonomies as $taxonomy) {
-    $taxonomy_status[$taxonomy] = taxonomy_exists($taxonomy);
+    $exists = taxonomy_exists($taxonomy);
+    $taxonomy_status[$taxonomy] = $exists;
+    error_log("Taxonomy $taxonomy exists: " . ($exists ? 'yes' : 'no'));
 }
 
 // Check roles
 $roles = array('mt_jury_member', 'mt_admin');
 $role_status = array();
 foreach ($roles as $role) {
-    $role_status[$role] = get_role($role) !== null;
+    $exists = get_role($role) !== null;
+    $role_status[$role] = $exists;
+    error_log("Role $role exists: " . ($exists ? 'yes' : 'no'));
 }
 
 // Check file permissions
@@ -66,8 +81,12 @@ $directories = array(
 
 $directory_status = array();
 foreach ($directories as $name => $dir) {
-    $directory_status[$name] = is_dir($dir) && is_readable($dir);
+    $accessible = is_dir($dir) && is_readable($dir);
+    $directory_status[$name] = $accessible;
+    error_log("Directory $name ($dir) accessible: " . ($accessible ? 'yes' : 'no'));
 }
+
+error_log('All checks completed');
 ?>
 
 <div class="wrap">
@@ -205,13 +224,13 @@ foreach ($directories as $name => $dir) {
 .mt-diagnostic-section {
     background: #fff;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
 
 .mt-diagnostic-section h2 {
-    margin-top: 0;
+    margin: 0 0 15px 0;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 }

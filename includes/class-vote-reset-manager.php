@@ -120,7 +120,8 @@ class VoteResetManager {
                 'affected_candidate_id' => $candidate_id,
                 'affected_user_id' => $jury_member_id,
                 'reset_reason' => $reason,
-                'votes_affected' => $total_affected
+                'votes_affected' => $total_affected,
+                'timestamp' => current_time('mysql')
             ));
             
             // Clear cache

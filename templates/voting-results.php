@@ -24,9 +24,9 @@ global $wpdb;
 $votes = $wpdb->get_results($wpdb->prepare(
     "SELECT v.*, u.display_name as voter_name 
      FROM {$wpdb->prefix}mt_votes v 
-     LEFT JOIN {$wpdb->users} u ON v.user_id = u.ID 
-     WHERE v.round = %d 
-     ORDER BY v.candidate_id, v.user_id",
+     LEFT JOIN {$wpdb->users} u ON v.jury_member_id = u.ID 
+     WHERE v.vote_round = %d 
+     ORDER BY v.candidate_id, v.jury_member_id",
     $current_round
 ));
 

@@ -53,6 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mt_vote_reset_nonce']
         $error_message = is_wp_error($result) ? $result->get_error_message() : __('An error occurred while resetting votes.', 'mobility-trailblazers');
         echo '<div class="notice notice-error"><p>' . esc_html($error_message) . '</p></div>';
     }
+
+    // Log the reset
+    global $wpdb;
+    $wpdb->insert(
+        $wpdb->prefix . 'vote_reset_logs',
+        array(
+            'initiated_by' => get_current_user_id(),
+            'affected_user_id' => $affected_user_id,
+            'reset_type' => $reset_type,
+            'reset_reason' => $reset_reason,
+            'reset_timestamp' => current_time('mysql')
+        ),
+        array('%d', '%d', '%s', '%s', '%s')
+    );
 }
 
 // Get current round

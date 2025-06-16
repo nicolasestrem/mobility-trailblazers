@@ -49,11 +49,11 @@ class Database {
         $sql .= "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}vote_reset_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             initiated_by bigint(20) NOT NULL,
-            affected_user_id bigint(20) NULL,
+            affected_user_id bigint(20) DEFAULT NULL,
             reset_type varchar(50) NOT NULL,
-            reset_reason text,
-            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
+            reset_reason text NOT NULL,
+            reset_timestamp datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
             KEY initiated_by (initiated_by),
             KEY affected_user_id (affected_user_id)
         ) $charset_collate;";
