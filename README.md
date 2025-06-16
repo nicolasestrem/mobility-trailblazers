@@ -271,7 +271,7 @@ mobility-trailblazers/
 │   └── mt-utility-functions.php      # Utility functions
 ├── admin/                             # Admin interface
 │   └── views/                         # Admin page templates
-│       ├── assignment-management.php  # Drag-and-drop interface
+│       ├── assignment-template.php  # Drag-and-drop interface
 │       ├── vote-reset.php            # Vote reset management
 │       ├── voting-results.php        # Results display
 │       └── diagnostic.php            # System diagnostics

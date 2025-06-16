@@ -18,65 +18,47 @@ class Admin {
     }
 
     public function register_admin_menus() {
-        // Main menu
+        // Add main menu
         add_menu_page(
-            __('MT Award System', 'mobility-trailblazers'),
-            __('MT Awards', 'mobility-trailblazers'),
-            'mt_manage_awards',
+            __('Mobility Trailblazers', 'mobility-trailblazers'),
+            __('Mobility Trailblazers', 'mobility-trailblazers'),
+            'manage_options',
             'mt-award-system',
             array($this, 'admin_dashboard'),
             'dashicons-awards',
             30
         );
-        
-        // Dashboard submenu (rename the first item)
+
+        // Add submenu items
         add_submenu_page(
             'mt-award-system',
             __('Dashboard', 'mobility-trailblazers'),
             __('Dashboard', 'mobility-trailblazers'),
-            'mt_manage_awards',
+            'manage_options',
             'mt-award-system',
             array($this, 'admin_dashboard')
         );
-        
-        // Candidates submenu
-        add_submenu_page(
-            'mt-award-system',
-            __('Candidates', 'mobility-trailblazers'),
-            __('Candidates', 'mobility-trailblazers'),
-            'edit_mt_candidates',
-            'edit.php?post_type=mt_candidate'
-        );
-        
-        // Jury Members submenu
-        add_submenu_page(
-            'mt-award-system',
-            __('Jury Members', 'mobility-trailblazers'),
-            __('Jury Members', 'mobility-trailblazers'),
-            'edit_mt_jurys',
-            'edit.php?post_type=mt_jury'
-        );
-        
-        // Jury Evaluation page (for jury members)
+
+        // Jury Evaluation
         add_submenu_page(
             'mt-award-system',
             __('Jury Evaluation', 'mobility-trailblazers'),
-            __('Jury Evaluation', 'mobility-trailblazers'),
-            'mt_submit_evaluations',
+            __('Evaluation', 'mobility-trailblazers'),
+            'mt_access_jury_dashboard',
             'mt-jury-evaluation',
             array($this, 'jury_evaluation_page')
         );
-        
+
         // Assignment Management
         add_submenu_page(
             'mt-award-system',
-            __('Assignment Management', 'mobility-trailblazers'),
+            __('Jury Assignments', 'mobility-trailblazers'),
             __('Assignments', 'mobility-trailblazers'),
-            'mt_manage_assignments',
-            'mt-assignment-management',
+            'manage_options',
+            'mt-assignments',
             array($this, 'assignment_management_page')
         );
-        
+
         // Voting Results
         add_submenu_page(
             'mt-award-system',
@@ -195,8 +177,51 @@ class Admin {
     }
 
     public function assignment_management_page() {
-        // Load the assignment management template
-        require_once MT_PLUGIN_PATH . 'templates/assignment-management.php';
+        // Enqueue required scripts and styles
+        wp_enqueue_script('mt-assignment-js', MT_PLUGIN_URL . 'assets/js/assignment.js', array('jquery'), MT_PLUGIN_VERSION, true);
+        wp_enqueue_style('mt-assignment-css', MT_PLUGIN_URL . 'assets/css/assignment.css', array(), MT_PLUGIN_VERSION);
+
+        // Localize script with necessary data
+        wp_localize_script('mt-assignment-js', 'mtAssignment', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_assignment_nonce'),
+            'i18n' => array(
+                'confirm_clear' => __('Are you sure you want to clear all assignments?', 'mobility-trailblazers'),
+                'confirm_export' => __('Are you sure you want to export assignments?', 'mobility-trailblazers'),
+                'success' => __('Operation completed successfully', 'mobility-trailblazers'),
+                'error' => __('An error occurred', 'mobility-trailblazers')
+            )
+        ));
+
+        // Get initial data
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        $total_jury = wp_count_posts('mt_jury')->publish;
+        
+        global $wpdb;
+        $assigned_count = $wpdb->get_var("
+            SELECT COUNT(DISTINCT post_id) 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_assigned_jury_member' 
+            AND meta_value != ''
+        ");
+
+        $completion_rate = $total_candidates > 0 ? ($assigned_count / $total_candidates) * 100 : 0;
+        $avg_per_jury = $total_jury > 0 ? $assigned_count / $total_jury : 0;
+
+        // Get current phase
+        $current_phase = get_option('mt_current_phase', 'preparation');
+        $phase_names = array(
+            'preparation' => __('Preparation', 'mobility-trailblazers'),
+            'candidate_collection' => __('Candidate Collection', 'mobility-trailblazers'),
+            'jury_evaluation' => __('Jury Evaluation', 'mobility-trailblazers'),
+            'public_voting' => __('Public Voting', 'mobility-trailblazers'),
+            'final_selection' => __('Final Selection', 'mobility-trailblazers'),
+            'award_ceremony' => __('Award Ceremony', 'mobility-trailblazers'),
+            'post_award' => __('Post Award', 'mobility-trailblazers')
+        );
+
+        // Load the assignment template
+        require_once MT_PLUGIN_PATH . 'templates/assignment-template.php';
     }
 
     public function voting_results_page() {
