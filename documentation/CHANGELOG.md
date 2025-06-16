@@ -1,5 +1,79 @@
 # Mobility Trailblazers Plugin Changelog
 
+## Version 2.2.0 - Jury Synchronization & Bug Fixes (January 2025)
+
+### 🔄 Jury Synchronization System
+- **Automatic User-Jury Post Sync**: Implemented comprehensive synchronization between users with `mt_jury_member` role and jury posts
+  - Auto-creates jury posts when users get jury member role
+  - Auto-removes jury member role when jury posts are deleted/trashed
+  - Restores jury posts when users regain jury member role
+  - Handles user deletion by cleaning up associated jury posts
+- **Bidirectional Synchronization**: Changes to either users or jury posts automatically sync to the other
+- **Data Preservation**: Uses trash instead of deletion to preserve evaluation data and assignments
+- **Orphan Cleanup**: Identifies and manages orphaned jury posts without valid users
+- **Manual Sync Tools**: Admin interface for manual synchronization with detailed status reporting
+
+### 🐛 Critical Bug Fixes
+- **Namespace Conflicts Resolved**: Fixed "Class not found" errors in namespaced files
+  - Fixed `WP_Query` references in `class-shortcodes.php` (lines 115, 180)
+  - Fixed `WP_Error` references in `class-vote-reset-manager.php` (5 instances)
+  - Fixed `VoteAuditLogger` namespace issues in vote management classes
+- **Missing Asset Files**: Created missing frontend CSS and JavaScript files
+  - Added `assets/css/frontend.css` with voting interface and candidate display styles
+  - Added `assets/js/frontend.js` with frontend functionality and AJAX utilities
+- **Template Property Access**: Fixed PHP warnings in jury dashboard template
+  - Fixed taxonomy name mismatches (`candidate_category` → `mt_category`, `vote_round` → `mt_phase`)
+  - Added safety checks for array vs object property access
+  - Enhanced error handling for missing taxonomy data
+
+### 🔧 Diagnostic System Enhancement
+- **Comprehensive Diagnostic Page**: Fully implemented MT Diagnostic page with detailed system checks
+  - Database table existence and record counts
+  - File permissions and directory access checks
+  - Plugin dependency verification (WordPress, PHP, MySQL versions)
+  - Plugin configuration status (post types, taxonomies, versions)
+  - System information display (memory limits, debug settings, etc.)
+  - Jury synchronization status monitoring
+- **Visual Status Indicators**: Color-coded status indicators (✓ green, ⚠ orange, ✗ red)
+- **Sync Management**: Direct access to jury synchronization tools from diagnostic page
+
+### 🗄️ Database Integration Improvements
+- **Audit Logger Table Structure**: Updated database schema for vote reset logs
+  - Added missing columns: `initiated_by_role`, `affected_candidate_id`, `voting_phase`, etc.
+  - Enhanced audit trail with IP address and user agent tracking
+  - Improved data integrity with proper column definitions
+- **Table Update System**: Automatic database updates for existing installations
+- **Proper Class Loading**: Fixed audit logger class inclusion and namespace issues
+
+### 🎨 Frontend Enhancements
+- **Jury Dashboard Widget**: Resolved loading issues with MT Jury Dashboard Elementor widget
+  - Fixed shortcode namespace references (`Roles::is_jury_member()` → `\MobilityTrailblazers\Roles::is_jury_member()`)
+  - Enhanced template compatibility with both array and object data formats
+  - Added fallback content for missing core classes
+  - Improved error handling and user feedback
+- **Template Safety**: Added comprehensive safety checks for data structure variations
+- **Responsive Design**: Enhanced mobile compatibility in frontend CSS
+
+### 🛡️ Security & Validation Enhancements
+- **Input Validation**: Enhanced validation for all user inputs and form submissions
+- **Error Handling**: Improved error handling with proper WordPress error responses
+- **Data Sanitization**: Enhanced sanitization for all database operations
+- **Access Control**: Strengthened permission checks for jury synchronization operations
+
+### 📊 Monitoring & Logging
+- **Sync Activity Logging**: Comprehensive logging of all jury synchronization activities
+  - User role changes and jury post creation/deletion
+  - Automatic cleanup operations and orphan detection
+  - Manual sync operations with success/error counts
+- **Diagnostic Integration**: Real-time sync status monitoring in diagnostic page
+- **Action Hooks**: Added extensibility hooks for jury post lifecycle events
+
+### 🚀 Performance Optimizations
+- **Conditional Loading**: Enhanced asset loading with better condition detection
+- **Database Queries**: Optimized queries for jury synchronization operations
+- **Caching**: Improved caching for frequently accessed jury member data
+- **Error Prevention**: Proactive error prevention through better validation
+
 ## Version 2.1.0 - Backend Integration & Localization (January 2025)
 
 ### 🔧 Backend Integration Implementation
@@ -74,7 +148,6 @@
     - Statistics display
     - Assigned candidates list
     - Evaluation progress
-    - Public voting results
     - Round selector
     - Category filter
     - Search functionality
@@ -112,7 +185,160 @@
 - Removed duplicate asset files from root assets directory
 - Removed old asset paths from documentation
 
-## Technical Details
+## Technical Details - Version 2.2.0
+
+### Jury Synchronization Implementation
+```php
+// Automatic jury post creation when user gets jury role
+class JurySync {
+    public function handle_user_role_add($user_id, $role) {
+        if ($role === 'mt_jury_member') {
+            $this->create_jury_post_for_user($user_id);
+        }
+    }
+    
+    // Bidirectional sync on jury post changes
+    public function handle_jury_post_trash($post_id) {
+        if (get_post_type($post_id) !== 'mt_jury') return;
+        
+        $user_id = get_post_meta($post_id, '_mt_jury_user_id', true);
+        if ($user_id) {
+            $user = get_user_by('id', $user_id);
+            if ($user && in_array('mt_jury_member', $user->roles)) {
+                $user->remove_role('mt_jury_member');
+            }
+        }
+    }
+}
+```
+
+### Diagnostic System Structure
+```php
+// Comprehensive system checks
+private function check_database_tables() {
+    $tables = array(
+        'mt_votes' => 'Votes',
+        'mt_vote_backups' => 'Vote Backups',
+        'vote_reset_logs' => 'Vote Reset Logs',
+        'mt_vote_audit_log' => 'Vote Audit Log',
+        'mt_candidate_scores' => 'Candidate Scores'
+    );
+    
+    foreach ($tables as $table_suffix => $table_label) {
+        $table_name = $wpdb->prefix . $table_suffix;
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+        // Display status with color coding
+    }
+}
+```
+
+### Enhanced Database Schema
+```sql
+-- Updated vote_reset_logs table with comprehensive audit trail
+CREATE TABLE IF NOT EXISTS `wp_vote_reset_logs` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `reset_type` varchar(50) NOT NULL,
+    `initiated_by` bigint(20) NOT NULL,
+    `initiated_by_role` varchar(50) DEFAULT NULL,
+    `affected_user_id` bigint(20) DEFAULT NULL,
+    `affected_candidate_id` bigint(20) DEFAULT NULL,
+    `voting_phase` varchar(50) DEFAULT NULL,
+    `votes_affected` int(11) DEFAULT 0,
+    `reset_reason` text NOT NULL,
+    `ip_address` varchar(45) DEFAULT NULL,
+    `user_agent` text DEFAULT NULL,
+    `reset_timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `initiated_by` (`initiated_by`),
+    KEY `affected_user_id` (`affected_user_id`),
+    KEY `affected_candidate_id` (`affected_candidate_id`)
+);
+```
+
+## Usage Examples - Version 2.2.0
+
+### Manual Jury Synchronization
+```php
+// Trigger manual sync via URL parameter
+// Visit: /wp-admin/admin.php?page=mt-diagnostic&mt_sync_jury=1
+
+// Programmatic sync
+$jury_sync = \MobilityTrailblazers\JurySync::get_instance();
+$result = $jury_sync->sync_all_jury_members();
+// Returns: array('synced' => 5, 'errors' => 0)
+```
+
+### Diagnostic Page Integration
+```php
+// Access diagnostic information
+// Visit: /wp-admin/admin.php?page=mt-diagnostic
+
+// Check specific sync status
+$jury_sync = \MobilityTrailblazers\JurySync::get_instance();
+$jury_post_id = $jury_sync->get_jury_post_for_user($user_id);
+```
+
+### Action Hooks for Extensions
+```php
+// Hook into jury post lifecycle
+add_action('mt_jury_post_created', function($jury_post_id, $user_id) {
+    // Custom logic when jury post is created
+    update_post_meta($jury_post_id, 'custom_field', 'value');
+});
+
+add_action('mt_jury_post_deactivated', function($jury_post_id, $user_id) {
+    // Custom logic when jury post is deactivated
+    // e.g., send notification email
+});
+```
+
+### Frontend Asset Integration
+```php
+// Enhanced frontend JavaScript with AJAX utilities
+window.MobilityTrailblazers = {
+    ajaxRequest: function(action, data, callback) {
+        $.ajax({
+            url: mtFrontend.ajax_url,
+            type: 'POST',
+            data: {
+                action: action,
+                nonce: mtFrontend.nonce,
+                ...data
+            },
+            success: callback,
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+            }
+        });
+    }
+};
+```
+
+## Bug Fixes - Version 2.2.0
+
+### Namespace Resolution
+```php
+// Before (causing errors)
+new WP_Query($args);
+new WP_Error('code', 'message');
+new VoteAuditLogger();
+
+// After (properly namespaced)
+new \WP_Query($args);
+new \WP_Error('code', 'message');
+new \MT_Vote_Audit_Logger();
+```
+
+### Template Safety Checks
+```php
+// Enhanced template compatibility
+$candidate_id = is_object($candidate) ? $candidate->ID : 
+                (is_array($candidate) ? $candidate['id'] : 0);
+$candidate_title = is_object($candidate) ? $candidate->post_title : 
+                   (is_array($candidate) ? $candidate['title'] : '');
+```
+
+## Technical Details - Version 2.1.0
 
 ### Property Declarations
 ```php

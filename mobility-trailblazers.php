@@ -240,6 +240,9 @@ class MobilityTrailblazersPlugin {
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-audit-logger.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-backup-manager.php');
         $this->safe_require(MT_PLUGIN_PATH . 'includes/class-vote-reset-manager.php');
+        
+        // Load jury synchronization class
+        $this->safe_require(MT_PLUGIN_PATH . 'includes/class-jury-sync.php');
 
         // Load core classes
         $this->safe_require(MT_PLUGIN_PATH . 'includes/core/class-evaluation.php');
@@ -349,6 +352,7 @@ class MobilityTrailblazersPlugin {
         $this->init_class('\MobilityTrailblazers\Roles');
         $this->init_class('\MobilityTrailblazers\Taxonomies');
         $this->init_class('\MobilityTrailblazers\PostTypes');
+        $this->init_class('\MobilityTrailblazers\JurySync');
     }
     
     /**
