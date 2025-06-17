@@ -186,12 +186,13 @@ $potential_users = get_users(array(
                     <tbody>
                         <?php foreach ($checks as $check) : ?>
                             <tr>
-                                <td><?php echo esc_html($check['name']); ?></td>
+                                <td><?php echo isset($check['name']) ? esc_html($check['name']) : __('Unnamed Check', 'mobility-trailblazers'); ?></td>
                                 <td>
                                     <?php
                                     $status_icon = '';
                                     $status_color = '';
-                                    switch ($check['status']) {
+                                    $status = isset($check['status']) ? $check['status'] : 'warning';
+                                    switch ($status) {
                                         case 'success':
                                             $status_icon = 'dashicons-yes';
                                             $status_color = '#46b450';
@@ -208,7 +209,7 @@ $potential_users = get_users(array(
                                     ?>
                                     <span class="dashicons <?php echo $status_icon; ?>" style="color: <?php echo $status_color; ?>;"></span>
                                 </td>
-                                <td><?php echo esc_html($check['message']); ?></td>
+                                <td><?php echo isset($check['message']) ? esc_html($check['message']) : __('No message available', 'mobility-trailblazers'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
