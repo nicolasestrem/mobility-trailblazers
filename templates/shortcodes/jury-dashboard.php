@@ -15,7 +15,8 @@ $total_assigned = count($assigned_candidates);
 $completed_evaluations = 0;
 $draft_evaluations = 0;
 
-foreach ($assigned_candidates as $candidate_id) {
+foreach ($assigned_candidates as $candidate) {
+    $candidate_id = is_object($candidate) ? $candidate->ID : $candidate;
     if (mt_has_evaluated($candidate_id, $jury_member->ID)) {
         $completed_evaluations++;
     } elseif (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
@@ -107,9 +108,10 @@ $completion_rate = $total_assigned > 0 ? round(($completed_evaluations / $total_
         
         <?php if ($total_assigned > 0) : ?>
             <div class="mt-candidates-grid">
-                <?php foreach ($assigned_candidates as $candidate_id) : 
-                    $candidate = get_post($candidate_id);
-                    if (!$candidate) continue;
+                <?php foreach ($assigned_candidates as $candidate) : 
+                    $candidate_id = is_object($candidate) ? $candidate->ID : $candidate;
+                    $candidate_post = is_object($candidate) ? $candidate : get_post($candidate_id);
+                    if (!$candidate_post) continue;
                     
                     // Get candidate meta
                     $company = get_post_meta($candidate_id, '_mt_company', true);
@@ -137,7 +139,7 @@ $completion_rate = $total_assigned > 0 ? round(($completed_evaluations / $total_
                      data-status="<?php echo esc_attr($evaluation_status); ?>">
                     <div class="candidate-header">
                         <div>
-                            <h3 class="candidate-name"><?php echo esc_html($candidate->post_title); ?></h3>
+                            <h3 class="candidate-name"><?php echo esc_html($candidate_post->post_title); ?></h3>
                             <?php if ($position) : ?>
                                 <p class="candidate-position"><?php echo esc_html($position); ?></p>
                             <?php endif; ?>

@@ -691,11 +691,16 @@ function mt_get_evaluation_statistics($args = array()) {
  * Check if jury member has a draft evaluation for a candidate
  * Fixed version without is_draft column check
  *
- * @param int $candidate_id Candidate ID
+ * @param int|WP_Post $candidate_id Candidate ID or WP_Post object
  * @param int $jury_member_id Jury member ID
  * @return bool Whether draft evaluation exists
  */
 function mt_has_draft_evaluation($candidate_id, $jury_member_id) {
+    // Get candidate ID if WP_Post object is passed
+    if (is_object($candidate_id) && isset($candidate_id->ID)) {
+        $candidate_id = $candidate_id->ID;
+    }
+    
     // Get the user ID for the jury member
     $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
     
