@@ -144,6 +144,7 @@ class MobilityTrailblazersPlugin {
         
         // Initialize Elementor integration if available
         if (did_action('elementor/loaded')) {
+            require_once MT_PLUGIN_DIR . 'includes/elementor/class-mt-elementor-integration.php';
             $this->components['elementor'] = new MT_Elementor_Integration();
         }
     }
