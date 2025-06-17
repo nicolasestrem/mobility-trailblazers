@@ -14,10 +14,12 @@ if (!defined('ABSPATH')) {
 global $wpdb;
 
 // Count total candidates
-$total_candidates = wp_count_posts('mt_candidate')->publish;
+$candidate_counts = wp_count_posts('mt_candidate');
+$total_candidates = isset($candidate_counts->publish) ? $candidate_counts->publish : 0;
 
 // Count total jury members
-$total_jury = wp_count_posts('mt_jury')->publish;
+$jury_counts = wp_count_posts('mt_jury');
+$total_jury = isset($jury_counts->publish) ? $jury_counts->publish : 0;
 
 // Count assigned candidates with proper query
 $assigned_candidates = $wpdb->get_var("

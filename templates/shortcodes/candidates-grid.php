@@ -53,7 +53,10 @@ if (!defined('ABSPATH')) {
                 $innovation = get_post_meta($candidate_id, '_mt_innovation_title', true);
                 $photo = get_post_meta($candidate_id, '_mt_photo_url', true);
                 $categories = wp_get_post_terms($candidate_id, 'mt_category');
-                $category_slugs = wp_list_pluck($categories, 'slug');
+                $category_slugs = array();
+                if (!is_wp_error($categories) && !empty($categories)) {
+                    $category_slugs = wp_list_pluck($categories, 'slug');
+                }
                 
                 // Get public vote count if enabled
                 $vote_count = mt_get_public_vote_count($candidate_id);

@@ -142,7 +142,7 @@ class MT_Jury_System {
             // Enqueue dashboard scripts
             wp_enqueue_script(
                 'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/dashboard.js',
+                MT_PLUGIN_URL . 'assets/jury-dashboard.js',
                 array('jquery'),
                 MT_PLUGIN_VERSION,
                 true

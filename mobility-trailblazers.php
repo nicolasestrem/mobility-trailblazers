@@ -255,7 +255,7 @@ class MobilityTrailblazersPlugin {
             if (strpos($hook, 'dashboard') !== false) {
                 wp_enqueue_script(
                     'mt-dashboard',
-                    MT_PLUGIN_URL . 'assets/dashboard.js',
+                    MT_PLUGIN_URL . 'assets/jury-dashboard.js',
                     array('jquery'),
                     MT_PLUGIN_VERSION,
                     true
