@@ -136,11 +136,13 @@ function mt_get_jury_member_by_user_id($user_id) {
 
 /**
  * Get assigned candidates for jury member
+ * Returns array of candidate post objects by default
  *
  * @param int $jury_member_id Jury member ID
- * @return array Array of candidate posts
+ * @param bool $ids_only Whether to return only IDs (default: false)
+ * @return array Array of candidate objects or IDs
  */
-function mt_get_assigned_candidates($jury_member_id) {
+function mt_get_assigned_candidates($jury_member_id, $ids_only = false) {
     global $wpdb;
     
     $jury_member_id = intval($jury_member_id);
@@ -162,16 +164,33 @@ function mt_get_assigned_candidates($jury_member_id) {
             // Convert all to integers for comparison
             $jury_ids = array_map('intval', $jury_ids);
             if (in_array($jury_member_id, $jury_ids)) {
-                // Return the actual post object instead of just ID
-                $candidate = get_post(intval($row->post_id));
-                if ($candidate && $candidate->post_type === 'mt_candidate' && $candidate->post_status === 'publish') {
-                    $assigned_candidates[] = $candidate;
+                $candidate_id = intval($row->post_id);
+                
+                if ($ids_only) {
+                    // Return just the ID
+                    $assigned_candidates[] = $candidate_id;
+                } else {
+                    // Return the post object
+                    $candidate = get_post($candidate_id);
+                    if ($candidate && $candidate->post_type === 'mt_candidate' && $candidate->post_status === 'publish') {
+                        $assigned_candidates[] = $candidate;
+                    }
                 }
             }
         }
     }
     
     return $assigned_candidates;
+}
+
+/**
+ * Alternative: Create a separate function for getting IDs only
+ *
+ * @param int $jury_member_id Jury member ID
+ * @return array Array of candidate IDs
+ */
+function mt_get_assigned_candidate_ids($jury_member_id) {
+    return mt_get_assigned_candidates($jury_member_id, true);
 }
 
 /**
@@ -187,6 +206,7 @@ function mt_get_assigned_jury_members($candidate_id) {
         $jury_members = array();
     }
     
+    // Ensure all IDs are integers
     return array_map('intval', $jury_members);
 }
 
@@ -601,25 +621,65 @@ function mt_get_evaluation_statistics($args = array()) {
 }
 
 /**
- * Check if jury member has a draft evaluation for candidate
+ * Check if jury member has a draft evaluation for a candidate
+ * Fixed version without is_draft column check
  *
  * @param int $candidate_id Candidate ID
  * @param int $jury_member_id Jury member ID
- * @return bool Whether draft exists
+ * @return bool Whether draft evaluation exists
  */
 function mt_has_draft_evaluation($candidate_id, $jury_member_id) {
-    // Check for draft saved in user meta
-    $user_id = get_current_user_id();
+    // Get the user ID for the jury member
+    $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
     
-    // If jury member ID is provided, get the user ID for that jury member
-    if ($jury_member_id) {
-        $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
-        if ($jury_user_id) {
-            $user_id = $jury_user_id;
+    if (!$jury_user_id) {
+        // If no user ID stored, try to find by current user
+        $current_user_id = get_current_user_id();
+        $current_jury = mt_get_jury_member_by_user_id($current_user_id);
+        
+        if ($current_jury && $current_jury->ID == $jury_member_id) {
+            $jury_user_id = $current_user_id;
         }
     }
     
-    $draft = get_user_meta($user_id, 'mt_evaluation_draft_' . $candidate_id, true);
+    if (!$jury_user_id) {
+        return false;
+    }
+    
+    // Check for draft in user meta
+    $draft = get_user_meta($jury_user_id, 'mt_evaluation_draft_' . $candidate_id, true);
     
     return !empty($draft);
+}
+
+/**
+ * Get draft evaluations for a jury member
+ *
+ * @param int $jury_member_id Jury member ID
+ * @return array Array of candidate IDs with drafts
+ */
+function mt_get_draft_evaluations($jury_member_id) {
+    $draft_candidates = array();
+    
+    // Get the user ID for the jury member
+    $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
+    
+    if (!$jury_user_id) {
+        return $draft_candidates;
+    }
+    
+    // Get all user meta keys for this user
+    $user_meta = get_user_meta($jury_user_id);
+    
+    foreach ($user_meta as $key => $value) {
+        // Check if this is a draft evaluation key
+        if (strpos($key, 'mt_evaluation_draft_') === 0) {
+            $candidate_id = str_replace('mt_evaluation_draft_', '', $key);
+            if (is_numeric($candidate_id) && !empty($value[0])) {
+                $draft_candidates[] = intval($candidate_id);
+            }
+        }
+    }
+    
+    return $draft_candidates;
 } 

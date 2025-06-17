@@ -1,6 +1,6 @@
 <?php
 /**
- * Assignment Management Template
+ * Assignment Management Template - Clean Version
  *
  * @package MobilityTrailblazers
  */
@@ -19,12 +19,17 @@ $total_candidates = wp_count_posts('mt_candidate')->publish;
 // Count total jury members
 $total_jury = wp_count_posts('mt_jury')->publish;
 
-// Count assigned candidates
+// Count assigned candidates with proper query
 $assigned_candidates = $wpdb->get_var("
-    SELECT COUNT(DISTINCT post_id) 
-    FROM {$wpdb->postmeta} 
-    WHERE meta_key = '_mt_assigned_jury_members' 
-    AND meta_value != 'a:0:{}'
+    SELECT COUNT(DISTINCT p.ID) 
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+    WHERE p.post_type = 'mt_candidate' 
+    AND p.post_status = 'publish'
+    AND pm.meta_key = '_mt_assigned_jury_members' 
+    AND pm.meta_value != ''
+    AND pm.meta_value != 'a:0:{}'
+    AND pm.meta_value IS NOT NULL
 ");
 
 // Get unassigned candidates
@@ -241,12 +246,15 @@ $unassigned_candidates = $total_candidates - $assigned_candidates;
                         <div class="mt-assigned-candidates" data-jury-id="<?php echo $jury_member->ID; ?>">
                             <?php
                             if (!empty($assigned_candidates)) {
-                                foreach ($assigned_candidates as $candidate_id) {
-                                    $candidate = get_post($candidate_id);
-                                    if ($candidate) {
+                                foreach ($assigned_candidates as $candidate) {
+                                    // Handle both objects and IDs
+                                    $candidate_id = is_object($candidate) ? $candidate->ID : $candidate;
+                                    $candidate_title = is_object($candidate) ? $candidate->post_title : get_the_title($candidate_id);
+                                    
+                                    if ($candidate_id && $candidate_title) {
                                         ?>
                                         <div class="mt-assigned-candidate" data-candidate-id="<?php echo $candidate_id; ?>">
-                                            <span><?php echo esc_html($candidate->post_title); ?></span>
+                                            <span><?php echo esc_html($candidate_title); ?></span>
                                             <button type="button" class="mt-remove-assignment" data-candidate-id="<?php echo $candidate_id; ?>" data-jury-id="<?php echo $jury_member->ID; ?>">
                                                 <span class="dashicons dashicons-no"></span>
                                             </button>
@@ -343,268 +351,3 @@ $unassigned_candidates = $total_candidates - $assigned_candidates;
         </div>
     </div>
 </div>
-
-<style>
-.mt-stats-row {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
-}
-
-.mt-stat-box {
-    flex: 1;
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    padding: 20px;
-    text-align: center;
-}
-
-.mt-stat-box h3 {
-    margin: 0 0 10px 0;
-    color: #23282d;
-}
-
-.mt-stat-number {
-    font-size: 32px;
-    font-weight: 600;
-    color: #0073aa;
-    margin: 0;
-}
-
-.mt-action-bar {
-    margin: 20px 0;
-    padding: 15px;
-    background: #f1f1f1;
-    border: 1px solid #ccd0d4;
-}
-
-.mt-action-bar .button {
-    margin-right: 10px;
-}
-
-.mt-search-filter-row {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-}
-
-.mt-search-box input,
-.mt-filter-box select {
-    min-width: 200px;
-}
-
-.mt-assignment-container {
-    display: flex;
-    gap: 30px;
-    margin-top: 20px;
-}
-
-.mt-assignment-column {
-    flex: 1;
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    padding: 20px;
-}
-
-.mt-assignment-column h2 {
-    margin-top: 0;
-}
-
-.mt-selection-info {
-    margin-bottom: 15px;
-    color: #666;
-}
-
-.mt-draggable-list,
-.mt-droppable-list {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.mt-draggable-item,
-.mt-droppable-item {
-    background: #f8f9fa;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    cursor: move;
-    transition: all 0.3s ease;
-}
-
-.mt-draggable-item:hover,
-.mt-droppable-item:hover {
-    background: #e8f4f8;
-    border-color: #0073aa;
-}
-
-.mt-draggable-item.assigned {
-    opacity: 0.7;
-}
-
-.mt-draggable-item.ui-draggable-dragging {
-    opacity: 0.8;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    z-index: 1000;
-}
-
-.mt-item-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.mt-item-header h4 {
-    margin: 0;
-    flex: 1;
-}
-
-.mt-assigned-badge {
-    background: #46b450;
-    color: #fff;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-}
-
-.mt-role-badge {
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.mt-role-president {
-    background: #dc3232;
-    color: #fff;
-}
-
-.mt-role-vice_president {
-    background: #0073aa;
-    color: #fff;
-}
-
-.mt-item-meta {
-    display: flex;
-    gap: 15px;
-    font-size: 13px;
-    color: #666;
-}
-
-.mt-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.mt-meta-item .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-}
-
-.mt-expertise-tags {
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.mt-expertise-tag {
-    background: #e5e5e5;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-}
-
-.mt-drop-zone {
-    border: 2px dashed #ccd0d4;
-    padding: 20px;
-    margin: 10px 0;
-    text-align: center;
-    color: #999;
-    transition: all 0.3s ease;
-}
-
-.mt-drop-zone.active {
-    border-color: #0073aa;
-    background: #f0f8ff;
-    color: #0073aa;
-}
-
-.mt-assigned-candidates {
-    margin-top: 10px;
-}
-
-.mt-assigned-candidate {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    margin-bottom: 5px;
-    font-size: 13px;
-}
-
-.mt-remove-assignment {
-    background: none;
-    border: none;
-    color: #dc3232;
-    cursor: pointer;
-    padding: 0;
-}
-
-.mt-remove-assignment:hover {
-    color: #a00;
-}
-
-.mt-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mt-modal-content {
-    background: #fff;
-    padding: 30px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-}
-
-.mt-modal-content h2 {
-    margin-top: 0;
-}
-
-.mt-form-group {
-    margin-bottom: 20px;
-}
-
-.mt-form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-}
-
-.mt-form-group select,
-.mt-form-group input {
-    width: 100%;
-}
-
-.mt-modal-actions {
-    margin-top: 30px;
-    text-align: right;
-}
-
-.mt-modal-actions .button {
-    margin-left: 10px;
-}
-</style> 

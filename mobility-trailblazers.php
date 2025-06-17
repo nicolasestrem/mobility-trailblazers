@@ -242,6 +242,11 @@ class MobilityTrailblazersPlugin {
                         'error' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
                         'success' => __('Operation completed successfully.', 'mobility-trailblazers'),
                         'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
+                        'confirm_delete' => __('Are you sure you want to delete this assignment?', 'mobility-trailblazers'),
+                        'no_candidates' => __('No candidates available for assignment.', 'mobility-trailblazers'),
+                        'no_jury' => __('No jury members available for assignment.', 'mobility-trailblazers'),
+                        'assignment_saved' => __('Assignment saved successfully.', 'mobility-trailblazers'),
+                        'assignment_failed' => __('Failed to save assignment. Please try again.', 'mobility-trailblazers')
                     )
                 ));
             }
