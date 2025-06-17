@@ -1,238 +1,245 @@
 <?php
 /**
  * Jury Dashboard Template
- *
- * @package MobilityTrailblazers
  * 
- * Available variables:
- * $jury_member - WP_Post object for jury member
- * $assigned_candidates - Array of assigned candidate posts
- * $atts - Shortcode attributes
+ * @package MobilityTrailblazers
  */
 
-// Security check
+// Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get evaluation statistics
-global $wpdb;
+// Get stats for the dashboard
 $total_assigned = count($assigned_candidates);
-$evaluated_count = $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(DISTINCT candidate_id) FROM {$wpdb->prefix}mt_votes 
-     WHERE jury_member_id = %d AND is_active = 1",
-    $jury_member->ID
-));
+$completed_evaluations = 0;
+$draft_evaluations = 0;
 
-$draft_count = 0;
-foreach ($assigned_candidates as $candidate) {
-    // Make sure we're using the candidate object properly
-    $candidate_id = is_object($candidate) ? $candidate->ID : $candidate;
-    if (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
-        $draft_count++;
+foreach ($assigned_candidates as $candidate_id) {
+    if (mt_has_evaluated($candidate_id, $jury_member->ID)) {
+        $completed_evaluations++;
+    } elseif (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
+        $draft_evaluations++;
     }
 }
 
-$remaining_count = $total_assigned - $evaluated_count;
-$completion_rate = $total_assigned > 0 ? round(($evaluated_count / $total_assigned) * 100) : 0;
+$completion_rate = $total_assigned > 0 ? round(($completed_evaluations / $total_assigned) * 100) : 0;
 ?>
 
-<div class="mt-jury-dashboard" id="mt-jury-dashboard">
-    <?php if ($atts['show_stats'] === 'yes'): ?>
-        <div class="mt-dashboard-header">
-            <h2><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($jury_member->post_title)); ?></h2>
-            <p><?php _e('Review and evaluate your assigned candidates below.', 'mobility-trailblazers'); ?></p>
-        </div>
-        
-        <div class="mt-dashboard-stats">
-            <div class="mt-stat-box">
-                <span class="mt-stat-number"><?php echo $total_assigned; ?></span>
-                <span class="mt-stat-label"><?php _e('Total Assigned', 'mobility-trailblazers'); ?></span>
-            </div>
-            <div class="mt-stat-box">
-                <span class="mt-stat-number"><?php echo $evaluated_count; ?></span>
-                <span class="mt-stat-label"><?php _e('Evaluated', 'mobility-trailblazers'); ?></span>
-            </div>
-            <div class="mt-stat-box">
-                <span class="mt-stat-number"><?php echo $draft_count; ?></span>
-                <span class="mt-stat-label"><?php _e('Drafts', 'mobility-trailblazers'); ?></span>
-            </div>
-            <div class="mt-stat-box">
-                <span class="mt-stat-number"><?php echo $remaining_count; ?></span>
-                <span class="mt-stat-label"><?php _e('Remaining', 'mobility-trailblazers'); ?></span>
-            </div>
-        </div>
-    <?php endif; ?>
-    
-    <?php if ($atts['show_progress'] === 'yes'): ?>
-        <div class="mt-progress-section">
-            <h3><?php _e('Progress', 'mobility-trailblazers'); ?></h3>
-            <div class="mt-progress-bar">
-                <div class="mt-progress-fill" style="width: <?php echo $completion_rate; ?>%"></div>
-                <span class="mt-progress-text"><?php echo $completion_rate; ?>%</span>
-            </div>
-        </div>
-    <?php endif; ?>
-    
-    <?php if ($atts['show_filters'] === 'yes'): ?>
-        <div class="mt-dashboard-filters">
-            <input type="text" id="candidate-search" placeholder="<?php _e('Search candidates...', 'mobility-trailblazers'); ?>">
-            
-            <select id="category-filter">
-                <option value=""><?php _e('All Categories', 'mobility-trailblazers'); ?></option>
-                <?php
-                $categories = get_terms(array(
-                    'taxonomy' => 'mt_category',
-                    'hide_empty' => false,
-                ));
-                foreach ($categories as $category):
-                ?>
-                    <option value="<?php echo esc_attr($category->slug); ?>">
-                        <?php echo esc_html($category->name); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            
-            <select id="status-filter">
-                <option value=""><?php _e('All Status', 'mobility-trailblazers'); ?></option>
-                <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
-                <option value="draft"><?php _e('Draft', 'mobility-trailblazers'); ?></option>
-                <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
-            </select>
-            
-            <button class="button" id="export-evaluations">
-                <?php _e('Export My Evaluations', 'mobility-trailblazers'); ?>
-            </button>
-        </div>
-    <?php endif; ?>
-    
-    <div class="mt-candidates-list">
-        <?php if (empty($assigned_candidates)): ?>
-            <p class="no-candidates"><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
-        <?php else: ?>
-            <?php foreach ($assigned_candidates as $candidate): 
-                $evaluation = mt_get_evaluation($candidate->ID, $jury_member->ID);
-                $is_draft = mt_has_draft_evaluation($candidate->ID, $jury_member->ID);
-                $categories = wp_get_post_terms($candidate->ID, 'mt_category');
-                $company = get_post_meta($candidate->ID, '_mt_company_name', true);
-                $position = get_post_meta($candidate->ID, '_mt_position', true);
-                $photo = get_post_meta($candidate->ID, '_mt_photo_url', true);
-            ?>
-                <div class="candidate-card" data-candidate-id="<?php echo $candidate->ID; ?>" 
-                     data-categories="<?php echo esc_attr(implode(' ', wp_list_pluck($categories, 'slug'))); ?>">
-                    
-                    <div class="candidate-header">
-                        <?php if ($photo): ?>
-                            <img src="<?php echo esc_url($photo); ?>" alt="<?php echo esc_attr($candidate->post_title); ?>" class="candidate-photo">
-                        <?php endif; ?>
-                        
-                        <div class="candidate-info">
-                            <h4 class="candidate-name"><?php echo esc_html($candidate->post_title); ?></h4>
-                            <?php if ($company): ?>
-                                <p class="candidate-company"><?php echo esc_html($company); ?></p>
-                            <?php endif; ?>
-                            <?php if ($position): ?>
-                                <p class="candidate-position"><?php echo esc_html($position); ?></p>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="candidate-status">
-                            <?php if ($evaluation): ?>
-                                <span class="evaluation-status completed">
-                                    <i class="dashicons dashicons-yes-alt"></i>
-                                    <?php _e('Evaluated', 'mobility-trailblazers'); ?>
-                                </span>
-                                <span class="evaluation-score"><?php echo $evaluation->total_score; ?>/50</span>
-                            <?php elseif ($is_draft): ?>
-                                <span class="evaluation-status draft">
-                                    <i class="dashicons dashicons-edit"></i>
-                                    <?php _e('Draft', 'mobility-trailblazers'); ?>
-                                </span>
-                            <?php else: ?>
-                                <span class="evaluation-status pending">
-                                    <i class="dashicons dashicons-clock"></i>
-                                    <?php _e('Pending', 'mobility-trailblazers'); ?>
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    
-                    <?php if (!empty($categories)): ?>
-                        <div class="candidate-categories">
-                            <?php foreach ($categories as $category): ?>
-                                <span class="category-tag"><?php echo esc_html($category->name); ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <div class="candidate-actions">
-                        <button class="button button-primary evaluate-button" data-candidate-id="<?php echo $candidate->ID; ?>">
-                            <?php echo $evaluation ? __('Edit Evaluation', 'mobility-trailblazers') : __('Evaluate', 'mobility-trailblazers'); ?>
-                        </button>
-                        <a href="<?php echo get_permalink($candidate->ID); ?>" target="_blank" class="button">
-                            <?php _e('View Profile', 'mobility-trailblazers'); ?>
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+<div class="mt-jury-dashboard">
+    <!-- Welcome Section -->
+    <div class="mt-welcome-section">
+        <h1><?php printf(__('Welcome back, %s', 'mobility-trailblazers'), esc_html($jury_member->post_title)); ?></h1>
+        <p><?php _e('Your evaluations help shape the future of mobility in the DACH region.', 'mobility-trailblazers'); ?></p>
     </div>
     
-    <!-- Evaluation Modal -->
-    <div id="evaluation-modal" class="mt-modal" style="display: none;">
-        <div class="mt-modal-content">
-            <span class="mt-modal-close">&times;</span>
-            <h2><?php _e('Evaluate Candidate', 'mobility-trailblazers'); ?></h2>
-            
-            <div id="evaluation-candidate-info">
-                <!-- Populated via JavaScript -->
+    <?php if ($atts['show_stats'] === 'yes') : ?>
+    <!-- Statistics Grid -->
+    <div class="mt-dashboard-stats">
+        <div class="mt-stat-box">
+            <span class="mt-stat-icon">📋</span>
+            <span class="mt-stat-number"><?php echo esc_html($total_assigned); ?></span>
+            <span class="mt-stat-label"><?php _e('Assigned Candidates', 'mobility-trailblazers'); ?></span>
+        </div>
+        
+        <div class="mt-stat-box">
+            <span class="mt-stat-icon">✅</span>
+            <span class="mt-stat-number"><?php echo esc_html($completed_evaluations); ?></span>
+            <span class="mt-stat-label"><?php _e('Evaluated', 'mobility-trailblazers'); ?></span>
+        </div>
+        
+        <div class="mt-stat-box">
+            <span class="mt-stat-icon">📊</span>
+            <span class="mt-stat-number"><?php echo esc_html($completion_rate); ?>%</span>
+            <span class="mt-stat-label"><?php _e('Completion', 'mobility-trailblazers'); ?></span>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($atts['show_progress'] === 'yes' && $total_assigned > 0) : ?>
+    <!-- Progress Section -->
+    <div class="mt-progress-section">
+        <div class="mt-progress-header">
+            <h2><?php _e('Your Progress', 'mobility-trailblazers'); ?></h2>
+            <span class="mt-progress-text" id="progress-text">
+                <?php echo esc_html($completed_evaluations); ?> / <?php echo esc_html($total_assigned); ?>
+            </span>
+        </div>
+        <div class="mt-progress-bar">
+            <div class="mt-progress-fill" style="width: <?php echo esc_attr($completion_rate); ?>%"></div>
+            <span class="mt-progress-percentage"><?php echo esc_html($completion_rate); ?>%</span>
+        </div>
+        <?php if ($completed_evaluations === $total_assigned && $total_assigned > 0) : ?>
+            <p class="mt-progress-message"><?php _e('Excellent! You have evaluated all assigned candidates.', 'mobility-trailblazers'); ?></p>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($atts['show_filters'] === 'yes') : ?>
+    <!-- Filters Section -->
+    <div class="mt-filters-section">
+        <div class="mt-search-box">
+            <input type="text" 
+                   id="mt-candidate-search" 
+                   placeholder="<?php esc_attr_e('Search candidates by name or company...', 'mobility-trailblazers'); ?>">
+        </div>
+        
+        <div class="mt-filter-controls">
+            <button class="filter-btn active" data-filter="all">
+                <?php printf(__('All (%d)', 'mobility-trailblazers'), $total_assigned); ?>
+            </button>
+            <button class="filter-btn" data-filter="pending">
+                <?php printf(__('Pending (%d)', 'mobility-trailblazers'), $total_assigned - $completed_evaluations - $draft_evaluations); ?>
+            </button>
+            <button class="filter-btn" data-filter="draft">
+                <?php printf(__('Draft (%d)', 'mobility-trailblazers'), $draft_evaluations); ?>
+            </button>
+            <button class="filter-btn" data-filter="completed">
+                <?php printf(__('Evaluated (%d)', 'mobility-trailblazers'), $completed_evaluations); ?>
+            </button>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Candidates Section -->
+    <div class="mt-candidates-section">
+        <h2><?php _e('Your Assigned Candidates', 'mobility-trailblazers'); ?></h2>
+        
+        <?php if ($total_assigned > 0) : ?>
+            <div class="mt-candidates-grid">
+                <?php foreach ($assigned_candidates as $candidate_id) : 
+                    $candidate = get_post($candidate_id);
+                    if (!$candidate) continue;
+                    
+                    // Get candidate meta
+                    $company = get_post_meta($candidate_id, '_mt_company', true);
+                    $position = get_post_meta($candidate_id, '_mt_position', true);
+                    $categories = wp_get_post_terms($candidate_id, 'mt_candidate_category', array('fields' => 'names'));
+                    
+                    // Get evaluation status
+                    $evaluation_status = '';
+                    $total_score = null;
+                    
+                    if (mt_has_evaluated($candidate_id, $jury_member->ID)) {
+                        $evaluation_status = 'completed';
+                        $evaluation = mt_get_evaluation($candidate_id, $jury_member->ID);
+                        if ($evaluation) {
+                            $total_score = intval($evaluation->courage) + intval($evaluation->innovation) + 
+                                         intval($evaluation->implementation) + intval($evaluation->relevance) + 
+                                         intval($evaluation->visibility);
+                        }
+                    } elseif (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
+                        $evaluation_status = 'draft';
+                    }
+                ?>
+                <div class="candidate-card" 
+                     data-candidate-id="<?php echo esc_attr($candidate_id); ?>"
+                     data-status="<?php echo esc_attr($evaluation_status); ?>">
+                    <div class="candidate-header">
+                        <div>
+                            <h3 class="candidate-name"><?php echo esc_html($candidate->post_title); ?></h3>
+                            <?php if ($position) : ?>
+                                <p class="candidate-position"><?php echo esc_html($position); ?></p>
+                            <?php endif; ?>
+                            <?php if ($company) : ?>
+                                <p class="candidate-company"><?php echo esc_html($company); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($evaluation_status) : ?>
+                            <span class="evaluation-status <?php echo esc_attr($evaluation_status); ?>">
+                                <?php echo $evaluation_status === 'completed' ? __('Evaluated', 'mobility-trailblazers') : __('Draft', 'mobility-trailblazers'); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <?php if (!empty($categories)) : ?>
+                    <div class="candidate-categories">
+                        <?php foreach ($categories as $category) : ?>
+                            <span class="category-tag"><?php echo esc_html($category); ?></span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($total_score !== null) : ?>
+                        <div class="evaluation-score"><?php echo esc_html($total_score); ?>/50</div>
+                    <?php endif; ?>
+                    
+                    <div class="card-hover-effect"></div>
+                </div>
+                <?php endforeach; ?>
             </div>
-            
+        <?php else : ?>
+            <div class="no-candidates">
+                <p><?php _e('No candidates have been assigned to you yet.', 'mobility-trailblazers'); ?></p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Evaluation Modal -->
+<div id="evaluation-modal" class="mt-modal">
+    <div class="mt-modal-overlay"></div>
+    <div class="mt-modal-content">
+        <div class="mt-modal-header">
+            <h2><?php _e('Candidate Evaluation', 'mobility-trailblazers'); ?></h2>
+            <button class="mt-modal-close">&times;</button>
+        </div>
+        <div class="mt-modal-body">
             <form id="evaluation-form">
-                <div class="evaluation-criteria">
-                    <div class="criteria-item">
+                <div class="mt-evaluation-header">
+                    <div>
+                        <h3 id="eval-candidate-name"></h3>
+                        <div class="evaluation-info">
+                            <span id="eval-candidate-position"></span>
+                            <span id="eval-candidate-company"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="criteria-sections">
+                    <div class="criteria-group">
                         <label for="courage-score">
                             <?php _e('Mut & Pioniergeist (Courage & Pioneer Spirit)', 'mobility-trailblazers'); ?>
                             <span class="score-display">5</span>
                         </label>
                         <input type="range" id="courage-score" class="score-slider" min="1" max="10" value="5">
-                        <p class="criteria-description"><?php _e('Willingness to take risks and break new ground', 'mobility-trailblazers'); ?></p>
+                        <p class="criteria-description"><?php _e('Did they act against resistance? Were there new paths? Personal risk?', 'mobility-trailblazers'); ?></p>
                     </div>
                     
-                    <div class="criteria-item">
+                    <div class="criteria-group">
                         <label for="innovation-score">
-                            <?php _e('Innovationsgrad (Degree of Innovation)', 'mobility-trailblazers'); ?>
+                            <?php _e('Innovationsgrad (Innovation Degree)', 'mobility-trailblazers'); ?>
                             <span class="score-display">5</span>
                         </label>
                         <input type="range" id="innovation-score" class="score-slider" min="1" max="10" value="5">
-                        <p class="criteria-description"><?php _e('Novelty and originality of the solution', 'mobility-trailblazers'); ?></p>
+                        <p class="criteria-description"><?php _e('To what extent does the contribution represent a real innovation?', 'mobility-trailblazers'); ?></p>
                     </div>
                     
-                    <div class="criteria-item">
+                    <div class="criteria-group">
                         <label for="implementation-score">
                             <?php _e('Umsetzungskraft & Wirkung (Implementation & Impact)', 'mobility-trailblazers'); ?>
                             <span class="score-display">5</span>
                         </label>
                         <input type="range" id="implementation-score" class="score-slider" min="1" max="10" value="5">
-                        <p class="criteria-description"><?php _e('Ability to execute and measurable impact', 'mobility-trailblazers'); ?></p>
+                        <p class="criteria-description"><?php _e('What results were achieved? Scaling? Measurable impact?', 'mobility-trailblazers'); ?></p>
                     </div>
                     
-                    <div class="criteria-item">
+                    <div class="criteria-group">
                         <label for="relevance-score">
                             <?php _e('Relevanz für Mobilitätswende (Mobility Transformation Relevance)', 'mobility-trailblazers'); ?>
                             <span class="score-display">5</span>
                         </label>
                         <input type="range" id="relevance-score" class="score-slider" min="1" max="10" value="5">
-                        <p class="criteria-description"><?php _e('Contribution to sustainable mobility', 'mobility-trailblazers'); ?></p>
+                        <p class="criteria-description"><?php _e('Does the initiative contribute to mobility transformation in DACH?', 'mobility-trailblazers'); ?></p>
                     </div>
                     
-                    <div class="criteria-item">
+                    <div class="criteria-group">
                         <label for="visibility-score">
                             <?php _e('Vorbildfunktion & Sichtbarkeit (Role Model & Visibility)', 'mobility-trailblazers'); ?>
                             <span class="score-display">5</span>
                         </label>
                         <input type="range" id="visibility-score" class="score-slider" min="1" max="10" value="5">
-                        <p class="criteria-description"><?php _e('Inspirational impact and public visibility', 'mobility-trailblazers'); ?></p>
+                        <p class="criteria-description"><?php _e('Is the person an inspiring role model with public impact?', 'mobility-trailblazers'); ?></p>
                     </div>
                 </div>
                 
@@ -243,24 +250,40 @@ $completion_rate = $total_assigned > 0 ? round(($evaluated_count / $total_assign
                 </div>
                 
                 <div class="evaluation-comments">
-                    <label for="evaluation-comments"><?php _e('Comments (Optional)', 'mobility-trailblazers'); ?></label>
-                    <textarea id="evaluation-comments" rows="4"></textarea>
+                    <label for="evaluation-comments"><?php _e('Additional Comments (Optional)', 'mobility-trailblazers'); ?></label>
+                    <textarea id="evaluation-comments" 
+                              rows="4" 
+                              placeholder="<?php esc_attr_e('Share any additional observations or insights about this candidate...', 'mobility-trailblazers'); ?>"></textarea>
                 </div>
                 
                 <div class="evaluation-actions">
-                    <button type="button" class="button" id="save-draft"><?php _e('Save as Draft', 'mobility-trailblazers'); ?></button>
-                    <button type="button" class="button button-primary" id="submit-evaluation"><?php _e('Submit Evaluation', 'mobility-trailblazers'); ?></button>
+                    <button type="button" class="button" id="save-draft">
+                        <?php _e('Save as Draft', 'mobility-trailblazers'); ?>
+                    </button>
+                    <button type="button" class="button button-primary" id="submit-evaluation">
+                        <?php _e('Submit Evaluation', 'mobility-trailblazers'); ?>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<script>
-// Initialize jury dashboard if script is loaded
-jQuery(document).ready(function($) {
-    if (typeof MTJuryDashboard !== 'undefined') {
-        MTJuryDashboard.init();
-    }
-});
-</script> 
+<?php
+// Localize script data
+wp_localize_script('mt-jury-dashboard', 'mt_jury_ajax', array(
+    'ajax_url' => admin_url('admin-ajax.php'),
+    'nonce' => wp_create_nonce('mt_jury_nonce'),
+    'i18n' => array(
+        'completed' => __('Evaluated', 'mobility-trailblazers'),
+        'draft' => __('Draft', 'mobility-trailblazers'),
+        'saving' => __('Saving...', 'mobility-trailblazers'),
+        'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
+        'submit' => __('Submit Evaluation', 'mobility-trailblazers'),
+        'confirm_submit' => __('Are you sure you want to submit this evaluation? This action cannot be undone.', 'mobility-trailblazers'),
+        'please_complete_scores' => __('Please complete all evaluation criteria before submitting.', 'mobility-trailblazers'),
+        'no_candidates_found' => __('No candidates found matching your search.', 'mobility-trailblazers'),
+        'error_loading' => __('Error loading evaluation data. Please try again.', 'mobility-trailblazers'),
+    )
+));
+?>
