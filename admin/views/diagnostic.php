@@ -10,6 +10,153 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Get the jury member post type name
+ * 
+ * @return string The post type name for jury members
+ */
+function mt_get_jury_post_type() {
+    // Check for different possible post type names
+    $possible_types = array('mt_jury', 'mt_jury_member', 'jury_member', 'jury');
+    
+    foreach ($possible_types as $type) {
+        if (post_type_exists($type)) {
+            // Additional check to ensure it's the right one by checking for jury meta
+            $test = get_posts(array(
+                'post_type' => $type,
+                'posts_per_page' => 1,
+                'meta_query' => array(
+                    'relation' => 'OR',
+                    array('key' => '_mt_email', 'compare' => 'EXISTS'),
+                    array('key' => '_mt_user_id', 'compare' => 'EXISTS'),
+                    array('key' => '_mt_company', 'compare' => 'EXISTS')
+                )
+            ));
+            
+            if (!empty($test)) {
+                return $type;
+            }
+        }
+    }
+    
+    // If no type found with meta, just return the first existing type
+    foreach ($possible_types as $type) {
+        if (post_type_exists($type)) {
+            return $type;
+        }
+    }
+    
+    // Default fallback
+    return 'mt_jury';
+}
+
+/**
+ * Get all jury members
+ * 
+ * @param array $args Additional query arguments
+ * @return array Array of jury member posts
+ */
+function mt_get_all_jury_members($args = array()) {
+    $defaults = array(
+        'post_type' => mt_get_jury_post_type(),
+        'posts_per_page' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+        'post_status' => 'any'
+    );
+    
+    $args = wp_parse_args($args, $defaults);
+    return get_posts($args);
+}
+
+/**
+ * Get unlinked jury members (no user account)
+ * 
+ * @return array Array of jury member posts without linked users
+ */
+function mt_get_unlinked_jury_members() {
+    return mt_get_all_jury_members(array(
+        'meta_query' => array(
+            'relation' => 'OR',
+            array(
+                'key' => '_mt_user_id',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => '',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => '0',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => 'false',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => 'null',
+                'compare' => '='
+            )
+        )
+    ));
+}
+
+/**
+ * Get linked jury members (have user account)
+ * 
+ * @return array Array of jury member posts with linked users
+ */
+function mt_get_linked_jury_members() {
+    return mt_get_all_jury_members(array(
+        'meta_query' => array(
+            array(
+                'key' => '_mt_user_id',
+                'compare' => 'EXISTS',
+                'value' => '',
+                'compare' => '!='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => array('', '0', 'false', 'null'),
+                'compare' => 'NOT IN'
+            )
+        )
+    ));
+}
+
+/**
+ * Check if a jury member is linked to a user
+ * 
+ * @param int $jury_id The jury member post ID
+ * @return bool|int False if not linked, user ID if linked
+ */
+function mt_jury_has_user($jury_id) {
+    $user_id = get_post_meta($jury_id, '_mt_user_id', true);
+    
+    // Check for various "empty" values
+    if (empty($user_id) || $user_id === '0' || $user_id === 'false' || $user_id === 'null') {
+        return false;
+    }
+    
+    // Verify the user exists
+    $user = get_user_by('id', $user_id);
+    return $user ? $user_id : false;
+}
+
+// Get all jury members for the current view
+$jury_members = mt_get_all_jury_members();
+
+// Get all users who could be jury members
+$potential_users = get_users(array(
+    'orderby' => 'display_name',
+    'order' => 'ASC'
+));
+
 // Get diagnostic instance
 $diagnostic = new MT_Diagnostic();
 $results = $diagnostic->get_diagnostic_results();
