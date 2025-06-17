@@ -317,7 +317,7 @@ class MT_Shortcodes {
         
         // Build query args
         $args = array(
-            'post_type' => 'mt_jury',
+            'post_type' => 'mt_jury_member',
             'posts_per_page' => intval($atts['limit']),
             'orderby' => $atts['orderby'],
             'order' => $atts['order'],

@@ -98,7 +98,7 @@ class MT_Jury_Widget extends \Elementor\Widget_Base {
     protected function render() {
         $settings = $this->get_settings_for_display();
         $shortcode = sprintf(
-            '[mt_jury_members role="%s" limit="%d" columns="%s" show_bio="%s"]',
+            '[mt_jury_member role="%s" limit="%d" columns="%s" show_bio="%s"]',
             $settings['role'],
             $settings['limit'],
             $settings['columns'],
@@ -109,7 +109,7 @@ class MT_Jury_Widget extends \Elementor\Widget_Base {
 
     public function get_shortcode() {
         return sprintf(
-            '[mt_jury role="%s" limit="%d" columns="%s" show_bio="%s"]',
+            '[mt_jury_member role="%s" limit="%d" columns="%s" show_bio="%s"]',
             $this->get_settings('role'),
             $this->get_settings('limit'),
             $this->get_settings('columns'),

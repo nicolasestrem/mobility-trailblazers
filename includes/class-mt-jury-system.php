@@ -194,7 +194,7 @@ class MT_Jury_System {
                 <td>
                     <?php
                     $jury_members = get_posts(array(
-                        'post_type' => 'mt_jury',
+                        'post_type' => 'mt_jury_member',
                         'posts_per_page' => -1,
                         'orderby' => 'title',
                         'order' => 'ASC'
@@ -592,7 +592,7 @@ class MT_Jury_System {
     public static function send_jury_reminder($jury_member_id, $type = 'evaluation') {
         $jury_member = get_post($jury_member_id);
         
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
             return false;
         }
         
@@ -684,7 +684,7 @@ Best regards,
         
         // Get all jury members
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => 'mt_jury_member',
             'posts_per_page' => -1,
             'post_status' => 'publish',
         ));

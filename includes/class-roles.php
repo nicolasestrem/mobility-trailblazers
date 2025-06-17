@@ -301,7 +301,7 @@ class MT_Roles {
     public static function create_jury_user($jury_member_id, $user_data = array()) {
         $jury_member = get_post($jury_member_id);
         
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
             return new WP_Error('invalid_jury_member', __('Invalid jury member.', 'mobility-trailblazers'));
         }
         

@@ -309,7 +309,7 @@ class MT_Diagnostic {
         
         $required_post_types = array(
             'mt_candidate' => __('Candidates', 'mobility-trailblazers'),
-            'mt_jury' => __('Jury Members', 'mobility-trailblazers'),
+            'mt_jury_member' => __('Jury Members', 'mobility-trailblazers'),
             'mt_backup' => __('Backups', 'mobility-trailblazers'),
         );
         
@@ -628,7 +628,7 @@ class MT_Diagnostic {
             SELECT COUNT(*) 
             FROM {$wpdb->posts} p
             LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_user_id'
-            WHERE p.post_type = 'mt_jury' 
+            WHERE p.post_type = 'mt_jury_member' 
             AND p.post_status = 'publish'
             AND (pm.meta_value IS NULL OR pm.meta_value = '')
         ");
@@ -852,7 +852,7 @@ class MT_Diagnostic {
     
     private function get_roles_info() {
         return array(
-            'mt_jury' => __('MT Jury', 'mobility-trailblazers'),
+            'mt_jury_member' => __('MT Jury Member', 'mobility-trailblazers'),
         );
     }
 
@@ -866,7 +866,7 @@ class MT_Diagnostic {
         
         // Check total counts
         $total_candidates = wp_count_posts('mt_candidate')->publish;
-        $total_jury = wp_count_posts('mt_jury')->publish;
+        $total_jury = wp_count_posts('mt_jury_member')->publish;
         
         echo "<p>Total Published Candidates: $total_candidates</p>";
         echo "<p>Total Published Jury Members: $total_jury</p>";
@@ -910,7 +910,7 @@ class MT_Diagnostic {
         // Check jury member assignments
         echo "<h3>Jury Member Assignment Counts:</h3>";
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => 'mt_jury_member',
             'posts_per_page' => -1,
             'post_status' => 'publish'
         ));

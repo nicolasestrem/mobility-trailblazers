@@ -691,19 +691,7 @@ function mt_get_draft_evaluations($jury_member_id) {
  * @return string
  */
 function mt_get_jury_post_type() {
-    // Check if migration has been completed
-    if (get_option('mt_jury_nomenclature_migrated', false)) {
-        return 'mt_jury_member';
-    }
-    
-    // Otherwise check what exists
-    if (post_type_exists('mt_jury_member')) {
-        return 'mt_jury_member';
-    } elseif (post_type_exists('mt_jury')) {
-        return 'mt_jury';
-    }
-    
-    // Default to new standard
+    // Since migration is complete, always return mt_jury_member
     return 'mt_jury_member';
 }
 
@@ -734,5 +722,5 @@ function mt_get_jury_member_meta_key() {
     if (get_option('mt_jury_nomenclature_migrated', false)) {
         return '_mt_jury_member_id';
     }
-    return '_mt_jury_id';
+    return '_mt_jury_member_id';
 } 

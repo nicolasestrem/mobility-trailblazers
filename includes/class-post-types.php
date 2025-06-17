@@ -148,11 +148,12 @@ class MT_Post_Types {
             'map_meta_cap'       => true,
             'has_archive'        => true,
             'hierarchical'       => false,
-            'menu_position'      => 26,
+            'menu_position'      => 5,
             'menu_icon'          => 'dashicons-groups',
-            'supports'           => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+            'supports'           => array('title', 'editor', 'thumbnail', 'custom-fields'),
             'show_in_rest'       => true,
-            'rest_base'          => 'mt-jury-members',
+            'rest_base'          => 'jury-members',
+            'rest_controller_class' => 'WP_REST_Posts_Controller',
         );
         
         register_post_type('mt_jury_member', $args);

@@ -66,7 +66,7 @@ function mt_fix_assignment_data() {
     
     // Check a few jury members
     $jury_members = get_posts(array(
-        'post_type' => 'mt_jury',
+        'post_type' => 'mt_jury_member',
         'posts_per_page' => 5,
         'post_status' => 'publish'
     ));

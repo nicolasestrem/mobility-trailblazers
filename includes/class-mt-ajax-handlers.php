@@ -407,7 +407,7 @@ class MT_AJAX_Handlers {
         
         // Verify jury member exists
         $jury_member = get_post($jury_member_id);
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
             wp_send_json_error(array('message' => __('Invalid jury member.', 'mobility-trailblazers')));
         }
         
@@ -1883,7 +1883,7 @@ The application is currently in pending status and requires approval.', 'mobilit
         // Verify jury members exist
         foreach ($jury_ids as $jury_id) {
             $jury_member = get_post($jury_id);
-            if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+            if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
                 wp_send_json_error(array('message' => __('Invalid jury member selected.', 'mobility-trailblazers')));
             }
         }

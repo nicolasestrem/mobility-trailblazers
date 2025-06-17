@@ -511,7 +511,7 @@ class MT_REST_API {
      */
     public function get_jury_members($request) {
         $args = array(
-            'post_type' => 'mt_jury',
+            'post_type' => 'mt_jury_member',
             'posts_per_page' => $request->get_param('per_page') ?: -1,
             'orderby' => $request->get_param('orderby') ?: 'title',
             'order' => $request->get_param('order') ?: 'ASC',
@@ -616,7 +616,7 @@ class MT_REST_API {
         
         // Validate jury member
         $jury_member = get_post($request->get_param('jury_member_id'));
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
             return new WP_Error('invalid_jury_member', __('Invalid jury member.', 'mobility-trailblazers'), array('status' => 400));
         }
         
@@ -759,7 +759,7 @@ class MT_REST_API {
         
         // Validate jury member
         $jury_member = get_post($jury_member_id);
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
             return new WP_Error('invalid_jury_member', __('Invalid jury member.', 'mobility-trailblazers'), array('status' => 400));
         }
         
@@ -827,7 +827,7 @@ class MT_REST_API {
         $total_candidates = wp_count_posts('mt_candidate')->publish;
         
         // Get total jury members
-        $total_jury = wp_count_posts('mt_jury')->publish;
+        $total_jury = wp_count_posts('mt_jury_member')->publish;
         
         // Get assigned candidates count
         $assigned_candidates = $wpdb->get_var("

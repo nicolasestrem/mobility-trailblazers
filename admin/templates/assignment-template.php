@@ -192,7 +192,7 @@ $unassigned_candidates = $total_candidates - $assigned_candidates;
                 <?php
                 // Get jury members
                 $jury_members = get_posts(array(
-                    'post_type' => 'mt_jury',
+                    'post_type' => 'mt_jury_member',
                     'posts_per_page' => -1,
                     'orderby' => 'title',
                     'order' => 'ASC',

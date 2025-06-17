@@ -15,40 +15,6 @@ if (!defined('ABSPATH')) {
  * 
  * @return string The post type name for jury members
  */
-function mt_get_jury_post_type() {
-    // Check for different possible post type names
-    $possible_types = array('mt_jury', 'mt_jury_member', 'jury_member', 'jury');
-    
-    foreach ($possible_types as $type) {
-        if (post_type_exists($type)) {
-            // Additional check to ensure it's the right one by checking for jury meta
-            $test = get_posts(array(
-                'post_type' => $type,
-                'posts_per_page' => 1,
-                'meta_query' => array(
-                    'relation' => 'OR',
-                    array('key' => '_mt_email', 'compare' => 'EXISTS'),
-                    array('key' => '_mt_user_id', 'compare' => 'EXISTS'),
-                    array('key' => '_mt_company', 'compare' => 'EXISTS')
-                )
-            ));
-            
-            if (!empty($test)) {
-                return $type;
-            }
-        }
-    }
-    
-    // If no type found with meta, just return the first existing type
-    foreach ($possible_types as $type) {
-        if (post_type_exists($type)) {
-            return $type;
-        }
-    }
-    
-    // Default fallback
-    return 'mt_jury';
-}
 
 /**
  * Get all jury members
