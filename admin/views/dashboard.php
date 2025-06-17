@@ -101,7 +101,7 @@ $jury_progress = $wpdb->get_results("
         <div class="mt-stat-card">
             <div class="mt-stat-icon score"></div>
             <div class="mt-stat-content">
-                <div class="mt-stat-number"><?php echo number_format($stats['avg_score'], 1); ?>/50</div>
+                <div class="mt-stat-number"><?php echo number_format($stats['avg_score'] ?? 0, 1); ?>/50</div>
                 <div class="mt-stat-label"><?php _e('Average Score', 'mobility-trailblazers'); ?></div>
             </div>
         </div>

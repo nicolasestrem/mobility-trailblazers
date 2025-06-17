@@ -229,6 +229,20 @@ class MobilityTrailblazersPlugin {
                     MT_PLUGIN_VERSION,
                     true
                 );
+
+                // Localize assignment script
+                wp_localize_script('mt-assignment', 'mt_assignment_vars', array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('mt_admin_nonce'),
+                    'i18n' => array(
+                        'confirm_clear' => __('Are you sure you want to clear all assignments? This action cannot be undone.', 'mobility-trailblazers'),
+                        'confirm_auto_assign' => __('This will automatically assign candidates to jury members. Continue?', 'mobility-trailblazers'),
+                        'processing' => __('Processing...', 'mobility-trailblazers'),
+                        'error' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
+                        'success' => __('Operation completed successfully.', 'mobility-trailblazers'),
+                        'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
+                    )
+                ));
             }
             
             // Dashboard assets

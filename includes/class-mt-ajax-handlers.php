@@ -1766,4 +1766,79 @@ The application is currently in pending status and requires approval.', 'mobilit
             'candidate_id' => $candidate_id,
         ));
     }
+    
+    /**
+     * Get assignment statistics
+     */
+    public function get_assignment_stats() {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_assignments')) {
+            wp_send_json_error(array('message' => __('You do not have permission to view assignment statistics.', 'mobility-trailblazers')));
+        }
+        
+        // Get all active candidates
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_status',
+                    'value' => array('approved', 'shortlisted'),
+                    'compare' => 'IN',
+                ),
+            ),
+        ));
+        
+        // Get all active jury members
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+        ));
+        
+        $stats = array(
+            'total_candidates' => count($candidates),
+            'total_jury_members' => count($jury_members),
+            'assigned_candidates' => 0,
+            'unassigned_candidates' => 0,
+            'jury_assignments' => array(),
+        );
+        
+        // Count assignments per jury member
+        foreach ($jury_members as $jury) {
+            $stats['jury_assignments'][$jury->ID] = 0;
+        }
+        
+        // Count assigned and unassigned candidates
+        foreach ($candidates as $candidate) {
+            $assignments = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
+            
+            if (!empty($assignments) && is_array($assignments)) {
+                $stats['assigned_candidates']++;
+                
+                // Count assignments per jury member
+                foreach ($assignments as $jury_id) {
+                    if (isset($stats['jury_assignments'][$jury_id])) {
+                        $stats['jury_assignments'][$jury_id]++;
+                    }
+                }
+            } else {
+                $stats['unassigned_candidates']++;
+            }
+        }
+        
+        // Calculate average assignments per jury member
+        $total_assignments = array_sum($stats['jury_assignments']);
+        $stats['average_assignments'] = $stats['total_jury_members'] > 0 
+            ? round($total_assignments / $stats['total_jury_members'], 2) 
+            : 0;
+        
+        wp_send_json_success($stats);
+    }
 } 
