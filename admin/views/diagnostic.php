@@ -916,228 +916,455 @@ $system_info = $diagnostic->get_system_info();
         <?php endif; ?>
     </div>
 
+    <!-- Jury Member Data Diagnostic and Repair Tool -->
+    <?php
+    /**
+     * Jury Member Data Diagnostic and Repair Tool
+     * Add this to your diagnostic.php to identify and fix data inconsistencies
+     */
+
+    // Security check
+    if (!defined('ABSPATH')) {
+        exit;
+    }
+
+    // Handle repair actions
+    if (isset($_POST['mt_repair_jury_data']) && wp_verify_nonce($_POST['mt_repair_nonce'], 'mt_repair_jury_data')) {
+        $action = sanitize_text_field($_POST['repair_action']);
+        $repaired = 0;
+        
+        switch ($action) {
+            case 'remove_orphaned_meta':
+                // Remove user meta pointing to non-existent jury members
+                $all_users = get_users();
+                foreach ($all_users as $user) {
+                    $jury_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
+                    if ($jury_id && !get_post($jury_id)) {
+                        delete_user_meta($user->ID, '_mt_jury_member_id');
+                        $repaired++;
+                    }
+                }
+                echo '<div class="notice notice-success"><p>' . sprintf(__('Removed %d orphaned user meta entries.', 'mobility-trailblazers'), $repaired) . '</p></div>';
+                break;
+                
+            case 'remove_invalid_links':
+                // Remove jury meta pointing to non-existent users
+                $jury_members = get_posts(array(
+                    'post_type' => 'mt_jury_member',
+                    'posts_per_page' => -1,
+                    'post_status' => 'any'
+                ));
+                
+                foreach ($jury_members as $jury) {
+                    $user_id = get_post_meta($jury->ID, '_mt_user_id', true);
+                    if ($user_id && !get_user_by('id', $user_id)) {
+                        delete_post_meta($jury->ID, '_mt_user_id');
+                        $repaired++;
+                    }
+                }
+                echo '<div class="notice notice-success"><p>' . sprintf(__('Removed %d invalid jury member links.', 'mobility-trailblazers'), $repaired) . '</p></div>';
+                break;
+                
+            case 'sync_bidirectional':
+                // Ensure bidirectional links are consistent
+                $jury_members = get_posts(array(
+                    'post_type' => 'mt_jury_member',
+                    'posts_per_page' => -1,
+                    'post_status' => 'any'
+                ));
+                
+                foreach ($jury_members as $jury) {
+                    $user_id = get_post_meta($jury->ID, '_mt_user_id', true);
+                    if ($user_id) {
+                        $user = get_user_by('id', $user_id);
+                        if ($user) {
+                            $stored_jury_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
+                            if ($stored_jury_id != $jury->ID) {
+                                update_user_meta($user_id, '_mt_jury_member_id', $jury->ID);
+                                $repaired++;
+                            }
+                        }
+                    }
+                }
+                echo '<div class="notice notice-success"><p>' . sprintf(__('Synchronized %d bidirectional links.', 'mobility-trailblazers'), $repaired) . '</p></div>';
+                break;
+        }
+    }
+
+    // Get diagnostic data
+    $all_jury_members = get_posts(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'post_status' => 'any',
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ));
+
+    $issues = array();
+    $jury_data = array();
+
+    foreach ($all_jury_members as $jury) {
+        $user_id = get_post_meta($jury->ID, '_mt_user_id', true);
+        $email = get_post_meta($jury->ID, '_mt_email', true);
+        $user = $user_id ? get_user_by('id', $user_id) : null;
+        
+        $data = array(
+            'jury' => $jury,
+            'user_id' => $user_id,
+            'user' => $user,
+            'email' => $email,
+            'issues' => array()
+        );
+        
+        // Check for issues
+        if ($user_id && !$user) {
+            $data['issues'][] = 'User ID ' . $user_id . ' does not exist';
+            $issues['invalid_user'][] = $jury->ID;
+        }
+        
+        if ($user) {
+            $stored_jury_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
+            if ($stored_jury_id != $jury->ID) {
+                $data['issues'][] = 'Bidirectional link mismatch';
+                $issues['link_mismatch'][] = $jury->ID;
+            }
+            
+            if (!in_array('mt_jury_member', $user->roles)) {
+                $data['issues'][] = 'User missing jury member role';
+                $issues['missing_role'][] = $jury->ID;
+            }
+        }
+        
+        if (!$user_id) {
+            $issues['no_user'][] = $jury->ID;
+        }
+        
+        $jury_data[] = $data;
+    }
+
+    // Check for orphaned user meta
+    $users_with_jury_meta = get_users(array(
+        'meta_key' => '_mt_jury_member_id',
+        'meta_compare' => 'EXISTS'
+    ));
+
+    foreach ($users_with_jury_meta as $user) {
+        $jury_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
+        if (!get_post($jury_id)) {
+            $issues['orphaned_meta'][] = $user->ID;
+        }
+    }
+    ?>
+
+    <div class="mt-jury-diagnostic">
+        <h2><?php _e('Jury Member Data Diagnostic', 'mobility-trailblazers'); ?></h2>
+        
+        <!-- Summary -->
+        <div class="mt-diagnostic-summary">
+            <h3><?php _e('Summary', 'mobility-trailblazers'); ?></h3>
+            <ul>
+                <li><?php printf(__('Total Jury Members: %d', 'mobility-trailblazers'), count($all_jury_members)); ?></li>
+                <li><?php printf(__('Linked to Users: %d', 'mobility-trailblazers'), count($all_jury_members) - count($issues['no_user'] ?? array())); ?></li>
+                <li><?php printf(__('Not Linked: %d', 'mobility-trailblazers'), count($issues['no_user'] ?? array())); ?></li>
+                <li class="<?php echo !empty($issues) ? 'has-issues' : 'no-issues'; ?>">
+                    <?php 
+                    $total_issues = array_sum(array_map('count', $issues));
+                    printf(__('Total Issues Found: %d', 'mobility-trailblazers'), $total_issues); 
+                    ?>
+                </li>
+            </ul>
+        </div>
+        
+        <?php if (!empty($issues)) : ?>
+        <!-- Issues Found -->
+        <div class="mt-diagnostic-issues">
+            <h3><?php _e('Issues Found', 'mobility-trailblazers'); ?></h3>
+            
+            <?php if (!empty($issues['invalid_user'])) : ?>
+            <div class="issue-group">
+                <h4><?php _e('Invalid User References', 'mobility-trailblazers'); ?></h4>
+                <p><?php printf(__('%d jury members linked to non-existent users', 'mobility-trailblazers'), count($issues['invalid_user'])); ?></p>
+                <form method="post" style="display: inline;">
+                    <?php wp_nonce_field('mt_repair_jury_data', 'mt_repair_nonce'); ?>
+                    <input type="hidden" name="repair_action" value="remove_invalid_links">
+                    <button type="submit" name="mt_repair_jury_data" class="button button-secondary">
+                        <?php _e('Remove Invalid Links', 'mobility-trailblazers'); ?>
+                    </button>
+                </form>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($issues['link_mismatch'])) : ?>
+            <div class="issue-group">
+                <h4><?php _e('Bidirectional Link Mismatches', 'mobility-trailblazers'); ?></h4>
+                <p><?php printf(__('%d jury members with inconsistent user links', 'mobility-trailblazers'), count($issues['link_mismatch'])); ?></p>
+                <form method="post" style="display: inline;">
+                    <?php wp_nonce_field('mt_repair_jury_data', 'mt_repair_nonce'); ?>
+                    <input type="hidden" name="repair_action" value="sync_bidirectional">
+                    <button type="submit" name="mt_repair_jury_data" class="button button-secondary">
+                        <?php _e('Sync Links', 'mobility-trailblazers'); ?>
+                    </button>
+                </form>
+            </div>
+            <?php endif; ?>
+            
+            <?php if (!empty($issues['orphaned_meta'])) : ?>
+            <div class="issue-group">
+                <h4><?php _e('Orphaned User Meta', 'mobility-trailblazers'); ?></h4>
+                <p><?php printf(__('%d users linked to non-existent jury members', 'mobility-trailblazers'), count($issues['orphaned_meta'])); ?></p>
+                <form method="post" style="display: inline;">
+                    <?php wp_nonce_field('mt_repair_jury_data', 'mt_repair_nonce'); ?>
+                    <input type="hidden" name="repair_action" value="remove_orphaned_meta">
+                    <button type="submit" name="mt_repair_jury_data" class="button button-secondary">
+                        <?php _e('Clean Orphaned Meta', 'mobility-trailblazers'); ?>
+                    </button>
+                </form>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Detailed Data -->
+        <div class="mt-diagnostic-details">
+            <h3><?php _e('Detailed Jury Member Data', 'mobility-trailblazers'); ?></h3>
+            
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('Email', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('Linked User', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('User Exists', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('Has Role', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('Bidirectional', 'mobility-trailblazers'); ?></th>
+                        <th><?php _e('Issues', 'mobility-trailblazers'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($jury_data as $data) : ?>
+                    <tr class="<?php echo !empty($data['issues']) ? 'has-issues' : ''; ?>">
+                        <td>
+                            <strong><?php echo esc_html($data['jury']->post_title); ?></strong>
+                            <br>
+                            <span class="description">ID: <?php echo $data['jury']->ID; ?></span>
+                        </td>
+                        <td>
+                            <?php echo $data['email'] ? esc_html($data['email']) : '<em>No email</em>'; ?>
+                        </td>
+                        <td>
+                            <?php if ($data['user']) : ?>
+                                <a href="<?php echo get_edit_user_link($data['user']->ID); ?>">
+                                    <?php echo esc_html($data['user']->display_name); ?>
+                                </a>
+                                <br>
+                                <span class="description">ID: <?php echo $data['user']->ID; ?></span>
+                            <?php elseif ($data['user_id']) : ?>
+                                <span class="error">User ID: <?php echo $data['user_id']; ?> (not found)</span>
+                            <?php else : ?>
+                                <em><?php _e('Not linked', 'mobility-trailblazers'); ?></em>
+                            <?php endif; ?>
+                        </td>
+                        <td class="status-column">
+                            <?php if ($data['user_id']) : ?>
+                                <?php if ($data['user']) : ?>
+                                    <span class="dashicons dashicons-yes" style="color: #46b450;"></span>
+                                <?php else : ?>
+                                    <span class="dashicons dashicons-no" style="color: #dc3232;"></span>
+                                <?php endif; ?>
+                            <?php else : ?>
+                                <span class="dashicons dashicons-minus" style="color: #666;"></span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="status-column">
+                            <?php if ($data['user'] && in_array('mt_jury_member', $data['user']->roles)) : ?>
+                                <span class="dashicons dashicons-yes" style="color: #46b450;"></span>
+                            <?php elseif ($data['user']) : ?>
+                                <span class="dashicons dashicons-no" style="color: #dc3232;"></span>
+                            <?php else : ?>
+                                <span class="dashicons dashicons-minus" style="color: #666;"></span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="status-column">
+                            <?php 
+                            if ($data['user']) {
+                                $stored_jury_id = get_user_meta($data['user']->ID, '_mt_jury_member_id', true);
+                                if ($stored_jury_id == $data['jury']->ID) {
+                                    echo '<span class="dashicons dashicons-yes" style="color: #46b450;"></span>';
+                                } else {
+                                    echo '<span class="dashicons dashicons-no" style="color: #dc3232;"></span>';
+                                }
+                            } else {
+                                echo '<span class="dashicons dashicons-minus" style="color: #666;"></span>';
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <?php if (!empty($data['issues'])) : ?>
+                                <ul class="issue-list">
+                                    <?php foreach ($data['issues'] as $issue) : ?>
+                                        <li><?php echo esc_html($issue); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php else : ?>
+                                <span style="color: #46b450;"><?php _e('OK', 'mobility-trailblazers'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Debug Information -->
+        <div class="mt-diagnostic-debug">
+            <h3><?php _e('Debug Information', 'mobility-trailblazers'); ?></h3>
+            <button type="button" class="button" id="toggle-debug-info"><?php _e('Show Debug Data', 'mobility-trailblazers'); ?></button>
+            
+            <div id="debug-info" style="display: none;">
+                <h4><?php _e('Unlinked Jury Members (for bulk tool)', 'mobility-trailblazers'); ?></h4>
+                <?php
+                $unlinked = get_posts(array(
+                    'post_type' => 'mt_jury_member',
+                    'posts_per_page' => -1,
+                    'post_status' => 'any',
+                    'meta_query' => array(
+                        array(
+                            'key' => '_mt_user_id',
+                            'compare' => 'NOT EXISTS'
+                        )
+                    )
+                ));
+                ?>
+                <p><?php printf(__('Found %d unlinked jury members using NOT EXISTS query', 'mobility-trailblazers'), count($unlinked)); ?></p>
+                
+                <h4><?php _e('Alternative Query (checking empty values)', 'mobility-trailblazers'); ?></h4>
+                <?php
+                $possibly_unlinked = get_posts(array(
+                    'post_type' => 'mt_jury_member',
+                    'posts_per_page' => -1,
+                    'post_status' => 'any',
+                    'meta_query' => array(
+                        array(
+                            'relation' => 'OR',
+                            array(
+                                'key' => '_mt_user_id',
+                                'compare' => 'NOT EXISTS'
+                            ),
+                            array(
+                                'key' => '_mt_user_id',
+                                'value' => '',
+                                'compare' => '='
+                            ),
+                            array(
+                                'key' => '_mt_user_id',
+                                'value' => '0',
+                                'compare' => '='
+                            )
+                        )
+                    )
+                ));
+                ?>
+                <p><?php printf(__('Found %d possibly unlinked jury members including empty values', 'mobility-trailblazers'), count($possibly_unlinked)); ?></p>
+            </div>
+        </div>
+    </div>
+
     <style>
-    .mt-bulk-creation-tool {
+    .mt-jury-diagnostic {
         background: #fff;
         padding: 20px;
-        margin: 20px 0;
+        margin-top: 20px;
         border: 1px solid #ccd0d4;
         box-shadow: 0 1px 1px rgba(0,0,0,.04);
     }
 
-    .mt-form-section {
-        margin-bottom: 30px;
-        padding: 20px;
+    .mt-diagnostic-summary {
         background: #f6f7f7;
-        border: 1px solid #dcdcde;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2271b1;
     }
 
-    .mt-form-section h3 {
-        margin-top: 0;
-        color: #1d2327;
+    .mt-diagnostic-summary ul {
+        margin: 0;
+        padding-left: 20px;
     }
 
-    .mt-select-controls {
+    .mt-diagnostic-summary .has-issues {
+        color: #dc3232;
+        font-weight: bold;
+    }
+
+    .mt-diagnostic-summary .no-issues {
+        color: #46b450;
+        font-weight: bold;
+    }
+
+    .mt-diagnostic-issues {
+        background: #fcf9e8;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ffb900;
+    }
+
+    .issue-group {
         margin-bottom: 15px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #ddd;
     }
 
-    .selected-count {
-        margin-left: auto;
-        font-weight: 600;
-        color: #2271b1;
+    .issue-group:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
     }
 
-    .mt-jury-selection {
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid #dcdcde;
-        padding: 10px;
-        background: #fff;
+    .mt-diagnostic-details {
+        margin-top: 20px;
     }
 
-    .jury-member-item {
-        display: block;
-        padding: 8px;
-        border-bottom: 1px solid #f0f0f1;
+    .status-column {
+        text-align: center;
     }
 
-    .jury-member-item:hover {
-        background: #f6f7f7;
+    tr.has-issues {
+        background-color: #fcf9e8 !important;
     }
 
-    .jury-checkbox {
-        margin-right: 10px;
-    }
-
-    .jury-email {
-        color: #646970;
+    .issue-list {
+        margin: 0;
+        padding-left: 20px;
         font-size: 0.9em;
-        margin-left: 5px;
+        color: #dc3232;
     }
 
-    .mt-created-users-list {
-        margin: 20px 0;
-        padding: 20px;
-        background: #ecf7ed;
-        border: 2px solid #46b450;
+    .mt-diagnostic-debug {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
     }
 
-    .password-field {
-        font-family: monospace;
-        background: #f0f0f1;
-        padding: 2px 6px;
-        border-radius: 3px;
-    }
-
-    .mt-export-actions {
+    #debug-info {
         margin-top: 15px;
-    }
-
-    .form-table td select,
-    .form-table td input[type="text"] {
-        margin-top: 5px;
+        padding: 15px;
+        background: #f0f0f1;
+        border: 1px solid #ddd;
     }
     </style>
 
     <script>
     jQuery(document).ready(function($) {
-        // Update selected count
-        function updateSelectedCount() {
-            var count = $('.jury-checkbox:checked').length;
-            $('#selected-count').text(count);
-            $('#bulk-create-submit').prop('disabled', count === 0);
-        }
-        
-        // Select all/none
-        $('#select-all').on('click', function() {
-            $('.jury-checkbox').prop('checked', true);
-            updateSelectedCount();
-        });
-        
-        $('#select-none').on('click', function() {
-            $('.jury-checkbox').prop('checked', false);
-            updateSelectedCount();
-        });
-        
-        // Update count on checkbox change
-        $('.jury-checkbox').on('change', updateSelectedCount);
-        
-        // Show/hide custom username field
-        $('#username_pattern').on('change', function() {
-            if ($(this).val() === 'custom') {
-                $('#custom-username-section').show();
-            } else {
-                $('#custom-username-section').hide();
-            }
-        });
-        
-        // Show/hide custom email field
-        $('input[name="use_custom_email"]').on('change', function() {
-            if ($(this).val() === '1') {
-                $('#custom-email-section').show();
-            } else {
-                $('#custom-email-section').hide();
-            }
-        });
-        
-        // Show/hide password fields
-        $('#password_type').on('change', function() {
-            $('#custom-password-section, #pattern-password-section').hide();
-            
-            if ($(this).val() === 'custom') {
-                $('#custom-password-section').show();
-            } else if ($(this).val() === 'pattern') {
-                $('#pattern-password-section').show();
-            }
-        });
-        
-        // Copy password functionality
-        $('.copy-password').on('click', function() {
-            var password = $(this).data('password');
-            var $temp = $('<input>');
-            $('body').append($temp);
-            $temp.val(password).select();
-            document.execCommand('copy');
-            $temp.remove();
-            
-            $(this).text('<?php _e('Copied!', 'mobility-trailblazers'); ?>');
-            setTimeout(() => {
-                $(this).text('<?php _e('Copy', 'mobility-trailblazers'); ?>');
-            }, 2000);
-        });
-        
-        // Export CSV
-        $('#export-credentials-csv').on('click', function() {
-            var csv = 'Jury Member,Username,Email,Password\n';
-            
-            $('.mt-created-users-list tbody tr').each(function() {
-                var cells = $(this).find('td');
-                csv += '"' + $(cells[0]).text() + '",';
-                csv += '"' + $(cells[1]).text() + '",';
-                csv += '"' + $(cells[2]).text() + '",';
-                csv += '"' + $(cells[3]).find('.password-field').text() + '"\n';
-            });
-            
-            var blob = new Blob([csv], { type: 'text/csv' });
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'jury_credentials_' + new Date().toISOString().split('T')[0] + '.csv';
-            a.click();
-        });
-        
-        // Print credentials
-        $('#print-credentials').on('click', function() {
-            var printWindow = window.open('', '_blank');
-            var content = $('.mt-created-users-list').html();
-            
-            printWindow.document.write('<html><head><title>Jury Credentials</title>');
-            printWindow.document.write('<style>body { font-family: Arial, sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background: #f0f0f1; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h1>Jury Member Credentials</h1>');
-            printWindow.document.write(content);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        });
-        
-        // Form validation
-        $('#bulk-create-form').on('submit', function(e) {
-            var selectedCount = $('.jury-checkbox:checked').length;
-            
-            if (selectedCount === 0) {
-                alert('<?php _e('Please select at least one jury member.', 'mobility-trailblazers'); ?>');
-                e.preventDefault();
-                return false;
-            }
-            
-            // Validate custom fields if needed
-            if ($('#username_pattern').val() === 'custom' && !$('input[name="custom_username_pattern"]').val()) {
-                alert('<?php _e('Please enter a custom username pattern.', 'mobility-trailblazers'); ?>');
-                e.preventDefault();
-                return false;
-            }
-            
-            if ($('input[name="use_custom_email"]:checked').val() === '1' && !$('input[name="email_domain"]').val()) {
-                alert('<?php _e('Please enter an email domain.', 'mobility-trailblazers'); ?>');
-                e.preventDefault();
-                return false;
-            }
-            
-            if ($('#password_type').val() === 'custom' && !$('input[name="custom_password"]').val()) {
-                alert('<?php _e('Please enter a password.', 'mobility-trailblazers'); ?>');
-                e.preventDefault();
-                return false;
-            }
-            
-            // Show spinner
-            $(this).find('.spinner').addClass('is-active');
+        $('#toggle-debug-info').on('click', function() {
+            $('#debug-info').toggle();
+            $(this).text(
+                $('#debug-info').is(':visible') 
+                    ? '<?php _e('Hide Debug Data', 'mobility-trailblazers'); ?>' 
+                    : '<?php _e('Show Debug Data', 'mobility-trailblazers'); ?>'
+            );
         });
     });
     </script>
+</div>
 </div>
 
 <style>
