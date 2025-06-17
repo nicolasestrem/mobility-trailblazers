@@ -102,11 +102,11 @@
             const self = this;
             
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_dashboard.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_get_jury_dashboard_data',
-                    nonce: mt_jury_ajax.nonce
+                    nonce: mt_jury_dashboard.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -173,8 +173,8 @@
         
         getStatusText: function(status) {
             const statusMap = {
-                'completed': mt_jury_ajax.i18n.completed,
-                'draft': mt_jury_ajax.i18n.draft,
+                'completed': mt_jury_dashboard.i18n.completed,
+                'draft': mt_jury_dashboard.i18n.draft,
                 'pending': ''
             };
             return statusMap[status] || '';
@@ -223,7 +223,7 @@
                 if (!$('.no-results-message').length) {
                     $('.mt-candidates-grid').append(`
                         <div class="no-results-message">
-                            <p>${mt_jury_ajax.i18n.no_candidates_found}</p>
+                            <p>${mt_jury_dashboard.i18n.no_candidates_found}</p>
                         </div>
                     `);
                 }
@@ -240,12 +240,12 @@
             this.showEvaluationModal();
             
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_dashboard.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_get_candidate_evaluation',
                     candidate_id: candidateId,
-                    nonce: mt_jury_ajax.nonce
+                    nonce: mt_jury_dashboard.nonce
                 },
                 beforeSend: function() {
                     $('#evaluation-form').addClass('loading');
@@ -344,15 +344,15 @@
             };
             
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_dashboard.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_save_evaluation',
                     evaluation: evaluationData,
-                    nonce: mt_jury_ajax.nonce
+                    nonce: mt_jury_dashboard.nonce
                 },
                 beforeSend: function() {
-                    $('#save-draft').prop('disabled', true).text(mt_jury_ajax.i18n.saving);
+                    $('#save-draft').prop('disabled', true).text(mt_jury_dashboard.i18n.saving);
                 },
                 success: function(response) {
                     if (response.success) {
@@ -364,7 +364,7 @@
                         
                         if (status === 'draft') {
                             $card.find('.evaluation-status').remove();
-                            $card.find('.candidate-header > div').after(`<span class="evaluation-status draft">${mt_jury_ajax.i18n.draft}</span>`);
+                            $card.find('.candidate-header > div').after(`<span class="evaluation-status draft">${mt_jury_dashboard.i18n.draft}</span>`);
                         }
                         
                         // Update progress if needed
@@ -376,7 +376,7 @@
                     }
                 },
                 complete: function() {
-                    $('#save-draft').prop('disabled', false).text(mt_jury_ajax.i18n.save_draft);
+                    $('#save-draft').prop('disabled', false).text(mt_jury_dashboard.i18n.save_draft);
                 }
             });
         },
@@ -394,12 +394,12 @@
             });
             
             if (!valid) {
-                this.showNotification('error', mt_jury_ajax.i18n.please_complete_scores);
+                this.showNotification('error', mt_jury_dashboard.i18n.please_complete_scores);
                 return;
             }
             
             // Confirm submission
-            if (!confirm(mt_jury_ajax.i18n.confirm_submit)) {
+            if (!confirm(mt_jury_dashboard.i18n.confirm_submit)) {
                 return;
             }
             
