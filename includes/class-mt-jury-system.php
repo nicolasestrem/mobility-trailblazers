@@ -63,7 +63,7 @@ class MT_Jury_System {
             // Enqueue dashboard styles
             wp_enqueue_style(
                 'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/frontend.css',
+                MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
                 array(),
                 MT_PLUGIN_VERSION
             );

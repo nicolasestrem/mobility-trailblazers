@@ -18,7 +18,7 @@ $candidate_counts = wp_count_posts('mt_candidate');
 $total_candidates = isset($candidate_counts->publish) ? $candidate_counts->publish : 0;
 
 // Count total jury members
-$jury_counts = wp_count_posts('mt_jury');
+$jury_counts = wp_count_posts('mt_jury_member');
 $total_jury = isset($jury_counts->publish) ? $jury_counts->publish : 0;
 
 // Count assigned candidates with proper query

@@ -601,7 +601,7 @@ function mt_get_evaluation_statistics($args = array()) {
     
     $where_clause = implode(' AND ', $where);
     
-    // Get statistics
+    // Get basic statistics
     $stats = $wpdb->get_row("
         SELECT 
             COUNT(*) as total_evaluations,
@@ -616,6 +616,73 @@ function mt_get_evaluation_statistics($args = array()) {
         FROM $table_name
         WHERE $where_clause
     ");
+    
+    // Convert to array
+    $stats = (array) $stats;
+    
+    // Get total candidates
+    $stats['total_candidates'] = wp_count_posts('mt_candidate')->publish;
+    
+    // Calculate completion rate
+    $stats['completion_rate'] = $stats['total_candidates'] > 0 
+        ? round(($stats['total_evaluations'] / $stats['total_candidates']) * 100) 
+        : 0;
+    
+    // Get daily evaluations
+    $daily_evaluations = $wpdb->get_results("
+        SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as count
+        FROM $table_name
+        WHERE $where_clause
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+    ", ARRAY_A);
+    
+    // Format daily evaluations
+    $stats['daily_evaluations'] = array();
+    foreach ($daily_evaluations as $day) {
+        $stats['daily_evaluations'][$day['date']] = intval($day['count']);
+    }
+    
+    // Get category statistics
+    $category_stats = $wpdb->get_results("
+        SELECT 
+            t.name as category,
+            COUNT(DISTINCT p.ID) as candidates,
+            COUNT(s.id) as evaluations,
+            AVG(s.total_score) as avg_score,
+            (COUNT(s.id) / COUNT(DISTINCT p.ID)) * 100 as completion_rate
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+        LEFT JOIN $table_name s ON p.ID = s.candidate_id
+        WHERE p.post_type = 'mt_candidate'
+        AND p.post_status = 'publish'
+        AND tt.taxonomy = 'mt_category'
+        GROUP BY t.term_id
+    ", ARRAY_A);
+    
+    // Format category statistics
+    $stats['by_category'] = array();
+    foreach ($category_stats as $cat) {
+        $stats['by_category'][$cat['category']] = array(
+            'candidates' => intval($cat['candidates']),
+            'evaluations' => intval($cat['evaluations']),
+            'avg_score' => round(floatval($cat['avg_score']), 1),
+            'completion_rate' => round(floatval($cat['completion_rate']))
+        );
+    }
+    
+    // Get criteria statistics
+    $stats['by_criteria'] = array(
+        'courage' => round(floatval($stats['avg_courage']), 1),
+        'innovation' => round(floatval($stats['avg_innovation']), 1),
+        'implementation' => round(floatval($stats['avg_implementation']), 1),
+        'relevance' => round(floatval($stats['avg_relevance']), 1),
+        'visibility' => round(floatval($stats['avg_visibility']), 1)
+    );
     
     return $stats;
 }

@@ -240,6 +240,9 @@ class MT_Shortcodes {
         // Get statistics
         $stats = mt_get_evaluation_statistics();
         
+        // Convert stdClass to array
+        $stats = (array) $stats;
+        
         // Include template
         include MT_PLUGIN_DIR . 'templates/shortcodes/evaluation-stats.php';
         
