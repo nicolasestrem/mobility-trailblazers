@@ -469,31 +469,35 @@ class MT_AJAX_Handlers {
         // Get parameters
         $algorithm = isset($_POST['algorithm']) ? sanitize_text_field($_POST['algorithm']) : 'balanced';
         $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 20;
-        $preserve_existing = isset($_POST['preserve_existing']) && $_POST['preserve_existing'] === 'true';
+        $preserve_existing = isset($_POST['preserve_existing']) ? (bool)$_POST['preserve_existing'] : true;
         
-        // Get all active candidates
+        // Get all published candidates
         $candidates = get_posts(array(
             'post_type' => 'mt_candidate',
             'posts_per_page' => -1,
             'post_status' => 'publish',
-            'meta_query' => array(
-                array(
-                    'key' => '_mt_status',
-                    'value' => array('approved', 'shortlisted'),
-                    'compare' => 'IN',
-                ),
-            ),
+            'orderby' => 'rand'
         ));
         
-        // Get all active jury members
+        // Get all published jury members
         $jury_members = get_posts(array(
             'post_type' => 'mt_jury',
             'posts_per_page' => -1,
-            'post_status' => 'publish',
+            'post_status' => 'publish'
         ));
         
+        // Debug logging
+        error_log('Auto-assign: Found ' . count($candidates) . ' candidates and ' . count($jury_members) . ' jury members');
+        
+        // Check if we have candidates and jury members
         if (empty($candidates) || empty($jury_members)) {
-            wp_send_json_error(array('message' => __('No candidates or jury members found.', 'mobility-trailblazers')));
+            wp_send_json_error(array(
+                'message' => __('No candidates or jury members found. Please ensure you have published candidates and jury members.', 'mobility-trailblazers'),
+                'debug' => array(
+                    'candidates_count' => count($candidates),
+                    'jury_count' => count($jury_members)
+                )
+            ));
         }
         
         // Clear existing assignments if not preserving
@@ -550,7 +554,7 @@ class MT_AJAX_Handlers {
                 __('Auto-assignment completed. %d assignments made.', 'mobility-trailblazers'),
                 $total_assignments
             ),
-            'total_assignments' => $total_assignments,
+            'total_assignments' => $total_assignments
         ));
     }
     
@@ -559,49 +563,54 @@ class MT_AJAX_Handlers {
      */
     private function balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
         $assignments = array();
-        $jury_count = array();
+        $jury_counts = array();
         
-        // Initialize jury count
+        // Initialize jury counts
         foreach ($jury_members as $jury) {
-            $jury_count[$jury->ID] = 0;
+            $jury_counts[$jury->ID] = 0;
         }
         
-        // Count existing assignments if preserving
+        // If preserving existing, count current assignments
         if ($preserve_existing) {
             foreach ($candidates as $candidate) {
                 $existing = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
                 if (is_array($existing)) {
                     $assignments[$candidate->ID] = $existing;
                     foreach ($existing as $jury_id) {
-                        if (isset($jury_count[$jury_id])) {
-                            $jury_count[$jury_id]++;
+                        if (isset($jury_counts[$jury_id])) {
+                            $jury_counts[$jury_id]++;
                         }
                     }
                 }
             }
         }
         
-        // Assign candidates
+        // Assign candidates to jury members
         foreach ($candidates as $candidate) {
+            // Skip if already has assignments and preserving
+            if ($preserve_existing && !empty($assignments[$candidate->ID])) {
+                continue;
+            }
+            
+            // Initialize assignments for this candidate
             if (!isset($assignments[$candidate->ID])) {
                 $assignments[$candidate->ID] = array();
             }
             
-            // Skip if already has enough assignments
-            if (count($assignments[$candidate->ID]) >= 3) {
-                continue;
-            }
+            // Sort jury members by assignment count (ascending)
+            asort($jury_counts);
             
-            // Sort jury by assignment count
-            asort($jury_count);
-            
-            // Assign to jury members with least assignments
-            foreach ($jury_count as $jury_id => $count) {
-                if ($count < $candidates_per_jury && !in_array($jury_id, $assignments[$candidate->ID])) {
+            // Assign to least loaded jury members (typically 3 per candidate)
+            $assigned_count = 0;
+            foreach ($jury_counts as $jury_id => $count) {
+                // Check if jury member hasn't exceeded their limit
+                if ($count < $candidates_per_jury) {
                     $assignments[$candidate->ID][] = $jury_id;
-                    $jury_count[$jury_id]++;
+                    $jury_counts[$jury_id]++;
+                    $assigned_count++;
                     
-                    if (count($assignments[$candidate->ID]) >= 3) {
+                    // Usually assign 3 jury members per candidate
+                    if ($assigned_count >= 3) {
                         break;
                     }
                 }
@@ -622,33 +631,28 @@ class MT_AJAX_Handlers {
         if ($preserve_existing) {
             foreach ($candidates as $candidate) {
                 $existing = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
-                if (is_array($existing)) {
+                if (is_array($existing) && !empty($existing)) {
                     $assignments[$candidate->ID] = $existing;
                 }
             }
         }
         
-        // Shuffle candidates for randomness
-        shuffle($candidates);
-        
+        // Assign candidates randomly
         foreach ($candidates as $candidate) {
-            if (!isset($assignments[$candidate->ID])) {
-                $assignments[$candidate->ID] = array();
-            }
-            
-            // Skip if already has enough assignments
-            if (count($assignments[$candidate->ID]) >= 3) {
+            // Skip if already has assignments and preserving
+            if ($preserve_existing && !empty($assignments[$candidate->ID])) {
                 continue;
             }
             
-            // Randomly select jury members
-            $available_jury = array_diff($jury_ids, $assignments[$candidate->ID]);
+            // Initialize assignments for this candidate
+            $assignments[$candidate->ID] = array();
+            
+            // Randomly select 3 jury members
+            $available_jury = $jury_ids;
             shuffle($available_jury);
             
-            $needed = 3 - count($assignments[$candidate->ID]);
-            $selected = array_slice($available_jury, 0, $needed);
-            
-            $assignments[$candidate->ID] = array_merge($assignments[$candidate->ID], $selected);
+            // Assign 3 jury members
+            $assignments[$candidate->ID] = array_slice($available_jury, 0, 3);
         }
         
         return $assignments;
@@ -658,8 +662,8 @@ class MT_AJAX_Handlers {
      * Expertise-based assignment algorithm
      */
     private function expertise_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        // This would match candidates to jury members based on expertise areas
         // For now, fall back to balanced assignment
+        // TODO: Implement expertise matching based on categories
         return $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
     }
     
@@ -667,8 +671,8 @@ class MT_AJAX_Handlers {
      * Category-based assignment algorithm
      */
     private function category_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        // This would assign candidates to jury members based on categories
         // For now, fall back to balanced assignment
+        // TODO: Implement category-based assignment
         return $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
     }
     
