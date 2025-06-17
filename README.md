@@ -1,193 +1,119 @@
-# Mobility Trailblazers Award System
+# Mobility Trailblazers - Award Management Platform
 
-A comprehensive WordPress plugin for managing the prestigious "25 Mobility Trailblazers in 25" award platform, designed to identify and celebrate 25 mobility innovators in the DACH region.
+A comprehensive WordPress plugin for managing mobility innovation awards in the DACH region. Features include candidate management, jury evaluations, public voting, and full Elementor Pro integration.
 
 ## Overview
 
-The Mobility Trailblazers Award System is an enterprise-grade WordPress plugin that provides a complete solution for managing multi-stage award selection processes. It features candidate management, jury evaluation systems, public voting, and comprehensive administrative tools.
+Mobility Trailblazers is a complete award management solution designed to:
+- Showcase mobility innovators and shapers in the DACH region
+- Enable jury members to evaluate candidates professionally
+- Allow public voting for community favorites
+- Provide comprehensive administration tools
+- Integrate seamlessly with WordPress and Elementor
 
 ## Features
 
-### 🏆 Core Features
+### 🏆 Award Management
+- **Candidate Profiles**: Comprehensive profiles with photos, bios, and achievements
+- **Category Management**: Organize candidates by award categories
+- **Multi-stage Evaluation**: Support for jury evaluation and public voting phases
 
-- **Candidate Management System**
-  - Custom post type for candidates with extensive metadata
-  - Company details, innovation information, and impact metrics
-  - Media management for photos and documentation
-  - Status tracking (pending, approved, winner)
+### 👥 Jury System
+- **Modern Dashboard**: Beautiful, responsive interface for jury members
+- **5-Criteria Evaluation**: Score candidates on courage, innovation, implementation, relevance, and visibility
+- **Draft Support**: Save evaluations as drafts before final submission
+- **Progress Tracking**: Visual indicators showing evaluation completion
+- **Real-time Search**: Filter and find assigned candidates instantly
 
-- **Jury Evaluation System**
-  - Dedicated jury member profiles with expertise tracking
-  - 5-criteria scoring system (Courage, Innovation, Implementation, Relevance, Visibility)
-  - Draft saving and evaluation management
-  - Progress tracking and statistics
+### 🗳️ Public Voting
+- **User-friendly Interface**: Easy voting process for public participation
+- **Vote Restrictions**: IP-based and cookie-based duplicate prevention
+- **Real-time Results**: Live vote counting and statistics
+- **Voting Periods**: Admin-controlled voting windows
 
-- **Public Voting System**
-  - Enable/disable public voting globally
-  - Real-time vote counting
-  - AJAX-powered voting interface
-  - Vote tracking and prevention of duplicate votes
+### 🛠️ Administration
+- **Assignment Management**: Easily assign candidates to jury members
+- **Bulk Operations**: Auto-assignment and bulk management tools
+- **Import/Export**: CSV support for data management
+- **Comprehensive Settings**: Full control over all aspects of the awards
 
-- **Assignment Management**
-  - Visual drag-and-drop interface for candidate-jury assignments
-  - Multiple assignment algorithms (random, balanced, category-based)
-  - Real-time statistics and workload visualization
-  - Bulk operations support
-
-### 📊 Administrative Features
-
-- **Dashboard & Analytics**
-  - Comprehensive statistics dashboard
-  - Evaluation progress tracking
-  - Category-wise and criteria-wise analytics
-  - Export functionality for results
-
-- **Vote Reset System**
-  - Individual, bulk, and full system reset options
-  - Automatic backup creation before resets
-  - Detailed audit trail and logging
-  - Email notifications for affected parties
-
-- **Import/Export Tools**
-  - Bulk candidate import via CSV
-  - Jury member import functionality
-  - Data export in multiple formats
-  - Backup and restore capabilities
-
-- **System Diagnostics**
-  - Health check system
-  - Database integrity verification
-  - Permission and capability checks
-  - Performance monitoring
-
-### 🎨 Frontend Features
-
-- **Shortcodes** (8 available)
-  - `[mt_candidates]` - Candidates grid with filtering
-  - `[mt_jury_dashboard]` - Jury member evaluation interface
-  - `[mt_voting_form]` - Public voting form
-  - `[mt_registration_form]` - Candidate registration
-  - `[mt_evaluation_stats]` - Statistics display
-  - `[mt_winners]` - Winners showcase
-  - `[mt_jury]` - Jury members grid
-  - `[mt_candidate_profile]` - Individual candidate profiles
-
-- **Elementor Pro Integration**
-  - 8 custom Elementor widgets
-  - Dynamic tags for candidate and jury data
-  - Full style customization options
-  - Live preview in Elementor editor
-
-### 🔧 Technical Features
-
-- **Custom Database Tables**
-  - `mt_votes` - Evaluation data storage
-  - `mt_candidate_scores` - Aggregated scoring
-  - `vote_reset_logs` - Reset audit trail
-  - `mt_vote_backups` - Backup storage
-
-- **REST API Endpoints**
-  - Full CRUD operations for candidates
-  - Evaluation submission and retrieval
-  - Assignment management
-  - Backup and restore operations
-
-- **AJAX Handlers**
-  - Real-time evaluation submission
-  - Draft saving functionality
-  - Vote processing
-  - Dynamic content loading
-
-- **Security Features**
-  - Nonce verification on all requests
-  - Capability-based permissions
-  - Input sanitization and validation
-  - SQL injection prevention
-
-## Requirements
-
-- WordPress 5.8 or higher
-- PHP 7.4 or higher (PHP 8.2 recommended)
-- MySQL 5.7 or higher
-- Modern browser with JavaScript enabled
+### 🎨 Elementor Integration
+- **Custom Widgets**: Native Elementor widgets for all major components
+- **Design Control**: Full styling options within Elementor
+- **Responsive Design**: Mobile-first approach for all elements
 
 ## Installation
 
 1. Upload the `mobility-trailblazers` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. The plugin will automatically:
-   - Create necessary database tables
-   - Set up custom post types and taxonomies
-   - Create user roles and capabilities
-   - Initialize default settings
+3. Run the setup wizard or configure manually via the admin menu
 
-## Configuration
+## Requirements
 
-### Initial Setup
+- WordPress 5.8 or higher
+- PHP 7.4 or higher
+- MySQL 5.7 or higher
+- Elementor Pro (optional, for widget functionality)
 
-1. Navigate to **Mobility Trailblazers → Settings**
-2. Configure the following:
-   - Current award year
-   - Award phases (nomination, evaluation, selection, announcement)
-   - Email settings for notifications
-   - Public voting options
+## Quick Start
 
-### User Roles
+### Setting Up Awards
 
-The plugin creates two custom roles:
+1. Navigate to **Mobility Trailblazers** → **Categories**
+2. Create award categories (e.g., "Innovation Leader", "Sustainability Champion")
+3. Add candidates via **Mobility Trailblazers** → **Add New Candidate**
+4. Create jury members and their user accounts
+5. Assign candidates to jury members
 
-- **MT Award Admin** (`mt_award_admin`)
-  - Full plugin management capabilities
-  - Access to all administrative features
-  - Can manage candidates, jury, and settings
+### Using Shortcodes
 
-- **MT Jury** (`mt_jury`)
-  - Can submit and edit evaluations
-  - Access to jury dashboard
-  - View assigned candidates only
+```php
+// Display candidates grid
+[mt_candidates category="innovation" limit="12" columns="3"]
 
-### Capabilities
+// Show jury dashboard
+[mt_jury_dashboard show_stats="yes" show_progress="yes"]
 
-Custom capabilities added:
-- `mt_manage_awards` - Overall plugin management
-- `mt_submit_evaluations` - Submit jury evaluations
-- `mt_reset_votes` - Perform vote resets
+// Display voting form
+[mt_voting_form]
 
-## Usage
+// Show voting results
+[mt_voting_results show_chart="yes"]
+```
 
-### Managing Candidates
+### Elementor Widgets
 
-1. Go to **Mobility Trailblazers → Candidates**
-2. Add new candidates with:
-   - Personal information
-   - Company details
-   - Innovation description
-   - Supporting documentation
-3. Set appropriate categories and status
+Available widgets in the Elementor editor:
+- **MT Candidates Grid** - Display candidates with filtering
+- **MT Jury Dashboard** - Complete jury interface
+- **MT Voting Form** - Public voting interface
+- **MT Results Display** - Show voting results
 
-### Jury Management
+## Jury Dashboard Guide
 
-1. Create jury members at **Mobility Trailblazers → Jury Members**
-2. Link to WordPress user accounts
-3. Assign candidates using the Assignment Template
-4. Monitor evaluation progress
+### For Jury Members
 
-### Public Voting
+1. **Login**: Use your provided credentials to access the jury area
+2. **Dashboard Overview**: 
+   - View assigned candidates count
+   - Track evaluation progress
+   - See completion percentage
+3. **Evaluating Candidates**:
+   - Click on any candidate card
+   - Score each of the 5 criteria (1-10 scale)
+   - Add optional comments
+   - Save as draft or submit final evaluation
+4. **Search & Filter**:
+   - Use the search box to find specific candidates
+   - Filter by evaluation status (Pending/Draft/Completed)
 
-1. Enable public voting in Settings
-2. Add voting form to pages using:
-   - Shortcode: `[mt_voting_form]`
-   - Elementor widget: "Voting Form"
-3. Monitor votes in the admin dashboard
+### Evaluation Criteria
 
-### Displaying Content
-
-Use shortcodes or Elementor widgets to display:
-- Candidate grids with filtering
-- Jury member profiles
-- Voting interfaces
-- Statistics and results
-- Winner announcements
+1. **Mut & Pioniergeist** (Courage & Pioneer Spirit) - Did they act against resistance?
+2. **Innovationsgrad** (Innovation Degree) - How innovative is the contribution?
+3. **Umsetzungskraft & Wirkung** (Implementation & Impact) - What results were achieved?
+4. **Relevanz für Mobilitätswende** (Mobility Transformation Relevance) - DACH region impact?
+5. **Vorbildfunktion & Sichtbarkeit** (Role Model & Visibility) - Public inspiration factor?
 
 ## Development
 
@@ -195,84 +121,101 @@ Use shortcodes or Elementor widgets to display:
 
 ```
 mobility-trailblazers/
-├── admin/
-│   └── views/          # Admin interface templates
 ├── assets/
-│   ├── css/           # Stylesheets
-│   └── js/            # JavaScript files
+│   ├── jury-dashboard.js      # Jury dashboard functionality
+│   ├── jury-dashboard.css     # Jury dashboard styling
+│   ├── frontend.js            # General frontend scripts
+│   └── frontend.css           # General frontend styles
 ├── includes/
-│   ├── elementor/     # Elementor integration
-│   │   ├── widgets/   # Custom widgets
-│   │   └── tags/      # Dynamic tags
-│   └── *.php          # Core functionality classes
-├── languages/         # Translation files
-└── templates/
-    └── shortcodes/    # Shortcode templates
+│   ├── class-mt-jury-system.php    # Jury system core
+│   ├── class-mt-ajax-handlers.php  # AJAX endpoints
+│   └── mt-utility-functions.php    # Helper functions
+├── templates/
+│   └── shortcodes/
+│       └── jury-dashboard.php      # Jury dashboard template
+└── elementor/
+    └── widgets/
+        └── jury-dashboard.php      # Elementor widget
 ```
 
-### Hooks and Filters
+### Hooks & Filters
 
-The plugin provides numerous hooks for customization:
+```php
+// Modify evaluation criteria
+add_filter('mt_evaluation_criteria', function($criteria) {
+    // Add or modify criteria
+    return $criteria;
+});
 
-- `mt_plugin_activated` - Fired on plugin activation
-- `mt_before_evaluation_save` - Before saving evaluations
-- `mt_after_vote_reset` - After vote reset operations
-- `mt_candidates_query_args` - Modify candidate queries
+// After evaluation submission
+add_action('mt_evaluation_submitted', function($candidate_id, $jury_member_id, $scores) {
+    // Custom actions after evaluation
+}, 10, 3);
 
-### REST API
+// Customize jury dashboard
+add_filter('mt_jury_dashboard_stats', function($stats, $jury_member_id) {
+    // Modify dashboard statistics
+    return $stats;
+}, 10, 2);
+```
 
-Example endpoints:
-- `GET /wp-json/mt/v1/candidates` - List candidates
-- `POST /wp-json/mt/v1/evaluations` - Submit evaluation
-- `GET /wp-json/mt/v1/statistics` - Get statistics
+### AJAX Endpoints
+
+Available AJAX actions for custom development:
+- `mt_get_jury_dashboard_data` - Retrieve dashboard statistics
+- `mt_get_candidate_evaluation` - Get evaluation data
+- `mt_save_evaluation` - Save evaluation (draft or final)
+- `mt_manual_assign` - Manually assign candidates
+- `mt_auto_assign` - Auto-assign candidates
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Missing Capabilities**
-   - Run the diagnostic tool
-   - Use "Fix Capabilities" option if needed
+**Jury Dashboard Not Loading**
+- Check browser console for JavaScript errors
+- Verify user has jury member permissions
+- Ensure assets are loading (no 404 errors)
 
-2. **Database Errors**
-   - Check table creation in diagnostic
-   - Verify MySQL permissions
+**Evaluations Not Saving**
+- Check AJAX response in browser Network tab
+- Verify nonce is being passed correctly
+- Ensure database tables exist
 
-3. **Elementor Widgets Not Showing**
-   - Ensure Elementor is active
-   - Clear Elementor cache
+**Styling Issues**
+- Clear browser cache
+- Check for CSS conflicts with theme
+- Verify Elementor is not overriding styles
 
-### Diagnostic Tools
+### Debug Mode
 
-Access diagnostics at **Mobility Trailblazers → Diagnostic**:
-- Database table checks
-- User capability verification
-- System requirements validation
-- Performance metrics
+Enable debug mode in `wp-config.php`:
+```php
+define('MT_DEBUG', true);
+```
 
-## Support
-
-For support and documentation:
-- Plugin URI: https://mobilitytrailblazers.de
-- Documentation: [Coming Soon]
-- Support Email: [Configure in Settings]
-
-## Changelog
-
-### Version 1.0.2
-- Initial public release
-- Complete award management system
-- Elementor Pro integration
-- Comprehensive admin tools
 
 ## License
 
-GPL v2 or later - https://www.gnu.org/licenses/gpl-2.0.html
+This plugin is licensed under the GPL v2 or later.
 
 ## Credits
 
-Developed by Nicolas Estrém for the Mobility Trailblazers Award Platform.
+Developed for the DACH Mobility Innovation Awards by [Your Organization]
+
+### Contributors
+- Lead Developer: [Name]
+- UI/UX Design: [Name]
+- Project Manager: [Name]
+
+### Special Thanks
+- Elementor Team for the excellent page builder
+- WordPress Community for ongoing support
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
 ---
 
-*This plugin is designed to streamline the entire award selection process, from candidate submission through final winner announcement, providing a professional and efficient platform for recognizing innovation in mobility.*
+Made with ❤️ for the future of mobility in the DACH region
