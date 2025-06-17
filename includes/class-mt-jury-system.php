@@ -63,10 +63,81 @@ class MT_Jury_System {
             // Enqueue dashboard styles
             wp_enqueue_style(
                 'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/jury-dashboard.css',
+                MT_PLUGIN_URL . 'assets/frontend.css',
                 array(),
                 MT_PLUGIN_VERSION
             );
+            
+            // Add inline styles as fallback
+            $inline_styles = "
+                .mt-jury-dashboard {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .mt-dashboard-header {
+                    background: #fff;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    border: 1px solid #ccd0d4;
+                    border-radius: 4px;
+                }
+                .mt-dashboard-stats {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 20px;
+                    margin-bottom: 20px;
+                }
+                .mt-stat-box {
+                    flex: 1;
+                    background: #fff;
+                    padding: 20px;
+                    border: 1px solid #ccd0d4;
+                    border-radius: 4px;
+                    text-align: center;
+                }
+                .mt-stat-number {
+                    display: block;
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #2271b1;
+                }
+                .mt-stat-label {
+                    display: block;
+                    font-size: 14px;
+                    color: #646970;
+                    margin-top: 5px;
+                }
+                .mt-progress-section {
+                    background: #fff;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                    border: 1px solid #ccd0d4;
+                    border-radius: 4px;
+                }
+                .mt-progress-bar {
+                    height: 20px;
+                    background: #f0f0f1;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    position: relative;
+                }
+                .mt-progress-fill {
+                    height: 100%;
+                    background: #2271b1;
+                    transition: width 0.3s ease;
+                }
+                .mt-progress-text {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #fff;
+                    font-weight: 600;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+                }
+            ";
+            wp_add_inline_style('mt-jury-dashboard', $inline_styles);
             
             // Enqueue dashboard scripts
             wp_enqueue_script(

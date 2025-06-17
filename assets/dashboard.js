@@ -518,6 +518,16 @@
         if ($('.mt-jury-dashboard').length || $('#mt-jury-dashboard').length) {
             MTJuryDashboard.init();
         }
+
+        // Fix for wp-auth-check
+        var authCheck = $('#wp-auth-check-wrap');
+        if (authCheck.length) {
+            authCheck.on('click', function(e) {
+                if ($(e.target).hasClass('wp-auth-check-close')) {
+                    $('#wp-auth-check').removeClass('loading');
+                }
+            });
+        }
     });
     
 })(jQuery); 

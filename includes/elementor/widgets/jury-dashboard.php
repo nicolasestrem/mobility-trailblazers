@@ -60,6 +60,10 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
         return array('jury', 'dashboard', 'evaluation', 'mobility', 'trailblazers');
     }
     
+    public function get_script_depends() {
+        return ['mt-jury-dashboard'];
+    }
+    
     /**
      * Register widget controls
      */
@@ -67,34 +71,34 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
         // Content Section
         $this->start_controls_section(
             'content_section',
-            array(
+            [
                 'label' => __('Content', 'mobility-trailblazers'),
                 'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
-            )
+            ]
         );
         
         $this->add_control(
             'show_stats',
-            array(
+            [
                 'label' => __('Show Statistics', 'mobility-trailblazers'),
                 'type' => \Elementor\Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'mobility-trailblazers'),
-                'label_off' => __('No', 'mobility-trailblazers'),
+                'label_on' => __('Show', 'mobility-trailblazers'),
+                'label_off' => __('Hide', 'mobility-trailblazers'),
                 'return_value' => 'yes',
                 'default' => 'yes',
-            )
+            ]
         );
         
         $this->add_control(
             'show_progress',
-            array(
+            [
                 'label' => __('Show Progress Bar', 'mobility-trailblazers'),
                 'type' => \Elementor\Controls_Manager::SWITCHER,
-                'label_on' => __('Yes', 'mobility-trailblazers'),
-                'label_off' => __('No', 'mobility-trailblazers'),
+                'label_on' => __('Show', 'mobility-trailblazers'),
+                'label_off' => __('Hide', 'mobility-trailblazers'),
                 'return_value' => 'yes',
                 'default' => 'yes',
-            )
+            ]
         );
         
         $this->add_control(
@@ -328,41 +332,28 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
     protected function render() {
         $settings = $this->get_settings_for_display();
         
-        // Check if user is logged in
+        // Get current user
+        $current_user = wp_get_current_user();
+        
         if (!is_user_logged_in()) {
-            echo '<div class="mt-notice mt-notice-error">' . 
-                 esc_html($settings['login_message']) . 
-                 ' <a href="' . wp_login_url(get_permalink()) . '">' . 
-                 __('Log in', 'mobility-trailblazers') . '</a></div>';
+            echo '<div class="mt-jury-dashboard-login-required">';
+            echo '<p>' . esc_html($settings['login_message']) . '</p>';
+            echo '</div>';
             return;
         }
         
-        // Check if user is jury member
-        if (!mt_is_jury_member()) {
-            echo '<div class="mt-notice mt-notice-error">' . 
-                 esc_html($settings['permission_message']) . 
-                 '</div>';
+        // Check if user is a jury member
+        $jury_member = mt_get_jury_member_by_user_id($current_user->ID);
+        
+        if (!$jury_member) {
+            echo '<div class="mt-jury-dashboard-permission-denied">';
+            echo '<p>' . esc_html($settings['permission_message']) . '</p>';
+            echo '</div>';
             return;
         }
         
-        // Build shortcode attributes
-        $atts = array(
-            'show_stats' => $settings['show_stats'],
-            'show_progress' => $settings['show_progress'],
-            'show_filters' => $settings['show_filters'],
-        );
-        
-        // Generate shortcode
-        $shortcode = '[mt_jury_dashboard';
-        foreach ($atts as $key => $value) {
-            if (!empty($value)) {
-                $shortcode .= ' ' . $key . '="' . esc_attr($value) . '"';
-            }
-        }
-        $shortcode .= ']';
-        
-        // Output shortcode
-        echo do_shortcode($shortcode);
+        // Render dashboard
+        echo do_shortcode('[mt_jury_dashboard show_stats="' . $settings['show_stats'] . '" show_progress="' . $settings['show_progress'] . '"]');
     }
     
     /**
