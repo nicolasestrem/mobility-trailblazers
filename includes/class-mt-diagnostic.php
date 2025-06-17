@@ -29,6 +29,9 @@ class MT_Diagnostic {
         
         // Add REST endpoint for diagnostics
         add_action('rest_api_init', array($this, 'register_diagnostic_endpoint'));
+
+        // Add assignment debug page
+        add_action('admin_menu', array($this, 'add_assignment_debug_page'));
     }
     
     /**
@@ -850,6 +853,171 @@ class MT_Diagnostic {
     private function get_roles_info() {
         return array(
             'mt_jury' => __('MT Jury', 'mobility-trailblazers'),
+        );
+    }
+
+    /**
+     * Debug function to check assignment data
+     */
+    public function debug_assignments() {
+        global $wpdb;
+        
+        echo "<h2>Assignment Debug Information</h2>";
+        
+        // Check total counts
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        $total_jury = wp_count_posts('mt_jury')->publish;
+        
+        echo "<p>Total Published Candidates: $total_candidates</p>";
+        echo "<p>Total Published Jury Members: $total_jury</p>";
+        
+        // Check assignment data structure
+        echo "<h3>Sample Assignment Data (First 5 candidates):</h3>";
+        
+        $candidates = get_posts(array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => 5,
+            'post_status' => 'publish'
+        ));
+        
+        foreach ($candidates as $candidate) {
+            $assigned_jury = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
+            echo "<p><strong>Candidate: {$candidate->post_title} (ID: {$candidate->ID})</strong></p>";
+            echo "<pre>";
+            var_dump($assigned_jury);
+            echo "</pre>";
+        }
+        
+        // Check raw database data
+        echo "<h3>Raw Database Check (postmeta table):</h3>";
+        $results = $wpdb->get_results("
+            SELECT post_id, meta_value 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_assigned_jury_members' 
+            LIMIT 5
+        ");
+        
+        foreach ($results as $row) {
+            echo "<p>Post ID: {$row->post_id}</p>";
+            echo "<p>Meta Value: {$row->meta_value}</p>";
+            echo "<p>Unserialized:</p>";
+            echo "<pre>";
+            var_dump(maybe_unserialize($row->meta_value));
+            echo "</pre>";
+            echo "<hr>";
+        }
+        
+        // Check jury member assignments
+        echo "<h3>Jury Member Assignment Counts:</h3>";
+        $jury_members = get_posts(array(
+            'post_type' => 'mt_jury',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+        
+        foreach ($jury_members as $jury) {
+            $assigned_count = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT post_id) 
+                 FROM {$wpdb->postmeta} 
+                 WHERE meta_key = '_mt_assigned_jury_members' 
+                 AND meta_value LIKE %s",
+                '%i:' . $jury->ID . ';%'
+            ));
+            
+            echo "<p>{$jury->post_title} (ID: {$jury->ID}): $assigned_count candidates assigned</p>";
+        }
+    }
+
+    /**
+     * Fixed version of the balanced assignment function
+     * This ensures proper integer IDs are stored
+     */
+    private function balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
+        $assignments = array();
+        $jury_counts = array();
+        
+        // Initialize jury counts with integer IDs
+        foreach ($jury_members as $jury) {
+            $jury_counts[intval($jury->ID)] = 0;
+        }
+        
+        // If preserving existing, count current assignments
+        if ($preserve_existing) {
+            foreach ($candidates as $candidate) {
+                $existing = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
+                if (is_array($existing)) {
+                    // Ensure IDs are integers
+                    $existing = array_map('intval', $existing);
+                    $assignments[$candidate->ID] = $existing;
+                    foreach ($existing as $jury_id) {
+                        if (isset($jury_counts[$jury_id])) {
+                            $jury_counts[$jury_id]++;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Assign candidates to jury members
+        foreach ($candidates as $candidate) {
+            // Skip if already has assignments and preserving
+            if ($preserve_existing && !empty($assignments[$candidate->ID]) && count($assignments[$candidate->ID]) >= 3) {
+                continue;
+            }
+            
+            // Initialize assignments for this candidate
+            if (!isset($assignments[$candidate->ID])) {
+                $assignments[$candidate->ID] = array();
+            }
+            
+            // Sort jury members by assignment count (ascending)
+            asort($jury_counts);
+            
+            // Determine how many more jury members to assign
+            $current_count = count($assignments[$candidate->ID]);
+            $needed = 3 - $current_count;
+            
+            if ($needed > 0) {
+                $assigned_count = 0;
+                foreach ($jury_counts as $jury_id => $count) {
+                    // Skip if already assigned to this candidate
+                    if (in_array($jury_id, $assignments[$candidate->ID])) {
+                        continue;
+                    }
+                    
+                    // Check if jury member hasn't exceeded their limit
+                    if ($count < $candidates_per_jury) {
+                        $assignments[$candidate->ID][] = intval($jury_id);
+                        $jury_counts[$jury_id]++;
+                        $assigned_count++;
+                        
+                        if ($assigned_count >= $needed) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Ensure all IDs are integers before returning
+        foreach ($assignments as $candidate_id => $jury_ids) {
+            $assignments[$candidate_id] = array_map('intval', $jury_ids);
+        }
+        
+        return $assignments;
+    }
+
+    /**
+     * Add assignment debug page to admin menu
+     */
+    public function add_assignment_debug_page() {
+        add_submenu_page(
+            'edit.php?post_type=mt_candidate',
+            'Assignment Debug',
+            'Assignment Debug',
+            'manage_options',
+            'mt-assignment-debug',
+            array($this, 'debug_assignments')
         );
     }
 } 

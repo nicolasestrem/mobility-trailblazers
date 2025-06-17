@@ -403,4 +403,30 @@ class MT_Roles {
             ),
         );
     }
+
+    /**
+     * Fix assignment data types by ensuring all jury member IDs are stored as integers
+     *
+     * @return int Number of records processed
+     */
+    public static function fix_assignment_data_types() {
+        global $wpdb;
+        
+        $results = $wpdb->get_results("
+            SELECT post_id, meta_value 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_mt_assigned_jury_members'
+        ");
+        
+        foreach ($results as $row) {
+            $jury_ids = maybe_unserialize($row->meta_value);
+            if (is_array($jury_ids) && !empty($jury_ids)) {
+                // Convert all IDs to integers
+                $jury_ids = array_map('intval', $jury_ids);
+                update_post_meta($row->post_id, '_mt_assigned_jury_members', $jury_ids);
+            }
+        }
+        
+        return count($results);
+    }
 } 

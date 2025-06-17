@@ -143,15 +143,26 @@ function mt_get_jury_member_by_user_id($user_id) {
 function mt_get_assigned_candidates($jury_member_id) {
     global $wpdb;
     
-    $candidates = $wpdb->get_col($wpdb->prepare(
-        "SELECT DISTINCT post_id 
-         FROM {$wpdb->postmeta} 
-         WHERE meta_key = '_mt_assigned_jury_members' 
-         AND meta_value LIKE %s",
-        '%"' . $jury_member_id . '"%'
-    ));
+    $jury_member_id = intval($jury_member_id);
+    $assigned_candidates = array();
     
-    return array_map('intval', $candidates);
+    // Get all candidates with assignments
+    $results = $wpdb->get_results("
+        SELECT post_id, meta_value 
+        FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_mt_assigned_jury_members' 
+        AND meta_value != ''
+        AND meta_value != 'a:0:{}'
+    ");
+    
+    foreach ($results as $row) {
+        $jury_ids = maybe_unserialize($row->meta_value);
+        if (is_array($jury_ids) && in_array($jury_member_id, array_map('intval', $jury_ids))) {
+            $assigned_candidates[] = intval($row->post_id);
+        }
+    }
+    
+    return $assigned_candidates;
 }
 
 /**

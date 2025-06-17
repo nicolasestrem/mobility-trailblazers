@@ -104,6 +104,12 @@ if (isset($_POST['fix_capabilities']) && wp_verify_nonce($_POST['mt_fix_nonce'],
     }
 }
 
+// Fix assignment data types if requested
+if (isset($_POST['fix_assignments']) && wp_verify_nonce($_POST['mt_fix_assignments_nonce'], 'mt_fix_assignments')) {
+    $processed = MT_Roles::fix_assignment_data_types();
+    $message = sprintf(__('Successfully processed %d assignment records.', 'mobility-trailblazers'), $processed);
+}
+
 // Check current status
 $admin_role = get_role('administrator');
 $missing_caps = array();
@@ -146,10 +152,23 @@ foreach ($required_caps as $cap) {
         <div class="notice notice-success">
             <p><?php _e('All required capabilities are properly assigned to the administrator role.', 'mobility-trailblazers'); ?></p>
         </div>
-        <p>
-            <a href="<?php echo admin_url('admin.php?page=mt-diagnostic'); ?>" class="button">
-                <?php _e('Return to Diagnostic', 'mobility-trailblazers'); ?>
-            </a>
-        </p>
     <?php endif; ?>
+
+    <hr>
+
+    <h2><?php _e('Fix Assignment Data Types', 'mobility-trailblazers'); ?></h2>
+    <p><?php _e('This will ensure all jury member IDs in assignments are stored as integers. This helps prevent type-related issues in the assignment system.', 'mobility-trailblazers'); ?></p>
+    
+    <form method="post" action="">
+        <?php wp_nonce_field('mt_fix_assignments', 'mt_fix_assignments_nonce'); ?>
+        <p class="submit">
+            <input type="submit" name="fix_assignments" class="button button-primary" value="<?php _e('Fix Assignment Data Types', 'mobility-trailblazers'); ?>" />
+        </p>
+    </form>
+
+    <p>
+        <a href="<?php echo admin_url('admin.php?page=mt-diagnostic'); ?>" class="button">
+            <?php _e('Return to Diagnostic', 'mobility-trailblazers'); ?>
+        </a>
+    </p>
 </div> 
