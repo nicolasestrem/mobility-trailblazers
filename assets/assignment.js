@@ -1,5 +1,5 @@
 /**
- * Assignment Management JavaScript - Fixed Version
+ * Assignment Management JavaScript - Fixed Version with Manual Assignment
  * 
  * @package MobilityTrailblazers
  */
@@ -50,6 +50,12 @@
                 self.performAutoAssign();
             });
             
+            // Manual Assignment Confirm button
+            $('#mt-confirm-manual-assign').on('click', function(e) {
+                e.preventDefault();
+                self.performManualAssign();
+            });
+            
             // Modal close buttons
             $('.mt-modal-close').on('click', function(e) {
                 e.preventDefault();
@@ -71,6 +77,14 @@
             // Category filter
             $('#mt-category-filter').on('change', function() {
                 self.filterByCategory($(this).val());
+            });
+            
+            // Remove assignment buttons
+            $(document).on('click', '.mt-remove-assignment', function(e) {
+                e.preventDefault();
+                var candidateId = $(this).data('candidate-id');
+                var juryId = $(this).data('jury-id');
+                self.removeAssignment(candidateId, juryId, $(this));
             });
         },
         
@@ -122,6 +136,59 @@
                 },
                 complete: function() {
                     $('#mt-confirm-auto-assign').prop('disabled', false).text('Start Auto-Assignment');
+                }
+            });
+        },
+        
+        // Perform Manual Assignment
+        performManualAssign: function() {
+            var self = this;
+            var candidateId = $('#mt-manual-candidate').val();
+            var juryIds = $('#mt-manual-jury').val();
+            
+            // Validation
+            if (!candidateId) {
+                self.showNotification('Please select a candidate', 'error');
+                return;
+            }
+            
+            if (!juryIds || juryIds.length === 0) {
+                self.showNotification('Please select at least one jury member', 'error');
+                return;
+            }
+            
+            // Disable button during processing
+            $('#mt-confirm-manual-assign').prop('disabled', true).text('Assigning...');
+            
+            $.ajax({
+                url: mt_assignment_vars.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_manual_assign',
+                    candidate_id: candidateId,
+                    jury_ids: juryIds,
+                    nonce: mt_assignment_vars.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        self.showNotification(response.data.message || 'Assignment saved successfully', 'success');
+                        $('#mt-manual-assign-modal').hide();
+                        // Reset form
+                        $('#mt-manual-candidate').val('');
+                        $('#mt-manual-jury').val([]);
+                        // Reload the page to show updated assignments
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        self.showNotification(response.data.message || 'Failed to save assignment', 'error');
+                    }
+                },
+                error: function() {
+                    self.showNotification('Connection error. Please try again.', 'error');
+                },
+                complete: function() {
+                    $('#mt-confirm-manual-assign').prop('disabled', false).text('Assign');
                 }
             });
         },
@@ -195,31 +262,56 @@
             self.showNotification('Export started. Download will begin shortly.', 'success');
         },
         
-        // Filter Candidates
-        filterCandidates: function(searchTerm) {
-            searchTerm = searchTerm.toLowerCase();
+        // Remove single assignment
+        removeAssignment: function(candidateId, juryId, button) {
+            var self = this;
             
-            $('.candidate-item').each(function() {
-                var candidateName = $(this).find('.candidate-name').text().toLowerCase();
-                var candidateCompany = $(this).find('.candidate-company').text().toLowerCase();
-                
-                if (candidateName.includes(searchTerm) || candidateCompany.includes(searchTerm)) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
-        },
-        
-        // Filter by Category
-        filterByCategory: function(categoryId) {
-            if (!categoryId) {
-                $('.candidate-item').show();
+            if (!confirm('Are you sure you want to remove this assignment?')) {
                 return;
             }
             
-            $('.candidate-item').each(function() {
-                if ($(this).data('category-id') == categoryId) {
+            // Disable button during processing
+            button.prop('disabled', true);
+            
+            $.ajax({
+                url: mt_assignment_vars.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_remove_assignment',
+                    candidate_id: candidateId,
+                    jury_member_id: juryId,
+                    nonce: mt_assignment_vars.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remove the assignment from UI
+                        button.closest('.mt-assigned-candidate').fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        self.showNotification('Assignment removed', 'success');
+                        self.updateStatistics();
+                    } else {
+                        self.showNotification(response.data.message || 'Error removing assignment', 'error');
+                    }
+                },
+                error: function() {
+                    self.showNotification('Connection error. Please try again.', 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                }
+            });
+        },
+        
+        // Filter candidates by search term
+        filterCandidates: function(searchTerm) {
+            searchTerm = searchTerm.toLowerCase();
+            
+            $('.mt-candidate-item').each(function() {
+                var candidateName = $(this).find('.mt-candidate-name').text().toLowerCase();
+                var companyName = $(this).find('.mt-company-name').text().toLowerCase();
+                
+                if (candidateName.indexOf(searchTerm) > -1 || companyName.indexOf(searchTerm) > -1) {
                     $(this).show();
                 } else {
                     $(this).hide();
@@ -227,10 +319,24 @@
             });
         },
         
-        // Update Statistics
-        updateStatistics: function() {
-            var self = this;
+        // Filter by category
+        filterByCategory: function(categoryId) {
+            if (!categoryId) {
+                $('.mt-candidate-item').show();
+                return;
+            }
             
+            $('.mt-candidate-item').each(function() {
+                if ($(this).data('categories') && $(this).data('categories').indexOf(categoryId) > -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        },
+        
+        // Update statistics
+        updateStatistics: function() {
             $.ajax({
                 url: mt_assignment_vars.ajax_url,
                 type: 'POST',
@@ -239,38 +345,39 @@
                     nonce: mt_assignment_vars.nonce
                 },
                 success: function(response) {
-                    if (response.success && response.data) {
-                        // Update stat numbers
-                        $('.mt-stat-box').eq(0).find('.mt-stat-number').text(response.data.total_candidates || 0);
-                        $('.mt-stat-box').eq(1).find('.mt-stat-number').text(response.data.total_jury_members || 0);
-                        $('.mt-stat-box').eq(2).find('.mt-stat-number').text(response.data.assigned_candidates || 0);
-                        $('.mt-stat-box').eq(3).find('.mt-stat-number').text(response.data.unassigned_candidates || 0);
+                    if (response.success) {
+                        // Update the statistics in the UI
+                        if (response.data.total_candidates !== undefined) {
+                            $('.mt-stat-candidates .mt-stat-number').text(response.data.total_candidates);
+                        }
+                        if (response.data.assigned_candidates !== undefined) {
+                            $('.mt-stat-assigned .mt-stat-number').text(response.data.assigned_candidates);
+                        }
+                        if (response.data.unassigned_candidates !== undefined) {
+                            $('.mt-stat-unassigned .mt-stat-number').text(response.data.unassigned_candidates);
+                        }
                     }
                 }
             });
         },
         
-        // Show Notification
+        // Show notification
         showNotification: function(message, type) {
-            // Remove existing notifications
-            $('.mt-notification').remove();
-            
             var notification = $('<div class="mt-notification ' + type + '">' + message + '</div>');
             
-            // Add notification styles if not exists
+            // Add notification styles if not already present
             if (!$('#mt-notification-styles').length) {
                 $('head').append(`
                     <style id="mt-notification-styles">
                         .mt-notification {
                             position: fixed;
-                            top: 32px;
+                            top: 50px;
                             right: 20px;
+                            padding: 15px 20px;
                             background: #fff;
-                            padding: 12px 20px;
                             border-left: 4px solid;
-                            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                             z-index: 100001;
-                            max-width: 300px;
                             opacity: 0;
                             transform: translateX(100%);
                             transition: all 0.3s ease;

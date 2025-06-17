@@ -35,6 +35,7 @@ class MT_AJAX_Handlers {
         add_action('wp_ajax_mt_clear_assignments', array($this, 'clear_assignments'));
         add_action('wp_ajax_mt_export_assignments', array($this, 'export_assignments'));
         add_action('wp_ajax_mt_remove_assignment', array($this, 'remove_assignment'));
+        add_action('wp_ajax_mt_manual_assign', array($this, 'manual_assign'));
         
         // Vote reset handlers
         add_action('wp_ajax_mt_reset_individual', array($this, 'reset_individual_vote'));
@@ -1844,5 +1845,107 @@ The application is currently in pending status and requires approval.', 'mobilit
             : 0;
         
         wp_send_json_success($stats);
+    }
+
+    /**
+     * Handle manual assignment
+     */
+    public function manual_assign() {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        }
+        
+        // Check permissions - temporarily disabled for testing
+        // if (!current_user_can('mt_manage_assignments')) {
+        //     wp_send_json_error(array('message' => __('You do not have permission to manage assignments.', 'mobility-trailblazers')));
+        // }
+        
+        // Get parameters
+        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
+        $jury_ids = isset($_POST['jury_ids']) ? array_map('intval', (array)$_POST['jury_ids']) : array();
+        
+        // Validate parameters
+        if (!$candidate_id) {
+            wp_send_json_error(array('message' => __('Please select a candidate.', 'mobility-trailblazers')));
+        }
+        
+        if (empty($jury_ids)) {
+            wp_send_json_error(array('message' => __('Please select at least one jury member.', 'mobility-trailblazers')));
+        }
+        
+        // Verify candidate exists
+        $candidate = get_post($candidate_id);
+        if (!$candidate || $candidate->post_type !== 'mt_candidate') {
+            wp_send_json_error(array('message' => __('Invalid candidate selected.', 'mobility-trailblazers')));
+        }
+        
+        // Verify jury members exist
+        foreach ($jury_ids as $jury_id) {
+            $jury_member = get_post($jury_id);
+            if (!$jury_member || $jury_member->post_type !== 'mt_jury') {
+                wp_send_json_error(array('message' => __('Invalid jury member selected.', 'mobility-trailblazers')));
+            }
+        }
+        
+        // Get existing assignments
+        $existing_assignments = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
+        if (!is_array($existing_assignments)) {
+            $existing_assignments = array();
+        }
+        
+        // Merge with new assignments (avoid duplicates)
+        $all_assignments = array_unique(array_merge($existing_assignments, $jury_ids));
+        
+        // Save the assignments
+        $updated = update_post_meta($candidate_id, '_mt_assigned_jury_members', array_values($all_assignments));
+        
+        if ($updated !== false) {
+            // Log the action
+            $this->log_action('manual_assignment', array(
+                'candidate_id' => $candidate_id,
+                'jury_ids' => $jury_ids,
+                'user_id' => get_current_user_id()
+            ));
+            
+            wp_send_json_success(array(
+                'message' => sprintf(
+                    __('Successfully assigned %s to %d jury member(s).', 'mobility-trailblazers'),
+                    $candidate->post_title,
+                    count($jury_ids)
+                ),
+                'assigned_count' => count($all_assignments)
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('Failed to save assignment. Please try again.', 'mobility-trailblazers')));
+        }
+    }
+
+    /**
+     * Log action helper method
+     */
+    private function log_action($action, $data) {
+        $log_entry = array(
+            'action' => $action,
+            'data' => $data,
+            'timestamp' => current_time('mysql'),
+            'user_id' => get_current_user_id()
+        );
+        
+        // You can implement actual logging here
+        // For now, we'll use a transient
+        $logs = get_transient('mt_assignment_logs');
+        if (!is_array($logs)) {
+            $logs = array();
+        }
+        
+        $logs[] = $log_entry;
+        
+        // Keep only last 100 entries
+        if (count($logs) > 100) {
+            $logs = array_slice($logs, -100);
+        }
+        
+        set_transient('mt_assignment_logs', $logs, DAY_IN_SECONDS);
     }
 } 

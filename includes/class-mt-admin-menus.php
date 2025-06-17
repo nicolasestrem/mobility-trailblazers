@@ -208,7 +208,7 @@ class MT_Admin_Menus {
         }
         
         // Include template
-        include MT_PLUGIN_DIR . 'admin/views/assignment-template.php';
+        include MT_PLUGIN_DIR . 'admin/templates/assignment-template.php';
     }
     
     /**

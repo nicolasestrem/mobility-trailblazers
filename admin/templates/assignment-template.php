@@ -350,4 +350,4 @@ $unassigned_candidates = $total_candidates - $assigned_candidates;
             </div>
         </div>
     </div>
-</div>
+</div> 
