@@ -589,4 +589,29 @@ function mt_get_evaluation_statistics($args = array()) {
     ");
     
     return $stats;
+}
+
+/**
+ * Check if jury member has a draft evaluation for a candidate
+ *
+ * @param int $candidate_id Candidate ID
+ * @param int $jury_member_id Jury member ID
+ * @return bool Whether draft evaluation exists
+ */
+function mt_has_draft_evaluation($candidate_id, $jury_member_id) {
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'mt_candidate_scores';
+    
+    $exists = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM $table_name 
+         WHERE candidate_id = %d 
+         AND jury_member_id = %d 
+         AND is_active = 1 
+         AND is_draft = 1",
+        $candidate_id,
+        $jury_member_id
+    ));
+    
+    return $exists > 0;
 } 
