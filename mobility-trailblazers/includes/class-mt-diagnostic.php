@@ -413,7 +413,7 @@ class MT_Diagnostic {
         $missing_caps = array();
         
         foreach ($required_caps as $cap) {
-            if (!$admin_role || !isset($admin_role->capabilities[$cap])) {
+            if (!$admin_role || !isset($admin_role->capabilities[$cap]) || !$admin_role->capabilities[$cap]) {
                 $missing_caps[] = $cap;
             }
         }
