@@ -390,4 +390,17 @@ class MT_Roles {
         
         wp_mail($user->user_email, $subject, $message);
     }
+
+    private function get_default_roles() {
+        return array(
+            'mt_jury' => array(
+                'name' => __('MT Jury', 'mobility-trailblazers'),
+                'capabilities' => array(
+                    'read' => true,
+                    'mt_submit_evaluations' => true,
+                    'mt_view_jury_dashboard' => true,
+                )
+            ),
+        );
+    }
 } 

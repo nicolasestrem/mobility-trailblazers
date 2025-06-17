@@ -24,10 +24,10 @@ class MT_Jury_System {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_jury_dashboard_scripts'));
         
         // Add jury member meta to user profile
-        add_action('show_user_profile', array($this, 'add_jury_profile_fields'));
-        add_action('edit_user_profile', array($this, 'add_jury_profile_fields'));
-        add_action('personal_options_update', array($this, 'save_jury_profile_fields'));
-        add_action('edit_user_profile_update', array($this, 'save_jury_profile_fields'));
+        add_action('show_user_profile', array($this, 'add_jury_fields'));
+        add_action('edit_user_profile', array($this, 'add_jury_fields'));
+        add_action('personal_options_update', array($this, 'save_jury_fields'));
+        add_action('edit_user_profile_update', array($this, 'save_jury_fields'));
         
         // Auto-create user accounts for jury members
         add_action('save_post_mt_jury', array($this, 'maybe_create_user_account'), 10, 3);
@@ -113,81 +113,33 @@ class MT_Jury_System {
      *
      * @param WP_User $user User object
      */
-    public function add_jury_profile_fields($user) {
-        if (!current_user_can('edit_users') && $user->ID !== get_current_user_id()) {
-            return;
-        }
-        
-        $jury_member_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
+    public function add_jury_fields($user) {
+        $jury_member_id = get_user_meta($user->ID, '_mt_jury_id', true);
         ?>
-        
         <h3><?php _e('Jury Member Information', 'mobility-trailblazers'); ?></h3>
-        
         <table class="form-table">
             <tr>
-                <th><label for="mt_jury_member_id"><?php _e('Linked Jury Member', 'mobility-trailblazers'); ?></label></th>
+                <th><label for="mt_jury_id"><?php _e('Linked Jury Member', 'mobility-trailblazers'); ?></label></th>
                 <td>
-                    <?php if ($jury_member_id) : ?>
-                        <?php $jury_member = get_post($jury_member_id); ?>
-                        <?php if ($jury_member) : ?>
-                            <a href="<?php echo get_edit_post_link($jury_member_id); ?>">
-                                <?php echo esc_html($jury_member->post_title); ?>
-                            </a>
-                            <p class="description">
-                                <?php _e('This user account is linked to a jury member profile.', 'mobility-trailblazers'); ?>
-                            </p>
-                        <?php else : ?>
-                            <p class="description">
-                                <?php _e('Linked jury member not found.', 'mobility-trailblazers'); ?>
-                            </p>
-                        <?php endif; ?>
-                    <?php else : ?>
-                        <?php if (current_user_can('edit_users')) : ?>
-                            <select name="mt_jury_member_id" id="mt_jury_member_id">
-                                <option value=""><?php _e('Select jury member...', 'mobility-trailblazers'); ?></option>
-                                <?php
-                                $jury_members = get_posts(array(
-                                    'post_type' => 'mt_jury',
-                                    'posts_per_page' => -1,
-                                    'orderby' => 'title',
-                                    'order' => 'ASC',
-                                    'meta_query' => array(
-                                        array(
-                                            'key' => '_mt_user_id',
-                                            'compare' => 'NOT EXISTS',
-                                        ),
-                                    ),
-                                ));
-                                
-                                foreach ($jury_members as $jury) {
-                                    echo '<option value="' . $jury->ID . '">' . esc_html($jury->post_title) . '</option>';
-                                }
-                                ?>
-                            </select>
-                            <p class="description">
-                                <?php _e('Link this user account to a jury member profile.', 'mobility-trailblazers'); ?>
-                            </p>
-                        <?php else : ?>
-                            <p class="description">
-                                <?php _e('Not linked to a jury member profile.', 'mobility-trailblazers'); ?>
-                            </p>
-                        <?php endif; ?>
-                    <?php endif; ?>
+                    <?php
+                    $jury_members = get_posts(array(
+                        'post_type' => 'mt_jury',
+                        'posts_per_page' => -1,
+                        'orderby' => 'title',
+                        'order' => 'ASC'
+                    ));
+                    ?>
+                    <select name="mt_jury_id" id="mt_jury_id">
+                        <option value=""><?php _e('— Select Jury Member —', 'mobility-trailblazers'); ?></option>
+                        <?php foreach ($jury_members as $member) : ?>
+                            <option value="<?php echo $member->ID; ?>" <?php selected($jury_member_id, $member->ID); ?>>
+                                <?php echo esc_html($member->post_title); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </td>
             </tr>
-            
-            <?php if (in_array('mt_jury_member', $user->roles)) : ?>
-                <tr>
-                    <th><?php _e('Jury Dashboard', 'mobility-trailblazers'); ?></th>
-                    <td>
-                        <a href="<?php echo admin_url('admin.php?page=mt-jury-dashboard'); ?>" class="button">
-                            <?php _e('Access Jury Dashboard', 'mobility-trailblazers'); ?>
-                        </a>
-                    </td>
-                </tr>
-            <?php endif; ?>
         </table>
-        
         <?php
     }
     
@@ -196,31 +148,27 @@ class MT_Jury_System {
      *
      * @param int $user_id User ID
      */
-    public function save_jury_profile_fields($user_id) {
-        if (!current_user_can('edit_users')) {
+    public function save_jury_fields($user_id) {
+        if (!current_user_can('edit_user', $user_id)) {
             return;
         }
-        
-        if (isset($_POST['mt_jury_member_id'])) {
-            $jury_member_id = intval($_POST['mt_jury_member_id']);
+
+        if (isset($_POST['mt_jury_id'])) {
+            $jury_member_id = intval($_POST['mt_jury_id']);
             
-            if ($jury_member_id) {
-                // Link user to jury member
-                update_user_meta($user_id, '_mt_jury_member_id', $jury_member_id);
-                update_post_meta($jury_member_id, '_mt_user_id', $user_id);
-                
-                // Update user role if not already jury member
-                $user = get_user_by('id', $user_id);
-                if (!in_array('mt_jury_member', $user->roles)) {
-                    $user->add_role('mt_jury_member');
-                }
-            } else {
-                // Remove link
-                $old_jury_member_id = get_user_meta($user_id, '_mt_jury_member_id', true);
-                if ($old_jury_member_id) {
-                    delete_post_meta($old_jury_member_id, '_mt_user_id');
-                }
-                delete_user_meta($user_id, '_mt_jury_member_id');
+            // Update the jury member link
+            update_user_meta($user_id, '_mt_jury_id', $jury_member_id);
+            
+            // Add jury role if needed
+            $user = get_user_by('id', $user_id);
+            if ($user && !in_array('mt_jury', $user->roles)) {
+                $user->add_role('mt_jury');
+            }
+            
+            // Remove old jury member link if changed
+            $old_jury_member_id = get_user_meta($user_id, '_mt_jury_id', true);
+            if ($old_jury_member_id && $old_jury_member_id !== $jury_member_id) {
+                delete_user_meta($user_id, '_mt_jury_id');
             }
         }
     }
@@ -275,7 +223,7 @@ class MT_Jury_System {
      * @param array $old_user_data Old user data
      */
     public function sync_user_to_jury_member($user_id, $old_user_data) {
-        $jury_member_id = get_user_meta($user_id, '_mt_jury_member_id', true);
+        $jury_member_id = get_user_meta($user_id, '_mt_jury_id', true);
         
         if (!$jury_member_id) {
             return;
@@ -450,7 +398,7 @@ class MT_Jury_System {
             return $redirect_to;
         }
         
-        if (in_array('mt_jury_member', $user->roles)) {
+        if (in_array('mt_jury', $user->roles)) {
             // Check if frontend dashboard page is set
             $frontend_page = get_option('mt_jury_dashboard_page');
             if ($frontend_page) {

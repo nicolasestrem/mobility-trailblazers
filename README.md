@@ -69,7 +69,7 @@ The Mobility Trailblazers Award System is an enterprise-grade WordPress plugin t
   - `[mt_registration_form]` - Candidate registration
   - `[mt_evaluation_stats]` - Statistics display
   - `[mt_winners]` - Winners showcase
-  - `[mt_jury_members]` - Jury members grid
+  - `[mt_jury]` - Jury members grid
   - `[mt_candidate_profile]` - Individual candidate profiles
 
 - **Elementor Pro Integration**
@@ -141,7 +141,7 @@ The plugin creates two custom roles:
   - Access to all administrative features
   - Can manage candidates, jury, and settings
 
-- **MT Jury Member** (`mt_jury_member`)
+- **MT Jury** (`mt_jury`)
   - Can submit and edit evaluations
   - Access to jury dashboard
   - View assigned candidates only

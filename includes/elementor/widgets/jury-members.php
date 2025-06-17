@@ -1,6 +1,6 @@
 <?php
 /**
- * Jury Members Elementor Widget
+ * MT Jury Widget
  *
  * @package MobilityTrailblazers
  */
@@ -11,9 +11,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Class MT_Jury_Members_Widget
+ * Class MT_Jury_Widget
  */
-class MT_Jury_Members_Widget extends \Elementor\Widget_Base {
+class MT_Jury_Widget extends \Elementor\Widget_Base {
     
     public function get_name() {
         return 'mt-jury-members';
@@ -105,5 +105,15 @@ class MT_Jury_Members_Widget extends \Elementor\Widget_Base {
             $settings['show_bio']
         );
         echo do_shortcode($shortcode);
+    }
+
+    public function get_shortcode() {
+        return sprintf(
+            '[mt_jury role="%s" limit="%d" columns="%s" show_bio="%s"]',
+            $this->get_settings('role'),
+            $this->get_settings('limit'),
+            $this->get_settings('columns'),
+            $this->get_settings('show_bio') ? 'true' : 'false'
+        );
     }
 } 

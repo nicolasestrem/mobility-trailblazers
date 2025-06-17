@@ -846,4 +846,10 @@ class MT_Diagnostic {
         
         return $report;
     }
+    
+    private function get_roles_info() {
+        return array(
+            'mt_jury' => __('MT Jury', 'mobility-trailblazers'),
+        );
+    }
 } 

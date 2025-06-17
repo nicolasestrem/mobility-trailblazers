@@ -27,7 +27,7 @@ class MT_Shortcodes {
         add_shortcode('mt_registration_form', array($this, 'registration_form'));
         add_shortcode('mt_evaluation_stats', array($this, 'evaluation_stats'));
         add_shortcode('mt_winners', array($this, 'winners_display'));
-        add_shortcode('mt_jury_members', array($this, 'jury_members_grid'));
+        add_shortcode('mt_jury', array($this, 'jury_members_grid'));
         add_shortcode('mt_candidate_profile', array($this, 'candidate_profile'));
     }
     
@@ -310,7 +310,7 @@ class MT_Shortcodes {
             'show_bio' => 'yes',
             'orderby' => 'menu_order',
             'order' => 'ASC',
-        ), $atts, 'mt_jury_members');
+        ), $atts, 'mt_jury');
         
         // Start output buffering
         ob_start();

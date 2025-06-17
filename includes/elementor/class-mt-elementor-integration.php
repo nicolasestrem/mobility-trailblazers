@@ -137,7 +137,7 @@ class MT_Elementor_Integration {
         $widgets_manager->register(new \MT_Registration_Form_Widget());
         $widgets_manager->register(new \MT_Evaluation_Stats_Widget());
         $widgets_manager->register(new \MT_Winners_Display_Widget());
-        $widgets_manager->register(new \MT_Jury_Members_Widget());
+        $widgets_manager->register(new \MT_Jury_Widget());
         $widgets_manager->register(new \MT_Candidate_Profile_Widget());
     }
     

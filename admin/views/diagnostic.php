@@ -307,7 +307,7 @@ $system_info = $diagnostic->get_system_info();
 
     // Get all jury members
     $jury_members = get_posts(array(
-        'post_type' => 'mt_jury_member',
+        'post_type' => 'mt_jury',
         'posts_per_page' => -1,
         'orderby' => 'title',
         'order' => 'ASC',
@@ -331,6 +331,11 @@ $system_info = $diagnostic->get_system_info();
         <!-- Jury Members Overview -->
         <div class="mt-jury-members-list">
             <h3><?php _e('Jury Members Status', 'mobility-trailblazers'); ?></h3>
+            <?php if (empty($jury_members)) : ?>
+                <div class="notice notice-warning">
+                    <p><?php _e('No jury members found.', 'mobility-trailblazers'); ?></p>
+                </div>
+            <?php else : ?>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
@@ -389,6 +394,7 @@ $system_info = $diagnostic->get_system_info();
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
         </div>
         
         <!-- Link/Create Form (Hidden by default) -->

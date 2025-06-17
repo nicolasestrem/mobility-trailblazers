@@ -526,7 +526,7 @@ function mt_is_jury_member($user_id = null) {
         return false;
     }
     
-    return in_array('mt_jury_member', $user->roles) || user_can($user, 'mt_submit_evaluations');
+    return in_array('mt_jury', $user->roles) || user_can($user, 'mt_submit_evaluations');
 }
 
 /**
