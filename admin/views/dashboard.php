@@ -12,9 +12,12 @@ if (!defined('ABSPATH')) {
 
 // Get statistics
 global $wpdb;
+$candidate_count = wp_count_posts('mt_candidate');
+$jury_count = wp_count_posts('mt_jury_member');
+
 $stats = array(
-    'total_candidates' => wp_count_posts('mt_candidate')->publish,
-    'total_jury' => wp_count_posts('mt_jury')->publish,
+    'total_candidates' => isset($candidate_count->publish) ? $candidate_count->publish : 0,
+    'total_jury' => isset($jury_count->publish) ? $jury_count->publish : 0,
     'total_votes' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE is_active = 1"),
     'total_evaluations' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores"),
     'avg_score' => $wpdb->get_var("SELECT AVG(total_score) FROM {$wpdb->prefix}mt_votes WHERE is_active = 1"),

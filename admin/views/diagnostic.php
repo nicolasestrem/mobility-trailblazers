@@ -216,13 +216,13 @@ $system_info = $diagnostic->get_system_info();
                         <tbody>
                             <?php foreach ($checks as $check): ?>
                                 <tr>
-                                    <td><?php echo esc_html($check['name']); ?></td>
+                                    <td><?php echo isset($check['name']) ? esc_html($check['name']) : ''; ?></td>
                                     <td>
-                                        <span class="mt-status status-<?php echo esc_attr($check['status']); ?>">
-                                            <?php echo esc_html($check['status']); ?>
+                                        <span class="mt-status status-<?php echo isset($check['status']) ? esc_attr($check['status']) : 'unknown'; ?>">
+                                            <?php echo isset($check['status']) ? esc_html($check['status']) : 'unknown'; ?>
                                         </span>
                                     </td>
-                                    <td><?php echo esc_html($check['message']); ?></td>
+                                    <td><?php echo isset($check['message']) ? esc_html($check['message']) : ''; ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
