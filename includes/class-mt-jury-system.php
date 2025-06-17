@@ -30,7 +30,7 @@ class MT_Jury_System {
         add_action('edit_user_profile_update', array($this, 'save_jury_fields'));
         
         // Auto-create user accounts for jury members
-        add_action('save_post_mt_jury', array($this, 'maybe_create_user_account'), 10, 3);
+        add_action('save_post_mt_jury_member', array($this, 'maybe_create_user_account'), 10, 3);
         
         // Sync jury member data with user
         add_action('profile_update', array($this, 'sync_user_to_jury_member'), 10, 2);
@@ -185,12 +185,12 @@ class MT_Jury_System {
      * @param WP_User $user User object
      */
     public function add_jury_fields($user) {
-        $jury_member_id = get_user_meta($user->ID, '_mt_jury_id', true);
+        $jury_member_id = get_user_meta($user->ID, '_mt_jury_member_id', true);
         ?>
         <h3><?php _e('Jury Member Information', 'mobility-trailblazers'); ?></h3>
         <table class="form-table">
             <tr>
-                <th><label for="mt_jury_id"><?php _e('Linked Jury Member', 'mobility-trailblazers'); ?></label></th>
+                <th><label for="mt_jury_member_id"><?php _e('Linked Jury Member', 'mobility-trailblazers'); ?></label></th>
                 <td>
                     <?php
                     $jury_members = get_posts(array(
@@ -200,7 +200,7 @@ class MT_Jury_System {
                         'order' => 'ASC'
                     ));
                     ?>
-                    <select name="mt_jury_id" id="mt_jury_id">
+                    <select name="mt_jury_member_id" id="mt_jury_member_id">
                         <option value=""><?php _e('— Select Jury Member —', 'mobility-trailblazers'); ?></option>
                         <?php foreach ($jury_members as $member) : ?>
                             <option value="<?php echo $member->ID; ?>" <?php selected($jury_member_id, $member->ID); ?>>
@@ -224,22 +224,22 @@ class MT_Jury_System {
             return;
         }
 
-        if (isset($_POST['mt_jury_id'])) {
-            $jury_member_id = intval($_POST['mt_jury_id']);
+        if (isset($_POST['mt_jury_member_id'])) {
+            $jury_member_id = intval($_POST['mt_jury_member_id']);
             
             // Update the jury member link
-            update_user_meta($user_id, '_mt_jury_id', $jury_member_id);
+            update_user_meta($user_id, '_mt_jury_member_id', $jury_member_id);
             
             // Add jury role if needed
             $user = get_user_by('id', $user_id);
-            if ($user && !in_array('mt_jury', $user->roles)) {
-                $user->add_role('mt_jury');
+            if ($user && !in_array('mt_jury_member', $user->roles)) {
+                $user->add_role('mt_jury_member');
             }
             
             // Remove old jury member link if changed
-            $old_jury_member_id = get_user_meta($user_id, '_mt_jury_id', true);
+            $old_jury_member_id = get_user_meta($user_id, '_mt_jury_member_id', true);
             if ($old_jury_member_id && $old_jury_member_id !== $jury_member_id) {
-                delete_user_meta($user_id, '_mt_jury_id');
+                delete_user_meta($user_id, '_mt_jury_member_id');
             }
         }
     }
@@ -294,7 +294,7 @@ class MT_Jury_System {
      * @param array $old_user_data Old user data
      */
     public function sync_user_to_jury_member($user_id, $old_user_data) {
-        $jury_member_id = get_user_meta($user_id, '_mt_jury_id', true);
+        $jury_member_id = get_user_meta($user_id, '_mt_jury_member_id', true);
         
         if (!$jury_member_id) {
             return;
@@ -469,7 +469,7 @@ class MT_Jury_System {
             return $redirect_to;
         }
         
-        if (in_array('mt_jury', $user->roles)) {
+        if (in_array('mt_jury_member', $user->roles)) {
             // Check if frontend dashboard page is set
             $frontend_page = get_option('mt_jury_dashboard_page');
             if ($frontend_page) {

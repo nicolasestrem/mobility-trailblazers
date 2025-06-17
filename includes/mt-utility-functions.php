@@ -111,14 +111,14 @@ function mt_get_jury_member_by_user_id($user_id) {
     if ($jury_member_id) {
         $jury_member = get_post($jury_member_id);
         
-        if ($jury_member && $jury_member->post_type === 'mt_jury') {
+        if ($jury_member && $jury_member->post_type === 'mt_jury_member') {
             return $jury_member;
         }
     }
     
     // Fallback: Query by user ID meta
     $args = array(
-        'post_type' => 'mt_jury',
+        'post_type' => 'mt_jury_member',
         'meta_key' => '_mt_user_id',
         'meta_value' => $user_id,
         'posts_per_page' => 1,
@@ -682,4 +682,57 @@ function mt_get_draft_evaluations($jury_member_id) {
     }
     
     return $draft_candidates;
+}
+
+/**
+ * Get the jury member post type name
+ * This function provides backward compatibility during transition
+ * 
+ * @return string
+ */
+function mt_get_jury_post_type() {
+    // Check if migration has been completed
+    if (get_option('mt_jury_nomenclature_migrated', false)) {
+        return 'mt_jury_member';
+    }
+    
+    // Otherwise check what exists
+    if (post_type_exists('mt_jury_member')) {
+        return 'mt_jury_member';
+    } elseif (post_type_exists('mt_jury')) {
+        return 'mt_jury';
+    }
+    
+    // Default to new standard
+    return 'mt_jury_member';
+}
+
+/**
+ * Get jury member capability
+ * This function provides backward compatibility for capabilities
+ * 
+ * @param string $base_cap Base capability name (e.g., 'edit', 'delete')
+ * @param bool $plural Whether to return plural form
+ * @return string
+ */
+function mt_get_jury_capability($base_cap, $plural = false) {
+    $post_type = mt_get_jury_post_type();
+    
+    if ($post_type === 'mt_jury_member') {
+        return $base_cap . '_' . ($plural ? 'mt_jury_members' : 'mt_jury_member');
+    } else {
+        return $base_cap . '_' . ($plural ? 'mt_jurys' : 'mt_jury');
+    }
+}
+
+/**
+ * Get jury member user meta key
+ * 
+ * @return string
+ */
+function mt_get_jury_member_meta_key() {
+    if (get_option('mt_jury_nomenclature_migrated', false)) {
+        return '_mt_jury_member_id';
+    }
+    return '_mt_jury_id';
 } 

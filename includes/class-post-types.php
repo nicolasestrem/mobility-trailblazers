@@ -144,7 +144,7 @@ class MT_Post_Types {
             'show_in_menu'       => true,
             'query_var'          => true,
             'rewrite'            => array('slug' => 'jury-member'),
-            'capability_type'    => array('mt_jury', 'mt_jurys'),
+            'capability_type'    => array('mt_jury_member', 'mt_jury_members'),
             'map_meta_cap'       => true,
             'has_archive'        => true,
             'hierarchical'       => false,
@@ -155,7 +155,7 @@ class MT_Post_Types {
             'rest_base'          => 'mt-jury-members',
         );
         
-        register_post_type('mt_jury', $args);
+        register_post_type('mt_jury_member', $args);
     }
     
     /**
@@ -435,7 +435,7 @@ class MT_Post_Types {
         }
         
         // Handle jury member sorting
-        if ($query->get('post_type') === 'mt_jury') {
+        if ($query->get('post_type') === 'mt_jury_member') {
             switch ($orderby) {
                 case 'organization':
                     $query->set('meta_key', '_mt_organization');

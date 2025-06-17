@@ -118,8 +118,8 @@ class MT_Roles {
                 'read_private_mt_candidates' => true,
                 
                 // Jury capabilities (can edit own profile)
-                'read_mt_jury' => true,
-                'edit_mt_jury' => true,
+                'read_mt_jury_member' => true,
+                'edit_mt_jury_member' => true,
                 
                 // Custom capabilities
                 'mt_submit_evaluations' => true,
@@ -223,13 +223,13 @@ class MT_Roles {
         if (isset($args[0]) && $args[0] === 'edit_post' && isset($args[2])) {
             $post = get_post($args[2]);
             
-            if ($post && $post->post_type === 'mt_jury') {
+            if ($post && $post->post_type === 'mt_jury_member') {
                 $jury_user_id = get_post_meta($post->ID, '_mt_user_id', true);
                 
                 if ($jury_user_id && $jury_user_id == $user->ID) {
-                    $allcaps['edit_mt_jury'] = true;
-                    $allcaps['edit_mt_jurys'] = true;
-                    $allcaps['edit_published_mt_jurys'] = true;
+                    $allcaps['edit_mt_jury_member'] = true;
+                    $allcaps['edit_mt_jury_members'] = true;
+                    $allcaps['edit_published_mt_jury_members'] = true;
                 }
             }
         }
