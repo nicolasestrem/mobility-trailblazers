@@ -108,6 +108,7 @@ class MobilityTrailblazersPlugin {
     private function load_dependencies() {
         // Utility functions
         require_once MT_PLUGIN_DIR . 'includes/mt-utility-functions.php';
+        require_once MT_PLUGIN_DIR . 'includes/mt-debug-functions.php';
         
         // Core functionality classes
         require_once MT_PLUGIN_DIR . 'includes/class-mt-shortcodes.php';

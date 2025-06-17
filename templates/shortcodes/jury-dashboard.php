@@ -23,7 +23,16 @@ $evaluated_count = $wpdb->get_var($wpdb->prepare(
      WHERE jury_member_id = %d AND is_active = 1",
     $jury_member->ID
 ));
-$draft_count = count(mt_get_draft_evaluations($jury_member->ID));
+
+$draft_count = 0;
+foreach ($assigned_candidates as $candidate) {
+    // Make sure we're using the candidate object properly
+    $candidate_id = is_object($candidate) ? $candidate->ID : $candidate;
+    if (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
+        $draft_count++;
+    }
+}
+
 $remaining_count = $total_assigned - $evaluated_count;
 $completion_rate = $total_assigned > 0 ? round(($evaluated_count / $total_assigned) * 100) : 0;
 ?>

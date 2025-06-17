@@ -128,7 +128,17 @@ $system_info = $diagnostic->get_system_info();
         <?php
         global $wpdb;
         $stats = array(
-            'candidates' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_candidate' AND post_status = 'publish'"),
+            'candidates' => $wpdb->get_var("
+                SELECT COUNT(DISTINCT p.ID) 
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+                WHERE p.post_type = 'mt_candidate' 
+                AND p.post_status = 'publish'
+                AND pm.meta_key = '_mt_assigned_jury_members' 
+                AND pm.meta_value != ''
+                AND pm.meta_value != 'a:0:{}'
+                AND pm.meta_value IS NOT NULL
+            "),
             'jury_members' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_jury' AND post_status = 'publish'"),
             'votes' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE is_active = 1"),
             'evaluations' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores"),

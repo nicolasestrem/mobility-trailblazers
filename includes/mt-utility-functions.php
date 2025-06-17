@@ -138,7 +138,7 @@ function mt_get_jury_member_by_user_id($user_id) {
  * Get assigned candidates for jury member
  *
  * @param int $jury_member_id Jury member ID
- * @return array Array of candidate IDs
+ * @return array Array of candidate posts
  */
 function mt_get_assigned_candidates($jury_member_id) {
     global $wpdb;
@@ -153,12 +153,21 @@ function mt_get_assigned_candidates($jury_member_id) {
         WHERE meta_key = '_mt_assigned_jury_members' 
         AND meta_value != ''
         AND meta_value != 'a:0:{}'
+        AND meta_value IS NOT NULL
     ");
     
     foreach ($results as $row) {
         $jury_ids = maybe_unserialize($row->meta_value);
-        if (is_array($jury_ids) && in_array($jury_member_id, array_map('intval', $jury_ids))) {
-            $assigned_candidates[] = intval($row->post_id);
+        if (is_array($jury_ids)) {
+            // Convert all to integers for comparison
+            $jury_ids = array_map('intval', $jury_ids);
+            if (in_array($jury_member_id, $jury_ids)) {
+                // Return the actual post object instead of just ID
+                $candidate = get_post(intval($row->post_id));
+                if ($candidate && $candidate->post_type === 'mt_candidate' && $candidate->post_status === 'publish') {
+                    $assigned_candidates[] = $candidate;
+                }
+            }
         }
     }
     
@@ -592,26 +601,25 @@ function mt_get_evaluation_statistics($args = array()) {
 }
 
 /**
- * Check if jury member has a draft evaluation for a candidate
+ * Check if jury member has a draft evaluation for candidate
  *
  * @param int $candidate_id Candidate ID
  * @param int $jury_member_id Jury member ID
- * @return bool Whether draft evaluation exists
+ * @return bool Whether draft exists
  */
 function mt_has_draft_evaluation($candidate_id, $jury_member_id) {
-    global $wpdb;
+    // Check for draft saved in user meta
+    $user_id = get_current_user_id();
     
-    $table_name = $wpdb->prefix . 'mt_candidate_scores';
+    // If jury member ID is provided, get the user ID for that jury member
+    if ($jury_member_id) {
+        $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
+        if ($jury_user_id) {
+            $user_id = $jury_user_id;
+        }
+    }
     
-    $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table_name 
-         WHERE candidate_id = %d 
-         AND jury_member_id = %d 
-         AND is_active = 1 
-         AND is_draft = 1",
-        $candidate_id,
-        $jury_member_id
-    ));
+    $draft = get_user_meta($user_id, 'mt_evaluation_draft_' . $candidate_id, true);
     
-    return $exists > 0;
+    return !empty($draft);
 } 
