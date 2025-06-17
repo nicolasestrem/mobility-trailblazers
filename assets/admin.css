@@ -1,0 +1,366 @@
+/**
+ * Mobility Trailblazers Admin Styles
+ */
+
+/* General Admin Styles */
+.mt-meta-box {
+    padding: 10px 0;
+}
+
+.mt-field-group {
+    margin-bottom: 20px;
+}
+
+.mt-field-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.mt-field-group input[type="text"],
+.mt-field-group input[type="email"],
+.mt-field-group input[type="url"],
+.mt-field-group input[type="tel"],
+.mt-field-group input[type="number"],
+.mt-field-group select,
+.mt-field-group textarea {
+    width: 100%;
+    max-width: 100%;
+}
+
+.mt-field-group .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.mt-field-row {
+    display: flex;
+    gap: 20px;
+}
+
+.mt-field-row .mt-field-group {
+    flex: 1;
+}
+
+.mt-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.mt-checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.mt-checkbox-group input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+/* Status Badges */
+.mt-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.mt-status.status-active,
+.mt-status.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.mt-status.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.mt-status.status-inactive,
+.mt-status.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.mt-status.status-shortlisted {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.mt-status.status-winner {
+    background: #ffd700;
+    color: #333;
+    font-weight: 700;
+}
+
+/* Statistics Boxes */
+.mt-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.mt-stat-row:last-child {
+    border-bottom: none;
+}
+
+.mt-stat-row strong {
+    color: #23282d;
+}
+
+/* Admin Tables */
+.mt-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.mt-admin-table th,
+.mt-admin-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.mt-admin-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+.mt-admin-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Progress Bars */
+.mt-progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.mt-progress-fill {
+    height: 100%;
+    background: #0073aa;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.mt-progress-fill::after {
+    content: attr(data-percentage);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.mt-action-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.mt-action-buttons .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mt-action-buttons .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Notice Styles */
+.mt-notice {
+    padding: 12px;
+    margin: 15px 0;
+    border-left: 4px solid;
+    background: #fff;
+}
+
+.mt-notice-info {
+    border-left-color: #00a0d2;
+    background: #e5f5fa;
+}
+
+.mt-notice-success {
+    border-left-color: #46b450;
+    background: #ecf7ed;
+}
+
+.mt-notice-warning {
+    border-left-color: #ffb900;
+    background: #fff8e5;
+}
+
+.mt-notice-error {
+    border-left-color: #dc3232;
+    background: #fbeaea;
+}
+
+/* Loading Spinner */
+.mt-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0073aa;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes mt-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tabs */
+.mt-tabs {
+    margin: 20px 0;
+}
+
+.mt-tab-nav {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.mt-tab-nav a {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #555;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+}
+
+.mt-tab-nav a:hover {
+    color: #0073aa;
+}
+
+.mt-tab-nav a.active {
+    color: #0073aa;
+    border-bottom-color: #0073aa;
+}
+
+.mt-tab-content {
+    display: none;
+}
+
+.mt-tab-content.active {
+    display: block;
+}
+
+/* Cards */
+.mt-card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin-bottom: 20px;
+}
+
+.mt-card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fafafa;
+}
+
+.mt-card-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.mt-card-body {
+    padding: 20px;
+}
+
+/* Tooltips */
+.mt-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.mt-tooltip .dashicons {
+    color: #666;
+    font-size: 16px;
+}
+
+.mt-tooltip-content {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 8px 10px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.mt-tooltip-content::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.mt-tooltip:hover .mt-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .mt-field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .mt-stats-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mt-action-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .mt-tab-nav {
+        flex-wrap: wrap;
+    }
+    
+    .mt-tab-nav a {
+        flex: 1;
+        text-align: center;
+        min-width: 100px;
+    }
+} 
