@@ -117,6 +117,11 @@ class MobilityTrailblazersPlugin {
         require_once MT_PLUGIN_DIR . 'includes/class-mt-rest-api.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-jury-system.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-diagnostic.php';
+        
+        // Elementor integration
+        if (did_action('elementor/loaded')) {
+            require_once MT_PLUGIN_DIR . 'includes/elementor/class-mt-elementor-integration.php';
+        }
     }
 
     /**
@@ -136,6 +141,11 @@ class MobilityTrailblazersPlugin {
         $this->components['rest_api'] = new MT_REST_API();
         $this->components['jury_system'] = new MT_Jury_System();
         $this->components['diagnostic'] = new MT_Diagnostic();
+        
+        // Initialize Elementor integration if available
+        if (did_action('elementor/loaded')) {
+            $this->components['elementor'] = new MT_Elementor_Integration();
+        }
     }
 
     /**
