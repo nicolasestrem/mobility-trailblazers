@@ -27,12 +27,12 @@ class MT_Post_Types {
         add_filter('manage_mt_candidate_posts_columns', array($this, 'add_candidate_columns'));
         add_action('manage_mt_candidate_posts_custom_column', array($this, 'render_candidate_columns'), 10, 2);
         
-        add_filter('manage_mt_jury_posts_columns', array($this, 'add_jury_columns'));
-        add_action('manage_mt_jury_posts_custom_column', array($this, 'render_jury_columns'), 10, 2);
+        add_filter('manage_mt_jury_member_posts_columns', array($this, 'add_jury_columns'));
+        add_action('manage_mt_jury_member_posts_custom_column', array($this, 'render_jury_columns'), 10, 2);
         
         // Make columns sortable
         add_filter('manage_edit-mt_candidate_sortable_columns', array($this, 'make_candidate_columns_sortable'));
-        add_filter('manage_edit-mt_jury_sortable_columns', array($this, 'make_jury_columns_sortable'));
+        add_filter('manage_edit-mt_jury_member_sortable_columns', array($this, 'make_jury_columns_sortable'));
         
         // Handle column sorting
         add_action('pre_get_posts', array($this, 'handle_column_sorting'));

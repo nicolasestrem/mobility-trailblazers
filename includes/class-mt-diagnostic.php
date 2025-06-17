@@ -305,34 +305,40 @@ class MT_Diagnostic {
      * @return array Post type check results
      */
     private function check_post_types() {
-        $checks = array();
+        $results = array();
         
-        $required_post_types = array(
-            'mt_candidate' => __('Candidates', 'mobility-trailblazers'),
-            'mt_jury_member' => __('Jury Members', 'mobility-trailblazers'),
-            'mt_backup' => __('Backups', 'mobility-trailblazers'),
+        // Check if post types are registered
+        $post_types = array(
+            'mt_candidate' => 'Candidate',
+            'mt_jury_member' => 'Jury Member',
+            'mt_backup' => 'Backup'
         );
         
-        foreach ($required_post_types as $post_type => $label) {
-            if (post_type_exists($post_type)) {
-                $count = wp_count_posts($post_type);
-                $total = isset($count->publish) ? $count->publish : 0;
-                
-                $checks[] = array(
-                    'name' => $label,
-                    'status' => 'success',
-                    'message' => sprintf(__('Registered (%d published)', 'mobility-trailblazers'), $total),
+        foreach ($post_types as $post_type => $label) {
+            if (!post_type_exists($post_type)) {
+                $results[] = array(
+                    'status' => 'error',
+                    'message' => sprintf(__('%s post type is not registered', 'mobility-trailblazers'), $label)
                 );
             } else {
-                $checks[] = array(
-                    'name' => $label,
-                    'status' => 'error',
-                    'message' => __('Not registered', 'mobility-trailblazers'),
+                $results[] = array(
+                    'status' => 'success',
+                    'message' => sprintf(__('%s post type is registered correctly', 'mobility-trailblazers'), $label)
                 );
             }
         }
         
-        return $checks;
+        // Check for old mt_jury posts
+        global $wpdb;
+        $old_posts = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'mt_jury'");
+        if ($old_posts > 0) {
+            $results[] = array(
+                'status' => 'warning',
+                'message' => sprintf(__('Found %d posts still using mt_jury post type', 'mobility-trailblazers'), $old_posts)
+            );
+        }
+        
+        return $results;
     }
     
     /**
@@ -382,60 +388,39 @@ class MT_Diagnostic {
      * @return array Role check results
      */
     private function check_roles() {
-        $checks = array();
+        $results = array();
         
-        $required_roles = array(
-            'mt_award_admin' => __('MT Award Admin', 'mobility-trailblazers'),
-            'mt_jury_member' => __('MT Jury Member', 'mobility-trailblazers'),
-        );
-        
-        foreach ($required_roles as $role => $label) {
-            $role_obj = get_role($role);
+        // Check administrator capabilities
+        $admin = get_role('administrator');
+        if ($admin) {
+            $required_caps = array(
+                'edit_mt_jury_member',
+                'edit_mt_candidate',
+                'edit_others_mt_jury_member',
+                'edit_others_mt_candidate'
+            );
             
-            if ($role_obj) {
-                $users = get_users(array('role' => $role));
-                $count = count($users);
-                
-                $checks[] = array(
-                    'name' => $label,
-                    'status' => 'success',
-                    'message' => sprintf(__('Role exists (%d users)', 'mobility-trailblazers'), $count),
-                );
-            } else {
-                $checks[] = array(
-                    'name' => $label,
-                    'status' => 'error',
-                    'message' => __('Role does not exist', 'mobility-trailblazers'),
-                );
+            foreach ($required_caps as $cap) {
+                if (!isset($admin->capabilities[$cap])) {
+                    $results[] = array(
+                        'status' => 'error',
+                        'message' => sprintf(__('Administrator role missing %s capability', 'mobility-trailblazers'), $cap)
+                    );
+                }
             }
         }
         
-        // Check capabilities
-        $admin_role = get_role('administrator');
-        $required_caps = array('mt_manage_awards', 'mt_submit_evaluations', 'mt_reset_votes');
-        $missing_caps = array();
-        
-        foreach ($required_caps as $cap) {
-            if (!$admin_role || !isset($admin_role->capabilities[$cap]) || !$admin_role->capabilities[$cap]) {
-                $missing_caps[] = $cap;
-            }
-        }
-        
-        if (empty($missing_caps)) {
-            $checks[] = array(
-                'name' => __('Admin Capabilities', 'mobility-trailblazers'),
-                'status' => 'success',
-                'message' => __('All capabilities assigned', 'mobility-trailblazers'),
-            );
-        } else {
-            $checks[] = array(
-                'name' => __('Admin Capabilities', 'mobility-trailblazers'),
+        // Check for old user meta
+        global $wpdb;
+        $old_meta = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE meta_key = '_mt_jury_id'");
+        if ($old_meta > 0) {
+            $results[] = array(
                 'status' => 'warning',
-                'message' => sprintf(__('Missing capabilities: %s', 'mobility-trailblazers'), implode(', ', $missing_caps)),
+                'message' => sprintf(__('Found %d user meta entries still using _mt_jury_id', 'mobility-trailblazers'), $old_meta)
             );
         }
         
-        return $checks;
+        return $results;
     }
     
     /**

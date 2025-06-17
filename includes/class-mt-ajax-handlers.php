@@ -482,7 +482,7 @@ class MT_AJAX_Handlers {
         
         // Get all published jury members
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => mt_get_jury_post_type(),
             'posts_per_page' => -1,
             'post_status' => 'publish'
         ));
@@ -1409,7 +1409,7 @@ Best regards,
      */
     private function notify_all_jury_about_phase_transition($new_phase) {
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => mt_get_jury_post_type(),
             'posts_per_page' => -1,
             'post_status' => 'publish',
         ));
@@ -1448,7 +1448,7 @@ Best regards,
      */
     private function notify_all_jury_about_full_reset() {
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => mt_get_jury_post_type(),
             'posts_per_page' => -1,
             'post_status' => 'publish',
         ));
@@ -1802,7 +1802,7 @@ The application is currently in pending status and requires approval.', 'mobilit
         
         // Get all active jury members
         $jury_members = get_posts(array(
-            'post_type' => 'mt_jury',
+            'post_type' => mt_get_jury_post_type(),
             'posts_per_page' => -1,
             'post_status' => 'publish',
         ));

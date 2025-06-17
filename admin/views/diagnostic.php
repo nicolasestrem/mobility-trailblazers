@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!function_exists('mt_get_all_jury_members')):
 /**
  * Get all jury members
  * 
@@ -28,7 +29,9 @@ function mt_get_all_jury_members($args = array()) {
     $args = wp_parse_args($args, $defaults);
     return get_posts($args);
 }
+endif;
 
+if (!function_exists('mt_get_unlinked_jury_members')):
 /**
  * Get unlinked jury members (no user account)
  * 
@@ -65,7 +68,9 @@ function mt_get_unlinked_jury_members() {
         )
     ));
 }
+endif;
 
+if (!function_exists('mt_get_linked_jury_members')):
 /**
  * Get linked jury members (have user account)
  * 
@@ -88,7 +93,9 @@ function mt_get_linked_jury_members() {
         )
     ));
 }
+endif;
 
+if (!function_exists('mt_jury_has_user')):
 /**
  * Check if a jury member is linked to a user
  * 
@@ -107,6 +114,7 @@ function mt_jury_has_user($jury_id) {
     $user = get_user_by('id', $user_id);
     return $user ? $user_id : false;
 }
+endif;
 
 // Get all jury members for the current view
 $jury_members = mt_get_all_jury_members();

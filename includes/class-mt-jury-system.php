@@ -194,7 +194,7 @@ class MT_Jury_System {
                 <td>
                     <?php
                     $jury_members = get_posts(array(
-                        'post_type' => 'mt_jury_member',
+                        'post_type' => mt_get_jury_post_type(),
                         'posts_per_page' => -1,
                         'orderby' => 'title',
                         'order' => 'ASC'
