@@ -1244,22 +1244,20 @@ $system_info = $diagnostic->get_system_info();
                     'posts_per_page' => -1,
                     'post_status' => 'any',
                     'meta_query' => array(
+                        'relation' => 'OR',
                         array(
-                            'relation' => 'OR',
-                            array(
-                                'key' => '_mt_user_id',
-                                'compare' => 'NOT EXISTS'
-                            ),
-                            array(
-                                'key' => '_mt_user_id',
-                                'value' => '',
-                                'compare' => '='
-                            ),
-                            array(
-                                'key' => '_mt_user_id',
-                                'value' => '0',
-                                'compare' => '='
-                            )
+                            'key' => '_mt_user_id',
+                            'compare' => 'NOT EXISTS'
+                        ),
+                        array(
+                            'key' => '_mt_user_id',
+                            'value' => '',
+                            'compare' => '='
+                        ),
+                        array(
+                            'key' => '_mt_user_id',
+                            'value' => '0',
+                            'compare' => '='
                         )
                     )
                 ));
@@ -1269,8 +1267,376 @@ $system_info = $diagnostic->get_system_info();
         </div>
     </div>
 
+    <!-- Jury Member Query Diagnostic Tool -->
+    <?php
+    /**
+     * Jury Member Query Diagnostic Tool
+     * This will help identify why queries are returning different results
+     */
+
+    // Security check
+    if (!defined('ABSPATH')) {
+        exit;
+    }
+
+    // Try different query methods to find jury members
+    $query_results = array();
+
+    // Method 1: Basic query
+    $query_results['basic'] = get_posts(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'post_status' => 'any'
+    ));
+
+    // Method 2: WP_Query
+    $wp_query = new WP_Query(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'post_status' => array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash')
+    ));
+    $query_results['wp_query'] = $wp_query->posts;
+
+    // Method 3: Direct database query
+    global $wpdb;
+    $query_results['direct_db'] = $wpdb->get_results(
+        "SELECT * FROM {$wpdb->posts} WHERE post_type = 'mt_jury_member'"
+    );
+
+    // Method 4: Check if post type is registered
+    $post_types = get_post_types(array(), 'names');
+    $is_registered = in_array('mt_jury_member', $post_types);
+
+    // Method 5: Try different post type variations (in case of typo)
+    $possible_types = array('mt_jury_member', 'jury_member', 'mt_jury', 'jury');
+    $found_types = array();
+    foreach ($possible_types as $type) {
+        $count = wp_count_posts($type);
+        if ($count && (array_sum((array)$count) > 0)) {
+            $found_types[$type] = $count;
+        }
+    }
+
+    // Method 6: Get all custom post types with "jury" in the name
+    $all_post_types = get_post_types(array('_builtin' => false), 'objects');
+    $jury_related_types = array();
+    foreach ($all_post_types as $type => $obj) {
+        if (stripos($type, 'jury') !== false || stripos($obj->label, 'jury') !== false) {
+            $jury_related_types[$type] = array(
+                'label' => $obj->label,
+                'count' => wp_count_posts($type)
+            );
+        }
+    }
+
+    // Method 7: Check for posts with jury member meta
+    $posts_with_jury_meta = $wpdb->get_results(
+        "SELECT DISTINCT p.* 
+         FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE pm.meta_key IN ('_mt_email', '_mt_user_id', '_mt_company', '_mt_position')
+         AND p.post_status != 'trash'"
+    );
+
+    // Get unlinked jury members with different methods
+    $unlinked_queries = array();
+
+    // Standard NOT EXISTS query
+    $unlinked_queries['not_exists'] = get_posts(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'post_status' => 'any',
+        'meta_query' => array(
+            array(
+                'key' => '_mt_user_id',
+                'compare' => 'NOT EXISTS'
+            )
+        )
+    ));
+
+    // Including empty values
+    $unlinked_queries['empty_values'] = get_posts(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'post_status' => 'any',
+        'meta_query' => array(
+            'relation' => 'OR',
+            array(
+                'key' => '_mt_user_id',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => '',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => '0',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => 'false',
+                'compare' => '='
+            ),
+            array(
+                'key' => '_mt_user_id',
+                'value' => 'null',
+                'compare' => '='
+            )
+        )
+    ));
+
+    // Direct SQL for unlinked
+    $unlinked_queries['direct_sql'] = $wpdb->get_results(
+        "SELECT p.* 
+         FROM {$wpdb->posts} p
+         LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_user_id'
+         WHERE p.post_type = 'mt_jury_member' 
+         AND p.post_status != 'trash'
+         AND (pm.meta_value IS NULL OR pm.meta_value = '' OR pm.meta_value = '0')"
+    );
+    ?>
+
+    <div class="mt-query-diagnostic">
+        <h2><?php _e('Jury Member Query Diagnostic', 'mobility-trailblazers'); ?></h2>
+        
+        <!-- Post Type Registration Check -->
+        <div class="diagnostic-section">
+            <h3><?php _e('Post Type Registration', 'mobility-trailblazers'); ?></h3>
+            <p>
+                Post type 'mt_jury_member' registered: 
+                <strong><?php echo $is_registered ? '<span style="color: green;">YES</span>' : '<span style="color: red;">NO</span>'; ?></strong>
+            </p>
+            
+            <?php if (!empty($jury_related_types)) : ?>
+            <h4><?php _e('Found Jury-Related Post Types:', 'mobility-trailblazers'); ?></h4>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Post Type</th>
+                        <th>Label</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($jury_related_types as $type => $data) : ?>
+                    <tr>
+                        <td><code><?php echo esc_html($type); ?></code></td>
+                        <td><?php echo esc_html($data['label']); ?></td>
+                        <td>
+                            <?php 
+                            $count = $data['count'];
+                            if (is_object($count)) {
+                                echo 'Publish: ' . $count->publish . ', ';
+                                echo 'Draft: ' . $count->draft . ', ';
+                                echo 'Private: ' . $count->private . ', ';
+                                echo 'Trash: ' . $count->trash;
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Query Results Comparison -->
+        <div class="diagnostic-section">
+            <h3><?php _e('Query Method Results', 'mobility-trailblazers'); ?></h3>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Query Method</th>
+                        <th>Results Found</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Basic get_posts()</td>
+                        <td><?php echo count($query_results['basic']); ?></td>
+                        <td>Standard query with post_status = 'any'</td>
+                    </tr>
+                    <tr>
+                        <td>WP_Query</td>
+                        <td><?php echo count($query_results['wp_query']); ?></td>
+                        <td>All post statuses explicitly listed</td>
+                    </tr>
+                    <tr>
+                        <td>Direct Database</td>
+                        <td><?php echo count($query_results['direct_db']); ?></td>
+                        <td>Raw SQL query for post_type = 'mt_jury_member'</td>
+                    </tr>
+                    <tr>
+                        <td>Posts with Jury Meta</td>
+                        <td><?php echo count($posts_with_jury_meta); ?></td>
+                        <td>Any post with jury-related meta keys</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Found Post Types -->
+        <?php if (!empty($found_types)) : ?>
+        <div class="diagnostic-section">
+            <h3><?php _e('Post Type Counts', 'mobility-trailblazers'); ?></h3>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Post Type</th>
+                        <th>Status</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($found_types as $type => $counts) : ?>
+                        <?php foreach ($counts as $status => $count) : ?>
+                            <?php if ($count > 0) : ?>
+                            <tr>
+                                <td><code><?php echo esc_html($type); ?></code></td>
+                                <td><?php echo esc_html($status); ?></td>
+                                <td><?php echo esc_html($count); ?></td>
+                            </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Unlinked Queries Comparison -->
+        <div class="diagnostic-section">
+            <h3><?php _e('Unlinked Jury Members Query Results', 'mobility-trailblazers'); ?></h3>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>Query Type</th>
+                        <th>Count</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>NOT EXISTS</td>
+                        <td><?php echo count($unlinked_queries['not_exists']); ?></td>
+                        <td>Standard meta_query with NOT EXISTS</td>
+                    </tr>
+                    <tr>
+                        <td>Empty Values</td>
+                        <td><?php echo count($unlinked_queries['empty_values']); ?></td>
+                        <td>Including empty strings, 0, false, null</td>
+                    </tr>
+                    <tr>
+                        <td>Direct SQL</td>
+                        <td><?php echo count($unlinked_queries['direct_sql']); ?></td>
+                        <td>LEFT JOIN checking for NULL or empty</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Sample Data -->
+        <?php if (!empty($posts_with_jury_meta)) : ?>
+        <div class="diagnostic-section">
+            <h3><?php _e('Sample Posts with Jury Meta (First 5)', 'mobility-trailblazers'); ?></h3>
+            <table class="widefat">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Post Type</th>
+                        <th>Status</th>
+                        <th>Meta Keys</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $sample_posts = array_slice($posts_with_jury_meta, 0, 5);
+                    foreach ($sample_posts as $post) : 
+                        $meta_keys = $wpdb->get_col($wpdb->prepare(
+                            "SELECT DISTINCT meta_key FROM {$wpdb->postmeta} WHERE post_id = %d",
+                            $post->ID
+                        ));
+                    ?>
+                    <tr>
+                        <td><?php echo $post->ID; ?></td>
+                        <td><?php echo esc_html($post->post_title); ?></td>
+                        <td><code><?php echo esc_html($post->post_type); ?></code></td>
+                        <td><?php echo esc_html($post->post_status); ?></td>
+                        <td>
+                            <?php 
+                            $jury_meta = array_filter($meta_keys, function($key) {
+                                return strpos($key, '_mt_') === 0;
+                            });
+                            echo implode(', ', array_map('esc_html', $jury_meta));
+                            ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Raw SQL Debug -->
+        <div class="diagnostic-section">
+            <h3><?php _e('Debug SQL Queries', 'mobility-trailblazers'); ?></h3>
+            <button type="button" class="button" id="show-sql-queries"><?php _e('Show SQL Queries', 'mobility-trailblazers'); ?></button>
+            
+            <div id="sql-queries" style="display: none; margin-top: 15px;">
+                <h4>Find all posts of type 'mt_jury_member':</h4>
+                <pre style="background: #f0f0f1; padding: 10px; overflow-x: auto;">
+SELECT * FROM <?php echo $wpdb->posts; ?> 
+WHERE post_type = 'mt_jury_member' 
+AND post_status != 'trash'</pre>
+                
+                <h4>Find all custom post types:</h4>
+                <pre style="background: #f0f0f1; padding: 10px; overflow-x: auto;">
+SELECT DISTINCT post_type 
+FROM <?php echo $wpdb->posts; ?> 
+WHERE post_type NOT IN ('post', 'page', 'attachment', 'revision', 'nav_menu_item')</pre>
+                
+                <h4>Find unlinked jury members:</h4>
+                <pre style="background: #f0f0f1; padding: 10px; overflow-x: auto;">
+SELECT p.* 
+FROM <?php echo $wpdb->posts; ?> p
+LEFT JOIN <?php echo $wpdb->postmeta; ?> pm ON p.ID = pm.post_id AND pm.meta_key = '_mt_user_id'
+WHERE p.post_type = 'mt_jury_member' 
+AND (pm.meta_value IS NULL OR pm.meta_value = '' OR pm.meta_value = '0')</pre>
+            </div>
+        </div>
+        
+        <!-- All Custom Post Types -->
+        <div class="diagnostic-section">
+            <h3><?php _e('All Registered Custom Post Types', 'mobility-trailblazers'); ?></h3>
+            <?php
+            $all_types = get_post_types(array('_builtin' => false), 'objects');
+            if (!empty($all_types)) :
+            ?>
+            <ul>
+                <?php foreach ($all_types as $type => $obj) : ?>
+                    <li>
+                        <code><?php echo esc_html($type); ?></code> - 
+                        <?php echo esc_html($obj->label); ?>
+                        (<?php 
+                        $count = wp_count_posts($type);
+                        echo isset($count->publish) ? $count->publish : 0;
+                        ?> published)
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <?php else : ?>
+            <p><?php _e('No custom post types found.', 'mobility-trailblazers'); ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <style>
-    .mt-jury-diagnostic {
+    .mt-query-diagnostic {
         background: #fff;
         padding: 20px;
         margin-top: 20px;
@@ -1278,88 +1644,35 @@ $system_info = $diagnostic->get_system_info();
         box-shadow: 0 1px 1px rgba(0,0,0,.04);
     }
 
-    .mt-diagnostic-summary {
+    .diagnostic-section {
+        margin-bottom: 30px;
+        padding: 20px;
         background: #f6f7f7;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-left: 4px solid #2271b1;
+        border: 1px solid #dcdcde;
     }
 
-    .mt-diagnostic-summary ul {
-        margin: 0;
-        padding-left: 20px;
+    .diagnostic-section h3 {
+        margin-top: 0;
     }
 
-    .mt-diagnostic-summary .has-issues {
-        color: #dc3232;
-        font-weight: bold;
+    .diagnostic-section table {
+        background: #fff;
     }
 
-    .mt-diagnostic-summary .no-issues {
-        color: #46b450;
-        font-weight: bold;
-    }
-
-    .mt-diagnostic-issues {
-        background: #fcf9e8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid #ffb900;
-    }
-
-    .issue-group {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .issue-group:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    .mt-diagnostic-details {
-        margin-top: 20px;
-    }
-
-    .status-column {
-        text-align: center;
-    }
-
-    tr.has-issues {
-        background-color: #fcf9e8 !important;
-    }
-
-    .issue-list {
-        margin: 0;
-        padding-left: 20px;
-        font-size: 0.9em;
-        color: #dc3232;
-    }
-
-    .mt-diagnostic-debug {
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid #ddd;
-    }
-
-    #debug-info {
-        margin-top: 15px;
-        padding: 15px;
-        background: #f0f0f1;
-        border: 1px solid #ddd;
+    pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
     </style>
 
     <script>
     jQuery(document).ready(function($) {
-        $('#toggle-debug-info').on('click', function() {
-            $('#debug-info').toggle();
+        $('#show-sql-queries').on('click', function() {
+            $('#sql-queries').toggle();
             $(this).text(
-                $('#debug-info').is(':visible') 
-                    ? '<?php _e('Hide Debug Data', 'mobility-trailblazers'); ?>' 
-                    : '<?php _e('Show Debug Data', 'mobility-trailblazers'); ?>'
+                $('#sql-queries').is(':visible') 
+                    ? '<?php _e('Hide SQL Queries', 'mobility-trailblazers'); ?>' 
+                    : '<?php _e('Show SQL Queries', 'mobility-trailblazers'); ?>'
             );
         });
     });
