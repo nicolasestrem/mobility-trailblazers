@@ -530,124 +530,611 @@ $system_info = $diagnostic->get_system_info();
         </div>
     </div>
 
+    <!-- Bulk Jury Member User Account Creation Tool -->
+    <?php
+    /**
+     * Bulk Jury Member User Account Creation Tool
+     * Add this to your diagnostic.php 
+     */
+
+    // Security check
+    if (!defined('ABSPATH')) {
+        exit;
+    }
+
+    // Handle bulk creation form submission
+    if (isset($_POST['mt_bulk_create_users']) && wp_verify_nonce($_POST['mt_bulk_create_nonce'], 'mt_bulk_create_users')) {
+        $selected_jury_ids = isset($_POST['jury_members']) ? array_map('intval', $_POST['jury_members']) : array();
+        $username_pattern = sanitize_text_field($_POST['username_pattern']);
+        $email_domain = sanitize_text_field($_POST['email_domain']);
+        $use_custom_email = isset($_POST['use_custom_email']);
+        $send_notifications = isset($_POST['send_notifications']);
+        $password_type = sanitize_text_field($_POST['password_type']);
+        $custom_password = sanitize_text_field($_POST['custom_password']);
+        
+        $created_count = 0;
+        $errors = array();
+        
+        foreach ($selected_jury_ids as $jury_id) {
+            $jury_member = get_post($jury_id);
+            if (!$jury_member) continue;
+            
+            // Check if already linked
+            $existing_user_id = get_post_meta($jury_id, '_mt_user_id', true);
+            if ($existing_user_id) {
+                $errors[] = sprintf(__('Jury member "%s" is already linked to a user.', 'mobility-trailblazers'), $jury_member->post_title);
+                continue;
+            }
+            
+            // Generate username based on pattern
+            $username = '';
+            switch ($username_pattern) {
+                case 'firstname.lastname':
+                    $username = strtolower(str_replace(' ', '.', $jury_member->post_title));
+                    break;
+                case 'firstname_lastname':
+                    $username = strtolower(str_replace(' ', '_', $jury_member->post_title));
+                    break;
+                case 'firstnamelastname':
+                    $username = strtolower(str_replace(' ', '', $jury_member->post_title));
+                    break;
+                case 'jury_id':
+                    $username = 'jury_' . $jury_id;
+                    break;
+                case 'custom':
+                    $custom_pattern = sanitize_text_field($_POST['custom_username_pattern']);
+                    $username = str_replace(
+                        array('{name}', '{id}', '{date}'),
+                        array(
+                            strtolower(str_replace(' ', '', $jury_member->post_title)),
+                            $jury_id,
+                            date('Ymd')
+                        ),
+                        $custom_pattern
+                    );
+                    break;
+            }
+            
+            // Ensure username is unique
+            $base_username = $username;
+            $counter = 1;
+            while (username_exists($username)) {
+                $username = $base_username . $counter;
+                $counter++;
+            }
+            
+            // Generate email
+            $email = '';
+            if ($use_custom_email && $email_domain) {
+                // Use custom email pattern
+                $email = $username . '@' . $email_domain;
+            } else {
+                // Use jury member's existing email
+                $email = get_post_meta($jury_id, '_mt_email', true);
+                if (!$email) {
+                    // Fallback to generated email
+                    $email = $username . '@' . parse_url(home_url(), PHP_URL_HOST);
+                }
+            }
+            
+            // Check if email already exists
+            if (email_exists($email)) {
+                $errors[] = sprintf(__('Email %s already exists for jury member "%s".', 'mobility-trailblazers'), $email, $jury_member->post_title);
+                continue;
+            }
+            
+            // Generate password
+            $password = '';
+            switch ($password_type) {
+                case 'random':
+                    $password = wp_generate_password(12, true, false);
+                    break;
+                case 'custom':
+                    $password = $custom_password;
+                    break;
+                case 'pattern':
+                    $password_pattern = sanitize_text_field($_POST['password_pattern']);
+                    $password = str_replace(
+                        array('{username}', '{date}', '{random}'),
+                        array(
+                            $username,
+                            date('Y'),
+                            wp_generate_password(4, false, false)
+                        ),
+                        $password_pattern
+                    );
+                    break;
+            }
+            
+            // Create user
+            $user_data = array(
+                'user_login' => $username,
+                'user_email' => $email,
+                'user_pass' => $password,
+                'display_name' => $jury_member->post_title,
+                'role' => 'mt_jury_member'
+            );
+            
+            $user_id = wp_insert_user($user_data);
+            
+            if (!is_wp_error($user_id)) {
+                // Link user to jury member
+                update_post_meta($jury_id, '_mt_user_id', $user_id);
+                update_user_meta($user_id, '_mt_jury_member_id', $jury_id);
+                
+                // Update jury member email if using custom
+                if ($use_custom_email) {
+                    update_post_meta($jury_id, '_mt_email', $email);
+                }
+                
+                // Store credentials for display
+                $created_users[] = array(
+                    'jury_name' => $jury_member->post_title,
+                    'username' => $username,
+                    'email' => $email,
+                    'password' => $password
+                );
+                
+                // Send notification if requested
+                if ($send_notifications) {
+                    wp_new_user_notification($user_id, null, 'both');
+                }
+                
+                $created_count++;
+            } else {
+                $errors[] = sprintf(__('Failed to create user for "%s": %s', 'mobility-trailblazers'), $jury_member->post_title, $user_id->get_error_message());
+            }
+        }
+        
+        // Store results in transient for display
+        if ($created_count > 0) {
+            set_transient('mt_bulk_created_users', $created_users, 300); // 5 minutes
+        }
+    }
+
+    // Get unlinked jury members
+    $jury_members = get_posts(array(
+        'post_type' => 'mt_jury_member',
+        'posts_per_page' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+        'post_status' => 'any',
+        'meta_query' => array(
+            array(
+                'key' => '_mt_user_id',
+                'compare' => 'NOT EXISTS'
+            )
+        )
+    ));
+
+    // Check for recently created users to display
+    $created_users = get_transient('mt_bulk_created_users');
+    ?>
+
+    <div class="mt-bulk-creation-tool">
+        <h2><?php _e('Bulk Create User Accounts for Jury Members', 'mobility-trailblazers'); ?></h2>
+        
+        <?php if (isset($created_count) && $created_count > 0) : ?>
+            <div class="notice notice-success">
+                <p><?php printf(__('Successfully created %d user account(s).', 'mobility-trailblazers'), $created_count); ?></p>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($errors)) : ?>
+            <div class="notice notice-error">
+                <p><strong><?php _e('Some errors occurred:', 'mobility-trailblazers'); ?></strong></p>
+                <ul>
+                    <?php foreach ($errors as $error) : ?>
+                        <li><?php echo esc_html($error); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+        
+        <?php if ($created_users && !isset($_POST['mt_bulk_create_users'])) : ?>
+            <div class="mt-created-users-list">
+                <h3><?php _e('Recently Created User Accounts', 'mobility-trailblazers'); ?></h3>
+                <p class="description"><?php _e('Save these credentials - passwords cannot be retrieved later!', 'mobility-trailblazers'); ?></p>
+                
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
+                            <th><?php _e('Username', 'mobility-trailblazers'); ?></th>
+                            <th><?php _e('Email', 'mobility-trailblazers'); ?></th>
+                            <th><?php _e('Password', 'mobility-trailblazers'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($created_users as $user) : ?>
+                        <tr>
+                            <td><?php echo esc_html($user['jury_name']); ?></td>
+                            <td><code><?php echo esc_html($user['username']); ?></code></td>
+                            <td><?php echo esc_html($user['email']); ?></td>
+                            <td>
+                                <code class="password-field"><?php echo esc_html($user['password']); ?></code>
+                                <button class="button button-small copy-password" data-password="<?php echo esc_attr($user['password']); ?>">
+                                    <?php _e('Copy', 'mobility-trailblazers'); ?>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                
+                <p class="mt-export-actions">
+                    <button class="button" id="export-credentials-csv"><?php _e('Export as CSV', 'mobility-trailblazers'); ?></button>
+                    <button class="button" id="print-credentials"><?php _e('Print', 'mobility-trailblazers'); ?></button>
+                </p>
+            </div>
+            <?php delete_transient('mt_bulk_created_users'); ?>
+        <?php endif; ?>
+        
+        <?php if (empty($jury_members)) : ?>
+            <p><?php _e('All jury members are already linked to user accounts.', 'mobility-trailblazers'); ?></p>
+        <?php else : ?>
+        
+        <form method="post" action="" id="bulk-create-form">
+            <?php wp_nonce_field('mt_bulk_create_users', 'mt_bulk_create_nonce'); ?>
+            
+            <div class="mt-form-section">
+                <h3><?php _e('1. Select Jury Members', 'mobility-trailblazers'); ?></h3>
+                
+                <div class="mt-select-controls">
+                    <button type="button" class="button" id="select-all"><?php _e('Select All', 'mobility-trailblazers'); ?></button>
+                    <button type="button" class="button" id="select-none"><?php _e('Select None', 'mobility-trailblazers'); ?></button>
+                    <span class="selected-count">
+                        <span id="selected-count">0</span> <?php _e('selected', 'mobility-trailblazers'); ?>
+                    </span>
+                </div>
+                
+                <div class="mt-jury-selection">
+                    <?php foreach ($jury_members as $jury) : 
+                        $email = get_post_meta($jury->ID, '_mt_email', true);
+                    ?>
+                    <label class="jury-member-item">
+                        <input type="checkbox" name="jury_members[]" value="<?php echo $jury->ID; ?>" class="jury-checkbox">
+                        <span class="jury-name"><?php echo esc_html($jury->post_title); ?></span>
+                        <?php if ($email) : ?>
+                            <span class="jury-email">(<?php echo esc_html($email); ?>)</span>
+                        <?php endif; ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="mt-form-section">
+                <h3><?php _e('2. Username Pattern', 'mobility-trailblazers'); ?></h3>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php _e('Username Format', 'mobility-trailblazers'); ?></th>
+                        <td>
+                            <select name="username_pattern" id="username_pattern">
+                                <option value="firstname.lastname"><?php _e('firstname.lastname', 'mobility-trailblazers'); ?></option>
+                                <option value="firstname_lastname"><?php _e('firstname_lastname', 'mobility-trailblazers'); ?></option>
+                                <option value="firstnamelastname"><?php _e('firstnamelastname', 'mobility-trailblazers'); ?></option>
+                                <option value="jury_id"><?php _e('jury_123 (using ID)', 'mobility-trailblazers'); ?></option>
+                                <option value="custom"><?php _e('Custom pattern', 'mobility-trailblazers'); ?></option>
+                            </select>
+                            
+                            <div id="custom-username-section" style="display: none; margin-top: 10px;">
+                                <input type="text" name="custom_username_pattern" class="regular-text" placeholder="{name}_{date}">
+                                <p class="description">
+                                    <?php _e('Available variables: {name}, {id}, {date}', 'mobility-trailblazers'); ?>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="mt-form-section">
+                <h3><?php _e('3. Email Configuration', 'mobility-trailblazers'); ?></h3>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php _e('Email Source', 'mobility-trailblazers'); ?></th>
+                        <td>
+                            <label>
+                                <input type="radio" name="use_custom_email" value="0" checked>
+                                <?php _e('Use existing jury member emails', 'mobility-trailblazers'); ?>
+                            </label>
+                            <br>
+                            <label>
+                                <input type="radio" name="use_custom_email" value="1">
+                                <?php _e('Generate emails with custom domain', 'mobility-trailblazers'); ?>
+                            </label>
+                            
+                            <div id="custom-email-section" style="display: none; margin-top: 10px;">
+                                <input type="text" name="email_domain" class="regular-text" placeholder="example.com">
+                                <p class="description">
+                                    <?php _e('Emails will be: username@domain', 'mobility-trailblazers'); ?>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="mt-form-section">
+                <h3><?php _e('4. Password Configuration', 'mobility-trailblazers'); ?></h3>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php _e('Password Type', 'mobility-trailblazers'); ?></th>
+                        <td>
+                            <select name="password_type" id="password_type">
+                                <option value="random"><?php _e('Generate random passwords', 'mobility-trailblazers'); ?></option>
+                                <option value="custom"><?php _e('Same password for all', 'mobility-trailblazers'); ?></option>
+                                <option value="pattern"><?php _e('Pattern-based password', 'mobility-trailblazers'); ?></option>
+                            </select>
+                            
+                            <div id="custom-password-section" style="display: none; margin-top: 10px;">
+                                <input type="text" name="custom_password" class="regular-text" placeholder="<?php _e('Enter password', 'mobility-trailblazers'); ?>">
+                                <p class="description"><?php _e('All users will have this password', 'mobility-trailblazers'); ?></p>
+                            </div>
+                            
+                            <div id="pattern-password-section" style="display: none; margin-top: 10px;">
+                                <input type="text" name="password_pattern" class="regular-text" placeholder="Award{date}_{username}">
+                                <p class="description">
+                                    <?php _e('Variables: {username}, {date}, {random}', 'mobility-trailblazers'); ?>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="mt-form-section">
+                <h3><?php _e('5. Notifications', 'mobility-trailblazers'); ?></h3>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><?php _e('Email Notifications', 'mobility-trailblazers'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="send_notifications" value="1">
+                                <?php _e('Send new user notification emails', 'mobility-trailblazers'); ?>
+                            </label>
+                            <p class="description">
+                                <?php _e('WordPress will send login credentials to each new user', 'mobility-trailblazers'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p class="submit">
+                <button type="submit" name="mt_bulk_create_users" class="button button-primary" id="bulk-create-submit" disabled>
+                    <?php _e('Create User Accounts', 'mobility-trailblazers'); ?>
+                </button>
+                <span class="spinner"></span>
+            </p>
+        </form>
+        
+        <?php endif; ?>
+    </div>
+
     <style>
-    .mt-jury-linking-tool {
+    .mt-bulk-creation-tool {
         background: #fff;
         padding: 20px;
-        margin-top: 20px;
+        margin: 20px 0;
         border: 1px solid #ccd0d4;
         box-shadow: 0 1px 1px rgba(0,0,0,.04);
     }
 
-    .mt-tool-description {
-        margin-bottom: 20px;
-        padding: 10px;
-        background: #f0f0f1;
-        border-left: 4px solid #2271b1;
-    }
-
-    .mt-jury-members-list {
-        margin-bottom: 30px;
-    }
-
-    .mt-link-options {
-        margin: 20px 0;
-    }
-
-    .mt-link-options label {
-        display: block;
-        margin-bottom: 10px;
-    }
-
     .mt-form-section {
-        margin-top: 20px;
+        margin-bottom: 30px;
         padding: 20px;
         background: #f6f7f7;
         border: 1px solid #dcdcde;
     }
 
-    #mt-link-user-form,
-    #mt-unlink-user-form {
-        margin-top: 20px;
-        padding: 20px;
+    .mt-form-section h3 {
+        margin-top: 0;
+        color: #1d2327;
+    }
+
+    .mt-select-controls {
+        margin-bottom: 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .selected-count {
+        margin-left: auto;
+        font-weight: 600;
+        color: #2271b1;
+    }
+
+    .mt-jury-selection {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dcdcde;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .jury-member-item {
+        display: block;
+        padding: 8px;
+        border-bottom: 1px solid #f0f0f1;
+    }
+
+    .jury-member-item:hover {
         background: #f6f7f7;
-        border: 2px solid #2271b1;
+    }
+
+    .jury-checkbox {
+        margin-right: 10px;
+    }
+
+    .jury-email {
+        color: #646970;
+        font-size: 0.9em;
+        margin-left: 5px;
+    }
+
+    .mt-created-users-list {
+        margin: 20px 0;
+        padding: 20px;
+        background: #ecf7ed;
+        border: 2px solid #46b450;
+    }
+
+    .password-field {
+        font-family: monospace;
+        background: #f0f0f1;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+
+    .mt-export-actions {
+        margin-top: 15px;
+    }
+
+    .form-table td select,
+    .form-table td input[type="text"] {
+        margin-top: 5px;
     }
     </style>
 
     <script>
     jQuery(document).ready(function($) {
-        // Handle link user button click
-        $('.mt-link-user').on('click', function() {
-            var juryId = $(this).data('jury-id');
-            var email = $(this).data('email');
-            var name = $(this).data('name');
-            
-            $('#link-jury-member-id').val(juryId);
-            $('#new_user_email').val(email);
-            $('#new_user_display_name').val(name);
-            
-            // Generate username suggestion from name
-            if (name) {
-                var username = name.toLowerCase().replace(/\s+/g, '.');
-                $('#new_user_login').val(username);
-            }
-            
-            $('#mt-link-user-form').slideDown();
-            $('html, body').animate({
-                scrollTop: $('#mt-link-user-form').offset().top - 50
-            }, 500);
+        // Update selected count
+        function updateSelectedCount() {
+            var count = $('.jury-checkbox:checked').length;
+            $('#selected-count').text(count);
+            $('#bulk-create-submit').prop('disabled', count === 0);
+        }
+        
+        // Select all/none
+        $('#select-all').on('click', function() {
+            $('.jury-checkbox').prop('checked', true);
+            updateSelectedCount();
         });
         
-        // Handle unlink user button click
-        $('.mt-unlink-user').on('click', function() {
-            var juryId = $(this).data('jury-id');
-            $('#unlink-jury-member-id').val(juryId);
-            $('#mt-unlink-user-form').slideDown();
-            $('html, body').animate({
-                scrollTop: $('#mt-unlink-user-form').offset().top - 50
-            }, 500);
+        $('#select-none').on('click', function() {
+            $('.jury-checkbox').prop('checked', false);
+            updateSelectedCount();
         });
         
-        // Handle cancel buttons
-        $('.mt-cancel-link').on('click', function() {
-            $('#mt-link-user-form').slideUp();
-        });
+        // Update count on checkbox change
+        $('.jury-checkbox').on('change', updateSelectedCount);
         
-        $('.mt-cancel-unlink').on('click', function() {
-            $('#mt-unlink-user-form').slideUp();
-        });
-        
-        // Toggle between existing and new user sections
-        $('input[name="link_action"]').on('change', function() {
-            if ($(this).val() === 'existing') {
-                $('#existing-user-section').show();
-                $('#new-user-section').hide();
+        // Show/hide custom username field
+        $('#username_pattern').on('change', function() {
+            if ($(this).val() === 'custom') {
+                $('#custom-username-section').show();
             } else {
-                $('#existing-user-section').hide();
-                $('#new-user-section').show();
+                $('#custom-username-section').hide();
             }
         });
         
-        // Validate form before submission
-        $('form').on('submit', function(e) {
-            var action = $('input[name="link_action"]:checked').val();
-            
-            if ($(this).find('button[name="mt_link_jury_user"]').length) {
-                if (action === 'existing') {
-                    if (!$('#existing_user_id').val()) {
-                        alert('<?php _e('Please select a user.', 'mobility-trailblazers'); ?>');
-                        e.preventDefault();
-                        return false;
-                    }
-                } else if (action === 'create') {
-                    if (!$('#new_user_login').val() || !$('#new_user_email').val()) {
-                        alert('<?php _e('Please fill in all required fields.', 'mobility-trailblazers'); ?>');
-                        e.preventDefault();
-                        return false;
-                    }
-                }
+        // Show/hide custom email field
+        $('input[name="use_custom_email"]').on('change', function() {
+            if ($(this).val() === '1') {
+                $('#custom-email-section').show();
+            } else {
+                $('#custom-email-section').hide();
             }
+        });
+        
+        // Show/hide password fields
+        $('#password_type').on('change', function() {
+            $('#custom-password-section, #pattern-password-section').hide();
+            
+            if ($(this).val() === 'custom') {
+                $('#custom-password-section').show();
+            } else if ($(this).val() === 'pattern') {
+                $('#pattern-password-section').show();
+            }
+        });
+        
+        // Copy password functionality
+        $('.copy-password').on('click', function() {
+            var password = $(this).data('password');
+            var $temp = $('<input>');
+            $('body').append($temp);
+            $temp.val(password).select();
+            document.execCommand('copy');
+            $temp.remove();
+            
+            $(this).text('<?php _e('Copied!', 'mobility-trailblazers'); ?>');
+            setTimeout(() => {
+                $(this).text('<?php _e('Copy', 'mobility-trailblazers'); ?>');
+            }, 2000);
+        });
+        
+        // Export CSV
+        $('#export-credentials-csv').on('click', function() {
+            var csv = 'Jury Member,Username,Email,Password\n';
+            
+            $('.mt-created-users-list tbody tr').each(function() {
+                var cells = $(this).find('td');
+                csv += '"' + $(cells[0]).text() + '",';
+                csv += '"' + $(cells[1]).text() + '",';
+                csv += '"' + $(cells[2]).text() + '",';
+                csv += '"' + $(cells[3]).find('.password-field').text() + '"\n';
+            });
+            
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'jury_credentials_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+        });
+        
+        // Print credentials
+        $('#print-credentials').on('click', function() {
+            var printWindow = window.open('', '_blank');
+            var content = $('.mt-created-users-list').html();
+            
+            printWindow.document.write('<html><head><title>Jury Credentials</title>');
+            printWindow.document.write('<style>body { font-family: Arial, sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background: #f0f0f1; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h1>Jury Member Credentials</h1>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        // Form validation
+        $('#bulk-create-form').on('submit', function(e) {
+            var selectedCount = $('.jury-checkbox:checked').length;
+            
+            if (selectedCount === 0) {
+                alert('<?php _e('Please select at least one jury member.', 'mobility-trailblazers'); ?>');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Validate custom fields if needed
+            if ($('#username_pattern').val() === 'custom' && !$('input[name="custom_username_pattern"]').val()) {
+                alert('<?php _e('Please enter a custom username pattern.', 'mobility-trailblazers'); ?>');
+                e.preventDefault();
+                return false;
+            }
+            
+            if ($('input[name="use_custom_email"]:checked').val() === '1' && !$('input[name="email_domain"]').val()) {
+                alert('<?php _e('Please enter an email domain.', 'mobility-trailblazers'); ?>');
+                e.preventDefault();
+                return false;
+            }
+            
+            if ($('#password_type').val() === 'custom' && !$('input[name="custom_password"]').val()) {
+                alert('<?php _e('Please enter a password.', 'mobility-trailblazers'); ?>');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show spinner
+            $(this).find('.spinner').addClass('is-active');
         });
     });
     </script>
