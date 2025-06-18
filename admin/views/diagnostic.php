@@ -221,7 +221,7 @@ $potential_users = get_users(array(
             $has_capability_issues = false;
             if (isset($results['roles'])) {
                 foreach ($results['roles'] as $check) {
-                    if ($check['name'] === __('Admin Capabilities', 'mobility-trailblazers') && $check['status'] !== 'success') {
+                    if (isset($check['name']) && $check['name'] === __('Admin Capabilities', 'mobility-trailblazers') && isset($check['status']) && $check['status'] !== 'success') {
                         $has_capability_issues = true;
                         break;
                     }
