@@ -28,9 +28,136 @@ class MT_Roles {
     }
     
     /**
+     * Add capabilities to administrator role
+     * This runs on every admin_init to ensure capabilities are always present
+     */
+    public function add_admin_capabilities() {
+        $admin_role = get_role('administrator');
+        
+        if (!$admin_role) {
+            return;
+        }
+        
+        // Get all MT capabilities
+        $capabilities = self::get_all_mt_capabilities();
+        
+        // Check if we need to add any capabilities
+        $needs_update = false;
+        foreach ($capabilities as $cap) {
+            if (!isset($admin_role->capabilities[$cap]) || !$admin_role->capabilities[$cap]) {
+                $needs_update = true;
+                break;
+            }
+        }
+        
+        // Add capabilities if needed
+        if ($needs_update) {
+            foreach ($capabilities as $cap) {
+                $admin_role->add_cap($cap);
+            }
+            
+            // Clear cache
+            wp_cache_delete('user_roles', 'options');
+        }
+    }
+    
+    /**
+     * Get all MT capabilities
+     *
+     * @return array List of all MT capabilities
+     */
+    public static function get_all_mt_capabilities() {
+        return array(
+            // Custom capabilities
+            'mt_manage_awards',
+            'mt_manage_assignments',
+            'mt_view_all_evaluations',
+            'mt_manage_voting',
+            'mt_export_data',
+            'mt_manage_jury_members',
+            'mt_submit_evaluations',
+            'mt_view_candidates',
+            'mt_access_jury_dashboard',
+            'mt_export_own_evaluations',
+            'mt_reset_votes',
+            'mt_create_backups',
+            'mt_restore_backups',
+            
+            // Post type capabilities - Candidates
+            'edit_mt_candidate',
+            'read_mt_candidate',
+            'delete_mt_candidate',
+            'edit_mt_candidates',
+            'edit_others_mt_candidates',
+            'publish_mt_candidates',
+            'read_private_mt_candidates',
+            'delete_mt_candidates',
+            'delete_private_mt_candidates',
+            'delete_published_mt_candidates',
+            'delete_others_mt_candidates',
+            'edit_private_mt_candidates',
+            'edit_published_mt_candidates',
+            
+            // Post type capabilities - Jury Members (both naming conventions)
+            'edit_mt_jury_member',
+            'read_mt_jury_member',
+            'delete_mt_jury_member',
+            'edit_mt_jury_members',
+            'edit_others_mt_jury_members',
+            'publish_mt_jury_members',
+            'read_private_mt_jury_members',
+            'delete_mt_jury_members',
+            'delete_private_mt_jury_members',
+            'delete_published_mt_jury_members',
+            'delete_others_mt_jury_members',
+            'edit_private_mt_jury_members',
+            'edit_published_mt_jury_members',
+            
+            // Alternative naming (mt_jury vs mt_jury_member)
+            'edit_mt_jury',
+            'read_mt_jury',
+            'delete_mt_jury',
+            'edit_mt_jurys',
+            'edit_others_mt_jurys',
+            'publish_mt_jurys',
+            'read_private_mt_jurys',
+            'delete_mt_jurys',
+            'delete_private_mt_jurys',
+            'delete_published_mt_jurys',
+            'delete_others_mt_jurys',
+            'edit_private_mt_jurys',
+            'edit_published_mt_jurys',
+            
+            // Post type capabilities - Backups
+            'edit_mt_backup',
+            'read_mt_backup',
+            'delete_mt_backup',
+            'edit_mt_backups',
+            'edit_others_mt_backups',
+            'publish_mt_backups',
+            'read_private_mt_backups',
+            'delete_mt_backups',
+            'delete_private_mt_backups',
+            'delete_published_mt_backups',
+            'delete_others_mt_backups',
+            'edit_private_mt_backups',
+            'edit_published_mt_backups',
+        );
+    }
+    
+    /**
      * Create custom roles
      */
     public static function create_roles() {
+        // Get administrator role to ensure it has all capabilities
+        $admin_role = get_role('administrator');
+        if ($admin_role) {
+            $capabilities = self::get_all_mt_capabilities();
+            foreach ($capabilities as $cap) {
+                $admin_role->add_cap($cap);
+            }
+        }
+        
         // MT Award Admin role
         add_role(
             'mt_award_admin',
@@ -42,6 +169,14 @@ class MT_Roles {
                 'edit_posts' => false,
                 'delete_posts' => false,
                 'publish_posts' => false,
+                
+                // Custom capabilities
+                'mt_manage_awards' => true,
+                'mt_manage_assignments' => true,
+                'mt_view_all_evaluations' => true,
+                'mt_manage_voting' => true,
+                'mt_export_data' => true,
+                'mt_manage_jury_members' => true,
                 
                 // Candidate capabilities
                 'edit_mt_candidate' => true,
@@ -73,31 +208,20 @@ class MT_Roles {
                 'edit_private_mt_jurys' => true,
                 'edit_published_mt_jurys' => true,
                 
-                // Backup capabilities
-                'edit_mt_backup' => true,
-                'read_mt_backup' => true,
-                'delete_mt_backup' => true,
-                'edit_mt_backups' => true,
-                'edit_others_mt_backups' => true,
-                'publish_mt_backups' => true,
-                'read_private_mt_backups' => true,
-                'delete_mt_backups' => true,
-                'delete_private_mt_backups' => true,
-                'delete_published_mt_backups' => true,
-                'delete_others_mt_backups' => true,
-                'edit_private_mt_backups' => true,
-                'edit_published_mt_backups' => true,
-                
-                // Custom capabilities
-                'mt_manage_awards' => true,
-                'mt_manage_assignments' => true,
-                'mt_view_all_evaluations' => true,
-                'mt_manage_voting' => true,
-                'mt_export_data' => true,
-                'mt_manage_jury_members' => true,
-                'mt_reset_votes' => true,
-                'mt_create_backups' => true,
-                'mt_restore_backups' => true,
+                // Alternative naming
+                'edit_mt_jury_member' => true,
+                'read_mt_jury_member' => true,
+                'delete_mt_jury_member' => true,
+                'edit_mt_jury_members' => true,
+                'edit_others_mt_jury_members' => true,
+                'publish_mt_jury_members' => true,
+                'read_private_mt_jury_members' => true,
+                'delete_mt_jury_members' => true,
+                'delete_private_mt_jury_members' => true,
+                'delete_published_mt_jury_members' => true,
+                'delete_others_mt_jury_members' => true,
+                'edit_private_mt_jury_members' => true,
+                'edit_published_mt_jury_members' => true,
             )
         );
         
@@ -108,26 +232,21 @@ class MT_Roles {
             array(
                 // WordPress capabilities
                 'read' => true,
-                'upload_files' => true,
-                'edit_posts' => false,
-                'delete_posts' => false,
-                'publish_posts' => false,
-                
-                // Candidate capabilities (read only)
-                'read_mt_candidate' => true,
-                'read_private_mt_candidates' => true,
-                
-                // Jury capabilities (can edit own profile)
-                'read_mt_jury_member' => true,
-                'edit_mt_jury_member' => true,
                 
                 // Custom capabilities
                 'mt_submit_evaluations' => true,
                 'mt_view_candidates' => true,
                 'mt_access_jury_dashboard' => true,
                 'mt_export_own_evaluations' => true,
+                
+                // Read-only access to candidates
+                'read_mt_candidate' => true,
+                'read_private_mt_candidates' => true,
             )
         );
+        
+        // Clear capabilities cache
+        wp_cache_delete('user_roles', 'options');
     }
     
     /**
@@ -139,78 +258,7 @@ class MT_Roles {
     }
     
     /**
-     * Add capabilities to administrator role
-     */
-    public function add_admin_capabilities() {
-        $admin_role = get_role('administrator');
-        
-        if (!$admin_role) {
-            return;
-        }
-        
-        // Candidate capabilities
-        $admin_role->add_cap('edit_mt_candidate');
-        $admin_role->add_cap('read_mt_candidate');
-        $admin_role->add_cap('delete_mt_candidate');
-        $admin_role->add_cap('edit_mt_candidates');
-        $admin_role->add_cap('edit_others_mt_candidates');
-        $admin_role->add_cap('publish_mt_candidates');
-        $admin_role->add_cap('read_private_mt_candidates');
-        $admin_role->add_cap('delete_mt_candidates');
-        $admin_role->add_cap('delete_private_mt_candidates');
-        $admin_role->add_cap('delete_published_mt_candidates');
-        $admin_role->add_cap('delete_others_mt_candidates');
-        $admin_role->add_cap('edit_private_mt_candidates');
-        $admin_role->add_cap('edit_published_mt_candidates');
-        
-        // Jury capabilities
-        $admin_role->add_cap('edit_mt_jury');
-        $admin_role->add_cap('read_mt_jury');
-        $admin_role->add_cap('delete_mt_jury');
-        $admin_role->add_cap('edit_mt_jurys');
-        $admin_role->add_cap('edit_others_mt_jurys');
-        $admin_role->add_cap('publish_mt_jurys');
-        $admin_role->add_cap('read_private_mt_jurys');
-        $admin_role->add_cap('delete_mt_jurys');
-        $admin_role->add_cap('delete_private_mt_jurys');
-        $admin_role->add_cap('delete_published_mt_jurys');
-        $admin_role->add_cap('delete_others_mt_jurys');
-        $admin_role->add_cap('edit_private_mt_jurys');
-        $admin_role->add_cap('edit_published_mt_jurys');
-        
-        // Backup capabilities
-        $admin_role->add_cap('edit_mt_backup');
-        $admin_role->add_cap('read_mt_backup');
-        $admin_role->add_cap('delete_mt_backup');
-        $admin_role->add_cap('edit_mt_backups');
-        $admin_role->add_cap('edit_others_mt_backups');
-        $admin_role->add_cap('publish_mt_backups');
-        $admin_role->add_cap('read_private_mt_backups');
-        $admin_role->add_cap('delete_mt_backups');
-        $admin_role->add_cap('delete_private_mt_backups');
-        $admin_role->add_cap('delete_published_mt_backups');
-        $admin_role->add_cap('delete_others_mt_backups');
-        $admin_role->add_cap('edit_private_mt_backups');
-        $admin_role->add_cap('edit_published_mt_backups');
-        
-        // Custom capabilities
-        $admin_role->add_cap('mt_manage_awards');
-        $admin_role->add_cap('mt_manage_assignments');
-        $admin_role->add_cap('mt_view_all_evaluations');
-        $admin_role->add_cap('mt_manage_voting');
-        $admin_role->add_cap('mt_export_data');
-        $admin_role->add_cap('mt_manage_jury_members');
-        $admin_role->add_cap('mt_submit_evaluations');
-        $admin_role->add_cap('mt_view_candidates');
-        $admin_role->add_cap('mt_access_jury_dashboard');
-        $admin_role->add_cap('mt_export_own_evaluations');
-        $admin_role->add_cap('mt_reset_votes');
-        $admin_role->add_cap('mt_create_backups');
-        $admin_role->add_cap('mt_restore_backups');
-    }
-    
-    /**
-     * Filter user capabilities dynamically
+     * Filter user capabilities
      *
      * @param array $allcaps All user capabilities
      * @param array $caps Required capabilities
@@ -219,18 +267,15 @@ class MT_Roles {
      * @return array Modified capabilities
      */
     public function filter_user_capabilities($allcaps, $caps, $args, $user) {
-        // Allow jury members to edit their own jury profile
-        if (isset($args[0]) && $args[0] === 'edit_post' && isset($args[2])) {
-            $post = get_post($args[2]);
+        // Check if user is linked to a jury member
+        if (in_array('mt_submit_evaluations', $caps)) {
+            $jury_member = mt_get_jury_member_by_user_id($user->ID);
             
-            if ($post && $post->post_type === 'mt_jury_member') {
-                $jury_user_id = get_post_meta($post->ID, '_mt_user_id', true);
-                
-                if ($jury_user_id && $jury_user_id == $user->ID) {
-                    $allcaps['edit_mt_jury_member'] = true;
-                    $allcaps['edit_mt_jury_members'] = true;
-                    $allcaps['edit_published_mt_jury_members'] = true;
-                }
+            if ($jury_member) {
+                $allcaps['mt_submit_evaluations'] = true;
+                $allcaps['mt_view_candidates'] = true;
+                $allcaps['mt_access_jury_dashboard'] = true;
+                $allcaps['mt_export_own_evaluations'] = true;
             }
         }
         
@@ -238,195 +283,35 @@ class MT_Roles {
     }
     
     /**
-     * Check if user has specific capability
-     *
-     * @param string $capability Capability to check
-     * @param int $user_id User ID (optional, defaults to current user)
-     * @return bool Whether user has capability
-     */
-    public static function user_can($capability, $user_id = null) {
-        if (null === $user_id) {
-            return current_user_can($capability);
-        }
-        
-        $user = get_user_by('id', $user_id);
-        
-        if (!$user) {
-            return false;
-        }
-        
-        return user_can($user, $capability);
-    }
-    
-    /**
-     * Get users with specific capability
-     *
-     * @param string $capability Capability to check
-     * @return array Array of user objects
-     */
-    public static function get_users_with_capability($capability) {
-        $users = array();
-        
-        // Get all roles
-        global $wp_roles;
-        $roles_with_cap = array();
-        
-        foreach ($wp_roles->roles as $role_name => $role_info) {
-            if (isset($role_info['capabilities'][$capability]) && $role_info['capabilities'][$capability]) {
-                $roles_with_cap[] = $role_name;
-            }
-        }
-        
-        // Get users with those roles
-        if (!empty($roles_with_cap)) {
-            $user_query = new WP_User_Query(array(
-                'role__in' => $roles_with_cap,
-                'orderby' => 'display_name',
-                'order' => 'ASC',
-            ));
-            
-            $users = $user_query->get_results();
-        }
-        
-        return $users;
-    }
-    
-    /**
-     * Create WordPress user for jury member
-     *
-     * @param int $jury_member_id Jury member post ID
-     * @param array $user_data User data
-     * @return int|WP_Error User ID on success, WP_Error on failure
-     */
-    public static function create_jury_user($jury_member_id, $user_data = array()) {
-        $jury_member = get_post($jury_member_id);
-        
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
-            return new WP_Error('invalid_jury_member', __('Invalid jury member.', 'mobility-trailblazers'));
-        }
-        
-        // Check if user already exists
-        $existing_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
-        if ($existing_user_id && get_user_by('id', $existing_user_id)) {
-            return new WP_Error('user_exists', __('User already exists for this jury member.', 'mobility-trailblazers'));
-        }
-        
-        // Get email
-        $email = isset($user_data['email']) ? $user_data['email'] : get_post_meta($jury_member_id, '_mt_email', true);
-        if (!$email || !is_email($email)) {
-            return new WP_Error('invalid_email', __('Valid email address required.', 'mobility-trailblazers'));
-        }
-        
-        // Check if email already exists
-        if (email_exists($email)) {
-            return new WP_Error('email_exists', __('Email address already registered.', 'mobility-trailblazers'));
-        }
-        
-        // Generate username
-        $username = isset($user_data['username']) ? $user_data['username'] : sanitize_user(strtolower(str_replace(' ', '.', $jury_member->post_title)));
-        $base_username = $username;
-        $counter = 1;
-        
-        while (username_exists($username)) {
-            $username = $base_username . $counter;
-            $counter++;
-        }
-        
-        // Generate password
-        $password = isset($user_data['password']) ? $user_data['password'] : wp_generate_password(12, true, false);
-        
-        // Create user
-        $user_id = wp_create_user($username, $password, $email);
-        
-        if (is_wp_error($user_id)) {
-            return $user_id;
-        }
-        
-        // Update user meta
-        wp_update_user(array(
-            'ID' => $user_id,
-            'display_name' => $jury_member->post_title,
-            'first_name' => isset($user_data['first_name']) ? $user_data['first_name'] : '',
-            'last_name' => isset($user_data['last_name']) ? $user_data['last_name'] : '',
-            'role' => 'mt_jury_member',
-        ));
-        
-        // Link user to jury member
-        update_post_meta($jury_member_id, '_mt_user_id', $user_id);
-        update_user_meta($user_id, '_mt_jury_member_id', $jury_member_id);
-        
-        // Send notification email
-        if (!isset($user_data['send_notification']) || $user_data['send_notification']) {
-            self::send_jury_welcome_email($user_id, $password);
-        }
-        
-        return $user_id;
-    }
-    
-    /**
-     * Send welcome email to jury member
-     *
-     * @param int $user_id User ID
-     * @param string $password Password
-     */
-    private static function send_jury_welcome_email($user_id, $password) {
-        $user = get_user_by('id', $user_id);
-        
-        if (!$user) {
-            return;
-        }
-        
-        $subject = sprintf(__('Welcome to %s - Jury Member Access', 'mobility-trailblazers'), get_bloginfo('name'));
-        
-        $message = sprintf(__('Dear %s,', 'mobility-trailblazers'), $user->display_name) . "\n\n";
-        $message .= __('You have been added as a jury member for the Mobility Trailblazers Award.', 'mobility-trailblazers') . "\n\n";
-        $message .= __('Your login credentials:', 'mobility-trailblazers') . "\n";
-        $message .= sprintf(__('Username: %s', 'mobility-trailblazers'), $user->user_login) . "\n";
-        $message .= sprintf(__('Password: %s', 'mobility-trailblazers'), $password) . "\n\n";
-        $message .= sprintf(__('Login URL: %s', 'mobility-trailblazers'), wp_login_url()) . "\n\n";
-        $message .= __('Please change your password after your first login.', 'mobility-trailblazers') . "\n\n";
-        $message .= __('Best regards,', 'mobility-trailblazers') . "\n";
-        $message .= get_bloginfo('name');
-        
-        wp_mail($user->user_email, $subject, $message);
-    }
-
-    private function get_default_roles() {
-        return array(
-            'mt_jury' => array(
-                'name' => __('MT Jury', 'mobility-trailblazers'),
-                'capabilities' => array(
-                    'read' => true,
-                    'mt_submit_evaluations' => true,
-                    'mt_view_jury_dashboard' => true,
-                )
-            ),
-        );
-    }
-
-    /**
-     * Fix assignment data types by ensuring all jury member IDs are stored as integers
+     * Fix assignment data types
      *
      * @return int Number of records processed
      */
     public static function fix_assignment_data_types() {
         global $wpdb;
         
-        $results = $wpdb->get_results("
-            SELECT post_id, meta_value 
-            FROM {$wpdb->postmeta} 
-            WHERE meta_key = '_mt_assigned_jury_members'
-        ");
+        $processed = 0;
         
-        foreach ($results as $row) {
-            $jury_ids = maybe_unserialize($row->meta_value);
-            if (is_array($jury_ids) && !empty($jury_ids)) {
-                // Convert all IDs to integers
-                $jury_ids = array_map('intval', $jury_ids);
-                update_post_meta($row->post_id, '_mt_assigned_jury_members', $jury_ids);
+        // Get all posts with _mt_assigned_jury_members meta
+        $posts = $wpdb->get_results(
+            "SELECT post_id, meta_value 
+             FROM {$wpdb->postmeta} 
+             WHERE meta_key = '_mt_assigned_jury_members'"
+        );
+        
+        foreach ($posts as $post) {
+            $value = maybe_unserialize($post->meta_value);
+            
+            if (is_array($value)) {
+                // Convert all values to integers
+                $fixed_value = array_map('intval', $value);
+                
+                // Update the meta value
+                update_post_meta($post->post_id, '_mt_assigned_jury_members', $fixed_value);
+                $processed++;
             }
         }
         
-        return count($results);
+        return $processed;
     }
 } 

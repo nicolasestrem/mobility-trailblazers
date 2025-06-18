@@ -21,7 +21,7 @@ class MT_Database {
      *
      * @var string
      */
-    private $db_version = '1.0.2';
+    private $db_version = '1.0.3';
     
     /**
      * Constructor
@@ -62,6 +62,9 @@ class MT_Database {
         
         // Create candidate scores table
         $this->create_candidate_scores_table($charset_collate);
+        
+        // Create evaluations table
+        $this->create_evaluations_table($charset_collate);
         
         // Create vote reset logs table
         $this->create_vote_reset_logs_table($charset_collate);
@@ -146,6 +149,86 @@ class MT_Database {
         
         // Create trigger for automatic total_score calculation
         $this->create_score_trigger();
+    }
+    
+    /**
+     * Create evaluations table
+     *
+     * @param string $charset_collate Database charset collation
+     */
+    private function create_evaluations_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_evaluations';
+        
+        $sql = "CREATE TABLE $table_name (
+            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            candidate_id bigint(20) UNSIGNED NOT NULL,
+            jury_member_id bigint(20) UNSIGNED NOT NULL,
+            user_id bigint(20) UNSIGNED NOT NULL,
+            courage_score decimal(3,1) NOT NULL DEFAULT '0.0',
+            innovation_score decimal(3,1) NOT NULL DEFAULT '0.0',
+            implementation_score decimal(3,1) NOT NULL DEFAULT '0.0',
+            relevance_score decimal(3,1) NOT NULL DEFAULT '0.0',
+            visibility_score decimal(3,1) NOT NULL DEFAULT '0.0',
+            total_score decimal(4,1) NOT NULL DEFAULT '0.0',
+            notes longtext,
+            status varchar(20) NOT NULL DEFAULT 'draft',
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            submitted_at datetime DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY candidate_id (candidate_id),
+            KEY jury_member_id (jury_member_id),
+            KEY user_id (user_id),
+            KEY status (status),
+            KEY created_at (created_at),
+            KEY submitted_at (submitted_at),
+            UNIQUE KEY unique_evaluation (candidate_id, jury_member_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+        
+        // Create triggers for automatic total_score calculation
+        $this->create_evaluation_triggers();
+    }
+    
+    /**
+     * Create evaluation triggers
+     */
+    private function create_evaluation_triggers() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_evaluations';
+        
+        // Note: dbDelta doesn't support triggers, so we need to check if they exist first
+        $triggers_exist = $wpdb->get_var("SHOW TRIGGERS LIKE '$table_name'");
+        
+        if (!$triggers_exist) {
+            // Drop existing triggers if they exist (just in case)
+            $wpdb->query("DROP TRIGGER IF EXISTS calculate_evaluation_total_score");
+            $wpdb->query("DROP TRIGGER IF EXISTS update_evaluation_total_score");
+            
+            // Create trigger for INSERT
+            $sql = "CREATE TRIGGER calculate_evaluation_total_score 
+                    BEFORE INSERT ON $table_name 
+                    FOR EACH ROW 
+                    SET NEW.total_score = NEW.courage_score + NEW.innovation_score + 
+                                         NEW.implementation_score + NEW.relevance_score + 
+                                         NEW.visibility_score";
+            
+            $wpdb->query($sql);
+            
+            // Create trigger for UPDATE
+            $sql = "CREATE TRIGGER update_evaluation_total_score 
+                    BEFORE UPDATE ON $table_name 
+                    FOR EACH ROW 
+                    SET NEW.total_score = NEW.courage_score + NEW.innovation_score + 
+                                         NEW.implementation_score + NEW.relevance_score + 
+                                         NEW.visibility_score";
+            
+            $wpdb->query($sql);
+        }
     }
     
     /**
@@ -247,6 +330,7 @@ class MT_Database {
         $tables = array(
             $wpdb->prefix . 'mt_votes',
             $wpdb->prefix . 'mt_candidate_scores',
+            $wpdb->prefix . 'mt_evaluations',
             $wpdb->prefix . 'vote_reset_logs',
             $wpdb->prefix . 'mt_vote_backups'
         );
@@ -271,6 +355,7 @@ class MT_Database {
         $tables = array(
             'votes' => $wpdb->prefix . 'mt_votes',
             'scores' => $wpdb->prefix . 'mt_candidate_scores',
+            'evaluations' => $wpdb->prefix . 'mt_evaluations',
             'reset_logs' => $wpdb->prefix . 'vote_reset_logs',
             'backups' => $wpdb->prefix . 'mt_vote_backups'
         );
