@@ -64,6 +64,10 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
         return ['mt-jury-dashboard'];
     }
     
+    public function get_style_depends() {
+        return ['mt-jury-dashboard'];
+    }
+    
     /**
      * Register widget controls
      */

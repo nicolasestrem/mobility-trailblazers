@@ -188,9 +188,18 @@ class MT_Elementor_Integration {
         // Enqueue jury dashboard CSS
         wp_enqueue_style(
             'mt-jury-dashboard',
-            MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.css',
             array(),
             MT_PLUGIN_VERSION
+        );
+        
+        // Enqueue jury dashboard JavaScript
+        wp_enqueue_script(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.js',
+            array('jquery'),
+            MT_PLUGIN_VERSION,
+            true
         );
         
         // Localize script

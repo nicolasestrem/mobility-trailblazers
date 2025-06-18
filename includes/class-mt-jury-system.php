@@ -52,131 +52,75 @@ class MT_Jury_System {
      * Enqueue jury dashboard scripts
      */
     public function enqueue_jury_dashboard_scripts() {
+        if (!$this->is_jury_dashboard()) {
+            return;
+        }
+        
+        // Enqueue the correct CSS file
+        wp_enqueue_style(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.css', // Changed from frontend.css
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        // Enqueue jQuery UI for sliders
+        wp_enqueue_script('jquery-ui-slider');
+        wp_enqueue_style('jquery-ui', 'https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css');
+        
+        // Enqueue the jury dashboard JavaScript
+        wp_enqueue_script(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.js',
+            array('jquery', 'jquery-ui-slider'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        // Localize script
+        wp_localize_script('mt-jury-dashboard', 'mt_jury_dashboard', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_jury_dashboard'),
+            'i18n' => array(
+                'loading_evaluation' => __('Loading evaluation...', 'mobility-trailblazers'),
+                'evaluation_loaded' => __('Evaluation loaded successfully', 'mobility-trailblazers'),
+                'error_loading' => __('Error loading evaluation', 'mobility-trailblazers'),
+                'submitting' => __('Submitting evaluation...', 'mobility-trailblazers'),
+                'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
+                'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
+                'error_submitting' => __('Error submitting evaluation', 'mobility-trailblazers'),
+                'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
+                'evaluated' => __('Evaluated', 'mobility-trailblazers'),
+                'please_rate_all' => __('Please rate all criteria before submitting', 'mobility-trailblazers'),
+                'saving' => __('Saving draft...', 'mobility-trailblazers'),
+                'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
+                'draft_saved' => __('Draft saved successfully!', 'mobility-trailblazers'),
+                'error_saving' => __('Error saving draft', 'mobility-trailblazers'),
+                'all_complete' => __('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'),
+                'preparing_export' => __('Preparing export...', 'mobility-trailblazers'),
+                'export_complete' => __('Export ready! Download will start shortly.', 'mobility-trailblazers'),
+                'export_error' => __('Error preparing export', 'mobility-trailblazers'),
+                'unsaved_changes' => __('You have unsaved changes. Are you sure you want to leave?', 'mobility-trailblazers'),
+                'confirm_submit' => __('Are you sure you want to submit this evaluation?', 'mobility-trailblazers'),
+                'confirm_export' => __('Are you sure you want to export your evaluations?', 'mobility-trailblazers'),
+            ),
+        ));
+    }
+    
+    /**
+     * Check if current page is jury dashboard
+     *
+     * @return bool True if on jury dashboard page
+     */
+    private function is_jury_dashboard() {
         // Check if we're on a page with jury dashboard shortcode
         global $post;
         
         if (!is_a($post, 'WP_Post')) {
-            return;
+            return false;
         }
         
-        if (has_shortcode($post->post_content, 'mt_jury_dashboard')) {
-            // Enqueue dashboard styles
-            wp_enqueue_style(
-                'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
-                array(),
-                MT_PLUGIN_VERSION
-            );
-            
-            // Add inline styles as fallback
-            $inline_styles = "
-                .mt-jury-dashboard {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }
-                .mt-dashboard-header {
-                    background: #fff;
-                    padding: 20px;
-                    margin-bottom: 20px;
-                    border: 1px solid #ccd0d4;
-                    border-radius: 4px;
-                }
-                .mt-dashboard-stats {
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-                .mt-stat-box {
-                    flex: 1;
-                    background: #fff;
-                    padding: 20px;
-                    border: 1px solid #ccd0d4;
-                    border-radius: 4px;
-                    text-align: center;
-                }
-                .mt-stat-number {
-                    display: block;
-                    font-size: 24px;
-                    font-weight: 600;
-                    color: #2271b1;
-                }
-                .mt-stat-label {
-                    display: block;
-                    font-size: 14px;
-                    color: #646970;
-                    margin-top: 5px;
-                }
-                .mt-progress-section {
-                    background: #fff;
-                    padding: 20px;
-                    margin-bottom: 20px;
-                    border: 1px solid #ccd0d4;
-                    border-radius: 4px;
-                }
-                .mt-progress-bar {
-                    height: 20px;
-                    background: #f0f0f1;
-                    border-radius: 10px;
-                    overflow: hidden;
-                    position: relative;
-                }
-                .mt-progress-fill {
-                    height: 100%;
-                    background: #2271b1;
-                    transition: width 0.3s ease;
-                }
-                .mt-progress-text {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    color: #fff;
-                    font-weight: 600;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                }
-            ";
-            wp_add_inline_style('mt-jury-dashboard', $inline_styles);
-            
-            // Enqueue dashboard scripts
-            wp_enqueue_script(
-                'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/jury-dashboard.js',
-                array('jquery'),
-                MT_PLUGIN_VERSION,
-                true
-            );
-            
-            // Localize script
-            wp_localize_script('mt-jury-dashboard', 'mt_jury_dashboard', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('mt_jury_dashboard'),
-                'i18n' => array(
-                    'loading_evaluation' => __('Loading evaluation...', 'mobility-trailblazers'),
-                    'evaluation_loaded' => __('Evaluation loaded successfully', 'mobility-trailblazers'),
-                    'error_loading' => __('Error loading evaluation', 'mobility-trailblazers'),
-                    'submitting' => __('Submitting evaluation...', 'mobility-trailblazers'),
-                    'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
-                    'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
-                    'error_submitting' => __('Error submitting evaluation', 'mobility-trailblazers'),
-                    'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
-                    'evaluated' => __('Evaluated', 'mobility-trailblazers'),
-                    'please_rate_all' => __('Please rate all criteria before submitting', 'mobility-trailblazers'),
-                    'saving' => __('Saving draft...', 'mobility-trailblazers'),
-                    'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
-                    'draft_saved' => __('Draft saved successfully!', 'mobility-trailblazers'),
-                    'error_saving' => __('Error saving draft', 'mobility-trailblazers'),
-                    'all_complete' => __('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'),
-                    'preparing_export' => __('Preparing export...', 'mobility-trailblazers'),
-                    'export_complete' => __('Export ready! Download will start shortly.', 'mobility-trailblazers'),
-                    'export_error' => __('Error preparing export', 'mobility-trailblazers'),
-                    'unsaved_changes' => __('You have unsaved changes. Are you sure you want to leave?', 'mobility-trailblazers'),
-                    'confirm_submit' => __('Are you sure you want to submit this evaluation?', 'mobility-trailblazers'),
-                    'confirm_export' => __('Are you sure you want to export your evaluations?', 'mobility-trailblazers'),
-                ),
-            ));
-        }
+        return has_shortcode($post->post_content, 'mt_jury_dashboard');
     }
     
     /**

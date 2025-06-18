@@ -379,6 +379,14 @@ class MT_Admin_Menus {
             return;
         }
 
+        // Enqueue dashboard CSS
+        wp_enqueue_style(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+
         // Enqueue dashboard script
         wp_enqueue_script(
             'mt-jury-dashboard',
