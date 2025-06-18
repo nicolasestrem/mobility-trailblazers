@@ -95,6 +95,9 @@ class MobilityTrailblazersPlugin {
         // Load remaining dependencies
         $this->load_dependencies();
         
+        // Check and fix database if needed
+        $this->ensure_database_tables();
+        
         // Initialize components
         $this->init_components();
         
@@ -380,6 +383,34 @@ class MobilityTrailblazersPlugin {
         // Display settings
         add_option('mt_candidates_per_page', 20);
         add_option('mt_date_format', get_option('date_format'));
+    }
+
+    /**
+     * Ensure database tables exist
+     */
+    private function ensure_database_tables() {
+        global $wpdb;
+        
+        // Check if critical tables exist
+        $critical_tables = array(
+            $wpdb->prefix . 'mt_jury_assignments',
+            $wpdb->prefix . 'mt_evaluations'
+        );
+        
+        $missing_tables = false;
+        foreach ($critical_tables as $table) {
+            if ($wpdb->get_var("SHOW TABLES LIKE '$table'") !== $table) {
+                $missing_tables = true;
+                break;
+            }
+        }
+        
+        // If any critical tables are missing, force create them
+        if ($missing_tables) {
+            if (isset($this->components['database'])) {
+                $this->components['database']->force_create_tables();
+            }
+        }
     }
 
     /**

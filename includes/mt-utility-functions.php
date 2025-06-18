@@ -119,6 +119,46 @@ function mt_get_jury_member_by_user_id($user_id) {
 }
 
 /**
+ * Check if current user is a jury member
+ *
+ * @param int $user_id Optional user ID, defaults to current user
+ * @return bool Whether user is a jury member
+ */
+function mt_is_jury_member($user_id = null) {
+    if (!$user_id) {
+        $user_id = get_current_user_id();
+    }
+    
+    if (!$user_id) {
+        return false;
+    }
+    
+    // Check if user has jury member role
+    $user = get_user_by('id', $user_id);
+    if (!$user) {
+        return false;
+    }
+    
+    // Check for jury member role
+    if (in_array('mt_jury_member', $user->roles)) {
+        return true;
+    }
+    
+    // Check if user has jury member capability
+    if (user_can($user_id, 'mt_access_jury_dashboard')) {
+        return true;
+    }
+    
+    // Check if user is associated with a jury member post
+    $jury_member = mt_get_jury_member_by_user_id($user_id);
+    if ($jury_member) {
+        return true;
+    }
+    
+    return false;
+}
+
+/**
  * Get assigned candidates for a jury member
  * This function now has a fallback method to check post meta if the table doesn't exist
  *

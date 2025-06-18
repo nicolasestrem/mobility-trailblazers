@@ -112,6 +112,75 @@ function mt_debug_specific_assignment($candidate_id = null, $jury_id = null) {
     }
 }
 
+/**
+ * Fix database issues
+ * This function can be called manually to fix database problems
+ */
+function mt_fix_database_issues() {
+    global $wpdb;
+    
+    // Check if database class exists
+    if (!class_exists('MT_Database')) {
+        require_once MT_PLUGIN_DIR . 'includes/class-database.php';
+    }
+    
+    $database = new MT_Database();
+    
+    // Force create tables
+    $database->force_create_tables();
+    
+    // Check if tables were created successfully
+    $tables_to_check = array(
+        $wpdb->prefix . 'mt_jury_assignments',
+        $wpdb->prefix . 'mt_evaluations',
+        $wpdb->prefix . 'mt_votes',
+        $wpdb->prefix . 'mt_candidate_scores'
+    );
+    
+    $results = array();
+    foreach ($tables_to_check as $table) {
+        $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+        $results[$table] = $exists;
+    }
+    
+    return $results;
+}
+
+/**
+ * Check if all required database tables exist
+ *
+ * @return array Array of table existence status
+ */
+function mt_check_database_tables() {
+    global $wpdb;
+    
+    $tables_to_check = array(
+        'mt_jury_assignments' => $wpdb->prefix . 'mt_jury_assignments',
+        'mt_evaluations' => $wpdb->prefix . 'mt_evaluations',
+        'mt_votes' => $wpdb->prefix . 'mt_votes',
+        'mt_candidate_scores' => $wpdb->prefix . 'mt_candidate_scores',
+        'vote_reset_logs' => $wpdb->prefix . 'vote_reset_logs',
+        'mt_vote_backups' => $wpdb->prefix . 'mt_vote_backups'
+    );
+    
+    $results = array();
+    foreach ($tables_to_check as $table_name => $full_table_name) {
+        $exists = $wpdb->get_var("SHOW TABLES LIKE '$full_table_name'") === $full_table_name;
+        $results[$table_name] = array(
+            'exists' => $exists,
+            'full_name' => $full_table_name
+        );
+        
+        if ($exists) {
+            // Get table structure info
+            $columns = $wpdb->get_results("SHOW COLUMNS FROM $full_table_name");
+            $results[$table_name]['columns'] = count($columns);
+        }
+    }
+    
+    return $results;
+}
+
 // Add debug menu
 add_action('admin_menu', function() {
     add_submenu_page(

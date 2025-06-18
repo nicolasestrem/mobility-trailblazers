@@ -47,6 +47,17 @@ class MT_Database {
     }
     
     /**
+     * Force create tables (for manual database setup)
+     */
+    public function force_create_tables() {
+        $this->create_tables();
+        update_option('mt_db_version', $this->db_version);
+        
+        // Fire database updated action
+        do_action('mt_database_updated', '0', $this->db_version);
+    }
+    
+    /**
      * Create plugin database tables
      */
     public function create_tables() {

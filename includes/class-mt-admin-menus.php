@@ -115,7 +115,7 @@ class MT_Admin_Menus {
             array($this, 'render_diagnostic_page')
         );
         
-        // Fix Capabilities (temporary, can be removed after fixing)
+        // Fix Capabilities
         add_submenu_page(
             'mt-award-system',
             __('Fix Capabilities', 'mobility-trailblazers'),
@@ -123,6 +123,16 @@ class MT_Admin_Menus {
             'manage_options',
             'mt-fix-capabilities',
             array($this, 'render_fix_capabilities_page')
+        );
+        
+        // Database Fix
+        add_submenu_page(
+            'mt-award-system',
+            __('Database Fix', 'mobility-trailblazers'),
+            __('Database Fix', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-database-fix',
+            array($this, 'render_database_fix_page')
         );
         
         // Jury Dashboard (for jury members)
@@ -312,6 +322,29 @@ class MT_Admin_Menus {
         
         // Include template
         include MT_PLUGIN_DIR . 'admin/views/fix-capabilities.php';
+    }
+    
+    /**
+     * Render database fix page
+     */
+    public function render_database_fix_page() {
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Handle form submission
+        if (isset($_POST['mt_fix_database']) && wp_verify_nonce($_POST['mt_database_fix_nonce'], 'mt_fix_database')) {
+            $results = mt_fix_database_issues();
+            $message = 'Database tables have been created successfully.';
+            $message_type = 'success';
+        }
+        
+        // Get current database status
+        $table_status = mt_check_database_tables();
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'admin/views/database-fix.php';
     }
     
     /**

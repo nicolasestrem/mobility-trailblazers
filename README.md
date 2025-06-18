@@ -24,6 +24,7 @@ Mobility Trailblazers is a complete award management solution designed to:
 - **Draft Support**: Save evaluations as drafts before final submission
 - **Progress Tracking**: Visual indicators showing evaluation completion
 - **Real-time Search**: Filter and find assigned candidates instantly
+- **Assignment Management**: Flexible candidate-to-jury assignment system with both database and post meta support
 
 ### 🗳️ Public Voting
 - **User-friendly Interface**: Easy voting process for public participation
@@ -36,6 +37,7 @@ Mobility Trailblazers is a complete award management solution designed to:
 - **Bulk Operations**: Auto-assignment and bulk management tools
 - **Import/Export**: CSV support for data management
 - **Comprehensive Settings**: Full control over all aspects of the awards
+- **Self-Healing Capabilities**: Automatic repair of permissions and database issues
 
 ### 🎨 Elementor Integration
 - **Custom Widgets**: Native Elementor widgets for all major components
@@ -46,7 +48,10 @@ Mobility Trailblazers is a complete award management solution designed to:
 
 1. Upload the `mobility-trailblazers` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Run the setup wizard or configure manually via the admin menu
+3. The plugin will automatically:
+   - Create necessary database tables
+   - Set up required user roles and capabilities
+   - Configure default settings
 
 ## Requirements
 
@@ -54,6 +59,21 @@ Mobility Trailblazers is a complete award management solution designed to:
 - PHP 7.4 or higher
 - MySQL 5.7 or higher
 - Elementor Pro (optional, for widget functionality)
+
+## Database Architecture
+
+The plugin uses a hybrid approach for data storage:
+
+### Custom Tables
+- `wp_mt_votes` - Public voting data
+- `wp_mt_candidate_scores` - Jury scoring data (legacy)
+- `wp_mt_evaluations` - Detailed jury evaluations
+- `wp_mt_jury_assignments` - Candidate-to-jury assignments
+- `wp_vote_reset_logs` - Voting reset audit trail
+- `wp_mt_vote_backups` - Voting data backups
+
+### Post Meta Storage
+The plugin maintains backward compatibility by supporting assignment data in post meta as a fallback when custom tables are not available.
 
 ## Quick Start
 
@@ -63,79 +83,88 @@ Mobility Trailblazers is a complete award management solution designed to:
 2. Create award categories (e.g., "Innovation Leader", "Sustainability Champion")
 3. Add candidates via **Mobility Trailblazers** → **Add New Candidate**
 4. Create jury members and their user accounts
-5. Assign candidates to jury members
+5. Assign candidates to jury members for evaluation
 
-### Using Shortcodes
+### Managing Assignments
 
+The plugin offers two methods for managing jury assignments:
+
+1. **Manual Assignment**: Select specific candidates for each jury member
+2. **Auto-Assignment**: Use balanced or random algorithms to distribute candidates
+
+### Evaluation Process
+
+1. Jury members log in to their dashboard
+2. They see their assigned candidates
+3. For each candidate, they provide scores (1-10) on five criteria:
+   - **Mut & Pioniergeist** (Courage & Pioneer Spirit)
+   - **Innovationsgrad** (Innovation Degree)
+   - **Umsetzungskraft & Wirkung** (Implementation & Impact)
+   - **Relevanz für Mobilitätswende** (Mobility Transformation Relevance)
+   - **Vorbildfunktion & Sichtbarkeit** (Role Model & Visibility)
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Database Tables Not Created
+**Symptom**: Errors mentioning missing tables like `wp_mt_evaluations` or `wp_mt_jury_assignments`
+
+**Solution**: The plugin now includes automatic table creation. Simply:
+1. Deactivate and reactivate the plugin, OR
+2. Visit any admin page - tables will be created automatically
+
+#### Administrator Missing Capabilities
+**Symptom**: "Administrator role missing edit_others_mt_jury_member capability" errors
+
+**Solution**: The plugin now self-heals capabilities. Just:
+1. Visit any WordPress admin page
+2. Capabilities are automatically repaired on each page load
+
+#### Assignments Not Showing
+**Symptom**: Jury members don't see assigned candidates
+
+**Solution**: The plugin now includes fallback methods:
+1. If the assignments table exists, it will be used
+2. If not, the plugin falls back to post meta storage
+3. Both methods work seamlessly
+
+### Debug Mode
+
+Enable debug mode in `wp-config.php`:
 ```php
-// Display candidates grid
-[mt_candidates category="innovation" limit="12" columns="3"]
-
-// Show jury dashboard
-[mt_jury_dashboard show_stats="yes" show_progress="yes"]
-
-// Display voting form
-[mt_voting_form]
-
-// Show voting results
-[mt_voting_results show_chart="yes"]
+define('MT_DEBUG', true);
 ```
 
-### Elementor Widgets
-
-Available widgets in the Elementor editor:
-- **MT Candidates Grid** - Display candidates with filtering
-- **MT Jury Dashboard** - Complete jury interface
-- **MT Voting Form** - Public voting interface
-- **MT Results Display** - Show voting results
-
-## Jury Dashboard Guide
-
-### For Jury Members
-
-1. **Login**: Use your provided credentials to access the jury area
-2. **Dashboard Overview**: 
-   - View assigned candidates count
-   - Track evaluation progress
-   - See completion percentage
-3. **Evaluating Candidates**:
-   - Click on any candidate card
-   - Score each of the 5 criteria (1-10 scale)
-   - Add optional comments
-   - Save as draft or submit final evaluation
-4. **Search & Filter**:
-   - Use the search box to find specific candidates
-   - Filter by evaluation status (Pending/Draft/Completed)
-
-### Evaluation Criteria
-
-1. **Mut & Pioniergeist** (Courage & Pioneer Spirit) - Did they act against resistance?
-2. **Innovationsgrad** (Innovation Degree) - How innovative is the contribution?
-3. **Umsetzungskraft & Wirkung** (Implementation & Impact) - What results were achieved?
-4. **Relevanz für Mobilitätswende** (Mobility Transformation Relevance) - DACH region impact?
-5. **Vorbildfunktion & Sichtbarkeit** (Role Model & Visibility) - Public inspiration factor?
+This will:
+- Enable detailed error logging
+- Show diagnostic information in the admin area
+- Help troubleshoot issues
 
 ## Development
 
-### File Structure
+### Architecture Overview
+
+The plugin follows WordPress coding standards and uses:
+- **Object-oriented architecture** with clearly defined classes
+- **Hybrid data storage** supporting both custom tables and post meta
+- **Self-healing mechanisms** for automatic issue resolution
+- **Comprehensive error handling** to prevent fatal errors
+
+### Key Components
 
 ```
 mobility-trailblazers/
-├── assets/
-│   ├── jury-dashboard.js      # Jury dashboard functionality
-│   ├── jury-dashboard.css     # Jury dashboard styling
-│   ├── frontend.js            # General frontend scripts
-│   └── frontend.css           # General frontend styles
 ├── includes/
-│   ├── class-mt-jury-system.php    # Jury system core
-│   ├── class-mt-ajax-handlers.php  # AJAX endpoints
-│   └── mt-utility-functions.php    # Helper functions
-├── templates/
-│   └── shortcodes/
-│       └── jury-dashboard.php      # Jury dashboard template
-└── elementor/
-    └── widgets/
-        └── jury-dashboard.php      # Elementor widget
+│   ├── class-database.php         # Database table management
+│   ├── class-roles.php           # Roles and capabilities
+│   ├── class-post-types.php      # Custom post type definitions
+│   ├── class-mt-ajax-handlers.php # AJAX endpoints
+│   └── mt-utility-functions.php   # Helper functions with fallbacks
+├── admin/
+│   └── views/                    # Admin interface templates
+└── templates/
+    └── shortcodes/               # Frontend templates
 ```
 
 ### Hooks & Filters
@@ -159,41 +188,31 @@ add_filter('mt_jury_dashboard_stats', function($stats, $jury_member_id) {
 }, 10, 2);
 ```
 
-### AJAX Endpoints
+## Version History
 
-Available AJAX actions for custom development:
-- `mt_get_jury_dashboard_data` - Retrieve dashboard statistics
-- `mt_get_candidate_evaluation` - Get evaluation data
-- `mt_save_evaluation` - Save evaluation (draft or final)
-- `mt_manual_assign` - Manually assign candidates
-- `mt_auto_assign` - Auto-assign candidates
+### 1.0.4 (Current)
+- Critical infrastructure update
+- Fixed missing database tables (evaluations, assignments)
+- Fixed administrator capability issues
+- Added self-healing mechanisms
+- Improved backward compatibility
 
-## Troubleshooting
+### 1.0.3
+- Fixed assignment data type consistency
+- Improved AJAX handlers
 
-### Common Issues
+### 1.0.2
+- Initial public release
+- Full feature set implementation
 
-**Jury Dashboard Not Loading**
-- Check browser console for JavaScript errors
-- Verify user has jury member permissions
-- Ensure assets are loading (no 404 errors)
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Evaluations Not Saving**
-- Check AJAX response in browser Network tab
-- Verify nonce is being passed correctly
-- Ensure database tables exist
+## Support
 
-**Styling Issues**
-- Clear browser cache
-- Check for CSS conflicts with theme
-- Verify Elementor is not overriding styles
-
-### Debug Mode
-
-Enable debug mode in `wp-config.php`:
-```php
-define('MT_DEBUG', true);
-```
-
+For support and documentation:
+- Check the diagnostic tool at **Mobility Trailblazers** → **Diagnostic**
+- Enable debug mode for detailed error information
+- Review the [CHANGELOG.md](CHANGELOG.md) for recent fixes
 
 ## License
 
@@ -201,21 +220,4 @@ This plugin is licensed under the GPL v2 or later.
 
 ## Credits
 
-Developed for the DACH Mobility Innovation Awards by [Your Organization]
-
-### Contributors
-- Lead Developer: [Name]
-- UI/UX Design: [Name]
-- Project Manager: [Name]
-
-### Special Thanks
-- Elementor Team for the excellent page builder
-- WordPress Community for ongoing support
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
-
----
-
-Made with ❤️ for the future of mobility in the DACH region
+Developed for the Mobility Trailblazers initiative in the DACH region, recognizing and celebrating pioneers in mobility transformation.
