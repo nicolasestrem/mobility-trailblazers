@@ -120,6 +120,7 @@ function mt_get_jury_member_by_user_id($user_id) {
 
 /**
  * Get assigned candidates for a jury member
+ * This function now has a fallback method to check post meta if the table doesn't exist
  *
  * @param int $jury_member_id Jury member ID
  * @return array Array of candidate IDs
@@ -127,11 +128,46 @@ function mt_get_jury_member_by_user_id($user_id) {
 function mt_get_assigned_candidates($jury_member_id) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'mt_jury_assignments';
-    $candidates = $wpdb->get_col($wpdb->prepare(
-        "SELECT candidate_id FROM $table_name WHERE jury_member_id = %d AND is_active = 1",
-        $jury_member_id
-    ));
-    return array_map('intval', $candidates);
+    
+    // Check if the table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+    
+    if ($table_exists) {
+        // Use the table if it exists
+        $candidates = $wpdb->get_col($wpdb->prepare(
+            "SELECT candidate_id FROM $table_name WHERE jury_member_id = %d AND is_active = 1",
+            $jury_member_id
+        ));
+        return array_map('intval', $candidates);
+    } else {
+        // Fallback: Query candidates by post meta
+        $args = array(
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => array(
+                array(
+                    'key' => '_mt_assigned_jury_members',
+                    'value' => serialize(strval($jury_member_id)),
+                    'compare' => 'LIKE'
+                )
+            ),
+            'fields' => 'ids'
+        );
+        
+        $candidates = get_posts($args);
+        
+        // Double-check by loading the meta and verifying
+        $verified_candidates = array();
+        foreach ($candidates as $candidate_id) {
+            $assigned_jury = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
+            if (is_array($assigned_jury) && in_array($jury_member_id, array_map('intval', $assigned_jury))) {
+                $verified_candidates[] = $candidate_id;
+            }
+        }
+        
+        return $verified_candidates;
+    }
 }
 
 /**
@@ -162,13 +198,22 @@ function mt_has_evaluated($candidate_id, $jury_member_id) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'mt_evaluations';
     
-    $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d",
-        $candidate_id,
-        $jury_member_id
-    ));
+    // Check if table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
     
-    return $exists > 0;
+    if ($table_exists) {
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d",
+            $candidate_id,
+            $jury_member_id
+        ));
+        
+        return $exists > 0;
+    }
+    
+    // Fallback: check post meta
+    $evaluation = get_post_meta($candidate_id, '_mt_evaluation_' . $jury_member_id, true);
+    return !empty($evaluation);
 }
 
 /**
@@ -181,12 +226,27 @@ function mt_has_evaluated($candidate_id, $jury_member_id) {
 function mt_get_evaluation($candidate_id, $jury_member_id) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'mt_evaluations';
-    $evaluation = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d ORDER BY created_at DESC LIMIT 1",
-        $candidate_id,
-        $jury_member_id
-    ));
-    return $evaluation;
+    
+    // Check if table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+    
+    if ($table_exists) {
+        $evaluation = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d ORDER BY created_at DESC LIMIT 1",
+            $candidate_id,
+            $jury_member_id
+        ));
+        return $evaluation;
+    }
+    
+    // Fallback: get from post meta
+    $evaluation_data = get_post_meta($candidate_id, '_mt_evaluation_' . $jury_member_id, true);
+    if ($evaluation_data) {
+        // Convert array to object format
+        return (object) $evaluation_data;
+    }
+    
+    return null;
 }
 
 /**
@@ -245,257 +305,92 @@ function mt_get_phase_label($phase) {
 }
 
 /**
- * Sanitize evaluation score
- *
- * @param mixed $score Score value
- * @param int $max Maximum allowed score
- * @return int Sanitized score
- */
-function mt_sanitize_score($score, $max = 10) {
-    $score = intval($score);
-    
-    if ($score < 0) {
-        $score = 0;
-    } elseif ($score > $max) {
-        $score = $max;
-    }
-    
-    return $score;
-}
-
-/**
- * Get candidate excerpt
- *
- * @param int $candidate_id Candidate ID
- * @param int $length Excerpt length
- * @return string Candidate excerpt
- */
-function mt_get_candidate_excerpt($candidate_id, $length = 150) {
-    $candidate = get_post($candidate_id);
-    
-    if (!$candidate) {
-        return '';
-    }
-    
-    if ($candidate->post_excerpt) {
-        return $candidate->post_excerpt;
-    }
-    
-    $content = strip_shortcodes($candidate->post_content);
-    $content = wp_strip_all_tags($content);
-    $content = substr($content, 0, $length);
-    
-    if (strlen($candidate->post_content) > $length) {
-        $content .= '...';
-    }
-    
-    return $content;
-}
-
-/**
- * Get candidate photo URL
- *
- * @param int $candidate_id Candidate ID
- * @param string $size Image size
- * @return string Photo URL or default
- */
-function mt_get_candidate_photo($candidate_id, $size = 'medium') {
-    if (has_post_thumbnail($candidate_id)) {
-        $image = wp_get_attachment_image_src(get_post_thumbnail_id($candidate_id), $size);
-        return $image[0];
-    }
-    
-    // Return default image
-    return MT_PLUGIN_URL . 'assets/images/default-candidate.png';
-}
-
-/**
- * Get jury member photo URL
- *
- * @param int $jury_member_id Jury member ID
- * @param string $size Image size
- * @return string Photo URL or default
- */
-function mt_get_jury_member_photo($jury_member_id, $size = 'medium') {
-    if (has_post_thumbnail($jury_member_id)) {
-        $image = wp_get_attachment_image_src(get_post_thumbnail_id($jury_member_id), $size);
-        return $image[0];
-    }
-    
-    // Return default image
-    return MT_PLUGIN_URL . 'assets/images/default-jury.png';
-}
-
-/**
- * Log plugin activity
+ * Log activity
  *
  * @param string $message Log message
- * @param string $type Log type (info, warning, error)
+ * @param string $level Log level (info, warning, error)
  * @param array $context Additional context
  */
-function mt_log($message, $type = 'info', $context = array()) {
+function mt_log($message, $level = 'info', $context = array()) {
     if (!defined('MT_DEBUG') || !MT_DEBUG) {
         return;
     }
     
     $log_entry = array(
         'timestamp' => current_time('mysql'),
-        'type' => $type,
+        'level' => $level,
         'message' => $message,
         'context' => $context,
         'user_id' => get_current_user_id(),
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? '',
     );
     
-    // Log to error log
-    error_log('[MT ' . strtoupper($type) . '] ' . $message . ' | Context: ' . json_encode($context));
+    // Log to error log in debug mode
+    error_log('[MT ' . strtoupper($level) . '] ' . $message . ' ' . json_encode($context));
     
     // Fire action for custom logging
     do_action('mt_log_activity', $log_entry);
 }
 
 /**
- * Send email notification
+ * Get formatted score display
  *
- * @param string $to Recipient email
- * @param string $subject Email subject
- * @param string $message Email message
- * @param array $headers Optional headers
- * @return bool Whether email was sent
+ * @param float $score Score value
+ * @param int $max_score Maximum possible score
+ * @return string Formatted score display
  */
-function mt_send_email($to, $subject, $message, $headers = array()) {
-    // Get email settings
-    $from_name = get_option('mt_email_from_name', get_bloginfo('name'));
-    $from_email = get_option('mt_email_from_address', get_option('admin_email'));
-    
-    // Set default headers
-    $default_headers = array(
-        'From: ' . $from_name . ' <' . $from_email . '>',
-        'Content-Type: text/html; charset=UTF-8',
-    );
-    
-    $headers = array_merge($default_headers, $headers);
-    
-    // Apply filters
-    $to = apply_filters('mt_email_recipient', $to, $subject);
-    $subject = apply_filters('mt_email_subject', $subject, $to);
-    $message = apply_filters('mt_email_message', $message, $to, $subject);
-    $headers = apply_filters('mt_email_headers', $headers, $to, $subject);
-    
-    // Send email
-    $sent = wp_mail($to, $subject, $message, $headers);
-    
-    // Log email activity
-    mt_log('Email sent', $sent ? 'info' : 'error', array(
-        'to' => $to,
-        'subject' => $subject,
-        'sent' => $sent,
-    ));
-    
-    return $sent;
+function mt_format_score($score, $max_score = 10) {
+    return sprintf('%.1f / %d', floatval($score), intval($max_score));
 }
 
 /**
- * Get email template
+ * Check if user can evaluate candidate
  *
- * @param string $template Template name
- * @param array $variables Template variables
- * @return string Processed template
+ * @param int $candidate_id Candidate ID
+ * @param int $user_id User ID (optional, defaults to current user)
+ * @return bool Whether user can evaluate
  */
-function mt_get_email_template($template, $variables = array()) {
-    $template_file = MT_PLUGIN_DIR . 'templates/emails/' . $template . '.php';
-    
-    if (!file_exists($template_file)) {
-        return '';
-    }
-    
-    // Extract variables
-    extract($variables);
-    
-    // Start output buffering
-    ob_start();
-    
-    // Include template
-    include $template_file;
-    
-    // Get content
-    $content = ob_get_clean();
-    
-    // Process variables
-    foreach ($variables as $key => $value) {
-        $content = str_replace('{{' . $key . '}}', $value, $content);
-    }
-    
-    return $content;
-}
-
-/**
- * Export data to CSV
- *
- * @param array $data Data to export
- * @param string $filename Filename
- * @param array $headers Column headers
- */
-function mt_export_csv($data, $filename, $headers = array()) {
-    // Set headers
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $filename . '"');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-    
-    // Open output stream
-    $output = fopen('php://output', 'w');
-    
-    // Add BOM for Excel UTF-8 compatibility
-    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-    
-    // Write headers
-    if (!empty($headers)) {
-        fputcsv($output, $headers);
-    }
-    
-    // Write data
-    foreach ($data as $row) {
-        fputcsv($output, $row);
-    }
-    
-    // Close stream
-    fclose($output);
-    
-    exit;
-}
-
-/**
- * Get plugin version
- *
- * @return string Plugin version
- */
-function mt_get_plugin_version() {
-    return MT_PLUGIN_VERSION;
-}
-
-/**
- * Check if current user is jury member
- *
- * @param int $user_id Optional user ID
- * @return bool Whether user is jury member
- */
-function mt_is_jury_member($user_id = null) {
+function mt_user_can_evaluate($candidate_id, $user_id = null) {
     if (null === $user_id) {
         $user_id = get_current_user_id();
     }
     
-    if (!$user_id) {
+    // Check basic capability
+    if (!user_can($user_id, 'mt_submit_evaluations')) {
         return false;
     }
     
-    $user = get_user_by('id', $user_id);
-    
-    if (!$user) {
+    // Get jury member
+    $jury_member = mt_get_jury_member_by_user_id($user_id);
+    if (!$jury_member) {
         return false;
     }
     
-    return in_array('mt_jury', $user->roles) || user_can($user, 'mt_submit_evaluations');
+    // Check if candidate is assigned
+    $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
+    
+    return in_array($candidate_id, $assigned_candidates);
+}
+
+/**
+ * Sanitize score value
+ *
+ * @param mixed $score Score value
+ * @param int $min Minimum allowed score
+ * @param int $max Maximum allowed score
+ * @return int Sanitized score
+ */
+function mt_sanitize_score($score, $min = 1, $max = 10) {
+    $score = intval($score);
+    
+    if ($score < $min) {
+        return $min;
+    }
+    
+    if ($score > $max) {
+        return $max;
+    }
+    
+    return $score;
 }
 
 /**
@@ -506,106 +401,149 @@ function mt_is_jury_member($user_id = null) {
  */
 function mt_get_evaluation_statistics($args = array()) {
     global $wpdb;
+    
     $defaults = array(
-        'jury_member_id' => null,
-        'candidate_id' => null,
-        'category_id' => null,
-        'phase' => null,
-        'year' => mt_get_current_award_year(),
+        'candidate_id' => 0,
+        'jury_member_id' => 0,
+        'category_id' => 0,
+        'phase' => '',
+        'date_from' => '',
+        'date_to' => '',
     );
+    
     $args = wp_parse_args($args, $defaults);
+    
+    // Initialize stats array
+    $stats = array(
+        'total_evaluations' => 0,
+        'average_score' => 0,
+        'min_score' => 0,
+        'max_score' => 0,
+        'completion_rate' => 0,
+        'by_criteria' => array(),
+        'by_date' => array(),
+        'by_category' => array(),
+    );
+    
     $table_name = $wpdb->prefix . 'mt_evaluations';
-    $where = array('1=1');
-    if ($args['jury_member_id']) {
-        $where[] = $wpdb->prepare('jury_member_id = %d', $args['jury_member_id']);
-    }
-    if ($args['candidate_id']) {
-        $where[] = $wpdb->prepare('candidate_id = %d', $args['candidate_id']);
-    }
-    $where_clause = implode(' AND ', $where);
-    // Get basic statistics
-    $stats = $wpdb->get_row("
-        SELECT 
-            COUNT(*) as total_evaluations,
-            AVG(total_score) as average_score,
-            MIN(total_score) as min_score,
-            MAX(total_score) as max_score,
-            AVG(courage_score) as avg_courage,
-            AVG(innovation_score) as avg_innovation,
-            AVG(implementation_score) as avg_implementation,
-            AVG(relevance_score) as avg_relevance,
-            AVG(visibility_score) as avg_visibility
-        FROM $table_name
-        WHERE $where_clause
-    ");
-    $stats = (array) $stats;
-    $stats['total_candidates'] = wp_count_posts('mt_candidate')->publish;
-    $stats['completion_rate'] = $stats['total_candidates'] > 0 
-        ? round(($stats['total_evaluations'] / $stats['total_candidates']) * 100) 
-        : 0;
-    $daily_evaluations = $wpdb->get_results("
-        SELECT 
-            DATE(created_at) as date,
-            COUNT(*) as count
-        FROM $table_name
-        WHERE $where_clause
-        GROUP BY DATE(created_at)
-        ORDER BY date ASC
-    ", ARRAY_A);
-    $stats['daily_evaluations'] = array();
-    foreach ($daily_evaluations as $day) {
-        $stats['daily_evaluations'][$day['date']] = intval($day['count']);
-    }
-    // Get category statistics
-    $category_stats = $wpdb->get_results("
-        SELECT 
-            t.name as category,
-            COUNT(DISTINCT p.ID) as candidates,
-            COUNT(e.id) as evaluations,
-            AVG(e.total_score) as avg_score,
-            (COUNT(e.id) / COUNT(DISTINCT p.ID)) * 100 as completion_rate
-        FROM {$wpdb->posts} p
-        LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-        LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-        LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-        LEFT JOIN $table_name e ON p.ID = e.candidate_id
-        WHERE p.post_type = 'mt_candidate'
-        AND p.post_status = 'publish'
-        AND tt.taxonomy = 'mt_category'
-        GROUP BY t.term_id
-    ", ARRAY_A);
-    $stats['by_category'] = array();
-    foreach ($category_stats as $cat) {
-        $stats['by_category'][$cat['category']] = array(
-            'candidates' => intval($cat['candidates']),
-            'evaluations' => intval($cat['evaluations']),
-            'avg_score' => round(floatval($cat['avg_score']), 1),
-            'completion_rate' => round(floatval($cat['completion_rate']))
+    
+    // Check if table exists
+    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+    
+    if ($table_exists) {
+        // Build WHERE clause
+        $where = array('1=1');
+        
+        if ($args['candidate_id']) {
+            $where[] = $wpdb->prepare('candidate_id = %d', $args['candidate_id']);
+        }
+        
+        if ($args['jury_member_id']) {
+            $where[] = $wpdb->prepare('jury_member_id = %d', $args['jury_member_id']);
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        // Get basic statistics
+        $basic_stats = $wpdb->get_row("
+            SELECT 
+                COUNT(*) as total_evaluations,
+                AVG(total_score) as average_score,
+                MIN(total_score) as min_score,
+                MAX(total_score) as max_score,
+                AVG(courage_score) as avg_courage,
+                AVG(innovation_score) as avg_innovation,
+                AVG(implementation_score) as avg_implementation,
+                AVG(relevance_score) as avg_relevance,
+                AVG(visibility_score) as avg_visibility
+            FROM $table_name
+            WHERE $where_clause
+        ");
+        
+        if ($basic_stats) {
+            $stats = array_merge($stats, (array) $basic_stats);
+        }
+        
+        // Get evaluations by date
+        $date_stats = $wpdb->get_results("
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as count
+            FROM $table_name
+            WHERE $where_clause
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        
+        if ($date_stats) {
+            foreach ($date_stats as $day) {
+                $stats['by_date'][$day->date] = $day->count;
+            }
+        }
+        
+        // Get evaluations by category
+        $category_stats = $wpdb->get_results("
+            SELECT 
+                t.name as category,
+                COUNT(DISTINCT p.ID) as candidates,
+                COUNT(e.id) as evaluations,
+                AVG(e.total_score) as avg_score,
+                (COUNT(e.id) / COUNT(DISTINCT p.ID)) * 100 as completion_rate
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+            LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+            LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+            LEFT JOIN $table_name e ON p.ID = e.candidate_id
+            WHERE p.post_type = 'mt_candidate'
+            AND p.post_status = 'publish'
+            AND tt.taxonomy = 'mt_category'
+            GROUP BY t.term_id
+        ");
+        
+        if ($category_stats) {
+            foreach ($category_stats as $cat) {
+                $stats['by_category'][$cat->category] = array(
+                    'candidates' => $cat->candidates,
+                    'evaluations' => $cat->evaluations,
+                    'avg_score' => $cat->avg_score,
+                    'completion_rate' => $cat->completion_rate,
+                );
+            }
+        }
+        
+        // Calculate criteria averages
+        $stats['by_criteria'] = array(
+            'courage' => floatval($stats['avg_courage'] ?? 0),
+            'innovation' => floatval($stats['avg_innovation'] ?? 0),
+            'implementation' => floatval($stats['avg_implementation'] ?? 0),
+            'relevance' => floatval($stats['avg_relevance'] ?? 0),
+            'visibility' => floatval($stats['avg_visibility'] ?? 0),
         );
     }
-    // Get criteria statistics
-    $stats['by_criteria'] = array(
-        'courage' => round(floatval($stats['avg_courage']), 1),
-        'innovation' => round(floatval($stats['avg_innovation']), 1),
-        'implementation' => round(floatval($stats['avg_implementation']), 1),
-        'relevance' => round(floatval($stats['avg_relevance']), 1),
-        'visibility' => round(floatval($stats['avg_visibility']), 1)
-    );
-    return $stats;
+    
+    // Calculate completion rate
+    $stats['total_candidates'] = wp_count_posts('mt_candidate')->publish;
+    $stats['completion_rate'] = $stats['total_candidates'] > 0 
+        ? round(($stats['total_evaluations'] / $stats['total_candidates']) * 100, 1)
+        : 0;
+    
+    return apply_filters('mt_evaluation_statistics', $stats, $args);
 }
 
 /**
- * Check if jury member has a draft evaluation for a candidate
+ * Check if user has draft evaluation
  *
  * @param int $candidate_id Candidate ID
  * @param int $jury_member_id Jury member ID
- * @return bool Whether draft evaluation exists
+ * @return bool Whether draft exists
  */
 function mt_has_draft_evaluation($candidate_id, $jury_member_id) {
-    $user_id = mt_get_user_id_by_jury_member($jury_member_id);
-    if (!$user_id) return false;
+    $jury_user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
+    if (!$jury_user_id) {
+        return false;
+    }
     
-    $draft = get_user_meta($user_id, 'mt_draft_evaluation_' . $candidate_id, true);
+    $draft = get_user_meta($jury_user_id, 'mt_evaluation_draft_' . $candidate_id, true);
     return !empty($draft);
 }
 
