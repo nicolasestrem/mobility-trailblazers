@@ -21,7 +21,7 @@ class MT_Database {
      *
      * @var string
      */
-    private $db_version = '1.0.3';
+    private $db_version = '1.0.4';
     
     /**
      * Constructor
@@ -65,6 +65,9 @@ class MT_Database {
         
         // Create evaluations table
         $this->create_evaluations_table($charset_collate);
+        
+        // Create jury assignments table
+        $this->create_jury_assignments_table($charset_collate);
         
         // Create vote reset logs table
         $this->create_vote_reset_logs_table($charset_collate);
@@ -232,6 +235,35 @@ class MT_Database {
     }
     
     /**
+     * Create jury assignments table
+     *
+     * @param string $charset_collate Database charset collation
+     */
+    private function create_jury_assignments_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_jury_assignments';
+        
+        $sql = "CREATE TABLE $table_name (
+            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            candidate_id bigint(20) UNSIGNED NOT NULL,
+            jury_member_id bigint(20) UNSIGNED NOT NULL,
+            assignment_date datetime DEFAULT CURRENT_TIMESTAMP,
+            is_active tinyint(1) DEFAULT 1,
+            assigned_by bigint(20) UNSIGNED DEFAULT NULL,
+            notes text,
+            PRIMARY KEY (id),
+            KEY candidate_id (candidate_id),
+            KEY jury_member_id (jury_member_id),
+            KEY is_active (is_active),
+            KEY assignment_date (assignment_date),
+            UNIQUE KEY unique_assignment (candidate_id, jury_member_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+    
+    /**
      * Create vote reset logs table
      *
      * @param string $charset_collate Database charset collation
@@ -331,6 +363,7 @@ class MT_Database {
             $wpdb->prefix . 'mt_votes',
             $wpdb->prefix . 'mt_candidate_scores',
             $wpdb->prefix . 'mt_evaluations',
+            $wpdb->prefix . 'mt_jury_assignments',
             $wpdb->prefix . 'vote_reset_logs',
             $wpdb->prefix . 'mt_vote_backups'
         );
@@ -356,6 +389,7 @@ class MT_Database {
             'votes' => $wpdb->prefix . 'mt_votes',
             'scores' => $wpdb->prefix . 'mt_candidate_scores',
             'evaluations' => $wpdb->prefix . 'mt_evaluations',
+            'assignments' => $wpdb->prefix . 'mt_jury_assignments',
             'reset_logs' => $wpdb->prefix . 'vote_reset_logs',
             'backups' => $wpdb->prefix . 'mt_vote_backups'
         );
