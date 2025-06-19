@@ -1,125 +1,134 @@
 <?php
 /**
- * Database Fix Page Template
+ * Database Fix Admin View
  *
  * @package MobilityTrailblazers
  */
 
-// Prevent direct access
+// Security check
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Check permissions
+if (!current_user_can('manage_options')) {
+    wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+}
+
+// Handle form submission
+$message = '';
+$message_type = '';
+
+if (isset($_POST['mt_fix_database']) && wp_verify_nonce($_POST['mt_fix_database_nonce'], 'mt_fix_database')) {
+    // Force create tables
+    require_once MT_PLUGIN_DIR . 'includes/class-database.php';
+    $database = new MT_Database();
+    $database->force_create_tables();
+    
+    $message = __('Database tables have been recreated successfully.', 'mobility-trailblazers');
+    $message_type = 'success';
+}
+
+// Check current table status
+global $wpdb;
+
+$tables = array(
+    'mt_votes' => $wpdb->prefix . 'mt_votes',
+    'mt_candidate_scores' => $wpdb->prefix . 'mt_candidate_scores',
+    'mt_evaluations' => $wpdb->prefix . 'mt_evaluations',
+    'mt_jury_assignments' => $wpdb->prefix . 'mt_jury_assignments',
+    'vote_reset_logs' => $wpdb->prefix . 'vote_reset_logs',
+    'mt_vote_backups' => $wpdb->prefix . 'mt_vote_backups',
+);
+
+$table_status = array();
+foreach ($tables as $name => $table) {
+    $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+    $columns = 0;
+    if ($exists) {
+        $columns = count($wpdb->get_results("SHOW COLUMNS FROM $table"));
+    }
+    $table_status[$name] = array(
+        'exists' => $exists,
+        'columns' => $columns,
+        'full_name' => $table
+    );
+}
+
+// Check for missing function
+$function_exists = function_exists('mt_is_jury_member');
 ?>
 
 <div class="wrap">
     <h1><?php _e('Database Fix', 'mobility-trailblazers'); ?></h1>
     
-    <?php if (isset($message)): ?>
-        <div class="notice notice-<?php echo $message_type; ?> is-dismissible">
+    <?php if ($message): ?>
+        <div class="notice notice-<?php echo esc_attr($message_type); ?> is-dismissible">
             <p><?php echo esc_html($message); ?></p>
         </div>
     <?php endif; ?>
     
-    <div class="mt-database-status">
-        <h2><?php _e('Database Table Status', 'mobility-trailblazers'); ?></h2>
+    <div class="card">
+        <h2><?php _e('Database Status', 'mobility-trailblazers'); ?></h2>
         
-        <table class="wp-list-table widefat fixed striped">
+        <table class="widefat striped">
             <thead>
                 <tr>
                     <th><?php _e('Table Name', 'mobility-trailblazers'); ?></th>
                     <th><?php _e('Status', 'mobility-trailblazers'); ?></th>
                     <th><?php _e('Columns', 'mobility-trailblazers'); ?></th>
+                    <th><?php _e('Full Name', 'mobility-trailblazers'); ?></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($table_status as $table_name => $status): ?>
+                <?php foreach ($table_status as $name => $status): ?>
                     <tr>
-                        <td><strong><?php echo esc_html($table_name); ?></strong></td>
+                        <td><?php echo esc_html($name); ?></td>
                         <td>
                             <?php if ($status['exists']): ?>
-                                <span class="dashicons dashicons-yes-alt" style="color: green;"></span>
-                                <?php _e('Exists', 'mobility-trailblazers'); ?>
+                                <span style="color: green;">✓ <?php _e('Exists', 'mobility-trailblazers'); ?></span>
                             <?php else: ?>
-                                <span class="dashicons dashicons-no-alt" style="color: red;"></span>
-                                <?php _e('Missing', 'mobility-trailblazers'); ?>
+                                <span style="color: red;">✗ <?php _e('Missing', 'mobility-trailblazers'); ?></span>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <?php if ($status['exists'] && isset($status['columns'])): ?>
-                                <?php echo esc_html($status['columns']); ?>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
-                        </td>
+                        <td><?php echo $status['exists'] ? $status['columns'] : '-'; ?></td>
+                        <td><code><?php echo esc_html($status['full_name']); ?></code></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        
+        <h3><?php _e('Function Status', 'mobility-trailblazers'); ?></h3>
+        <p>
+            <strong>mt_is_jury_member():</strong> 
+            <?php if ($function_exists): ?>
+                <span style="color: green;">✓ <?php _e('Function exists', 'mobility-trailblazers'); ?></span>
+            <?php else: ?>
+                <span style="color: red;">✗ <?php _e('Function missing', 'mobility-trailblazers'); ?></span>
+            <?php endif; ?>
+        </p>
     </div>
     
-    <div class="mt-database-actions">
-        <h2><?php _e('Database Actions', 'mobility-trailblazers'); ?></h2>
+    <div class="card">
+        <h2><?php _e('Fix Database Issues', 'mobility-trailblazers'); ?></h2>
+        
+        <p><?php _e('Click the button below to recreate all database tables. This will not delete existing data.', 'mobility-trailblazers'); ?></p>
         
         <form method="post" action="">
-            <?php wp_nonce_field('mt_fix_database', 'mt_database_fix_nonce'); ?>
-            
-            <p>
-                <?php _e('If any tables are missing, click the button below to create them:', 'mobility-trailblazers'); ?>
-            </p>
-            
+            <?php wp_nonce_field('mt_fix_database', 'mt_fix_database_nonce'); ?>
             <p class="submit">
-                <input type="submit" name="mt_fix_database" class="button button-primary" value="<?php _e('Create Missing Tables', 'mobility-trailblazers'); ?>">
+                <input type="submit" name="mt_fix_database" class="button button-primary" value="<?php _e('Fix Database Tables', 'mobility-trailblazers'); ?>" />
             </p>
         </form>
     </div>
     
-    <div class="mt-database-info">
-        <h2><?php _e('Database Information', 'mobility-trailblazers'); ?></h2>
+    <div class="card">
+        <h2><?php _e('Additional Information', 'mobility-trailblazers'); ?></h2>
         
-        <p>
-            <?php _e('This page allows you to fix database issues that may occur during plugin installation or updates.', 'mobility-trailblazers'); ?>
-        </p>
-        
-        <p>
-            <strong><?php _e('Required Tables:', 'mobility-trailblazers'); ?></strong>
-        </p>
-        
-        <ul>
-            <li><code>wp_mt_jury_assignments</code> - <?php _e('Stores jury member assignments to candidates', 'mobility-trailblazers'); ?></li>
-            <li><code>wp_mt_evaluations</code> - <?php _e('Stores jury member evaluations of candidates', 'mobility-trailblazers'); ?></li>
-            <li><code>wp_mt_votes</code> - <?php _e('Stores voting data', 'mobility-trailblazers'); ?></li>
-            <li><code>wp_mt_candidate_scores</code> - <?php _e('Stores candidate scoring data', 'mobility-trailblazers'); ?></li>
-            <li><code>wp_vote_reset_logs</code> - <?php _e('Stores vote reset logs', 'mobility-trailblazers'); ?></li>
-            <li><code>wp_mt_vote_backups</code> - <?php _e('Stores vote backup data', 'mobility-trailblazers'); ?></li>
-        </ul>
+        <p><strong><?php _e('Database Version:', 'mobility-trailblazers'); ?></strong> <?php echo get_option('mt_db_version', 'Not set'); ?></p>
+        <p><strong><?php _e('Plugin Version:', 'mobility-trailblazers'); ?></strong> <?php echo MT_PLUGIN_VERSION; ?></p>
+        <p><strong><?php _e('WordPress Version:', 'mobility-trailblazers'); ?></strong> <?php echo get_bloginfo('version'); ?></p>
+        <p><strong><?php _e('PHP Version:', 'mobility-trailblazers'); ?></strong> <?php echo PHP_VERSION; ?></p>
+        <p><strong><?php _e('MySQL Version:', 'mobility-trailblazers'); ?></strong> <?php echo $wpdb->db_version(); ?></p>
     </div>
 </div>
-
-<style>
-.mt-database-status,
-.mt-database-actions,
-.mt-database-info {
-    margin-top: 20px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    box-shadow: 0 1px 1px rgba(0,0,0,.04);
-}
-
-.mt-database-status h2,
-.mt-database-actions h2,
-.mt-database-info h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.mt-database-info ul {
-    margin-left: 20px;
-}
-
-.mt-database-info code {
-    background: #f1f1f1;
-    padding: 2px 4px;
-    border-radius: 3px;
-}
-</style> 

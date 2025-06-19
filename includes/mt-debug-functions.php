@@ -113,73 +113,129 @@ function mt_debug_specific_assignment($candidate_id = null, $jury_id = null) {
 }
 
 /**
- * Fix database issues
- * This function can be called manually to fix database problems
+ * Check if all required database tables exist
+ *
+ * @return array Table status information
  */
-function mt_fix_database_issues() {
+function mt_check_database_tables() {
     global $wpdb;
     
-    // Check if database class exists
-    if (!class_exists('MT_Database')) {
-        require_once MT_PLUGIN_DIR . 'includes/class-database.php';
-    }
-    
-    $database = new MT_Database();
-    
-    // Force create tables
-    $database->force_create_tables();
-    
-    // Check if tables were created successfully
-    $tables_to_check = array(
-        $wpdb->prefix . 'mt_jury_assignments',
-        $wpdb->prefix . 'mt_evaluations',
-        $wpdb->prefix . 'mt_votes',
-        $wpdb->prefix . 'mt_candidate_scores'
+    $tables = array(
+        'mt_votes' => $wpdb->prefix . 'mt_votes',
+        'mt_candidate_scores' => $wpdb->prefix . 'mt_candidate_scores',
+        'mt_evaluations' => $wpdb->prefix . 'mt_evaluations',
+        'mt_jury_assignments' => $wpdb->prefix . 'mt_jury_assignments',
+        'vote_reset_logs' => $wpdb->prefix . 'vote_reset_logs',
+        'mt_vote_backups' => $wpdb->prefix . 'mt_vote_backups',
     );
     
-    $results = array();
-    foreach ($tables_to_check as $table) {
+    $status = array();
+    foreach ($tables as $name => $table) {
         $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
-        $results[$table] = $exists;
+        $columns = 0;
+        if ($exists) {
+            $columns = count($wpdb->get_results("SHOW COLUMNS FROM $table"));
+        }
+        $status[$table] = array(
+            'exists' => $exists,
+            'columns' => $columns,
+            'name' => $name
+        );
+    }
+    
+    return $status;
+}
+
+/**
+ * Fix database issues by forcing table creation
+ *
+ * @return array Results of the fix attempt
+ */
+function mt_fix_database_issues() {
+    require_once MT_PLUGIN_DIR . 'includes/class-database.php';
+    
+    $database = new MT_Database();
+    $database->force_create_tables();
+    
+    // Check results
+    $status = mt_check_database_tables();
+    
+    $results = array(
+        'success' => true,
+        'created' => array(),
+        'failed' => array()
+    );
+    
+    foreach ($status as $table => $info) {
+        if ($info['exists']) {
+            $results['created'][] = $table;
+        } else {
+            $results['failed'][] = $table;
+            $results['success'] = false;
+        }
     }
     
     return $results;
 }
 
 /**
- * Check if all required database tables exist
+ * Debug output for database status
  *
- * @return array Array of table existence status
+ * @param bool $return Whether to return the output instead of echoing
+ * @return string|void Debug output
  */
-function mt_check_database_tables() {
-    global $wpdb;
+function mt_debug_database_status($return = false) {
+    $status = mt_check_database_tables();
     
-    $tables_to_check = array(
-        'mt_jury_assignments' => $wpdb->prefix . 'mt_jury_assignments',
-        'mt_evaluations' => $wpdb->prefix . 'mt_evaluations',
-        'mt_votes' => $wpdb->prefix . 'mt_votes',
-        'mt_candidate_scores' => $wpdb->prefix . 'mt_candidate_scores',
-        'vote_reset_logs' => $wpdb->prefix . 'vote_reset_logs',
-        'mt_vote_backups' => $wpdb->prefix . 'mt_vote_backups'
-    );
+    $output = "<div class='mt-debug-database'>";
+    $output .= "<h3>Database Table Status</h3>";
+    $output .= "<table style='width: 100%; border-collapse: collapse;'>";
+    $output .= "<tr><th style='text-align: left; padding: 5px; border: 1px solid #ccc;'>Table</th>";
+    $output .= "<th style='text-align: left; padding: 5px; border: 1px solid #ccc;'>Status</th>";
+    $output .= "<th style='text-align: left; padding: 5px; border: 1px solid #ccc;'>Columns</th></tr>";
     
-    $results = array();
-    foreach ($tables_to_check as $table_name => $full_table_name) {
-        $exists = $wpdb->get_var("SHOW TABLES LIKE '$full_table_name'") === $full_table_name;
-        $results[$table_name] = array(
-            'exists' => $exists,
-            'full_name' => $full_table_name
-        );
-        
-        if ($exists) {
-            // Get table structure info
-            $columns = $wpdb->get_results("SHOW COLUMNS FROM $full_table_name");
-            $results[$table_name]['columns'] = count($columns);
-        }
+    foreach ($status as $table => $info) {
+        $status_text = $info['exists'] ? '<span style="color: green;">✓ Exists</span>' : '<span style="color: red;">✗ Missing</span>';
+        $output .= "<tr>";
+        $output .= "<td style='padding: 5px; border: 1px solid #ccc;'>{$table}</td>";
+        $output .= "<td style='padding: 5px; border: 1px solid #ccc;'>{$status_text}</td>";
+        $output .= "<td style='padding: 5px; border: 1px solid #ccc;'>{$info['columns']}</td>";
+        $output .= "</tr>";
     }
     
-    return $results;
+    $output .= "</table>";
+    $output .= "</div>";
+    
+    if ($return) {
+        return $output;
+    }
+    
+    echo $output;
 }
+
+/**
+ * Add database status to health check
+ */
+add_filter('debug_information', function($info) {
+    $database_status = mt_check_database_tables();
+    
+    $fields = array();
+    foreach ($database_status as $table => $status) {
+        $fields[$table] = array(
+            'label' => $status['name'],
+            'value' => $status['exists'] ? sprintf(__('%d columns', 'mobility-trailblazers'), $status['columns']) : __('Missing', 'mobility-trailblazers'),
+            'debug' => $status
+        );
+    }
+    
+    $info['mobility-trailblazers-database'] = array(
+        'label' => __('Mobility Trailblazers Database', 'mobility-trailblazers'),
+        'description' => __('Status of plugin database tables', 'mobility-trailblazers'),
+        'fields' => $fields
+    );
+    
+    return $info;
+});
 
 // Add debug menu
 add_action('admin_menu', function() {
@@ -211,5 +267,7 @@ add_action('admin_menu', function() {
             
             echo '</div>';
         }
+
+        
     );
 }); 

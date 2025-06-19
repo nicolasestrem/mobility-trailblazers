@@ -21,7 +21,7 @@ class MT_Database {
      *
      * @var string
      */
-    private $db_version = '1.0.4';
+    private $db_version = '1.0.4'; // Increased version to force update
     
     /**
      * Constructor
@@ -47,14 +47,11 @@ class MT_Database {
     }
     
     /**
-     * Force create tables (for manual database setup)
+     * Force create all tables (used for fixing missing tables)
      */
     public function force_create_tables() {
         $this->create_tables();
         update_option('mt_db_version', $this->db_version);
-        
-        // Fire database updated action
-        do_action('mt_database_updated', '0', $this->db_version);
     }
     
     /**
@@ -166,7 +163,7 @@ class MT_Database {
     }
     
     /**
-     * Create evaluations table
+     * Create evaluations table (NEW METHOD!)
      *
      * @param string $charset_collate Database charset collation
      */
@@ -208,6 +205,35 @@ class MT_Database {
     }
     
     /**
+     * Create jury assignments table
+     *
+     * @param string $charset_collate Database charset collation
+     */
+    private function create_jury_assignments_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_jury_assignments';
+        
+        $sql = "CREATE TABLE $table_name (
+            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            candidate_id bigint(20) UNSIGNED NOT NULL,
+            jury_member_id bigint(20) UNSIGNED NOT NULL,
+            assignment_date datetime DEFAULT CURRENT_TIMESTAMP,
+            is_active tinyint(1) DEFAULT 1,
+            assigned_by bigint(20) UNSIGNED DEFAULT NULL,
+            notes text,
+            PRIMARY KEY (id),
+            KEY candidate_id (candidate_id),
+            KEY jury_member_id (jury_member_id),
+            KEY is_active (is_active),
+            KEY assignment_date (assignment_date),
+            UNIQUE KEY unique_assignment (candidate_id, jury_member_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+    
+    /**
      * Create evaluation triggers
      */
     private function create_evaluation_triggers() {
@@ -243,35 +269,6 @@ class MT_Database {
             
             $wpdb->query($sql);
         }
-    }
-    
-    /**
-     * Create jury assignments table
-     *
-     * @param string $charset_collate Database charset collation
-     */
-    private function create_jury_assignments_table($charset_collate) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_jury_assignments';
-        
-        $sql = "CREATE TABLE $table_name (
-            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            candidate_id bigint(20) UNSIGNED NOT NULL,
-            jury_member_id bigint(20) UNSIGNED NOT NULL,
-            assignment_date datetime DEFAULT CURRENT_TIMESTAMP,
-            is_active tinyint(1) DEFAULT 1,
-            assigned_by bigint(20) UNSIGNED DEFAULT NULL,
-            notes text,
-            PRIMARY KEY (id),
-            KEY candidate_id (candidate_id),
-            KEY jury_member_id (jury_member_id),
-            KEY is_active (is_active),
-            KEY assignment_date (assignment_date),
-            UNIQUE KEY unique_assignment (candidate_id, jury_member_id)
-        ) $charset_collate;";
-        
-        dbDelta($sql);
     }
     
     /**
@@ -407,4 +404,4 @@ class MT_Database {
         
         return isset($tables[$table]) ? $tables[$table] : '';
     }
-} 
+}

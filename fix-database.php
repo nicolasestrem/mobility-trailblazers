@@ -9,8 +9,8 @@
 // Load WordPress
 require_once dirname(__FILE__) . '/../../../wp-load.php';
 
-// Check if user is admin
-if (!current_user_can('manage_options')) {
+// Check if user is admin (if running from CLI, assume admin privileges)
+if (php_sapi_name() !== 'cli' && !current_user_can('manage_options')) {
     die('You need to be an administrator to run this script.');
 }
 
@@ -19,19 +19,29 @@ echo "=== Mobility Trailblazers Database Fix Script ===\n\n";
 // Load plugin files
 require_once dirname(__FILE__) . '/includes/class-database.php';
 require_once dirname(__FILE__) . '/includes/mt-utility-functions.php';
-require_once dirname(__FILE__) . '/includes/mt-debug-functions.php';
 
 // Check current database status
 echo "Checking current database status...\n";
-$table_status = mt_check_database_tables();
+
+global $wpdb;
+$tables = array(
+    'mt_votes' => $wpdb->prefix . 'mt_votes',
+    'mt_candidate_scores' => $wpdb->prefix . 'mt_candidate_scores',
+    'mt_evaluations' => $wpdb->prefix . 'mt_evaluations',
+    'mt_jury_assignments' => $wpdb->prefix . 'mt_jury_assignments',
+    'vote_reset_logs' => $wpdb->prefix . 'vote_reset_logs',
+    'mt_vote_backups' => $wpdb->prefix . 'mt_vote_backups',
+);
 
 $missing_tables = array();
-foreach ($table_status as $table_name => $status) {
-    if ($status['exists']) {
-        echo "✓ {$table_name} - EXISTS ({$status['columns']} columns)\n";
+foreach ($tables as $name => $table) {
+    $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+    if ($exists) {
+        $columns = count($wpdb->get_results("SHOW COLUMNS FROM $table"));
+        echo "✓ {$name} - EXISTS ({$columns} columns)\n";
     } else {
-        echo "✗ {$table_name} - MISSING\n";
-        $missing_tables[] = $table_name;
+        echo "✗ {$name} - MISSING\n";
+        $missing_tables[] = $name;
     }
 }
 
@@ -45,34 +55,32 @@ if (empty($missing_tables)) {
 echo "Missing tables detected. Creating them now...\n\n";
 
 // Fix database issues
-$results = mt_fix_database_issues();
+$database = new MT_Database();
+$database->force_create_tables();
 
 echo "Database fix completed. Checking results...\n\n";
 
 // Check results
-$table_status_after = mt_check_database_tables();
-$still_missing = array();
-
-foreach ($table_status_after as $table_name => $status) {
-    if ($status['exists']) {
-        echo "✓ {$table_name} - CREATED ({$status['columns']} columns)\n";
+$all_good = true;
+foreach ($tables as $name => $table) {
+    $exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+    if ($exists) {
+        $columns = count($wpdb->get_results("SHOW COLUMNS FROM $table"));
+        echo "✓ {$name} - CREATED ({$columns} columns)\n";
     } else {
-        echo "✗ {$table_name} - STILL MISSING\n";
-        $still_missing[] = $table_name;
+        echo "✗ {$name} - STILL MISSING\n";
+        $all_good = false;
     }
 }
 
 echo "\n";
 
-if (empty($still_missing)) {
+if ($all_good) {
     echo "SUCCESS: All database tables have been created successfully!\n";
     echo "The plugin should now work without database errors.\n";
     exit(0);
 } else {
-    echo "WARNING: Some tables could not be created:\n";
-    foreach ($still_missing as $table) {
-        echo "- {$table}\n";
-    }
-    echo "\nPlease check your database permissions and try again.\n";
+    echo "WARNING: Some tables could not be created.\n";
+    echo "Please check your database permissions and try again.\n";
     exit(1);
-} 
+}
