@@ -188,6 +188,178 @@ add_filter('mt_jury_dashboard_stats', function($stats, $jury_member_id) {
 }, 10, 2);
 ```
 
+# README.md Update - Troubleshooting Section
+
+## Troubleshooting
+
+### Elementor Integration Issues
+
+#### Elementor Editor Shows 403 Forbidden Errors
+
+**Symptoms**:
+- Cannot edit pages with Elementor
+- Browser console shows 403 errors on `/wp-json/elementor/` endpoints
+- Elementor interface loads but widgets don't work
+
+**Solutions**:
+
+1. **Clear All Caches**:
+```bash
+# If using Docker
+docker exec mobility_wpcli_STAGING wp cache flush
+docker exec mobility_wpcli_STAGING wp transient delete --all
+docker exec mobility_redis_STAGING redis-cli FLUSHALL
+docker exec mobility_wpcli_STAGING wp elementor flush-css
+```
+
+2. **Fix User Sessions** (Critical for existing users):
+   - Logout completely from WordPress admin
+   - Clear browser data for your site:
+     - Open Developer Tools (F12)
+     - Go to Application → Storage
+     - Click "Clear site data"
+   - Login again with your credentials
+
+3. **Verify Must-Use Plugins**:
+   The plugin automatically installs emergency fixes in `/wp-content/mu-plugins/`:
+   - `elementor-emergency-fix.php`
+   - `force-elementor-rest-auth.php`
+   - `fix-user-elementor.php`
+
+4. **For Persistent Issues**:
+```bash
+# Reset specific user
+docker exec mobility_wpcli_STAGING wp user reset-password USERNAME
+
+# Create new admin as fallback
+docker exec mobility_wpcli_STAGING wp user create newadmin admin@example.com --role=administrator --user_pass=StrongPass123!
+```
+
+#### Mobility Trailblazers Widgets Not Showing in Elementor
+
+**Symptoms**:
+- MT Evaluation Statistics widget missing
+- MT Jury Dashboard widget not available
+- Widgets category appears but is empty
+
+**Solutions**:
+
+1. **Verify Plugin Activation**:
+```bash
+docker exec mobility_wpcli_STAGING wp plugin list --status=active
+```
+
+2. **Re-register Widgets**:
+```bash
+# Deactivate and reactivate
+docker exec mobility_wpcli_STAGING wp plugin deactivate mobility-trailblazers
+docker exec mobility_wpcli_STAGING wp plugin activate mobility-trailblazers
+```
+
+3. **Check Widget Registration**:
+```bash
+docker exec mobility_wpcli_STAGING wp eval '
+if (class_exists("\Elementor\Plugin")) {
+    $widgets = \Elementor\Plugin::instance()->widgets_manager->get_widget_types();
+    $mt_widgets = array_filter(array_keys($widgets), function($key) {
+        return strpos($key, "mt_") === 0;
+    });
+    echo "MT Widgets found: " . implode(", ", $mt_widgets) . "\n";
+}'
+```
+
+### Docker Environment Specific
+
+#### Container Communication Issues
+
+**For Docker installations**:
+- WordPress Container: `mobility_wordpress_STAGING`
+- Database Container: `mobility_mariadb_STAGING`
+- WP-CLI Container: `mobility_wpcli_STAGING`
+- Redis Container: `mobility_redis_STAGING`
+
+**Common Commands**:
+```bash
+# Check plugin files
+docker exec mobility_wpcli_STAGING ls -la /var/www/html/wp-content/plugins/mobility-trailblazers/
+
+# View error logs
+docker exec mobility_wordpress_STAGING tail -n 50 /var/www/html/wp-content/debug.log
+
+# Database operations
+docker exec mobility_wpcli_STAGING wp db check
+docker exec mobility_wpcli_STAGING wp db optimize
+```
+
+### REST API Authentication
+
+#### Understanding the Issue
+
+The plugin includes multiple layers of REST API authentication fixes:
+
+1. **Plugin Level**: Removed conflicting filters in Elementor integration
+2. **Emergency Override**: Added to main plugin file for immediate effect
+3. **Must-Use Plugins**: Provide failsafe authentication bypass
+4. **User Session Repair**: Fixes corrupted authentication tokens
+
+#### Manual REST API Test
+
+```bash
+docker exec mobility_wpcli_STAGING wp eval '
+$request = new WP_REST_Request("GET", "/wp/v2/users/me");
+$response = rest_do_request($request);
+if (is_wp_error($response)) {
+    echo "Error: " . $response->get_error_message() . "\n";
+} else {
+    $data = $response->get_data();
+    echo "Success - User ID: " . $data["id"] . "\n";
+}'
+```
+
+### Best Practices
+
+1. **After Plugin Updates**:
+   - Clear all caches
+   - Re-login to WordPress admin
+   - Test Elementor functionality
+
+2. **For Production Sites**:
+   - Test updates in staging first
+   - Backup before applying fixes
+   - Monitor error logs during deployment
+
+3. **Preventing Future Issues**:
+   - Keep WordPress, Elementor, and plugins updated
+   - Use strong, unique authentication keys in wp-config.php
+   - Regularly clear transient data
+
+### Emergency Recovery
+
+If all else fails:
+
+1. **Backup your data**:
+```bash
+docker exec mobility_wpcli_STAGING wp export
+docker exec mobility_wpcli_STAGING wp db export backup.sql
+```
+
+2. **Reset Elementor**:
+```bash
+# Remove Elementor settings
+docker exec mobility_wpcli_STAGING wp db query "DELETE FROM wp_options WHERE option_name LIKE '%elementor%'"
+
+# Reinstall Elementor
+docker exec mobility_wpcli_STAGING wp plugin deactivate elementor elementor-pro
+docker exec mobility_wpcli_STAGING wp plugin delete elementor elementor-pro
+docker exec mobility_wpcli_STAGING wp plugin install elementor --activate
+```
+
+3. **Contact Support** with:
+   - Error messages from browser console
+   - WordPress debug.log contents
+   - List of active plugins
+   - PHP and WordPress versions
+
 ## Version History
 
 ### 1.0.4 (Current)
