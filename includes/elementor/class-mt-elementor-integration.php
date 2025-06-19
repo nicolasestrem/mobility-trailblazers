@@ -58,6 +58,9 @@ class MT_Elementor_Integration {
         
         // FIXED: Add proper REST API authentication handling
         add_filter('rest_authentication_errors', array($this, 'allow_rest_api_for_elementor'), 20);
+
+        // More permissive REST API filter for Elementor and general use
+        add_filter('rest_pre_dispatch', array($this, 'filter_rest_pre_dispatch'), 10, 3);
     }
     
     /**
@@ -344,5 +347,36 @@ class MT_Elementor_Integration {
                 ELEMENTOR_VERSION
             );
         }
+    }
+
+    /**
+     * More permissive REST API filter for Elementor and general use
+     */
+    public function filter_rest_pre_dispatch($result, $server, $request) {
+        // Get the route
+        $route = $request->get_route();
+        // If no route, return
+        if (empty($route)) {
+            return $result;
+        }
+        // For logged-in users who can edit posts, allow ALL REST API access
+        if (is_user_logged_in() && current_user_can('edit_posts')) {
+            return $result;
+        }
+        // For non-logged in users, only block specific routes
+        $blocked_routes = array(
+            '/wp/v2/users',
+            '/wp/v2/comments',
+        );
+        foreach ($blocked_routes as $blocked) {
+            if (strpos($route, $blocked) === 0) {
+                return new WP_Error(
+                    'rest_forbidden',
+                    __('Sorry, you are not allowed to do that.'),
+                    array('status' => 403)
+                );
+            }
+        }
+        return $result;
     }
 }
