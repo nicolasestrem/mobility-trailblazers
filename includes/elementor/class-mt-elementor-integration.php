@@ -359,17 +359,32 @@ class MT_Elementor_Integration {
         if (empty($route)) {
             return $result;
         }
-        // For logged-in users who can edit posts, allow ALL REST API access
-        if (is_user_logged_in() && current_user_can('edit_posts')) {
-            return $result;
+        // Always allow Elementor routes
+        $elementor_patterns = array(
+            '/elementor/',
+            '/wp/v2/blocks',
+            '/wp/v2/global-styles',
+            '/wp/v2/users/me',
+            '/wp/v2/types',
+            '/wp/v2/taxonomies',
+            '/wp-site-health/',
+        );
+        foreach ($elementor_patterns as $pattern) {
+            if (strpos($route, $pattern) !== false) {
+                return $result; // Allow access
+            }
         }
-        // For non-logged in users, only block specific routes
-        $blocked_routes = array(
+        // For all other routes, check if user is logged in and can edit
+        if (is_user_logged_in() && current_user_can('edit_posts')) {
+            return $result; // Allow access
+        }
+        // Only block specific routes for non-logged-in users
+        $blocked_for_guests = array(
             '/wp/v2/users',
             '/wp/v2/comments',
         );
-        foreach ($blocked_routes as $blocked) {
-            if (strpos($route, $blocked) === 0) {
+        foreach ($blocked_for_guests as $blocked) {
+            if (strpos($route, $blocked) === 0 && !is_user_logged_in()) {
                 return new WP_Error(
                     'rest_forbidden',
                     __('Sorry, you are not allowed to do that.'),
