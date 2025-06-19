@@ -1,5 +1,85 @@
 # Changelog
 
+# Changelog Update - June 19, 2025
+
+## [1.0.5] - 2025-06-19
+
+### Critical Elementor Integration Fix
+
+This release resolves critical issues preventing Elementor from functioning properly with the Mobility Trailblazers plugin.
+
+### Fixed
+
+#### Elementor REST API Authentication Issues
+- **Problem**: Elementor editor was receiving 403 Forbidden errors on all REST API endpoints
+- **Root Cause**: Multiple conflicting authentication filters and corrupted user sessions
+- **Solutions Implemented**:
+  1. Removed problematic REST API filter in `class-mt-elementor-integration.php`
+  2. Added emergency override in main plugin file to bypass REST filters during Elementor sessions
+  3. Created must-use plugins for aggressive REST API authentication fixes
+  4. Fixed corrupted user sessions for existing admin accounts
+
+#### Widget Registration Issues
+- **Problem**: MT Evaluation Statistics and MT Jury Dashboard widgets not appearing in Elementor
+- **Fixes**:
+  - Corrected widget naming inconsistency (hyphens vs underscores)
+  - Fixed malformed PHP code in `evaluation-stats.php` (line 135)
+  - Added missing helper functions `mt_get_user_evaluation_count()` and `mt_get_user_assignments_count()`
+
+#### User Session Corruption
+- **Problem**: Existing admin accounts couldn't use Elementor while new accounts worked fine
+- **Solution**: Implemented comprehensive user session cleanup and capability refresh system
+- **Added**: Auto-repair functionality for user capabilities on login
+
+### Added
+
+#### Must-Use Plugins
+1. **elementor-emergency-fix.php** - Forces REST API access for Elementor routes
+2. **force-elementor-rest-auth.php** - Aggressive authentication bypass for logged-in users
+3. **fix-user-elementor.php** - Automatic user capability repair on login
+
+#### New Utility Functions
+- `mt_get_user_evaluation_count()` - Returns evaluation count for a user
+- `mt_get_user_assignments_count()` - Returns assignment count for a user
+
+### Changed
+
+- Updated `class-mt-elementor-integration.php` to remove conflicting REST API filters
+- Modified widget registration to use consistent naming convention
+- Enhanced error handling in utility functions
+
+### Technical Details
+
+#### Files Modified
+1. `/includes/elementor/class-mt-elementor-integration.php`
+2. `/mobility-trailblazers.php`
+3. `/templates/shortcodes/evaluation-stats.php`
+4. `/includes/elementor/widgets/jury-dashboard.php`
+5. `/includes/mt-utility-functions.php`
+6. `/wp-content/mu-plugins/` (new emergency fixes)
+
+#### Database Changes
+- None required
+
+#### Breaking Changes
+- None - all changes are backward compatible
+
+### Upgrade Instructions
+
+1. Update the plugin files
+2. Clear all caches (Redis, WordPress transients, Elementor CSS)
+3. All existing admin users must:
+   - Logout completely from WordPress
+   - Clear browser cache and cookies for the site
+   - Login again to receive fresh authentication tokens
+4. Deactivate and reactivate the plugin to ensure all fixes are applied
+
+### Notes
+
+- This fix addresses a complex interaction between WordPress REST API authentication, Elementor's requirements, and user session management
+- The must-use plugins provide failsafe mechanisms to ensure Elementor access
+- Future updates will include more robust REST API handling to prevent similar issues
+
 All notable changes to the Mobility Trailblazers plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
