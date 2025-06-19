@@ -247,7 +247,7 @@ We adopt the BEM (Block Element Modifier) methodology with `mt-` prefix.
   }
   ```
 
-## Migration Strategy
+## Migration Strategies
 
 ### Deprecated Function Handling
 When renaming functions, maintain backward compatibility:
