@@ -19,6 +19,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Emergency Elementor REST API Fix
+add_action('init', function() {
+    // Remove any filters that might block Elementor REST API
+    if (isset($_GET['action']) && $_GET['action'] === 'elementor' || 
+        isset($_GET['elementor-preview']) ||
+        (defined('REST_REQUEST') && REST_REQUEST && strpos($_SERVER['REQUEST_URI'], '/elementor/') !== false)) {
+        remove_all_filters('rest_pre_dispatch');
+        remove_all_filters('rest_authentication_errors');
+    }
+}, 1);
+
 // Define plugin constants
 define('MT_PLUGIN_VERSION', '1.0.2');
 define('MT_PLUGIN_FILE', __FILE__);

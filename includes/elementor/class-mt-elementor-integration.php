@@ -59,8 +59,8 @@ class MT_Elementor_Integration {
         // FIXED: Add proper REST API authentication handling
         add_filter('rest_authentication_errors', array($this, 'allow_rest_api_for_elementor'), 20);
 
-        // More permissive REST API filter for Elementor and general use
-        add_filter('rest_pre_dispatch', array($this, 'filter_rest_pre_dispatch'), 10, 3);
+        // DISABLED TO FIX ELEMENTOR REST API ACCESS
+        // add_filter('rest_pre_dispatch', array($this, 'filter_rest_pre_dispatch'), 10, 3);
     }
     
     /**
