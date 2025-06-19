@@ -639,6 +639,56 @@ function mt_get_draft_evaluations($jury_member_id) {
 }
 
 /**
+ * Get user evaluation count
+ * @param int $user_id User ID
+ * @return int Number of evaluations
+ */
+function mt_get_user_evaluation_count($user_id) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'mt_candidate_scores';
+    
+    // Check if table exists
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+        return intval($wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE jury_id = %d",
+            $user_id
+        )));
+    }
+    
+    // Fallback: count evaluations using the mt_evaluations table
+    $table_name = $wpdb->prefix . 'mt_evaluations';
+    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+        // Get jury member by user ID
+        $jury_member = mt_get_jury_member_by_user_id($user_id);
+        if ($jury_member) {
+            return intval($wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $table_name WHERE jury_member_id = %d",
+                $jury_member->ID
+            )));
+        }
+    }
+    
+    return 0;
+}
+
+/**
+ * Get user assignments count
+ * @param int $user_id User ID
+ * @return int Number of assignments
+ */
+function mt_get_user_assignments_count($user_id) {
+    // Get jury member by user ID
+    $jury_member = mt_get_jury_member_by_user_id($user_id);
+    if (!$jury_member) {
+        return 0;
+    }
+    
+    // Use existing function to get assigned candidates
+    $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
+    return count($assigned_candidates);
+}
+
+/**
  * Get the jury member post type name
  * This function provides backward compatibility during transition
  * 

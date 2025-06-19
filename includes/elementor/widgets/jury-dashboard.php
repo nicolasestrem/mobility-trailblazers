@@ -61,11 +61,11 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
     }
     
     public function get_script_depends() {
-        return ['mt-jury-dashboard'];
+        return ['mt_jury_dashboard'];
     }
     
     public function get_style_depends() {
-        return ['mt-jury-dashboard'];
+        return ['mt_jury_dashboard'];
     }
     
     /**
