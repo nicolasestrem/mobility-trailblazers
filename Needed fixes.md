@@ -52,6 +52,8 @@ Timeline: Day 3
  Fix assets/assignment.css - Complete the truncated CSS rules
  Fix malformed code in templates/shortcodes/evaluation-stats.php (line 135)
 
+DONE UNTIL HERE
+
 Phase 2: Naming Convention Standardization
 Timeline: Day 4-7
 2.1 File Naming Standards
