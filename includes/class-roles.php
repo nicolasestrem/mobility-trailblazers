@@ -83,12 +83,13 @@ class MT_Roles {
             'mt_create_backups',
             'mt_restore_backups',
             
-            // Post type capabilities - Candidates
+            // Post type capabilities - Candidates (both singular and plural forms)
             'edit_mt_candidate',
             'read_mt_candidate',
             'delete_mt_candidate',
             'edit_mt_candidates',
-            'edit_others_mt_candidates',
+            'edit_others_mt_candidate',      // Singular form
+            'edit_others_mt_candidates',     // Plural form
             'publish_mt_candidates',
             'read_private_mt_candidates',
             'delete_mt_candidates',
@@ -98,12 +99,13 @@ class MT_Roles {
             'edit_private_mt_candidates',
             'edit_published_mt_candidates',
             
-            // Post type capabilities - Jury Members (both naming conventions)
+            // Post type capabilities - Jury Members (all variations)
             'edit_mt_jury_member',
             'read_mt_jury_member',
             'delete_mt_jury_member',
             'edit_mt_jury_members',
-            'edit_others_mt_jury_members',
+            'edit_others_mt_jury_member',    // Singular form
+            'edit_others_mt_jury_members',   // Plural form
             'publish_mt_jury_members',
             'read_private_mt_jury_members',
             'delete_mt_jury_members',
@@ -118,7 +120,8 @@ class MT_Roles {
             'read_mt_jury',
             'delete_mt_jury',
             'edit_mt_jurys',
-            'edit_others_mt_jurys',
+            'edit_others_mt_jury',           // Singular form
+            'edit_others_mt_jurys',          // Plural form
             'publish_mt_jurys',
             'read_private_mt_jurys',
             'delete_mt_jurys',
@@ -314,4 +317,4 @@ class MT_Roles {
         
         return $processed;
     }
-} 
+}
