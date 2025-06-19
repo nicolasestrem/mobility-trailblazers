@@ -13,6 +13,12 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Prepare chart data for overview if needed
+if ($atts['type'] === 'overview' && isset($atts['show_chart']) && $atts['show_chart'] === 'yes') {
+    $dates = isset($stats["daily_evaluations"]) && is_array($stats["daily_evaluations"]) ? array_keys($stats["daily_evaluations"]) : array();
+    $eval_counts = isset($stats["daily_evaluations"]) && is_array($stats["daily_evaluations"]) ? array_values($stats["daily_evaluations"]) : array();
+}
 ?>
 
 <div class="mt-evaluation-stats-wrapper">
@@ -132,10 +138,10 @@ jQuery(document).ready(function($) {
             new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
-$dates = isset($stats["daily_evaluations"]) && is_array($stats["daily_evaluations"]) ? array_keys($stats["daily_evaluations"]) : array();
+                    labels: <?php echo json_encode($dates); ?>,
                     datasets: [{
                         label: '<?php _e('Evaluations', 'mobility-trailblazers'); ?>',
-                        data: <?php echo json_encode(array_values($stats['daily_evaluations'])); ?>,
+                        data: <?php echo json_encode($eval_counts); ?>,
                         backgroundColor: '#0073aa'
                     }]
                 },

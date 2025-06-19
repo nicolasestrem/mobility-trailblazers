@@ -179,6 +179,7 @@ $categories = get_terms(array(
         </div>
         
         <form id="evaluation-form-fields">
+            <?php wp_nonce_field('mt_jury_evaluation', 'mt_jury_evaluation_nonce'); ?>
             <h4><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h4>
             
             <div class="criteria-group">

@@ -363,7 +363,7 @@
                 visibility: $('#visibility-score').val(),
                 comments: $('#evaluation-comments').val(),
                 status: status,
-                nonce: mt_jury_ajax.nonce
+                nonce: $('#evaluation-form-fields input[name="mt_jury_evaluation_nonce"]').val()
             };
             
             $.ajax({

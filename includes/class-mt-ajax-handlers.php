@@ -2134,7 +2134,7 @@ The application is currently in pending status and requires approval.', 'mobilit
      */
     public function save_evaluation() {
         // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_jury_nonce')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_jury_evaluation')) {
             wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
         }
         
