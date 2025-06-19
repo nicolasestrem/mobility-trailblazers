@@ -106,56 +106,35 @@ function mt_calculate_total_score($scores) {
  * @return WP_Post|null Jury member post or null
  */
 function mt_get_jury_member_by_user_id($user_id) {
+    // First try the underscore prefix version (used by diagnostic tool)
     $args = array(
         'post_type' => 'mt_jury_member',
-        'meta_key' => 'mt_jury_user_id',
+        'meta_key' => '_mt_user_id',
         'meta_value' => $user_id,
         'posts_per_page' => 1,
         'post_status' => 'publish'
     );
     
     $jury_members = get_posts($args);
+    
+    // If not found, try without underscore (legacy)
+    if (empty($jury_members)) {
+        $args['meta_key'] = 'mt_jury_user_id';
+        $jury_members = get_posts($args);
+    }
+    
+    // If still not found, check user meta for linked jury member
+    if (empty($jury_members)) {
+        $jury_member_id = get_user_meta($user_id, '_mt_jury_member_id', true);
+        if ($jury_member_id) {
+            $jury_member = get_post($jury_member_id);
+            if ($jury_member && $jury_member->post_type === 'mt_jury_member' && $jury_member->post_status === 'publish') {
+                return $jury_member;
+            }
+        }
+    }
+    
     return !empty($jury_members) ? $jury_members[0] : null;
-}
-
-/**
- * Check if current user is a jury member
- *
- * @param int $user_id Optional user ID, defaults to current user
- * @return bool Whether user is a jury member
- */
-function mt_is_jury_member($user_id = null) {
-    if (!$user_id) {
-        $user_id = get_current_user_id();
-    }
-    
-    if (!$user_id) {
-        return false;
-    }
-    
-    // Check if user has jury member role
-    $user = get_user_by('id', $user_id);
-    if (!$user) {
-        return false;
-    }
-    
-    // Check for jury member role
-    if (in_array('mt_jury_member', $user->roles)) {
-        return true;
-    }
-    
-    // Check if user has jury member capability
-    if (user_can($user_id, 'mt_access_jury_dashboard')) {
-        return true;
-    }
-    
-    // Check if user is associated with a jury member post
-    $jury_member = mt_get_jury_member_by_user_id($user_id);
-    if ($jury_member) {
-        return true;
-    }
-    
-    return false;
 }
 
 /**
@@ -667,6 +646,13 @@ function mt_get_jury_member_meta_key() {
  * @return int|false User ID or false if not found
  */
 function mt_get_user_id_by_jury_member($jury_member_id) {
-    $user_id = get_post_meta($jury_member_id, 'mt_jury_user_id', true);
+    // First try with underscore prefix (current standard)
+    $user_id = get_post_meta($jury_member_id, '_mt_user_id', true);
+    
+    // If not found, try without underscore (legacy)
+    if (!$user_id) {
+        $user_id = get_post_meta($jury_member_id, 'mt_jury_user_id', true);
+    }
+    
     return $user_id ? intval($user_id) : false;
-} 
+}
