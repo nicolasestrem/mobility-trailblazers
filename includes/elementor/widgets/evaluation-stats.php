@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 class MT_Evaluation_Stats_Widget extends \Elementor\Widget_Base {
     
     public function get_name() {
-        return 'mt-evaluation-stats';
+        return 'mt_evaluation_stats';
     }
     
     public function get_title() {

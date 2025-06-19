@@ -21,7 +21,7 @@ class MT_Jury_Dashboard_Widget extends \Elementor\Widget_Base {
      * @return string Widget name
      */
     public function get_name() {
-        return 'mt-jury-dashboard';
+        return 'mt_jury_dashboard';
     }
     
     /**

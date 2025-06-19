@@ -132,7 +132,7 @@ jQuery(document).ready(function($) {
             new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: <?php echo json_encode(array_keys($stats['daily_evaluations'])); ?>,
+$dates = isset($stats["daily_evaluations"]) && is_array($stats["daily_evaluations"]) ? isset($stats["daily_evaluations"]) && is_array($stats["daily_evaluations"]) ? array_keys($stats["daily_evaluations"]) : array() : array();
                     datasets: [{
                         label: '<?php _e('Evaluations', 'mobility-trailblazers'); ?>',
                         data: <?php echo json_encode(array_values($stats['daily_evaluations'])); ?>,

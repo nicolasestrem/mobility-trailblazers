@@ -37,7 +37,7 @@
             initCandidatesGrid($scope);
         });
 
-        elementor.hooks.addAction('frontend/element_ready/mt-jury-dashboard.default', function($scope) {
+        elementor.hooks.addAction('frontend/element_ready/mt_jury_dashboard.default', function($scope) {
             // Initialize widget in editor
             initJuryDashboard($scope);
         });
@@ -69,7 +69,7 @@
 
     // Initialize Jury Dashboard in editor
     function initJuryDashboard($scope) {
-        var $dashboard = $scope.find('.mt-jury-dashboard');
+        var $dashboard = $scope.find('.mt_jury_dashboard');
         
         if ($dashboard.length) {
             // Initialize dashboard functionality

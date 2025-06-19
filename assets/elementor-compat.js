@@ -17,7 +17,7 @@
             }
             
             // Bind to Elementor hooks
-            elementorFrontend.hooks.addAction('frontend/element_ready/mt-jury-dashboard.default', this.initJuryDashboard);
+            elementorFrontend.hooks.addAction('frontend/element_ready/mt_jury_dashboard.default', this.initJuryDashboard);
             elementorFrontend.hooks.addAction('frontend/element_ready/mt-candidate-grid.default', this.initCandidateGrid);
             elementorFrontend.hooks.addAction('frontend/element_ready/mt-voting-form.default', this.initVotingForm);
             elementorFrontend.hooks.addAction('frontend/element_ready/mt-statistics.default', this.initStatistics);
@@ -32,7 +32,7 @@
         
         // Initialize Jury Dashboard widget
         initJuryDashboard: function($scope) {
-            var $element = $scope.find('.mt-jury-dashboard');
+            var $element = $scope.find('.mt_jury_dashboard');
             
             if ($element.length && typeof MTJuryDashboard !== 'undefined') {
                 // Re-initialize dashboard functionality
@@ -310,7 +310,7 @@
         // Re-initialize all widgets
         reinitializeAll: function() {
             // Re-initialize each widget type
-            $('.mt-jury-dashboard').each(function() {
+            $('.mt_jury_dashboard').each(function() {
                 MTElementor.initJuryDashboard($(this).closest('.elementor-widget'));
             });
             
