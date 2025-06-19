@@ -61,41 +61,42 @@ class MT_Elementor_Integration {
     }
     
     /**
-     * FIXED: Allow REST API access for Elementor endpoints
+     * Allow REST API access for Elementor endpoints
      */
     public function allow_rest_api_for_elementor($result) {
         // If there's already an error, return it
         if (!empty($result)) {
             return $result;
         }
-        
         // Check if this is a REST API request
         if (!defined('REST_REQUEST') || !REST_REQUEST) {
             return $result;
         }
-        
         // Get the current route
         $rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
-        
         // List of routes that Elementor needs
         $elementor_routes = array(
             '/wp/v2/blocks',
             '/wp/v2/global-styles',
             '/wp/v2/global-styles/themes',
-            '/wp/v2/global-styles/167', // Specific ID from your error
-            '/elementor/v1/'
+            '/wp/v2/global-styles/',
+            '/elementor/v1/',
+            '/wp/v2/users/me',
+            '/wp/v2/types',
+            '/wp/v2/taxonomies',
+            '/wp-site-health/v1/tests/background-updates',
+            '/wp-site-health/v1/tests/loopback-requests',
+            '/wp-site-health/v1/directory-sizes'
         );
-        
         // Check if current route is needed by Elementor
-        foreach ($elementor_routes as $route) {
-            if (strpos($rest_route, $route) !== false) {
+        foreach ($elementor_routes as $allowed_route) {
+            if (strpos($rest_route, $allowed_route) === 0) {
                 // Allow access if user is logged in and can edit posts
                 if (is_user_logged_in() && current_user_can('edit_posts')) {
                     return null; // Allow access
                 }
             }
         }
-        
         return $result;
     }
     
@@ -147,31 +148,21 @@ class MT_Elementor_Integration {
     public function enqueue_scripts() {
         // Ensure jQuery is loaded
         wp_enqueue_script('jquery');
-        
-        // Add authentication check handling
+        // Add authentication check handling with proper error checking
         wp_add_inline_script('jquery', '
             jQuery(document).ready(function($) {
                 // Handle authentication check
                 if (typeof wp !== "undefined" && wp.authCheck) {
-                    var $authCheck = $("#wp-auth-check-wrap");
-                    if ($authCheck.length) {
-                        wp.authCheck.interval = 180; // Reduce check frequency
-                        
-                        // Ensure auth check element exists before initializing
-                        if (!$authCheck.hasClass("hidden")) {
-                            wp.authCheck.init();
-                        }
-                        
-                        // Add error handling for auth check
-                        $(document).on("heartbeat-tick", function(e, data) {
-                            if (data && data["wp-auth-check"]) {
-                                var $authCheck = $("#wp-auth-check-wrap");
-                                if ($authCheck.length && !$authCheck.hasClass("hidden")) {
+                    $(document).on("heartbeat-tick", function(e, data) {
+                        if (data && data["wp-auth-check"]) {
+                            var $authCheck = $("#wp-auth-check-wrap");
+                            if ($authCheck.length && $authCheck.is(":visible")) {
+                                if (typeof wp.authCheck.init === "function") {
                                     wp.authCheck.init();
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             });
         ');
