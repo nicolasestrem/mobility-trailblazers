@@ -17,24 +17,24 @@ if (!defined('ABSPATH')) {
 /**
  * Get jury nomenclature (base or plural)
  * 
- * @deprecated 1.0.6 Use mt_mt_get_jury_nomenclature() instead
+ * @deprecated 1.0.6 Use mt_get_jury_nomenclature() instead
  * @param bool $plural Whether to return plural form
  * @return string
  */
 function mt_get_jury_nomenclature($plural = false) {
     _deprecated_function(__FUNCTION__, '1.0.6', 'mt_get_jury_nomenclature');
-    return mt_mt_get_jury_nomenclature($plural);
+    return mt_get_jury_nomenclature($plural);
 }
 
 /**
  * Get jury member user meta key
  * 
- * @deprecated 1.0.6 Use mt_mt_get_jury_member_meta_key() instead
+ * @deprecated 1.0.6 Use mt_get_jury_member_meta_key() instead
  * @return string
  */
 function mt_get_jury_member_meta_key() {
     _deprecated_function(__FUNCTION__, '1.0.6', 'mt_get_jury_member_meta_key');
-    return mt_mt_get_jury_member_meta_key();
+    return mt_get_jury_member_meta_key();
 }
 
 /**

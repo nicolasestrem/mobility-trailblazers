@@ -2241,6 +2241,7 @@ The application is currently in pending status and requires approval.', 'mobilit
             
             // Trigger action for other plugins
             do_action('mt_evaluation_submitted', $candidate_id, $jury_member->ID, $evaluation_data);
+            do_action_deprecated('evaluation_submitted', array($candidate_id, $jury_member->ID, $evaluation_data), '1.0.6', 'mt_evaluation_submitted');
             
             wp_send_json_success(array(
                 'message' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),

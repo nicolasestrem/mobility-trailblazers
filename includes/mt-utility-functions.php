@@ -722,7 +722,7 @@ function mt_get_jury_capability($base_cap, $plural = false) {
  * 
  * @return string
  */
-function mt_mt_mt_get_jury_member_meta_key() {
+function mt_get_jury_member_meta_key() {
     if (get_option('mt_jury_nomenclature_migrated', false)) {
         return '_mt_jury_member_id';
     }

@@ -75,7 +75,7 @@ if (!defined('ABSPATH')) {
  * @param bool $plural Whether to return plural form
  * @return string
  */
-function get_jury_nomenclature($plural = false) {
+function mt_get_jury_nomenclature($plural = false) {
     _deprecated_function(__FUNCTION__, '1.0.6', 'mt_get_jury_nomenclature');
     return mt_get_jury_nomenclature($plural);
 }
@@ -86,7 +86,7 @@ function get_jury_nomenclature($plural = false) {
  * @deprecated 1.0.6 Use mt_get_jury_member_meta_key() instead
  * @return string
  */
-function get_jury_member_meta_key() {
+function mt_get_jury_member_meta_key() {
     _deprecated_function(__FUNCTION__, '1.0.6', 'mt_get_jury_member_meta_key');
     return mt_get_jury_member_meta_key();
 }
@@ -97,7 +97,7 @@ function get_jury_member_meta_key() {
  * @deprecated 1.0.6 Use mt_get_evaluation_criteria() instead
  * @return array
  */
-function MT_get_evaluation_criteria() {
+function mt_get_evaluation_criteria() {
     _deprecated_function(__FUNCTION__, '1.0.6', 'mt_get_evaluation_criteria');
     return mt_get_evaluation_criteria();
 }
