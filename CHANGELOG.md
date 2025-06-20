@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.6] - 2024-12-20
+
+### Changed
+- **Naming Convention Standardization** - Completed Phase 2 of major refactoring
+  - All global functions now use `mt_` prefix consistently
+  - CSS classes updated to use `.mt-` prefix with BEM methodology
+  - JavaScript variables converted from snake_case to camelCase
+  - WordPress hooks standardized with `mt_` prefix
+  - Added backward compatibility layer for deprecated functions
+
+### Added
+- `includes/mt-compatibility-functions.php` - Deprecated function wrappers for backward compatibility
+- `NAMING_CONVENTIONS.md` - Comprehensive naming standards documentation
+
+### Fixed
+- Circular reference bug in compatibility functions
+- Multiple naming inconsistencies across PHP, CSS, and JavaScript files
+
+### Deprecated
+- `get_jury_nomenclature()` - Use `mt_get_jury_nomenclature()` instead
+- `get_jury_member_meta_key()` - Use `mt_get_jury_member_meta_key()` instead
+- `MT_get_evaluation_criteria()` - Use `mt_get_evaluation_criteria()` instead
+
+### Technical Details
+- Modified 9 files with automated naming convention fixes
+- Manual corrections applied to compatibility layer
+- All changes maintain backward compatibility through deprecation wrappers
 # Changelog Update - June 19, 2025
 
 ## [1.0.5] - 2025-06-19
