@@ -181,7 +181,7 @@
             var page = parseInt($button.data('page')) || 1;
             
             $.ajax({
-                url: mt_frontend.ajax_url,
+                url: mt_frontend.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_load_more_candidates',
@@ -223,11 +223,11 @@
             var self = this;
             
             $.ajax({
-                url: mt_frontend.ajax_url,
+                url: mt_frontend.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_get_candidate_details',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     nonce: mt_frontend.nonce
                 },
                 success: function(response) {
@@ -252,11 +252,11 @@
             var $button = $('.mt-vote-button[data-candidate-id="' + candidateId + '"]');
             
             $.ajax({
-                url: mt_frontend.ajax_url,
+                url: mt_frontend.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_submit_public_vote',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     nonce: mt_frontend.nonce
                 },
                 beforeSend: function() {
@@ -298,7 +298,7 @@
             formData.append('nonce', mt_frontend.nonce);
             
             $.ajax({
-                url: mt_frontend.ajax_url,
+                url: mt_frontend.ajaxUrl,
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -331,7 +331,7 @@
             var email = $form.find('input[type="email"]').val();
             
             $.ajax({
-                url: mt_frontend.ajax_url,
+                url: mt_frontend.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_subscribe_newsletter',
@@ -438,11 +438,11 @@
                 var self = this;
                 
                 $.ajax({
-                    url: mt_frontend.ajax_url,
+                    url: mt_frontend.ajaxUrl,
                     type: 'POST',
                     data: {
                         action: 'mt_get_vote_count',
-                        candidate_id: candidateId,
+                        candidateId: candidateId,
                         nonce: mt_frontend.nonce
                     },
                     success: function(response) {

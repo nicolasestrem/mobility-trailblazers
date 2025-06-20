@@ -88,11 +88,11 @@
             $button.prop('disabled', true).text(mt_elementor.voting_text || 'Voting...');
             
             $.ajax({
-                url: mt_elementor.ajax_url,
+                url: mt_elementor.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_submit_vote',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     nonce: mt_elementor.nonce
                 },
                 success: function(response) {
@@ -165,7 +165,7 @@
             $button.prop('disabled', true).text('Loading...');
             
             $.ajax({
-                url: mt_elementor.ajax_url,
+                url: mt_elementor.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_load_more_candidates',
@@ -219,7 +219,7 @@
             $submitButton.prop('disabled', true).text('Submitting...');
             
             $.ajax({
-                url: mt_elementor.ajax_url,
+                url: mt_elementor.ajaxUrl,
                 type: 'POST',
                 data: formData,
                 processData: false,
