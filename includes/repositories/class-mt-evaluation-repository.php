@@ -147,36 +147,65 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
     }
     
     /**
-     * Get statistics for evaluations
+     * Get average score for a candidate
+     *
+     * @param int $candidate_id
+     * @return float
+     */
+    public function get_average_score_for_candidate($candidate_id) {
+        global $wpdb;
+        $score = $wpdb->get_var($wpdb->prepare(
+            "SELECT AVG(total_score) FROM {$this->table_name} WHERE candidate_id = %d AND status = 'completed'",
+            $candidate_id
+        ));
+        return $score ? round($score, 2) : 0;
+    }
+    
+    /**
+     * Get statistics for evaluations (updated version)
+     *
+     * @param array $args
+     * @return array
      */
     public function get_statistics($args = array()) {
         global $wpdb;
         $defaults = array(
-            'candidate_id' => 0,
-            'jury_member_id' => 0,
+            'year' => date('Y'),
+            'phase' => null
         );
         $args = wp_parse_args($args, $defaults);
-        $where = array('1=1');
-        if ($args['candidate_id']) {
-            $where[] = $wpdb->prepare('candidate_id = %d', $args['candidate_id']);
+        $stats = array(
+            'total_evaluations' => 0,
+            'completed_evaluations' => 0,
+            'draft_evaluations' => 0,
+            'average_score' => 0,
+            'evaluations_by_jury' => array()
+        );
+        // Total evaluations
+        $stats['total_evaluations'] = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$this->table_name}"
+        );
+        // Completed evaluations
+        $stats['completed_evaluations'] = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'completed'"
+        );
+        // Draft evaluations
+        $stats['draft_evaluations'] = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'draft'"
+        );
+        // Average score
+        $avg = $wpdb->get_var(
+            "SELECT AVG(total_score) FROM {$this->table_name} WHERE status = 'completed'"
+        );
+        $stats['average_score'] = $avg ? round($avg, 2) : 0;
+        // Evaluations by jury member
+        $by_jury = $wpdb->get_results(
+            "SELECT jury_member_id, COUNT(*) as count FROM {$this->table_name} GROUP BY jury_member_id",
+            ARRAY_A
+        );
+        foreach ($by_jury as $row) {
+            $stats['evaluations_by_jury'][$row['jury_member_id']] = $row['count'];
         }
-        if ($args['jury_member_id']) {
-            $where[] = $wpdb->prepare('jury_member_id = %d', $args['jury_member_id']);
-        }
-        $where_clause = implode(' AND ', $where);
-        $table = $this->table_name;
-        $stats = array();
-        $basic = $wpdb->get_row("SELECT COUNT(*) as total, AVG(total_score) as average, MIN(total_score) as min, MAX(total_score) as max FROM $table WHERE $where_clause");
-        if ($basic) { $stats = (array)$basic; }
-        // By criteria
-        $criteria = $wpdb->get_row("SELECT AVG(courage) as avg_courage, AVG(innovation) as avg_innovation, AVG(implementation) as avg_implementation, AVG(relevance) as avg_relevance, AVG(visibility) as avg_visibility FROM $table WHERE $where_clause");
-        if ($criteria) { $stats['by_criteria'] = (array)$criteria; }
-        // By date
-        $by_date = $wpdb->get_results("SELECT DATE(created_at) as date, COUNT(*) as count FROM $table WHERE $where_clause GROUP BY DATE(created_at) ORDER BY date ASC");
-        $stats['by_date'] = array();
-        foreach ($by_date as $row) { $stats['by_date'][$row->date] = $row->count; }
-        // By category (optional, requires join)
-        // Not implemented here for brevity
         return $stats;
     }
 }

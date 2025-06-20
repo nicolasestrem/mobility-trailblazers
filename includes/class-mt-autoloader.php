@@ -64,6 +64,8 @@ class MT_Autoloader {
         $namespace_map = [
             'Ajax' => 'ajax',
             'Elementor' => 'elementor',
+            'Repositories' => 'repositories',
+            'Interfaces' => 'interfaces',
             // Add more mappings as needed
         ];
         $parts = explode('\\', $relative_class);

@@ -225,45 +225,51 @@ class MT_Jury_Repository implements MT_Repository_Interface {
     }
     
     /**
-     * Get jury member statistics
+     * Get statistics for jury or all juries
+     *
+     * @param int|null $jury_id
+     * @return array|null
      */
-    public function get_statistics() {
+    public function get_statistics($jury_id = null) {
         global $wpdb;
-        
-        $stats = array();
-        
-        // Total jury members
-        $user_query = new \WP_User_Query(array(
-            'role' => 'mt_jury_member',
-            'count_total' => true
-        ));
-        $stats['total'] = $user_query->get_total();
-        
-        // By status
-        $statuses = array('active', 'inactive', 'pending');
-        foreach ($statuses as $status) {
-            $query = new \WP_User_Query(array(
-                'role' => 'mt_jury_member',
-                'meta_query' => array(
-                    array(
-                        'key' => 'mt_jury_status',
-                        'value' => $status
-                    )
-                ),
-                'count_total' => true
-            ));
-            $stats['by_status'][$status] = $query->get_total();
+        if ($jury_id) {
+            // Get statistics for specific jury member
+            $user = get_user_by('ID', $jury_id);
+            if (!$user) {
+                return null;
+            }
+            $table_name = $wpdb->prefix . 'mt_evaluations';
+            $assignments_table = $wpdb->prefix . 'mt_assignments';
+            return array(
+                'jury_id' => $jury_id,
+                'name' => $user->display_name,
+                'email' => $user->user_email,
+                'total_assignments' => $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$assignments_table} WHERE jury_member_id = %d",
+                    $jury_id
+                )),
+                'completed_evaluations' => $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$table_name} WHERE jury_member_id = %d AND status = 'completed'",
+                    $jury_id
+                )),
+                'draft_evaluations' => $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$table_name} WHERE jury_member_id = %d AND status = 'draft'",
+                    $jury_id
+                )),
+                'average_score_given' => $wpdb->get_var($wpdb->prepare(
+                    "SELECT AVG(total_score) FROM {$table_name} WHERE jury_member_id = %d AND status = 'completed'",
+                    $jury_id
+                ))
+            );
+        } else {
+            // Get statistics for all jury members
+            $jury_members = get_users(array('role' => 'mt_jury_member'));
+            $stats = array();
+            foreach ($jury_members as $member) {
+                $stats[] = $this->get_statistics($member->ID);
+            }
+            return $stats;
         }
-        
-        // Average evaluations
-        $stats['avg_evaluations'] = $wpdb->get_var(
-            "SELECT AVG(CAST(meta_value AS UNSIGNED)) 
-             FROM {$wpdb->usermeta} 
-             WHERE meta_key = 'mt_evaluation_count' 
-             AND meta_value != ''"
-        );
-        
-        return $stats;
     }
     
     /**

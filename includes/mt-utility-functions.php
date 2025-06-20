@@ -427,14 +427,8 @@ function mt_sanitize_score($score, $min = 1, $max = 10) {
  * @return array Statistics data
  */
 function mt_get_evaluation_statistics($args = array()) {
-    $repo = new MT_Evaluation_Repository();
-    $stats = $repo->get_statistics($args);
-    // Add total_candidates and completion_rate for compatibility
-    $stats['total_candidates'] = wp_count_posts('mt_candidate')->publish;
-    $stats['completion_rate'] = $stats['total_candidates'] > 0 && !empty($stats['total'])
-        ? round(($stats['total'] / $stats['total_candidates']) * 100, 1)
-        : 0;
-    return apply_filters('mt_evaluation_statistics', $stats, $args);
+    $repository = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+    return $repository->get_statistics($args);
 }
 
 /**
@@ -582,4 +576,36 @@ function mt_get_user_id_by_jury_member($jury_member_id) {
     }
     
     return $user_id ? intval($user_id) : false;
+}
+
+/**
+ * Get candidate average score
+ *
+ * @param int $candidate_id Candidate ID
+ * @return float Average score
+ */
+function mt_get_candidate_score($candidate_id) {
+    $repository = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+    return $repository->get_average_score_for_candidate($candidate_id);
+}
+
+/**
+ * Get voting results
+ *
+ * @return array Voting results
+ */
+function mt_get_voting_results() {
+    $repository = new \MobilityTrailblazers\Repositories\MT_Voting_Repository();
+    return $repository->get_results();
+}
+
+/**
+ * Get jury statistics
+ *
+ * @param int|null $jury_id Jury user ID (optional)
+ * @return array|null Statistics for jury or all juries
+ */
+function mt_get_jury_statistics($jury_id = null) {
+    $repository = new \MobilityTrailblazers\Repositories\MT_Jury_Repository();
+    return $repository->get_statistics($jury_id);
 }
