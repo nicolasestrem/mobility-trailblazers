@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.6] - 2024-12-20
+## [1.0.6] - 2025-06-20
 
 ### Changed
 - **Naming Convention Standardization** - Completed Phase 2 of major refactoring
