@@ -10,6 +10,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Add repository use statements
+use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
+use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
+use MobilityTrailblazers\Repositories\MT_Candidate_Scores_Repository;
+
 /**
  * Get current award year
  *
@@ -185,48 +190,35 @@ function mt_is_jury_member($user_id = null) {
  * @return array Array of candidate IDs
  */
 function mt_get_assigned_candidates($jury_member_id) {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'mt_jury_assignments';
-    
-    // Check if the table exists
-    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-    
-    if ($table_exists) {
-        // Use the table if it exists
-        $candidates = $wpdb->get_col($wpdb->prepare(
-            "SELECT candidate_id FROM $table_name WHERE jury_member_id = %d AND is_active = 1",
-            $jury_member_id
-        ));
-        return array_map('intval', $candidates);
-    } else {
-        // Fallback: Query candidates by post meta
-        $args = array(
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'meta_query' => array(
-                array(
-                    'key' => '_mt_assigned_jury_members',
-                    'value' => serialize(strval($jury_member_id)),
-                    'compare' => 'LIKE'
-                )
-            ),
-            'fields' => 'ids'
-        );
-        
-        $candidates = get_posts($args);
-        
-        // Double-check by loading the meta and verifying
-        $verified_candidates = array();
-        foreach ($candidates as $candidate_id) {
-            $assigned_jury = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
-            if (is_array($assigned_jury) && in_array($jury_member_id, array_map('intval', $assigned_jury))) {
-                $verified_candidates[] = $candidate_id;
-            }
-        }
-        
-        return $verified_candidates;
+    // Try repository first
+    $repo = new MT_Assignment_Repository();
+    $assignments = $repo->find_all(['jury_member_id' => $jury_member_id, 'limit' => 9999]);
+    if (!empty($assignments)) {
+        return array_map(function($a) { return intval($a->candidate_id); }, $assignments);
     }
+    // Fallback: legacy post meta
+    $args = array(
+        'post_type' => 'mt_candidate',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'meta_query' => array(
+            array(
+                'key' => '_mt_assigned_jury_members',
+                'value' => serialize(strval($jury_member_id)),
+                'compare' => 'LIKE'
+            )
+        ),
+        'fields' => 'ids'
+    );
+    $candidates = get_posts($args);
+    $verified_candidates = array();
+    foreach ($candidates as $candidate_id) {
+        $assigned_jury = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
+        if (is_array($assigned_jury) && in_array($jury_member_id, array_map('intval', $assigned_jury))) {
+            $verified_candidates[] = $candidate_id;
+        }
+    }
+    return $verified_candidates;
 }
 
 /**
@@ -254,23 +246,11 @@ function mt_get_assigned_jury_members($candidate_id) {
  * @return bool Whether evaluation exists
  */
 function mt_has_evaluated($candidate_id, $jury_member_id) {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'mt_evaluations';
-    
-    // Check if table exists
-    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-    
-    if ($table_exists) {
-        $exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d",
-            $candidate_id,
-            $jury_member_id
-        ));
-        
-        return $exists > 0;
+    $repo = new MT_Evaluation_Repository();
+    if ($repo->exists($jury_member_id, $candidate_id)) {
+        return true;
     }
-    
-    // Fallback: check post meta
+    // Fallback: legacy post meta
     $evaluation = get_post_meta($candidate_id, '_mt_evaluation_' . $jury_member_id, true);
     return !empty($evaluation);
 }
@@ -283,28 +263,16 @@ function mt_has_evaluated($candidate_id, $jury_member_id) {
  * @return object|null Evaluation object or null
  */
 function mt_get_evaluation($candidate_id, $jury_member_id) {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'mt_evaluations';
-    
-    // Check if table exists
-    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-    
-    if ($table_exists) {
-        $evaluation = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d ORDER BY created_at DESC LIMIT 1",
-            $candidate_id,
-            $jury_member_id
-        ));
-        return $evaluation;
+    $repo = new MT_Evaluation_Repository();
+    $results = $repo->find_all(['candidate_id' => $candidate_id, 'jury_member_id' => $jury_member_id, 'limit' => 1]);
+    if (!empty($results)) {
+        return $results[0];
     }
-    
-    // Fallback: get from post meta
+    // Fallback: legacy post meta
     $evaluation_data = get_post_meta($candidate_id, '_mt_evaluation_' . $jury_member_id, true);
     if ($evaluation_data) {
-        // Convert array to object format
         return (object) $evaluation_data;
     }
-    
     return null;
 }
 
@@ -459,133 +427,13 @@ function mt_sanitize_score($score, $min = 1, $max = 10) {
  * @return array Statistics data
  */
 function mt_get_evaluation_statistics($args = array()) {
-    global $wpdb;
-    
-    $defaults = array(
-        'candidate_id' => 0,
-        'jury_member_id' => 0,
-        'category_id' => 0,
-        'phase' => '',
-        'date_from' => '',
-        'date_to' => '',
-    );
-    
-    $args = wp_parse_args($args, $defaults);
-    
-    // Initialize stats array
-    $stats = array(
-        'total_evaluations' => 0,
-        'average_score' => 0,
-        'min_score' => 0,
-        'max_score' => 0,
-        'completion_rate' => 0,
-        'by_criteria' => array(),
-        'by_date' => array(),
-        'by_category' => array(),
-    );
-    
-    $table_name = $wpdb->prefix . 'mt_evaluations';
-    
-    // Check if table exists
-    $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-    
-    if ($table_exists) {
-        // Build WHERE clause
-        $where = array('1=1');
-        
-        if ($args['candidate_id']) {
-            $where[] = $wpdb->prepare('candidate_id = %d', $args['candidate_id']);
-        }
-        
-        if ($args['jury_member_id']) {
-            $where[] = $wpdb->prepare('jury_member_id = %d', $args['jury_member_id']);
-        }
-        
-        $where_clause = implode(' AND ', $where);
-        
-        // Get basic statistics
-        $basic_stats = $wpdb->get_row("
-            SELECT 
-                COUNT(*) as total_evaluations,
-                AVG(total_score) as average_score,
-                MIN(total_score) as min_score,
-                MAX(total_score) as max_score,
-                AVG(courage_score) as avg_courage,
-                AVG(innovation_score) as avg_innovation,
-                AVG(implementation_score) as avg_implementation,
-                AVG(relevance_score) as avg_relevance,
-                AVG(visibility_score) as avg_visibility
-            FROM $table_name
-            WHERE $where_clause
-        ");
-        
-        if ($basic_stats) {
-            $stats = array_merge($stats, (array) $basic_stats);
-        }
-        
-        // Get evaluations by date
-        $date_stats = $wpdb->get_results("
-            SELECT 
-                DATE(created_at) as date,
-                COUNT(*) as count
-            FROM $table_name
-            WHERE $where_clause
-            GROUP BY DATE(created_at)
-            ORDER BY date ASC
-        ");
-        
-        if ($date_stats) {
-            foreach ($date_stats as $day) {
-                $stats['by_date'][$day->date] = $day->count;
-            }
-        }
-        
-        // Get evaluations by category
-        $category_stats = $wpdb->get_results("
-            SELECT 
-                t.name as category,
-                COUNT(DISTINCT p.ID) as candidates,
-                COUNT(e.id) as evaluations,
-                AVG(e.total_score) as avg_score,
-                (COUNT(e.id) / COUNT(DISTINCT p.ID)) * 100 as completion_rate
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
-            LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
-            LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
-            LEFT JOIN $table_name e ON p.ID = e.candidate_id
-            WHERE p.post_type = 'mt_candidate'
-            AND p.post_status = 'publish'
-            AND tt.taxonomy = 'mt_category'
-            GROUP BY t.term_id
-        ");
-        
-        if ($category_stats) {
-            foreach ($category_stats as $cat) {
-                $stats['by_category'][$cat->category] = array(
-                    'candidates' => $cat->candidates,
-                    'evaluations' => $cat->evaluations,
-                    'avg_score' => $cat->avg_score,
-                    'completion_rate' => $cat->completion_rate,
-                );
-            }
-        }
-        
-        // Calculate criteria averages
-        $stats['by_criteria'] = array(
-            'courage' => floatval($stats['avg_courage'] ?? 0),
-            'innovation' => floatval($stats['avg_innovation'] ?? 0),
-            'implementation' => floatval($stats['avg_implementation'] ?? 0),
-            'relevance' => floatval($stats['avg_relevance'] ?? 0),
-            'visibility' => floatval($stats['avg_visibility'] ?? 0),
-        );
-    }
-    
-    // Calculate completion rate
+    $repo = new MT_Evaluation_Repository();
+    $stats = $repo->get_statistics($args);
+    // Add total_candidates and completion_rate for compatibility
     $stats['total_candidates'] = wp_count_posts('mt_candidate')->publish;
-    $stats['completion_rate'] = $stats['total_candidates'] > 0 
-        ? round(($stats['total_evaluations'] / $stats['total_candidates']) * 100, 1)
+    $stats['completion_rate'] = $stats['total_candidates'] > 0 && !empty($stats['total'])
+        ? round(($stats['total'] / $stats['total_candidates']) * 100, 1)
         : 0;
-    
     return apply_filters('mt_evaluation_statistics', $stats, $args);
 }
 
@@ -644,30 +492,19 @@ function mt_get_draft_evaluations($jury_member_id) {
  * @return int Number of evaluations
  */
 function mt_get_user_evaluation_count($user_id) {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'mt_candidate_scores';
-    
-    // Check if table exists
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
-        return intval($wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name WHERE jury_id = %d",
-            $user_id
-        )));
+    // Try candidate scores repository first
+    $repo = new MT_Candidate_Scores_Repository();
+    $count = $repo->get_count_by_jury_id($user_id);
+    if ($count > 0) {
+        return $count;
     }
-    
-    // Fallback: count evaluations using the mt_evaluations table
-    $table_name = $wpdb->prefix . 'mt_evaluations';
-    if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
-        // Get jury member by user ID
-        $jury_member = mt_get_jury_member_by_user_id($user_id);
-        if ($jury_member) {
-            return intval($wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $table_name WHERE jury_member_id = %d",
-                $jury_member->ID
-            )));
-        }
+    // Fallback: use evaluations repository
+    $repo_eval = new MT_Evaluation_Repository();
+    $jury_member = mt_get_jury_member_by_user_id($user_id);
+    if ($jury_member) {
+        $results = $repo_eval->find_all(['jury_member_id' => $jury_member->ID, 'limit' => 9999]);
+        return count($results);
     }
-    
     return 0;
 }
 

@@ -1237,69 +1237,24 @@ Best regards,
             wp_send_json_error(array('message' => __('Invalid candidate.', 'mobility-trailblazers')));
         }
         
-        // Check if already voted (by email)
-        global $wpdb;
-        $votes_table = $wpdb->prefix . 'mt_votes';
-        
-        $existing_vote = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM $votes_table 
-             WHERE candidate_id = %d 
-             AND JSON_EXTRACT(criteria_scores, '$.voter_email') = %s 
-             AND is_active = 1",
-            $candidate_id,
-            $voter_email
+        // Use voting service
+        $service = new \MobilityTrailblazers\Services\MT_Voting_Service();
+        $result = $service->process(array(
+            'candidate_id' => $candidate_id,
+            'voter_email' => $voter_email,
+            'voter_name' => $voter_name
         ));
         
-        if ($existing_vote) {
-            wp_send_json_error(array('message' => __('You have already voted for this candidate.', 'mobility-trailblazers')));
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Failed to save vote. Please try again.', 'mobility-trailblazers'),
+                'errors' => $service->get_errors()
+            ));
         }
         
-        // Save vote
-        $result = $wpdb->insert(
-            $votes_table,
-            array(
-                'candidate_id' => $candidate_id,
-                'jury_member_id' => 0, // Public vote
-                'user_id' => get_current_user_id() ?: 0,
-                'criteria_scores' => json_encode(array(
-                    'voter_email' => $voter_email,
-                    'voter_name' => $voter_name,
-                    'vote_type' => 'public',
-                )),
-                'total_score' => 1, // Each public vote counts as 1
-                'voting_phase' => 'public',
-                'created_at' => current_time('mysql'),
-            ),
-            array('%d', '%d', '%d', '%s', '%d', '%s', '%s')
-        );
-        
-        if ($result === false) {
-            wp_send_json_error(array('message' => __('Failed to save vote. Please try again.', 'mobility-trailblazers')));
-        }
-        
-        // Update candidate vote count
-        $current_votes = get_post_meta($candidate_id, '_mt_public_votes', true);
-        update_post_meta($candidate_id, '_mt_public_votes', intval($current_votes) + 1);
-        
-        // Send confirmation email
-        $subject = __('Vote Confirmation - Mobility Trailblazers Award', 'mobility-trailblazers');
-        $message = sprintf(
-            __('Dear %s,
-
-Thank you for voting in the Mobility Trailblazers Award!
-
-You have successfully voted for: %s
-
-Your vote has been recorded and will be counted in the public voting results.
-
-Best regards,
-%s', 'mobility-trailblazers'),
-            $voter_name ?: __('Voter', 'mobility-trailblazers'),
-            $candidate->post_title,
-            get_bloginfo('name')
-        );
-        
-        mt_send_email($voter_email, $subject, $message);
+        // Send confirmation email using notification service
+        $notification_service = new \MobilityTrailblazers\Services\MT_Notification_Service();
+        $notification_service->send_voting_confirmation($voter_email, $candidate->post_title);
         
         wp_send_json_success(array(
             'message' => __('Thank you for voting! Your vote has been recorded.', 'mobility-trailblazers'),

@@ -259,3 +259,48 @@ class MT_Candidate_Repository implements MT_Repository_Interface {
         return $stats;
     }
 }
+
+/**
+ * Candidate Scores Repository
+ * Handles mt_candidate_scores table
+ */
+namespace MobilityTrailblazers\Repositories;
+
+use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+
+class MT_Candidate_Scores_Repository implements MT_Repository_Interface {
+    private $table_name;
+    public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'mt_candidate_scores';
+    }
+    public function find($id) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table_name} WHERE id = %d", $id));
+    }
+    public function find_all($args = array()) {
+        global $wpdb;
+        $defaults = array('jury_id' => null, 'candidate_id' => null, 'limit' => 50, 'offset' => 0);
+        $args = wp_parse_args($args, $defaults);
+        $where = array('1=1');
+        $values = array();
+        if ($args['jury_id']) { $where[] = 'jury_id = %d'; $values[] = $args['jury_id']; }
+        if ($args['candidate_id']) { $where[] = 'candidate_id = %d'; $values[] = $args['candidate_id']; }
+        $where_clause = implode(' AND ', $where);
+        $query = "SELECT * FROM {$this->table_name} WHERE {$where_clause} LIMIT %d OFFSET %d";
+        $values[] = $args['limit'];
+        $values[] = $args['offset'];
+        return $wpdb->get_results($wpdb->prepare($query, $values));
+    }
+    public function get_count_by_jury_id($jury_id) {
+        global $wpdb;
+        return intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE jury_id = %d", $jury_id)));
+    }
+    public function get_count_by_candidate_id($candidate_id) {
+        global $wpdb;
+        return intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE candidate_id = %d", $candidate_id)));
+    }
+    public function create($data) { return false; }
+    public function update($id, $data) { return false; }
+    public function delete($id) { return false; }
+}
