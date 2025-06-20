@@ -163,7 +163,7 @@
                 var settings = $grid.data('settings');
                 
                 $.ajax({
-                    url: mt_elementor.ajax_url,
+                    url: mt_elementor.ajaxUrl,
                     type: 'POST',
                     data: {
                         action: 'mt_elementor_load_more',
@@ -282,7 +282,7 @@
                 var settings = $element.data('settings');
                 
                 $.ajax({
-                    url: mt_elementor.ajax_url,
+                    url: mt_elementor.ajaxUrl,
                     type: 'POST',
                     data: {
                         action: 'mt_elementor_refresh_statistics',

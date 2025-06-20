@@ -90,7 +90,7 @@
         // Load dashboard data via AJAX
         loadDashboardData: function() {
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_ajax.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_get_jury_dashboard_data',
@@ -177,11 +177,11 @@
             this.currentCandidate = candidateId;
             
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_ajax.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_get_candidate_evaluation',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     nonce: mt_jury_ajax.nonce
                 },
                 beforeSend: function() {
@@ -355,7 +355,7 @@
             // Collect form data
             const formData = {
                 action: 'mt_save_evaluation',
-                candidate_id: this.currentCandidate,
+                candidateId: this.currentCandidate,
                 courage: $('#courage-score').val(),
                 innovation: $('#innovation-score').val(),
                 implementation: $('#implementation-score').val(),
@@ -367,7 +367,7 @@
             };
             
             $.ajax({
-                url: mt_jury_ajax.ajax_url,
+                url: mt_jury_ajax.ajaxUrl,
                 type: 'POST',
                 data: formData,
                 beforeSend: function() {

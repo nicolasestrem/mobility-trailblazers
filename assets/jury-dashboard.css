@@ -306,7 +306,7 @@
     margin-bottom: 2rem;
 }
 
-.candidate-card {
+.mt-candidate-card {
     background: white;
     border-radius: var(--mt-radius);
     box-shadow: var(--mt-shadow);
@@ -316,12 +316,12 @@
     position: relative;
 }
 
-.candidate-card:hover {
+.mt-candidate-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--mt-shadow-hover);
 }
 
-.candidate-card::before {
+.mt-candidate-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -332,15 +332,15 @@
     transition: var(--mt-transition);
 }
 
-.candidate-card.status-completed::before {
+.mt-candidate-card.status-completed::before {
     background: var(--mt-success);
 }
 
-.candidate-card.status-draft::before {
+.mt-candidate-card.status-draft::before {
     background: var(--mt-warning);
 }
 
-.candidate-card.status-pending::before {
+.mt-candidate-card.status-pending::before {
     background: var(--mt-info);
 }
 
@@ -563,13 +563,13 @@
 }
 
 /* Evaluation Form */
-.evaluation-form {
+.mt-evaluation-form {
     background: #f8f9fa;
     padding: 2rem;
     border-radius: var(--mt-radius);
 }
 
-.evaluation-form h3 {
+.mt-evaluation-form h3 {
     margin: 0 0 1.5rem;
     font-size: 1.5rem;
     color: var(--mt-dark);
@@ -936,7 +936,7 @@
         padding: 1.5rem;
     }
     
-    .evaluation-form {
+    .mt-evaluation-form {
         padding: 1.5rem;
     }
     
@@ -961,7 +961,7 @@
         color: black;
     }
     
-    .candidate-card {
+    .mt-candidate-card {
         break-inside: avoid;
     }
 }

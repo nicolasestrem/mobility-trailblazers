@@ -109,7 +109,7 @@
             $('#mt-confirm-auto-assign').prop('disabled', true).text('Processing...');
             
             $.ajax({
-                url: mt_assignment_vars.ajax_url,
+                url: mt_assignment_vars.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_auto_assign',
@@ -161,11 +161,11 @@
             $('#mt-confirm-manual-assign').prop('disabled', true).text('Assigning...');
             
             $.ajax({
-                url: mt_assignment_vars.ajax_url,
+                url: mt_assignment_vars.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_manual_assign',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     jury_ids: juryIds,
                     nonce: mt_assignment_vars.nonce
                 },
@@ -202,7 +202,7 @@
             }
             
             $.ajax({
-                url: mt_assignment_vars.ajax_url,
+                url: mt_assignment_vars.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_clear_assignments',
@@ -239,7 +239,7 @@
             // Create a temporary form for file download
             var form = $('<form>', {
                 method: 'POST',
-                action: mt_assignment_vars.ajax_url
+                action: mt_assignment_vars.ajaxUrl
             });
             
             form.append($('<input>', {
@@ -274,11 +274,11 @@
             button.prop('disabled', true);
             
             $.ajax({
-                url: mt_assignment_vars.ajax_url,
+                url: mt_assignment_vars.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_remove_assignment',
-                    candidate_id: candidateId,
+                    candidateId: candidateId,
                     jury_member_id: juryId,
                     nonce: mt_assignment_vars.nonce
                 },
@@ -338,7 +338,7 @@
         // Update statistics
         updateStatistics: function() {
             $.ajax({
-                url: mt_assignment_vars.ajax_url,
+                url: mt_assignment_vars.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'mt_get_assignment_stats',

@@ -129,7 +129,7 @@ $categories = get_terms(array(
                     $company = get_post_meta($candidate->ID, '_mt_company_name', true);
                     $position = get_post_meta($candidate->ID, '_mt_position', true);
                 ?>
-                    <div class="candidate-card" data-candidate-id="<?php echo $candidate->ID; ?>" 
+                    <div class="mt-candidate-card" data-candidate-id="<?php echo $candidate->ID; ?>" 
                          data-categories="<?php echo esc_attr(implode(' ', wp_list_pluck($categories, 'slug'))); ?>">
                         <div class="candidate-header">
                             <h4 class="candidate-name"><?php echo esc_html($candidate->post_title); ?></h4>

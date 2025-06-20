@@ -151,7 +151,7 @@
             
             // Send AJAX request
             $.ajax({
-                url: mt_admin.ajax_url,
+                url: mt_admin.ajaxUrl,
                 type: 'POST',
                 data: formData,
                 processData: false,

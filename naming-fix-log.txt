@@ -1,0 +1,18 @@
+Naming Convention Fix Log
+Date: 2025-06-20 12:39:19
+
+File: /var/www/html/wp-content/plugins/mobility-trailblazers/includes/mt-compatibility-functions.php
+Type: file_created
+
+File: includes/mt-compatibility-functions.php
+Type: file_modified
+Changes:
+  - 3 occurrences of '/get_jury_nomenclature\(/' replaced
+  - 3 occurrences of '/get_jury_member_meta_key\(/' replaced
+  - 1 occurrences of '/MT_get_evaluation_criteria\(/' replaced
+
+File: includes/mt-utility-functions.php
+Type: file_modified
+Changes:
+  - 1 occurrences of '/get_jury_member_meta_key\(/' replaced
+
