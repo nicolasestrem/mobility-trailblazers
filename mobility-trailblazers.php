@@ -24,6 +24,15 @@ require_once plugin_dir_path(__FILE__) . 'includes/class-mt-autoloader.php';
 $mt_autoloader = new MT_Autoloader();
 $mt_autoloader->register();
 
+// Initialize AJAX handlers for new Ajax classes
+add_action('init', function() {
+    if (wp_doing_ajax()) {
+        new \MobilityTrailblazers\Ajax\MT_Evaluation_Ajax();
+        new \MobilityTrailblazers\Ajax\MT_Assignment_Ajax();
+        new \MobilityTrailblazers\Ajax\MT_Voting_Ajax();
+    }
+});
+
 // Emergency Elementor REST API Fix
 add_action('init', function() {
     // Remove any filters that might block Elementor REST API

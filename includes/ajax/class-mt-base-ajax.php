@@ -11,6 +11,18 @@ namespace MobilityTrailblazers\Ajax;
 abstract class MT_Base_Ajax {
     
     /**
+     * Constructor
+     */
+    public function __construct() {
+        $this->register_hooks();
+    }
+    
+    /**
+     * Register AJAX hooks
+     */
+    abstract protected function register_hooks();
+    
+    /**
      * Verify nonce
      */
     protected function verify_nonce($action = 'mt_ajax_nonce') {
@@ -56,5 +68,26 @@ abstract class MT_Base_Ajax {
         }
         
         wp_send_json_error($response);
+    }
+    
+    /**
+     * Get POST parameter
+     */
+    protected function get_param($key, $default = null) {
+        return isset($_POST[$key]) ? $_POST[$key] : $default;
+    }
+    
+    /**
+     * Get sanitized integer parameter
+     */
+    protected function get_int_param($key, $default = 0) {
+        return isset($_POST[$key]) ? intval($_POST[$key]) : $default;
+    }
+    
+    /**
+     * Get sanitized array parameter
+     */
+    protected function get_array_param($key, $default = array()) {
+        return isset($_POST[$key]) && is_array($_POST[$key]) ? $_POST[$key] : $default;
     }
 }

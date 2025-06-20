@@ -60,10 +60,22 @@ class MT_Autoloader {
         // Get the relative class name
         $relative_class = substr($class, $len);
         
-        // Replace the namespace prefix with the base directory,
-        // replace namespace separators with directory separators in the relative class name,
-        // append with .php
-        $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+        // Namespace-to-directory mapping
+        $namespace_map = [
+            'Ajax' => 'ajax',
+            'Elementor' => 'elementor',
+            // Add more mappings as needed
+        ];
+        $parts = explode('\\', $relative_class);
+        if (count($parts) > 1 && isset($namespace_map[$parts[0]])) {
+            $parts[0] = $namespace_map[$parts[0]];
+            $relative_path = implode('/', $parts);
+        } else {
+            $relative_path = str_replace('\\', '/', $relative_class);
+        }
+        
+        // Build the file path
+        $file = $base_dir . $relative_path . '.php';
         
         // Convert to lowercase and add 'class-' prefix for consistency
         $path_parts = explode('/', $file);
