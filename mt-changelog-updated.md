@@ -1,5 +1,33 @@
 # Changelog
 
+[1.0.8] - 2025-06-20 (In Progress)
+Added
+
+AJAX Handler Architecture - Split monolithic AJAX handler into focused classes:
+
+MT_Base_Ajax - Base class with common AJAX functionality (nonce verification, permissions, response formatting)
+MT_Evaluation_Ajax - Handles evaluation-related AJAX calls (submit, save draft, get evaluation, export)
+MT_Assignment_Ajax - Handles assignment operations (auto-assign, manual assign, remove, statistics)
+MT_Voting_Ajax - Manages voting functionality (public votes, results, resets, exports)
+
+
+Improved Error Handling - Consistent error responses across all AJAX endpoints
+Helper Methods - Parameter sanitization and validation methods in base AJAX class
+
+Changed
+
+AJAX Organization - Moved from single 50+ method class to focused classes with single responsibility
+Code Structure - AJAX handlers now use dependency injection with service classes
+Namespace Support - Extended autoloader to support Ajax namespace
+
+Technical Improvements
+
+Standardized AJAX response format
+Centralized nonce verification
+Consistent permission checking
+Reduced code duplication
+Better separation of concerns
+
 [1.0.7] - 2025-06-20
 Added
 Repository Pattern Implementation
