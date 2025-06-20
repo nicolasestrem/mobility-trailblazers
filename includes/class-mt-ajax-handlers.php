@@ -75,164 +75,78 @@ class MT_AJAX_Handlers {
     }
     
     /**
-     * Submit jury evaluation
+     * Submit evaluation
      */
     public function submit_evaluation() {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
         }
         
         // Check permissions
-        if (!current_user_can('mt_submit_evaluations')) {
-            wp_send_json_error(array('message' => __('You do not have permission to submit evaluations.', 'mobility-trailblazers')));
+        if (!mt_is_jury_member(get_current_user_id())) {
+            wp_send_json_error(array('message' => __('You do not have permission to submit evaluations', 'mobility-trailblazers')));
         }
         
-        // Get jury member
-        $jury_member = mt_get_jury_member_by_user_id(get_current_user_id());
-        if (!$jury_member) {
-            wp_send_json_error(array('message' => __('Jury member profile not found.', 'mobility-trailblazers')));
-        }
-        
-        // Validate input
-        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
-        if (!$candidate_id) {
-            wp_send_json_error(array('message' => __('Invalid candidate.', 'mobility-trailblazers')));
-        }
-        
-        // Check if candidate is assigned to this jury member
-        $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
-        if (!in_array($candidate_id, $assigned_candidates)) {
-            wp_send_json_error(array('message' => __('This candidate is not assigned to you.', 'mobility-trailblazers')));
-        }
-        
-        // Get scores
-        $scores = array(
-            'courage' => isset($_POST['courage']) ? mt_sanitize_score($_POST['courage']) : 0,
-            'innovation' => isset($_POST['innovation']) ? mt_sanitize_score($_POST['innovation']) : 0,
-            'implementation' => isset($_POST['implementation']) ? mt_sanitize_score($_POST['implementation']) : 0,
-            'relevance' => isset($_POST['relevance']) ? mt_sanitize_score($_POST['relevance']) : 0,
-            'visibility' => isset($_POST['visibility']) ? mt_sanitize_score($_POST['visibility']) : 0,
+        // Prepare data for service
+        $data = array(
+            'jury_member_id' => get_current_user_id(),
+            'candidate_id' => intval($_POST['candidate_id']),
+            'scores' => isset($_POST['scores']) ? $_POST['scores'] : array(),
+            'comments' => isset($_POST['comments']) ? $_POST['comments'] : ''
         );
         
-        // Calculate total score
-        $total_score = array_sum($scores);
+        // Use the evaluation service
+        $service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+        $result = $service->process($data);
         
-        // Get comments
-        $comments = isset($_POST['comments']) ? sanitize_textarea_field($_POST['comments']) : '';
-        
-        // Save to database
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mt_candidate_scores';
-        
-        // Check if evaluation already exists
-        $existing = $wpdb->get_row($wpdb->prepare(
-            "SELECT id FROM $table_name 
-             WHERE candidate_id = %d AND jury_member_id = %d AND evaluation_round = %s",
-            $candidate_id,
-            $jury_member->ID,
-            'initial'
-        ));
-        
-        if ($existing) {
-            // Update existing evaluation
-            $result = $wpdb->update(
-                $table_name,
-                array(
-                    'courage_score' => $scores['courage'],
-                    'innovation_score' => $scores['innovation'],
-                    'implementation_score' => $scores['implementation'],
-                    'relevance_score' => $scores['relevance'],
-                    'visibility_score' => $scores['visibility'],
-                    'total_score' => $total_score,
-                    'comments' => $comments,
-                    'evaluation_date' => current_time('mysql'),
-                    'is_active' => 1,
-                ),
-                array('id' => $existing->id),
-                array('%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%d'),
-                array('%d')
-            );
-        } else {
-            // Insert new evaluation
-            $result = $wpdb->insert(
-                $table_name,
-                array(
-                    'candidate_id' => $candidate_id,
-                    'jury_member_id' => $jury_member->ID,
-                    'courage_score' => $scores['courage'],
-                    'innovation_score' => $scores['innovation'],
-                    'implementation_score' => $scores['implementation'],
-                    'relevance_score' => $scores['relevance'],
-                    'visibility_score' => $scores['visibility'],
-                    'total_score' => $total_score,
-                    'evaluation_round' => 'initial',
-                    'comments' => $comments,
-                    'evaluation_date' => current_time('mysql'),
-                ),
-                array('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%s')
-            );
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Failed to save evaluation', 'mobility-trailblazers'),
+                'errors' => $service->get_errors()
+            ));
         }
-        
-        if ($result === false) {
-            wp_send_json_error(array('message' => __('Failed to save evaluation.', 'mobility-trailblazers')));
-        }
-        
-        // Remove draft if exists
-        delete_user_meta(get_current_user_id(), 'mt_evaluation_draft_' . $candidate_id);
-        
-        // Fire action
-        do_action('mt_evaluation_completed', $candidate_id, $jury_member->ID, $total_score);
-        
-        // Log activity
-        mt_log('Evaluation submitted', 'info', array(
-            'candidate_id' => $candidate_id,
-            'jury_member_id' => $jury_member->ID,
-            'total_score' => $total_score,
-        ));
         
         wp_send_json_success(array(
-            'message' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
-            'total_score' => $total_score,
+            'message' => __('Evaluation submitted successfully!', 'mobility-trailblazers')
         ));
     }
     
     /**
-     * Save evaluation draft
+     * Save draft evaluation
      */
     public function save_draft() {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_jury_dashboard')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
         }
         
         // Check permissions
-        if (!current_user_can('mt_submit_evaluations')) {
-            wp_send_json_error(array('message' => __('You do not have permission to save drafts.', 'mobility-trailblazers')));
+        if (!mt_is_jury_member(get_current_user_id())) {
+            wp_send_json_error(array('message' => __('You do not have permission to save drafts', 'mobility-trailblazers')));
         }
         
-        // Validate input
-        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
-        if (!$candidate_id) {
-            wp_send_json_error(array('message' => __('Invalid candidate.', 'mobility-trailblazers')));
-        }
-        
-        // Save draft data
-        $draft_data = array(
-            'courage' => isset($_POST['courage']) ? intval($_POST['courage']) : 0,
-            'innovation' => isset($_POST['innovation']) ? intval($_POST['innovation']) : 0,
-            'implementation' => isset($_POST['implementation']) ? intval($_POST['implementation']) : 0,
-            'relevance' => isset($_POST['relevance']) ? intval($_POST['relevance']) : 0,
-            'visibility' => isset($_POST['visibility']) ? intval($_POST['visibility']) : 0,
-            'comments' => isset($_POST['comments']) ? sanitize_textarea_field($_POST['comments']) : '',
-            'saved_at' => current_time('mysql'),
+        // Prepare data for service
+        $data = array(
+            'jury_member_id' => get_current_user_id(),
+            'candidate_id' => intval($_POST['candidate_id']),
+            'scores' => isset($_POST['scores']) ? $_POST['scores'] : array(),
+            'comments' => isset($_POST['comments']) ? $_POST['comments'] : ''
         );
         
-        // Save to user meta
-        update_user_meta(get_current_user_id(), 'mt_evaluation_draft_' . $candidate_id, $draft_data);
+        // Use the evaluation service
+        $service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+        $result = $service->save_draft($data);
+        
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Failed to save draft', 'mobility-trailblazers'),
+                'errors' => $service->get_errors()
+            ));
+        }
         
         wp_send_json_success(array(
-            'message' => __('Draft saved successfully!', 'mobility-trailblazers'),
+            'message' => __('Draft saved successfully!', 'mobility-trailblazers')
         ));
     }
     
@@ -389,72 +303,39 @@ class MT_AJAX_Handlers {
     }
     
     /**
-     * Assign candidates to jury members
+     * Assign candidates to jury member
      */
     public function assign_candidates() {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
         }
         
         // Check permissions
-        if (!current_user_can('mt_manage_assignments')) {
-            wp_send_json_error(array('message' => __('You do not have permission to manage assignments.', 'mobility-trailblazers')));
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to manage assignments', 'mobility-trailblazers')));
         }
         
-        // Get parameters
-        $candidate_ids = isset($_POST['candidate_ids']) ? array_map('intval', (array)$_POST['candidate_ids']) : array();
-        $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
+        // Prepare data
+        $data = array(
+            'assignment_type' => 'manual',
+            'jury_member_id' => intval($_POST['jury_member_id']),
+            'candidate_ids' => array_map('intval', $_POST['candidate_ids'] ?? array())
+        );
         
-        if (empty($candidate_ids) || !$jury_member_id) {
-            wp_send_json_error(array('message' => __('Invalid parameters.', 'mobility-trailblazers')));
+        // Use assignment service
+        $service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
+        $result = $service->process($data);
+        
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Failed to create assignments', 'mobility-trailblazers'),
+                'errors' => $service->get_errors()
+            ));
         }
-        
-        // Verify jury member exists
-        $jury_member = get_post($jury_member_id);
-        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
-            wp_send_json_error(array('message' => __('Invalid jury member.', 'mobility-trailblazers')));
-        }
-        
-        $assigned_count = 0;
-        
-        foreach ($candidate_ids as $candidate_id) {
-            // Verify candidate exists
-            $candidate = get_post($candidate_id);
-            if (!$candidate || $candidate->post_type !== 'mt_candidate') {
-                continue;
-            }
-            
-            // Get current assignments
-            $current_assignments = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
-            if (!is_array($current_assignments)) {
-                $current_assignments = array();
-            }
-            
-            // Add jury member if not already assigned
-            if (!in_array($jury_member_id, $current_assignments)) {
-                $current_assignments[] = $jury_member_id;
-                update_post_meta($candidate_id, '_mt_assigned_jury_members', $current_assignments);
-                
-                // Fire action
-                do_action('mt_after_candidate_assignment', $candidate_id, $jury_member_id);
-                
-                $assigned_count++;
-            }
-        }
-        
-        // Log activity
-        mt_log('Candidates assigned', 'info', array(
-            'jury_member_id' => $jury_member_id,
-            'candidate_count' => $assigned_count,
-        ));
         
         wp_send_json_success(array(
-            'message' => sprintf(
-                _n('%d candidate assigned successfully.', '%d candidates assigned successfully.', $assigned_count, 'mobility-trailblazers'),
-                $assigned_count
-            ),
-            'assigned_count' => $assigned_count,
+            'message' => __('Assignments created successfully', 'mobility-trailblazers')
         ));
     }
     
@@ -462,266 +343,69 @@ class MT_AJAX_Handlers {
      * Auto-assign candidates
      */
     public function auto_assign() {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
         }
         
         // Check permissions
-        if (!current_user_can('mt_manage_assignments')) {
-            wp_send_json_error(array('message' => __('You do not have permission to manage assignments.', 'mobility-trailblazers')));
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to manage assignments', 'mobility-trailblazers')));
         }
         
-        // Get parameters
-        $algorithm = isset($_POST['algorithm']) ? sanitize_text_field($_POST['algorithm']) : 'balanced';
-        $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 20;
-        $preserve_existing = isset($_POST['preserve_existing']) ? (bool)$_POST['preserve_existing'] : true;
+        // Prepare data
+        $data = array(
+            'assignment_type' => 'auto',
+            'candidates_per_jury' => intval($_POST['candidates_per_jury']),
+            'clear_existing' => !empty($_POST['clear_existing'])
+        );
         
-        // Get all published candidates
-        $candidates = get_posts(array(
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'orderby' => 'rand'
-        ));
+        // Use assignment service
+        $service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
+        $result = $service->process($data);
         
-        // Get all published jury members
-        $jury_members = get_posts(array(
-            'post_type' => mt_get_jury_post_type(),
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ));
-        
-        // Debug logging
-        error_log('Auto-assign: Found ' . count($candidates) . ' candidates and ' . count($jury_members) . ' jury members');
-        
-        // Check if we have candidates and jury members
-        if (empty($candidates) || empty($jury_members)) {
+        if (!$result) {
             wp_send_json_error(array(
-                'message' => __('No candidates or jury members found. Please ensure you have published candidates and jury members.', 'mobility-trailblazers'),
-                'debug' => array(
-                    'candidates_count' => count($candidates),
-                    'jury_count' => count($jury_members)
-                )
+                'message' => __('Failed to auto-assign candidates', 'mobility-trailblazers'),
+                'errors' => $service->get_errors()
             ));
         }
         
-        // Clear existing assignments if not preserving
-        if (!$preserve_existing) {
-            foreach ($candidates as $candidate) {
-                delete_post_meta($candidate->ID, '_mt_assigned_jury_members');
-            }
-        }
-        
-        $assignments = array();
-        
-        switch ($algorithm) {
-            case 'balanced':
-                $assignments = $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
-                break;
-                
-            case 'random':
-                $assignments = $this->random_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
-                break;
-                
-            case 'expertise':
-                $assignments = $this->expertise_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
-                break;
-                
-            case 'category':
-                $assignments = $this->category_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
-                break;
-        }
-        
-        // Apply assignments
-        $total_assignments = 0;
-        
-        foreach ($assignments as $candidate_id => $jury_ids) {
-            if (!empty($jury_ids)) {
-                update_post_meta($candidate_id, '_mt_assigned_jury_members', $jury_ids);
-                $total_assignments += count($jury_ids);
-                
-                // Fire actions
-                foreach ($jury_ids as $jury_id) {
-                    do_action('mt_after_candidate_assignment', $candidate_id, $jury_id);
-                }
-            }
-        }
-        
-        // Log activity
-        mt_log('Auto-assignment completed', 'info', array(
-            'algorithm' => $algorithm,
-            'total_assignments' => $total_assignments,
-            'candidates_per_jury' => $candidates_per_jury,
-        ));
-        
         wp_send_json_success(array(
-            'message' => sprintf(
-                __('Auto-assignment completed. %d assignments made.', 'mobility-trailblazers'),
-                $total_assignments
-            ),
-            'total_assignments' => $total_assignments
+            'message' => __('Auto-assignment completed successfully', 'mobility-trailblazers')
         ));
-    }
-    
-    /**
-     * Balanced assignment algorithm
-     */
-    private function balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        $assignments = array();
-        $jury_counts = array();
-        
-        // Initialize jury counts
-        foreach ($jury_members as $jury) {
-            $jury_counts[$jury->ID] = 0;
-        }
-        
-        // If preserving existing, count current assignments
-        if ($preserve_existing) {
-            foreach ($candidates as $candidate) {
-                $existing = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
-                if (is_array($existing)) {
-                    $assignments[$candidate->ID] = $existing;
-                    foreach ($existing as $jury_id) {
-                        if (isset($jury_counts[$jury_id])) {
-                            $jury_counts[$jury_id]++;
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Assign candidates to jury members
-        foreach ($candidates as $candidate) {
-            // Skip if already has assignments and preserving
-            if ($preserve_existing && !empty($assignments[$candidate->ID])) {
-                continue;
-            }
-            
-            // Initialize assignments for this candidate
-            if (!isset($assignments[$candidate->ID])) {
-                $assignments[$candidate->ID] = array();
-            }
-            
-            // Sort jury members by assignment count (ascending)
-            asort($jury_counts);
-            
-            // Assign to least loaded jury members (typically 3 per candidate)
-            $assigned_count = 0;
-            foreach ($jury_counts as $jury_id => $count) {
-                // Check if jury member hasn't exceeded their limit
-                if ($count < $candidates_per_jury) {
-                    $assignments[$candidate->ID][] = $jury_id;
-                    $jury_counts[$jury_id]++;
-                    $assigned_count++;
-                    
-                    // Usually assign 3 jury members per candidate
-                    if ($assigned_count >= 3) {
-                        break;
-                    }
-                }
-            }
-        }
-        
-        return $assignments;
-    }
-    
-    /**
-     * Random assignment algorithm
-     */
-    private function random_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        $assignments = array();
-        $jury_ids = wp_list_pluck($jury_members, 'ID');
-        
-        // Get existing assignments if preserving
-        if ($preserve_existing) {
-            foreach ($candidates as $candidate) {
-                $existing = get_post_meta($candidate->ID, '_mt_assigned_jury_members', true);
-                if (is_array($existing) && !empty($existing)) {
-                    $assignments[$candidate->ID] = $existing;
-                }
-            }
-        }
-        
-        // Assign candidates randomly
-        foreach ($candidates as $candidate) {
-            // Skip if already has assignments and preserving
-            if ($preserve_existing && !empty($assignments[$candidate->ID])) {
-                continue;
-            }
-            
-            // Initialize assignments for this candidate
-            $assignments[$candidate->ID] = array();
-            
-            // Randomly select 3 jury members
-            $available_jury = $jury_ids;
-            shuffle($available_jury);
-            
-            // Assign 3 jury members
-            $assignments[$candidate->ID] = array_slice($available_jury, 0, 3);
-        }
-        
-        return $assignments;
-    }
-    
-    /**
-     * Expertise-based assignment algorithm
-     */
-    private function expertise_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        // For now, fall back to balanced assignment
-        // TODO: Implement expertise matching based on categories
-        return $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
-    }
-    
-    /**
-     * Category-based assignment algorithm
-     */
-    private function category_based_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing) {
-        // For now, fall back to balanced assignment
-        // TODO: Implement category-based assignment
-        return $this->balanced_assignment($candidates, $jury_members, $candidates_per_jury, $preserve_existing);
     }
     
     /**
      * Remove assignment
      */
     public function remove_assignment() {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_admin_nonce')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'mobility-trailblazers')));
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
         }
         
         // Check permissions
-        if (!current_user_can('mt_manage_assignments')) {
-            wp_send_json_error(array('message' => __('You do not have permission to manage assignments.', 'mobility-trailblazers')));
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to manage assignments', 'mobility-trailblazers')));
         }
         
-        // Get parameters
-        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
-        $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
+        $jury_member_id = intval($_POST['jury_member_id']);
+        $candidate_id = intval($_POST['candidate_id']);
         
-        if (!$candidate_id || !$jury_member_id) {
-            wp_send_json_error(array('message' => __('Invalid parameters.', 'mobility-trailblazers')));
+        // Use assignment service
+        $service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
+        $result = $service->remove_assignment($jury_member_id, $candidate_id);
+        
+        if (!$result) {
+            wp_send_json_error(array(
+                'message' => __('Failed to remove assignment', 'mobility-trailblazers')
+            ));
         }
         
-        // Get current assignments
-        $assignments = get_post_meta($candidate_id, '_mt_assigned_jury_members', true);
-        
-        if (is_array($assignments)) {
-            $key = array_search($jury_member_id, $assignments);
-            if ($key !== false) {
-                unset($assignments[$key]);
-                $assignments = array_values($assignments); // Re-index array
-                
-                update_post_meta($candidate_id, '_mt_assigned_jury_members', $assignments);
-                
-                wp_send_json_success(array(
-                    'message' => __('Assignment removed successfully.', 'mobility-trailblazers'),
-                ));
-            }
-        }
-        
-        wp_send_json_error(array('message' => __('Assignment not found.', 'mobility-trailblazers')));
+        wp_send_json_success(array(
+            'message' => __('Assignment removed successfully', 'mobility-trailblazers')
+        ));
     }
     
     /**

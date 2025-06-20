@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.7] - 2025-06-20
+
+### Added
+- Implemented Repository Pattern for data access layer
+  - `MT_Evaluation_Repository` for evaluation data operations
+  - `MT_Assignment_Repository` for assignment management
+  - `MT_Candidate_Repository` for candidate data access
+  - `MT_Jury_Repository` for jury member operations
+- Implemented Service Layer for business logic
+  - `MT_Evaluation_Service` for evaluation processing
+  - `MT_Assignment_Service` for assignment logic
+- Added namespace support with autoloader
+- Created standardized interfaces for repositories and services
+
+### Changed
+- Refactored AJAX handlers to use service layer instead of direct database access
+- Moved all database queries from AJAX handlers to repository classes
+- Improved code organization following SOLID principles
+- Enhanced error handling with service-level validation
+
+### Technical Details
+- Maximum 1 responsibility per class
+- All database operations now use prepared statements
+- Services are testable without WordPress dependencies
+- Maintains 100% backward compatibility
+
 ## [1.0.6] - 2025-06-20
 
 ### Changed

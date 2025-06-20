@@ -19,6 +19,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Add after the prevent direct access check
+require_once plugin_dir_path(__FILE__) . 'includes/class-mt-autoloader.php';
+$mt_autoloader = new MT_Autoloader();
+$mt_autoloader->register();
+
 // Emergency Elementor REST API Fix
 add_action('init', function() {
     // Remove any filters that might block Elementor REST API
