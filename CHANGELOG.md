@@ -280,7 +280,7 @@ No manual intervention required - all fixes are self-applying
 - Custom post types for candidates and jury members
 - Voting system with IP-based restrictions
 - CSV import/export functionality
-- Multi-language support (WPML ready)
+- Multi-language support (WPML ready
 - Email notification system
 - Role-based access control
 
