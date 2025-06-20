@@ -12,7 +12,7 @@
         // Initialize
         init: function() {
             // Check if Elementor is present
-            if (typeof elementorFrontend === 'undefined') {
+            if (typeof elementorFrontend === 'undefined' || typeof elementor === 'undefined') {
                 return;
             }
             
@@ -23,7 +23,7 @@
             elementorFrontend.hooks.addAction('frontend/element_ready/mt-statistics.default', this.initStatistics);
             
             // Re-initialize on Elementor editor save
-            if (elementor) {
+            if (typeof elementor !== 'undefined') {
                 elementor.on('preview:loaded', function() {
                     MTElementor.reinitializeAll();
                 });

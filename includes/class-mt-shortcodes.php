@@ -122,6 +122,12 @@ class MT_Shortcodes {
                    '</div>';
         }
         
+        // Ensure scripts are enqueued and localized for shortcode context
+        if (class_exists('MT_Jury_System')) {
+            $jury_system = new \MT_Jury_System();
+            $jury_system->enqueue_jury_dashboard_scripts();
+        }
+        
         $atts = shortcode_atts(array(
             'show_stats' => 'yes',
             'show_progress' => 'yes',
