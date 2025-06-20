@@ -78,32 +78,26 @@ class MT_Jury_System {
         );
         
         // Localize script
-        wp_localize_script('mt-jury-dashboard', 'mt_jury_dashboard', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_jury_dashboard'),
+        wp_localize_script('mt_jury_dashboard', 'mt_jury_ajax', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_jury_nonce'),
             'i18n' => array(
-                'loading_evaluation' => __('Loading evaluation...', 'mobility-trailblazers'),
-                'evaluation_loaded' => __('Evaluation loaded successfully', 'mobility-trailblazers'),
-                'error_loading' => __('Error loading evaluation', 'mobility-trailblazers'),
-                'submitting' => __('Submitting evaluation...', 'mobility-trailblazers'),
-                'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
-                'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
-                'error_submitting' => __('Error submitting evaluation', 'mobility-trailblazers'),
-                'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
-                'evaluated' => __('Evaluated', 'mobility-trailblazers'),
-                'please_rate_all' => __('Please rate all criteria before submitting', 'mobility-trailblazers'),
-                'saving' => __('Saving draft...', 'mobility-trailblazers'),
-                'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
-                'draft_saved' => __('Draft saved successfully!', 'mobility-trailblazers'),
-                'error_saving' => __('Error saving draft', 'mobility-trailblazers'),
-                'all_complete' => __('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'),
-                'preparing_export' => __('Preparing export...', 'mobility-trailblazers'),
-                'export_complete' => __('Export ready! Download will start shortly.', 'mobility-trailblazers'),
-                'export_error' => __('Error preparing export', 'mobility-trailblazers'),
-                'unsaved_changes' => __('You have unsaved changes. Are you sure you want to leave?', 'mobility-trailblazers'),
                 'confirm_submit' => __('Are you sure you want to submit this evaluation?', 'mobility-trailblazers'),
-                'confirm_export' => __('Are you sure you want to export your evaluations?', 'mobility-trailblazers'),
+                'error_loading'  => __('Error loading data.', 'mobility-trailblazers'),
+                'no_candidates_found' => __('No candidates found.', 'mobility-trailblazers'),
+                'evaluate' => __('Evaluate', 'mobility-trailblazers'),
+                'view_evaluation' => __('View Evaluation', 'mobility-trailblazers'),
+                'please_complete_scores' => __('Please complete all scores before submitting.', 'mobility-trailblazers'),
+                'completed' => __('Completed', 'mobility-trailblazers'),
+                'draft' => __('Draft', 'mobility-trailblazers'),
+                'pending' => __('Pending', 'mobility-trailblazers'),
+                'achievement' => __('Achievement', 'mobility-trailblazers'),
+                'impact' => __('Impact', 'mobility-trailblazers'),
+                'vision' => __('Vision', 'mobility-trailblazers'),
+                'saving' => __('Saving...', 'mobility-trailblazers'),
+                'error_saving' => __('Error saving.', 'mobility-trailblazers'),
             ),
+            'default_avatar' => MT_PLUGIN_URL . 'assets/default-avatar.png',
         ));
     }
     

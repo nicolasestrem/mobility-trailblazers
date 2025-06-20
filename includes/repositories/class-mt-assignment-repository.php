@@ -16,7 +16,7 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'mt_assignments';
+        $this->table_name = $wpdb->prefix . 'mt_jury_assignments';
     }
     
     /**
@@ -43,7 +43,7 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             'status' => null,
             'limit' => 50,
             'offset' => 0,
-            'orderby' => 'created_at',
+            'orderby' => 'assignment_date',
             'order' => 'DESC'
         );
         

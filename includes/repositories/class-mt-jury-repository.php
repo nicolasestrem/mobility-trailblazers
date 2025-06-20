@@ -239,7 +239,7 @@ class MT_Jury_Repository implements MT_Repository_Interface {
                 return null;
             }
             $table_name = $wpdb->prefix . 'mt_evaluations';
-            $assignments_table = $wpdb->prefix . 'mt_assignments';
+            $assignments_table = $wpdb->prefix . 'mt_jury_assignments';
             return array(
                 'jury_id' => $jury_id,
                 'name' => $user->display_name,

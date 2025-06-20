@@ -120,7 +120,10 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        self.showNotification(response.data.message, 'success');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'An error occurred',
+                            'success'
+                        );
                         $('#mt-auto-assign-modal').hide();
                         self.updateStatistics();
                         // Reload the page to show updated assignments
@@ -128,7 +131,10 @@
                             location.reload();
                         }, 1500);
                     } else {
-                        self.showNotification(response.data.message || 'An error occurred', 'error');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'An error occurred',
+                            'error'
+                        );
                     }
                 },
                 error: function() {
@@ -171,7 +177,10 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        self.showNotification(response.data.message || 'Assignment saved successfully', 'success');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Assignment saved successfully',
+                            'success'
+                        );
                         $('#mt-manual-assign-modal').hide();
                         // Reset form
                         $('#mt-manual-candidate').val('');
@@ -181,7 +190,10 @@
                             location.reload();
                         }, 1500);
                     } else {
-                        self.showNotification(response.data.message || 'Failed to save assignment', 'error');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Failed to save assignment',
+                            'error'
+                        );
                     }
                 },
                 error: function() {
@@ -213,14 +225,20 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        self.showNotification(response.data.message, 'success');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Assignments cleared successfully',
+                            'success'
+                        );
                         self.updateStatistics();
                         // Reload the page to show updated state
                         setTimeout(function() {
                             location.reload();
                         }, 1500);
                     } else {
-                        self.showNotification(response.data.message || 'Error clearing assignments', 'error');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Error clearing assignments',
+                            'error'
+                        );
                     }
                 },
                 error: function() {
@@ -259,7 +277,10 @@
             form.submit();
             form.remove();
             
-            self.showNotification('Export started. Download will begin shortly.', 'success');
+            self.showNotification(
+                (response.data && response.data.message) || response.message || 'Export started. Download will begin shortly.',
+                'success'
+            );
         },
         
         // Remove single assignment
@@ -288,10 +309,16 @@
                         button.closest('.mt-assigned-candidate').fadeOut(300, function() {
                             $(this).remove();
                         });
-                        self.showNotification('Assignment removed', 'success');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Assignment removed',
+                            'success'
+                        );
                         self.updateStatistics();
                     } else {
-                        self.showNotification(response.data.message || 'Error removing assignment', 'error');
+                        self.showNotification(
+                            (response.data && response.data.message) || response.message || 'Error removing assignment',
+                            'error'
+                        );
                     }
                 },
                 error: function() {

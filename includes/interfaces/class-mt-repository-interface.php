@@ -14,4 +14,4 @@ interface MT_Repository_Interface {
     public function create($data);
     public function update($id, $data);
     public function delete($id);
-}
+} 

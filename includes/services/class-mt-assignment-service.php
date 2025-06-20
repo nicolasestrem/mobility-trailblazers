@@ -243,8 +243,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
      */
     public function clear_all_assignments() {
         global $wpdb;
-        $table = $wpdb->prefix . 'mt_assignments';
-        
+        $table = $wpdb->prefix . 'mt_jury_assignments';
         return $wpdb->query("TRUNCATE TABLE {$table}");
     }
     
@@ -253,8 +252,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
      */
     public function remove_assignment($jury_member_id, $candidate_id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'mt_assignments';
-        
+        $table = $wpdb->prefix . 'mt_jury_assignments';
         $result = $wpdb->delete(
             $table,
             array(
@@ -262,11 +260,9 @@ class MT_Assignment_Service implements MT_Service_Interface {
                 'candidate_id' => $candidate_id
             )
         );
-        
         if ($result) {
             do_action('mt_assignment_removed', $candidate_id, $jury_member_id);
         }
-        
         return $result;
     }
 }
