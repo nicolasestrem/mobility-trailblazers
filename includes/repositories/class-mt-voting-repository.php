@@ -19,21 +19,14 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         $this->table_name = $wpdb->prefix . 'mt_votes';
     }
     
-    /**
-     * Find vote by ID
-     */
     public function find($id) {
         global $wpdb;
-        
         return $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM {$this->table_name} WHERE id = %d",
             $id
         ));
     }
     
-    /**
-     * Find all votes with filters
-     */
     public function find_all($args = array()) {
         global $wpdb;
         
@@ -60,7 +53,6 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         }
         
         $where_clause = implode(' AND ', $where);
-        
         $query = "SELECT * FROM {$this->table_name} WHERE {$where_clause} LIMIT %d OFFSET %d";
         $values[] = $args['limit'];
         $values[] = $args['offset'];
@@ -68,40 +60,29 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         return $wpdb->get_results($wpdb->prepare($query, $values));
     }
     
-    /**
-     * Create new vote
-     */
     public function create($data) {
         global $wpdb;
+        
+        $defaults = array(
+            'vote_time' => current_time('mysql'),
+            'ip_address' => $_SERVER['REMOTE_ADDR']
+        );
+        
+        $data = wp_parse_args($data, $defaults);
         
         $result = $wpdb->insert($this->table_name, $data);
         
         return $result ? $wpdb->insert_id : false;
     }
     
-    /**
-     * Update vote (not typically used)
-     */
     public function update($id, $data) {
         global $wpdb;
-        
-        return $wpdb->update(
-            $this->table_name,
-            $data,
-            array('id' => $id)
-        );
+        return $wpdb->update($this->table_name, $data, array('id' => $id));
     }
     
-    /**
-     * Delete vote
-     */
     public function delete($id) {
         global $wpdb;
-        
-        return $wpdb->delete(
-            $this->table_name,
-            array('id' => $id)
-        );
+        return $wpdb->delete($this->table_name, array('id' => $id));
     }
     
     /**
@@ -111,7 +92,8 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         global $wpdb;
         
         $count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$this->table_name} WHERE voter_email = %s AND candidate_id = %d",
+            "SELECT COUNT(*) FROM {$this->table_name} 
+             WHERE voter_email = %s AND candidate_id = %d",
             $voter_email,
             $candidate_id
         ));
@@ -126,41 +108,26 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         global $wpdb;
         
         if ($category_id) {
-            // Get votes for candidates in specific category
-            $query = "
-                SELECT c.ID as candidate_id, c.post_title as candidate_name, COUNT(v.id) as vote_count
-                FROM {$wpdb->posts} c
-                LEFT JOIN {$this->table_name} v ON c.ID = v.candidate_id
-                INNER JOIN {$wpdb->term_relationships} tr ON c.ID = tr.object_id
-                WHERE c.post_type = 'mt_candidate' 
-                AND c.post_status = 'publish'
-                AND tr.term_taxonomy_id = %d
-                GROUP BY c.ID
-                ORDER BY vote_count DESC
-            ";
-            return $wpdb->get_results($wpdb->prepare($query, $category_id));
-        } else {
-            // Get all votes
-            $query = "
-                SELECT c.ID as candidate_id, c.post_title as candidate_name, COUNT(v.id) as vote_count
-                FROM {$wpdb->posts} c
-                LEFT JOIN {$this->table_name} v ON c.ID = v.candidate_id
-                WHERE c.post_type = 'mt_candidate' 
-                AND c.post_status = 'publish'
-                GROUP BY c.ID
-                ORDER BY vote_count DESC
-            ";
-            return $wpdb->get_results($query);
+            // Join with posts and term relationships for category filtering
+            return $wpdb->get_results($wpdb->prepare(
+                "SELECT v.candidate_id, COUNT(*) as vote_count, p.post_title as candidate_name
+                 FROM {$this->table_name} v
+                 JOIN {$wpdb->posts} p ON v.candidate_id = p.ID
+                 JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+                 WHERE tr.term_taxonomy_id = %d
+                 GROUP BY v.candidate_id
+                 ORDER BY vote_count DESC",
+                $category_id
+            ));
         }
-    }
-    
-    /**
-     * Clear all votes
-     */
-    public function clear_all() {
-        global $wpdb;
         
-        return $wpdb->query("TRUNCATE TABLE {$this->table_name}");
+        return $wpdb->get_results(
+            "SELECT v.candidate_id, COUNT(*) as vote_count, p.post_title as candidate_name
+             FROM {$this->table_name} v
+             JOIN {$wpdb->posts} p ON v.candidate_id = p.ID
+             GROUP BY v.candidate_id
+             ORDER BY vote_count DESC"
+        );
     }
     
     /**
@@ -170,13 +137,29 @@ class MT_Voting_Repository implements MT_Repository_Interface {
         global $wpdb;
         $backup_table = $wpdb->prefix . 'mt_vote_backups';
         
-        // Insert backup record
+        // Create backup record
         $wpdb->insert($backup_table, array(
-            'backup_data' => json_encode($this->find_all(array('limit' => -1))),
-            'created_at' => current_time('mysql'),
+            'backup_date' => current_time('mysql'),
             'created_by' => get_current_user_id()
         ));
         
-        return $wpdb->insert_id;
+        $backup_id = $wpdb->insert_id;
+        
+        // Copy votes to backup
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$backup_table}_data 
+             SELECT %d, v.* FROM {$this->table_name} v",
+            $backup_id
+        ));
+        
+        return $backup_id;
+    }
+    
+    /**
+     * Clear all votes
+     */
+    public function clear_all() {
+        global $wpdb;
+        return $wpdb->query("TRUNCATE TABLE {$this->table_name}");
     }
 }
