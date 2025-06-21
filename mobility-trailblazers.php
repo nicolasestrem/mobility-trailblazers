@@ -351,6 +351,191 @@ class MobilityTrailblazersPlugin {
             MT_PLUGIN_VERSION,
             true
         );
+        
+        // Add aggressive webpack fix directly to head
+        add_action('wp_head', array($this, 'inject_elementor_webpack_fix'), 1);
+    }
+    
+    /**
+     * Inject Elementor webpack fix directly into head
+     */
+    public function inject_elementor_webpack_fix() {
+        if (!did_action('elementor/loaded')) {
+            return;
+        }
+        
+        echo '<script type="text/javascript">
+        // Aggressive Elementor webpack fix - injected before any scripts load
+        (function() {
+            "use strict";
+            
+            // Intercept webpack require function immediately
+            if (typeof __webpack_require__ !== "undefined") {
+                var originalWebpackRequire = __webpack_require__;
+                __webpack_require__ = function(moduleId) {
+                    try {
+                        var result = originalWebpackRequire(moduleId);
+                        
+                        // Special handling for problematic modules
+                        if (moduleId === 820) {
+                            if (result && typeof result.default === "function") {
+                                var originalModule = result.default;
+                                result.default = function() {
+                                    try {
+                                        return originalModule.apply(this, arguments);
+                                    } catch (error) {
+                                        console.warn("Elementor: Error in handlers module:", error);
+                                        return {
+                                            handlers: {},
+                                            addAction: function() {},
+                                            addFilter: function() {},
+                                            doAction: function() {}
+                                        };
+                                    }
+                                };
+                            }
+                        }
+                        
+                        return result;
+                    } catch (error) {
+                        console.warn("Elementor: Webpack module loading error for module", moduleId, error);
+                        
+                        // Return appropriate mock modules
+                        if (moduleId === 820) {
+                            return {
+                                default: function() {
+                                    return {
+                                        handlers: {},
+                                        addAction: function(action, callback) {
+                                            if (!this.handlers[action]) {
+                                                this.handlers[action] = [];
+                                            }
+                                            this.handlers[action].push(callback);
+                                        },
+                                        addFilter: function(filter, callback) {
+                                            if (!this.handlers[filter]) {
+                                                this.handlers[filter] = [];
+                                            }
+                                            this.handlers[filter].push(callback);
+                                        },
+                                        doAction: function(action) {
+                                            if (this.handlers[action]) {
+                                                for (var i = 0; i < this.handlers[action].length; i++) {
+                                                    try {
+                                                        this.handlers[action][i].apply(this, Array.prototype.slice.call(arguments, 1));
+                                                    } catch (error) {
+                                                        console.warn("Elementor: Error in hook handler:", error);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    };
+                                },
+                                __esModule: true
+                            };
+                        } else if (moduleId === 4906 || moduleId === 3000) {
+                            return {
+                                default: function() {
+                                    return {
+                                        tools: {
+                                            getUniqueId: function() {
+                                                return "elementor-" + Math.random().toString(36).substr(2, 9);
+                                            },
+                                            debounce: function(func, wait) {
+                                                var timeout;
+                                                return function() {
+                                                    var context = this, args = arguments;
+                                                    clearTimeout(timeout);
+                                                    timeout = setTimeout(function() {
+                                                        func.apply(context, args);
+                                                    }, wait);
+                                                };
+                                            }
+                                        }
+                                    };
+                                },
+                                __esModule: true
+                            };
+                        }
+                        
+                        return {
+                            default: function() {},
+                            __esModule: true
+                        };
+                    }
+                };
+            }
+            
+            // Intercept webpackJsonpCallback
+            if (typeof webpackJsonpCallback !== "undefined") {
+                var originalWebpackJsonpCallback = webpackJsonpCallback;
+                webpackJsonpCallback = function(data) {
+                    try {
+                        return originalWebpackJsonpCallback(data);
+                    } catch (error) {
+                        console.warn("Elementor: Error in webpackJsonpCallback:", error);
+                        return [];
+                    }
+                };
+            }
+            
+            // Initialize elementorFrontend immediately
+            if (typeof elementorFrontend === "undefined") {
+                window.elementorFrontend = {};
+            }
+            
+            if (!elementorFrontend.hooks) {
+                elementorFrontend.hooks = {
+                    handlers: {},
+                    addAction: function(action, callback) {
+                        if (!this.handlers[action]) {
+                            this.handlers[action] = [];
+                        }
+                        this.handlers[action].push(callback);
+                    },
+                    addFilter: function(filter, callback) {
+                        if (!this.handlers[filter]) {
+                            this.handlers[filter] = [];
+                        }
+                        this.handlers[filter].push(callback);
+                    },
+                    doAction: function(action) {
+                        if (this.handlers[action]) {
+                            for (var i = 0; i < this.handlers[action].length; i++) {
+                                try {
+                                    this.handlers[action][i].apply(this, Array.prototype.slice.call(arguments, 1));
+                                } catch (error) {
+                                    console.warn("Elementor: Error in hook handler:", error);
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+            
+            if (!elementorFrontend.tools) {
+                elementorFrontend.tools = {
+                    tools: {
+                        getUniqueId: function() {
+                            return "elementor-" + Math.random().toString(36).substr(2, 9);
+                        },
+                        debounce: function(func, wait) {
+                            var timeout;
+                            return function() {
+                                var context = this, args = arguments;
+                                clearTimeout(timeout);
+                                timeout = setTimeout(function() {
+                                    func.apply(context, args);
+                                }, wait);
+                            };
+                        }
+                    }
+                };
+            }
+            
+            console.log("Elementor: Aggressive webpack fix injected in head");
+        })();
+        </script>';
     }
 
     /**
