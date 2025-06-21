@@ -66,6 +66,7 @@ class MT_Autoloader {
             'Elementor' => 'elementor',
             'Repositories' => 'repositories',
             'Interfaces' => 'interfaces',
+            'Services' => 'services',
             // Add more mappings as needed
         ];
         $parts = explode('\\', $relative_class);

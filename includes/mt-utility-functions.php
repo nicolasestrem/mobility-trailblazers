@@ -14,6 +14,8 @@ if (!defined('ABSPATH')) {
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
 use MobilityTrailblazers\Repositories\MT_Candidate_Scores_Repository;
+use MobilityTrailblazers\Repositories\MT_Voting_Repository;
+use MobilityTrailblazers\Repositories\MT_Jury_Repository;
 
 /**
  * Get current award year
