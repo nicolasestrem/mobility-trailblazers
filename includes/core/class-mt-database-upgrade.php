@@ -38,6 +38,16 @@ class MT_Database_Upgrade {
     }
     
     /**
+     * Force database upgrade (for debugging)
+     *
+     * @return void
+     */
+    public static function force_upgrade() {
+        self::upgrade_to_2_0_1();
+        update_option('mt_db_version', MT_VERSION);
+    }
+    
+    /**
      * Upgrade to version 2.0.1
      *
      * @return void

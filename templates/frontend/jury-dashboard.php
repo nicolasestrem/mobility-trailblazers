@@ -11,6 +11,28 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Check if viewing evaluation form
+if (isset($_GET['evaluate']) && is_numeric($_GET['evaluate'])) {
+    $candidate_id = intval($_GET['evaluate']);
+    
+    // Verify assignment
+    $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+    $has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);
+    
+    if ($has_assignment) {
+        include MT_PLUGIN_DIR . 'templates/frontend/jury-evaluation-form.php';
+        return;
+    } else {
+        echo '<div class="mt-notice mt-notice-error">' . 
+             __('You are not assigned to evaluate this candidate.', 'mobility-trailblazers') . 
+             '</div>';
+        echo '<a href="' . esc_url(remove_query_arg('evaluate')) . '" class="mt-btn mt-btn-secondary">' . 
+             __('Back to Dashboard', 'mobility-trailblazers') . 
+             '</a>';
+        return;
+    }
+}
+
 // Get evaluation service and data
 $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
 $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();

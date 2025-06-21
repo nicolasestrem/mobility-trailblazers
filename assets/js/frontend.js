@@ -1,6 +1,6 @@
 /**
  * Mobility Trailblazers Frontend JavaScript
- * Version: 2.0.0
+ * Version: 2.0.1
  */
 
 (function($) {
@@ -11,6 +11,8 @@
         init: function() {
             this.bindEvents();
             this.initEvaluationForm();
+            this.updateTotalScore();
+            this.initCharacterCount();
         },
         
         bindEvents: function() {
@@ -21,10 +23,16 @@
             $(document).on('click', '.mt-save-draft', this.saveDraft);
             
             // Score slider updates
-            $(document).on('input', '.mt-score-input', this.updateScoreDisplay);
+            $(document).on('input', '.mt-score-slider', this.updateScoreDisplay);
+            
+            // Score mark clicks
+            $(document).on('click', '.mt-score-mark', this.setScoreFromMark);
             
             // Load evaluation modal
             $(document).on('click', '.mt-evaluate-btn', this.loadEvaluation);
+            
+            // Character count
+            $(document).on('input', '#mt-comments', this.updateCharCount);
         },
         
         initEvaluationForm: function() {
@@ -186,7 +194,59 @@
         updateScoreDisplay: function() {
             var $input = $(this);
             var value = $input.val();
-            $input.siblings('.mt-score-value').text(value);
+            var $card = $input.closest('.mt-criterion-card');
+            
+            // Update the score display
+            $card.find('.mt-score-value').text(value);
+            
+            // Update slider background gradient
+            var percentage = (value / 10) * 100;
+            $input.css('background', 'linear-gradient(to right, #667eea 0%, #667eea ' + percentage + '%, #e5e7eb ' + percentage + '%, #e5e7eb 100%)');
+            
+            // Update total score
+            MTJuryDashboard.updateTotalScore();
+        },
+        
+        setScoreFromMark: function(e) {
+            e.preventDefault();
+            var $mark = $(this);
+            var value = $mark.data('value');
+            var $slider = $mark.closest('.mt-score-slider-wrapper').find('.mt-score-slider');
+            
+            $slider.val(value).trigger('input');
+        },
+        
+        updateTotalScore: function() {
+            var total = 0;
+            var count = 0;
+            
+            $('.mt-score-slider').each(function() {
+                total += parseInt($(this).val()) || 0;
+                count++;
+            });
+            
+            var average = count > 0 ? (total / count).toFixed(1) : 0;
+            $('#mt-total-score').text(average);
+        },
+        
+        updateCharCount: function() {
+            var $textarea = $(this);
+            var length = $textarea.val().length;
+            var maxLength = 1000;
+            
+            $('#mt-char-current').text(length);
+            
+            if (length > maxLength) {
+                $textarea.val($textarea.val().substring(0, maxLength));
+                $('#mt-char-current').text(maxLength);
+            }
+        },
+        
+        initCharacterCount: function() {
+            var $textarea = $('#mt-comments');
+            if ($textarea.length) {
+                $('#mt-char-current').text($textarea.val().length);
+            }
         },
         
         submitEvaluation: function(e) {
@@ -195,34 +255,61 @@
             var $form = $(this);
             var $submitBtn = $form.find('button[type="submit"]');
             
+            // Validate scores
+            var isValid = true;
+            $('.mt-score-slider').each(function() {
+                var value = parseInt($(this).val());
+                if (isNaN(value) || value < 0 || value > 10) {
+                    isValid = false;
+                    return false;
+                }
+            });
+            
+            if (!isValid) {
+                MTJuryDashboard.showError('Please ensure all scores are between 0 and 10.');
+                return;
+            }
+            
             // Disable button and show loading
-            $submitBtn.prop('disabled', true).text('Submitting...');
+            $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Submitting...');
             
             var formData = $form.serializeArray();
             formData.push({ name: 'action', value: 'mt_submit_evaluation' });
-            formData.push({ name: 'nonce', value: mt_ajax.nonce });
+            formData.push({ name: 'nonce', value: $('#mt_nonce').val() });
+            formData.push({ name: 'status', value: 'completed' });
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
                     if (response.success) {
                         // Show success message
-                        $form.before('<div class="mt-notice mt-notice-success">' + response.data.message + '</div>');
+                        $('.mt-evaluation-header').after('<div class="mt-notice mt-notice-success">' + response.data.message + '</div>');
+                        
+                        // Update status badge
+                        var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
+                        if ($statusBadge.length) {
+                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text('Evaluation Submitted');
+                        } else {
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">Evaluation Submitted</span>');
+                        }
                         
                         // Scroll to top
                         $('html, body').animate({ scrollTop: 0 }, 300);
                         
-                        // Redirect after 2 seconds
+                        // Re-enable button
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
+                        
+                        // Redirect after 3 seconds
                         setTimeout(function() {
                             window.location.href = window.location.pathname;
-                        }, 2000);
+                        }, 3000);
                     } else {
                         MTJuryDashboard.showError(response.data.message);
-                        $submitBtn.prop('disabled', false).text('Submit Evaluation');
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
                     }
                 })
                 .fail(function() {
                     MTJuryDashboard.showError('An error occurred. Please try again.');
-                    $submitBtn.prop('disabled', false).text('Submit Evaluation');
+                    $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
                 });
         },
         
@@ -233,28 +320,38 @@
             var $form = $('#mt-evaluation-form');
             
             // Disable button and show loading
-            $btn.prop('disabled', true).text('Saving...');
+            $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Saving...');
             
             var formData = $form.serializeArray();
-            formData.push({ name: 'action', value: 'mt_save_draft' });
-            formData.push({ name: 'nonce', value: mt_ajax.nonce });
+            formData.push({ name: 'action', value: 'mt_submit_evaluation' });
+            formData.push({ name: 'nonce', value: $('#mt_nonce').val() });
+            formData.push({ name: 'status', value: 'draft' });
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
                     if (response.success) {
-                        // Show success message
-                        $btn.text('Draft Saved!');
+                        // Show success message temporarily
+                        $btn.html('<span class="dashicons dashicons-saved"></span> Draft Saved!');
+                        
+                        // Update or add status badge
+                        var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
+                        if ($statusBadge.length) {
+                            $statusBadge.removeClass('mt-status-completed').addClass('mt-status-draft').text('Draft Saved');
+                        } else {
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-draft">Draft Saved</span>');
+                        }
+                        
                         setTimeout(function() {
-                            $btn.prop('disabled', false).text('Save as Draft');
+                            $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
                         }, 2000);
                     } else {
                         MTJuryDashboard.showError(response.data.message);
-                        $btn.prop('disabled', false).text('Save as Draft');
+                        $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
                     }
                 })
                 .fail(function() {
                     MTJuryDashboard.showError('Failed to save draft.');
-                    $btn.prop('disabled', false).text('Save as Draft');
+                    $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
                 });
         },
         

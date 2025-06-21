@@ -146,10 +146,66 @@ mobility-trailblazers/
 
 ### Shortcodes
 
-- `[mt_jury_dashboard]` - Display jury member dashboard
-- `[mt_candidates_grid]` - Show candidates grid
-- `[mt_evaluation_stats]` - Display evaluation statistics
-- `[mt_winners_display]` - Show top-rated candidates
+#### 1. Jury Dashboard
+`[mt_jury_dashboard]`
+
+Displays the jury member dashboard with evaluation interface. Must be placed on a page accessible only to logged-in jury members.
+
+**Features:**
+- Progress tracking with visual statistics
+- Candidate assignment list with search and filtering  
+- Direct evaluation form access
+- Draft saving capability
+- Responsive design
+
+#### 2. Candidates Grid
+`[mt_candidates_grid]`
+
+Shows a public grid of award candidates.
+
+**Parameters:**
+- `category` - Filter by award category slug (optional)
+- `columns` - Number of columns: 2, 3, or 4 (default: 3)
+- `limit` - Maximum candidates to show (default: -1 for all)
+- `orderby` - Sort field: title, date, modified (default: title)
+- `order` - Sort direction: ASC or DESC (default: ASC)
+- `show_bio` - Display candidate bio: yes/no (default: yes)
+- `show_category` - Display category: yes/no (default: yes)
+
+**Example:**
+```
+[mt_candidates_grid category="innovation" columns="3" limit="6" show_bio="yes"]
+```
+
+#### 3. Evaluation Statistics
+`[mt_evaluation_stats]`
+
+Displays evaluation statistics (admin/jury admin only).
+
+**Parameters:**
+- `type` - Display type: summary, by-category, by-jury (default: summary)
+- `show_chart` - Show visual charts: yes/no (default: yes)
+
+**Example:**
+```
+[mt_evaluation_stats type="by-category" show_chart="yes"]
+```
+
+#### 4. Winners Display
+`[mt_winners_display]`
+
+Shows the top-scored candidates as award winners.
+
+**Parameters:**
+- `category` - Filter by category slug (optional)
+- `year` - Award year (default: current year)
+- `limit` - Number of winners to show (default: 3)
+- `show_scores` - Display average scores: yes/no (default: no)
+
+**Example:**
+```
+[mt_winners_display category="sustainability" limit="3" year="2024" show_scores="yes"]
+```
 
 ### Hooks & Filters
 

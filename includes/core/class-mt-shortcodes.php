@@ -58,8 +58,15 @@ class MT_Shortcodes {
         }
         
         // Enqueue dashboard scripts and styles
-        wp_enqueue_style('mt-jury-dashboard');
-        wp_enqueue_script('mt-jury-dashboard');
+        wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
+        wp_enqueue_style('dashicons');
+        wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
+        
+        // Localize script
+        wp_localize_script('mt-frontend', 'mt_ajax', [
+            'url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_ajax_nonce')
+        ]);
         
         // Start output buffering
         ob_start();

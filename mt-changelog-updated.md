@@ -5,9 +5,49 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2] - 2025-06-21
+
+### Fixed
+- **Assignment Service**: Fixed missing `auto_assign()` method
+  - Added `auto_assign()` method to `MT_Assignment_Service` class
+  - Resolves fatal error when accessing assignments admin page
+  - Method properly handles balanced and random assignment methods
+- **Database Column Errors**: Fixed "Unknown column 'assigned_at'" errors
+  - Made `find_all()` method robust to handle missing columns gracefully
+  - Falls back to `id` ordering when `assigned_at` column doesn't exist
+  - Added force database upgrade option in diagnostics page
+  - Improved error handling for database schema mismatches
+
 ## [2.0.1] - 2025-06-21
 
 ### Added
+- **Complete Jury Dashboard System**: Modern, responsive interface for jury members
+  - Beautiful evaluation form with real-time score tracking
+  - Visual progress indicators showing completion status
+  - Advanced search and filtering for assigned candidates
+  - Draft saving with auto-save functionality
+  - Character count for comment fields
+  - Score sliders with visual feedback
+  - Total score calculation in real-time
+  - Mobile-optimized responsive design
+  
+- **Enhanced Shortcode System**: Comprehensive shortcodes with full parameter support
+  - `[mt_jury_dashboard]` - Full-featured jury member interface
+  - `[mt_candidates_grid]` - Public candidate display with customization
+  - `[mt_evaluation_stats]` - Statistics visualization for admins
+  - `[mt_winners_display]` - Winners showcase with ranking
+  
+- **Frontend Templates**: New template system for all shortcodes
+  - `jury-evaluation-form.php` - Comprehensive evaluation interface
+  - `candidates-grid.php` - Flexible candidate grid display
+  - `winners-display.php` - Award winners presentation
+  - `evaluation-stats.php` - Statistics and analytics display
+  
+- **Enhanced AJAX Handlers**: Improved evaluation submission
+  - Combined draft and final submission endpoint
+  - Better error handling and validation
+  - Real-time feedback for user actions
+  
 - **Diagnostics Page**: Comprehensive debugging interface for administrators and jury admins
   - System information display (PHP version, WordPress version, memory limits)
   - Database table verification with row counts
@@ -43,6 +83,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Checks and adds missing `assigned_at` and `assigned_by` columns to assignments table
   - Adds missing indexes for better performance
   - Database upgrades run automatically on plugin initialization
+- **Assignment Service**: Fixed missing `auto_assign()` method
+  - Added `auto_assign()` method to `MT_Assignment_Service` class
+  - Resolves fatal error when accessing assignments admin page
+  - Method properly handles balanced and random assignment methods
+- **Database Column Errors**: Fixed "Unknown column 'assigned_at'" errors
+  - Made `find_all()` method robust to handle missing columns gracefully
+  - Falls back to `id` ordering when `assigned_at` column doesn't exist
+  - Added force database upgrade option in diagnostics page
+  - Improved error handling for database schema mismatches
 
 ### Technical Details
 - Fixed regex pattern in `MT_Autoloader::autoload()` to be case-insensitive

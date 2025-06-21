@@ -481,6 +481,334 @@
     object-fit: cover;
 }
 
+/* Evaluation Page */
+.mt-evaluation-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.mt-evaluation-header {
+    margin-bottom: 30px;
+}
+
+.mt-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #667eea;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.2s;
+}
+
+.mt-back-link:hover {
+    color: #5a67d8;
+}
+
+.mt-evaluation-title {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.mt-evaluation-title h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+/* Candidate Showcase */
+.mt-candidate-showcase {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+}
+
+.mt-candidate-profile {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 30px;
+}
+
+.mt-candidate-photo-wrap {
+    position: relative;
+}
+
+.mt-candidate-photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.mt-candidate-details h2 {
+    margin: 0 0 15px 0;
+    font-size: 28px;
+}
+
+.mt-candidate-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #6b7280;
+}
+
+.mt-candidate-categories {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.mt-category-badge {
+    background: #e5e7eb;
+    color: #374151;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.mt-innovation-summary,
+.mt-candidate-bio {
+    margin-top: 25px;
+}
+
+.mt-innovation-summary h3,
+.mt-candidate-bio h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.mt-bio-content {
+    line-height: 1.8;
+    color: #4b5563;
+}
+
+/* Scoring Section */
+.mt-scoring-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.mt-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 30px 0;
+    font-size: 24px;
+}
+
+.mt-total-score-display {
+    font-size: 18px;
+    color: #667eea;
+}
+
+#mt-total-score {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.mt-criteria-grid {
+    display: grid;
+    gap: 25px;
+}
+
+.mt-criterion-card {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 25px;
+    transition: transform 0.2s;
+}
+
+.mt-criterion-card:hover {
+    transform: translateY(-2px);
+}
+
+.mt-criterion-header {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-left: 15px;
+    border-left: 4px solid;
+}
+
+.mt-criterion-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.mt-criterion-label {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.mt-criterion-description {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.mt-scoring-control {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.mt-score-slider-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.mt-score-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.mt-score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mt-score-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.mt-score-marks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    padding: 0 12px;
+}
+
+.mt-score-mark {
+    font-size: 12px;
+    color: #9ca3af;
+    cursor: pointer;
+}
+
+.mt-score-display {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Comments Section */
+.mt-comments-section {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.mt-section-description {
+    color: #6b7280;
+    margin: -10px 0 20px 0;
+}
+
+.mt-comments-textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.mt-comments-textarea:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.mt-char-count {
+    text-align: right;
+    color: #9ca3af;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Submission Guidelines */
+.mt-submission-guidelines {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 30px;
+}
+
+.mt-submission-guidelines h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.mt-submission-guidelines ul {
+    margin: 0;
+    padding-left: 25px;
+}
+
+.mt-submission-guidelines li {
+    margin-bottom: 10px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+/* Loading State */
+.mt-loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    color: #6b7280;
+}
+
+.mt-loading::after {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    to { transform: rotate(360deg); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .mt-stats-grid {
@@ -498,6 +826,262 @@
     .mt-btn {
         width: 100%;
     }
+    
+    .mt-candidate-profile {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-candidate-photo {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+    
+    .mt-scoring-control {
+        flex-direction: column;
+    }
+    
+    .mt-score-slider-wrapper {
+        width: 100%;
+    }
+    
+    .mt-section-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Winners Display */
+.mt-winner-card.gold .mt-winner-rank {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.mt-winner-card.silver .mt-winner-rank {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+}
+
+.mt-winner-card.bronze .mt-winner-rank {
+    background: linear-gradient(135deg, #CD7F32, #B87333);
+}
+
+.mt-winner-photo.mt-no-photo {
+    width: 120px;
+    height: 120px;
+    background: #f0f0f1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.mt-winner-photo.mt-no-photo .dashicons {
+    font-size: 48px;
+    color: #667eea;
+}
+
+.mt-winner-meta {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.mt-winner-category {
+    display: inline-block;
+    background: #e5e7eb;
+    color: #374151;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin: 10px 0;
+}
+
+.mt-winner-score {
+    margin: 15px 0;
+}
+
+.mt-score-label {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.mt-score-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.mt-winner-excerpt {
+    margin-top: 15px;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Evaluation Stats */
+.mt-evaluation-stats {
+    margin: 20px 0;
+}
+
+.mt-stats-summary h3,
+.mt-stats-by-category h3,
+.mt-stats-by-jury h3 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.mt-stat-box {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-criteria-stats {
+    margin-top: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-criteria-stats h4 {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.mt-criterion-bar {
+    margin-bottom: 15px;
+}
+
+.mt-bar-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.mt-bar-container {
+    background: #e5e7eb;
+    border-radius: 10px;
+    height: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-bar-fill {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.mt-bar-value {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Category Stats */
+.mt-category-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.mt-category-stat-item {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-category-stat-item h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.mt-category-metrics {
+    display: flex;
+    justify-content: space-between;
+}
+
+.mt-metric {
+    text-align: center;
+}
+
+.mt-metric strong {
+    display: block;
+    font-size: 24px;
+    color: #667eea;
+}
+
+/* Jury Stats Table */
+.mt-jury-stats-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mt-jury-stats-table th,
+.mt-jury-stats-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.mt-jury-stats-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #374151;
+}
+
+.mt-jury-stats-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.mt-progress-mini {
+    width: 100px;
+    height: 20px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-progress-mini-fill {
+    background: #667eea;
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.mt-progress-mini-text {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: bold;
+    color: #374151;
+}
+
+/* Additional utility classes */
+.mt-separator {
+    color: #9ca3af;
+    margin: 0 5px;
+}
+
+.mt-spin {
+    animation: mt-spin 1s linear infinite;
 }
 
 @media (min-width: 769px) {

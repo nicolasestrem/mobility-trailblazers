@@ -329,4 +329,22 @@ class MT_Assignment_Service implements MT_Service_Interface {
         
         return $stats;
     }
+    
+    /**
+     * Auto assign candidates to jury members
+     *
+     * @param string $method Assignment method (balanced/random)
+     * @param int $candidates_per_jury Number of candidates per jury member
+     * @return bool
+     */
+    public function auto_assign($method, $candidates_per_jury) {
+        $data = [
+            'assignment_type' => 'auto',
+            'distribution_type' => $method,
+            'candidates_per_jury' => $candidates_per_jury,
+            'clear_existing' => true
+        ];
+        
+        return $this->process_auto_assignment($data);
+    }
 } 

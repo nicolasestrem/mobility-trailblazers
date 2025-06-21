@@ -159,7 +159,7 @@ $diagnostics['ajax'] = [
 // 8. Recent Activity
 $diagnostics['activity'] = [
     'recent_evaluations' => $evaluation_repo->find_all(['limit' => 5, 'orderby' => 'created_at', 'order' => 'DESC']),
-    'recent_assignments' => $assignment_repo->find_all(['limit' => 5, 'orderby' => 'assigned_at', 'order' => 'DESC'])
+    'recent_assignments' => $assignment_repo->find_all(['limit' => 5, 'orderby' => 'id', 'order' => 'DESC'])
 ];
 
 // 9. Statistics
@@ -264,6 +264,12 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
             \MobilityTrailblazers\Core\MT_Database_Upgrade::run();
             $test_result = __('Database upgrade completed!', 'mobility-trailblazers');
             break;
+            
+        case 'force_db_upgrade':
+            // Force database upgrade
+            \MobilityTrailblazers\Core\MT_Database_Upgrade::force_upgrade();
+            $test_result = __('Database upgrade forced and completed!', 'mobility-trailblazers');
+            break;
     }
 }
 ?>
@@ -308,6 +314,12 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
             <?php wp_nonce_field('mt_diagnostics'); ?>
             <input type="hidden" name="test_action" value="run_db_upgrade">
             <button type="submit" class="button button-primary"><?php _e('Run Database Upgrade', 'mobility-trailblazers'); ?></button>
+        </form>
+        
+        <form method="post" style="display: inline-block; margin-right: 10px;">
+            <?php wp_nonce_field('mt_diagnostics'); ?>
+            <input type="hidden" name="test_action" value="force_db_upgrade">
+            <button type="submit" class="button button-primary" style="background: #d63638; border-color: #d63638;"><?php _e('Force Database Upgrade', 'mobility-trailblazers'); ?></button>
         </form>
         
         <form method="post" style="display: inline-block; margin-right: 10px;" onsubmit="return confirm('<?php esc_attr_e('Are you sure you want to clear all assignments? This cannot be undone!', 'mobility-trailblazers'); ?>');">

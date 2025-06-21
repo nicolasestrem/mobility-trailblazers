@@ -40,6 +40,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         // Data management actions
         add_action('wp_ajax_mt_clear_data', [$this, 'clear_data']);
+        add_action('wp_ajax_mt_force_db_upgrade', [$this, 'force_db_upgrade']);
     }
     
     /**
@@ -386,6 +387,23 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
                     $this->error(__('Failed to clear assignments.', 'mobility-trailblazers'));
                 }
                 break;
+        }
+    }
+    
+    /**
+     * Force database upgrade
+     *
+     * @return void
+     */
+    public function force_db_upgrade() {
+        $this->verify_nonce('mt_admin_nonce');
+        $this->check_permission('mt_manage_settings');
+        
+        try {
+            \MobilityTrailblazers\Core\MT_Database_Upgrade::force_upgrade();
+            $this->success([], __('Database upgrade completed successfully!', 'mobility-trailblazers'));
+        } catch (Exception $e) {
+            $this->error(__('Database upgrade failed: ', 'mobility-trailblazers') . $e->getMessage());
         }
     }
     

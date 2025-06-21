@@ -53,6 +53,12 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
         }
         
+        // Get status (draft or completed)
+        $status = $this->get_param('status', 'completed');
+        if (!in_array($status, ['draft', 'completed'])) {
+            $status = 'completed';
+        }
+        
         // Prepare evaluation data
         $data = [
             'jury_member_id' => $jury_member->ID,
@@ -63,21 +69,28 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'relevance_score' => $this->get_int_param('relevance_score'),
             'visibility_score' => $this->get_int_param('visibility_score'),
             'comments' => $this->get_textarea_param('comments'),
-            'status' => 'completed'
+            'status' => $status
         ];
         
         // Process evaluation
         $service = new MT_Evaluation_Service();
-        $result = $service->submit_final($data);
+        
+        if ($status === 'draft') {
+            $result = $service->save_draft($data);
+            $message = __('Draft saved successfully!', 'mobility-trailblazers');
+        } else {
+            $result = $service->submit_final($data);
+            $message = __('Evaluation submitted successfully!', 'mobility-trailblazers');
+        }
         
         if ($result) {
             $this->success(
                 ['evaluation_id' => $result],
-                __('Evaluation submitted successfully!', 'mobility-trailblazers')
+                $message
             );
         } else {
             $this->error(
-                __('Failed to submit evaluation.', 'mobility-trailblazers'),
+                __('Failed to save evaluation.', 'mobility-trailblazers'),
                 ['errors' => $service->get_errors()]
             );
         }

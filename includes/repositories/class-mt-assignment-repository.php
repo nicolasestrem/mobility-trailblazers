@@ -64,13 +64,19 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         $defaults = [
             'jury_member_id' => null,
             'candidate_id' => null,
-            'orderby' => 'assigned_at',
+            'orderby' => 'id',
             'order' => 'DESC',
             'limit' => -1,
             'offset' => 0
         ];
         
         $args = wp_parse_args($args, $defaults);
+        
+        // Check if assigned_at column exists, if not use id for ordering
+        $columns = $wpdb->get_col("SHOW COLUMNS FROM {$this->table_name}");
+        if ($args['orderby'] === 'assigned_at' && !in_array('assigned_at', $columns)) {
+            $args['orderby'] = 'id';
+        }
         
         // Build query
         $where_clauses = ['1=1'];
