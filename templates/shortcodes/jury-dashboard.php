@@ -246,31 +246,3 @@ $completion_rate = $total_assigned > 0 ? round(($completed_evaluations / $total_
         </div>
     </div>
 </div>
-
-<?php
-// Localize script data
-wp_localize_script('mt-jury-dashboard', 'mt_jury_ajax', array(
-    'ajax_url' => admin_url('admin-ajax.php'),
-    'nonce' => wp_create_nonce('mt_jury_nonce'),
-    'default_avatar' => MT_PLUGIN_URL . 'assets/default-avatar.png',
-    'i18n' => array(
-        'completed' => __('Evaluated', 'mobility-trailblazers'),
-        'draft' => __('Draft', 'mobility-trailblazers'),
-        'pending' => __('Pending', 'mobility-trailblazers'),
-        'saving' => __('Saving...', 'mobility-trailblazers'),
-        'save_draft' => __('Save as Draft', 'mobility-trailblazers'),
-        'submit' => __('Submit Evaluation', 'mobility-trailblazers'),
-        'evaluate' => __('Evaluate', 'mobility-trailblazers'),
-        'view_evaluation' => __('View Evaluation', 'mobility-trailblazers'),
-        'confirm_submit' => __('Are you sure you want to submit this evaluation? This action cannot be undone.', 'mobility-trailblazers'),
-        'please_complete_scores' => __('Please complete all evaluation criteria before submitting.', 'mobility-trailblazers'),
-        'no_candidates_found' => __('No candidates found matching your search.', 'mobility-trailblazers'),
-        'error_loading' => __('Error loading data. Please try again.', 'mobility-trailblazers'),
-        'error_saving' => __('Error saving evaluation. Please try again.', 'mobility-trailblazers'),
-        'unsaved_changes' => __('You have unsaved changes. Are you sure you want to close?', 'mobility-trailblazers'),
-        'achievement' => __('Key Achievement', 'mobility-trailblazers'),
-        'impact' => __('Impact & Results', 'mobility-trailblazers'),
-        'vision' => __('Vision for Mobility', 'mobility-trailblazers'),
-    )
-));
-?>

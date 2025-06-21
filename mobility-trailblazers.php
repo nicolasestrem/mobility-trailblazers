@@ -167,9 +167,8 @@ class MobilityTrailblazersPlugin {
         $this->components['taxonomies'] = new MT_Taxonomies();
         $this->components['roles'] = new MT_Roles();
         
-        // Initialize AJAX handlers early to ensure they're registered
-        require_once MT_PLUGIN_DIR . 'includes/class-mt-ajax-handlers.php';
-        $this->components['ajax_handlers'] = new MT_AJAX_Handlers();
+        // Note: AJAX handlers are now initialized separately via the new AJAX classes
+        // (MT_Evaluation_Ajax, MT_Assignment_Ajax, MT_Voting_Ajax) to avoid conflicts
         
         // Initialize functionality components
         $this->components['shortcodes'] = new MT_Shortcodes();

@@ -244,3 +244,8 @@ For issues not covered by the test scripts:
 ---
 
 *This changelog is maintained as part of the Mobility Trailblazers Award System plugin development process.*
+
+## [Unreleased]
+- Removed old `MT_AJAX_Handlers` initialization to prevent duplicate/conflicting AJAX handler registration.
+- Created `MT_Admin_Ajax` for admin/utility AJAX actions previously handled by the old class.
+- Jury dashboard and all AJAX actions now return proper JSON responses without HTML fallback or handler conflicts.

@@ -78,7 +78,7 @@ class MT_Jury_System {
         );
         
         // Localize script
-        wp_localize_script('mt_jury_dashboard', 'mt_jury_ajax', array(
+        wp_localize_script('mt-jury-dashboard', 'mt_jury_ajax', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'rest_url' => rest_url(),
             'nonce' => wp_create_nonce('mt_jury_nonce'),

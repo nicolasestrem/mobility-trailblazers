@@ -1722,17 +1722,21 @@ class MT_REST_API {
             }
         }
         
-        if (!$has_jury_role) {
-            return false;
+        // Also check if user has the capability
+        $has_capability = current_user_can('mt_submit_evaluations');
+        
+        // Allow if user has either jury role or capability
+        if ($has_jury_role || $has_capability) {
+            // Verify nonce
+            $nonce = $request->get_param('nonce');
+            if (!wp_verify_nonce($nonce, 'mt_jury_nonce')) {
+                return false;
+            }
+            return true;
         }
         
-        // Verify nonce
-        $nonce = $request->get_param('nonce');
-        if (!wp_verify_nonce($nonce, 'mt_jury_nonce')) {
-            return false;
-        }
-        
-        return true;
+        // If we get here, user doesn't have proper permissions
+        return false;
     }
     
     /**

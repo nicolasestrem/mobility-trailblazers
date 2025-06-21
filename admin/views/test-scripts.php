@@ -198,6 +198,19 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Test AJAX Conflict Fix', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Test if the AJAX conflict has been resolved and verify that jury dashboard AJAX handlers are working properly.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_ajax_conflict_fix_test')); ?>" class="button button-primary">
+                    <?php _e('Test AJAX Conflict Fix', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'test-ajax-conflict-fix.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
     </div>
     
     <?php
@@ -363,6 +376,18 @@ if (!defined('ABSPATH')) {
                     echo '<pre>' . esc_html($output) . '</pre>';
                 } else {
                     echo '<p class="error">' . __('Permissions debug script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_ajax_conflict_fix_test':
+                echo '<h3>' . __('AJAX Conflict Fix Test Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'test-ajax-conflict-fix.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'test-ajax-conflict-fix.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('AJAX conflict fix test script file not found.', 'mobility-trailblazers') . '</p>';
                 }
                 break;
                 
