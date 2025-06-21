@@ -325,13 +325,13 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         );
         
         if ($averages) {
-            $stats['average_score'] = round($averages->avg_total, 2);
+            $stats['average_score'] = $averages->avg_total ? round($averages->avg_total, 2) : 0;
             $stats['by_criteria'] = [
-                'courage' => round($averages->avg_courage, 2),
-                'innovation' => round($averages->avg_innovation, 2),
-                'implementation' => round($averages->avg_implementation, 2),
-                'relevance' => round($averages->avg_relevance, 2),
-                'visibility' => round($averages->avg_visibility, 2)
+                'courage' => $averages->avg_courage ? round($averages->avg_courage, 2) : 0,
+                'innovation' => $averages->avg_innovation ? round($averages->avg_innovation, 2) : 0,
+                'implementation' => $averages->avg_implementation ? round($averages->avg_implementation, 2) : 0,
+                'relevance' => $averages->avg_relevance ? round($averages->avg_relevance, 2) : 0,
+                'visibility' => $averages->avg_visibility ? round($averages->avg_visibility, 2) : 0
             ];
         }
         

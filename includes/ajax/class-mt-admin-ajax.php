@@ -37,6 +37,9 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         // Dashboard actions
         add_action('wp_ajax_mt_get_dashboard_stats', [$this, 'get_dashboard_stats']);
+        
+        // Data management actions
+        add_action('wp_ajax_mt_clear_data', [$this, 'clear_data']);
     }
     
     /**
@@ -348,6 +351,42 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             'assignments' => $assign_stats,
             'top_candidates' => $top_candidates
         ]);
+    }
+    
+    /**
+     * Clear data based on type
+     *
+     * @return void
+     */
+    public function clear_data() {
+        $this->verify_nonce('mt_clear_data');
+        $this->check_permission('mt_manage_settings');
+        
+        $type = $this->get_string_param('type');
+        
+        if (!in_array($type, ['evaluations', 'assignments'])) {
+            $this->error(__('Invalid data type.', 'mobility-trailblazers'));
+        }
+        
+        global $wpdb;
+        
+        switch ($type) {
+            case 'evaluations':
+                if (\MobilityTrailblazers\Core\MT_Database_Upgrade::clear_evaluations()) {
+                    $this->success([], __('All evaluations have been cleared.', 'mobility-trailblazers'));
+                } else {
+                    $this->error(__('Failed to clear evaluations.', 'mobility-trailblazers'));
+                }
+                break;
+                
+            case 'assignments':
+                if (\MobilityTrailblazers\Core\MT_Database_Upgrade::clear_assignments()) {
+                    $this->success([], __('All assignments have been cleared.', 'mobility-trailblazers'));
+                } else {
+                    $this->error(__('Failed to clear assignments.', 'mobility-trailblazers'));
+                }
+                break;
+        }
     }
     
     /**

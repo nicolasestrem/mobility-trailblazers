@@ -74,7 +74,8 @@ class MT_Roles {
             'mt_manage_settings',
             'mt_export_data',
             'mt_import_data',
-            'mt_view_reports'
+            'mt_view_reports',
+            'mt_jury_admin'
         ];
         
         $admin_role = get_role('administrator');
@@ -166,7 +167,8 @@ class MT_Roles {
             'mt_export_data',
             'mt_import_data',
             'mt_view_reports',
-            'mt_view_assigned_candidates'
+            'mt_view_assigned_candidates',
+            'mt_jury_admin'
         ];
         
         $roles = ['administrator', 'editor', 'mt_jury_member'];

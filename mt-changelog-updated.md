@@ -5,6 +5,53 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-06-21
+
+### Added
+- **Diagnostics Page**: Comprehensive debugging interface for administrators and jury admins
+  - System information display (PHP version, WordPress version, memory limits)
+  - Database table verification with row counts
+  - Post types and taxonomies registration status
+  - User roles and capabilities checker
+  - Plugin settings overview
+  - AJAX endpoints documentation
+  - Recent activity monitoring
+  - Error log viewer (filters plugin-specific errors)
+  - Quick tests for database operations, AJAX calls, and permissions
+  - Export diagnostic data for support
+
+### Fixed
+- **Autoloader Interface Loading**: Fixed fatal error when loading interface files
+  - Updated autoloader to properly handle `_Interface` suffix in class names
+  - Now correctly maps interface classes to `interface-*.php` files
+  - Resolves "Interface not found" errors that prevented admin dashboard from loading
+- **PHP Deprecated Warnings**: Fixed deprecated warnings for null values in round() function
+  - Added null checks in evaluation statistics calculation
+  - Ensures compatibility with PHP 8.1+
+- **Missing Admin Templates**: Created missing admin template files
+  - Added `evaluations.php` template for evaluations management
+  - Added `assignments.php` template for jury assignments
+  - Added `import-export.php` template for data import/export
+  - Added `settings.php` template for plugin settings
+- **Data Management**: Added AJAX handler for clearing data
+  - Implemented `mt_clear_data` action for clearing evaluations and assignments
+  - Added proper permission checks and nonce verification
+- **Version Constant**: Updated MT_VERSION constant to match plugin version
+- **Database Schema Issues**: Fixed missing columns in existing tables
+  - Added automatic database upgrade system
+  - Checks and adds missing `comments` column to evaluations table
+  - Checks and adds missing `assigned_at` and `assigned_by` columns to assignments table
+  - Adds missing indexes for better performance
+  - Database upgrades run automatically on plugin initialization
+
+### Technical Details
+- Fixed regex pattern in `MT_Autoloader::autoload()` to be case-insensitive
+- Interface files now load correctly: `MT_Repository_Interface` → `interface-mt-repository.php`
+- Added null coalescing operators in `get_statistics()` method to prevent deprecated warnings
+- All admin pages now render correctly without template not found errors
+- Created `MT_Database_Upgrade` class to handle schema migrations
+- Added database operation buttons to diagnostics page for maintenance tasks
+
 ## [2.0.0] - 2024-01-21
 
 ### 🎉 Major Release - Complete Rebuild

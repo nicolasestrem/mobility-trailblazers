@@ -53,6 +53,9 @@ class MT_Plugin {
      * @return void
      */
     public function init() {
+        // Check for database upgrades
+        MT_Database_Upgrade::run();
+        
         // Register post types
         $post_types = new MT_Post_Types();
         $post_types->init();

@@ -69,7 +69,16 @@ class MT_Autoloader {
         $subdirectory = !empty($parts) ? strtolower(implode('/', $parts)) . '/' : '';
         
         // Convert class name to file name
-        $file_name = 'class-' . str_replace('_', '-', strtolower($class_name)) . '.php';
+        // Determine if this is an interface or class
+        if (strpos($class_name, '_Interface') !== false || strpos($class_name, 'Interface') !== false) {
+            // For interfaces, use 'interface-' prefix
+            // Remove '_Interface' suffix (case-insensitive) and convert to filename
+            $interface_name = preg_replace('/_?Interface$/i', '', $class_name);
+            $file_name = 'interface-' . str_replace('_', '-', strtolower($interface_name)) . '.php';
+        } else {
+            // For classes, use 'class-' prefix
+            $file_name = 'class-' . str_replace('_', '-', strtolower($class_name)) . '.php';
+        }
         
         // Build the file path
         $file = self::$base_dir . $subdirectory . $file_name;

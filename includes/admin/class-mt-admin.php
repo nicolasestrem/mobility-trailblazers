@@ -104,6 +104,18 @@ class MT_Admin {
             'mt-settings',
             [$this, 'render_settings_page']
         );
+        
+        // Diagnostics submenu (for admins and jury admins)
+        if (current_user_can('manage_options') || current_user_can('mt_jury_admin')) {
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Diagnostics', 'mobility-trailblazers'),
+                __('Diagnostics', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-diagnostics',
+                [$this, 'render_diagnostics_page']
+            );
+        }
     }
     
     /**
@@ -329,6 +341,15 @@ class MT_Admin {
      */
     public function render_settings_page() {
         include MT_PLUGIN_DIR . 'templates/admin/settings.php';
+    }
+    
+    /**
+     * Render diagnostics page
+     *
+     * @return void
+     */
+    public function render_diagnostics_page() {
+        include MT_PLUGIN_DIR . 'templates/admin/diagnostics.php';
     }
     
     /**
