@@ -123,6 +123,19 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+        
+        <div class="mt-test-script-card">
+            <h2><?php _e('Jury Shortcode Debug', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Debug script to test the jury dashboard shortcode functionality and identify why it\'s not displaying.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_jury_shortcode_debug')); ?>" class="button button-primary">
+                    <?php _e('Run Shortcode Debug', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'debug-jury-shortcode.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
     </div>
     
     <?php
@@ -228,6 +241,18 @@ if (!defined('ABSPATH')) {
                     echo '<pre>' . esc_html($output) . '</pre>';
                 } else {
                     echo '<p class="error">' . __('Elementor webpack fix script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_jury_shortcode_debug':
+                echo '<h3>' . __('Jury Shortcode Debug Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'debug-jury-shortcode.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'debug-jury-shortcode.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('Jury shortcode debug script file not found.', 'mobility-trailblazers') . '</p>';
                 }
                 break;
                 

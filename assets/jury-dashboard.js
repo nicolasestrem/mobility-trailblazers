@@ -103,7 +103,13 @@
                     if (response.success) {
                         MTJuryDashboard.updateDashboard(response.data);
                     } else {
-                        MTJuryDashboard.showNotification(response.data.message, 'error');
+                        let msg = 'An unknown error occurred.';
+                        if (response && response.data && response.data.message) {
+                            msg = response.data.message;
+                        } else {
+                            console.warn('AJAX error response:', response);
+                        }
+                        MTJuryDashboard.showNotification(msg, 'error');
                     }
                 },
                 error: function() {
@@ -218,7 +224,13 @@
                         $('#evaluation-modal').addClass('active');
                         $('body').addClass('modal-open');
                     } else {
-                        MTJuryDashboard.showNotification(response.data.message, 'error');
+                        let msg = 'An unknown error occurred.';
+                        if (response && response.data && response.data.message) {
+                            msg = response.data.message;
+                        } else {
+                            console.warn('AJAX error response:', response);
+                        }
+                        MTJuryDashboard.showNotification(msg, 'error');
                     }
                 },
                 error: function() {
@@ -415,7 +427,13 @@
                             MTJuryDashboard.formDirty = false;
                         }
                     } else {
-                        MTJuryDashboard.showNotification(response.data.message, 'error');
+                        let msg = 'An unknown error occurred.';
+                        if (response && response.data && response.data.message) {
+                            msg = response.data.message;
+                        } else {
+                            console.warn('AJAX error response:', response);
+                        }
+                        MTJuryDashboard.showNotification(msg, 'error');
                     }
                 },
                 error: function() {

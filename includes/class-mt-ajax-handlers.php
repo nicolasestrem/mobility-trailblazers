@@ -1656,15 +1656,31 @@ The application is currently in pending status and requires approval.', 'mobilit
             );
         }
         
-        wp_send_json_success(array(
+        $response_data = array(
             'stats' => array(
                 'total_assigned' => $total_assigned,
                 'completed' => $completed_evaluations,
                 'drafts' => $draft_evaluations,
+                'pending' => $total_assigned - $completed_evaluations - $draft_evaluations,
                 'completion_rate' => $completion_rate
             ),
             'candidates' => $candidates_data
-        ));
+        );
+        
+        // Add debug info if no candidates found
+        if ($total_assigned === 0) {
+            // Check if there are any candidates in the system
+            $total_candidates = wp_count_posts('mt_candidate')->publish;
+            $total_jury = wp_count_posts('mt_jury_member')->publish;
+            
+            $response_data['debug'] = array(
+                'total_candidates_in_system' => $total_candidates,
+                'total_jury_members_in_system' => $total_jury,
+                'message' => 'No candidates assigned to this jury member. Please contact an administrator to assign candidates.'
+            );
+        }
+        
+        wp_send_json_success($response_data);
     }
 
     /**
