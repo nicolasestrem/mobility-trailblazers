@@ -151,6 +151,33 @@ class MT_Elementor_Integration {
     public function enqueue_scripts() {
         // Ensure jQuery is loaded
         wp_enqueue_script('jquery');
+        
+        // Enqueue Elementor compatibility script with proper dependencies
+        wp_enqueue_script(
+            'mt-elementor-compat',
+            MT_PLUGIN_URL . 'assets/js/elementor-compat.js',
+            array('jquery', 'elementor-frontend'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
+        // Enqueue jury dashboard CSS
+        wp_enqueue_style(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.css',
+            array(),
+            MT_PLUGIN_VERSION
+        );
+        
+        // Enqueue jury dashboard JavaScript with proper dependencies
+        wp_enqueue_script(
+            'mt-jury-dashboard',
+            MT_PLUGIN_URL . 'assets/jury-dashboard.js',
+            array('jquery', 'mt-elementor-compat'),
+            MT_PLUGIN_VERSION,
+            true
+        );
+        
         // Add authentication check handling with proper error checking
         wp_add_inline_script('jquery', '
             jQuery(document).ready(function($) {
@@ -169,34 +196,8 @@ class MT_Elementor_Integration {
                 }
             });
         ');
-
-        // Enqueue Elementor compatibility script
-        wp_enqueue_script(
-            'mt-elementor-compat',
-            MT_PLUGIN_URL . 'assets/js/elementor-compat.js',
-            array('jquery', 'elementor-frontend', 'elementor-editor'),
-            MT_PLUGIN_VERSION,
-            true
-        );
         
-        // Enqueue jury dashboard CSS
-        wp_enqueue_style(
-            'mt-jury-dashboard',
-            MT_PLUGIN_URL . 'assets/jury-dashboard.css',
-            array(),
-            MT_PLUGIN_VERSION
-        );
-        
-        // Enqueue jury dashboard JavaScript
-        wp_enqueue_script(
-            'mt-jury-dashboard',
-            MT_PLUGIN_URL . 'assets/jury-dashboard.js',
-            array('jquery'),
-            MT_PLUGIN_VERSION,
-            true
-        );
-        
-        // Localize script
+        // Localize script with safety checks
         wp_localize_script('mt-elementor-compat', 'mt_elementor', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_elementor_nonce'),

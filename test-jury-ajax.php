@@ -3,9 +3,26 @@
  * Test jury dashboard AJAX functionality
  */
 
-// Load WordPress
-require_once 'wp-config.php';
-require_once 'wp-load.php';
+// Load WordPress only if not already loaded
+if (!defined('ABSPATH')) {
+    // Try to find wp-config.php relative to this file
+    $wp_config_path = dirname(__FILE__) . '/../../../wp-config.php';
+    if (file_exists($wp_config_path)) {
+        require_once $wp_config_path;
+        // wp-load.php should be in the same directory as wp-config.php
+        $wp_load_path = dirname($wp_config_path) . '/wp-load.php';
+        if (file_exists($wp_load_path)) {
+            require_once $wp_load_path;
+        } else {
+            // Fallback to current directory
+            require_once 'wp-load.php';
+        }
+    } else {
+        // Fallback to current directory
+        require_once 'wp-config.php';
+        require_once 'wp-load.php';
+    }
+}
 
 echo "=== Testing Jury Dashboard AJAX ===\n\n";
 
@@ -45,7 +62,11 @@ if (has_action('wp_ajax_mt_get_jury_dashboard_data')) {
         $handlers = $wp_filter['wp_ajax_mt_get_jury_dashboard_data'] ?? null;
         
         if ($handlers) {
-            echo "Found " . count($handlers) . " handler(s).\n";
+            if (is_object($handlers)) {
+                echo "Found handler object (WP_Hook).\n";
+            } else {
+                echo "Found " . count($handlers) . " handler(s).\n";
+            }
             
             // Test the evaluation AJAX handler
             $evaluation_ajax = new \MobilityTrailblazers\Ajax\MT_Evaluation_Ajax();

@@ -7,8 +7,20 @@
 (function($) {
     'use strict';
     
+    // Safety check: Ensure Elementor is loaded
+    if (typeof elementorFrontend === 'undefined') {
+        console.warn('Mobility Trailblazers: Elementor Frontend not loaded');
+        return;
+    }
+    
     // Wait for Elementor to be ready
     $(window).on('elementor/frontend/init', function() {
+        
+        // Safety check: Ensure hooks are available
+        if (typeof elementorFrontend.hooks === 'undefined') {
+            console.warn('Mobility Trailblazers: Elementor hooks not available');
+            return;
+        }
         
         // Re-initialize MT scripts after Elementor renders widgets
         elementorFrontend.hooks.addAction('frontend/element_ready/mt-candidates-grid.default', function($scope) {
@@ -84,6 +96,13 @@
             var candidateId = $button.data('candidate-id');
             
             if (!candidateId) return;
+            
+            // Safety check: Ensure mt_elementor is available
+            if (typeof mt_elementor === 'undefined') {
+                console.error('Mobility Trailblazers: mt_elementor not loaded');
+                alert('Configuration error. Please refresh the page.');
+                return;
+            }
             
             $button.prop('disabled', true).text(mt_elementor.voting_text || 'Voting...');
             
@@ -162,6 +181,13 @@
             var $button = $(this);
             var page = parseInt($button.data('page')) + 1;
             
+            // Safety check: Ensure mt_elementor is available
+            if (typeof mt_elementor === 'undefined') {
+                console.error('Mobility Trailblazers: mt_elementor not loaded');
+                alert('Configuration error. Please refresh the page.');
+                return;
+            }
+            
             $button.prop('disabled', true).text('Loading...');
             
             $.ajax({
@@ -195,8 +221,22 @@
      * Initialize Jury Dashboard functionality
      */
     function initJuryDashboard($scope) {
-        if (typeof MTJuryDashboard !== 'undefined') {
+        // Safety check: Ensure MTJuryDashboard is available
+        if (typeof MTJuryDashboard === 'undefined') {
+            console.warn('Mobility Trailblazers: MTJuryDashboard not loaded');
+            return;
+        }
+        
+        // Safety check: Ensure init method exists
+        if (typeof MTJuryDashboard.init !== 'function') {
+            console.warn('Mobility Trailblazers: MTJuryDashboard.init is not a function');
+            return;
+        }
+        
+        try {
             MTJuryDashboard.init();
+        } catch (error) {
+            console.error('Mobility Trailblazers: Error initializing jury dashboard:', error);
         }
     }
     
@@ -210,6 +250,13 @@
         
         $form.on('submit', function(e) {
             e.preventDefault();
+            
+            // Safety check: Ensure mt_elementor is available
+            if (typeof mt_elementor === 'undefined') {
+                console.error('Mobility Trailblazers: mt_elementor not loaded');
+                alert('Configuration error. Please refresh the page.');
+                return;
+            }
             
             var formData = new FormData(this);
             formData.append('action', 'mt_submit_registration');

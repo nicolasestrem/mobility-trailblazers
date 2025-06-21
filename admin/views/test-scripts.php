@@ -71,6 +71,45 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+        
+        <div class="mt-test-script-card">
+            <h2><?php _e('Elementor Compatibility Debug', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Debug script to check Elementor compatibility and identify JavaScript conflicts.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_elementor_debug')); ?>" class="button button-primary">
+                    <?php _e('Run Elementor Debug', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'debug-elementor.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+        
+        <div class="mt-test-script-card">
+            <h2><?php _e('Fix Elementor Database', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Fix script to resolve Elementor database initialization issues and JavaScript errors.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_elementor_db_fix')); ?>" class="button button-primary">
+                    <?php _e('Run Elementor DB Fix', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'fix-elementor-database.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+        
+        <div class="mt-test-script-card">
+            <h2><?php _e('Verify MU Plugin', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Verification script to check if the Elementor REST fix mu-plugin is properly installed and working.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_mu_plugin_verify')); ?>" class="button button-primary">
+                    <?php _e('Verify MU Plugin', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'verify-mu-plugin.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
     </div>
     
     <?php
@@ -128,6 +167,42 @@ if (!defined('ABSPATH')) {
                     echo '<pre>' . esc_html($output) . '</pre>';
                 } else {
                     echo '<p class="error">' . __('Fix script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_elementor_debug':
+                echo '<h3>' . __('Elementor Compatibility Debug Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'debug-elementor.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'debug-elementor.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('Elementor debug script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_elementor_db_fix':
+                echo '<h3>' . __('Elementor Database Fix Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'fix-elementor-database.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'fix-elementor-database.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('Elementor database fix script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_mu_plugin_verify':
+                echo '<h3>' . __('MU Plugin Verification Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'verify-mu-plugin.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'verify-mu-plugin.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('MU plugin verification script file not found.', 'mobility-trailblazers') . '</p>';
                 }
                 break;
                 
