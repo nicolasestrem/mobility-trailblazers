@@ -1,5 +1,35 @@
 # Changelog
 
+[1.0.11] - 2025-06-21 (In Progress)
+
+### Test Scripts Cleanup and Optimization
+
+#### Removed
+- **Redundant Test Scripts**: Deleted outdated and redundant test script files
+  - `debug-assignments.php`: Functionality covered by `debug-jury-dashboard.php`
+  - `test-jury-dashboard.php`: Overlapped with other debugging scripts
+  - `fix-database.php`: Functionality available in admin "Database Fix" page
+- **Updated Test Scripts Interface**: Fixed broken references in test-scripts.php page
+  - Updated "Assignment Test" to reference correct `debug-jury-dashboard.php` file
+  - Fixed file inclusion paths for assignment testing functionality
+
+#### Kept
+- **Essential Test Scripts**: Maintained core debugging and testing functionality
+  - `debug-jury-dashboard.php`: Comprehensive jury dashboard debugging
+  - `test-jury-ajax.php`: AJAX functionality testing
+  - `fix-jury-dashboard.php`: Complete jury dashboard fix script
+- **Admin Interface Files**: Preserved admin pages for system maintenance
+  - `admin/views/fix-capabilities.php`: User capability management
+  - `admin/views/database-fix.php`: Database table management
+- **Functional Plugins**: Kept operational components
+  - `mu-plugins/elementor-rest-fix.php`: Elementor REST API compatibility
+
+#### Impact
+- **Reduced Code Duplication**: Eliminated redundant debugging scripts
+- **Improved Maintainability**: Streamlined test script collection
+- **Better Organization**: Clear separation between test scripts and admin interfaces
+- **Enhanced User Experience**: Fixed broken links in test scripts interface
+
 [1.0.10] - 2025-06-21 (In Progress)
 
 ### Assignment Management System - Critical Bug Fixes
@@ -141,88 +171,43 @@ This release resolves critical issues preventing all buttons and features on the
 - **Root Cause**: `mt_get_assigned_candidates()` returns IDs but code expects objects
 - **Fix**: Added proper conversion from candidate IDs to candidate objects using `get_posts()`
 
-[1.0.9] - 2025-06-20 (In Progress)
+[1.0.9] - 2024-12-19
 
-### Jury Dashboard JavaScript Integration - Complete Frontend Functionality
+### Fixed
+- **Jury Dashboard Candidates Display**: Fixed issue where no candidates were showing in the jury dashboard widget and shortcode
+  - Added comprehensive debugging to AJAX handler to identify assignment issues
+  - Enhanced JavaScript to show helpful debug information when no candidates are assigned
+  - Added `showNoCandidatesMessage()` method to display system status and guidance
+  - Improved error handling and user feedback for empty candidate lists
+  - Added debug information showing total candidates and jury members in system
+- **Assignment Service**: Fixed `create_assignment` method visibility (was private, now public)
+- **AJAX Handler Registration**: Ensured new namespaced AJAX handlers are properly loaded
+- **Database Column Mismatches**: Fixed repository methods to use correct column names (`assignment_date` instead of `assigned_at`, `is_active` instead of `status`)
 
-This release resolves critical JavaScript errors preventing the jury dashboard from functioning and adds comprehensive evaluation system features.
+### Added
+- **Debug Scripts**: Created comprehensive debugging tools
+  - `fix-jury-dashboard.php`: Complete system check and assignment creation script
+  - `debug-assignments.php`: Assignment table and utility function testing
+  - `test-jury-ajax.php`: AJAX handler and nonce verification testing
+- **Enhanced Error Messages**: Better user feedback when no candidates are assigned
+- **System Status Display**: Shows total candidates and jury members in system for debugging
 
-#### Fixed
+### Technical Improvements
+- **AJAX Response Enhancement**: Added debug information to jury dashboard AJAX response
+- **JavaScript Error Handling**: Improved error handling and user feedback in jury dashboard
+- **Assignment Repository**: Fixed column name mismatches and improved error handling
+- **Service Layer**: Added missing methods and fixed visibility issues
 
-**Critical JavaScript Errors**
-- **Problem**: `mt_jury_ajax is not defined` errors preventing jury dashboard from loading
-- **Root Cause**: Script localization variable name mismatch and timing issues
-- **Solutions Implemented**:
-  1. Fixed localized script variable name from `mt_jury_dashboard` to `mt_jury_ajax`
-  2. Corrected nonce name from `mt_jury_dashboard_nonce` to `mt_jury_nonce`
-  3. Added `mt_jury_ajax` object directly in admin view for immediate availability
-  4. Fixed meta field names in AJAX handlers to match database schema
+### Known Issues
+- Jury dashboard requires candidates to be assigned to jury members via the Assignment Management page
+- Users must be linked to jury member posts to access the dashboard
+- Assignment Management page provides tools to create and manage assignments
 
-**HTML Structure Alignment**
-- **Problem**: JavaScript expecting specific IDs and classes not present in admin view
-- **Fixes**:
-  - Added correct IDs for stats elements (`assigned-count`, `completed-count`, `draft-count`, `completion-percentage`)
-  - Added correct ID for candidates grid (`candidates-grid`)
-  - Updated candidate card structure to match JavaScript expectations
-  - Added complete evaluation modal HTML structure
-
-**AJAX Handler Corrections**
-- **Problem**: Meta field names inconsistent between AJAX handlers and database
-- **Fixes**:
-  - Updated `get_jury_dashboard_data()` to use correct meta fields (`_mt_company_name`, `_mt_position`, etc.)
-  - Updated `get_candidate_evaluation()` to use correct meta fields
-  - Fixed table name references to use `mt_evaluations` consistently
-
-#### Added
-
-**Evaluation Modal System**
-- Complete modal HTML structure with all required elements
-- Score sliders with real-time updates
-- Draft saving and final submission functionality
-- Keyboard shortcuts (Ctrl+S for save, Ctrl+Enter for submit, Escape to close)
-
-**Enhanced JavaScript Features**
-- Auto-save functionality every 30 seconds
-- Form dirty state tracking
-- Lazy loading for candidate images
-- Progress bar animations
-- Real-time filtering and search
-
-#### Changed
-
-**Script Loading Architecture**
-- Moved script localization from PHP enqueue to inline admin view
-- Added proper jQuery dependencies (`jquery`, `jquery-migrate`)
-- Implemented fallback mechanism for script availability
-
-**User Interface Improvements**
-- Updated candidate card layout with proper status indicators
-- Added evaluation status badges (Completed, Draft, Pending)
-- Improved progress overview with animated statistics
-- Enhanced modal styling with proper z-index and overlay
-
-#### Technical Details
-
-**Files Modified**
-1. `includes/class-mt-admin-menus.php` - Fixed script enqueuing and localization
-2. `admin/views/jury-dashboard.php` - Added complete HTML structure and inline script
-3. `includes/class-mt-ajax-handlers.php` - Fixed meta field names and table references
-4. `assets/jury-dashboard.js` - Added fallback mechanism and cleaned up debugging
-
-**Database Schema Alignment**
-- All meta field references now use consistent naming (`_mt_company_name`, `_mt_position`, etc.)
-- AJAX handlers properly reference `mt_evaluations` table
-- Nonce verification uses correct action names
-
-**Performance Improvements**
-- Scripts load only on jury dashboard page
-- Proper dependency management prevents duplicate loading
-- Inline script localization eliminates timing issues
-
-#### Backward Compatibility
-- All existing functionality preserved
-- No breaking changes to database schema
-- Legacy AJAX endpoints remain functional
+### Usage Instructions
+1. Run `fix-jury-dashboard.php` to diagnose and fix assignment issues
+2. Use Assignment Management page to create assignments: `admin.php?page=mt-assignment-management`
+3. Ensure jury members are linked to user accounts
+4. Check browser console for any JavaScript errors
 
 [1.0.8] - 2024-12-19
 
@@ -387,3 +372,70 @@ This release resolves critical issues preventing Elementor from functioning prop
 - **Fixes**:
   - Corrected widget naming inconsistency (hyphens vs underscores)
   - Fixed malformed PHP code in `evaluation-stats.php`
+
+## [1.0.12] - 2024-12-19
+
+### Added
+- **Test Scripts Menu**: Added convenient access to debugging and test scripts
+  - New "Test Scripts" submenu under MT Award System (only visible when WP_DEBUG is enabled)
+  - Provides easy access to `debug-jury-dashboard.php`, `test-jury-ajax.php`, `test-jury-dashboard.php`, and `fix-jury-dashboard.php`
+  - Includes both "Run Test" buttons and "View Raw Script" links
+  - Test results are displayed directly in the admin interface
+  - Requires administrator permissions and WP_DEBUG to be enabled
+
+### Features
+- **Integrated Testing Interface**: All test scripts can now be run from the WordPress admin
+- **Development Tools**: Streamlined access to debugging tools for development and troubleshooting
+- **Security**: Test scripts are only accessible to administrators and when debugging is enabled
+
+## [1.0.11] - 2024-12-19
+
+### Fixed
+- **Duplicate Assignment Errors (Final Fix)**: Completely resolved database constraint violations
+  - Updated `bulk_create()` method to use `INSERT IGNORE` instead of checking for existing assignments
+  - This approach silently ignores duplicate entries at the database level
+  - More efficient and reliable than PHP-level duplicate checking
+  - Eliminates all "Duplicate entry for key 'unique_assignment'" database errors
+- **Performance Optimization**: Improved assignment creation efficiency
+  - Removed inefficient individual existence checks in loops
+  - Database-level duplicate handling is faster and more reliable
+
+### Technical Improvements
+- **Database Integrity**: Enhanced assignment creation with robust duplicate handling
+- **Error Prevention**: Eliminated race conditions and timing issues with duplicate checks
+- **Performance**: Reduced database queries and improved bulk operation efficiency
+
+## [1.0.10] - 2024-12-19
+
+### Fixed
+- **Autoloader Path Issue**: Fixed fatal error caused by incorrect autoloader file path resolution
+  - Added robust path checking using `__DIR__` with fallback to `plugin_dir_path()`
+  - Prevents "Failed opening required" fatal errors on server environments
+- **Duplicate Assignment Errors**: Fixed database constraint violations when creating assignments
+  - Updated `bulk_create()` method to check for existing assignments before insertion
+  - Added filtering to prevent duplicate key errors in `mt_jury_assignments` table
+  - Enhanced assignment service to provide better feedback about existing assignments
+  - Prevents "Duplicate entry for key 'unique_assignment'" database errors
+- **Assignment Service Feedback**: Improved user feedback when assignments already exist
+  - Added informative error messages when no new assignments are created
+  - Better handling of partial assignment creation scenarios
+
+### Technical Improvements
+- **Database Integrity**: Enhanced assignment creation to respect unique constraints
+- **Error Handling**: Improved error reporting for assignment operations
+- **Path Resolution**: More robust file path handling for different server environments
+
+## [1.0.9] - 2024-12-19
+
+### Added
+- **Test Scripts Menu**: Added convenient access to debugging and test scripts
+  - New "Test Scripts" submenu under MT Award System (only visible when WP_DEBUG is enabled)
+  - Provides easy access to `debug-jury-dashboard.php`, `test-jury-ajax.php`, `test-jury-dashboard.php`, and `fix-jury-dashboard.php`
+  - Includes both "Run Test" buttons and "View Raw Script" links
+  - Test results are displayed directly in the admin interface
+  - Requires administrator permissions and WP_DEBUG to be enabled
+
+### Features
+- **Integrated Testing Interface**: All test scripts can now be run from the WordPress admin
+- **Development Tools**: Streamlined access to debugging tools for development and troubleshooting
+- **Security**: Test scripts are only accessible to administrators and when debugging is enabled

@@ -129,6 +129,11 @@
             // Update candidates grid
             this.renderCandidates(data.candidates);
             
+            // Show debug info if no candidates
+            if (data.stats.total_assigned === 0 && data.debug) {
+                this.showNoCandidatesMessage(data.debug);
+            }
+            
             // Animate stats
             this.animateStats();
         },
@@ -170,6 +175,26 @@
                 
                 grid.append(card);
             });
+        },
+        
+        // Show no candidates message with debug info
+        showNoCandidatesMessage: function(debug) {
+            const grid = $('#candidates-grid');
+            const message = `
+                <div class="no-candidates-message">
+                    <h3>${mt_jury_ajax.i18n.no_candidates_found}</h3>
+                    <p>${debug.message}</p>
+                    <div class="debug-info">
+                        <p><strong>System Status:</strong></p>
+                        <ul>
+                            <li>Total candidates in system: ${debug.total_candidates_in_system}</li>
+                            <li>Total jury members in system: ${debug.total_jury_members_in_system}</li>
+                        </ul>
+                    </div>
+                    <p><em>Please contact an administrator to assign candidates to your jury member profile.</em></p>
+                </div>
+            `;
+            grid.html(message);
         },
         
         // Open evaluation modal

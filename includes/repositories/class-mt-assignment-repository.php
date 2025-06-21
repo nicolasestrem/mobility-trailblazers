@@ -156,7 +156,8 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
                 );
             }
             
-            $query = "INSERT INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
+            // Use INSERT IGNORE to silently ignore duplicate entries
+            $query = "INSERT IGNORE INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
             $query .= implode(', ', $place_holders);
             
             $result = $wpdb->query($wpdb->prepare($query, $values));

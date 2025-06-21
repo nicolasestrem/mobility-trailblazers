@@ -173,6 +173,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
         $total_assigned = count($assigned_candidates);
         
+        // Debug information
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log("Jury Dashboard Debug - Jury Member ID: {$jury_member->ID}, Assigned Candidates: " . implode(', ', $assigned_candidates));
+        }
+        
         // Count evaluations
         $completed_evaluations = 0;
         $draft_evaluations = 0;
@@ -200,11 +205,24 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                     $status = 'draft';
                 }
                 
+                // Get excerpt
+                $excerpt = wp_trim_words($candidate->post_excerpt ?: $candidate->post_content, 20);
+                
+                // Get thumbnail
+                $thumbnail = get_the_post_thumbnail_url($candidate_id, 'medium');
+                
+                // Get category
+                $categories = wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'names'));
+                $category = !empty($categories) ? $categories[0] : '';
+                
                 $candidates_data[] = array(
                     'id' => $candidate_id,
                     'title' => $candidate->post_title,
+                    'excerpt' => $excerpt,
+                    'thumbnail' => $thumbnail,
                     'company' => get_post_meta($candidate_id, '_mt_company_name', true),
                     'position' => get_post_meta($candidate_id, '_mt_position', true),
+                    'category' => $category,
                     'status' => $status,
                     'evaluated_at' => mt_has_evaluated($candidate_id, $jury_member->ID) ? 
                         get_post_meta($candidate_id, '_mt_evaluated_at_' . $jury_member->ID, true) : null
@@ -222,6 +240,19 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             ),
             'candidates' => $candidates_data
         );
+        
+        // Add debug info if no candidates found
+        if ($total_assigned === 0) {
+            // Check if there are any candidates in the system
+            $total_candidates = wp_count_posts('mt_candidate')->publish;
+            $total_jury = wp_count_posts('mt_jury_member')->publish;
+            
+            $response_data['debug'] = array(
+                'total_candidates_in_system' => $total_candidates,
+                'total_jury_members_in_system' => $total_jury,
+                'message' => 'No candidates assigned to this jury member. Please contact an administrator to assign candidates.'
+            );
+        }
         
         $this->success($response_data);
     }

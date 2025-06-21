@@ -235,7 +235,19 @@ class MT_Assignment_Service implements MT_Service_Interface {
             }
         }
         
-        return $this->repository->bulk_create($assignments);
+        $result = $this->repository->bulk_create($assignments);
+        
+        // Provide feedback about the operation
+        if ($result === 0) {
+            $this->errors[] = __('All assignments already exist. No new assignments were created.', 'mobility-trailblazers');
+        } elseif ($result < count($assignments)) {
+            $this->errors[] = sprintf(
+                __('Created %d new assignments. Some assignments already existed.', 'mobility-trailblazers'),
+                $result
+            );
+        }
+        
+        return $result;
     }
     
     /**

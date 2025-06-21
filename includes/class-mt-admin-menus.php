@@ -135,6 +135,18 @@ class MT_Admin_Menus {
             array($this, 'render_database_fix_page')
         );
         
+        // Test Scripts (Development/Testing)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            add_submenu_page(
+                'mt-award-system',
+                __('Test Scripts', 'mobility-trailblazers'),
+                __('Test Scripts', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-test-scripts',
+                array($this, 'render_test_scripts_page')
+            );
+        }
+        
         // Jury Dashboard (for jury members)
         if (mt_is_jury_member()) {
             add_menu_page(
@@ -345,6 +357,24 @@ class MT_Admin_Menus {
         
         // Include template
         include MT_PLUGIN_DIR . 'admin/views/database-fix.php';
+    }
+    
+    /**
+     * Render test scripts page
+     */
+    public function render_test_scripts_page() {
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+        }
+        
+        // Check if WP_DEBUG is enabled
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            wp_die(__('Test scripts are only available when WP_DEBUG is enabled.', 'mobility-trailblazers'));
+        }
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'admin/views/test-scripts.php';
     }
     
     /**
