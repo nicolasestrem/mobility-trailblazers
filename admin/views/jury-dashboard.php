@@ -18,8 +18,21 @@ if (!$jury_member) {
 }
 
 // Get assigned candidates
-$assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
-$total_assigned = count($assigned_candidates);
+$assigned_candidate_ids = mt_get_assigned_candidates($jury_member->ID);
+$total_assigned = count($assigned_candidate_ids);
+
+// Convert IDs to candidate objects
+$assigned_candidates = array();
+if (!empty($assigned_candidate_ids)) {
+    $assigned_candidates = get_posts(array(
+        'post_type' => 'mt_candidate',
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'post__in' => $assigned_candidate_ids,
+        'orderby' => 'title',
+        'order' => 'ASC'
+    ));
+}
 
 // Get evaluation statistics
 global $wpdb;

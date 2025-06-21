@@ -26,11 +26,9 @@ $mt_autoloader->register();
 
 // Initialize AJAX handlers for new Ajax classes
 add_action('init', function() {
-    if (wp_doing_ajax()) {
-        new \MobilityTrailblazers\Ajax\MT_Evaluation_Ajax();
-        new \MobilityTrailblazers\Ajax\MT_Assignment_Ajax();
-        new \MobilityTrailblazers\Ajax\MT_Voting_Ajax();
-    }
+    new \MobilityTrailblazers\Ajax\MT_Evaluation_Ajax();
+    new \MobilityTrailblazers\Ajax\MT_Assignment_Ajax();
+    new \MobilityTrailblazers\Ajax\MT_Voting_Ajax();
 });
 
 // Emergency Elementor REST API Fix
@@ -142,7 +140,6 @@ class MobilityTrailblazersPlugin {
         require_once MT_PLUGIN_DIR . 'includes/class-mt-shortcodes.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-meta-boxes.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-admin-menus.php';
-        require_once MT_PLUGIN_DIR . 'includes/class-mt-ajax-handlers.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-rest-api.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-jury-system.php';
         require_once MT_PLUGIN_DIR . 'includes/class-mt-diagnostic.php';
@@ -166,7 +163,6 @@ class MobilityTrailblazersPlugin {
         $this->components['shortcodes'] = new MT_Shortcodes();
         $this->components['meta_boxes'] = new MT_Meta_Boxes();
         $this->components['admin_menus'] = new MT_Admin_Menus();
-        $this->components['ajax_handlers'] = new MT_AJAX_Handlers();
         $this->components['rest_api'] = new MT_REST_API();
         $this->components['jury_system'] = new MT_Jury_System();
         $this->components['diagnostic'] = new MT_Diagnostic();

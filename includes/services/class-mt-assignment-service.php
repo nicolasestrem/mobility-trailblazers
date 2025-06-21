@@ -8,6 +8,11 @@
 
 namespace MobilityTrailblazers\Services;
 
+// Manual require for interface as fallback
+if (!interface_exists('MobilityTrailblazers\Interfaces\MT_Service_Interface')) {
+    require_once plugin_dir_path(dirname(__FILE__)) . 'interfaces/interface-mt-service.php';
+}
+
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 
@@ -180,18 +185,13 @@ class MT_Assignment_Service implements MT_Service_Interface {
      */
     private function get_active_jury_members() {
         $args = array(
-            'role' => 'mt_jury_member',
-            'meta_query' => array(
-                array(
-                    'key' => 'mt_jury_status',
-                    'value' => 'active',
-                    'compare' => '='
-                )
-            )
+            'post_type' => 'mt_jury_member',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
         );
         
-        $users = get_users($args);
-        return wp_list_pluck($users, 'ID');
+        return get_posts($args);
     }
     
     /**

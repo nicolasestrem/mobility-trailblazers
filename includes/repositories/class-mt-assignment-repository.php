@@ -8,6 +8,11 @@
 
 namespace MobilityTrailblazers\Repositories;
 
+// Manual require for interface as fallback
+if (!interface_exists('MobilityTrailblazers\Interfaces\MT_Repository_Interface')) {
+    require_once plugin_dir_path(dirname(__FILE__)) . 'interfaces/class-mt-repository-interface.php';
+}
+
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
 
 class MT_Assignment_Repository implements MT_Repository_Interface {
@@ -130,23 +135,43 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             return false;
         }
         
-        $values = array();
-        $place_holders = array();
+        // Process in smaller batches to avoid deadlocks
+        $batch_size = 50;
+        $total_assignments = count($assignments);
+        $success_count = 0;
         
-        foreach ($assignments as $assignment) {
-            $place_holders[] = "(%d, %d, %s, %d)";
-            array_push($values, 
-                $assignment['jury_member_id'],
-                $assignment['candidate_id'],
-                current_time('mysql'),
-                1 // is_active
-            );
+        for ($i = 0; $i < $total_assignments; $i += $batch_size) {
+            $batch = array_slice($assignments, $i, $batch_size);
+            
+            $values = array();
+            $place_holders = array();
+            
+            foreach ($batch as $assignment) {
+                $place_holders[] = "(%d, %d, %s, %d)";
+                array_push($values, 
+                    $assignment['jury_member_id'],
+                    $assignment['candidate_id'],
+                    current_time('mysql'),
+                    1 // is_active
+                );
+            }
+            
+            $query = "INSERT INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
+            $query .= implode(', ', $place_holders);
+            
+            $result = $wpdb->query($wpdb->prepare($query, $values));
+            
+            if ($result !== false) {
+                $success_count += $result;
+            }
+            
+            // Small delay between batches to reduce lock contention
+            if ($i + $batch_size < $total_assignments) {
+                usleep(10000); // 10ms delay
+            }
         }
         
-        $query = "INSERT INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
-        $query .= implode(', ', $place_holders);
-        
-        return $wpdb->query($wpdb->prepare($query, $values));
+        return $success_count;
     }
     
     /**

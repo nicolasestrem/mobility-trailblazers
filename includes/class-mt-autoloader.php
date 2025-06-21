@@ -80,11 +80,32 @@ class MT_Autoloader {
         // Build the file path
         $file = $base_dir . $relative_path . '.php';
         
-        // Convert to lowercase and add 'class-' prefix for consistency
+        // Convert to lowercase and add appropriate prefix
         $path_parts = explode('/', $file);
         $filename = array_pop($path_parts);
-        $filename = 'class-' . strtolower(str_replace('_', '-', $filename));
-        $file = implode('/', $path_parts) . '/' . $filename;
+        
+        // Check if this is an interface (starts with 'I' or 'Interface')
+        if (strpos($filename, 'Interface') !== false || strpos($filename, 'I_') !== false) {
+            // Try both interface- and class- prefixes for interfaces
+            $interface_filename = 'interface-' . strtolower(str_replace('_', '-', $filename));
+            $class_filename = 'class-' . strtolower(str_replace('_', '-', $filename));
+            
+            $interface_file = implode('/', $path_parts) . '/' . $interface_filename;
+            $class_file = implode('/', $path_parts) . '/' . $class_filename;
+            
+            // Check which file exists
+            if (file_exists($interface_file)) {
+                $file = $interface_file;
+            } elseif (file_exists($class_file)) {
+                $file = $class_file;
+            } else {
+                // If neither exists, try the interface- version
+                $file = $interface_file;
+            }
+        } else {
+            $filename = 'class-' . strtolower(str_replace('_', '-', $filename));
+            $file = implode('/', $path_parts) . '/' . $filename;
+        }
         
         // If the file exists, require it
         if (file_exists($file)) {
