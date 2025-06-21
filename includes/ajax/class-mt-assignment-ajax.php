@@ -134,7 +134,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
-        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
+        $candidate_id = isset($_POST['candidateId']) ? intval($_POST['candidateId']) : 0;
         
         if (!$jury_member_id || !$candidate_id) {
             wp_send_json_error(array('message' => __('Invalid assignment data', 'mobility-trailblazers')));

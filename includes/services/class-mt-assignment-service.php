@@ -151,7 +151,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
     /**
      * Create single assignment
      */
-    private function create_assignment($jury_member_id, $candidate_id) {
+    public function create_assignment($jury_member_id, $candidate_id) {
         // Check if assignment already exists
         if ($this->repository->exists($jury_member_id, $candidate_id)) {
             $this->errors[] = sprintf(
@@ -264,5 +264,78 @@ class MT_Assignment_Service implements MT_Service_Interface {
             do_action('mt_assignment_removed', $candidate_id, $jury_member_id);
         }
         return $result;
+    }
+    
+    /**
+     * Get assignment statistics
+     */
+    public function get_statistics() {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mt_jury_assignments';
+        
+        // Get total candidates
+        $total_candidates = wp_count_posts('mt_candidate')->publish;
+        
+        // Get total jury members
+        $total_jury = wp_count_posts('mt_jury_member')->publish;
+        
+        // Get assigned candidates count
+        $assigned_candidates = $wpdb->get_var("SELECT COUNT(DISTINCT candidate_id) FROM {$table} WHERE is_active = 1");
+        
+        // Get unassigned candidates count
+        $unassigned_candidates = $total_candidates - $assigned_candidates;
+        
+        // Get total assignments
+        $total_assignments = $wpdb->get_var("SELECT COUNT(*) FROM {$table} WHERE is_active = 1");
+        
+        // Get assignments per jury member
+        $assignments_per_jury = $wpdb->get_results("
+            SELECT jury_member_id, COUNT(*) as count 
+            FROM {$table} 
+            WHERE is_active = 1 
+            GROUP BY jury_member_id
+        ");
+        
+        $stats = array(
+            'total_candidates' => intval($total_candidates),
+            'total_jury_members' => intval($total_jury),
+            'assigned_candidates' => intval($assigned_candidates),
+            'unassigned_candidates' => intval($unassigned_candidates),
+            'total_assignments' => intval($total_assignments),
+            'assignments_per_jury' => $assignments_per_jury
+        );
+        
+        return $stats;
+    }
+    
+    /**
+     * Get all assignments for export
+     */
+    public function get_all_assignments_for_export() {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mt_jury_assignments';
+        
+        $query = "
+            SELECT 
+                jm.post_title as jury_name,
+                jm_meta.meta_value as jury_email,
+                c.post_title as candidate_name,
+                c_cat.name as category,
+                a.assignment_date
+            FROM {$table} a
+            LEFT JOIN {$wpdb->posts} jm ON a.jury_member_id = jm.ID
+            LEFT JOIN {$wpdb->postmeta} jm_meta ON jm.ID = jm_meta.post_id AND jm_meta.meta_key = '_mt_email'
+            LEFT JOIN {$wpdb->posts} c ON a.candidate_id = c.ID
+            LEFT JOIN {$wpdb->term_relationships} c_tr ON c.ID = c_tr.object_id
+            LEFT JOIN {$wpdb->term_taxonomy} c_tt ON c_tr.term_taxonomy_id = c_tt.term_taxonomy_id
+            LEFT JOIN {$wpdb->terms} c_cat ON c_tt.term_id = c_cat.term_id
+            WHERE a.is_active = 1 
+            AND c_tt.taxonomy = 'mt_category'
+            ORDER BY a.assignment_date DESC
+        ";
+        
+        return $wpdb->get_results($query, ARRAY_A);
     }
 }

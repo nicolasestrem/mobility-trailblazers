@@ -12,52 +12,62 @@
         
         // Initialize
         init: function() {
+            console.log('Assignment JS: MTAssignmentManager.init() called');
             this.bindEvents();
             this.updateStatistics();
+            console.log('Assignment JS: MTAssignmentManager.init() completed');
         },
         
         // Bind events
         bindEvents: function() {
+            console.log('Assignment JS: Binding events');
             var self = this;
             
             // Auto-Assign button
             $('#mt-auto-assign-btn').on('click', function(e) {
+                console.log('Assignment JS: Auto-assign button clicked');
                 e.preventDefault();
                 self.showAutoAssignModal();
             });
             
             // Clear Assignments button
             $('#mt-clear-assignments-btn').on('click', function(e) {
+                console.log('Assignment JS: Clear assignments button clicked');
                 e.preventDefault();
                 self.clearAllAssignments();
             });
             
             // Export Assignments button
             $('#mt-export-assignments-btn').on('click', function(e) {
+                console.log('Assignment JS: Export assignments button clicked');
                 e.preventDefault();
                 self.exportAssignments();
             });
             
             // Manual Assignment button
             $('#mt-manual-assignment-btn').on('click', function(e) {
+                console.log('Assignment JS: Manual assignment button clicked');
                 e.preventDefault();
                 self.showManualAssignModal();
             });
             
             // Modal actions - Auto Assign
             $('#mt-confirm-auto-assign').on('click', function(e) {
+                console.log('Assignment JS: Confirm auto-assign button clicked');
                 e.preventDefault();
                 self.performAutoAssign();
             });
             
             // Manual Assignment Confirm button
             $('#mt-confirm-manual-assign').on('click', function(e) {
+                console.log('Assignment JS: Confirm manual assign button clicked');
                 e.preventDefault();
                 self.performManualAssign();
             });
             
             // Modal close buttons
             $('.mt-modal-close').on('click', function(e) {
+                console.log('Assignment JS: Modal close button clicked');
                 e.preventDefault();
                 $(this).closest('.mt-modal').hide();
             });
@@ -81,11 +91,14 @@
             
             // Remove assignment buttons
             $(document).on('click', '.mt-remove-assignment', function(e) {
+                console.log('Assignment JS: Remove assignment button clicked');
                 e.preventDefault();
                 var candidateId = $(this).data('candidate-id');
                 var juryId = $(this).data('jury-id');
                 self.removeAssignment(candidateId, juryId, $(this));
             });
+            
+            console.log('Assignment JS: Events bound successfully');
         },
         
         // Show Auto-Assign Modal
@@ -442,16 +455,25 @@
     
     // Initialize on document ready
     $(document).ready(function() {
+        console.log('Assignment JS: Document ready');
+        console.log('Assignment JS: mt_assignment_vars =', typeof mt_assignment_vars !== 'undefined' ? mt_assignment_vars : 'undefined');
+        console.log('Assignment JS: Buttons found =', $('#mt-auto-assign-btn').length);
+        
         // Check if we're on the assignment management page
         if ($('.wrap h1').text().includes('Assignment Management') || 
             $('#mt-auto-assign-btn').length > 0) {
+            console.log('Assignment JS: Initializing MTAssignmentManager');
             MTAssignmentManager.init();
+        } else {
+            console.log('Assignment JS: Not on assignment management page');
         }
     });
     
     // Also initialize on WordPress admin ready
     $(window).on('load', function() {
+        console.log('Assignment JS: Window load event');
         if ($('#mt-auto-assign-btn').length > 0 && !window.MTAssignmentManagerInitialized) {
+            console.log('Assignment JS: Initializing on window load');
             window.MTAssignmentManagerInitialized = true;
             MTAssignmentManager.init();
         }

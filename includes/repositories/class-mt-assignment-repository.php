@@ -40,7 +40,7 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         $defaults = array(
             'jury_member_id' => null,
             'candidate_id' => null,
-            'status' => null,
+            'is_active' => null,
             'limit' => 50,
             'offset' => 0,
             'orderby' => 'assignment_date',
@@ -62,9 +62,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             $values[] = $args['candidate_id'];
         }
         
-        if ($args['status']) {
-            $where[] = 'status = %s';
-            $values[] = $args['status'];
+        if ($args['is_active'] !== null) {
+            $where[] = 'is_active = %d';
+            $values[] = $args['is_active'];
         }
         
         $where_clause = implode(' AND ', $where);
@@ -84,8 +84,8 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         global $wpdb;
         
         $defaults = array(
-            'assigned_at' => current_time('mysql'),
-            'status' => 'active'
+            'assignment_date' => current_time('mysql'),
+            'is_active' => 1
         );
         
         $data = wp_parse_args($data, $defaults);
@@ -134,16 +134,16 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         $place_holders = array();
         
         foreach ($assignments as $assignment) {
-            $place_holders[] = "(%d, %d, %s, %s)";
+            $place_holders[] = "(%d, %d, %s, %d)";
             array_push($values, 
                 $assignment['jury_member_id'],
                 $assignment['candidate_id'],
-                $assignment['status'] ?? 'active',
-                current_time('mysql')
+                current_time('mysql'),
+                1 // is_active
             );
         }
         
-        $query = "INSERT INTO {$this->table_name} (jury_member_id, candidate_id, status, assigned_at) VALUES ";
+        $query = "INSERT INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
         $query .= implode(', ', $place_holders);
         
         return $wpdb->query($wpdb->prepare($query, $values));
@@ -201,11 +201,11 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         
         // Assignments by status
         $status_counts = $wpdb->get_results(
-            "SELECT status, COUNT(*) as count FROM {$this->table_name} GROUP BY status"
+            "SELECT is_active, COUNT(*) as count FROM {$this->table_name} GROUP BY is_active"
         );
         
         foreach ($status_counts as $status) {
-            $stats['by_status'][$status->status] = $status->count;
+            $stats['by_status'][$status->is_active ? 'active' : 'inactive'] = $status->count;
         }
         
         // Average assignments per jury member

@@ -261,8 +261,8 @@ class MobilityTrailblazersPlugin {
 
                 // Localize assignment script
                 wp_localize_script('mt-assignment', 'mt_assignment_vars', array(
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('mt_admin_nonce'),
+                    'ajaxUrl' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('mt_ajax_nonce'),
                     'i18n' => array(
                         'confirm_clear' => __('Are you sure you want to clear all assignments? This action cannot be undone.', 'mobility-trailblazers'),
                         'confirm_auto_assign' => __('This will automatically assign candidates to jury members. Continue?', 'mobility-trailblazers'),
