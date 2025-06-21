@@ -1,6 +1,6 @@
 <?php
 /**
- * Assignment AJAX Handler
+ * Assignment AJAX Handler - FIXED VERSION
  *
  * @package MobilityTrailblazers
  * @since 1.0.7
@@ -29,32 +29,47 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Auto-assign candidates to jury members
      */
     public function auto_assign() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
+        // First check if this is an AJAX request
+        if (!wp_doing_ajax()) {
+            return;
+        }
         
-        $options = array(
-            'algorithm' => $this->get_param('algorithm', 'balanced'),
-            'candidates_per_jury' => $this->get_int_param('candidates_per_jury', 5),
-            'preserve_existing' => $this->get_param('preserve_existing') === 'true'
+        // Verify nonce - using 'mt_ajax_nonce' to match the JavaScript
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
+        
+        // Check permissions - use manage_options instead of custom capability
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to manage assignments', 'mobility-trailblazers')));
+            return;
+        }
+        
+        // Prepare data in the format expected by the service's process() method
+        $data = array(
+            'assignment_type' => 'auto',
+            'candidates_per_jury' => isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 5,
+            'clear_existing' => isset($_POST['preserve_existing']) && $_POST['preserve_existing'] === 'true' ? false : true
         );
         
         try {
             $service = new MT_Assignment_Service();
-            $result = $service->auto_assign($options);
+            $result = $service->process($data);
             
-            if ($result['success']) {
-                $this->success(
-                    $result,
-                    sprintf(
-                        __('%d assignments created successfully', 'mobility-trailblazers'),
-                        $result['created']
-                    )
-                );
+            if ($result) {
+                wp_send_json_success(array(
+                    'message' => __('Auto-assignment completed successfully', 'mobility-trailblazers'),
+                    'created' => is_array($result) ? count($result) : 0
+                ));
             } else {
-                $this->error($result['message']);
+                $errors = $service->get_errors();
+                wp_send_json_error(array(
+                    'message' => !empty($errors) ? implode(', ', $errors) : __('Failed to auto-assign candidates', 'mobility-trailblazers')
+                ));
             }
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
     
@@ -62,30 +77,45 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Manual assignment
      */
     public function manual_assign() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
         
-        $candidate_id = $this->get_int_param('candidate_id');
-        $jury_ids = array_map('intval', $this->get_array_param('jury_ids', array()));
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'mobility-trailblazers')));
+            return;
+        }
+        
+        $candidate_id = isset($_POST['candidateId']) ? intval($_POST['candidateId']) : 0;
+        $jury_ids = isset($_POST['jury_ids']) && is_array($_POST['jury_ids']) ? array_map('intval', $_POST['jury_ids']) : array();
         
         if (!$candidate_id || empty($jury_ids)) {
-            $this->error(__('Please select candidate and jury members', 'mobility-trailblazers'));
+            wp_send_json_error(array('message' => __('Please select candidate and jury members', 'mobility-trailblazers')));
+            return;
         }
         
         try {
             $service = new MT_Assignment_Service();
-            $result = $service->manual_assign($candidate_id, $jury_ids);
             
-            if ($result['success']) {
-                $this->success(
-                    $result,
-                    __('Assignments created successfully', 'mobility-trailblazers')
-                );
+            // Process each jury member assignment
+            $success_count = 0;
+            foreach ($jury_ids as $jury_id) {
+                $result = $service->create_assignment($jury_id, $candidate_id);
+                if ($result) {
+                    $success_count++;
+                }
+            }
+            
+            if ($success_count > 0) {
+                wp_send_json_success(array(
+                    'message' => sprintf(__('Successfully assigned to %d jury members', 'mobility-trailblazers'), $success_count)
+                ));
             } else {
-                $this->error($result['message']);
+                wp_send_json_error(array('message' => __('Failed to create assignments', 'mobility-trailblazers')));
             }
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
     
@@ -93,26 +123,35 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Remove assignment
      */
     public function remove_assignment() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
         
-        $assignment_id = $this->get_int_param('assignment_id');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'mobility-trailblazers')));
+            return;
+        }
         
-        if (!$assignment_id) {
-            $this->error(__('Invalid assignment', 'mobility-trailblazers'));
+        $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
+        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
+        
+        if (!$jury_member_id || !$candidate_id) {
+            wp_send_json_error(array('message' => __('Invalid assignment data', 'mobility-trailblazers')));
+            return;
         }
         
         try {
             $service = new MT_Assignment_Service();
-            $result = $service->remove($assignment_id);
+            $result = $service->remove_assignment($jury_member_id, $candidate_id);
             
             if ($result) {
-                $this->success(null, __('Assignment removed successfully', 'mobility-trailblazers'));
+                wp_send_json_success(array('message' => __('Assignment removed successfully', 'mobility-trailblazers')));
             } else {
-                $this->error(__('Error removing assignment', 'mobility-trailblazers'));
+                wp_send_json_error(array('message' => __('Failed to remove assignment', 'mobility-trailblazers')));
             }
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
     
@@ -120,15 +159,18 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Get assignment statistics
      */
     public function get_assignment_stats() {
-        $this->verify_nonce('mt_ajax_nonce');
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
         
         try {
             $service = new MT_Assignment_Service();
             $stats = $service->get_statistics();
             
-            $this->success($stats);
+            wp_send_json_success($stats);
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
     
@@ -136,26 +178,27 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Clear all assignments
      */
     public function clear_assignments() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
         
-        $confirm = $this->get_param('confirm');
-        
-        if ($confirm !== 'DELETE') {
-            $this->error(__('Please type DELETE to confirm', 'mobility-trailblazers'));
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'mobility-trailblazers')));
+            return;
         }
         
         try {
             $service = new MT_Assignment_Service();
-            $result = $service->clear_all();
+            $result = $service->clear_all_assignments();
             
             if ($result) {
-                $this->success(null, __('All assignments cleared successfully', 'mobility-trailblazers'));
+                wp_send_json_success(array('message' => __('All assignments cleared successfully', 'mobility-trailblazers')));
             } else {
-                $this->error(__('Error clearing assignments', 'mobility-trailblazers'));
+                wp_send_json_error(array('message' => __('Failed to clear assignments', 'mobility-trailblazers')));
             }
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
     
@@ -163,20 +206,52 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Export assignments
      */
     public function export_assignments() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_export_data');
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed', 'mobility-trailblazers')));
+            return;
+        }
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'mobility-trailblazers')));
+            return;
+        }
         
         try {
             $service = new MT_Assignment_Service();
-            $export_url = $service->export();
+            $assignments = $service->get_all_assignments_for_export();
             
-            if ($export_url) {
-                $this->success(array('download_url' => $export_url));
-            } else {
-                $this->error(__('Error generating export', 'mobility-trailblazers'));
+            $csv_data = array();
+            $csv_data[] = array('Jury Member', 'Email', 'Candidate', 'Category', 'Assigned Date');
+            
+            foreach ($assignments as $assignment) {
+                $csv_data[] = array(
+                    $assignment['jury_name'],
+                    $assignment['jury_email'],
+                    $assignment['candidate_name'],
+                    $assignment['category'],
+                    $assignment['assigned_date']
+                );
             }
+            
+            // Generate CSV content
+            $output = fopen('php://temp', 'r+');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM for Excel
+            
+            foreach ($csv_data as $row) {
+                fputcsv($output, $row);
+            }
+            
+            rewind($output);
+            $csv_content = stream_get_contents($output);
+            fclose($output);
+            
+            wp_send_json_success(array(
+                'filename' => 'assignments-' . date('Y-m-d') . '.csv',
+                'content' => base64_encode($csv_content),
+                'message' => sprintf(__('Exported %d assignments', 'mobility-trailblazers'), count($assignments))
+            ));
         } catch (\Exception $e) {
-            $this->error($e->getMessage());
+            wp_send_json_error(array('message' => $e->getMessage()));
         }
     }
 }
