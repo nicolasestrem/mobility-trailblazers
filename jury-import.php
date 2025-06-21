@@ -14,6 +14,18 @@ if (!defined('ABSPATH')) {
     die('This script must be run within WordPress environment.');
 }
 
+// Get global $wpdb
+global $wpdb;
+
+// Check if assignments table exists
+$table_name = $wpdb->prefix . 'mt_assignments';
+$table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
+
+if (!$table_exists) {
+    echo "Warning: Assignments table does not exist. Skipping assignment creation.\n";
+    echo "Please ensure the Mobility Trailblazers plugin is properly activated.\n\n";
+}
+
 // Before importing jury members, ensure the role exists
 if (!get_role('mt_jury_member')) {
     add_role('mt_jury_member', __('Jury Member', 'mobility-trailblazers'), array(
@@ -277,12 +289,11 @@ function import_mobility_trailblazers_jury() {
             
             // Check if jury member already exists
             $existing_post = get_posts(array(
-                'post_type' => 'mt_jury',
+                'post_type' => 'mt_jury_member',
                 'meta_query' => array(
                     array(
                         'key' => '_mt_jury_email',
-                        'value' => $member['email'],
-                        'compare' => '='
+                        'value' => $member['email']
                     )
                 ),
                 'posts_per_page' => 1
@@ -303,7 +314,7 @@ function import_mobility_trailblazers_jury() {
             } else {
                 // Create new jury member post
                 $post_id = wp_insert_post(array(
-                    'post_type' => 'mt_jury',
+                    'post_type' => 'mt_jury_member',
                     'post_title' => $member['name'],
                     'post_content' => $member['bio'],
                     'post_excerpt' => substr($member['bio'], 0, 150) . '...',
@@ -398,22 +409,35 @@ function import_mobility_trailblazers_jury() {
             update_user_meta($user_id, '_mt_jury_post_id', $post_id);
             
             // Create initial assignments for the jury member
-            $candidates = get_posts(array(
-                'post_type' => 'mt_candidate',
-                'posts_per_page' => 10, // Assign 10 candidates per jury member
-                'orderby' => 'rand'
-            ));
-            
-            foreach ($candidates as $candidate) {
-                $wpdb->insert(
-                    $wpdb->prefix . 'mt_assignments',
-                    array(
-                        'candidate_id' => $candidate->ID,
-                        'jury_member_id' => $user_id,
-                        'status' => 'pending'
-                    ),
-                    array('%d', '%d', '%s')
-                );
+            if ($table_exists) {
+                $candidates = get_posts(array(
+                    'post_type' => 'mt_candidate',
+                    'posts_per_page' => 10, // Assign 10 candidates per jury member
+                    'orderby' => 'rand'
+                ));
+                
+                if (!empty($candidates)) {
+                    foreach ($candidates as $candidate) {
+                        $result = $wpdb->insert(
+                            $wpdb->prefix . 'mt_assignments',
+                            array(
+                                'candidate_id' => $candidate->ID,
+                                'jury_member_id' => $user_id,
+                                'status' => 'pending'
+                            ),
+                            array('%d', '%d', '%s')
+                        );
+                        
+                        if ($result === false) {
+                            echo "  → Warning: Failed to create assignment for candidate {$candidate->ID}\n";
+                        }
+                    }
+                    echo "  → Created " . count($candidates) . " initial assignments\n";
+                } else {
+                    echo "  → No candidates available for assignment\n";
+                }
+            } else {
+                echo "  → Skipping assignment creation (table not available)\n";
             }
             
             $imported_count++;
@@ -445,12 +469,13 @@ function import_mobility_trailblazers_jury() {
     echo "Members: " . ($imported_count - 2) . "\n";
     
     echo "\n=== VERIFICATION ===\n";
-    $jury_count = wp_count_posts('mt_jury')->publish;
+    $jury_count_obj = wp_count_posts('mt_jury_member');
+    $jury_count = isset($jury_count_obj->publish) ? $jury_count_obj->publish : 0;
     echo "Total jury posts in database: $jury_count\n";
     
     // Verify president and vice president
     $presidents = get_posts(array(
-        'post_type' => 'mt_jury',
+        'post_type' => 'mt_jury_member',
         'meta_query' => array(
             array(
                 'key' => '_mt_jury_is_president',
@@ -460,7 +485,7 @@ function import_mobility_trailblazers_jury() {
     ));
     
     $vice_presidents = get_posts(array(
-        'post_type' => 'mt_jury',
+        'post_type' => 'mt_jury_member',
         'meta_query' => array(
             array(
                 'key' => '_mt_jury_is_vice_president',
