@@ -1,6 +1,6 @@
 <?php
 /**
- * Elementor REST API Fix
+ * Elementor REST API Fix MU PLUGIN
  * Ensures Elementor can access REST API endpoints and fixes JavaScript initialization issues
  */
 

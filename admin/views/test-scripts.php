@@ -110,6 +110,19 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+        
+        <div class="mt-test-script-card">
+            <h2><?php _e('Fix Elementor Webpack', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Comprehensive fix for Elementor webpack module loading issues and JavaScript errors.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_elementor_webpack_fix')); ?>" class="button button-primary">
+                    <?php _e('Fix Elementor Webpack', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'fix-elementor-webpack.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
     </div>
     
     <?php
@@ -203,6 +216,18 @@ if (!defined('ABSPATH')) {
                     echo '<pre>' . esc_html($output) . '</pre>';
                 } else {
                     echo '<p class="error">' . __('MU plugin verification script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_elementor_webpack_fix':
+                echo '<h3>' . __('Elementor Webpack Fix Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'fix-elementor-webpack.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'fix-elementor-webpack.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('Elementor webpack fix script file not found.', 'mobility-trailblazers') . '</p>';
                 }
                 break;
                 

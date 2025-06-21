@@ -327,6 +327,17 @@ class MobilityTrailblazersPlugin {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_frontend_nonce'),
         ));
+        
+        // Add Elementor webpack fix if Elementor is active
+        if (did_action('elementor/loaded')) {
+            wp_enqueue_script(
+                'mt-elementor-webpack-fix',
+                MT_PLUGIN_URL . 'assets/js/elementor-webpack-fix.js',
+                array(), // No dependencies to ensure it loads first
+                MT_PLUGIN_VERSION,
+                false // Load in header to intercept webpack before Elementor loads
+            );
+        }
     }
 
     /**
