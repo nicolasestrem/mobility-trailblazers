@@ -1651,7 +1651,7 @@ The application is currently in pending status and requires approval.', 'mobilit
                 'excerpt' => wp_trim_words($candidate->post_excerpt ?: $candidate->post_content, 20),
                 'thumbnail' => get_the_post_thumbnail_url($candidate_id, 'medium'),
                 'status' => $status,
-                'company' => get_post_meta($candidate_id, 'mt_candidate_company', true),
+                'company' => get_post_meta($candidate_id, '_mt_company_name', true),
                 'category' => wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'names'))[0] ?? ''
             );
         }
@@ -1710,13 +1710,13 @@ The application is currently in pending status and requires approval.', 'mobilit
                 'id' => $candidate_id,
                 'title' => $candidate->post_title,
                 'content' => wpautop($candidate->post_content),
-                'company' => get_post_meta($candidate_id, 'mt_candidate_company', true),
-                'position' => get_post_meta($candidate_id, 'mt_candidate_position', true),
-                'website' => get_post_meta($candidate_id, 'mt_candidate_website', true),
-                'linkedin' => get_post_meta($candidate_id, 'mt_candidate_linkedin', true),
-                'achievement' => get_post_meta($candidate_id, 'mt_candidate_achievement', true),
-                'impact' => get_post_meta($candidate_id, 'mt_candidate_impact', true),
-                'vision' => get_post_meta($candidate_id, 'mt_candidate_vision', true)
+                'company' => get_post_meta($candidate_id, '_mt_company_name', true),
+                'position' => get_post_meta($candidate_id, '_mt_position', true),
+                'website' => get_post_meta($candidate_id, '_mt_website', true),
+                'linkedin' => get_post_meta($candidate_id, '_mt_linkedin', true),
+                'achievement' => get_post_meta($candidate_id, '_mt_achievement', true),
+                'impact' => get_post_meta($candidate_id, '_mt_impact', true),
+                'vision' => get_post_meta($candidate_id, '_mt_vision', true)
             ),
             'evaluation' => null,
             'is_final' => false

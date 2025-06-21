@@ -617,7 +617,16 @@
     // Initialize when document is ready
     $(document).ready(function() {
         if ($('.mt-jury-dashboard').length) {
-            MTJuryDashboard.init();
+            // Wait for mt_jury_ajax to be available
+            const checkAjaxObject = function() {
+                if (typeof mt_jury_ajax !== 'undefined') {
+                    MTJuryDashboard.init();
+                } else {
+                    setTimeout(checkAjaxObject, 100);
+                }
+            };
+            
+            checkAjaxObject();
         }
     });
     

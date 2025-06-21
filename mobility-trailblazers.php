@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
  * Description: Comprehensive WordPress plugin for managing the prestigious "25 Mobility Trailblazers in 25" award platform
- * Version: 1.0.8
+ * Version: 1.0.9
  * Author: Nicolas Estrem
  * Author URI: https://mobilitytrailblazers.de
  * License: GPL v2 or later

@@ -407,8 +407,18 @@ class MT_Admin_Menus {
      * @param string $hook Current admin page hook
      */
     public function enqueue_jury_dashboard_scripts($hook) {
+        // Only load in admin area
+        if (!is_admin()) {
+            return;
+        }
+        
         // Only load on jury dashboard page
         if ($hook !== 'toplevel_page_mt-jury-dashboard') {
+            return;
+        }
+
+        // Check if script is already loaded
+        if (wp_script_is('mt-jury-dashboard', 'enqueued')) {
             return;
         }
 
@@ -424,28 +434,9 @@ class MT_Admin_Menus {
         wp_enqueue_script(
             'mt-jury-dashboard',
             MT_PLUGIN_URL . 'assets/jury-dashboard.js',
-            array('jquery'),
+            array('jquery', 'jquery-migrate'),
             MT_PLUGIN_VERSION,
-            true
+            true  // Load in footer
         );
-
-        // Localize script
-        wp_localize_script('mt-jury-dashboard', 'mt_jury_dashboard', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mt_jury_dashboard_nonce'),
-            'i18n' => array(
-                'unsaved_changes' => __('You have unsaved changes. Are you sure you want to leave?', 'mobility-trailblazers'),
-                'error_loading' => __('Error loading candidate data.', 'mobility-trailblazers'),
-                'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
-                'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
-                'update_evaluation' => __('Update Evaluation', 'mobility-trailblazers'),
-                'save_success' => __('Evaluation saved successfully.', 'mobility-trailblazers'),
-                'save_error' => __('Error saving evaluation.', 'mobility-trailblazers'),
-                'submit_success' => __('Evaluation submitted successfully.', 'mobility-trailblazers'),
-                'submit_error' => __('Error submitting evaluation.', 'mobility-trailblazers'),
-                'export_success' => __('Evaluations exported successfully.', 'mobility-trailblazers'),
-                'export_error' => __('Error exporting evaluations.', 'mobility-trailblazers')
-            )
-        ));
     }
 } 
