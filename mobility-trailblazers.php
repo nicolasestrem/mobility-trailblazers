@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers Award System
  * Plugin URI: https://mobilitytrailblazers.de
  * Description: Comprehensive WordPress plugin for managing the prestigious "25 Mobility Trailblazers in 25" award platform
- * Version: 1.0.11
+ * Version: 1.0.12
  * Author: Nicolas Estrem
  * Author URI: https://mobilitytrailblazers.de
  * License: GPL v2 or later
@@ -166,6 +166,10 @@ class MobilityTrailblazersPlugin {
         $this->components['post_types'] = new MT_Post_Types();
         $this->components['taxonomies'] = new MT_Taxonomies();
         $this->components['roles'] = new MT_Roles();
+        
+        // Initialize AJAX handlers early to ensure they're registered
+        require_once MT_PLUGIN_DIR . 'includes/class-mt-ajax-handlers.php';
+        $this->components['ajax_handlers'] = new MT_AJAX_Handlers();
         
         // Initialize functionality components
         $this->components['shortcodes'] = new MT_Shortcodes();

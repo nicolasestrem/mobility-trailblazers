@@ -136,6 +136,68 @@ if (!defined('ABSPATH')) {
                 </a>
             </div>
         </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Debug Jury Shortcode', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Analyze jury dashboard shortcode functionality and identify display issues.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'debug-jury-shortcode.php'); ?>" class="button button-primary" target="_blank">
+                    <?php _e('Run Debug Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Test AJAX Endpoint', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Test jury dashboard AJAX functionality and identify why it returns HTML instead of JSON.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_ajax_endpoint_test')); ?>" class="button button-primary">
+                    <?php _e('Test AJAX Endpoint', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'test-ajax-endpoint.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Debug AJAX 400 Error', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Detailed debug to identify the exact cause of the 400 Bad Request error in AJAX requests.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_ajax_400_debug')); ?>" class="button button-primary">
+                    <?php _e('Debug 400 Error', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'debug-ajax-400.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Test REST API', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Test REST API functionality and check if the jury dashboard endpoint is working correctly.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_rest_api_test')); ?>" class="button button-primary">
+                    <?php _e('Test REST API', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'test-rest-api.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-test-script-card">
+            <h2><?php _e('Debug Permissions', 'mobility-trailblazers'); ?></h2>
+            <p><?php _e('Debug user roles and permissions to identify REST API access issues.', 'mobility-trailblazers'); ?></p>
+            <div class="mt-test-script-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mt-test-scripts&action=run_permissions_debug')); ?>" class="button button-primary">
+                    <?php _e('Debug Permissions', 'mobility-trailblazers'); ?>
+                </a>
+                <a href="<?php echo esc_url(plugin_dir_url(MT_PLUGIN_FILE) . 'debug-permissions.php'); ?>" class="button button-secondary" target="_blank">
+                    <?php _e('View Raw Script', 'mobility-trailblazers'); ?>
+                </a>
+            </div>
+        </div>
     </div>
     
     <?php
@@ -253,6 +315,54 @@ if (!defined('ABSPATH')) {
                     echo '<pre>' . esc_html($output) . '</pre>';
                 } else {
                     echo '<p class="error">' . __('Jury shortcode debug script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_ajax_endpoint_test':
+                echo '<h3>' . __('AJAX Endpoint Test Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'test-ajax-endpoint.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'test-ajax-endpoint.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('AJAX endpoint test script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_ajax_400_debug':
+                echo '<h3>' . __('AJAX 400 Error Debug Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'debug-ajax-400.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'debug-ajax-400.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('AJAX 400 debug script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_rest_api_test':
+                echo '<h3>' . __('REST API Test Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'test-rest-api.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'test-rest-api.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('REST API test script file not found.', 'mobility-trailblazers') . '</p>';
+                }
+                break;
+                
+            case 'run_permissions_debug':
+                echo '<h3>' . __('Permissions Debug Results', 'mobility-trailblazers') . '</h3>';
+                if (file_exists(MT_PLUGIN_DIR . 'debug-permissions.php')) {
+                    ob_start();
+                    include MT_PLUGIN_DIR . 'debug-permissions.php';
+                    $output = ob_get_clean();
+                    echo '<pre>' . esc_html($output) . '</pre>';
+                } else {
+                    echo '<p class="error">' . __('Permissions debug script file not found.', 'mobility-trailblazers') . '</p>';
                 }
                 break;
                 

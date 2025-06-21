@@ -1,5 +1,71 @@
 # Mobility Trailblazers Plugin - Changelog
 
+## Version 1.0.12 - 2025-06-21
+
+### 🔧 Bug Fixes
+- **Fixed jury dashboard shortcode display issues**: Resolved shortcode not showing any content with no error messages
+- **Fixed AJAX 400 Bad Request errors**: Identified and resolved admin-ajax.php returning 400 status codes
+- **Fixed JavaScript error handling**: Improved AJAX error response handling to prevent "Cannot read properties of undefined (reading 'message')" errors
+- **Fixed AJAX handler registration conflicts**: Resolved duplicate MT_AJAX_Handlers instantiation causing registration issues
+- **Fixed REST API URL construction**: Corrected undefined REST URL issues in JavaScript
+- **Fixed AJAX response format inconsistencies**: Standardized all AJAX error responses to use proper object format
+- **Fixed jury dashboard data loading**: Resolved issues with jury dashboard not loading candidate data properly
+- **Fixed nonce verification issues**: Improved nonce handling and verification across AJAX and REST endpoints
+
+### 🆕 New Features
+- **REST API Implementation**: Added comprehensive REST API endpoints as alternative to problematic admin-ajax.php
+  - `/mobility-trailblazers/v1/jury-dashboard` - Get jury dashboard data
+  - `/mobility-trailblazers/v1/candidate-evaluation` - Get candidate evaluation data
+  - `/mobility-trailblazers/v1/save-evaluation` - Save evaluation data
+- **Enhanced JavaScript Error Handling**: Added comprehensive error handling with fallback mechanisms
+- **Improved AJAX Debugging**: Added detailed debugging tools for AJAX functionality
+- **REST API Fallback System**: Implemented automatic fallback from REST API to AJAX when needed
+
+### 🛠️ Technical Improvements
+- **Dual AJAX/REST Architecture**: Implemented hybrid approach using both AJAX and REST API endpoints
+- **Enhanced Error Logging**: Added comprehensive console logging for debugging AJAX and REST requests
+- **Improved URL Construction**: Added proper URL validation and construction for REST API calls
+- **Better Response Handling**: Enhanced handling of different response formats (REST vs AJAX)
+- **Robust Fallback Mechanisms**: Added automatic fallback systems when primary methods fail
+
+### 📋 Admin Interface Enhancements
+- **Enhanced Test Scripts Menu**: Added new debugging tools
+  - **AJAX Endpoint Test**: Test admin-ajax.php functionality and identify issues
+  - **AJAX 400 Error Debug**: Detailed debugging for 400 Bad Request errors
+  - **REST API Test**: Comprehensive testing of REST API endpoints and functionality
+  - **Jury Shortcode Debug**: Analyze jury dashboard shortcode functionality
+- **Improved Debugging Capabilities**: Enhanced all existing test scripts with better error reporting
+
+### 🔧 JavaScript Improvements
+- **Enhanced AJAX Error Handling**: 
+  - Added proper response format checking
+  - Implemented fallback error messages
+  - Added console logging for debugging
+  - Improved error notification display
+- **REST API Integration**:
+  - Added REST API URL validation
+  - Implemented automatic fallback to AJAX
+  - Added proper URL construction
+  - Enhanced response format handling
+- **Better User Feedback**: Improved loading states and error messages
+
+### 🚀 Performance Improvements
+- **Optimized Request Handling**: Reduced failed requests with better error handling
+- **Improved Response Processing**: Faster response handling with proper format detection
+- **Enhanced Caching**: Better cache management for AJAX and REST responses
+
+### 📝 Documentation
+- **Updated Debugging Guide**: Comprehensive guide for troubleshooting AJAX and REST issues
+- **Enhanced API Documentation**: Detailed documentation for new REST API endpoints
+- **Improved Error Handling Guide**: Guide for understanding and fixing common errors
+
+### 🔒 Security Improvements
+- **Enhanced Nonce Verification**: Improved nonce handling across all endpoints
+- **Better Permission Checking**: Enhanced permission validation for jury member access
+- **Improved Input Validation**: Better validation for all AJAX and REST requests
+
+---
+
 ## Version 1.0.11 - 2025-06-21
 
 ### 🔧 Bug Fixes
@@ -84,6 +150,14 @@
 
 ## Installation Notes
 
+### For Jury Dashboard AJAX Issues:
+1. **Clear browser cache completely** (Ctrl+F5 or Cmd+Shift+R)
+2. **Run "Test REST API" script** from Test Scripts menu to verify REST API functionality
+3. **Run "AJAX Endpoint Test" script** to check admin-ajax.php functionality
+4. **Run "AJAX 400 Error Debug" script** for detailed error analysis
+5. **Check browser console** for JavaScript debug output
+6. **Verify REST API routes** are properly registered
+
 ### For Elementor Compatibility Issues:
 1. Run the "Fix Elementor Database" script from Test Scripts menu
 2. Run the "Fix Elementor Webpack" script for JavaScript errors
@@ -105,6 +179,38 @@
 ---
 
 ## Known Issues and Solutions
+
+### Jury Dashboard Shortcode Not Showing Content
+- **Issue**: `[mt_jury_dashboard]` shortcode shows nothing with no error messages
+- **Solution**: 
+  1. Clear browser cache completely
+  2. Run "Test REST API" script to verify REST API functionality
+  3. Check browser console for JavaScript debug output
+  4. Verify user has jury member role and permissions
+
+### AJAX 400 Bad Request Errors
+- **Issue**: AJAX requests returning 400 status codes
+- **Solution**: 
+  1. Run "AJAX 400 Error Debug" script for detailed analysis
+  2. Check if AJAX handlers are properly registered
+  3. Verify nonce creation and verification
+  4. Use REST API as fallback when AJAX fails
+
+### JavaScript "Cannot read properties of undefined" Errors
+- **Issue**: JavaScript errors about reading properties from undefined objects
+- **Solution**: 
+  1. Clear browser cache completely
+  2. Check browser console for debug output
+  3. Verify REST API URL is properly constructed
+  4. Check if fallback to AJAX is working
+
+### REST API URL Issues
+- **Issue**: REST API URL showing as "undefined" in requests
+- **Solution**: 
+  1. Run "Test REST API" script to verify REST API functionality
+  2. Check if REST API routes are properly registered
+  3. Verify `rest_url()` function is available
+  4. Check browser console for debug output
 
 ### Elementor JavaScript Errors
 - **Issue**: "Cannot read properties of undefined (reading 'handlers')" or "tools"
@@ -132,6 +238,8 @@ For issues not covered by the test scripts:
 3. Use browser developer tools to check for JavaScript errors
 4. Verify all plugin dependencies are active
 5. Check server error logs for PHP fatal errors
+6. Review browser console for JavaScript debug output
+7. Test REST API endpoints manually using browser developer tools
 
 ---
 

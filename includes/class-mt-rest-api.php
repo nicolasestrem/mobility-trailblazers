@@ -323,6 +323,67 @@ class MT_REST_API {
                 ),
             ),
         ));
+        
+        // Jury dashboard data endpoint
+        register_rest_route($this->namespace, '/jury-dashboard', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_jury_dashboard_data'),
+            'permission_callback' => array($this, 'check_jury_permissions'),
+            'args' => array(
+                'nonce' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ),
+            ),
+        ));
+        
+        // Candidate evaluation endpoint
+        register_rest_route($this->namespace, '/candidate-evaluation', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'get_candidate_evaluation'),
+            'permission_callback' => array($this, 'check_jury_permissions'),
+            'args' => array(
+                'nonce' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ),
+                'candidate_id' => array(
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ),
+            ),
+        ));
+        
+        // Save evaluation endpoint
+        register_rest_route($this->namespace, '/save-evaluation', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'save_evaluation'),
+            'permission_callback' => array($this, 'check_jury_permissions'),
+            'args' => array(
+                'nonce' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ),
+                'candidate_id' => array(
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ),
+                'scores' => array(
+                    'required' => true,
+                    'type' => 'object',
+                ),
+                'comments' => array(
+                    'required' => false,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                ),
+            ),
+        ));
     }
     
     /**
@@ -1627,5 +1688,240 @@ class MT_REST_API {
     
     public function restore_backup_permission() {
         return current_user_can('mt_restore_backups');
+    }
+    
+    /**
+     * Check jury member permissions
+     */
+    public function check_jury_permissions($request) {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            return false;
+        }
+        
+        $user = wp_get_current_user();
+        
+        // Allow administrators
+        if (in_array('administrator', $user->roles)) {
+            // Verify nonce for administrators
+            $nonce = $request->get_param('nonce');
+            if (!wp_verify_nonce($nonce, 'mt_jury_nonce')) {
+                return false;
+            }
+            return true;
+        }
+        
+        // Check if user has jury member role (check both possible role names)
+        $jury_roles = array('mt-jury-member', 'mt_jury_member', 'jury_member');
+        $has_jury_role = false;
+        
+        foreach ($jury_roles as $role) {
+            if (in_array($role, $user->roles)) {
+                $has_jury_role = true;
+                break;
+            }
+        }
+        
+        if (!$has_jury_role) {
+            return false;
+        }
+        
+        // Verify nonce
+        $nonce = $request->get_param('nonce');
+        if (!wp_verify_nonce($nonce, 'mt_jury_nonce')) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get jury dashboard data
+     */
+    public function get_jury_dashboard_data($request) {
+        // Get jury member
+        $jury_member = mt_get_jury_member_by_user_id(get_current_user_id());
+        if (!$jury_member) {
+            return new WP_Error('jury_member_not_found', 'Jury member profile not found.', array('status' => 404));
+        }
+        
+        // Get assigned candidates
+        $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
+        $total_assigned = count($assigned_candidates);
+        
+        // Count evaluations
+        $completed_evaluations = 0;
+        $draft_evaluations = 0;
+        
+        foreach ($assigned_candidates as $candidate_id) {
+            if (mt_has_evaluated($candidate_id, $jury_member->ID)) {
+                $completed_evaluations++;
+            } elseif (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
+                $draft_evaluations++;
+            }
+        }
+        
+        // Calculate completion rate
+        $completion_rate = $total_assigned > 0 ? round(($completed_evaluations / $total_assigned) * 100) : 0;
+        
+        // Build candidates data
+        $candidates_data = array();
+        foreach ($assigned_candidates as $candidate_id) {
+            $candidate = get_post($candidate_id);
+            if (!$candidate) continue;
+            
+            $status = 'pending';
+            if (mt_has_evaluated($candidate_id, $jury_member->ID)) {
+                $status = 'completed';
+            } elseif (mt_has_draft_evaluation($candidate_id, $jury_member->ID)) {
+                $status = 'draft';
+            }
+            
+            $candidates_data[] = array(
+                'id' => $candidate_id,
+                'title' => $candidate->post_title,
+                'excerpt' => wp_trim_words($candidate->post_excerpt ?: $candidate->post_content, 20),
+                'thumbnail' => get_the_post_thumbnail_url($candidate_id, 'medium'),
+                'status' => $status,
+                'company' => get_post_meta($candidate_id, '_mt_company_name', true),
+                'category' => wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'names'))[0] ?? ''
+            );
+        }
+        
+        $response_data = array(
+            'stats' => array(
+                'total_assigned' => $total_assigned,
+                'completed' => $completed_evaluations,
+                'drafts' => $draft_evaluations,
+                'pending' => $total_assigned - $completed_evaluations - $draft_evaluations,
+                'completion_rate' => $completion_rate
+            ),
+            'candidates' => $candidates_data
+        );
+        
+        return new WP_REST_Response($response_data, 200);
+    }
+    
+    /**
+     * Get candidate evaluation data
+     */
+    public function get_candidate_evaluation($request) {
+        $candidate_id = $request->get_param('candidate_id');
+        
+        // Get jury member
+        $jury_member = mt_get_jury_member_by_user_id(get_current_user_id());
+        if (!$jury_member) {
+            return new WP_Error('jury_member_not_found', 'Jury member profile not found.', array('status' => 404));
+        }
+        
+        // Check if candidate is assigned
+        $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
+        if (!in_array($candidate_id, $assigned_candidates)) {
+            return new WP_Error('candidate_not_assigned', 'This candidate is not assigned to you.', array('status' => 403));
+        }
+        
+        // Get candidate details
+        $candidate = get_post($candidate_id);
+        if (!$candidate) {
+            return new WP_Error('candidate_not_found', 'Candidate not found.', array('status' => 404));
+        }
+        
+        $response_data = array(
+            'candidate' => array(
+                'id' => $candidate_id,
+                'title' => $candidate->post_title,
+                'content' => wpautop($candidate->post_content),
+                'company' => get_post_meta($candidate_id, '_mt_company_name', true),
+                'position' => get_post_meta($candidate_id, '_mt_position', true),
+                'website' => get_post_meta($candidate_id, '_mt_website', true),
+                'linkedin' => get_post_meta($candidate_id, '_mt_linkedin', true),
+                'achievement' => get_post_meta($candidate_id, '_mt_achievement', true),
+                'impact' => get_post_meta($candidate_id, '_mt_impact', true),
+                'vision' => get_post_meta($candidate_id, '_mt_vision', true)
+            ),
+            'evaluation' => null,
+            'is_final' => false
+        );
+        
+        // Check for existing evaluation
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mt_evaluations';
+        
+        $existing_evaluation = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE candidate_id = %d AND jury_member_id = %d",
+            $candidate_id,
+            $jury_member->ID
+        ));
+        
+        if ($existing_evaluation) {
+            $response_data['evaluation'] = array(
+                'courage' => intval($existing_evaluation->courage),
+                'innovation' => intval($existing_evaluation->innovation),
+                'implementation' => intval($existing_evaluation->implementation),
+                'relevance' => intval($existing_evaluation->relevance),
+                'visibility' => intval($existing_evaluation->visibility),
+                'comments' => $existing_evaluation->comments,
+                'total_score' => intval($existing_evaluation->total_score)
+            );
+            $response_data['is_final'] = true;
+        } else {
+            // Check for draft
+            $draft = get_user_meta(get_current_user_id(), 'mt_draft_evaluation_' . $candidate_id, true);
+            if ($draft) {
+                $response_data['evaluation'] = array(
+                    'courage' => intval($draft['courage'] ?? 5),
+                    'innovation' => intval($draft['innovation'] ?? 5),
+                    'implementation' => intval($draft['implementation'] ?? 5),
+                    'relevance' => intval($draft['relevance'] ?? 5),
+                    'visibility' => intval($draft['visibility'] ?? 5),
+                    'comments' => $draft['comments'] ?? '',
+                    'total_score' => array_sum(array(
+                        intval($draft['courage'] ?? 5),
+                        intval($draft['innovation'] ?? 5),
+                        intval($draft['implementation'] ?? 5),
+                        intval($draft['relevance'] ?? 5),
+                        intval($draft['visibility'] ?? 5)
+                    ))
+                );
+            }
+        }
+        
+        return new WP_REST_Response($response_data, 200);
+    }
+    
+    /**
+     * Save evaluation
+     */
+    public function save_evaluation($request) {
+        $candidate_id = $request->get_param('candidate_id');
+        $scores = $request->get_param('scores');
+        $comments = $request->get_param('comments');
+        
+        // Get jury member
+        $jury_member = mt_get_jury_member_by_user_id(get_current_user_id());
+        if (!$jury_member) {
+            return new WP_Error('jury_member_not_found', 'Jury member profile not found.', array('status' => 404));
+        }
+        
+        // Check if candidate is assigned
+        $assigned_candidates = mt_get_assigned_candidates($jury_member->ID);
+        if (!in_array($candidate_id, $assigned_candidates)) {
+            return new WP_Error('candidate_not_assigned', 'This candidate is not assigned to you.', array('status' => 403));
+        }
+        
+        // Save evaluation using the service
+        $service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+        $result = $service->process(array(
+            'jury_member_id' => $jury_member->ID,
+            'candidate_id' => $candidate_id,
+            'scores' => $scores,
+            'comments' => $comments
+        ));
+        
+        if (!$result) {
+            return new WP_Error('save_failed', 'Failed to save evaluation.', array('status' => 500));
+        }
+        
+        return new WP_REST_Response(array('message' => 'Evaluation saved successfully.'), 200);
     }
 } 

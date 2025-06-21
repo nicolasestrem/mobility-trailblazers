@@ -87,8 +87,104 @@
             });
         },
         
-        // Load dashboard data via AJAX
+        // Load dashboard data
         loadDashboardData: function() {
+            var self = this;
+            
+            // Debug: Check if REST URL is available
+            console.log('REST URL:', mt_jury_ajax.rest_url);
+            console.log('Full AJAX object:', mt_jury_ajax);
+            
+            // Construct the full URL - try to get REST URL or construct it manually
+            var restUrl = mt_jury_ajax.rest_url || '';
+            if (!restUrl) {
+                // Try to construct REST URL manually
+                var siteUrl = window.location.origin;
+                restUrl = siteUrl + '/wp-json/';
+                console.log('Constructed REST URL:', restUrl);
+            }
+            
+            // Test if REST API is accessible
+            var testUrl = restUrl + 'wp/v2/posts';
+            console.log('Testing REST API with:', testUrl);
+            
+            $.ajax({
+                url: testUrl,
+                method: 'GET',
+                timeout: 5000,
+                success: function(response) {
+                    console.log('REST API is accessible, using REST endpoint');
+                    self.loadDataViaRest(restUrl);
+                },
+                error: function(xhr, status, error) {
+                    console.log('REST API not accessible, falling back to AJAX');
+                    self.loadDataViaAjax();
+                }
+            });
+        },
+        
+        // Load data via REST API
+        loadDataViaRest: function(restUrl) {
+            var self = this;
+            
+            // Ensure the URL ends with a slash
+            if (!restUrl.endsWith('/')) {
+                restUrl += '/';
+            }
+            
+            var fullUrl = restUrl + 'mobility-trailblazers/v1/jury-dashboard';
+            console.log('Full REST URL:', fullUrl);
+            
+            $.ajax({
+                url: fullUrl,
+                method: 'POST',
+                data: {
+                    nonce: mt_jury_ajax.nonce
+                },
+                beforeSend: function() {
+                    self.showLoader();
+                },
+                success: function(response) {
+                    if (response.success !== undefined) {
+                        // REST API response format
+                        if (response.success) {
+                            MTJuryDashboard.updateDashboard(response.data);
+                        } else {
+                            let msg = 'An unknown error occurred.';
+                            if (response && response.data && response.data.message) {
+                                msg = response.data.message;
+                            } else {
+                                console.warn('REST API error response:', response);
+                            }
+                            MTJuryDashboard.showNotification(msg, 'error');
+                        }
+                    } else {
+                        // Direct response format
+                        MTJuryDashboard.updateDashboard(response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('REST API Error:', xhr.responseText);
+                    let msg = 'Failed to load dashboard data via REST API.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = xhr.responseJSON.message;
+                    }
+                    MTJuryDashboard.showNotification(msg, 'error');
+                    // Fallback to AJAX
+                    self.loadDataViaAjax();
+                },
+                complete: function() {
+                    self.hideLoader();
+                }
+            });
+        },
+        
+        // Load data via AJAX
+        loadDataViaAjax: function() {
+            var self = this;
+            
+            console.log('Using AJAX fallback');
+            
             $.ajax({
                 url: mt_jury_ajax.ajaxUrl,
                 type: 'POST',
@@ -97,9 +193,10 @@
                     nonce: mt_jury_ajax.nonce
                 },
                 beforeSend: function() {
-                    MTJuryDashboard.showLoader();
+                    self.showLoader();
                 },
                 success: function(response) {
+                    console.log('AJAX response:', response);
                     if (response.success) {
                         MTJuryDashboard.updateDashboard(response.data);
                     } else {
@@ -112,11 +209,12 @@
                         MTJuryDashboard.showNotification(msg, 'error');
                     }
                 },
-                error: function() {
-                    MTJuryDashboard.showNotification(mt_jury_ajax.i18n.error_loading, 'error');
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', xhr.responseText);
+                    MTJuryDashboard.showNotification('Failed to load dashboard data.', 'error');
                 },
                 complete: function() {
-                    MTJuryDashboard.hideLoader();
+                    self.hideLoader();
                 }
             });
         },
