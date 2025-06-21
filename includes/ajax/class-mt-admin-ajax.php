@@ -3,296 +3,389 @@
  * Admin AJAX Handler
  *
  * @package MobilityTrailblazers
- * @since 1.0.7
+ * @since 2.0.0
  */
 
 namespace MobilityTrailblazers\Ajax;
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * Class MT_Admin_Ajax
+ *
+ * Handles general admin AJAX requests
+ */
 class MT_Admin_Ajax extends MT_Base_Ajax {
     
     /**
-     * Register AJAX hooks
+     * Initialize AJAX handlers
+     *
+     * @return void
      */
-    protected function register_hooks() {
-        // Assignment management
-        add_action('wp_ajax_mt_get_candidates_for_assignment', array($this, 'get_candidates_for_assignment'));
+    public function init() {
+        // Export actions
+        add_action('wp_ajax_mt_export_candidates', [$this, 'export_candidates']);
+        add_action('wp_ajax_mt_export_evaluations', [$this, 'export_evaluations']);
+        add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
         
-        // Backup management
-        add_action('wp_ajax_mt_create_backup', array($this, 'create_backup'));
-        add_action('wp_ajax_mt_restore_backup', array($this, 'restore_backup'));
-        add_action('wp_ajax_mt_delete_backup', array($this, 'delete_backup'));
-        add_action('wp_ajax_mt_export_backup', array($this, 'export_backup'));
+        // Import actions
+        add_action('wp_ajax_mt_import_candidates', [$this, 'import_candidates']);
+        add_action('wp_ajax_mt_upload_import_file', [$this, 'upload_import_file']);
         
-        // Import/Export
-        add_action('wp_ajax_mt_export_candidates', array($this, 'export_candidates'));
-        add_action('wp_ajax_mt_export_jury', array($this, 'export_jury'));
-        add_action('wp_ajax_mt_export_votes', array($this, 'export_votes'));
-        add_action('wp_ajax_mt_import_data', array($this, 'import_data'));
-        
-        // Jury user management
-        add_action('wp_ajax_mt_create_jury_user', array($this, 'create_jury_user'));
-        add_action('wp_ajax_mt_send_jury_credentials', array($this, 'send_jury_credentials'));
-        
-        // Public registration
-        add_action('wp_ajax_mt_submit_registration', array($this, 'submit_registration'));
-        add_action('wp_ajax_nopriv_mt_submit_registration', array($this, 'submit_registration'));
+        // Dashboard actions
+        add_action('wp_ajax_mt_get_dashboard_stats', [$this, 'get_dashboard_stats']);
     }
     
     /**
-     * Get candidates for assignment
-     */
-    public function get_candidates_for_assignment() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
-        
-        $candidates = get_posts(array(
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'meta_query' => array(
-                array(
-                    'key' => '_mt_status',
-                    'value' => array('approved', 'shortlisted'),
-                    'compare' => 'IN',
-                ),
-            ),
-        ));
-        
-        $candidate_list = array();
-        foreach ($candidates as $candidate) {
-            $candidate_list[] = array(
-                'id' => $candidate->ID,
-                'title' => $candidate->post_title,
-                'company' => get_post_meta($candidate->ID, '_mt_company', true),
-                'status' => get_post_meta($candidate->ID, '_mt_status', true),
-            );
-        }
-        
-        $this->success($candidate_list);
-    }
-    
-    /**
-     * Create backup
-     */
-    public function create_backup() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_backups');
-        
-        // Implementation would go here
-        $this->error(__('Backup functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Restore backup
-     */
-    public function restore_backup() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_backups');
-        
-        // Implementation would go here
-        $this->error(__('Restore functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Delete backup
-     */
-    public function delete_backup() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_backups');
-        
-        // Implementation would go here
-        $this->error(__('Delete backup functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Export backup
-     */
-    public function export_backup() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_backups');
-        
-        // Implementation would go here
-        $this->error(__('Export backup functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Export candidates
+     * Export candidates to CSV
+     *
+     * @return void
      */
     public function export_candidates() {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_export_data');
         
-        // Implementation would go here
-        $this->error(__('Export candidates functionality not yet implemented', 'mobility-trailblazers'));
+        $candidates = get_posts([
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ]);
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'ID',
+            'Name',
+            'Organization',
+            'Position',
+            'Categories',
+            'Average Score',
+            'Evaluation Count'
+        ];
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        foreach ($candidates as $candidate) {
+            $categories = wp_get_post_terms($candidate->ID, 'mt_award_category', ['fields' => 'names']);
+            $avg_score = $evaluation_repo->get_average_score_for_candidate($candidate->ID);
+            $evaluations = $evaluation_repo->get_by_candidate($candidate->ID);
+            
+            $csv_data[] = [
+                $candidate->ID,
+                $candidate->post_title,
+                get_post_meta($candidate->ID, '_mt_organization', true),
+                get_post_meta($candidate->ID, '_mt_position', true),
+                implode(', ', $categories),
+                $avg_score,
+                count($evaluations)
+            ];
+        }
+        
+        $this->success([
+            'csv' => $this->array_to_csv($csv_data),
+            'filename' => 'candidates-' . date('Y-m-d') . '.csv'
+        ]);
     }
     
     /**
-     * Export jury
+     * Export evaluations to CSV
+     *
+     * @return void
      */
-    public function export_jury() {
+    public function export_evaluations() {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_export_data');
         
-        // Implementation would go here
-        $this->error(__('Export jury functionality not yet implemented', 'mobility-trailblazers'));
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluations = $evaluation_repo->find_all();
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'ID',
+            'Jury Member',
+            'Candidate',
+            'Courage Score',
+            'Innovation Score',
+            'Implementation Score',
+            'Relevance Score',
+            'Visibility Score',
+            'Total Score',
+            'Status',
+            'Date'
+        ];
+        
+        foreach ($evaluations as $evaluation) {
+            $jury_member = get_post($evaluation->jury_member_id);
+            $candidate = get_post($evaluation->candidate_id);
+            
+            $csv_data[] = [
+                $evaluation->id,
+                $jury_member ? $jury_member->post_title : 'Unknown',
+                $candidate ? $candidate->post_title : 'Unknown',
+                $evaluation->courage_score,
+                $evaluation->innovation_score,
+                $evaluation->implementation_score,
+                $evaluation->relevance_score,
+                $evaluation->visibility_score,
+                $evaluation->total_score,
+                $evaluation->status,
+                $evaluation->created_at
+            ];
+        }
+        
+        $this->success([
+            'csv' => $this->array_to_csv($csv_data),
+            'filename' => 'evaluations-' . date('Y-m-d') . '.csv'
+        ]);
     }
     
     /**
-     * Export votes
+     * Export assignments to CSV
+     *
+     * @return void
      */
-    public function export_votes() {
+    public function export_assignments() {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_export_data');
         
-        // Implementation would go here
-        $this->error(__('Export votes functionality not yet implemented', 'mobility-trailblazers'));
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $assignments = $assignment_repo->find_all();
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'Jury Member',
+            'Candidate',
+            'Assigned Date',
+            'Evaluation Status'
+        ];
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        foreach ($assignments as $assignment) {
+            $jury_member = get_post($assignment->jury_member_id);
+            $candidate = get_post($assignment->candidate_id);
+            
+            // Check evaluation status
+            $evaluations = $evaluation_repo->find_all([
+                'jury_member_id' => $assignment->jury_member_id,
+                'candidate_id' => $assignment->candidate_id,
+                'limit' => 1
+            ]);
+            
+            $status = 'Not Started';
+            if (!empty($evaluations)) {
+                $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+            }
+            
+            $csv_data[] = [
+                $jury_member ? $jury_member->post_title : 'Unknown',
+                $candidate ? $candidate->post_title : 'Unknown',
+                $assignment->assigned_at,
+                $status
+            ];
+        }
+        
+        $this->success([
+            'csv' => $this->array_to_csv($csv_data),
+            'filename' => 'assignments-' . date('Y-m-d') . '.csv'
+        ]);
     }
     
     /**
-     * Import data
+     * Import candidates from CSV
+     *
+     * @return void
      */
-    public function import_data() {
+    public function import_candidates() {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_import_data');
         
-        // Implementation would go here
-        $this->error(__('Import data functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Create jury user
-     */
-    public function create_jury_user() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_jury_members');
-        
-        $jury_member_id = $this->get_param('jury_member_id', 0);
-        
-        if (!$jury_member_id) {
-            $this->error(__('Invalid jury member.', 'mobility-trailblazers'));
+        $file_id = $this->get_int_param('file_id');
+        if (!$file_id) {
+            $this->error(__('No file provided.', 'mobility-trailblazers'));
         }
         
-        // Create user
-        $user_id = MT_Roles::create_jury_user($jury_member_id, array(
-            'send_notification' => $this->get_param('send_notification') === 'true',
-        ));
-        
-        if (is_wp_error($user_id)) {
-            $this->error($user_id->get_error_message());
+        $file_path = get_attached_file($file_id);
+        if (!$file_path || !file_exists($file_path)) {
+            $this->error(__('File not found.', 'mobility-trailblazers'));
         }
         
-        $this->success(
-            array('user_id' => $user_id),
-            __('User account created successfully.', 'mobility-trailblazers')
-        );
-    }
-    
-    /**
-     * Send jury credentials
-     */
-    public function send_jury_credentials() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_jury_members');
-        
-        // Implementation would go here
-        $this->error(__('Send credentials functionality not yet implemented', 'mobility-trailblazers'));
-    }
-    
-    /**
-     * Submit registration
-     */
-    public function submit_registration() {
-        // Check if registration is open
-        if (!mt_is_registration_open()) {
-            $this->error(__('Registration is currently closed.', 'mobility-trailblazers'));
+        $csv_data = $this->parse_csv($file_path);
+        if (empty($csv_data)) {
+            $this->error(__('Invalid CSV file.', 'mobility-trailblazers'));
         }
         
-        $this->verify_nonce('mt_registration');
+        $imported = 0;
+        $errors = [];
         
-        // Validate required fields
-        $required_fields = array('name', 'email', 'company', 'position', 'innovation_title');
-        
-        foreach ($required_fields as $field) {
-            if (empty($_POST[$field])) {
-                $this->error(sprintf(__('Please fill in all required fields. Missing: %s', 'mobility-trailblazers'), $field));
+        foreach ($csv_data as $row_num => $row) {
+            // Skip header row
+            if ($row_num === 0) {
+                continue;
             }
-        }
-        
-        // Create candidate post
-        $post_data = array(
-            'post_title' => sanitize_text_field($_POST['name']),
-            'post_content' => sanitize_textarea_field($_POST['innovation_description'] ?? ''),
-            'post_type' => 'mt_candidate',
-            'post_status' => 'pending', // Requires approval
-        );
-        
-        $candidate_id = wp_insert_post($post_data);
-        
-        if (is_wp_error($candidate_id)) {
-            $this->error(__('Failed to create candidate profile. Please try again.', 'mobility-trailblazers'));
-        }
-        
-        // Save candidate meta
-        update_post_meta($candidate_id, '_mt_email', sanitize_email($_POST['email']));
-        update_post_meta($candidate_id, '_mt_company', sanitize_text_field($_POST['company']));
-        update_post_meta($candidate_id, '_mt_position', sanitize_text_field($_POST['position']));
-        update_post_meta($candidate_id, '_mt_innovation_title', sanitize_text_field($_POST['innovation_title']));
-        update_post_meta($candidate_id, '_mt_phone', sanitize_text_field($_POST['phone'] ?? ''));
-        update_post_meta($candidate_id, '_mt_website', esc_url_raw($_POST['website'] ?? ''));
-        update_post_meta($candidate_id, '_mt_status', 'pending');
-        
-        // Send confirmation email
-        $notification_service = new \MobilityTrailblazers\Services\MT_Notification_Service();
-        $notification_service->send_registration_confirmation($_POST['email'], $_POST['name']);
-        
-        // Send notification to admins
-        $admin_emails = mt_get_admin_emails();
-        if (!empty($admin_emails)) {
-            $admin_subject = sprintf(__('New candidate registration: %s', 'mobility-trailblazers'), $_POST['name']);
-            $admin_message = sprintf(
-                __('A new candidate has registered:
-
-Name: %s
-Email: %s
-Company: %s
-Position: %s
-Innovation: %s
-
-Please review the application: %s
-
-The application is currently in pending status and requires approval.', 'mobility-trailblazers'),
-                sanitize_text_field($_POST['name']),
-                sanitize_email($_POST['email']),
-                sanitize_text_field($_POST['company']),
-                sanitize_text_field($_POST['position']),
-                sanitize_text_field($_POST['innovation_title']),
-                admin_url('post.php?post=' . $candidate_id . '&action=edit')
-            );
             
-            foreach ($admin_emails as $admin_email) {
-                mt_send_email($admin_email, $admin_subject, $admin_message);
+            // Validate required fields
+            if (empty($row[0])) { // Name
+                $errors[] = sprintf(__('Row %d: Name is required.', 'mobility-trailblazers'), $row_num + 1);
+                continue;
             }
+            
+            // Create candidate
+            $candidate_data = [
+                'post_title' => sanitize_text_field($row[0]),
+                'post_type' => 'mt_candidate',
+                'post_status' => 'publish',
+                'post_content' => isset($row[4]) ? wp_kses_post($row[4]) : '', // Bio
+            ];
+            
+            $candidate_id = wp_insert_post($candidate_data);
+            
+            if (is_wp_error($candidate_id)) {
+                $errors[] = sprintf(__('Row %d: %s', 'mobility-trailblazers'), $row_num + 1, $candidate_id->get_error_message());
+                continue;
+            }
+            
+            // Add meta data
+            if (!empty($row[1])) { // Organization
+                update_post_meta($candidate_id, '_mt_organization', sanitize_text_field($row[1]));
+            }
+            if (!empty($row[2])) { // Position
+                update_post_meta($candidate_id, '_mt_position', sanitize_text_field($row[2]));
+            }
+            
+            // Add categories
+            if (!empty($row[3])) { // Categories
+                $categories = array_map('trim', explode(',', $row[3]));
+                wp_set_object_terms($candidate_id, $categories, 'mt_award_category');
+            }
+            
+            $imported++;
         }
         
-        // Log registration
-        mt_log('New candidate registration', 'info', array(
-            'candidate_id' => $candidate_id,
-            'name' => sanitize_text_field($_POST['name']),
-            'company' => sanitize_text_field($_POST['company']),
-        ));
+        // Clean up
+        wp_delete_attachment($file_id, true);
         
-        // Redirect URL if provided
-        $redirect_url = '';
-        if (!empty($_POST['redirect_url'])) {
-            $redirect_url = esc_url_raw($_POST['redirect_url']);
+        if ($imported > 0) {
+            $this->success([
+                'imported' => $imported,
+                'errors' => $errors
+            ], sprintf(__('%d candidates imported successfully.', 'mobility-trailblazers'), $imported));
+        } else {
+            $this->error(__('No candidates were imported.', 'mobility-trailblazers'), ['errors' => $errors]);
+        }
+    }
+    
+    /**
+     * Upload import file
+     *
+     * @return void
+     */
+    public function upload_import_file() {
+        $this->verify_nonce('mt_admin_nonce');
+        $this->check_permission('mt_import_data');
+        
+        if (empty($_FILES['import_file'])) {
+            $this->error(__('No file uploaded.', 'mobility-trailblazers'));
         }
         
-        $this->success(
-            array(
-                'redirect_url' => $redirect_url,
-                'candidate_id' => $candidate_id,
-            ),
-            __('Thank you for your registration! We will review your application and get back to you soon.', 'mobility-trailblazers')
-        );
+        $file = $_FILES['import_file'];
+        
+        // Validate file type
+        $allowed_types = ['text/csv', 'application/csv', 'text/plain'];
+        if (!in_array($file['type'], $allowed_types)) {
+            $this->error(__('Invalid file type. Please upload a CSV file.', 'mobility-trailblazers'));
+        }
+        
+        // Handle upload
+        $upload = wp_handle_upload($file, ['test_form' => false]);
+        
+        if (isset($upload['error'])) {
+            $this->error($upload['error']);
+        }
+        
+        // Create attachment
+        $attachment = [
+            'post_mime_type' => $upload['type'],
+            'post_title' => sanitize_file_name($file['name']),
+            'post_content' => '',
+            'post_status' => 'private'
+        ];
+        
+        $attach_id = wp_insert_attachment($attachment, $upload['file']);
+        
+        if (is_wp_error($attach_id)) {
+            $this->error(__('Failed to process file.', 'mobility-trailblazers'));
+        }
+        
+        $this->success([
+            'file_id' => $attach_id,
+            'filename' => basename($upload['file'])
+        ]);
+    }
+    
+    /**
+     * Get dashboard statistics
+     *
+     * @return void
+     */
+    public function get_dashboard_stats() {
+        $this->verify_nonce('mt_admin_nonce');
+        $this->check_permission('mt_view_all_evaluations');
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        
+        $eval_stats = $evaluation_repo->get_statistics();
+        $assign_stats = $assignment_repo->get_statistics();
+        
+        // Get top candidates
+        $top_candidates = $evaluation_repo->get_top_candidates(5);
+        
+        $this->success([
+            'evaluations' => $eval_stats,
+            'assignments' => $assign_stats,
+            'top_candidates' => $top_candidates
+        ]);
+    }
+    
+    /**
+     * Convert array to CSV string
+     *
+     * @param array $data Data array
+     * @return string
+     */
+    private function array_to_csv($data) {
+        $output = fopen('php://temp', 'r+');
+        
+        foreach ($data as $row) {
+            fputcsv($output, $row);
+        }
+        
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+        
+        return $csv;
+    }
+    
+    /**
+     * Parse CSV file
+     *
+     * @param string $file_path Path to CSV file
+     * @return array
+     */
+    private function parse_csv($file_path) {
+        $data = [];
+        
+        if (($handle = fopen($file_path, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                $data[] = $row;
+            }
+            fclose($handle);
+        }
+        
+        return $data;
     }
 } 

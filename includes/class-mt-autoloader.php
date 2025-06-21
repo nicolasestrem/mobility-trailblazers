@@ -1,115 +1,82 @@
 <?php
 /**
- * Autoloader for Mobility Trailblazers plugin
+ * PSR-4 Autoloader for Mobility Trailblazers
  *
  * @package MobilityTrailblazers
- * @since 1.0.7
+ * @since 2.0.0
  */
 
-// Prevent direct access
+namespace MobilityTrailblazers\Core;
+
+// Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
 }
 
 /**
  * Class MT_Autoloader
- * Handles autoloading of namespaced classes
+ *
+ * Handles PSR-4 autoloading for plugin classes
  */
 class MT_Autoloader {
     
     /**
-     * Plugin base directory
+     * Namespace prefix
      *
      * @var string
      */
-    private $base_dir;
+    private static $namespace_prefix = 'MobilityTrailblazers\\';
     
     /**
-     * Constructor
+     * Base directory for classes
+     *
+     * @var string
      */
-    public function __construct() {
-        $this->base_dir = plugin_dir_path(dirname(__FILE__));
+    private static $base_dir;
+    
+    /**
+     * Register the autoloader
+     *
+     * @return void
+     */
+    public static function register() {
+        self::$base_dir = MT_PLUGIN_DIR . 'includes/';
+        
+        spl_autoload_register([__CLASS__, 'autoload']);
     }
     
     /**
-     * Register autoloader
-     */
-    public function register() {
-        spl_autoload_register(array($this, 'autoload'));
-    }
-    
-    /**
-     * Autoload method
+     * Autoload handler
      *
      * @param string $class The fully-qualified class name
+     * @return void
      */
-    public function autoload($class) {
-        // Project-specific namespace prefix
-        $prefix = 'MobilityTrailblazers\\';
-        
-        // Base directory for the namespace prefix
-        $base_dir = $this->base_dir . 'includes/';
-        
-        // Does the class use the namespace prefix?
-        $len = strlen($prefix);
-        if (strncmp($prefix, $class, $len) !== 0) {
-            // No, move to the next registered autoloader
+    public static function autoload($class) {
+        // Check if class uses our namespace
+        $len = strlen(self::$namespace_prefix);
+        if (strncmp(self::$namespace_prefix, $class, $len) !== 0) {
             return;
         }
         
         // Get the relative class name
         $relative_class = substr($class, $len);
         
-        // Namespace-to-directory mapping
-        $namespace_map = [
-            'Ajax' => 'ajax',
-            'Elementor' => 'elementor',
-            'Repositories' => 'repositories',
-            'Interfaces' => 'interfaces',
-            'Services' => 'services',
-            // Add more mappings as needed
-        ];
+        // Convert namespace to file path
         $parts = explode('\\', $relative_class);
-        if (count($parts) > 1 && isset($namespace_map[$parts[0]])) {
-            $parts[0] = $namespace_map[$parts[0]];
-            $relative_path = implode('/', $parts);
-        } else {
-            $relative_path = str_replace('\\', '/', $relative_class);
-        }
+        $class_name = array_pop($parts);
+        
+        // Convert to lowercase directory structure
+        $subdirectory = !empty($parts) ? strtolower(implode('/', $parts)) . '/' : '';
+        
+        // Convert class name to file name
+        $file_name = 'class-' . str_replace('_', '-', strtolower($class_name)) . '.php';
         
         // Build the file path
-        $file = $base_dir . $relative_path . '.php';
+        $file = self::$base_dir . $subdirectory . $file_name;
         
-        // Convert to lowercase and add appropriate prefix
-        $path_parts = explode('/', $file);
-        $filename = array_pop($path_parts);
-        
-        // Check if this is an interface (starts with 'I' or 'Interface')
-        if (strpos($filename, 'Interface') !== false || strpos($filename, 'I_') !== false) {
-            // Try both interface- and class- prefixes for interfaces
-            $interface_filename = 'interface-' . strtolower(str_replace('_', '-', $filename));
-            $class_filename = 'class-' . strtolower(str_replace('_', '-', $filename));
-            
-            $interface_file = implode('/', $path_parts) . '/' . $interface_filename;
-            $class_file = implode('/', $path_parts) . '/' . $class_filename;
-            
-            // Check which file exists
-            if (file_exists($interface_file)) {
-                $file = $interface_file;
-            } elseif (file_exists($class_file)) {
-                $file = $class_file;
-            } else {
-                // If neither exists, try the interface- version
-                $file = $interface_file;
-            }
-        } else {
-            $filename = 'class-' . strtolower(str_replace('_', '-', $filename));
-            $file = implode('/', $path_parts) . '/' . $filename;
-        }
-        
-        // If the file exists, require it
+        // Require the file if it exists
         if (file_exists($file)) {
             require_once $file;
         }
     }
-}
+} 

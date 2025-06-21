@@ -1,684 +1,628 @@
 # Mobility Trailblazers - Developer Guide
 
+**Version:** 2.0.0  
+**Last Updated:** June 21, 2025
+
 ## Table of Contents
 1. [Getting Started](#getting-started)
-2. [Creating Custom Repositories](#creating-custom-repositories)
-3. [Creating Custom Services](#creating-custom-services)
-4. [Extending Existing Functionality](#extending-existing-functionality)
-5. [Adding New Features](#adding-new-features)
-6. [Testing](#testing)
-7. [Common Patterns](#common-patterns)
-8. [Troubleshooting](#troubleshooting)
+2. [Development Environment](#development-environment)
+3. [Code Standards](#code-standards)
+4. [Working with Custom Post Types](#working-with-custom-post-types)
+5. [Repository Pattern Usage](#repository-pattern-usage)
+6. [Service Layer Development](#service-layer-development)
+7. [AJAX Implementation](#ajax-implementation)
+8. [Creating Templates](#creating-templates)
+9. [Adding Hooks & Filters](#adding-hooks--filters)
+10. [Testing Guidelines](#testing-guidelines)
+11. [Common Tasks](#common-tasks)
 
 ## Getting Started
 
-### Development Environment Setup
+### Prerequisites
 
-1. **Enable Debug Mode**
-   ```php
-   // In wp-config.php
-   define('WP_DEBUG', true);
-   define('WP_DEBUG_LOG', true);
-   define('WP_DEBUG_DISPLAY', false);
-   define('MT_DEBUG', true);
-   ```
+- WordPress 5.8 or higher
+- PHP 7.4 or higher
+- MySQL 5.7 or higher
+- Node.js 14+ (for build tools)
+- Composer (optional, for dependencies)
 
-2. **Check Plugin Structure**
-   ```bash
-   mobility-trailblazers/
-   ├── includes/
-   │   ├── interfaces/
-   │   ├── repositories/
-   │   ├── services/
-   │   └── class-mt-autoloader.php
-   ```
+### Installation for Development
 
-3. **Understand Namespacing**
-   ```php
-   // All custom classes use this namespace structure
-   namespace MobilityTrailblazers\{Type}\{ClassName};
-   
-   // Examples:
-   namespace MobilityTrailblazers\Services\MT_Custom_Service;
-   namespace MobilityTrailblazers\Repositories\MT_Custom_Repository;
-   ```
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd mobility-trailblazers
+```
 
-## Creating Custom Repositories
+2. Set up local WordPress environment:
+```bash
+# Using Local by Flywheel, XAMPP, or Docker
+# Configure wp-config.php with database credentials
+```
 
-### Step 1: Create Repository Interface (if needed)
+3. Activate the plugin:
+```bash
+wp plugin activate mobility-trailblazers
+```
+
+## Development Environment
+
+### Recommended Tools
+
+1. **IDE/Editor**
+   - PHPStorm (recommended)
+   - VS Code with PHP extensions
+   - Sublime Text with PHP packages
+
+2. **Debugging**
+   - Query Monitor plugin
+   - Debug Bar plugin
+   - Xdebug configuration
+
+3. **Version Control**
+   - Git with conventional commits
+   - Feature branch workflow
+
+### Local Development Setup
 
 ```php
-<?php
-// File: includes/interfaces/interface-mt-custom-repository.php
+// wp-config.php additions for development
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false);
+define('SCRIPT_DEBUG', true);
+define('SAVEQUERIES', true);
+```
 
-namespace MobilityTrailblazers\Interfaces;
+## Code Standards
 
-interface MT_Custom_Repository_Interface extends MT_Repository_Interface {
-    public function custom_method($param);
+### PHP Standards
+
+Follow WordPress Coding Standards with these additions:
+
+1. **Namespace Convention**
+```php
+namespace MobilityTrailblazers\Services;
+
+use MobilityTrailblazers\Interfaces\MT_Service_Interface;
+use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
+```
+
+2. **Class Naming**
+```php
+// File: includes/services/class-mt-evaluation-service.php
+class MT_Evaluation_Service implements MT_Service_Interface {
+    // Implementation
 }
 ```
 
-### Step 2: Implement Repository Class
+3. **Method Documentation**
+```php
+/**
+ * Process evaluation submission.
+ *
+ * @since 2.0.0
+ * @param array $data Evaluation data.
+ * @return int|WP_Error Evaluation ID or error.
+ */
+public function process($data) {
+    // Method implementation
+}
+```
+
+### JavaScript Standards
+
+1. **ES6+ Syntax**
+```javascript
+// Use const/let instead of var
+const MTEvaluation = {
+    init() {
+        this.bindEvents();
+    },
+    
+    bindEvents() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.setupForm();
+        });
+    }
+};
+```
+
+2. **jQuery Usage**
+```javascript
+// Wrap jQuery code properly
+(function($) {
+    'use strict';
+    
+    $(document).ready(function() {
+        // Your code here
+    });
+})(jQuery);
+```
+
+### CSS Standards
+
+1. **BEM Methodology**
+```css
+/* Block */
+.mt-evaluation-form {}
+
+/* Element */
+.mt-evaluation-form__field {}
+
+/* Modifier */
+.mt-evaluation-form--loading {}
+```
+
+2. **Responsive Design**
+```css
+/* Mobile-first approach */
+.mt-card {
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .mt-card {
+        padding: 2rem;
+    }
+}
+```
+
+## Working with Custom Post Types
+
+### Registering Post Types
+
+Post types are registered in `includes/core/class-mt-post-types.php`:
 
 ```php
-<?php
-// File: includes/repositories/class-mt-custom-repository.php
+public function register_candidate_post_type() {
+    $args = [
+        'labels' => $this->get_candidate_labels(),
+        'public' => true,
+        'has_archive' => false,
+        'show_in_rest' => true,
+        'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
+        'menu_icon' => 'dashicons-awards',
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
+    ];
+    
+    register_post_type('mt_candidate', $args);
+}
+```
 
+### Adding Meta Boxes
+
+```php
+// In your admin class
+public function add_candidate_meta_boxes() {
+    add_meta_box(
+        'mt_candidate_details',
+        __('Candidate Details', 'mobility-trailblazers'),
+        [$this, 'render_candidate_details_meta_box'],
+        'mt_candidate',
+        'normal',
+        'high'
+    );
+}
+
+public function render_candidate_details_meta_box($post) {
+    wp_nonce_field('mt_candidate_details', 'mt_candidate_details_nonce');
+    
+    $innovation_summary = get_post_meta($post->ID, '_mt_innovation_summary', true);
+    ?>
+    <label for="mt_innovation_summary">
+        <?php _e('Innovation Summary', 'mobility-trailblazers'); ?>
+    </label>
+    <textarea id="mt_innovation_summary" name="mt_innovation_summary" rows="5" style="width: 100%;">
+        <?php echo esc_textarea($innovation_summary); ?>
+    </textarea>
+    <?php
+}
+```
+
+## Repository Pattern Usage
+
+### Creating a New Repository
+
+1. **Define the Repository Class**
+```php
 namespace MobilityTrailblazers\Repositories;
 
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
 
-class MT_Custom_Repository implements MT_Repository_Interface {
-    
+class MT_Candidate_Repository implements MT_Repository_Interface {
     private $table_name;
     
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'mt_custom_table';
+        $this->table_name = $wpdb->prefix . 'posts';
     }
     
-    /**
-     * Find record by ID
-     */
     public function find($id) {
-        global $wpdb;
-        
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$this->table_name} WHERE id = %d",
-            $id
-        ));
+        return get_post($id);
     }
     
-    /**
-     * Find all records with filters
-     */
-    public function find_all($args = array()) {
-        global $wpdb;
-        
-        $defaults = array(
-            'status' => null,
-            'orderby' => 'created_at',
-            'order' => 'DESC',
-            'limit' => 50,
-            'offset' => 0
-        );
+    public function find_all($args = []) {
+        $defaults = [
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+        ];
         
         $args = wp_parse_args($args, $defaults);
-        
-        // Build query
-        $where_clauses = array('1=1');
-        $values = array();
-        
-        if ($args['status'] !== null) {
-            $where_clauses[] = 'status = %s';
-            $values[] = $args['status'];
-        }
-        
-        $where = implode(' AND ', $where_clauses);
-        $orderby = sprintf('%s %s', 
-            esc_sql($args['orderby']), 
-            esc_sql($args['order'])
-        );
-        
-        $query = "SELECT * FROM {$this->table_name} 
-                  WHERE {$where} 
-                  ORDER BY {$orderby} 
-                  LIMIT %d OFFSET %d";
-        
-        $values[] = $args['limit'];
-        $values[] = $args['offset'];
-        
-        return $wpdb->get_results(
-            $wpdb->prepare($query, $values)
-        );
+        return get_posts($args);
     }
     
-    /**
-     * Create new record
-     */
     public function create($data) {
-        global $wpdb;
-        
-        $defaults = array(
-            'created_at' => current_time('mysql'),
-            'updated_at' => current_time('mysql')
-        );
-        
-        $data = wp_parse_args($data, $defaults);
-        
-        $result = $wpdb->insert(
-            $this->table_name,
-            $data,
-            $this->get_column_formats($data)
-        );
-        
-        return $result ? $wpdb->insert_id : false;
+        return wp_insert_post($data);
     }
     
-    /**
-     * Update record
-     */
     public function update($id, $data) {
-        global $wpdb;
-        
-        $data['updated_at'] = current_time('mysql');
-        
-        return $wpdb->update(
-            $this->table_name,
-            $data,
-            array('id' => $id),
-            $this->get_column_formats($data),
-            array('%d')
-        );
+        $data['ID'] = $id;
+        return wp_update_post($data);
     }
     
-    /**
-     * Delete record
-     */
     public function delete($id) {
-        global $wpdb;
-        
-        return $wpdb->delete(
-            $this->table_name,
-            array('id' => $id),
-            array('%d')
-        );
-    }
-    
-    /**
-     * Get column formats for wpdb
-     */
-    private function get_column_formats($data) {
-        $formats = array();
-        
-        foreach ($data as $key => $value) {
-            if (is_int($value)) {
-                $formats[] = '%d';
-            } elseif (is_float($value)) {
-                $formats[] = '%f';
-            } else {
-                $formats[] = '%s';
-            }
-        }
-        
-        return $formats;
-    }
-    
-    /**
-     * Custom method example: Bulk update status
-     */
-    public function bulk_update_status($ids, $status) {
-        global $wpdb;
-        
-        if (empty($ids)) {
-            return 0;
-        }
-        
-        $placeholders = implode(',', array_fill(0, count($ids), '%d'));
-        $values = $ids;
-        $values[] = $status;
-        
-        return $wpdb->query($wpdb->prepare(
-            "UPDATE {$this->table_name} 
-             SET status = %s, updated_at = NOW() 
-             WHERE id IN ({$placeholders})",
-            $values
-        ));
+        return wp_delete_post($id, true);
     }
 }
 ```
 
-### Step 3: Create Database Table
+### Using Repositories
 
 ```php
-// In your activation hook or database class
-public function create_custom_table() {
-    global $wpdb;
+// In a service class
+class MT_Candidate_Service {
+    private $repository;
     
-    $table_name = $wpdb->prefix . 'mt_custom_table';
-    $charset_collate = $wpdb->get_charset_collate();
+    public function __construct() {
+        $this->repository = new MT_Candidate_Repository();
+    }
     
-    $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-        id int(11) NOT NULL AUTO_INCREMENT,
-        user_id int(11) NOT NULL,
-        status varchar(50) DEFAULT 'active',
-        data longtext,
-        created_at datetime DEFAULT CURRENT_TIMESTAMP,
-        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        KEY user_id (user_id),
-        KEY status (status)
-    ) $charset_collate;";
-    
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
+    public function get_candidates_by_category($category_id) {
+        return $this->repository->find_all([
+            'tax_query' => [
+                [
+                    'taxonomy' => 'mt_award_category',
+                    'field' => 'term_id',
+                    'terms' => $category_id,
+                ],
+            ],
+        ]);
+    }
 }
 ```
 
-## Creating Custom Services
+## Service Layer Development
 
-### Step 1: Create Service Class
+### Creating a New Service
 
+1. **Define the Service Interface**
 ```php
-<?php
-// File: includes/services/class-mt-custom-service.php
-
 namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
-use MobilityTrailblazers\Repositories\MT_Custom_Repository;
 
-class MT_Custom_Service implements MT_Service_Interface {
+class MT_Notification_Service implements MT_Service_Interface {
+    private $errors = [];
     
-    private $repository;
-    private $errors = array();
-    
-    public function __construct() {
-        $this->repository = new MT_Custom_Repository();
-    }
-    
-    /**
-     * Process the main action
-     */
     public function process($data) {
-        $this->errors = array();
-        
-        // Validate
         if (!$this->validate($data)) {
             return false;
         }
         
-        // Business logic
-        $processed_data = $this->prepare_data($data);
-        
-        // Check business rules
-        if (!$this->check_business_rules($processed_data)) {
-            return false;
-        }
-        
-        // Save using repository
-        $result = $this->repository->create($processed_data);
-        
-        if ($result) {
-            // Trigger action for other plugins
-            do_action('mt_custom_processed', $result, $processed_data);
-            
-            // Maybe send notification
-            $this->maybe_send_notification($result);
-        }
-        
-        return $result;
+        return $this->send_notification($data);
     }
     
-    /**
-     * Validate input data
-     */
     public function validate($data) {
-        $valid = true;
-        
-        // Required fields
-        if (empty($data['user_id'])) {
-            $this->errors[] = __('User ID is required', 'mobility-trailblazers');
-            $valid = false;
-        }
-        
-        // Validate user exists and has permission
-        if (!empty($data['user_id'])) {
-            $user = get_user_by('id', $data['user_id']);
-            if (!$user) {
-                $this->errors[] = __('Invalid user', 'mobility-trailblazers');
-                $valid = false;
-            } elseif (!user_can($user, 'mt_use_custom_feature')) {
-                $this->errors[] = __('User lacks permission', 'mobility-trailblazers');
-                $valid = false;
-            }
-        }
-        
-        // Custom validation
-        $valid = apply_filters('mt_custom_validate', $valid, $data, $this);
-        
-        return $valid;
-    }
-    
-    /**
-     * Get validation errors
-     */
-    public function get_errors() {
-        return $this->errors;
-    }
-    
-    /**
-     * Prepare data for storage
-     */
-    private function prepare_data($data) {
-        $prepared = array(
-            'user_id' => intval($data['user_id']),
-            'status' => 'pending',
-            'data' => json_encode($data)
-        );
-        
-        // Allow filtering
-        return apply_filters('mt_custom_prepare_data', $prepared, $data);
-    }
-    
-    /**
-     * Check business rules
-     */
-    private function check_business_rules($data) {
-        // Example: Check user hasn't exceeded limit
-        $user_count = $this->repository->get_user_count($data['user_id']);
-        
-        if ($user_count >= 10) {
-            $this->errors[] = __('User has reached the maximum limit', 'mobility-trailblazers');
+        if (empty($data['recipient'])) {
+            $this->errors[] = __('Recipient is required', 'mobility-trailblazers');
             return false;
         }
         
-        // Example: Check time restrictions
-        $current_hour = date('H');
-        if ($current_hour < 8 || $current_hour > 18) {
-            $this->errors[] = __('This action is only available during business hours', 'mobility-trailblazers');
+        if (!is_email($data['recipient'])) {
+            $this->errors[] = __('Invalid email address', 'mobility-trailblazers');
             return false;
         }
         
         return true;
     }
     
-    /**
-     * Send notification if needed
-     */
-    private function maybe_send_notification($id) {
-        $send_notification = apply_filters('mt_custom_should_notify', true, $id);
-        
-        if ($send_notification) {
-            $notification_service = new MT_Notification_Service();
-            $notification_service->send_custom_notification($id);
-        }
+    public function get_errors() {
+        return $this->errors;
     }
     
-    /**
-     * Batch process multiple items
-     */
-    public function batch_process($items) {
-        $results = array(
-            'success' => 0,
-            'failed' => 0,
-            'errors' => array()
+    private function send_notification($data) {
+        $subject = sprintf(
+            __('New Evaluation for %s', 'mobility-trailblazers'),
+            $data['candidate_name']
         );
         
-        foreach ($items as $item) {
-            $result = $this->process($item);
-            
-            if ($result) {
-                $results['success']++;
-            } else {
-                $results['failed']++;
-                $results['errors'][] = array(
-                    'item' => $item,
-                    'errors' => $this->get_errors()
-                );
-            }
-            
-            // Clear errors for next iteration
-            $this->errors = array();
-        }
+        $message = $this->build_message($data);
         
-        return $results;
+        return wp_mail($data['recipient'], $subject, $message);
     }
 }
 ```
 
-### Step 2: Create AJAX Handler
+### Service Integration
 
 ```php
-<?php
-// File: includes/ajax/class-mt-custom-ajax.php
+// In AJAX handler
+public function handle_evaluation_submission() {
+    $evaluation_service = new MT_Evaluation_Service();
+    $notification_service = new MT_Notification_Service();
+    
+    $result = $evaluation_service->process($_POST);
+    
+    if (is_wp_error($result)) {
+        return $this->error($result->get_error_message());
+    }
+    
+    // Send notification
+    $notification_service->process([
+        'recipient' => get_option('admin_email'),
+        'candidate_name' => get_the_title($_POST['candidate_id']),
+        'jury_member' => wp_get_current_user()->display_name,
+    ]);
+    
+    return $this->success(['evaluation_id' => $result]);
+}
+```
 
+## AJAX Implementation
+
+### Creating AJAX Handlers
+
+1. **Backend Handler**
+```php
 namespace MobilityTrailblazers\Ajax;
 
 class MT_Custom_Ajax extends MT_Base_Ajax {
     
     public function __construct() {
-        add_action('wp_ajax_mt_custom_action', array($this, 'handle_custom_action'));
-        add_action('wp_ajax_nopriv_mt_custom_action', array($this, 'handle_custom_action_public'));
+        parent::__construct();
+        $this->register_ajax_handlers();
     }
     
-    /**
-     * Handle custom action for logged-in users
-     */
+    protected function register_ajax_handlers() {
+        add_action('wp_ajax_mt_custom_action', [$this, 'handle_custom_action']);
+        add_action('wp_ajax_nopriv_mt_custom_action', [$this, 'handle_custom_action']);
+    }
+    
     public function handle_custom_action() {
-        $this->verify_nonce('mt_custom_nonce');
-        $this->check_permission('mt_use_custom_feature');
+        // Verify nonce
+        if (!$this->verify_nonce('mt_custom_nonce')) {
+            return;
+        }
         
-        $data = array(
-            'user_id' => get_current_user_id(),
-            'field1' => sanitize_text_field($_POST['field1'] ?? ''),
-            'field2' => intval($_POST['field2'] ?? 0)
-        );
+        // Check permissions
+        if (!$this->check_permission('read')) {
+            return;
+        }
         
-        $service = new \MobilityTrailblazers\Services\MT_Custom_Service();
-        $result = $service->process($data);
+        // Process data
+        $data = $this->sanitize_data($_POST);
+        
+        // Perform action
+        $result = $this->perform_action($data);
         
         if ($result) {
-            $this->success(
-                array('id' => $result),
-                __('Action completed successfully', 'mobility-trailblazers')
-            );
+            $this->success($result, __('Action completed', 'mobility-trailblazers'));
         } else {
-            $this->error(
-                __('Action failed', 'mobility-trailblazers'),
-                array('errors' => $service->get_errors())
-            );
+            $this->error(__('Action failed', 'mobility-trailblazers'));
         }
-    }
-    
-    /**
-     * Handle public version
-     */
-    public function handle_custom_action_public() {
-        $this->verify_nonce('mt_custom_public_nonce');
-        
-        // Different logic for non-logged-in users
-        $this->error(__('Please log in to use this feature', 'mobility-trailblazers'));
     }
 }
 ```
 
-## Extending Existing Functionality
+2. **Frontend JavaScript**
+```javascript
+// AJAX request example
+const MTAjax = {
+    performAction(data) {
+        const formData = new FormData();
+        formData.append('action', 'mt_custom_action');
+        formData.append('nonce', mt_ajax.nonce);
+        
+        Object.keys(data).forEach(key => {
+            formData.append(key, data[key]);
+        });
+        
+        return fetch(mt_ajax.ajax_url, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                this.handleSuccess(result.data);
+            } else {
+                this.handleError(result.data.message);
+            }
+        })
+        .catch(error => {
+            console.error('AJAX error:', error);
+        });
+    }
+};
+```
 
-### Adding New Evaluation Criteria
+## Creating Templates
+
+### Template Structure
+
+1. **Frontend Template Example**
+```php
+<?php
+/**
+ * Template: Evaluation Form
+ * 
+ * @package MobilityTrailblazers
+ * @since 2.0.0
+ */
+
+// Security check
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Get current user
+$current_user = wp_get_current_user();
+$jury_member_id = MT_Jury_Member::get_by_user_id($current_user->ID);
+
+if (!$jury_member_id) {
+    echo '<p>' . esc_html__('You must be a jury member to access this form.', 'mobility-trailblazers') . '</p>';
+    return;
+}
+?>
+
+<div class="mt-evaluation-form-wrapper">
+    <form id="mt-evaluation-form" class="mt-evaluation-form">
+        <?php wp_nonce_field('mt_evaluation_nonce', 'mt_nonce'); ?>
+        
+        <input type="hidden" name="jury_member_id" value="<?php echo esc_attr($jury_member_id); ?>">
+        
+        <div class="mt-form-group">
+            <label for="candidate_id">
+                <?php esc_html_e('Select Candidate', 'mobility-trailblazers'); ?>
+            </label>
+            <select name="candidate_id" id="candidate_id" required>
+                <option value=""><?php esc_html_e('Choose...', 'mobility-trailblazers'); ?></option>
+                <?php foreach ($candidates as $candidate) : ?>
+                    <option value="<?php echo esc_attr($candidate->ID); ?>">
+                        <?php echo esc_html($candidate->post_title); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <!-- Evaluation criteria fields -->
+        <?php mt_render_evaluation_criteria_fields(); ?>
+        
+        <button type="submit" class="mt-button mt-button--primary">
+            <?php esc_html_e('Submit Evaluation', 'mobility-trailblazers'); ?>
+        </button>
+    </form>
+</div>
+```
+
+### Template Functions
 
 ```php
-// In your plugin or theme
+/**
+ * Render evaluation criteria fields.
+ *
+ * @since 2.0.0
+ */
+function mt_render_evaluation_criteria_fields() {
+    $criteria = mt_get_evaluation_criteria();
+    
+    foreach ($criteria as $key => $label) {
+        ?>
+        <div class="mt-form-group">
+            <label for="<?php echo esc_attr($key); ?>_score">
+                <?php echo esc_html($label); ?>
+            </label>
+            <input 
+                type="range" 
+                name="<?php echo esc_attr($key); ?>_score" 
+                id="<?php echo esc_attr($key); ?>_score"
+                min="0" 
+                max="10" 
+                step="1" 
+                value="5"
+                class="mt-range-slider"
+            >
+            <span class="mt-range-value">5</span>
+        </div>
+        <?php
+    }
+}
+```
+
+## Adding Hooks & Filters
+
+### Action Hooks
+
+```php
+// Define custom actions
+do_action('mt_before_evaluation_save', $evaluation_data, $jury_member_id);
+do_action('mt_after_evaluation_save', $evaluation_id, $evaluation_data);
+
+// Hook into actions
+add_action('mt_after_evaluation_save', function($evaluation_id, $data) {
+    // Log evaluation
+    error_log(sprintf(
+        'Evaluation %d saved by jury member %d for candidate %d',
+        $evaluation_id,
+        $data['jury_member_id'],
+        $data['candidate_id']
+    ));
+}, 10, 2);
+```
+
+### Filter Hooks
+
+```php
+// Define filters
+$criteria = apply_filters('mt_evaluation_criteria', [
+    'courage' => __('Mut & Pioniergeist', 'mobility-trailblazers'),
+    'innovation' => __('Innovationsgrad', 'mobility-trailblazers'),
+    'implementation' => __('Umsetzungskraft & Wirkung', 'mobility-trailblazers'),
+    'relevance' => __('Relevanz für Mobilitätswende', 'mobility-trailblazers'),
+    'visibility' => __('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'),
+]);
+
+// Use filters
 add_filter('mt_evaluation_criteria', function($criteria) {
-    // Add new criterion
-    $criteria['sustainability'] = array(
-        'label' => __('Sustainability Impact', 'my-plugin'),
-        'description' => __('Environmental and social sustainability', 'my-plugin'),
-        'weight' => 1.2, // 20% more weight than standard criteria
-        'max_score' => 10
-    );
-    
-    // Modify existing criterion
-    $criteria['innovation']['weight'] = 2.0; // Double the weight
-    
+    // Add custom criterion
+    $criteria['sustainability'] = __('Sustainability Impact', 'mobility-trailblazers');
     return $criteria;
 });
 ```
 
-### Customizing Assignment Distribution
+## Testing Guidelines
+
+### Unit Testing
 
 ```php
-// Hook into assignment distribution
-add_filter('mt_assignment_distribution_algorithm', function($assignments, $jury_members, $candidates) {
-    // Custom distribution logic
-    $custom_assignments = array();
-    
-    // Example: Assign based on expertise matching
-    foreach ($jury_members as $jury_id) {
-        $expertise = get_user_meta($jury_id, 'expertise_areas', true);
-        
-        foreach ($candidates as $candidate_id) {
-            $category = wp_get_post_terms($candidate_id, 'mt_category', array('fields' => 'slugs'));
-            
-            if (array_intersect($expertise, $category)) {
-                $custom_assignments[] = array(
-                    'jury_member_id' => $jury_id,
-                    'candidate_id' => $candidate_id
-                );
-            }
-        }
-    }
-    
-    return $custom_assignments;
-}, 10, 3);
-```
-
-### Adding Custom Validation
-
-```php
-// Add validation to evaluation submission
-add_filter('mt_evaluation_validate', function($valid, $data, $service) {
-    // Custom validation rule
-    if (isset($data['scores']['innovation']) && $data['scores']['innovation'] > 8) {
-        // Require justification for high innovation scores
-        if (empty($data['innovation_justification'])) {
-            $service->add_error(__('Please justify high innovation score', 'my-plugin'));
-            return false;
-        }
-    }
-    
-    return $valid;
-}, 10, 3);
-```
-
-## Adding New Features
-
-### Example: Adding a Review System
-
-```php
-// 1. Create Review Repository
-namespace MyPlugin\Repositories;
-
-use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
-
-class Review_Repository implements MT_Repository_Interface {
-    // Implementation similar to above
-}
-
-// 2. Create Review Service
-namespace MyPlugin\Services;
-
-use MobilityTrailblazers\Interfaces\MT_Service_Interface;
-
-class Review_Service implements MT_Service_Interface {
-    
-    private $repository;
-    private $evaluation_repo;
-    
-    public function __construct() {
-        $this->repository = new \MyPlugin\Repositories\Review_Repository();
-        $this->evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-    }
-    
-    public function process($data) {
-        // Get evaluation
-        $evaluation = $this->evaluation_repo->find($data['evaluation_id']);
-        
-        if (!$evaluation) {
-            $this->errors[] = __('Evaluation not found', 'my-plugin');
-            return false;
-        }
-        
-        // Check reviewer permission
-        if (!current_user_can('mt_review_evaluations')) {
-            $this->errors[] = __('Permission denied', 'my-plugin');
-            return false;
-        }
-        
-        // Create review
-        return $this->repository->create(array(
-            'evaluation_id' => $evaluation->id,
-            'reviewer_id' => get_current_user_id(),
-            'status' => $data['status'],
-            'comments' => sanitize_textarea_field($data['comments'])
-        ));
-    }
-    
-    public function validate($data) {
-        // Validation logic
-    }
-    
-    public function get_errors() {
-        return $this->errors;
-    }
-}
-
-// 3. Add UI Hook
-add_action('mt_after_evaluation_display', function($evaluation) {
-    if (current_user_can('mt_review_evaluations')) {
-        include 'templates/review-form.php';
-    }
-});
-```
-
-## Testing
-
-### Unit Testing Services
-
-```php
-class Test_Custom_Service extends WP_UnitTestCase {
+// tests/test-evaluation-service.php
+class Test_MT_Evaluation_Service extends WP_UnitTestCase {
     
     private $service;
     
     public function setUp() {
         parent::setUp();
-        $this->service = new \MobilityTrailblazers\Services\MT_Custom_Service();
+        $this->service = new MT_Evaluation_Service();
     }
     
-    public function test_validation_fails_without_user_id() {
-        $result = $this->service->validate(array());
+    public function test_validate_evaluation_data() {
+        $valid_data = [
+            'jury_member_id' => 1,
+            'candidate_id' => 2,
+            'courage_score' => 8,
+            'innovation_score' => 7,
+            'implementation_score' => 9,
+            'relevance_score' => 8,
+            'visibility_score' => 7,
+        ];
         
-        $this->assertFalse($result);
-        $this->assertContains('User ID is required', $this->service->get_errors());
+        $this->assertTrue($this->service->validate($valid_data));
     }
     
-    public function test_process_creates_record() {
-        // Create test user
-        $user_id = $this->factory->user->create(array(
-            'role' => 'administrator'
-        ));
+    public function test_invalid_score_range() {
+        $invalid_data = [
+            'jury_member_id' => 1,
+            'candidate_id' => 2,
+            'courage_score' => 15, // Invalid: > 10
+        ];
         
-        // Add capability
-        $user = get_user_by('id', $user_id);
-        $user->add_cap('mt_use_custom_feature');
-        
-        // Test data
-        $data = array(
-            'user_id' => $user_id,
-            'field1' => 'test value',
-            'field2' => 123
-        );
-        
-        // Process
-        $result = $this->service->process($data);
-        
-        // Assert
-        $this->assertNotFalse($result);
-        $this->assertIsInt($result);
-    }
-    
-    public function test_batch_process() {
-        $items = array(
-            array('user_id' => 1, 'field1' => 'test1'),
-            array('user_id' => 2, 'field1' => 'test2'),
-            array('user_id' => 0, 'field1' => 'invalid') // Should fail
-        );
-        
-        $results = $this->service->batch_process($items);
-        
-        $this->assertEquals(2, $results['success']);
-        $this->assertEquals(1, $results['failed']);
-        $this->assertCount(1, $results['errors']);
+        $this->assertFalse($this->service->validate($invalid_data));
+        $errors = $this->service->get_errors();
+        $this->assertContains('Invalid score range', $errors[0]);
     }
 }
 ```
@@ -686,377 +630,196 @@ class Test_Custom_Service extends WP_UnitTestCase {
 ### Integration Testing
 
 ```php
-class Test_Custom_Integration extends WP_UnitTestCase {
+// Test AJAX endpoints
+public function test_evaluation_submission_ajax() {
+    // Set up user
+    $user_id = $this->factory->user->create(['role' => 'mt_jury_member']);
+    wp_set_current_user($user_id);
     
-    public function test_complete_workflow() {
-        // 1. Create test data
-        $user = $this->factory->user->create_and_get(array(
-            'role' => 'mt_jury_member'
-        ));
-        
-        $candidate = $this->factory->post->create(array(
-            'post_type' => 'mt_candidate',
-            'post_status' => 'publish'
-        ));
-        
-        // 2. Create assignment
-        $assignment_service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
-        $assignment_service->process(array(
-            'jury_member_id' => $user->ID,
-            'candidate_id' => $candidate
-        ));
-        
-        // 3. Submit evaluation
-        wp_set_current_user($user->ID);
-        
-        $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
-        $evaluation_id = $evaluation_service->process(array(
-            'jury_member_id' => $user->ID,
-            'candidate_id' => $candidate,
-            'scores' => array(
-                'courage' => 8,
-                'innovation' => 9,
-                'implementation' => 7,
-                'relevance' => 8,
-                'visibility' => 9
-            )
-        ));
-        
-        // 4. Verify
-        $this->assertNotFalse($evaluation_id);
-        
-        // 5. Check if can evaluate again
-        $this->assertFalse(mt_user_can_evaluate($candidate, $user->ID));
+    // Prepare request
+    $_POST = [
+        'action' => 'mt_submit_evaluation',
+        'nonce' => wp_create_nonce('mt_evaluation_nonce'),
+        'candidate_id' => $this->factory->post->create(['post_type' => 'mt_candidate']),
+        'courage_score' => 8,
+        // ... other scores
+    ];
+    
+    // Execute AJAX handler
+    $handler = new MT_Evaluation_Ajax();
+    $handler->handle_evaluation_submission();
+    
+    // Check response
+    $this->expectOutputRegex('/"success":true/');
+}
+```
+
+## Common Tasks
+
+### Adding a New Evaluation Criterion
+
+1. **Update the database schema** (if needed):
+```php
+// In activation class
+$sql = "ALTER TABLE {$wpdb->prefix}mt_evaluations 
+        ADD COLUMN new_criterion_score TINYINT(2) DEFAULT 0";
+$wpdb->query($sql);
+```
+
+2. **Update the repository**:
+```php
+// In MT_Evaluation_Repository
+public function create($data) {
+    // Add new field to insert data
+    $insert_data['new_criterion_score'] = intval($data['new_criterion_score']);
+}
+```
+
+3. **Update the service validation**:
+```php
+// In MT_Evaluation_Service
+public function validate($data) {
+    // Add validation for new criterion
+    if (!isset($data['new_criterion_score']) || 
+        $data['new_criterion_score'] < 0 || 
+        $data['new_criterion_score'] > 10) {
+        $this->errors[] = __('Invalid new criterion score', 'mobility-trailblazers');
+        return false;
     }
 }
 ```
 
-### Testing AJAX Endpoints
-
+4. **Update the frontend form**:
 ```php
-class Test_Custom_Ajax extends WP_Ajax_UnitTestCase {
-    
-    public function test_ajax_custom_action() {
-        // Set user
-        $user_id = $this->factory->user->create(array(
-            'role' => 'administrator'
-        ));
-        wp_set_current_user($user_id);
-        
-        // Set POST data
-        $_POST = array(
-            'action' => 'mt_custom_action',
-            'nonce' => wp_create_nonce('mt_custom_nonce'),
-            'field1' => 'test value',
-            'field2' => '123'
-        );
-        
-        // Capture response
-        try {
-            $this->_handleAjax('mt_custom_action');
-        } catch (WPAjaxDieContinueException $e) {
-            // Expected
-        }
-        
-        // Check response
-        $response = json_decode($this->_last_response, true);
-        
-        $this->assertTrue($response['success']);
-        $this->assertArrayHasKey('data', $response);
-        $this->assertArrayHasKey('id', $response['data']);
-    }
-}
+// Add to evaluation criteria filter
+add_filter('mt_evaluation_criteria', function($criteria) {
+    $criteria['new_criterion'] = __('New Criterion Name', 'mobility-trailblazers');
+    return $criteria;
+});
 ```
 
-## Common Patterns
-
-### Singleton Pattern for Heavy Services
+### Creating a Custom Report
 
 ```php
-class MT_Heavy_Service {
-    
-    private static $instance = null;
-    private $cache = array();
-    
-    public static function get_instance() {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-    
-    private function __construct() {
-        // Heavy initialization
-        $this->load_cache();
-    }
-}
-
-// Usage
-$service = MT_Heavy_Service::get_instance();
-```
-
-### Factory Pattern for Creating Objects
-
-```php
-class MT_Notification_Factory {
-    
-    public static function create($type, $data) {
-        switch ($type) {
-            case 'email':
-                return new MT_Email_Notification($data);
-            case 'sms':
-                return new MT_SMS_Notification($data);
-            case 'push':
-                return new MT_Push_Notification($data);
-            default:
-                throw new InvalidArgumentException("Unknown notification type: {$type}");
-        }
-    }
-}
-
-// Usage
-$notification = MT_Notification_Factory::create('email', $data);
-$notification->send();
-```
-
-### Observer Pattern with WordPress Hooks
-
-```php
-class MT_Evaluation_Observer {
+// Create a new service for reports
+class MT_Report_Service {
+    private $evaluation_repo;
     
     public function __construct() {
-        add_action('mt_evaluation_submitted', array($this, 'on_evaluation_submitted'), 10, 3);
-        add_action('mt_evaluation_updated', array($this, 'on_evaluation_updated'), 10, 2);
+        $this->evaluation_repo = new MT_Evaluation_Repository();
     }
     
-    public function on_evaluation_submitted($evaluation_id, $candidate_id, $jury_member_id) {
-        // Update statistics
-        $this->update_candidate_statistics($candidate_id);
+    public function generate_candidate_report($candidate_id) {
+        $evaluations = $this->evaluation_repo->find_all([
+            'candidate_id' => $candidate_id,
+            'status' => 'completed',
+        ]);
         
-        // Check if all evaluations complete
-        if ($this->all_evaluations_complete($candidate_id)) {
-            do_action('mt_candidate_evaluation_complete', $candidate_id);
+        if (empty($evaluations)) {
+            return null;
         }
-    }
-    
-    public function on_evaluation_updated($evaluation_id, $old_data) {
-        // Recalculate scores if needed
-        $evaluation = $this->get_evaluation($evaluation_id);
-        if ($evaluation->total_score !== $old_data->total_score) {
-            $this->recalculate_candidate_average($evaluation->candidate_id);
+        
+        // Calculate averages
+        $totals = array_fill_keys(['courage', 'innovation', 'implementation', 'relevance', 'visibility'], 0);
+        
+        foreach ($evaluations as $evaluation) {
+            foreach ($totals as $key => &$total) {
+                $total += $evaluation->{$key . '_score'};
+            }
         }
+        
+        $count = count($evaluations);
+        $averages = array_map(function($total) use ($count) {
+            return round($total / $count, 2);
+        }, $totals);
+        
+        return [
+            'candidate_id' => $candidate_id,
+            'evaluation_count' => $count,
+            'averages' => $averages,
+            'total_average' => round(array_sum($averages) / count($averages), 2),
+        ];
     }
 }
-
-// Initialize observer
-new MT_Evaluation_Observer();
 ```
 
-### Decorator Pattern for Extending Functionality
+### Implementing Caching
 
 ```php
-abstract class MT_Repository_Decorator implements MT_Repository_Interface {
+// Cache expensive operations
+class MT_Cache_Helper {
     
-    protected $repository;
-    
-    public function __construct(MT_Repository_Interface $repository) {
-        $this->repository = $repository;
-    }
-    
-    public function find($id) {
-        return $this->repository->find($id);
-    }
-    
-    public function find_all($args = array()) {
-        return $this->repository->find_all($args);
-    }
-    
-    // Delegate other methods...
-}
-
-class MT_Cached_Repository extends MT_Repository_Decorator {
-    
-    private $cache_group = 'mt_repository';
-    private $cache_ttl = 300; // 5 minutes
-    
-    public function find($id) {
-        $cache_key = "find_{$id}";
-        $cached = wp_cache_get($cache_key, $this->cache_group);
+    public static function get_cached_data($key, $callback, $expiration = HOUR_IN_SECONDS) {
+        $cached = get_transient($key);
         
         if (false !== $cached) {
             return $cached;
         }
         
-        $result = parent::find($id);
-        wp_cache_set($cache_key, $result, $this->cache_group, $this->cache_ttl);
+        $data = call_user_func($callback);
+        set_transient($key, $data, $expiration);
         
-        return $result;
+        return $data;
+    }
+    
+    public static function clear_cache($key) {
+        delete_transient($key);
     }
 }
 
 // Usage
-$repository = new MT_Evaluation_Repository();
-$cached_repository = new MT_Cached_Repository($repository);
-$evaluation = $cached_repository->find(123); // Uses cache
+$statistics = MT_Cache_Helper::get_cached_data(
+    'mt_evaluation_statistics',
+    function() {
+        $service = new MT_Statistics_Service();
+        return $service->calculate_all_statistics();
+    },
+    HOUR_IN_SECONDS
+);
 ```
 
-## Troubleshooting
+## Debugging Tips
 
-### Common Issues and Solutions
-
-#### 1. Class Not Found Errors
-
-**Problem:**
-```
-Fatal error: Class 'MobilityTrailblazers\Services\MT_Custom_Service' not found
-```
-
-**Solution:**
-```php
-// Check file naming
-// Class: MT_Custom_Service
-// File: class-mt-custom-service.php (lowercase with hyphens)
-
-// Check namespace
-namespace MobilityTrailblazers\Services; // Exact case matters
-
-// Check autoloader is loaded
-if (!class_exists('MT_Autoloader')) {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-mt-autoloader.php';
-}
-```
-
-#### 2. Database Errors
-
-**Problem:**
-```
-WordPress database error: Table 'wp_mt_custom' doesn't exist
-```
-
-**Solution:**
-```php
-// Add table creation to activation hook
-register_activation_hook(__FILE__, 'my_plugin_activate');
-
-function my_plugin_activate() {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-database.php';
-    $db = new MT_Database();
-    $db->create_tables();
-}
-
-// Check table exists before queries
-global $wpdb;
-$table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}mt_custom'");
-if (!$table_exists) {
-    // Create table or show error
-}
-```
-
-#### 3. Permission Errors
-
-**Problem:**
-```
-You do not have permission to perform this action
-```
-
-**Solution:**
-```php
-// Add capability to role
-$role = get_role('administrator');
-$role->add_cap('mt_custom_capability');
-
-// Check capability exists
-if (!current_user_can('mt_custom_capability')) {
-    $user = wp_get_current_user();
-    $user->add_cap('mt_custom_capability');
-}
-
-// Debug capabilities
-$user = wp_get_current_user();
-error_log('User caps: ' . print_r($user->allcaps, true));
-```
-
-#### 4. AJAX Not Working
-
-**Problem:**
-```
-400 Bad Request or 0 response
-```
-
-**Solution:**
-```php
-// Check action is registered
-add_action('wp_ajax_mt_custom_action', 'handle_custom_action');
-add_action('wp_ajax_nopriv_mt_custom_action', 'handle_custom_action'); // For non-logged users
-
-// Check nonce name matches
-wp_create_nonce('mt_custom_nonce'); // Creating
-check_ajax_referer('mt_custom_nonce', 'nonce'); // Verifying
-
-// Debug AJAX
-add_action('wp_ajax_mt_custom_action', function() {
-    error_log('AJAX action triggered');
-    error_log('POST data: ' . print_r($_POST, true));
-    wp_die(); // Always end with wp_die()
-});
-```
-
-### Debug Helpers
+### Enable Debug Logging
 
 ```php
-// Enable debug logging
-if (!function_exists('mt_debug_log')) {
-    function mt_debug_log($message, $data = null) {
-        if (defined('MT_DEBUG') && MT_DEBUG) {
-            $log = date('[Y-m-d H:i:s] ') . $message;
-            if ($data !== null) {
-                $log .= ' | Data: ' . print_r($data, true);
-            }
-            error_log($log);
-        }
+// Custom debug function
+function mt_debug_log($message, $data = null) {
+    if (!defined('WP_DEBUG') || !WP_DEBUG) {
+        return;
     }
+    
+    $log_entry = sprintf(
+        "[%s] Mobility Trailblazers: %s",
+        date('Y-m-d H:i:s'),
+        $message
+    );
+    
+    if ($data !== null) {
+        $log_entry .= "\n" . print_r($data, true);
+    }
+    
+    error_log($log_entry);
 }
 
-// Usage in your code
-mt_debug_log('Processing evaluation', array(
-    'user_id' => $user_id,
-    'candidate_id' => $candidate_id
-));
+// Usage
+mt_debug_log('Evaluation submitted', [
+    'jury_member' => $jury_member_id,
+    'candidate' => $candidate_id,
+    'scores' => $scores,
+]);
+```
 
-// Query monitor
+### Database Query Debugging
+
+```php
+// Log slow queries
 add_filter('query', function($query) {
-    if (strpos($query, 'mt_') !== false) {
-        mt_debug_log('MT Query', $query);
+    if (strpos($query, 'mt_evaluations') !== false) {
+        mt_debug_log('Evaluation query', $query);
     }
     return $query;
 });
-
-// Hook monitor
-add_action('all', function($hook) {
-    if (strpos($hook, 'mt_') === 0) {
-        mt_debug_log('MT Hook fired', $hook);
-    }
-});
 ```
 
-## Best Practices Summary
-
-1. **Always use namespaces** for new classes
-2. **Follow single responsibility principle** - one class, one purpose
-3. **Use dependency injection** where possible
-4. **Validate all input** in services, not repositories
-5. **Handle errors gracefully** with meaningful messages
-6. **Document your code** with PHPDoc blocks
-7. **Write tests** for critical functionality
-8. **Use WordPress coding standards**
-9. **Leverage existing services** rather than reimplementing
-10. **Hook into existing actions/filters** for extensibility
-
-## Resources
-
-- [WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)
-- [PHP The Right Way](https://phptherightway.com/)
-- [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/)
-- [PHPUnit Testing](https://phpunit.de/documentation.html)
-- [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
-- [Service Layer Pattern](https://martinfowler.com/eaaCatalog/serviceLayer.html)
+This developer guide provides comprehensive information for working with the Mobility Trailblazers plugin. Follow these guidelines to maintain code quality and consistency across the project. 

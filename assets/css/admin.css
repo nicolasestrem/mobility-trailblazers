@@ -1,0 +1,320 @@
+/**
+ * Mobility Trailblazers Admin Styles
+ * Version: 2.0.0
+ */
+
+/* Admin Dashboard */
+.mt-admin-dashboard {
+    max-width: 1400px;
+}
+
+.mt-dashboard-header {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-dashboard-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+}
+
+/* Stats Cards */
+.mt-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mt-stat-box {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+}
+
+.mt-stat-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    color: #0073aa;
+}
+
+.mt-stat-box p {
+    margin: 0;
+    color: #666;
+}
+
+/* Tables */
+.mt-admin-table {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.mt-admin-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mt-admin-table th {
+    background: #f3f4f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid #ccd0d4;
+}
+
+.mt-admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mt-admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.mt-admin-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Status Badges */
+.mt-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.mt-status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.mt-status-draft {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.mt-status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Forms */
+.mt-admin-form {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.mt-form-group {
+    margin-bottom: 20px;
+}
+
+.mt-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.mt-form-group input[type="text"],
+.mt-form-group input[type="number"],
+.mt-form-group input[type="email"],
+.mt-form-group select,
+.mt-form-group textarea {
+    width: 100%;
+    max-width: 400px;
+}
+
+.mt-form-group .description {
+    margin-top: 5px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Assignment Page */
+.mt-assignment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.mt-assignment-panel {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.mt-assignment-panel h3 {
+    margin-top: 0;
+}
+
+.mt-jury-select {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.mt-candidates-checklist {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.mt-candidate-item {
+    margin-bottom: 8px;
+}
+
+.mt-candidate-item label {
+    display: block;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.mt-candidate-item:hover {
+    background: #f5f5f5;
+}
+
+/* Import/Export */
+.mt-import-section,
+.mt-export-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-export-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Settings Page */
+.mt-settings-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-settings-section h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* Criteria Weights */
+.mt-criteria-weights {
+    display: grid;
+    gap: 15px;
+}
+
+.mt-weight-item {
+    display: grid;
+    grid-template-columns: 200px 100px auto;
+    align-items: center;
+    gap: 15px;
+}
+
+.mt-weight-slider {
+    width: 200px;
+}
+
+.mt-weight-value {
+    font-weight: bold;
+    color: #0073aa;
+}
+
+/* Charts */
+.mt-chart-container {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-chart-canvas {
+    max-height: 400px;
+}
+
+/* Action Buttons */
+.mt-action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* Notices */
+.mt-admin-notice {
+    margin: 20px 0;
+    padding: 12px 20px;
+    border-left: 4px solid;
+    background: #fff;
+}
+
+.mt-admin-notice-success {
+    border-color: #46b450;
+}
+
+.mt-admin-notice-error {
+    border-color: #dc3232;
+}
+
+.mt-admin-notice-warning {
+    border-color: #ffb900;
+}
+
+/* Loading State */
+.mt-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.mt-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0073aa;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .mt-assignment-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 782px) {
+    .mt-stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-export-buttons {
+        flex-direction: column;
+    }
+    
+    .mt-weight-item {
+        grid-template-columns: 1fr;
+    }
+} 

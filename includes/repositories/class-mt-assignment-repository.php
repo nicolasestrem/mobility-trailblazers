@@ -3,22 +3,35 @@
  * Assignment Repository
  *
  * @package MobilityTrailblazers
- * @since 1.0.7
+ * @since 2.0.0
  */
 
 namespace MobilityTrailblazers\Repositories;
 
-// Manual require for interface as fallback
-if (!interface_exists('MobilityTrailblazers\Interfaces\MT_Repository_Interface')) {
-    require_once plugin_dir_path(dirname(__FILE__)) . 'interfaces/class-mt-repository-interface.php';
-}
-
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
 
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * Class MT_Assignment_Repository
+ *
+ * Handles database operations for jury assignments
+ */
 class MT_Assignment_Repository implements MT_Repository_Interface {
     
+    /**
+     * Table name
+     *
+     * @var string
+     */
     private $table_name;
     
+    /**
+     * Constructor
+     */
     public function __construct() {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'mt_jury_assignments';
@@ -26,6 +39,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     
     /**
      * Find assignment by ID
+     *
+     * @param int $id Assignment ID
+     * @return object|null
      */
     public function find($id) {
         global $wpdb;
@@ -37,176 +53,147 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     }
     
     /**
-     * Find all assignments with filters
+     * Find all assignments
+     *
+     * @param array $args Query arguments
+     * @return array
      */
-    public function find_all($args = array()) {
+    public function find_all($args = []) {
         global $wpdb;
         
-        $defaults = array(
+        $defaults = [
             'jury_member_id' => null,
             'candidate_id' => null,
-            'is_active' => null,
-            'limit' => 50,
-            'offset' => 0,
-            'orderby' => 'assignment_date',
-            'order' => 'DESC'
-        );
+            'orderby' => 'assigned_at',
+            'order' => 'DESC',
+            'limit' => -1,
+            'offset' => 0
+        ];
         
         $args = wp_parse_args($args, $defaults);
         
-        $where = array('1=1');
-        $values = array();
+        // Build query
+        $where_clauses = ['1=1'];
+        $values = [];
         
-        if ($args['jury_member_id']) {
-            $where[] = 'jury_member_id = %d';
+        if ($args['jury_member_id'] !== null) {
+            $where_clauses[] = 'jury_member_id = %d';
             $values[] = $args['jury_member_id'];
         }
         
-        if ($args['candidate_id']) {
-            $where[] = 'candidate_id = %d';
+        if ($args['candidate_id'] !== null) {
+            $where_clauses[] = 'candidate_id = %d';
             $values[] = $args['candidate_id'];
         }
         
-        if ($args['is_active'] !== null) {
-            $where[] = 'is_active = %d';
-            $values[] = $args['is_active'];
+        $where = implode(' AND ', $where_clauses);
+        $orderby = sprintf('%s %s', 
+            esc_sql($args['orderby']), 
+            esc_sql($args['order'])
+        );
+        
+        $query = "SELECT * FROM {$this->table_name} WHERE {$where} ORDER BY {$orderby}";
+        
+        if ($args['limit'] > 0) {
+            $query .= " LIMIT %d OFFSET %d";
+            $values[] = $args['limit'];
+            $values[] = $args['offset'];
         }
         
-        $where_clause = implode(' AND ', $where);
-        $order_clause = sprintf('%s %s', $args['orderby'], $args['order']);
+        if (!empty($values)) {
+            $query = $wpdb->prepare($query, $values);
+        }
         
-        $query = "SELECT * FROM {$this->table_name} WHERE {$where_clause} ORDER BY {$order_clause} LIMIT %d OFFSET %d";
-        $values[] = $args['limit'];
-        $values[] = $args['offset'];
-        
-        return $wpdb->get_results($wpdb->prepare($query, $values));
+        return $wpdb->get_results($query);
     }
     
     /**
      * Create new assignment
+     *
+     * @param array $data Assignment data
+     * @return int|false
      */
     public function create($data) {
         global $wpdb;
         
-        $defaults = array(
-            'assignment_date' => current_time('mysql'),
-            'is_active' => 1
-        );
+        $defaults = [
+            'assigned_at' => current_time('mysql'),
+            'assigned_by' => get_current_user_id()
+        ];
         
         $data = wp_parse_args($data, $defaults);
         
-        $result = $wpdb->insert($this->table_name, $data);
+        $result = $wpdb->insert(
+            $this->table_name,
+            $data,
+            [
+                '%d', // jury_member_id
+                '%d', // candidate_id
+                '%s', // assigned_at
+                '%d'  // assigned_by
+            ]
+        );
         
         return $result ? $wpdb->insert_id : false;
     }
     
     /**
      * Update assignment
+     *
+     * @param int $id Assignment ID
+     * @param array $data Updated data
+     * @return bool
      */
     public function update($id, $data) {
         global $wpdb;
         
+        $formats = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, ['jury_member_id', 'candidate_id', 'assigned_by'])) {
+                $formats[] = '%d';
+            } else {
+                $formats[] = '%s';
+            }
+        }
+        
         return $wpdb->update(
             $this->table_name,
             $data,
-            array('id' => $id)
-        );
+            ['id' => $id],
+            $formats,
+            ['%d']
+        ) !== false;
     }
     
     /**
      * Delete assignment
+     *
+     * @param int $id Assignment ID
+     * @return bool
      */
     public function delete($id) {
         global $wpdb;
         
         return $wpdb->delete(
             $this->table_name,
-            array('id' => $id)
-        );
-    }
-    
-    /**
-     * Bulk create assignments
-     */
-    public function bulk_create($assignments) {
-        global $wpdb;
-        
-        if (empty($assignments)) {
-            return false;
-        }
-        
-        // Process in smaller batches to avoid deadlocks
-        $batch_size = 50;
-        $total_assignments = count($assignments);
-        $success_count = 0;
-        
-        for ($i = 0; $i < $total_assignments; $i += $batch_size) {
-            $batch = array_slice($assignments, $i, $batch_size);
-            
-            $values = array();
-            $place_holders = array();
-            
-            foreach ($batch as $assignment) {
-                $place_holders[] = "(%d, %d, %s, %d)";
-                array_push($values, 
-                    $assignment['jury_member_id'],
-                    $assignment['candidate_id'],
-                    current_time('mysql'),
-                    1 // is_active
-                );
-            }
-            
-            // Use INSERT IGNORE to silently ignore duplicate entries
-            $query = "INSERT IGNORE INTO {$this->table_name} (jury_member_id, candidate_id, assignment_date, is_active) VALUES ";
-            $query .= implode(', ', $place_holders);
-            
-            $result = $wpdb->query($wpdb->prepare($query, $values));
-            
-            if ($result !== false) {
-                $success_count += $result;
-            }
-            
-            // Small delay between batches to reduce lock contention
-            if ($i + $batch_size < $total_assignments) {
-                usleep(10000); // 10ms delay
-            }
-        }
-        
-        return $success_count;
-    }
-    
-    /**
-     * Delete assignments by jury member
-     */
-    public function delete_by_jury_member($jury_member_id) {
-        global $wpdb;
-        
-        return $wpdb->delete(
-            $this->table_name,
-            array('jury_member_id' => $jury_member_id)
-        );
-    }
-    
-    /**
-     * Delete assignments by candidate
-     */
-    public function delete_by_candidate($candidate_id) {
-        global $wpdb;
-        
-        return $wpdb->delete(
-            $this->table_name,
-            array('candidate_id' => $candidate_id)
-        );
+            ['id' => $id],
+            ['%d']
+        ) !== false;
     }
     
     /**
      * Check if assignment exists
+     *
+     * @param int $jury_member_id Jury member ID
+     * @param int $candidate_id Candidate ID
+     * @return bool
      */
     public function exists($jury_member_id, $candidate_id) {
         global $wpdb;
         
         $count = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$this->table_name} WHERE jury_member_id = %d AND candidate_id = %d",
+            "SELECT COUNT(*) FROM {$this->table_name} 
+             WHERE jury_member_id = %d AND candidate_id = %d",
             $jury_member_id,
             $candidate_id
         ));
@@ -215,34 +202,195 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     }
     
     /**
+     * Get assignments for jury member
+     *
+     * @param int $jury_member_id Jury member ID
+     * @return array
+     */
+    public function get_by_jury_member($jury_member_id) {
+        global $wpdb;
+        
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT a.*, c.post_title as candidate_name 
+             FROM {$this->table_name} a
+             INNER JOIN {$wpdb->posts} c ON a.candidate_id = c.ID
+             WHERE a.jury_member_id = %d
+             ORDER BY c.post_title ASC",
+            $jury_member_id
+        ));
+    }
+    
+    /**
+     * Get assignments for candidate
+     *
+     * @param int $candidate_id Candidate ID
+     * @return array
+     */
+    public function get_by_candidate($candidate_id) {
+        global $wpdb;
+        
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT a.*, j.post_title as jury_member_name 
+             FROM {$this->table_name} a
+             INNER JOIN {$wpdb->posts} j ON a.jury_member_id = j.ID
+             WHERE a.candidate_id = %d
+             ORDER BY j.post_title ASC",
+            $candidate_id
+        ));
+    }
+    
+    /**
+     * Bulk create assignments
+     *
+     * @param array $assignments Array of assignment data
+     * @return int Number of assignments created
+     */
+    public function bulk_create($assignments) {
+        global $wpdb;
+        
+        $created = 0;
+        $assigned_at = current_time('mysql');
+        $assigned_by = get_current_user_id();
+        
+        foreach ($assignments as $assignment) {
+            // Skip if assignment already exists
+            if ($this->exists($assignment['jury_member_id'], $assignment['candidate_id'])) {
+                continue;
+            }
+            
+            $data = [
+                'jury_member_id' => $assignment['jury_member_id'],
+                'candidate_id' => $assignment['candidate_id'],
+                'assigned_at' => $assigned_at,
+                'assigned_by' => $assigned_by
+            ];
+            
+            $result = $wpdb->insert(
+                $this->table_name,
+                $data,
+                ['%d', '%d', '%s', '%d']
+            );
+            
+            if ($result) {
+                $created++;
+            }
+        }
+        
+        return $created;
+    }
+    
+    /**
+     * Delete all assignments for jury member
+     *
+     * @param int $jury_member_id Jury member ID
+     * @return int Number of assignments deleted
+     */
+    public function delete_by_jury_member($jury_member_id) {
+        global $wpdb;
+        
+        return $wpdb->delete(
+            $this->table_name,
+            ['jury_member_id' => $jury_member_id],
+            ['%d']
+        );
+    }
+    
+    /**
+     * Delete all assignments for candidate
+     *
+     * @param int $candidate_id Candidate ID
+     * @return int Number of assignments deleted
+     */
+    public function delete_by_candidate($candidate_id) {
+        global $wpdb;
+        
+        return $wpdb->delete(
+            $this->table_name,
+            ['candidate_id' => $candidate_id],
+            ['%d']
+        );
+    }
+    
+    /**
      * Get assignment statistics
+     *
+     * @return array
      */
     public function get_statistics() {
         global $wpdb;
         
-        $stats = array();
+        $stats = [
+            'total_assignments' => 0,
+            'assigned_candidates' => 0,
+            'assigned_jury_members' => 0,
+            'assignments_per_jury' => []
+        ];
         
         // Total assignments
-        $stats['total'] = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}");
-        
-        // Assignments by status
-        $status_counts = $wpdb->get_results(
-            "SELECT is_active, COUNT(*) as count FROM {$this->table_name} GROUP BY is_active"
+        $stats['total_assignments'] = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$this->table_name}"
         );
         
-        foreach ($status_counts as $status) {
-            $stats['by_status'][$status->is_active ? 'active' : 'inactive'] = $status->count;
+        // Unique assigned candidates
+        $stats['assigned_candidates'] = $wpdb->get_var(
+            "SELECT COUNT(DISTINCT candidate_id) FROM {$this->table_name}"
+        );
+        
+        // Unique assigned jury members
+        $stats['assigned_jury_members'] = $wpdb->get_var(
+            "SELECT COUNT(DISTINCT jury_member_id) FROM {$this->table_name}"
+        );
+        
+        // Assignments per jury member
+        $per_jury = $wpdb->get_results(
+            "SELECT 
+                j.post_title as jury_member_name,
+                COUNT(a.id) as assignment_count
+             FROM {$this->table_name} a
+             INNER JOIN {$wpdb->posts} j ON a.jury_member_id = j.ID
+             GROUP BY a.jury_member_id
+             ORDER BY assignment_count DESC"
+        );
+        
+        foreach ($per_jury as $jury) {
+            $stats['assignments_per_jury'][] = [
+                'name' => $jury->jury_member_name,
+                'count' => intval($jury->assignment_count)
+            ];
         }
-        
-        // Average assignments per jury member
-        $stats['avg_per_jury'] = $wpdb->get_var(
-            "SELECT AVG(assignment_count) FROM (
-                SELECT COUNT(*) as assignment_count 
-                FROM {$this->table_name} 
-                GROUP BY jury_member_id
-            ) as counts"
-        );
         
         return $stats;
     }
-}
+    
+    /**
+     * Get unassigned candidates
+     *
+     * @return array
+     */
+    public function get_unassigned_candidates() {
+        global $wpdb;
+        
+        return $wpdb->get_results(
+            "SELECT ID, post_title 
+             FROM {$wpdb->posts} 
+             WHERE post_type = 'mt_candidate' 
+               AND post_status = 'publish'
+               AND ID NOT IN (
+                   SELECT DISTINCT candidate_id 
+                   FROM {$this->table_name}
+               )
+             ORDER BY post_title ASC"
+        );
+    }
+    
+    /**
+     * Clear all assignments
+     *
+     * @return bool
+     */
+    public function clear_all() {
+        global $wpdb;
+        
+        return $wpdb->query("TRUNCATE TABLE {$this->table_name}") !== false;
+    }
+} 
