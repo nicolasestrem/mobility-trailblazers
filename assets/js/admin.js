@@ -380,9 +380,20 @@ if (typeof mt_admin.i18n === 'undefined') {
      */
     const MTAssignmentManager = {
         init: function() {
+            console.log('MTAssignmentManager initializing...');
+            console.log('mt_admin object:', mt_admin);
+            console.log('Buttons found:', {
+                autoAssign: $('#mt-auto-assign-btn').length,
+                manualAssign: $('#mt-manual-assign-btn').length,
+                clearAll: $('#mt-clear-all-btn').length,
+                export: $('#mt-export-btn').length
+            });
+            
             this.bindEvents();
             this.initializeModals();
             this.initializeFilters();
+            
+            console.log('MTAssignmentManager initialized');
         },
         
         bindEvents: function() {
@@ -422,6 +433,12 @@ if (typeof mt_admin.i18n === 'undefined') {
                 this.submitManualAssignment();
             });
             
+            // Auto-assignment form submission
+            $('#mt-auto-assign-modal form').on('submit', (e) => {
+                e.preventDefault();
+                this.submitAutoAssignment();
+            });
+            
             // Modal close buttons
             $('.mt-modal-close').on('click', () => this.closeModals());
             
@@ -457,15 +474,15 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         showAutoAssignModal: function() {
-            this.modals.autoAssign.addClass('active');
+            $('#mt-auto-assign-modal').fadeIn(300);
         },
         
         showManualAssignModal: function() {
-            this.modals.manualAssign.addClass('active');
+            $('#mt-manual-assign-modal').fadeIn(300);
         },
         
         closeModals: function() {
-            $('.mt-modal').removeClass('active');
+            $('.mt-modal').fadeOut(300);
         },
         
         removeAssignment: function($button) {
@@ -618,6 +635,35 @@ if (typeof mt_admin.i18n === 'undefined') {
                         ? mt_admin.i18n.assign_selected 
                         : 'Assign Selected';
                     $form.find('button[type="submit"]').prop('disabled', false).text(assignText);
+                }
+            });
+        },
+        
+        submitAutoAssignment: function() {
+            const $form = $('#mt-auto-assign-modal form');
+            const formData = $form.serialize();
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: formData + '&action=mt_auto_assign&nonce=' + mt_admin.nonce,
+                beforeSend: () => {
+                    $form.find('button[type="submit"]').prop('disabled', true).text('Processing...');
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.showNotification('Auto-assignment completed successfully.', 'success');
+                        this.closeModals();
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        this.showNotification(response.data?.message || 'An error occurred.', 'error');
+                    }
+                },
+                error: () => {
+                    this.showNotification('Connection error. Please try again.', 'error');
+                },
+                complete: () => {
+                    $form.find('button[type="submit"]').prop('disabled', false).text('Run Auto-Assignment');
                 }
             });
         },
@@ -794,7 +840,10 @@ if (typeof mt_admin.i18n === 'undefined') {
     
     // Initialize Assignment Manager on document ready
     $(document).ready(function() {
-        if ($('.mt-assignment-grid').length > 0) {
+        // Check if we're on the assignment management page
+        if ($('#mt-auto-assign-btn').length > 0 || 
+            $('.mt-assignment-management').length > 0 ||
+            $('body').hasClass('mobility-trailblazers_page_mt-assignment-management')) {
             MTAssignmentManager.init();
         }
     });

@@ -570,72 +570,37 @@
     gap: 10px;
 }
 
-/* Modal Styles */
+/* Modal Base Styles */
 .mt-modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.7);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     z-index: 100000;
+    display: none;
+}
+
+.mt-modal.active {
+    display: flex !important;
     align-items: center;
     justify-content: center;
 }
 
-.mt-modal.active {
-    display: flex;
-}
-
 .mt-modal-content {
     background: #fff;
-    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    padding: 30px;
 }
 
-.mt-modal-content h2 {
-    margin: 0 0 20px 0;
-}
-
-.mt-form-group {
-    margin-bottom: 20px;
-}
-
-.mt-form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.mt-candidates-checklist {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
-}
-
-.mt-candidate-checkbox {
-    display: block;
-    padding: 5px 0;
-}
-
-.mt-candidate-checkbox input {
-    margin-right: 8px;
-}
-
-.mt-modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
+.mt-modal-close {
+    cursor: pointer;
 }
 
 /* Responsive Design */

@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) {
 // Get assignment repository and service
 $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
 $assignment_service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
+$evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
 
 // Get statistics
 $total_candidates = wp_count_posts('mt_candidate')->publish;
@@ -173,7 +174,8 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
         <?php foreach ($jury_members as $jury) : 
             $jury_assignments = isset($assignments_by_jury[$jury->ID]) ? $assignments_by_jury[$jury->ID] : [];
             $user = get_user_by('ID', get_post_meta($jury->ID, '_mt_user_id', true));
-            $completion_rate = $total_candidates > 0 ? round((count($jury_assignments) / $total_candidates) * 100) : 0;
+            $progress = $evaluation_service->get_assignment_progress($jury->ID);
+            $percentage = $progress['percentage'];
         ?>
         <div class="mt-jury-card" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
             <div class="mt-jury-header">
@@ -190,8 +192,8 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
             </div>
             
             <div class="mt-progress-bar">
-                <div class="mt-progress-fill" style="width: <?php echo $completion_rate; ?>%"></div>
-                <span class="mt-progress-text"><?php echo $completion_rate; ?>%</span>
+                <div class="mt-progress-fill" style="width: <?php echo $percentage; ?>%"></div>
+                <span class="mt-progress-text"><?php echo $percentage; ?>%</span>
             </div>
             
             <div class="mt-jury-assignments">
