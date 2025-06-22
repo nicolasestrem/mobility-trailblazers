@@ -5,7 +5,7 @@
 // Ensure mt_admin object exists with fallback values
 if (typeof mt_admin === 'undefined') {
     window.mt_admin = {
-        ajax_url: ajaxurl || '/wp-admin/admin-ajax.php',
+        ajax_url: typeof ajaxurl !== 'undefined' ? ajaxurl : '/wp-admin/admin-ajax.php',
         nonce: '',
         admin_url: '/wp-admin/',
         i18n: {
@@ -24,6 +24,26 @@ if (typeof mt_admin === 'undefined') {
             all_assignments_cleared: 'All assignments have been cleared.',
             export_started: 'Export started. Download will begin shortly.'
         }
+    };
+}
+
+// Ensure i18n object exists
+if (typeof mt_admin.i18n === 'undefined') {
+    mt_admin.i18n = {
+        confirm_remove_assignment: 'Are you sure you want to remove this assignment?',
+        assignment_removed: 'Assignment removed successfully.',
+        error_occurred: 'An error occurred. Please try again.',
+        no_assignments: 'No assignments yet',
+        processing: 'Processing...',
+        select_jury_and_candidates: 'Please select a jury member and at least one candidate.',
+        assignments_created: 'Assignments created successfully.',
+        assign_selected: 'Assign Selected',
+        confirm_clear_all: 'Are you sure you want to clear ALL assignments? This cannot be undone.',
+        confirm_clear_all_second: 'This will remove ALL jury assignments. Are you absolutely sure?',
+        clearing: 'Clearing...',
+        clear_all: 'Clear All',
+        all_assignments_cleared: 'All assignments have been cleared.',
+        export_started: 'Export started. Download will begin shortly.'
     };
 }
 
@@ -451,7 +471,11 @@ if (typeof mt_admin === 'undefined') {
         removeAssignment: function($button) {
             const assignmentId = $button.closest('.mt-assignment-item').data('assignment-id');
             
-            if (!confirm(mt_admin.i18n.confirm_remove_assignment)) {
+            const confirmMessage = (mt_admin.i18n && mt_admin.i18n.confirm_remove_assignment) 
+                ? mt_admin.i18n.confirm_remove_assignment 
+                : 'Are you sure you want to remove this assignment?';
+            
+            if (!confirm(confirmMessage)) {
                 return;
             }
             
@@ -468,13 +492,21 @@ if (typeof mt_admin === 'undefined') {
                 success: (response) => {
                     if (response.success) {
                         this.handleRemoveSuccess($button);
-                        this.showNotification(mt_admin.i18n.assignment_removed, 'success');
+                        const message = (mt_admin.i18n && mt_admin.i18n.assignment_removed) 
+                            ? mt_admin.i18n.assignment_removed 
+                            : 'Assignment removed successfully.';
+                        this.showNotification(message, 'success');
                     } else {
-                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
+                        const message = response.data?.message || 
+                            (mt_admin.i18n && mt_admin.i18n.error_occurred ? mt_admin.i18n.error_occurred : 'An error occurred. Please try again.');
+                        this.showNotification(message, 'error');
                     }
                 },
                 error: () => {
-                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                    const message = (mt_admin.i18n && mt_admin.i18n.error_occurred) 
+                        ? mt_admin.i18n.error_occurred 
+                        : 'An error occurred. Please try again.';
+                    this.showNotification(message, 'error');
                 },
                 complete: () => {
                     $button.prop('disabled', false);
@@ -497,8 +529,11 @@ if (typeof mt_admin === 'undefined') {
             $card.find('.mt-assignment-count').text(assignmentCount);
             
             if (assignmentCount === 0) {
+                const noAssignmentsText = (mt_admin.i18n && mt_admin.i18n.no_assignments) 
+                    ? mt_admin.i18n.no_assignments 
+                    : 'No assignments yet';
                 $card.find('.mt-assignment-list').html(
-                    '<p class="mt-no-assignments">' + mt_admin.i18n.no_assignments + '</p>'
+                    '<p class="mt-no-assignments">' + noAssignmentsText + '</p>'
                 );
             }
             
@@ -517,11 +552,17 @@ if (typeof mt_admin === 'undefined') {
             }).get();
             
             if (!juryMemberId || candidateIds.length === 0) {
-                this.showNotification(mt_admin.i18n.select_jury_and_candidates, 'error');
+                const message = (mt_admin.i18n && mt_admin.i18n.select_jury_and_candidates) 
+                    ? mt_admin.i18n.select_jury_and_candidates 
+                    : 'Please select a jury member and at least one candidate.';
+                this.showNotification(message, 'error');
                 return;
             }
             
-            $form.find('button[type="submit"]').prop('disabled', true).text(mt_admin.i18n.processing);
+            const processingText = (mt_admin.i18n && mt_admin.i18n.processing) 
+                ? mt_admin.i18n.processing 
+                : 'Processing...';
+            $form.find('button[type="submit"]').prop('disabled', true).text(processingText);
             
             $.ajax({
                 url: mt_admin.ajax_url,
@@ -534,30 +575,49 @@ if (typeof mt_admin === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        this.showNotification(mt_admin.i18n.assignments_created, 'success');
+                        const message = (mt_admin.i18n && mt_admin.i18n.assignments_created) 
+                            ? mt_admin.i18n.assignments_created 
+                            : 'Assignments created successfully.';
+                        this.showNotification(message, 'success');
                         this.closeModals();
                         // Reload page to show new assignments
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
+                        const message = response.data?.message || 
+                            (mt_admin.i18n && mt_admin.i18n.error_occurred ? mt_admin.i18n.error_occurred : 'An error occurred. Please try again.');
+                        this.showNotification(message, 'error');
                     }
                 },
                 error: () => {
-                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                    const message = (mt_admin.i18n && mt_admin.i18n.error_occurred) 
+                        ? mt_admin.i18n.error_occurred 
+                        : 'An error occurred. Please try again.';
+                    this.showNotification(message, 'error');
                 },
                 complete: () => {
-                    $form.find('button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.assign_selected);
+                    const assignText = (mt_admin.i18n && mt_admin.i18n.assign_selected) 
+                        ? mt_admin.i18n.assign_selected 
+                        : 'Assign Selected';
+                    $form.find('button[type="submit"]').prop('disabled', false).text(assignText);
                 }
             });
         },
         
         confirmClearAll: function() {
-            if (!confirm(mt_admin.i18n.confirm_clear_all)) {
+            const confirmMessage = (mt_admin.i18n && mt_admin.i18n.confirm_clear_all) 
+                ? mt_admin.i18n.confirm_clear_all 
+                : 'Are you sure you want to clear ALL assignments? This cannot be undone.';
+            
+            if (!confirm(confirmMessage)) {
                 return;
             }
             
             // Double confirmation for safety
-            if (!confirm(mt_admin.i18n.confirm_clear_all_second)) {
+            const secondConfirmMessage = (mt_admin.i18n && mt_admin.i18n.confirm_clear_all_second) 
+                ? mt_admin.i18n.confirm_clear_all_second 
+                : 'This will remove ALL jury assignments. Are you absolutely sure?';
+            
+            if (!confirm(secondConfirmMessage)) {
                 return;
             }
             
@@ -566,7 +626,10 @@ if (typeof mt_admin === 'undefined') {
         
         clearAllAssignments: function() {
             const $button = $('#mt-clear-all-btn');
-            $button.prop('disabled', true).text(mt_admin.i18n.clearing);
+            const clearingText = (mt_admin.i18n && mt_admin.i18n.clearing) 
+                ? mt_admin.i18n.clearing 
+                : 'Clearing...';
+            $button.prop('disabled', true).text(clearingText);
             
             $.ajax({
                 url: mt_admin.ajax_url,
@@ -577,17 +640,28 @@ if (typeof mt_admin === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        this.showNotification(mt_admin.i18n.all_assignments_cleared, 'success');
+                        const message = (mt_admin.i18n && mt_admin.i18n.all_assignments_cleared) 
+                            ? mt_admin.i18n.all_assignments_cleared 
+                            : 'All assignments have been cleared.';
+                        this.showNotification(message, 'success');
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
+                        const message = response.data?.message || 
+                            (mt_admin.i18n && mt_admin.i18n.error_occurred ? mt_admin.i18n.error_occurred : 'An error occurred. Please try again.');
+                        this.showNotification(message, 'error');
                     }
                 },
                 error: () => {
-                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                    const message = (mt_admin.i18n && mt_admin.i18n.error_occurred) 
+                        ? mt_admin.i18n.error_occurred 
+                        : 'An error occurred. Please try again.';
+                    this.showNotification(message, 'error');
                 },
                 complete: () => {
-                    $button.prop('disabled', false).text(mt_admin.i18n.clear_all);
+                    const clearText = (mt_admin.i18n && mt_admin.i18n.clear_all) 
+                        ? mt_admin.i18n.clear_all 
+                        : 'Clear All';
+                    $button.prop('disabled', false).text(clearText);
                 }
             });
         },
@@ -613,7 +687,10 @@ if (typeof mt_admin === 'undefined') {
             
             $form.appendTo('body').submit().remove();
             
-            this.showNotification(mt_admin.i18n.export_started, 'success');
+            const message = (mt_admin.i18n && mt_admin.i18n.export_started) 
+                ? mt_admin.i18n.export_started 
+                : 'Export started. Download will begin shortly.';
+            this.showNotification(message, 'success');
         },
         
         filterAssignments: function(searchTerm) {
