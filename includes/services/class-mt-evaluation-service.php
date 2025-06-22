@@ -310,6 +310,48 @@ class MT_Evaluation_Service implements MT_Service_Interface {
     }
     
     /**
+     * Get assignment progress for display
+     *
+     * @param int $jury_member_id Jury member ID
+     * @return array Progress data
+     */
+    public function get_assignment_progress($jury_member_id) {
+        $assignment_repo = new MT_Assignment_Repository();
+        $evaluation_repo = new MT_Evaluation_Repository();
+        
+        // Get all assignments
+        $assignments = $assignment_repo->get_by_jury_member($jury_member_id);
+        $total_assignments = count($assignments);
+        
+        if ($total_assignments === 0) {
+            return [
+                'total' => 0,
+                'completed' => 0,
+                'percentage' => 0
+            ];
+        }
+        
+        // Count completed evaluations
+        $completed = 0;
+        foreach ($assignments as $assignment) {
+            $evaluation = $evaluation_repo->get_by_jury_and_candidate(
+                $jury_member_id, 
+                $assignment->candidate_id
+            );
+            
+            if ($evaluation && $evaluation->status === 'completed') {
+                $completed++;
+            }
+        }
+        
+        return [
+            'total' => $total_assignments,
+            'completed' => $completed,
+            'percentage' => round(($completed / $total_assignments) * 100)
+        ];
+    }
+    
+    /**
      * Check if jury member has permission to evaluate candidate
      *
      * @param int $jury_member_id Jury member ID

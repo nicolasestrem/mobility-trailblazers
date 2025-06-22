@@ -469,7 +469,26 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         removeAssignment: function($button) {
-            const assignmentId = $button.closest('.mt-assignment-item').data('assignment-id');
+            // Try multiple ways to get the assignment ID
+            let assignmentId = $button.data('assignment-id');
+            
+            // If not found, try from the parent item
+            if (!assignmentId) {
+                assignmentId = $button.closest('.mt-assignment-item').data('assignment-id');
+            }
+            
+            // If still not found, try from the href attribute
+            if (!assignmentId && $button.attr('href')) {
+                const match = $button.attr('href').match(/assignment_id=(\d+)/);
+                if (match) {
+                    assignmentId = match[1];
+                }
+            }
+            
+            if (!assignmentId) {
+                this.showNotification('Could not determine assignment ID', 'error');
+                return;
+            }
             
             const confirmMessage = (mt_admin.i18n && mt_admin.i18n.confirm_remove_assignment) 
                 ? mt_admin.i18n.confirm_remove_assignment 
@@ -667,10 +686,16 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         exportAssignments: function() {
-            // Create a form and submit it to trigger download
+            const exportingText = (mt_admin.i18n && mt_admin.i18n.export_started) 
+                ? mt_admin.i18n.export_started 
+                : 'Export started. Download will begin shortly.';
+            
+            this.showNotification(exportingText, 'info');
+            
+            // Create a form to trigger the download
             const $form = $('<form>', {
-                action: mt_admin.ajax_url,
-                method: 'POST'
+                method: 'POST',
+                action: mt_admin.ajax_url
             });
             
             $form.append($('<input>', {
@@ -685,12 +710,8 @@ if (typeof mt_admin.i18n === 'undefined') {
                 value: mt_admin.nonce || $('#mt_admin_nonce').val() || ''
             }));
             
+            // Submit form to trigger download
             $form.appendTo('body').submit().remove();
-            
-            const message = (mt_admin.i18n && mt_admin.i18n.export_started) 
-                ? mt_admin.i18n.export_started 
-                : 'Export started. Download will begin shortly.';
-            this.showNotification(message, 'success');
         },
         
         filterAssignments: function(searchTerm) {

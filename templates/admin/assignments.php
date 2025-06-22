@@ -205,7 +205,7 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
                             <a href="<?php echo get_edit_post_link($candidate->ID); ?>" class="mt-candidate-link">
                                 <?php echo esc_html($candidate->post_title); ?>
                             </a>
-                            <button class="mt-remove-assignment" title="<?php esc_attr_e('Remove assignment', 'mobility-trailblazers'); ?>">
+                            <button class="mt-remove-assignment" data-assignment-id="<?php echo esc_attr($assignment->id); ?>" title="<?php esc_attr_e('Remove assignment', 'mobility-trailblazers'); ?>">
                                 <span class="dashicons dashicons-no"></span>
                             </button>
                         </div>
