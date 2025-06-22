@@ -88,7 +88,12 @@ if (typeof mt_admin.i18n === 'undefined') {
      * Initialize tooltips
      */
     function initTooltips() {
-        $('.mt-tooltip').tooltip();
+        // Check if tooltip function exists before calling it
+        if (typeof $.fn.tooltip === 'function') {
+            $('.mt-tooltip').tooltip();
+        } else {
+            console.log('jQuery tooltip plugin not available, skipping tooltip initialization');
+        }
     }
     
     /**
@@ -629,8 +634,15 @@ if (typeof mt_admin.i18n === 'undefined') {
             const method = $('#assignment_method').val();
             const candidatesPerJury = $('#candidates_per_jury').val();
             
+            console.log('submitAutoAssignment called with:', {
+                method: method,
+                candidatesPerJury: candidatesPerJury,
+                ajax_url: mt_admin.url,
+                nonce: mt_admin.nonce
+            });
+            
             $.ajax({
-                url: mt_admin.ajax_url,
+                url: mt_admin.url,
                 type: 'POST',
                 data: {
                     action: 'mt_auto_assign',
@@ -639,9 +651,11 @@ if (typeof mt_admin.i18n === 'undefined') {
                     candidates_per_jury: candidatesPerJury
                 },
                 beforeSend: () => {
+                    console.log('AJAX request starting...');
                     $form.find('button[type="submit"]').prop('disabled', true).text('Processing...');
                 },
                 success: (response) => {
+                    console.log('AJAX Success Response:', response);
                     if (response.success) {
                         this.showNotification(response.data || 'Auto-assignment completed successfully.', 'success');
                         this.closeModals();
@@ -660,6 +674,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                     this.showNotification('Connection error. Please check console for details.', 'error');
                 },
                 complete: () => {
+                    console.log('AJAX request completed');
                     $form.find('button[type="submit"]').prop('disabled', false).text('Run Auto-Assignment');
                 }
             });
