@@ -1,7 +1,7 @@
 # Mobility Trailblazers - Known Issues & Needed Fixes
 
 **Version:** 2.0.0  
-**Last Updated:** January 21, 2024
+**Last Updated:** June 21, 2025
 
 ## Overview
 

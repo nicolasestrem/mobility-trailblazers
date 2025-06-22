@@ -5,6 +5,22 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2025-06-21
+
+### Fixed
+- **Missing Admin JavaScript**: Fixed 404 error for admin.js file
+  - Created missing `assets/js/admin.js` file that was referenced by the main plugin class
+  - Updated AJAX URL reference from `mt_admin.ajaxUrl` to `mt_admin.url` to match localization
+  - Updated error message reference from `mt_admin.i18n.error` to `mt_admin.strings.error`
+  - Resolves "GET http://192.168.1.7:9989/wp-content/plugins/mobility-trailblazers/assets/js/admin.js?ver=2.0.2 net::ERR_ABORTED 404 (Not Found)" error
+  - Restores functionality for manual candidate assignment to jury members on mt-assignment page
+
+### Technical Details
+- **File Created**: `assets/js/admin.js` (11KB, 333 lines)
+- **Features Restored**: Tooltips, tabs, modals, confirmations, AJAX forms, utility functions
+- **Localization**: Properly configured to work with `mt_admin` object from PHP
+- **Compatibility**: Maintains all existing functionality from archive version
+
 ## [2.0.2] - 2025-06-21
 
 ### Fixed

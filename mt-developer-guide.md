@@ -450,6 +450,180 @@ const MTAjax = {
 };
 ```
 
+## JavaScript Assets
+
+### File Structure
+
+The plugin includes two main JavaScript files:
+
+```
+assets/js/
+├── frontend.js    # Frontend functionality (jury dashboard, forms)
+└── admin.js       # Admin interface functionality
+```
+
+### Frontend JavaScript (`frontend.js`)
+
+**Purpose**: Handles frontend user interactions, primarily for jury members.
+
+**Key Features**:
+- Evaluation form handling with real-time validation
+- AJAX form submissions with loading states
+- Score calculation and display
+- Character counting for comment fields
+- Mobile-responsive interactions
+
+**Usage Example**:
+```javascript
+// Evaluation form submission
+$('#mt-evaluation-form').on('submit', function(e) {
+    e.preventDefault();
+    
+    const $form = $(this);
+    const $submit = $form.find('[type="submit"]');
+    
+    // Show loading state
+    $submit.prop('disabled', true).text('Submitting...');
+    
+    // Submit via AJAX
+    $.ajax({
+        url: mt_ajax.url,
+        type: 'POST',
+        data: new FormData(this),
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                mtShowNotification('Evaluation saved successfully!', 'success');
+            } else {
+                mtShowNotification(response.data.message, 'error');
+            }
+        },
+        complete: function() {
+            $submit.prop('disabled', false).text('Submit Evaluation');
+        }
+    });
+});
+```
+
+### Admin JavaScript (`admin.js`)
+
+**Purpose**: Handles admin interface functionality for managing assignments, evaluations, and settings.
+
+**Key Features**:
+- Tooltip initialization and positioning
+- Tab navigation with localStorage persistence
+- Modal opening/closing functionality
+- Confirmation dialogs for destructive actions
+- AJAX form handling with error management
+- Utility functions for notifications and data handling
+
+**Usage Example**:
+```javascript
+// Manual assignment form
+$('.mt-assignment-form').on('submit', function(e) {
+    e.preventDefault();
+    
+    const $form = $(this);
+    const formData = new FormData(this);
+    formData.append('action', 'mt_manual_assignment');
+    formData.append('nonce', mt_admin.nonce);
+    
+    $.ajax({
+        url: mt_admin.url,
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                mtShowNotification('Assignment created successfully!', 'success');
+                // Refresh the assignments list
+                location.reload();
+            } else {
+                mtShowNotification(response.data.message, 'error');
+            }
+        },
+        error: function() {
+            mtShowNotification(mt_admin.strings.error, 'error');
+        }
+    });
+});
+```
+
+### Localization
+
+Both JavaScript files receive localized data from PHP:
+
+**Frontend Localization**:
+```php
+wp_localize_script('mt-frontend', 'mt_ajax', [
+    'url' => admin_url('admin-ajax.php'),
+    'nonce' => wp_create_nonce('mt_ajax_nonce')
+]);
+```
+
+**Admin Localization**:
+```php
+wp_localize_script('mt-admin', 'mt_admin', [
+    'url' => admin_url('admin-ajax.php'),
+    'nonce' => wp_create_nonce('mt_admin_nonce'),
+    'strings' => [
+        'confirm_delete' => __('Are you sure you want to delete this?', 'mobility-trailblazers'),
+        'saving' => __('Saving...', 'mobility-trailblazers'),
+        'saved' => __('Saved!', 'mobility-trailblazers'),
+        'error' => __('An error occurred. Please try again.', 'mobility-trailblazers')
+    ]
+]);
+```
+
+### Utility Functions
+
+The admin.js file provides several utility functions:
+
+```javascript
+// Show notifications
+mtShowNotification('Operation completed!', 'success');
+
+// Handle AJAX errors
+mtHandleAjaxError(xhr, textStatus, errorThrown);
+
+// Serialize form data
+const data = mtSerializeForm($('#my-form'));
+
+// Update URL parameters
+mtUpdateUrlParam('page', '2');
+
+// Get URL parameters
+const page = mtGetUrlParam('page');
+
+// Format numbers
+const formatted = mtFormatNumber(1234.56); // "1.234,56"
+
+// Debounce function calls
+const debouncedSearch = mtDebounce(function(query) {
+    // Perform search
+}, 300);
+```
+
+### Development Guidelines
+
+1. **jQuery Usage**: Wrap all jQuery code in IIFE:
+```javascript
+(function($) {
+    'use strict';
+    
+    $(document).ready(function() {
+        // Your code here
+    });
+})(jQuery);
+```
+
+2. **Error Handling**: Always include error handling for AJAX requests
+3. **Loading States**: Show loading indicators during AJAX operations
+4. **Accessibility**: Ensure keyboard navigation and screen reader support
+5. **Mobile First**: Test on mobile devices and ensure responsive behavior
+
 ## Creating Templates
 
 ### Template Structure
