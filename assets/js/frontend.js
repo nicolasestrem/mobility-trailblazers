@@ -16,23 +16,37 @@
         },
         
         bindEvents: function() {
+            var self = this;
+            
             // Evaluation form submission
-            $(document).on('submit', '#mt-evaluation-form', this.submitEvaluation);
+            $(document).on('submit', '#mt-evaluation-form', function(e) {
+                self.submitEvaluation.call(self, e);
+            });
             
             // Save draft
-            $(document).on('click', '.mt-save-draft', this.saveDraft);
+            $(document).on('click', '.mt-save-draft', function(e) {
+                self.saveDraft.call(self, e);
+            });
             
             // Score slider updates
-            $(document).on('input', '.mt-score-slider', this.updateScoreDisplay);
+            $(document).on('input', '.mt-score-slider', function() {
+                self.updateScoreDisplay.call(this);
+            });
             
             // Score mark clicks
-            $(document).on('click', '.mt-score-mark', this.setScoreFromMark);
+            $(document).on('click', '.mt-score-mark', function(e) {
+                self.setScoreFromMark.call(this, e);
+            });
             
             // Load evaluation modal
-            $(document).on('click', '.mt-evaluate-btn', this.loadEvaluation);
+            $(document).on('click', '.mt-evaluate-btn', function(e) {
+                self.loadEvaluation.call(self, e);
+            });
             
             // Character count
-            $(document).on('input', '#mt-comments', this.updateCharCount);
+            $(document).on('input', '#mt-comments', function() {
+                self.updateCharCount.call(this);
+            });
         },
         
         initEvaluationForm: function() {
@@ -42,6 +56,18 @@
             
             if (candidateId) {
                 this.loadEvaluationForm(candidateId);
+            }
+        },
+        
+        loadEvaluation: function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var candidateId = $btn.data('candidate-id');
+            
+            if (candidateId) {
+                this.loadEvaluationForm(candidateId);
+            } else {
+                this.showError('Invalid candidate ID.');
             }
         },
         
@@ -87,70 +113,148 @@
                         <div class="mt-criteria-section">
                             <h3>Evaluation Criteria</h3>
                             
-                            <div class="mt-criterion">
+                            <div class="mt-criterion-card" data-criterion="courage">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-superhero"></span>
                                     <h4 class="mt-criterion-label">Mut & Pioniergeist</h4>
                                 </div>
                                 <p class="mt-criterion-description">Courage & Pioneer Spirit</p>
-                                <div class="mt-score-slider">
-                                    <input type="range" name="courage_score" class="mt-score-input" min="0" max="10" value="5">
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" name="courage_score" class="mt-score-slider" min="0" max="10" value="5">
+                                    <div class="mt-score-marks">
+                                        <span class="mt-score-mark" data-value="0">0</span>
+                                        <span class="mt-score-mark" data-value="1">1</span>
+                                        <span class="mt-score-mark" data-value="2">2</span>
+                                        <span class="mt-score-mark" data-value="3">3</span>
+                                        <span class="mt-score-mark" data-value="4">4</span>
+                                        <span class="mt-score-mark" data-value="5">5</span>
+                                        <span class="mt-score-mark" data-value="6">6</span>
+                                        <span class="mt-score-mark" data-value="7">7</span>
+                                        <span class="mt-score-mark" data-value="8">8</span>
+                                        <span class="mt-score-mark" data-value="9">9</span>
+                                        <span class="mt-score-mark" data-value="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="mt-score-display">
                                     <span class="mt-score-value">5</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-criterion">
+                            <div class="mt-criterion-card" data-criterion="innovation">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-lightbulb"></span>
                                     <h4 class="mt-criterion-label">Innovationsgrad</h4>
                                 </div>
                                 <p class="mt-criterion-description">Innovation Degree</p>
-                                <div class="mt-score-slider">
-                                    <input type="range" name="innovation_score" class="mt-score-input" min="0" max="10" value="5">
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" name="innovation_score" class="mt-score-slider" min="0" max="10" value="5">
+                                    <div class="mt-score-marks">
+                                        <span class="mt-score-mark" data-value="0">0</span>
+                                        <span class="mt-score-mark" data-value="1">1</span>
+                                        <span class="mt-score-mark" data-value="2">2</span>
+                                        <span class="mt-score-mark" data-value="3">3</span>
+                                        <span class="mt-score-mark" data-value="4">4</span>
+                                        <span class="mt-score-mark" data-value="5">5</span>
+                                        <span class="mt-score-mark" data-value="6">6</span>
+                                        <span class="mt-score-mark" data-value="7">7</span>
+                                        <span class="mt-score-mark" data-value="8">8</span>
+                                        <span class="mt-score-mark" data-value="9">9</span>
+                                        <span class="mt-score-mark" data-value="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="mt-score-display">
                                     <span class="mt-score-value">5</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-criterion">
+                            <div class="mt-criterion-card" data-criterion="implementation">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-hammer"></span>
                                     <h4 class="mt-criterion-label">Umsetzungskraft & Wirkung</h4>
                                 </div>
                                 <p class="mt-criterion-description">Implementation & Impact</p>
-                                <div class="mt-score-slider">
-                                    <input type="range" name="implementation_score" class="mt-score-input" min="0" max="10" value="5">
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" name="implementation_score" class="mt-score-slider" min="0" max="10" value="5">
+                                    <div class="mt-score-marks">
+                                        <span class="mt-score-mark" data-value="0">0</span>
+                                        <span class="mt-score-mark" data-value="1">1</span>
+                                        <span class="mt-score-mark" data-value="2">2</span>
+                                        <span class="mt-score-mark" data-value="3">3</span>
+                                        <span class="mt-score-mark" data-value="4">4</span>
+                                        <span class="mt-score-mark" data-value="5">5</span>
+                                        <span class="mt-score-mark" data-value="6">6</span>
+                                        <span class="mt-score-mark" data-value="7">7</span>
+                                        <span class="mt-score-mark" data-value="8">8</span>
+                                        <span class="mt-score-mark" data-value="9">9</span>
+                                        <span class="mt-score-mark" data-value="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="mt-score-display">
                                     <span class="mt-score-value">5</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-criterion">
+                            <div class="mt-criterion-card" data-criterion="relevance">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-location-alt"></span>
                                     <h4 class="mt-criterion-label">Relevanz für Mobilitätswende</h4>
                                 </div>
                                 <p class="mt-criterion-description">Mobility Transformation Relevance</p>
-                                <div class="mt-score-slider">
-                                    <input type="range" name="relevance_score" class="mt-score-input" min="0" max="10" value="5">
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" name="relevance_score" class="mt-score-slider" min="0" max="10" value="5">
+                                    <div class="mt-score-marks">
+                                        <span class="mt-score-mark" data-value="0">0</span>
+                                        <span class="mt-score-mark" data-value="1">1</span>
+                                        <span class="mt-score-mark" data-value="2">2</span>
+                                        <span class="mt-score-mark" data-value="3">3</span>
+                                        <span class="mt-score-mark" data-value="4">4</span>
+                                        <span class="mt-score-mark" data-value="5">5</span>
+                                        <span class="mt-score-mark" data-value="6">6</span>
+                                        <span class="mt-score-mark" data-value="7">7</span>
+                                        <span class="mt-score-mark" data-value="8">8</span>
+                                        <span class="mt-score-mark" data-value="9">9</span>
+                                        <span class="mt-score-mark" data-value="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="mt-score-display">
                                     <span class="mt-score-value">5</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-criterion">
+                            <div class="mt-criterion-card" data-criterion="visibility">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-visibility"></span>
                                     <h4 class="mt-criterion-label">Vorbildfunktion & Sichtbarkeit</h4>
                                 </div>
                                 <p class="mt-criterion-description">Role Model & Visibility</p>
-                                <div class="mt-score-slider">
-                                    <input type="range" name="visibility_score" class="mt-score-input" min="0" max="10" value="5">
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" name="visibility_score" class="mt-score-slider" min="0" max="10" value="5">
+                                    <div class="mt-score-marks">
+                                        <span class="mt-score-mark" data-value="0">0</span>
+                                        <span class="mt-score-mark" data-value="1">1</span>
+                                        <span class="mt-score-mark" data-value="2">2</span>
+                                        <span class="mt-score-mark" data-value="3">3</span>
+                                        <span class="mt-score-mark" data-value="4">4</span>
+                                        <span class="mt-score-mark" data-value="5">5</span>
+                                        <span class="mt-score-mark" data-value="6">6</span>
+                                        <span class="mt-score-mark" data-value="7">7</span>
+                                        <span class="mt-score-mark" data-value="8">8</span>
+                                        <span class="mt-score-mark" data-value="9">9</span>
+                                        <span class="mt-score-mark" data-value="10">10</span>
+                                    </div>
+                                </div>
+                                <div class="mt-score-display">
                                     <span class="mt-score-value">5</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="mt-comments-section">
-                            <label for="comments" class="mt-comments-label">Additional Comments (Optional)</label>
-                            <textarea name="comments" id="comments" class="mt-comments-textarea" rows="5"></textarea>
+                            <label for="mt-comments" class="mt-comments-label">Additional Comments (Optional)</label>
+                            <textarea name="comments" id="mt-comments" class="mt-comments-textarea" rows="5"></textarea>
+                            <div class="mt-char-count">
+                                <span id="mt-char-current">0</span> / 1000 characters
+                            </div>
                         </div>
                         
                         <div class="mt-form-actions">
@@ -204,14 +308,15 @@
             $input.css('background', 'linear-gradient(to right, #667eea 0%, #667eea ' + percentage + '%, #e5e7eb ' + percentage + '%, #e5e7eb 100%)');
             
             // Update total score
-            MTJuryDashboard.updateTotalScore();
+            var self = MTJuryDashboard;
+            self.updateTotalScore();
         },
         
         setScoreFromMark: function(e) {
             e.preventDefault();
             var $mark = $(this);
             var value = $mark.data('value');
-            var $slider = $mark.closest('.mt-score-slider-wrapper').find('.mt-score-slider');
+            var $slider = $mark.closest('.mt-criterion-card').find('.mt-score-slider');
             
             $slider.val(value).trigger('input');
         },
