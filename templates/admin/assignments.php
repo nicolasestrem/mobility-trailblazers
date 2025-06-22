@@ -66,6 +66,40 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
 }
 ?>
 
+<!-- Debug Section -->
+<div style="background: #f0f0f0; padding: 10px; margin: 20px 0; border: 1px solid #ccc;">
+    <h3>Debug Information</h3>
+    <p>Page: <?php echo esc_html($_GET['page'] ?? 'unknown'); ?></p>
+    <p>Current User Can Manage: <?php echo current_user_can('manage_options') ? 'Yes' : 'No'; ?></p>
+    <p>AJAX URL: <?php echo admin_url('admin-ajax.php'); ?></p>
+    <p>Nonce: <?php echo wp_create_nonce('mt_admin_nonce'); ?></p>
+    <button onclick="testAjax()">Test AJAX</button>
+</div>
+
+<script>
+function testAjax() {
+    console.log('Testing AJAX...');
+    jQuery.ajax({
+        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        type: 'POST',
+        data: {
+            action: 'mt_auto_assign',
+            nonce: '<?php echo wp_create_nonce('mt_admin_nonce'); ?>',
+            method: 'balanced',
+            candidates_per_jury: 5
+        },
+        success: function(response) {
+            console.log('AJAX Success:', response);
+            alert('AJAX Success: ' + JSON.stringify(response));
+        },
+        error: function(xhr, status, error) {
+            console.log('AJAX Error:', {xhr, status, error});
+            alert('AJAX Error: ' + xhr.responseText);
+        }
+    });
+}
+</script>
+
 <div class="wrap">
     <h1><?php _e('Assignment Management', 'mobility-trailblazers'); ?></h1>
     <input type="hidden" id="mt_admin_nonce" value="<?php echo wp_create_nonce('mt_admin_nonce'); ?>" />
@@ -302,3 +336,29 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
         </form>
     </div>
 </div>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    console.log('Inline script running...');
+    
+    // Direct event binding as fallback
+    $(document).on('click', '#mt-auto-assign-btn', function(e) {
+        e.preventDefault();
+        console.log('Fallback handler: Auto-assign clicked');
+        $('#mt-auto-assign-modal').show();
+    });
+    
+    $(document).on('click', '.mt-modal-close', function(e) {
+        e.preventDefault();
+        console.log('Fallback handler: Close modal clicked');
+        $('.mt-modal').hide();
+    });
+    
+    // Test if mt_admin exists
+    if (typeof mt_admin !== 'undefined') {
+        console.log('mt_admin is available:', mt_admin);
+    } else {
+        console.error('mt_admin is NOT available!');
+    }
+});
+</script>

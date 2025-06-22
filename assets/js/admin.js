@@ -4,9 +4,10 @@
 
 // Ensure mt_admin object exists with fallback values
 if (typeof mt_admin === 'undefined') {
+    console.warn('mt_admin object not found, creating fallback');
     window.mt_admin = {
-        ajax_url: typeof ajaxurl !== 'undefined' ? ajaxurl : '/wp-admin/admin-ajax.php',
-        nonce: '',
+        ajax_url: ajaxurl || '/wp-admin/admin-ajax.php',
+        nonce: $('#mt_admin_nonce').val() || '',
         admin_url: '/wp-admin/',
         i18n: {
             confirm_remove_assignment: 'Are you sure you want to remove this assignment?',
@@ -50,6 +51,8 @@ if (typeof mt_admin.i18n === 'undefined') {
 (function($) {
     'use strict';
 
+    console.log('Admin JS loading...');
+
     // Wait for document ready
     $(document).ready(function() {
         
@@ -85,74 +88,56 @@ if (typeof mt_admin.i18n === 'undefined') {
      * Initialize tooltips
      */
     function initTooltips() {
-        // Already handled by CSS, but we can add enhanced functionality here
-        $('.mt-tooltip').on('mouseenter', function() {
-            var $tooltip = $(this).find('.mt-tooltip-content');
-            
-            // Check if tooltip goes off screen
-            var tooltipOffset = $tooltip.offset();
-            if (tooltipOffset && tooltipOffset.left < 0) {
-                $tooltip.css('left', '0');
-                $tooltip.css('margin-left', '0');
-            }
-        });
+        $('.mt-tooltip').tooltip();
     }
     
     /**
      * Initialize tabs
      */
     function initTabs() {
-        $('.mt-tab-nav a').on('click', function(e) {
+        $('.mt-tabs').on('click', '.mt-tab-link', function(e) {
             e.preventDefault();
             
-            var $this = $(this);
-            var target = $this.attr('href');
+            const $this = $(this);
+            const target = $this.attr('href');
+            const $tabContent = $(target);
             
-            // Update active states
-            $this.siblings().removeClass('active');
+            // Hide all tab contents
+            $('.mt-tab-content').removeClass('active');
+            
+            // Remove active class from all tab links
+            $('.mt-tab-link').removeClass('active');
+            
+            // Show target tab content
+            $tabContent.addClass('active');
+            
+            // Add active class to clicked tab link
             $this.addClass('active');
-            
-            // Show target content
-            $(target).siblings('.mt-tab-content').removeClass('active');
-            $(target).addClass('active');
-            
-            // Save active tab to localStorage
-            if (typeof(Storage) !== "undefined") {
-                localStorage.setItem('mt_active_tab_' + window.location.pathname, target);
-            }
         });
-        
-        // Restore active tab from localStorage
-        if (typeof(Storage) !== "undefined") {
-            var savedTab = localStorage.getItem('mt_active_tab_' + window.location.pathname);
-            if (savedTab && $(savedTab).length) {
-                $('.mt-tab-nav a[href="' + savedTab + '"]').trigger('click');
-            }
-        }
     }
     
     /**
      * Initialize modals
      */
     function initModals() {
-        // Open modal
-        $('[data-modal]').on('click', function(e) {
+        $('.mt-modal-trigger').on('click', function(e) {
             e.preventDefault();
-            var modalId = $(this).data('modal');
-            $('#' + modalId).fadeIn();
-        });
-        
-        // Close modal
-        $('.mt-modal-close, .mt-modal').on('click', function(e) {
-            if (e.target === this) {
-                $(this).closest('.mt-modal').fadeOut();
+            
+            const target = $(this).data('modal');
+            const $modal = $('#' + target);
+            
+            if ($modal.length) {
+                $modal.addClass('active');
             }
         });
         
-        // Close on escape key
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape') {
-                $('.mt-modal:visible').fadeOut();
+        $('.mt-modal-close').on('click', function() {
+            $(this).closest('.mt-modal').removeClass('active');
+        });
+        
+        $('.mt-modal').on('click', function(e) {
+            if ($(e.target).hasClass('mt-modal')) {
+                $(this).removeClass('active');
             }
         });
     }
@@ -161,11 +146,11 @@ if (typeof mt_admin.i18n === 'undefined') {
      * Initialize confirmations
      */
     function initConfirmations() {
-        $('[data-confirm]').on('click', function(e) {
-            var message = $(this).data('confirm');
+        $('.mt-confirm').on('click', function(e) {
+            const message = $(this).data('confirm') || 'Are you sure?';
+            
             if (!confirm(message)) {
                 e.preventDefault();
-                e.stopPropagation();
                 return false;
             }
         });
@@ -178,68 +163,42 @@ if (typeof mt_admin.i18n === 'undefined') {
         $('.mt-ajax-form').on('submit', function(e) {
             e.preventDefault();
             
-            var $form = $(this);
-            var $submit = $form.find('[type="submit"]');
-            var originalText = $submit.text();
+            const $form = $(this);
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
             
-            // Disable submit button and show loading
-            $submit.prop('disabled', true).html(originalText + ' <span class="mt-spinner"></span>');
+            // Disable submit button
+            $submitBtn.prop('disabled', true).text('Processing...');
             
-            // Clear previous errors
-            $form.find('.mt-form-error').remove();
-            $form.find('.mt-alert').remove();
-            
-            // Prepare data
-            var formData = new FormData(this);
-            formData.append('action', $form.data('action'));
-            formData.append('nonce', mt_admin.nonce);
-            
-            // Send AJAX request
             $.ajax({
-                url: mt_admin.url,
+                url: $form.attr('action'),
                 type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                data: $form.serialize(),
                 success: function(response) {
                     if (response.success) {
                         // Show success message
-                        $form.prepend('<div class="mt-alert mt-alert-success">' + response.data.message + '</div>');
-                        
-                        // Reset form if specified
-                        if ($form.data('reset-on-success')) {
-                            $form[0].reset();
-                        }
-                        
-                        // Trigger custom event
-                        $form.trigger('mt:form:success', [response]);
-                        
-                        // Redirect if URL provided
-                        if (response.data.redirect_url) {
-                            window.location.href = response.data.redirect_url;
-                        }
+                        $('<div class="notice notice-success"><p>' + response.data.message + '</p></div>')
+                            .insertAfter($form)
+                            .delay(3000)
+                            .fadeOut();
                     } else {
                         // Show error message
-                        $form.prepend('<div class="mt-alert mt-alert-danger">' + response.data.message + '</div>');
-                        
-                        // Show field errors if any
-                        if (response.data.errors) {
-                            $.each(response.data.errors, function(field, error) {
-                                var $field = $form.find('[name="' + field + '"]');
-                                $field.after('<span class="mt-form-error">' + error + '</span>');
-                            });
-                        }
-                        
-                        // Trigger custom event
-                        $form.trigger('mt:form:error', [response]);
+                        $('<div class="notice notice-error"><p>' + response.data.message + '</p></div>')
+                            .insertAfter($form)
+                            .delay(3000)
+                            .fadeOut();
                     }
                 },
                 error: function() {
-                    $form.prepend('<div class="mt-alert mt-alert-danger">' + mt_admin.strings.error + '</div>');
+                    // Show error message
+                    $('<div class="notice notice-error"><p>An error occurred. Please try again.</p></div>')
+                        .insertAfter($form)
+                        .delay(3000)
+                        .fadeOut();
                 },
                 complete: function() {
                     // Re-enable submit button
-                    $submit.prop('disabled', false).text(originalText);
+                    $submitBtn.prop('disabled', false).text(originalText);
                 }
             });
         });
@@ -397,8 +356,17 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         bindEvents: function() {
-            // Auto-assign button
-            $('#mt-auto-assign-btn').on('click', () => this.showAutoAssignModal());
+            console.log('Binding events...');
+            
+            // Auto-assign button with debugging
+            $('#mt-auto-assign-btn').on('click', (e) => {
+                console.log('Auto-assign button clicked');
+                e.preventDefault();
+                this.showAutoAssignModal();
+            });
+            
+            // Test if jQuery is working
+            $('#mt-auto-assign-btn').css('border', '2px solid red');
             
             // Manual assign button
             $('#mt-manual-assign-btn').on('click', () => this.showManualAssignModal());
@@ -435,6 +403,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             
             // Auto-assignment form submission
             $('#mt-auto-assign-modal form').on('submit', (e) => {
+                console.log('Auto-assign form submitted');
                 e.preventDefault();
                 this.submitAutoAssignment();
             });
@@ -451,11 +420,16 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         initializeModals: function() {
+            console.log('Initializing modals...');
             // Initialize modal functionality
             this.modals = {
                 autoAssign: $('#mt-auto-assign-modal'),
                 manualAssign: $('#mt-manual-assign-modal')
             };
+            console.log('Modals found:', {
+                autoAssign: this.modals.autoAssign.length,
+                manualAssign: this.modals.manualAssign.length
+            });
         },
         
         initializeFilters: function() {
@@ -474,7 +448,16 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         
         showAutoAssignModal: function() {
+            console.log('showAutoAssignModal called');
+            console.log('Modal element:', $('#mt-auto-assign-modal'));
+            console.log('Modal exists:', $('#mt-auto-assign-modal').length > 0);
+            
+            // Try multiple methods to show the modal
+            $('#mt-auto-assign-modal').show();
+            $('#mt-auto-assign-modal').css('display', 'block');
             $('#mt-auto-assign-modal').fadeIn(300);
+            
+            console.log('Modal display after show:', $('#mt-auto-assign-modal').css('display'));
         },
         
         showManualAssignModal: function() {
@@ -852,13 +835,20 @@ if (typeof mt_admin.i18n === 'undefined') {
         }
     };
     
-    // Initialize Assignment Manager on document ready
+    // Try multiple initialization methods
     $(document).ready(function() {
-        // Check if we're on the assignment management page
+        console.log('Document ready - checking for assignment page');
+        
+        // More inclusive check
         if ($('#mt-auto-assign-btn').length > 0 || 
             $('.mt-assignment-management').length > 0 ||
-            $('body').hasClass('mobility-trailblazers_page_mt-assignment-management')) {
+            $('body').hasClass('mobility-trailblazers_page_mt-assignment-management') ||
+            window.location.href.includes('mt-assignment-management')) {
+            
+            console.log('Assignment page detected, initializing...');
             MTAssignmentManager.init();
+        } else {
+            console.log('Not on assignment page, skipping initialization');
         }
     });
 
