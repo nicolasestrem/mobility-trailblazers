@@ -49,7 +49,7 @@ foreach ($all_assignments as $assignment) {
 }
 
 // Handle form submissions
-if (isset($_POST['action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignments')) {
+if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignments')) {
     if ($_POST['action'] === 'auto_assign') {
         $method = sanitize_text_field($_POST['method']);
         $candidates_per_jury = intval($_POST['candidates_per_jury']);
@@ -67,6 +67,7 @@ if (isset($_POST['action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignmen
 
 <div class="wrap">
     <h1><?php _e('Assignment Management', 'mobility-trailblazers'); ?></h1>
+    <input type="hidden" id="mt_admin_nonce" value="<?php echo wp_create_nonce('mt_admin_nonce'); ?>" />
     
     <!-- Statistics Dashboard -->
     <div class="mt-stats-dashboard">
@@ -155,8 +156,12 @@ if (isset($_POST['action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignmen
                     'taxonomy' => 'mt_category',
                     'hide_empty' => false
                 ));
-                foreach ($categories as $category) {
-                    echo '<option value="' . esc_attr($category->slug) . '">' . esc_html($category->name) . '</option>';
+                if (!is_wp_error($categories) && !empty($categories)) {
+                    foreach ($categories as $category) {
+                        if (is_object($category)) {
+                            echo '<option value="' . esc_attr($category->slug) . '">' . esc_html($category->name) . '</option>';
+                        }
+                    }
                 }
                 ?>
             </select>

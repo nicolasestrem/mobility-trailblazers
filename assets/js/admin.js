@@ -2,6 +2,31 @@
  * Mobility Trailblazers Admin JavaScript
  */
 
+// Ensure mt_admin object exists with fallback values
+if (typeof mt_admin === 'undefined') {
+    window.mt_admin = {
+        ajax_url: ajaxurl || '/wp-admin/admin-ajax.php',
+        nonce: '',
+        admin_url: '/wp-admin/',
+        i18n: {
+            confirm_remove_assignment: 'Are you sure you want to remove this assignment?',
+            assignment_removed: 'Assignment removed successfully.',
+            error_occurred: 'An error occurred. Please try again.',
+            no_assignments: 'No assignments yet',
+            processing: 'Processing...',
+            select_jury_and_candidates: 'Please select a jury member and at least one candidate.',
+            assignments_created: 'Assignments created successfully.',
+            assign_selected: 'Assign Selected',
+            confirm_clear_all: 'Are you sure you want to clear ALL assignments? This cannot be undone.',
+            confirm_clear_all_second: 'This will remove ALL jury assignments. Are you absolutely sure?',
+            clearing: 'Clearing...',
+            clear_all: 'Clear All',
+            all_assignments_cleared: 'All assignments have been cleared.',
+            export_started: 'Export started. Download will begin shortly.'
+        }
+    };
+}
+
 (function($) {
     'use strict';
 
@@ -397,10 +422,12 @@
         },
         
         initializeFilters: function() {
+            const self = this;
+            
             // Search functionality
-            $('#mt-search-assignments').on('keyup', debounce((e) => {
-                this.filterAssignments($(e.target).val());
-            }, 300));
+            $('#mt-search-assignments').on('keyup', function() {
+                self.filterAssignments($(this).val());
+            });
             
             // Status filter
             $('#mt-filter-status').on('change', () => this.applyFilters());
@@ -435,7 +462,7 @@
                 type: 'POST',
                 data: {
                     action: 'mt_delete_assignment',
-                    nonce: mt_admin.nonce,
+                    nonce: mt_admin.nonce || $('#mt_admin_nonce').val() || '',
                     assignment_id: assignmentId
                 },
                 success: (response) => {
@@ -443,7 +470,7 @@
                         this.handleRemoveSuccess($button);
                         this.showNotification(mt_admin.i18n.assignment_removed, 'success');
                     } else {
-                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
@@ -476,7 +503,7 @@
             }
             
             // Update progress bar
-            const totalCandidates = parseInt($('.mt-stat-card:first .mt-stat-number').text());
+            const totalCandidates = parseInt($('.mt-stat-card:first .mt-stat-number').text()) || 1;
             const percentage = totalCandidates > 0 ? Math.round((assignmentCount / totalCandidates) * 100) : 0;
             $card.find('.mt-progress-fill').css('width', percentage + '%');
             $card.find('.mt-progress-text').text(percentage + '%');
@@ -501,7 +528,7 @@
                 type: 'POST',
                 data: {
                     action: 'mt_bulk_create_assignments',
-                    nonce: mt_admin.nonce,
+                    nonce: mt_admin.nonce || $('#mt_admin_nonce').val() || '',
                     jury_member_id: juryMemberId,
                     candidate_ids: candidateIds
                 },
@@ -512,7 +539,7 @@
                         // Reload page to show new assignments
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
@@ -546,14 +573,14 @@
                 type: 'POST',
                 data: {
                     action: 'mt_clear_all_assignments',
-                    nonce: mt_admin.nonce
+                    nonce: mt_admin.nonce || $('#mt_admin_nonce').val() || ''
                 },
                 success: (response) => {
                     if (response.success) {
                         this.showNotification(mt_admin.i18n.all_assignments_cleared, 'success');
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                        this.showNotification(response.data?.message || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
@@ -581,7 +608,7 @@
             $form.append($('<input>', {
                 type: 'hidden',
                 name: 'nonce',
-                value: mt_admin.nonce
+                value: mt_admin.nonce || $('#mt_admin_nonce').val() || ''
             }));
             
             $form.appendTo('body').submit().remove();
@@ -666,19 +693,6 @@
             });
         }
     };
-    
-    // Debounce function for search
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
     
     // Initialize Assignment Manager on document ready
     $(document).ready(function() {
