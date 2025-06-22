@@ -50,8 +50,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
+            error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
         }
+        
+        error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
         
         // Get status (draft or completed)
         $status = $this->get_param('status', 'completed');
@@ -63,14 +66,24 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $data = [
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $this->get_int_param('candidate_id'),
-            'courage_score' => $this->get_int_param('courage_score'),
-            'innovation_score' => $this->get_int_param('innovation_score'),
-            'implementation_score' => $this->get_int_param('implementation_score'),
-            'relevance_score' => $this->get_int_param('relevance_score'),
-            'visibility_score' => $this->get_int_param('visibility_score'),
+            'courage_score' => $this->get_float_param('courage_score'),
+            'innovation_score' => $this->get_float_param('innovation_score'),
+            'implementation_score' => $this->get_float_param('implementation_score'),
+            'relevance_score' => $this->get_float_param('relevance_score'),
+            'visibility_score' => $this->get_float_param('visibility_score'),
             'comments' => $this->get_textarea_param('comments'),
             'status' => $status
         ];
+        
+        // Debug: Check if assignment exists
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $has_assignment = $assignment_repo->exists($jury_member->ID, $data['candidate_id']);
+        
+        error_log('MT AJAX - Assignment check: jury_member_id=' . $jury_member->ID . ', candidate_id=' . $data['candidate_id'] . ', has_assignment=' . ($has_assignment ? 'true' : 'false'));
+        
+        if (!$has_assignment) {
+            $this->error(__('You do not have permission to evaluate this candidate. Please contact an administrator.', 'mobility-trailblazers'));
+        }
         
         // Process evaluation
         $service = new MT_Evaluation_Service();
@@ -89,10 +102,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 $message
             );
         } else {
-            $this->error(
-                __('Failed to save evaluation.', 'mobility-trailblazers'),
-                ['errors' => $service->get_errors()]
-            );
+            $errors = $service->get_errors();
+            $error_message = !empty($errors) ? implode(', ', $errors) : __('Failed to save evaluation.', 'mobility-trailblazers');
+            $this->error($error_message);
         }
     }
     
@@ -132,7 +144,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         foreach ($score_fields as $field) {
             $value = $this->get_param($field);
             if ($value !== null && $value !== '') {
-                $data[$field] = intval($value);
+                $data[$field] = floatval($value);
             }
         }
         

@@ -5,6 +5,42 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2025-06-21
+
+### Fixed
+- **jQuery Event Binding Errors**: Fixed "Cannot create property 'guid' on string" errors
+  - Resolved incorrect jQuery event handler binding in frontend JavaScript
+  - Fixed event handlers being passed as string references instead of function references
+  - Added proper context binding using `self.call()` to maintain correct scope
+  - Resolves jQuery migration warnings and prevents JavaScript errors on evaluation form
+  
+- **Nonce Security Verification**: Fixed "Security check failed" errors on evaluation submission
+  - Corrected nonce mismatch between JavaScript and server-side verification
+  - Changed JavaScript to use `mt_ajax.nonce` instead of form field `mt_nonce`
+  - Ensured consistent nonce name usage (`mt_ajax_nonce`) across all AJAX calls
+  - Added safety checks to prevent undefined nonce errors
+  
+- **Missing Event Handlers**: Added missing `loadEvaluation` method
+  - Implemented `loadEvaluation` method to handle evaluate button clicks
+  - Fixed event handler reference that was causing JavaScript errors
+  - Properly handles candidate ID extraction and form loading
+  
+- **CSS Selector Mismatches**: Fixed incorrect CSS selectors in JavaScript
+  - Updated selectors to match actual HTML structure from templates
+  - Changed `.mt-criterion` to `.mt-criterion-card` for proper element targeting
+  - Fixed score slider and mark click handlers to use correct parent elements
+  - Ensured character count functionality targets correct textarea ID
+
+### Technical Details
+- **Event Binding**: All jQuery event handlers now properly maintain context
+- **Nonce Flow**: Shortcode → `mt_ajax.nonce` → AJAX handler → `wp_verify_nonce()`
+- **Safety Checks**: Added `typeof mt_ajax === 'undefined'` checks in all AJAX functions
+- **Form Structure**: Dynamically generated forms now match template structure
+- **Error Handling**: Improved error messages for configuration issues
+
+### Files Modified
+- `assets/js/frontend.js` - Complete event binding and nonce handling overhaul
+
 ## [2.0.3] - 2025-06-21
 
 ### Fixed

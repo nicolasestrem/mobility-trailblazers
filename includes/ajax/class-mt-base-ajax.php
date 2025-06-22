@@ -106,6 +106,17 @@ abstract class MT_Base_Ajax {
     }
     
     /**
+     * Get sanitized float parameter
+     *
+     * @param string $key Parameter key
+     * @param float $default Default value
+     * @return float
+     */
+    protected function get_float_param($key, $default = 0.0) {
+        return floatval($this->get_param($key, $default));
+    }
+    
+    /**
      * Get sanitized textarea parameter
      *
      * @param string $key Parameter key

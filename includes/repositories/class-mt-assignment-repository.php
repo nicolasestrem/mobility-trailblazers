@@ -129,15 +129,20 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         
         $data = wp_parse_args($data, $defaults);
         
+        // Generate format specifiers dynamically
+        $formats = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, ['jury_member_id', 'candidate_id', 'assigned_by'])) {
+                $formats[] = '%d';
+            } else {
+                $formats[] = '%s';
+            }
+        }
+        
         $result = $wpdb->insert(
             $this->table_name,
             $data,
-            [
-                '%d', // jury_member_id
-                '%d', // candidate_id
-                '%s', // assigned_at
-                '%d'  // assigned_by
-            ]
+            $formats
         );
         
         return $result ? $wpdb->insert_id : false;

@@ -125,7 +125,8 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         $defaults = [
             'created_at' => current_time('mysql'),
             'updated_at' => current_time('mysql'),
-            'status' => 'draft'
+            'status' => 'draft',
+            'user_id' => get_current_user_id()
         ];
         
         $data = wp_parse_args($data, $defaults);
@@ -135,24 +136,43 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             $data['total_score'] = $this->calculate_total_score($data);
         }
         
+        // Generate format specifiers dynamically
+        $formats = [];
+        foreach ($data as $key => $value) {
+            switch ($key) {
+                case 'jury_member_id':
+                case 'candidate_id':
+                case 'user_id':
+                    $formats[] = '%d';
+                    break;
+                case 'courage_score':
+                case 'innovation_score':
+                case 'implementation_score':
+                case 'relevance_score':
+                case 'visibility_score':
+                case 'total_score':
+                    $formats[] = '%f';
+                    break;
+                default:
+                    $formats[] = '%s';
+            }
+        }
+        
+        // Debug: Log the data and formats
+        error_log('MT Evaluation Repository - Inserting data: ' . print_r($data, true));
+        error_log('MT Evaluation Repository - Formats: ' . print_r($formats, true));
+        
         $result = $wpdb->insert(
             $this->table_name,
             $data,
-            [
-                '%d', // jury_member_id
-                '%d', // candidate_id
-                '%d', // courage_score
-                '%d', // innovation_score
-                '%d', // implementation_score
-                '%d', // relevance_score
-                '%d', // visibility_score
-                '%f', // total_score
-                '%s', // comments
-                '%s', // status
-                '%s', // created_at
-                '%s'  // updated_at
-            ]
+            $formats
         );
+        
+        if ($result) {
+            error_log('MT Evaluation Repository - Insert successful, ID: ' . $wpdb->insert_id);
+        } else {
+            error_log('MT Evaluation Repository - Insert failed, error: ' . $wpdb->last_error);
+        }
         
         return $result ? $wpdb->insert_id : false;
     }
@@ -183,13 +203,14 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             switch ($key) {
                 case 'jury_member_id':
                 case 'candidate_id':
+                case 'user_id':
+                    $formats[] = '%d';
+                    break;
                 case 'courage_score':
                 case 'innovation_score':
                 case 'implementation_score':
                 case 'relevance_score':
                 case 'visibility_score':
-                    $formats[] = '%d';
-                    break;
                 case 'total_score':
                     $formats[] = '%f';
                     break;
@@ -389,11 +410,11 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
      */
     private function calculate_total_score($data) {
         $scores = [
-            'courage_score' => isset($data['courage_score']) ? intval($data['courage_score']) : 0,
-            'innovation_score' => isset($data['innovation_score']) ? intval($data['innovation_score']) : 0,
-            'implementation_score' => isset($data['implementation_score']) ? intval($data['implementation_score']) : 0,
-            'relevance_score' => isset($data['relevance_score']) ? intval($data['relevance_score']) : 0,
-            'visibility_score' => isset($data['visibility_score']) ? intval($data['visibility_score']) : 0
+            'courage_score' => isset($data['courage_score']) ? floatval($data['courage_score']) : 0.0,
+            'innovation_score' => isset($data['innovation_score']) ? floatval($data['innovation_score']) : 0.0,
+            'implementation_score' => isset($data['implementation_score']) ? floatval($data['implementation_score']) : 0.0,
+            'relevance_score' => isset($data['relevance_score']) ? floatval($data['relevance_score']) : 0.0,
+            'visibility_score' => isset($data['visibility_score']) ? floatval($data['visibility_score']) : 0.0
         ];
         
         // Get weights from options
@@ -405,17 +426,17 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             'visibility' => 1
         ]);
         
-        $weighted_sum = 0;
-        $weight_total = 0;
+        $weighted_sum = 0.0;
+        $weight_total = 0.0;
         
         foreach ($scores as $key => $score) {
             $criteria = str_replace('_score', '', $key);
-            $weight = isset($weights[$criteria]) ? floatval($weights[$criteria]) : 1;
+            $weight = isset($weights[$criteria]) ? floatval($weights[$criteria]) : 1.0;
             $weighted_sum += $score * $weight;
             $weight_total += $weight;
         }
         
-        return $weight_total > 0 ? round($weighted_sum / $weight_total, 2) : 0;
+        return $weight_total > 0 ? round($weighted_sum / $weight_total, 2) : 0.0;
     }
     
     /**

@@ -62,44 +62,59 @@ class MT_Evaluation_Service implements MT_Service_Interface {
     public function process($data) {
         $this->errors = [];
         
+        // Debug: Log the incoming data
+        error_log('MT Evaluation Service - Incoming data: ' . print_r($data, true));
+        
         // Validate input
         if (!$this->validate($data)) {
+            error_log('MT Evaluation Service - Validation failed: ' . print_r($this->errors, true));
             return false;
         }
         
         // Check if user has permission
         if (!$this->check_permission($data['jury_member_id'], $data['candidate_id'])) {
             $this->errors[] = __('You do not have permission to evaluate this candidate.', 'mobility-trailblazers');
+            error_log('MT Evaluation Service - Permission check failed for jury_member_id: ' . $data['jury_member_id'] . ', candidate_id: ' . $data['candidate_id']);
             return false;
         }
         
         // Prepare data
         $evaluation_data = $this->prepare_data($data);
+        error_log('MT Evaluation Service - Prepared data: ' . print_r($evaluation_data, true));
         
         // Check if evaluation exists
         $existing = $this->get_existing_evaluation($data['jury_member_id'], $data['candidate_id']);
         
         if ($existing) {
             // Update existing evaluation
+            error_log('MT Evaluation Service - Updating existing evaluation ID: ' . $existing->id);
             $result = $this->repository->update($existing->id, $evaluation_data);
             
             if ($result) {
                 // Trigger action
                 do_action('mt_evaluation_updated', $existing->id, $evaluation_data);
+                error_log('MT Evaluation Service - Update successful, returning ID: ' . $existing->id);
                 return $existing->id;
+            } else {
+                error_log('MT Evaluation Service - Update failed');
             }
         } else {
             // Create new evaluation
+            error_log('MT Evaluation Service - Creating new evaluation');
             $result = $this->repository->create($evaluation_data);
             
             if ($result) {
                 // Trigger action
                 do_action('mt_evaluation_submitted', $result, $evaluation_data);
+                error_log('MT Evaluation Service - Create successful, returning ID: ' . $result);
                 return $result;
+            } else {
+                error_log('MT Evaluation Service - Create failed');
             }
         }
         
         $this->errors[] = __('Failed to save evaluation. Please try again.', 'mobility-trailblazers');
+        error_log('MT Evaluation Service - Process failed, errors: ' . print_r($this->errors, true));
         return false;
     }
     
@@ -156,7 +171,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         
         foreach ($score_fields as $field => $label) {
             if (isset($data[$field])) {
-                $score = intval($data[$field]);
+                $score = floatval($data[$field]); // Convert to float for validation
                 if ($score < 0 || $score > 10) {
                     $this->errors[] = sprintf(
                         __('%s score must be between 0 and 10.', 'mobility-trailblazers'),
@@ -336,7 +351,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             'status' => isset($data['status']) ? sanitize_text_field($data['status']) : 'draft'
         ];
         
-        // Add scores
+        // Add scores as floats (decimal(3,1) in database)
         $score_fields = [
             'courage_score',
             'innovation_score',
@@ -347,7 +362,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         
         foreach ($score_fields as $field) {
             if (isset($data[$field]) && $data[$field] !== '') {
-                $prepared[$field] = intval($data[$field]);
+                $prepared[$field] = floatval($data[$field]); // Convert to float for decimal storage
             }
         }
         

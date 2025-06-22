@@ -74,6 +74,12 @@
         loadEvaluationForm: function(candidateId) {
             var self = this;
             
+            // Check if mt_ajax is available
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
+                self.showError('Security configuration error. Please refresh the page and try again.');
+                return;
+            }
+            
             // Show loading state
             var $container = $('.mt-jury-dashboard');
             $container.html('<div class="mt-loading">Loading evaluation form...</div>');
@@ -270,6 +276,12 @@
         },
         
         loadExistingEvaluation: function(candidateId) {
+            // Check if mt_ajax is available
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
+                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                return;
+            }
+            
             $.post(mt_ajax.url, {
                 action: 'mt_get_evaluation',
                 candidate_id: candidateId,
@@ -357,6 +369,12 @@
         submitEvaluation: function(e) {
             e.preventDefault();
             
+            // Check if mt_ajax is available
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
+                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                return;
+            }
+            
             var $form = $(this);
             var $submitBtn = $form.find('button[type="submit"]');
             
@@ -380,7 +398,7 @@
             
             var formData = $form.serializeArray();
             formData.push({ name: 'action', value: 'mt_submit_evaluation' });
-            formData.push({ name: 'nonce', value: $('#mt_nonce').val() });
+            formData.push({ name: 'nonce', value: mt_ajax.nonce });
             formData.push({ name: 'status', value: 'completed' });
             
             $.post(mt_ajax.url, formData)
@@ -421,6 +439,12 @@
         saveDraft: function(e) {
             e.preventDefault();
             
+            // Check if mt_ajax is available
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
+                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                return;
+            }
+            
             var $btn = $(this);
             var $form = $('#mt-evaluation-form');
             
@@ -429,7 +453,7 @@
             
             var formData = $form.serializeArray();
             formData.push({ name: 'action', value: 'mt_submit_evaluation' });
-            formData.push({ name: 'nonce', value: $('#mt_nonce').val() });
+            formData.push({ name: 'nonce', value: mt_ajax.nonce });
             formData.push({ name: 'status', value: 'draft' });
             
             $.post(mt_ajax.url, formData)
