@@ -334,12 +334,13 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         // Count completed evaluations
         $completed = 0;
         foreach ($assignments as $assignment) {
-            $evaluation = $evaluation_repo->get_by_jury_and_candidate(
-                $jury_member_id, 
-                $assignment->candidate_id
-            );
+            $evaluations = $evaluation_repo->find_all([
+                'jury_member_id' => $jury_member_id,
+                'candidate_id' => $assignment->candidate_id,
+                'limit' => 1
+            ]);
             
-            if ($evaluation && $evaluation->status === 'completed') {
+            if (!empty($evaluations) && $evaluations[0]->status === 'completed') {
                 $completed++;
             }
         }
