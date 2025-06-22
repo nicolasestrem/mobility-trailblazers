@@ -202,12 +202,18 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function exists($jury_member_id, $candidate_id) {
         global $wpdb;
         
-        $count = $wpdb->get_var($wpdb->prepare(
+        $query = $wpdb->prepare(
             "SELECT COUNT(*) FROM {$this->table_name} 
              WHERE jury_member_id = %d AND candidate_id = %d",
             $jury_member_id,
             $candidate_id
-        ));
+        );
+        
+        error_log('MT Assignment Repository - Checking assignment with query: ' . $query);
+        
+        $count = $wpdb->get_var($query);
+        
+        error_log('MT Assignment Repository - Assignment count: ' . $count . ' for jury_member_id=' . $jury_member_id . ', candidate_id=' . $candidate_id);
         
         return $count > 0;
     }

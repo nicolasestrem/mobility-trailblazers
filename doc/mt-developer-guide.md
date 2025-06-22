@@ -450,6 +450,161 @@ const MTAjax = {
 };
 ```
 
+## Form Submission Debugging
+
+### Common Issues and Solutions
+
+The jury evaluation form submission process has been optimized to handle several common issues that can occur with dynamically generated forms.
+
+#### 1. AJAX Response Data Structure
+
+**Issue**: Candidate data not being accessed correctly from AJAX response.
+
+**Problem**: The AJAX response structure has nested data:
+```javascript
+// Incorrect access
+response.data.id  // undefined
+
+// Correct access  
+response.data.data.id  // actual candidate ID
+```
+
+**Solution**: Always check the response structure and access data correctly:
+```javascript
+.done(function(response) {
+    if (response.success) {
+        // Handle nested data structure
+        var candidateData = response.data.data || response.data;
+        console.log('Candidate data:', candidateData);
+        self.displayEvaluationForm(candidateData);
+    }
+});
+```
+
+#### 2. Form Field Collection
+
+**Issue**: Form fields not being included in submission, especially hidden inputs.
+
+**Problem**: `serializeArray()` may not capture all fields in dynamically created forms.
+
+**Solution**: Use manual field collection:
+```javascript
+// Get form data including all fields
+var formData = {};
+
+// Add all form fields manually
+$form.find('input, textarea, select').each(function() {
+    var $field = $(this);
+    var name = $field.attr('name');
+    var value = $field.val();
+    
+    if (name && value !== undefined) {
+        formData[name] = value;
+    }
+});
+
+// Add required AJAX fields
+formData.action = 'mt_submit_evaluation';
+formData.nonce = mt_ajax.nonce;
+formData.status = 'completed';
+```
+
+#### 3. Form Selection Issues
+
+**Issue**: Form not being found after dynamic creation.
+
+**Problem**: jQuery selectors may not find dynamically inserted forms.
+
+**Solution**: Use multiple fallback selectors:
+```javascript
+// Try multiple selectors to find the form
+var $targetForm = $('#mt-evaluation-form');
+if ($targetForm.length === 0) {
+    $targetForm = $('.mt-evaluation-form');
+}
+if ($targetForm.length === 0) {
+    $targetForm = $form; // fallback to original reference
+}
+
+console.log('Target form found:', $targetForm.length);
+```
+
+#### 4. Debugging Form Submission
+
+**Add comprehensive logging**:
+```javascript
+// Debug form selection
+console.log('MT JS - Form element:', $form);
+console.log('MT JS - Form ID:', $form.attr('id'));
+console.log('MT JS - Form class:', $form.attr('class'));
+
+// Debug field collection
+var allFields = $targetForm.find('input, textarea, select');
+console.log('MT JS - Found form fields:', allFields.length);
+allFields.each(function(index) {
+    var $field = $(this);
+    var name = $field.attr('name');
+    var value = $field.val();
+    console.log('MT JS - Field ' + index + ':', name, '=', value);
+});
+
+// Debug final form data
+console.log('MT JS - Form data being sent:', formData);
+console.log('MT JS - Candidate ID in form data:', formData.candidate_id);
+```
+
+**Server-side debugging**:
+```php
+// In AJAX handler
+public function submit_evaluation() {
+    // Debug: Log raw POST data
+    error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
+    
+    // Debug: Check candidate_id specifically
+    $raw_candidate_id = $this->get_param('candidate_id');
+    error_log('MT AJAX - Raw candidate_id from POST: ' . var_export($raw_candidate_id, true));
+    $candidate_id = $this->get_int_param('candidate_id');
+    error_log('MT AJAX - Processed candidate_id: ' . $candidate_id);
+}
+```
+
+#### 5. Permission Error Troubleshooting
+
+**Common causes of "You do not have permission to evaluate this candidate"**:
+
+1. **Missing candidate_id**: Form not sending candidate_id field
+2. **Wrong candidate_id**: Form sending wrong or null candidate_id
+3. **Assignment mismatch**: Jury member not assigned to candidate
+4. **User role issues**: User doesn't have required capabilities
+
+**Debugging steps**:
+```php
+// Check jury member lookup
+$current_user_id = get_current_user_id();
+$jury_member = $this->get_jury_member_by_user_id($current_user_id);
+error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
+
+// Check assignment
+$assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+$has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);
+error_log('MT AJAX - Assignment check: jury_member_id=' . $jury_member->ID . ', candidate_id=' . $candidate_id . ', has_assignment=' . ($has_assignment ? 'true' : 'false'));
+
+// List all assignments for debugging
+$all_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
+foreach ($all_assignments as $assignment) {
+    error_log('MT AJAX - Assignment: jury_member_id=' . $assignment->jury_member_id . ', candidate_id=' . $assignment->candidate_id);
+}
+```
+
+### Best Practices
+
+1. **Always validate form data on both client and server side**
+2. **Use comprehensive logging for debugging dynamic forms**
+3. **Implement fallback selectors for form elements**
+4. **Test form submission with different user roles and scenarios**
+5. **Monitor WordPress debug log for server-side issues**
+6. **Use browser developer tools to inspect form data being sent**
+
 ## JavaScript Assets
 
 ### File Structure

@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers
  * Plugin URI: https://mobility-trailblazers.com
  * Description: Award management platform for recognizing mobility innovators in the DACH region
- * Version: 2.0.3
+ * Version: 2.0.5
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Mobility Trailblazers Team

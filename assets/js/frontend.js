@@ -64,6 +64,8 @@
             var $btn = $(this);
             var candidateId = $btn.data('candidate-id');
             
+            console.log('MT JS - Button clicked, candidate ID from data:', candidateId);
+            
             if (candidateId) {
                 this.loadEvaluationForm(candidateId);
             } else {
@@ -73,6 +75,8 @@
         
         loadEvaluationForm: function(candidateId) {
             var self = this;
+            
+            console.log('MT JS - Loading evaluation form for candidate ID:', candidateId);
             
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
@@ -91,8 +95,13 @@
                 nonce: mt_ajax.nonce
             })
             .done(function(response) {
+                console.log('MT JS - Candidate details response:', response);
                 if (response.success) {
-                    self.displayEvaluationForm(response.data);
+                    console.log('MT JS - Candidate data received:', response.data);
+                    // The candidate data is nested under response.data.data
+                    var candidateData = response.data.data || response.data;
+                    console.log('MT JS - Extracted candidate data:', candidateData);
+                    self.displayEvaluationForm(candidateData);
                     self.loadExistingEvaluation(candidateId);
                 } else {
                     self.showError(response.data.message);
@@ -104,6 +113,9 @@
         },
         
         displayEvaluationForm: function(candidate) {
+            console.log('MT JS - Displaying evaluation form for candidate:', candidate);
+            console.log('MT JS - Candidate ID being set in form:', candidate.id);
+            
             var formHtml = `
                 <div class="mt-evaluation-wrapper">
                     <div class="mt-candidate-details">
@@ -273,6 +285,10 @@
             `;
             
             $('.mt-jury-dashboard').html(formHtml);
+            
+            // Debug: Check the hidden input after form is created
+            var hiddenInput = $('input[name="candidate_id"]');
+            console.log('MT JS - Hidden input created with value:', hiddenInput.val());
         },
         
         loadExistingEvaluation: function(candidateId) {
@@ -378,6 +394,11 @@
             var $form = $(this);
             var $submitBtn = $form.find('button[type="submit"]');
             
+            // Debug: Check form selection
+            console.log('MT JS - Form element:', $form);
+            console.log('MT JS - Form ID:', $form.attr('id'));
+            console.log('MT JS - Form class:', $form.attr('class'));
+            
             // Validate scores
             var isValid = true;
             $('.mt-score-slider').each(function() {
@@ -396,10 +417,54 @@
             // Disable button and show loading
             $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Submitting...');
             
-            var formData = $form.serializeArray();
-            formData.push({ name: 'action', value: 'mt_submit_evaluation' });
-            formData.push({ name: 'nonce', value: mt_ajax.nonce });
-            formData.push({ name: 'status', value: 'completed' });
+            // Get form data including all fields
+            var formData = {};
+            
+            // Try multiple selectors to find the form
+            var $targetForm = $('#mt-evaluation-form');
+            if ($targetForm.length === 0) {
+                $targetForm = $('.mt-evaluation-form');
+            }
+            if ($targetForm.length === 0) {
+                $targetForm = $form;
+            }
+            
+            console.log('MT JS - Target form found:', $targetForm.length);
+            
+            // Debug: Check what fields are found
+            var allFields = $targetForm.find('input, textarea, select');
+            console.log('MT JS - Found form fields:', allFields.length);
+            allFields.each(function(index) {
+                var $field = $(this);
+                var name = $field.attr('name');
+                var value = $field.val();
+                console.log('MT JS - Field ' + index + ':', name, '=', value);
+            });
+            
+            // Add all form fields
+            $targetForm.find('input, textarea, select').each(function() {
+                var $field = $(this);
+                var name = $field.attr('name');
+                var value = $field.val();
+                
+                if (name && value !== undefined) {
+                    formData[name] = value;
+                }
+            });
+            
+            // Add required AJAX fields
+            formData.action = 'mt_submit_evaluation';
+            formData.nonce = mt_ajax.nonce;
+            formData.status = 'completed';
+            
+            // Debug: Log form data being sent
+            console.log('MT JS - Form data being sent:', formData);
+            console.log('MT JS - Candidate ID in form data:', formData.candidate_id);
+            
+            // Debug: Manually check the hidden input value
+            var hiddenInput = $('input[name="candidate_id"]');
+            console.log('MT JS - Hidden input value before submission:', hiddenInput.val());
+            console.log('MT JS - Hidden input exists:', hiddenInput.length > 0);
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
@@ -448,13 +513,34 @@
             var $btn = $(this);
             var $form = $('#mt-evaluation-form');
             
+            // Try multiple selectors to find the form
+            if ($form.length === 0) {
+                $form = $('.mt-evaluation-form');
+            }
+            
+            console.log('MT JS - Save draft - Target form found:', $form.length);
+            
             // Disable button and show loading
             $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Saving...');
             
-            var formData = $form.serializeArray();
-            formData.push({ name: 'action', value: 'mt_submit_evaluation' });
-            formData.push({ name: 'nonce', value: mt_ajax.nonce });
-            formData.push({ name: 'status', value: 'draft' });
+            // Get form data including all fields
+            var formData = {};
+            
+            // Add all form fields
+            $form.find('input, textarea, select').each(function() {
+                var $field = $(this);
+                var name = $field.attr('name');
+                var value = $field.val();
+                
+                if (name && value !== undefined) {
+                    formData[name] = value;
+                }
+            });
+            
+            // Add required AJAX fields
+            formData.action = 'mt_submit_evaluation';
+            formData.nonce = mt_ajax.nonce;
+            formData.status = 'draft';
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {

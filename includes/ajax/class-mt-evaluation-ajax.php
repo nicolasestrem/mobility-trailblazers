@@ -45,8 +45,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $this->verify_nonce();
         $this->check_permission('mt_submit_evaluations');
         
+        // Debug: Log raw POST data
+        error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
+        
         // Get current user as jury member
         $current_user_id = get_current_user_id();
+        error_log('MT AJAX - Current user ID: ' . $current_user_id);
+        
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
@@ -62,10 +67,16 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $status = 'completed';
         }
         
+        // Debug: Check candidate_id specifically
+        $raw_candidate_id = $this->get_param('candidate_id');
+        error_log('MT AJAX - Raw candidate_id from POST: ' . var_export($raw_candidate_id, true));
+        $candidate_id = $this->get_int_param('candidate_id');
+        error_log('MT AJAX - Processed candidate_id: ' . $candidate_id);
+        
         // Prepare evaluation data
         $data = [
             'jury_member_id' => $jury_member->ID,
-            'candidate_id' => $this->get_int_param('candidate_id'),
+            'candidate_id' => $candidate_id,
             'courage_score' => $this->get_float_param('courage_score'),
             'innovation_score' => $this->get_float_param('innovation_score'),
             'implementation_score' => $this->get_float_param('implementation_score'),
@@ -75,11 +86,20 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'status' => $status
         ];
         
+        error_log('MT AJAX - Evaluation data prepared: ' . print_r($data, true));
+        
         // Debug: Check if assignment exists
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
         $has_assignment = $assignment_repo->exists($jury_member->ID, $data['candidate_id']);
         
         error_log('MT AJAX - Assignment check: jury_member_id=' . $jury_member->ID . ', candidate_id=' . $data['candidate_id'] . ', has_assignment=' . ($has_assignment ? 'true' : 'false'));
+        
+        // Debug: Let's also check what assignments exist for this jury member
+        $all_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
+        error_log('MT AJAX - All assignments for jury member ' . $jury_member->ID . ': ' . count($all_assignments));
+        foreach ($all_assignments as $assignment) {
+            error_log('MT AJAX - Assignment: jury_member_id=' . $assignment->jury_member_id . ', candidate_id=' . $assignment->candidate_id);
+        }
         
         if (!$has_assignment) {
             $this->error(__('You do not have permission to evaluate this candidate. Please contact an administrator.', 'mobility-trailblazers'));
@@ -288,16 +308,45 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return WP_Post|null
      */
     private function get_jury_member_by_user_id($user_id) {
-        $args = [
+        // Try different meta keys that might be used
+        $meta_keys = ['_mt_user_id', 'mt_user_id', 'user_id', '_user_id'];
+        
+        foreach ($meta_keys as $meta_key) {
+            $args = [
+                'post_type' => 'mt_jury_member',
+                'meta_key' => $meta_key,
+                'meta_value' => $user_id,
+                'posts_per_page' => 1,
+                'post_status' => 'publish'
+            ];
+            
+            error_log('MT AJAX - Trying meta key "' . $meta_key . '" with args: ' . print_r($args, true));
+            
+            $jury_members = get_posts($args);
+            
+            error_log('MT AJAX - Found ' . count($jury_members) . ' jury members for user ' . $user_id . ' with meta key "' . $meta_key . '"');
+            
+            if (!empty($jury_members)) {
+                error_log('MT AJAX - Jury member found with meta key "' . $meta_key . '": ID=' . $jury_members[0]->ID . ', Title=' . $jury_members[0]->post_title);
+                return $jury_members[0];
+            }
+        }
+        
+        // If no jury member found with any meta key, let's check what meta keys exist
+        error_log('MT AJAX - No jury member found with any meta key for user ' . $user_id);
+        
+        // Get all jury members and check their meta
+        $all_jury_members = get_posts([
             'post_type' => 'mt_jury_member',
-            'meta_key' => '_mt_user_id',
-            'meta_value' => $user_id,
-            'posts_per_page' => 1,
-            'post_status' => 'publish'
-        ];
+            'posts_per_page' => 5,
+            'post_status' => 'any'
+        ]);
         
-        $jury_members = get_posts($args);
+        foreach ($all_jury_members as $jm) {
+            $all_meta = get_post_meta($jm->ID);
+            error_log('MT AJAX - Jury member ' . $jm->ID . ' (' . $jm->post_title . ') meta: ' . print_r($all_meta, true));
+        }
         
-        return !empty($jury_members) ? $jury_members[0] : null;
+        return null;
     }
 } 

@@ -5,6 +5,34 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2025-06-22
+
+### Fixed
+- **Jury Evaluation Form Submission**: Fixed "You do not have permission to evaluate this candidate" errors
+  - **AJAX Response Data Structure**: Fixed nested data structure issue where candidate data was under `response.data.data` instead of `response.data`
+  - **Form Data Collection**: Replaced `serializeArray()` with manual field collection to ensure all form fields are included
+  - **Form Selection**: Implemented robust form selection using multiple selectors (`#mt-evaluation-form`, `.mt-evaluation-form`) to handle dynamically created forms
+  - **Hidden Input Field**: Fixed candidate_id hidden input not being included in form submission
+  - **Score Fields**: Ensured all evaluation score fields (courage_score, innovation_score, etc.) are properly collected and submitted
+  - **Comments Field**: Fixed textarea comments field not being included in submission
+
+### Technical Details
+- **Data Structure Fix**: JavaScript now correctly accesses candidate data from `response.data.data` instead of `response.data`
+- **Form Field Collection**: Manual iteration through all form fields (`input`, `textarea`, `select`) ensures no fields are missed
+- **Form Selection Strategy**: Multiple fallback selectors prevent form not found issues with dynamically generated content
+- **Debug Logging**: Added comprehensive console logging to track form data collection and submission process
+- **Error Prevention**: Form validation now works correctly with proper field collection
+
+### Files Modified
+- `assets/js/frontend.js` - Complete form submission overhaul with robust field collection
+- `includes/ajax/class-mt-evaluation-ajax.php` - Added debugging for POST data analysis
+
+### Impact
+- Jury members can now successfully submit evaluations without permission errors
+- All form fields (scores, comments, candidate_id) are properly included in submissions
+- Draft saving functionality works correctly
+- Form submission is now reliable and consistent
+
 ## [2.0.4] - 2025-06-21
 
 ### Fixed
