@@ -429,6 +429,45 @@ class MT_Admin {
             return;
         }
         
+        // Enqueue admin CSS and JS
+        wp_enqueue_style(
+            'mt-admin',
+            MT_PLUGIN_URL . 'assets/css/admin.css',
+            [],
+            MT_VERSION
+        );
+        
+        wp_enqueue_script(
+            'mt-admin',
+            MT_PLUGIN_URL . 'assets/js/admin.js',
+            ['jquery'],
+            MT_VERSION,
+            true
+        );
+        
+        // Localize script for AJAX and internationalization
+        wp_localize_script('mt-admin', 'mt_admin', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mt_admin_nonce'),
+            'admin_url' => admin_url(),
+            'i18n' => array(
+                'confirm_remove_assignment' => __('Are you sure you want to remove this assignment?', 'mobility-trailblazers'),
+                'assignment_removed' => __('Assignment removed successfully.', 'mobility-trailblazers'),
+                'error_occurred' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
+                'no_assignments' => __('No assignments yet', 'mobility-trailblazers'),
+                'processing' => __('Processing...', 'mobility-trailblazers'),
+                'select_jury_and_candidates' => __('Please select a jury member and at least one candidate.', 'mobility-trailblazers'),
+                'assignments_created' => __('Assignments created successfully.', 'mobility-trailblazers'),
+                'assign_selected' => __('Assign Selected', 'mobility-trailblazers'),
+                'confirm_clear_all' => __('Are you sure you want to clear ALL assignments? This cannot be undone.', 'mobility-trailblazers'),
+                'confirm_clear_all_second' => __('This will remove ALL jury assignments. Are you absolutely sure?', 'mobility-trailblazers'),
+                'clearing' => __('Clearing...', 'mobility-trailblazers'),
+                'clear_all' => __('Clear All', 'mobility-trailblazers'),
+                'all_assignments_cleared' => __('All assignments have been cleared.', 'mobility-trailblazers'),
+                'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
+            )
+        ));
+        
         // Chart.js for statistics
         if (in_array($hook, ['toplevel_page_mobility-trailblazers', 'mobility-trailblazers_page_mt-evaluations'])) {
             wp_enqueue_script(

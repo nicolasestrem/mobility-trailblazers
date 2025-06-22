@@ -330,4 +330,361 @@
         };
     };
 
+    /**
+     * Assignment Management Module
+     */
+    const MTAssignmentManager = {
+        init: function() {
+            this.bindEvents();
+            this.initializeModals();
+            this.initializeFilters();
+        },
+        
+        bindEvents: function() {
+            // Auto-assign button
+            $('#mt-auto-assign-btn').on('click', () => this.showAutoAssignModal());
+            
+            // Manual assign button
+            $('#mt-manual-assign-btn').on('click', () => this.showManualAssignModal());
+            
+            // Clear all button
+            $('#mt-clear-all-btn').on('click', () => this.confirmClearAll());
+            
+            // Export button
+            $('#mt-export-btn').on('click', () => this.exportAssignments());
+            
+            // Remove assignment buttons
+            $(document).on('click', '.mt-remove-assignment', (e) => {
+                e.preventDefault();
+                this.removeAssignment($(e.currentTarget));
+            });
+            
+            // View details buttons
+            $(document).on('click', '.mt-view-details', (e) => {
+                e.preventDefault();
+                this.viewJuryDetails($(e.currentTarget).data('jury-id'));
+            });
+            
+            // Add assignment buttons
+            $(document).on('click', '.mt-add-assignment', (e) => {
+                e.preventDefault();
+                this.quickAddAssignment($(e.currentTarget).data('jury-id'));
+            });
+            
+            // Manual assignment form
+            $('#mt-manual-assignment-form').on('submit', (e) => {
+                e.preventDefault();
+                this.submitManualAssignment();
+            });
+            
+            // Modal close buttons
+            $('.mt-modal-close').on('click', () => this.closeModals());
+            
+            // Click outside modal to close
+            $('.mt-modal').on('click', (e) => {
+                if ($(e.target).hasClass('mt-modal')) {
+                    this.closeModals();
+                }
+            });
+        },
+        
+        initializeModals: function() {
+            // Initialize modal functionality
+            this.modals = {
+                autoAssign: $('#mt-auto-assign-modal'),
+                manualAssign: $('#mt-manual-assign-modal')
+            };
+        },
+        
+        initializeFilters: function() {
+            // Search functionality
+            $('#mt-search-assignments').on('keyup', debounce((e) => {
+                this.filterAssignments($(e.target).val());
+            }, 300));
+            
+            // Status filter
+            $('#mt-filter-status').on('change', () => this.applyFilters());
+            
+            // Category filter
+            $('#mt-filter-category').on('change', () => this.applyFilters());
+        },
+        
+        showAutoAssignModal: function() {
+            this.modals.autoAssign.addClass('active');
+        },
+        
+        showManualAssignModal: function() {
+            this.modals.manualAssign.addClass('active');
+        },
+        
+        closeModals: function() {
+            $('.mt-modal').removeClass('active');
+        },
+        
+        removeAssignment: function($button) {
+            const assignmentId = $button.closest('.mt-assignment-item').data('assignment-id');
+            
+            if (!confirm(mt_admin.i18n.confirm_remove_assignment)) {
+                return;
+            }
+            
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_delete_assignment',
+                    nonce: mt_admin.nonce,
+                    assignment_id: assignmentId
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.handleRemoveSuccess($button);
+                        this.showNotification(mt_admin.i18n.assignment_removed, 'success');
+                    } else {
+                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                    }
+                },
+                error: () => {
+                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                },
+                complete: () => {
+                    $button.prop('disabled', false);
+                }
+            });
+        },
+        
+        handleRemoveSuccess: function($button) {
+            const $item = $button.closest('.mt-assignment-item');
+            const $card = $button.closest('.mt-jury-card');
+            
+            $item.fadeOut(300, () => {
+                $item.remove();
+                this.updateJuryCardStats($card);
+            });
+        },
+        
+        updateJuryCardStats: function($card) {
+            const assignmentCount = $card.find('.mt-assignment-item').length;
+            $card.find('.mt-assignment-count').text(assignmentCount);
+            
+            if (assignmentCount === 0) {
+                $card.find('.mt-assignment-list').html(
+                    '<p class="mt-no-assignments">' + mt_admin.i18n.no_assignments + '</p>'
+                );
+            }
+            
+            // Update progress bar
+            const totalCandidates = parseInt($('.mt-stat-card:first .mt-stat-number').text());
+            const percentage = totalCandidates > 0 ? Math.round((assignmentCount / totalCandidates) * 100) : 0;
+            $card.find('.mt-progress-fill').css('width', percentage + '%');
+            $card.find('.mt-progress-text').text(percentage + '%');
+        },
+        
+        submitManualAssignment: function() {
+            const $form = $('#mt-manual-assignment-form');
+            const juryMemberId = $('#manual_jury_member').val();
+            const candidateIds = $('input[name="candidate_ids[]"]:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            if (!juryMemberId || candidateIds.length === 0) {
+                this.showNotification(mt_admin.i18n.select_jury_and_candidates, 'error');
+                return;
+            }
+            
+            $form.find('button[type="submit"]').prop('disabled', true).text(mt_admin.i18n.processing);
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_bulk_create_assignments',
+                    nonce: mt_admin.nonce,
+                    jury_member_id: juryMemberId,
+                    candidate_ids: candidateIds
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.showNotification(mt_admin.i18n.assignments_created, 'success');
+                        this.closeModals();
+                        // Reload page to show new assignments
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                    }
+                },
+                error: () => {
+                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                },
+                complete: () => {
+                    $form.find('button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.assign_selected);
+                }
+            });
+        },
+        
+        confirmClearAll: function() {
+            if (!confirm(mt_admin.i18n.confirm_clear_all)) {
+                return;
+            }
+            
+            // Double confirmation for safety
+            if (!confirm(mt_admin.i18n.confirm_clear_all_second)) {
+                return;
+            }
+            
+            this.clearAllAssignments();
+        },
+        
+        clearAllAssignments: function() {
+            const $button = $('#mt-clear-all-btn');
+            $button.prop('disabled', true).text(mt_admin.i18n.clearing);
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_clear_all_assignments',
+                    nonce: mt_admin.nonce
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.showNotification(mt_admin.i18n.all_assignments_cleared, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        this.showNotification(response.data.message || mt_admin.i18n.error_occurred, 'error');
+                    }
+                },
+                error: () => {
+                    this.showNotification(mt_admin.i18n.error_occurred, 'error');
+                },
+                complete: () => {
+                    $button.prop('disabled', false).text(mt_admin.i18n.clear_all);
+                }
+            });
+        },
+        
+        exportAssignments: function() {
+            // Create a form and submit it to trigger download
+            const $form = $('<form>', {
+                action: mt_admin.ajax_url,
+                method: 'POST'
+            });
+            
+            $form.append($('<input>', {
+                type: 'hidden',
+                name: 'action',
+                value: 'mt_export_assignments'
+            }));
+            
+            $form.append($('<input>', {
+                type: 'hidden',
+                name: 'nonce',
+                value: mt_admin.nonce
+            }));
+            
+            $form.appendTo('body').submit().remove();
+            
+            this.showNotification(mt_admin.i18n.export_started, 'success');
+        },
+        
+        filterAssignments: function(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            
+            $('.mt-jury-card').each(function() {
+                const $card = $(this);
+                const juryName = $card.find('h3').text().toLowerCase();
+                const email = $card.find('.mt-jury-email').text().toLowerCase();
+                const candidates = $card.find('.mt-candidate-link').map(function() {
+                    return $(this).text().toLowerCase();
+                }).get().join(' ');
+                
+                if (juryName.includes(term) || email.includes(term) || candidates.includes(term)) {
+                    $card.show();
+                } else {
+                    $card.hide();
+                }
+            });
+        },
+        
+        applyFilters: function() {
+            const status = $('#mt-filter-status').val();
+            const category = $('#mt-filter-category').val();
+            
+            $('.mt-jury-card').each(function() {
+                const $card = $(this);
+                let show = true;
+                
+                // Status filter
+                if (status) {
+                    const assignmentCount = parseInt($card.find('.mt-assignment-count').text());
+                    const totalCandidates = parseInt($('.mt-stat-card:first .mt-stat-number').text());
+                    
+                    if (status === 'complete' && assignmentCount < totalCandidates) show = false;
+                    if (status === 'partial' && (assignmentCount === 0 || assignmentCount >= totalCandidates)) show = false;
+                    if (status === 'none' && assignmentCount > 0) show = false;
+                }
+                
+                // Category filter would need additional data attributes
+                
+                $card.toggle(show);
+            });
+        },
+        
+        viewJuryDetails: function(juryId) {
+            // Navigate to jury member detail page
+            window.location.href = mt_admin.admin_url + 'post.php?post=' + juryId + '&action=edit';
+        },
+        
+        quickAddAssignment: function(juryId) {
+            // Pre-select jury member in manual assignment modal
+            $('#manual_jury_member').val(juryId);
+            this.showManualAssignModal();
+        },
+        
+        showNotification: function(message, type = 'info') {
+            const $notification = $('<div>', {
+                class: 'notice notice-' + type + ' is-dismissible mt-notification',
+                html: '<p>' + message + '</p>'
+            });
+            
+            $('.wrap h1').after($notification);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+            
+            // Make dismissible
+            $notification.on('click', '.notice-dismiss', function() {
+                $notification.fadeOut(300, function() {
+                    $(this).remove();
+                });
+            });
+        }
+    };
+    
+    // Debounce function for search
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Initialize Assignment Manager on document ready
+    $(document).ready(function() {
+        if ($('.mt-assignment-grid').length > 0) {
+            MTAssignmentManager.init();
+        }
+    });
+
 })(jQuery); 

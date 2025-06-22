@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Assignments Page Template
+ * Admin Assignments Page Template - Enhanced Version
  *
  * @package MobilityTrailblazers
  * @since 2.0.0
@@ -11,9 +11,42 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get assignment repository
+// Get assignment repository and service
 $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
 $assignment_service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
+
+// Get statistics
+$total_candidates = wp_count_posts('mt_candidate')->publish;
+$total_jury = wp_count_posts('mt_jury_member')->publish;
+$total_assignments = $assignment_repo->count();
+$average_per_jury = $total_jury > 0 ? round($total_assignments / $total_jury, 1) : 0;
+
+// Get all candidates and jury members
+$candidates = get_posts(array(
+    'post_type' => 'mt_candidate',
+    'posts_per_page' => -1,
+    'orderby' => 'title',
+    'order' => 'ASC',
+    'post_status' => 'publish'
+));
+
+$jury_members = get_posts(array(
+    'post_type' => 'mt_jury_member',
+    'posts_per_page' => -1,
+    'orderby' => 'title',
+    'order' => 'ASC',
+    'post_status' => 'publish'
+));
+
+// Get assignments grouped by jury member
+$assignments_by_jury = array();
+$all_assignments = $assignment_repo->find_all();
+foreach ($all_assignments as $assignment) {
+    if (!isset($assignments_by_jury[$assignment->jury_member_id])) {
+        $assignments_by_jury[$assignment->jury_member_id] = array();
+    }
+    $assignments_by_jury[$assignment->jury_member_id][] = $assignment;
+}
 
 // Handle form submissions
 if (isset($_POST['action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignments')) {
@@ -30,237 +63,235 @@ if (isset($_POST['action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_assignmen
         }
     }
 }
-
-// Get all assignments
-$assignments = $assignment_repo->find_all();
-
-// Get jury members and candidates
-$jury_members = get_posts([
-    'post_type' => 'mt_jury_member',
-    'posts_per_page' => -1,
-    'orderby' => 'title',
-    'order' => 'ASC'
-]);
-
-$candidates = get_posts([
-    'post_type' => 'mt_candidate',
-    'posts_per_page' => -1,
-    'orderby' => 'title',
-    'order' => 'ASC'
-]);
-
-// Group assignments by jury member
-$assignments_by_jury = [];
-foreach ($assignments as $assignment) {
-    if (!isset($assignments_by_jury[$assignment->jury_member_id])) {
-        $assignments_by_jury[$assignment->jury_member_id] = [];
-    }
-    $assignments_by_jury[$assignment->jury_member_id][] = $assignment;
-}
 ?>
 
 <div class="wrap">
-    <h1 class="wp-heading-inline"><?php _e('Jury Assignments', 'mobility-trailblazers'); ?></h1>
+    <h1><?php _e('Assignment Management', 'mobility-trailblazers'); ?></h1>
     
-    <hr class="wp-header-end">
+    <!-- Statistics Dashboard -->
+    <div class="mt-stats-dashboard">
+        <div class="mt-stat-card">
+            <div class="mt-stat-icon">
+                <span class="dashicons dashicons-groups"></span>
+            </div>
+            <div class="mt-stat-content">
+                <h3><?php _e('Total Candidates', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-number"><?php echo esc_html($total_candidates); ?></p>
+            </div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-icon">
+                <span class="dashicons dashicons-businessperson"></span>
+            </div>
+            <div class="mt-stat-content">
+                <h3><?php _e('Jury Members', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-number"><?php echo esc_html($total_jury); ?></p>
+            </div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-icon">
+                <span class="dashicons dashicons-admin-links"></span>
+            </div>
+            <div class="mt-stat-content">
+                <h3><?php _e('Total Assignments', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-number"><?php echo esc_html($total_assignments); ?></p>
+            </div>
+        </div>
+        <div class="mt-stat-card">
+            <div class="mt-stat-icon">
+                <span class="dashicons dashicons-chart-pie"></span>
+            </div>
+            <div class="mt-stat-content">
+                <h3><?php _e('Avg. per Jury', 'mobility-trailblazers'); ?></h3>
+                <p class="mt-stat-number"><?php echo esc_html($average_per_jury); ?></p>
+            </div>
+        </div>
+    </div>
     
-    <!-- Auto-Assignment Form -->
-    <div class="card">
-        <h2><?php _e('Auto-Assignment', 'mobility-trailblazers'); ?></h2>
+    <!-- Action Bar -->
+    <div class="mt-action-bar">
+        <button id="mt-auto-assign-btn" class="button button-primary">
+            <span class="dashicons dashicons-randomize"></span>
+            <?php _e('Auto-Assign', 'mobility-trailblazers'); ?>
+        </button>
+        <button id="mt-manual-assign-btn" class="button">
+            <span class="dashicons dashicons-plus-alt"></span>
+            <?php _e('Manual Assignment', 'mobility-trailblazers'); ?>
+        </button>
+        <button id="mt-bulk-actions-btn" class="button">
+            <span class="dashicons dashicons-admin-generic"></span>
+            <?php _e('Bulk Actions', 'mobility-trailblazers'); ?>
+        </button>
+        <button id="mt-export-btn" class="button">
+            <span class="dashicons dashicons-download"></span>
+            <?php _e('Export', 'mobility-trailblazers'); ?>
+        </button>
+        <?php if (current_user_can('manage_options')) : ?>
+        <button id="mt-clear-all-btn" class="button button-link-delete">
+            <span class="dashicons dashicons-trash"></span>
+            <?php _e('Clear All', 'mobility-trailblazers'); ?>
+        </button>
+        <?php endif; ?>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="mt-filters-row">
+        <div class="mt-search-box">
+            <input type="text" id="mt-search-assignments" placeholder="<?php esc_attr_e('Search jury members or candidates...', 'mobility-trailblazers'); ?>" />
+        </div>
+        <div class="mt-filter-box">
+            <select id="mt-filter-status">
+                <option value=""><?php _e('All Status', 'mobility-trailblazers'); ?></option>
+                <option value="complete"><?php _e('Complete', 'mobility-trailblazers'); ?></option>
+                <option value="partial"><?php _e('Partial', 'mobility-trailblazers'); ?></option>
+                <option value="none"><?php _e('No Assignments', 'mobility-trailblazers'); ?></option>
+            </select>
+        </div>
+        <div class="mt-filter-box">
+            <select id="mt-filter-category">
+                <option value=""><?php _e('All Categories', 'mobility-trailblazers'); ?></option>
+                <?php
+                $categories = get_terms(array(
+                    'taxonomy' => 'mt_category',
+                    'hide_empty' => false
+                ));
+                foreach ($categories as $category) {
+                    echo '<option value="' . esc_attr($category->slug) . '">' . esc_html($category->name) . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Assignment Grid -->
+    <div class="mt-assignment-grid">
+        <?php foreach ($jury_members as $jury) : 
+            $jury_assignments = isset($assignments_by_jury[$jury->ID]) ? $assignments_by_jury[$jury->ID] : [];
+            $user = get_user_by('ID', get_post_meta($jury->ID, '_mt_user_id', true));
+            $completion_rate = $total_candidates > 0 ? round((count($jury_assignments) / $total_candidates) * 100) : 0;
+        ?>
+        <div class="mt-jury-card" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
+            <div class="mt-jury-header">
+                <div class="mt-jury-info">
+                    <h3><?php echo esc_html($jury->post_title); ?></h3>
+                    <?php if ($user) : ?>
+                    <p class="mt-jury-email"><?php echo esc_html($user->user_email); ?></p>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-jury-stats">
+                    <span class="mt-assignment-count"><?php echo count($jury_assignments); ?></span>
+                    <span class="mt-assignment-label"><?php _e('assignments', 'mobility-trailblazers'); ?></span>
+                </div>
+            </div>
+            
+            <div class="mt-progress-bar">
+                <div class="mt-progress-fill" style="width: <?php echo $completion_rate; ?>%"></div>
+                <span class="mt-progress-text"><?php echo $completion_rate; ?>%</span>
+            </div>
+            
+            <div class="mt-jury-assignments">
+                <?php if (!empty($jury_assignments)) : ?>
+                    <div class="mt-assignment-list">
+                        <?php foreach (array_slice($jury_assignments, 0, 5) as $assignment) : 
+                            $candidate = get_post($assignment->candidate_id);
+                            if ($candidate) :
+                        ?>
+                        <div class="mt-assignment-item" data-assignment-id="<?php echo esc_attr($assignment->id); ?>">
+                            <a href="<?php echo get_edit_post_link($candidate->ID); ?>" class="mt-candidate-link">
+                                <?php echo esc_html($candidate->post_title); ?>
+                            </a>
+                            <button class="mt-remove-assignment" title="<?php esc_attr_e('Remove assignment', 'mobility-trailblazers'); ?>">
+                                <span class="dashicons dashicons-no"></span>
+                            </button>
+                        </div>
+                        <?php endif; endforeach; ?>
+                    </div>
+                    <?php if (count($jury_assignments) > 5) : ?>
+                    <p class="mt-more-assignments">
+                        <?php printf(__('and %d more...', 'mobility-trailblazers'), count($jury_assignments) - 5); ?>
+                    </p>
+                    <?php endif; ?>
+                <?php else : ?>
+                    <p class="mt-no-assignments"><?php _e('No assignments yet', 'mobility-trailblazers'); ?></p>
+                <?php endif; ?>
+            </div>
+            
+            <div class="mt-jury-actions">
+                <button class="button button-small mt-view-details" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
+                    <?php _e('View Details', 'mobility-trailblazers'); ?>
+                </button>
+                <button class="button button-small mt-add-assignment" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
+                    <?php _e('Add', 'mobility-trailblazers'); ?>
+                </button>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- Auto-Assignment Modal -->
+<div id="mt-auto-assign-modal" class="mt-modal" style="display: none;">
+    <div class="mt-modal-content">
+        <h2><?php _e('Auto-Assignment Configuration', 'mobility-trailblazers'); ?></h2>
         <form method="post" action="">
             <?php wp_nonce_field('mt_assignments'); ?>
             <input type="hidden" name="action" value="auto_assign">
             
-            <table class="form-table">
-                <tr>
-                    <th scope="row">
-                        <label for="method"><?php _e('Assignment Method', 'mobility-trailblazers'); ?></label>
-                    </th>
-                    <td>
-                        <select name="method" id="method">
-                            <option value="balanced"><?php _e('Balanced (Equal distribution)', 'mobility-trailblazers'); ?></option>
-                            <option value="random"><?php _e('Random', 'mobility-trailblazers'); ?></option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">
-                        <label for="candidates_per_jury"><?php _e('Candidates per Jury Member', 'mobility-trailblazers'); ?></label>
-                    </th>
-                    <td>
-                        <input type="number" name="candidates_per_jury" id="candidates_per_jury" value="5" min="1" max="50">
-                        <p class="description"><?php _e('Number of candidates to assign to each jury member.', 'mobility-trailblazers'); ?></p>
-                    </td>
-                </tr>
-            </table>
+            <div class="mt-form-group">
+                <label for="assignment_method"><?php _e('Assignment Method', 'mobility-trailblazers'); ?></label>
+                <select name="method" id="assignment_method" class="widefat">
+                    <option value="balanced"><?php _e('Balanced - Equal distribution', 'mobility-trailblazers'); ?></option>
+                    <option value="random"><?php _e('Random - Random distribution', 'mobility-trailblazers'); ?></option>
+                </select>
+            </div>
             
-            <p class="submit">
+            <div class="mt-form-group">
+                <label for="candidates_per_jury"><?php _e('Candidates per Jury Member', 'mobility-trailblazers'); ?></label>
+                <input type="number" name="candidates_per_jury" id="candidates_per_jury" value="5" min="1" max="20" class="widefat">
+                <p class="description"><?php _e('Each jury member will evaluate this many candidates.', 'mobility-trailblazers'); ?></p>
+            </div>
+            
+            <div class="mt-modal-actions">
                 <button type="submit" class="button button-primary"><?php _e('Run Auto-Assignment', 'mobility-trailblazers'); ?></button>
-                <span class="description"><?php _e('Warning: This will replace all existing assignments!', 'mobility-trailblazers'); ?></span>
-            </p>
-        </form>
-    </div>
-    
-    <!-- Current Assignments -->
-    <div class="card">
-        <h2><?php _e('Current Assignments', 'mobility-trailblazers'); ?></h2>
-        
-        <?php if (!empty($jury_members)) : ?>
-            <?php foreach ($jury_members as $jury) : 
-                $jury_assignments = isset($assignments_by_jury[$jury->ID]) ? $assignments_by_jury[$jury->ID] : [];
-                $user = get_user_by('ID', get_post_meta($jury->ID, '_mt_user_id', true));
-            ?>
-                <div class="jury-assignments">
-                    <h3>
-                        <?php echo esc_html($jury->post_title); ?>
-                        <?php if ($user) : ?>
-                            <span class="description">(<?php echo esc_html($user->user_email); ?>)</span>
-                        <?php endif; ?>
-                        <span class="count"><?php echo count($jury_assignments); ?> <?php _e('candidates', 'mobility-trailblazers'); ?></span>
-                    </h3>
-                    
-                    <?php if (!empty($jury_assignments)) : ?>
-                        <ul class="candidate-list">
-                            <?php foreach ($jury_assignments as $assignment) : 
-                                $candidate = get_post($assignment->candidate_id);
-                                if ($candidate) :
-                            ?>
-                                <li>
-                                    <a href="<?php echo get_edit_post_link($candidate->ID); ?>">
-                                        <?php echo esc_html($candidate->post_title); ?>
-                                    </a>
-                                    <button class="button-link remove-assignment" 
-                                            data-assignment-id="<?php echo esc_attr($assignment->id); ?>"
-                                            style="color: #a00;">
-                                        <?php _e('Remove', 'mobility-trailblazers'); ?>
-                                    </button>
-                                </li>
-                            <?php endif; endforeach; ?>
-                        </ul>
-                    <?php else : ?>
-                        <p class="description"><?php _e('No candidates assigned.', 'mobility-trailblazers'); ?></p>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <p><?php _e('No jury members found. Please create jury members first.', 'mobility-trailblazers'); ?></p>
-        <?php endif; ?>
-    </div>
-    
-    <!-- Manual Assignment -->
-    <div class="card">
-        <h2><?php _e('Manual Assignment', 'mobility-trailblazers'); ?></h2>
-        <form id="manual-assignment-form">
-            <table class="form-table">
-                <tr>
-                    <th scope="row">
-                        <label for="jury_member_id"><?php _e('Jury Member', 'mobility-trailblazers'); ?></label>
-                    </th>
-                    <td>
-                        <select name="jury_member_id" id="jury_member_id" required>
-                            <option value=""><?php _e('Select Jury Member', 'mobility-trailblazers'); ?></option>
-                            <?php foreach ($jury_members as $jury) : ?>
-                                <option value="<?php echo esc_attr($jury->ID); ?>">
-                                    <?php echo esc_html($jury->post_title); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">
-                        <label for="candidate_id"><?php _e('Candidate', 'mobility-trailblazers'); ?></label>
-                    </th>
-                    <td>
-                        <select name="candidate_id" id="candidate_id" required>
-                            <option value=""><?php _e('Select Candidate', 'mobility-trailblazers'); ?></option>
-                            <?php foreach ($candidates as $candidate) : ?>
-                                <option value="<?php echo esc_attr($candidate->ID); ?>">
-                                    <?php echo esc_html($candidate->post_title); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                </tr>
-            </table>
-            
-            <p class="submit">
-                <button type="submit" class="button button-secondary"><?php _e('Add Assignment', 'mobility-trailblazers'); ?></button>
-            </p>
+                <button type="button" class="button mt-modal-close"><?php _e('Cancel', 'mobility-trailblazers'); ?></button>
+            </div>
         </form>
     </div>
 </div>
 
-<style>
-.jury-assignments {
-    margin-bottom: 30px;
-    padding: 15px;
-    background: #f1f1f1;
-    border-radius: 5px;
-}
-.jury-assignments h3 {
-    margin-top: 0;
-}
-.jury-assignments .count {
-    background: #2271b1;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    margin-left: 10px;
-}
-.candidate-list {
-    list-style: disc;
-    margin-left: 20px;
-}
-.candidate-list li {
-    margin: 5px 0;
-}
-</style>
-
-<script>
-jQuery(document).ready(function($) {
-    // Manual assignment
-    $('#manual-assignment-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        var data = {
-            action: 'mt_create_assignment',
-            nonce: '<?php echo wp_create_nonce('mt_assignment_nonce'); ?>',
-            jury_member_id: $('#jury_member_id').val(),
-            candidate_id: $('#candidate_id').val()
-        };
-        
-        $.post(ajaxurl, data, function(response) {
-            if (response.success) {
-                alert('Assignment created successfully!');
-                location.reload();
-            } else {
-                alert('Error: ' + response.data.message);
-            }
-        });
-    });
-    
-    // Remove assignment
-    $('.remove-assignment').on('click', function() {
-        if (!confirm('Are you sure you want to remove this assignment?')) {
-            return;
-        }
-        
-        var assignmentId = $(this).data('assignment-id');
-        var $button = $(this);
-        
-        $.post(ajaxurl, {
-            action: 'mt_delete_assignment',
-            nonce: '<?php echo wp_create_nonce('mt_assignment_nonce'); ?>',
-            assignment_id: assignmentId
-        }, function(response) {
-            if (response.success) {
-                $button.closest('li').fadeOut();
-            } else {
-                alert('Error: ' + response.data.message);
-            }
-        });
-    });
-});
-</script> 
+<!-- Manual Assignment Modal -->
+<div id="mt-manual-assign-modal" class="mt-modal" style="display: none;">
+    <div class="mt-modal-content">
+        <h2><?php _e('Manual Assignment', 'mobility-trailblazers'); ?></h2>
+        <form id="mt-manual-assignment-form">
+            <div class="mt-form-group">
+                <label for="manual_jury_member"><?php _e('Jury Member', 'mobility-trailblazers'); ?></label>
+                <select name="jury_member_id" id="manual_jury_member" class="widefat" required>
+                    <option value=""><?php _e('Select Jury Member', 'mobility-trailblazers'); ?></option>
+                    <?php foreach ($jury_members as $jury) : ?>
+                    <option value="<?php echo esc_attr($jury->ID); ?>">
+                        <?php echo esc_html($jury->post_title); ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="mt-form-group">
+                <label for="manual_candidates"><?php _e('Select Candidates', 'mobility-trailblazers'); ?></label>
+                <div class="mt-candidates-checklist">
+                    <?php foreach ($candidates as $candidate) : ?>
+                    <label class="mt-candidate-checkbox">
+                        <input type="checkbox" name="candidate_ids[]" value="<?php echo esc_attr($candidate->ID); ?>">
+                        <?php echo esc_html($candidate->post_title); ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="mt-modal-actions">
+                <button type="submit" class="button button-primary"><?php _e('Assign Selected', 'mobility-trailblazers'); ?></button>
+                <button type="button" class="button mt-modal-close"><?php _e('Cancel', 'mobility-trailblazers'); ?></button>
+            </div>
+        </form>
+    </div>
+</div>
