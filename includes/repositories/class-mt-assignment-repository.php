@@ -408,6 +408,46 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function clear_all() {
         global $wpdb;
         
-        return $wpdb->query("TRUNCATE TABLE {$this->table_name}") !== false;
+        return $wpdb->query("DELETE FROM {$this->table_name}") !== false;
+    }
+    
+    /**
+     * Count total assignments
+     *
+     * @param array $args Optional filter arguments
+     * @return int
+     */
+    public function count($args = []) {
+        global $wpdb;
+        
+        $defaults = [
+            'jury_member_id' => null,
+            'candidate_id' => null
+        ];
+        
+        $args = wp_parse_args($args, $defaults);
+        
+        // Build query
+        $where_clauses = ['1=1'];
+        $values = [];
+        
+        if ($args['jury_member_id'] !== null) {
+            $where_clauses[] = 'jury_member_id = %d';
+            $values[] = $args['jury_member_id'];
+        }
+        
+        if ($args['candidate_id'] !== null) {
+            $where_clauses[] = 'candidate_id = %d';
+            $values[] = $args['candidate_id'];
+        }
+        
+        $where = implode(' AND ', $where_clauses);
+        $query = "SELECT COUNT(*) FROM {$this->table_name} WHERE {$where}";
+        
+        if (!empty($values)) {
+            $query = $wpdb->prepare($query, $values);
+        }
+        
+        return (int) $wpdb->get_var($query);
     }
 } 
