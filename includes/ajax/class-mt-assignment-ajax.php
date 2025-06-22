@@ -39,6 +39,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_bulk_create_assignments', [$this, 'bulk_create_assignments']);
         add_action('wp_ajax_mt_clear_all_assignments', [$this, 'clear_all_assignments']);
         add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
+        add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign']);
     }
     
     /**
@@ -350,5 +351,38 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         fclose($output);
         exit;
+    }
+
+    /**
+     * Handle auto assignment AJAX request
+     *
+     * @return void
+     */
+    public function auto_assign() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            $this->send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
+        }
+        
+        // Get parameters
+        $method = $this->get_param('method', 'balanced');
+        $candidates_per_jury = $this->get_int_param('candidates_per_jury', 5);
+        
+        // Use the assignment service
+        $assignment_service = new MT_Assignment_Service();
+        $result = $assignment_service->auto_assign($method, $candidates_per_jury);
+        
+        if ($result) {
+            $this->send_json_success(__('Auto-assignment completed successfully.', 'mobility-trailblazers'));
+        } else {
+            $errors = $assignment_service->get_errors();
+            $message = !empty($errors) ? implode(', ', $errors) : __('Auto-assignment failed.', 'mobility-trailblazers');
+            $this->send_json_error($message);
+        }
     }
 } 

@@ -24,12 +24,11 @@ abstract class MT_Base_Ajax {
      * Verify nonce
      *
      * @param string $nonce_name Nonce name
-     * @return void
+     * @return bool
      */
     protected function verify_nonce($nonce_name = 'mt_ajax_nonce') {
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], $nonce_name)) {
-            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
-        }
+        $nonce = isset($_REQUEST['nonce']) ? $_REQUEST['nonce'] : '';
+        return wp_verify_nonce($nonce, $nonce_name);
     }
     
     /**
@@ -73,6 +72,26 @@ abstract class MT_Base_Ajax {
     }
     
     /**
+     * Send JSON success response
+     *
+     * @param mixed $data Response data
+     * @return void
+     */
+    protected function send_json_success($data = null) {
+        wp_send_json_success($data);
+    }
+    
+    /**
+     * Send JSON error response
+     *
+     * @param string $message Error message
+     * @return void
+     */
+    protected function send_json_error($message = '') {
+        wp_send_json_error($message);
+    }
+    
+    /**
      * Get POST parameter
      *
      * @param string $key Parameter key
@@ -80,7 +99,7 @@ abstract class MT_Base_Ajax {
      * @return mixed
      */
     protected function get_param($key, $default = null) {
-        return isset($_POST[$key]) ? $_POST[$key] : $default;
+        return isset($_REQUEST[$key]) ? sanitize_text_field($_REQUEST[$key]) : $default;
     }
     
     /**

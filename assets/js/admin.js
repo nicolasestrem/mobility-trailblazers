@@ -641,26 +641,40 @@ if (typeof mt_admin.i18n === 'undefined') {
         
         submitAutoAssignment: function() {
             const $form = $('#mt-auto-assign-modal form');
-            const formData = $form.serialize();
+            
+            // Get form values
+            const method = $('#assignment_method').val();
+            const candidatesPerJury = $('#candidates_per_jury').val();
             
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
-                data: formData + '&action=mt_auto_assign&nonce=' + mt_admin.nonce,
+                data: {
+                    action: 'mt_auto_assign',
+                    nonce: mt_admin.nonce,
+                    method: method,
+                    candidates_per_jury: candidatesPerJury
+                },
                 beforeSend: () => {
                     $form.find('button[type="submit"]').prop('disabled', true).text('Processing...');
                 },
                 success: (response) => {
                     if (response.success) {
-                        this.showNotification('Auto-assignment completed successfully.', 'success');
+                        this.showNotification(response.data || 'Auto-assignment completed successfully.', 'success');
                         this.closeModals();
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        this.showNotification(response.data?.message || 'An error occurred.', 'error');
+                        this.showNotification(response.data || 'An error occurred.', 'error');
                     }
                 },
-                error: () => {
-                    this.showNotification('Connection error. Please try again.', 'error');
+                error: (xhr, status, error) => {
+                    console.error('AJAX Error Details:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                    this.showNotification('Connection error. Please check console for details.', 'error');
                 },
                 complete: () => {
                     $form.find('button[type="submit"]').prop('disabled', false).text('Run Auto-Assignment');
