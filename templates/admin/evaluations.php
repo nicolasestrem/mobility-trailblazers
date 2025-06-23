@@ -130,7 +130,7 @@ $candidates = get_posts([
                             <?php endif; ?>
                         </td>
                         <td>
-                            <strong><?php echo esc_html($evaluation->total_score); ?></strong> / 10
+                            <strong><?php echo esc_html($evaluation->total_score); ?></strong> / 50
                         </td>
                         <td>
                             <span class="status-<?php echo esc_attr($evaluation->status); ?>">
