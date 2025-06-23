@@ -213,35 +213,54 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Handle bulk assignment creation
      */
     public function bulk_create_assignments() {
-        // Verify nonce
-        if (!$this->verify_nonce()) {
+        error_log('MT Manual Assignment: Method called');
+        error_log('POST data: ' . print_r($_POST, true));
+        
+        // Verify nonce - use mt_admin_nonce like other methods
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            error_log('MT Manual Assignment: Nonce verification failed');
             $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_assignments')) {
+            error_log('MT Manual Assignment: Permission check failed');
             $this->send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
+            return;
         }
         
         $jury_member_id = $this->get_int_param('jury_member_id');
-        $candidate_ids = $this->get_param('candidate_ids', array());
+        // Get the raw array from $_POST to avoid sanitization issues
+        $candidate_ids = isset($_POST['candidate_ids']) && is_array($_POST['candidate_ids']) 
+            ? array_map('intval', $_POST['candidate_ids']) 
+            : array();
+        
+        error_log('MT Manual Assignment: jury_member_id=' . $jury_member_id);
+        error_log('MT Manual Assignment: candidate_ids=' . print_r($candidate_ids, true));
         
         if (!$jury_member_id || empty($candidate_ids)) {
+            error_log('MT Manual Assignment: Invalid data - jury_member_id or candidate_ids empty');
             $this->send_json_error(__('Invalid data provided.', 'mobility-trailblazers'));
+            return;
         }
         
         $assignment_service = new MT_Assignment_Service();
+        $assignment_repo = new MT_Assignment_Repository();
         $created = 0;
         $errors = 0;
         
+        // Convert candidate_ids array to assignments array
+        $assignments = [];
         foreach ($candidate_ids as $candidate_id) {
-            $result = $assignment_service->create_assignment($jury_member_id, intval($candidate_id));
-            if ($result) {
-                $created++;
-            } else {
-                $errors++;
-            }
+            $assignments[] = [
+                'jury_member_id' => $jury_member_id,
+                'candidate_id' => intval($candidate_id)
+            ];
         }
+        
+        // Use bulk_create directly on repository
+        $created = $assignment_repo->bulk_create($assignments);
         
         if ($created > 0) {
             $message = sprintf(
@@ -249,6 +268,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 $created
             );
             
+            // Calculate errors
+            $errors = count($candidate_ids) - $created;
             if ($errors > 0) {
                 $message .= ' ' . sprintf(
                     __('%d assignments could not be created (may already exist).', 'mobility-trailblazers'),
@@ -258,7 +279,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             $this->send_json_success($message);
         } else {
-            $this->send_json_error(__('No assignments could be created.', 'mobility-trailblazers'));
+            $this->send_json_error(__('No assignments could be created. They may already exist.', 'mobility-trailblazers'));
         }
     }
 
@@ -266,14 +287,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Handle clearing all assignments
      */
     public function clear_all_assignments() {
-        // Verify nonce
-        if (!$this->verify_nonce()) {
+        // Verify nonce - use mt_admin_nonce like other methods
+        if (!$this->verify_nonce('mt_admin_nonce')) {
             $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            return;
         }
         
         // Check permissions - only administrators
         if (!current_user_can('manage_options')) {
             $this->send_json_error(__('Only administrators can clear all assignments.', 'mobility-trailblazers'));
+            return;
         }
         
         $assignment_repo = new MT_Assignment_Repository();
@@ -300,8 +323,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             wp_die(__('Security check failed.', 'mobility-trailblazers'));
         }
         
-        // Check permissions
-        if (!current_user_can('mt_export_data')) {
+        // Check permissions - use manage_options instead of mt_export_data
+        if (!current_user_can('manage_options')) {
             wp_die(__('You do not have permission to export data.', 'mobility-trailblazers'));
         }
         
@@ -334,20 +357,36 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             $candidate = get_post($assignment->candidate_id);
             $user = get_user_by('ID', get_post_meta($assignment->jury_member_id, '_mt_user_id', true));
             
+            // Get categories safely
+            $category_name = '';
             $categories = wp_get_post_terms($assignment->candidate_id, 'mt_category');
-            $category_name = !empty($categories) ? $categories[0]->name : '';
+            if (!is_wp_error($categories) && !empty($categories)) {
+                $category_name = $categories[0]->name;
+            }
             
             // Check if evaluation exists
             $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-            $evaluation = $evaluation_repo->get_by_jury_and_candidate($assignment->jury_member_id, $assignment->candidate_id);
+            // Use find_all with filters instead of get_by_jury_and_candidate
+            $evaluations = $evaluation_repo->find_all([
+                'jury_member_id' => $assignment->jury_member_id,
+                'candidate_id' => $assignment->candidate_id,
+                'limit' => 1
+            ]);
+            $evaluation = !empty($evaluations) ? $evaluations[0] : null;
             $status = $evaluation ? __('Completed', 'mobility-trailblazers') : __('Pending', 'mobility-trailblazers');
+            
+            // Format date safely
+            $assigned_date = '';
+            if (!empty($assignment->created_at)) {
+                $assigned_date = date('Y-m-d', strtotime($assignment->created_at));
+            }
             
             fputcsv($output, array(
                 $jury ? $jury->post_title : '',
                 $user ? $user->user_email : '',
                 $candidate ? $candidate->post_title : '',
                 $category_name,
-                date('Y-m-d', strtotime($assignment->created_at)),
+                $assigned_date,
                 $status
             ));
         }
@@ -384,21 +423,23 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         // Get active jury members
         $jury_args = [
-            'post_type' => 'mt_jury',
+            'post_type' => 'mt_jury_member',
             'post_status' => 'publish',
-            'numberposts' => -1,
-            'meta_query' => [
-                [
-                    'key' => '_mt_status',
-                    'value' => 'active',
-                    'compare' => '='
-                ]
-            ]
+            'numberposts' => -1
         ];
         $jury_members = get_posts($jury_args);
         
+        error_log('MT Auto Assign: Found ' . count($jury_members) . ' jury members');
+        
+        // Log jury member details for debugging
+        if (!empty($jury_members)) {
+            foreach ($jury_members as $jury) {
+                error_log('MT Auto Assign: Jury Member - ID: ' . $jury->ID . ', Title: ' . $jury->post_title);
+            }
+        }
+        
         if (empty($jury_members)) {
-            wp_send_json_error(__('No active jury members found.', 'mobility-trailblazers'));
+            wp_send_json_error(__('No jury members found.', 'mobility-trailblazers'));
             return;
         }
         
@@ -409,6 +450,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             'numberposts' => -1
         ];
         $candidates = get_posts($candidate_args);
+        
+        error_log('MT Auto Assign: Found ' . count($candidates) . ' candidates');
         
         if (empty($candidates)) {
             wp_send_json_error(__('No candidates found.', 'mobility-trailblazers'));
@@ -428,13 +471,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         // Perform assignment based on method
         if ($method === 'balanced') {
-            // Balanced distribution
+            // Balanced distribution - but respect the candidates_per_jury limit
             $jury_count = count($jury_members);
+            $total_to_assign = min(count($candidates), $jury_count * $candidates_per_jury);
             $candidate_index = 0;
             
-            foreach ($candidates as $candidate) {
-                $jury_index = $candidate_index % $jury_count;
+            // Only assign up to candidates_per_jury for each jury member
+            for ($i = 0; $i < $total_to_assign; $i++) {
+                $jury_index = $i % $jury_count;
                 $jury_member = $jury_members[$jury_index];
+                $candidate = $candidates[$i];
                 
                 // Check if assignment already exists
                 $existing = $assignment_repo->get_by_jury_and_candidate(
@@ -458,18 +504,20 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                         );
                     }
                 }
-                
-                $candidate_index++;
             }
         } else {
-            // Fixed number per jury
+            // Fixed number per jury (random selection)
+            // Shuffle candidates for random distribution
+            $shuffled_candidates = $candidates;
+            shuffle($shuffled_candidates);
+            $candidate_index = 0;
+            
             foreach ($jury_members as $jury_member) {
                 $assigned_count = 0;
                 
-                foreach ($candidates as $candidate) {
-                    if ($assigned_count >= $candidates_per_jury) {
-                        break;
-                    }
+                // Start from where we left off in the shuffled array
+                for ($i = $candidate_index; $i < count($shuffled_candidates) && $assigned_count < $candidates_per_jury; $i++) {
+                    $candidate = $shuffled_candidates[$i];
                     
                     // Check if assignment already exists
                     $existing = $assignment_repo->get_by_jury_and_candidate(
@@ -495,6 +543,9 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                         }
                     }
                 }
+                
+                // Move the index forward for the next jury member
+                $candidate_index += $assigned_count;
             }
         }
         

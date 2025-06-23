@@ -154,7 +154,11 @@ abstract class MT_Base_Ajax {
      * @return array
      */
     protected function get_array_param($key, $default = []) {
-        $value = $this->get_param($key, $default);
+        if (!isset($_REQUEST[$key])) {
+            return $default;
+        }
+        
+        $value = $_REQUEST[$key];
         return is_array($value) ? $value : $default;
     }
     

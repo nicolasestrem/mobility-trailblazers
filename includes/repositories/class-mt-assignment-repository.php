@@ -129,6 +129,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         
         $data = wp_parse_args($data, $defaults);
         
+        // Log the data being inserted
+        error_log('MT Assignment Repository - Creating assignment with data: ' . print_r($data, true));
+        
         // Generate format specifiers dynamically
         $formats = [];
         foreach ($data as $key => $value) {
@@ -144,6 +147,12 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             $data,
             $formats
         );
+        
+        if ($result === false) {
+            error_log('MT Assignment Repository - Insert failed. Last error: ' . $wpdb->last_error);
+        } else {
+            error_log('MT Assignment Repository - Insert successful. ID: ' . $wpdb->insert_id);
+        }
         
         return $result ? $wpdb->insert_id : false;
     }

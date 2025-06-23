@@ -154,10 +154,12 @@ function testAjax() {
             <span class="dashicons dashicons-plus-alt"></span>
             <?php _e('Manual Assignment', 'mobility-trailblazers'); ?>
         </button>
+        <?php /* Bulk Actions - Not implemented yet
         <button id="mt-bulk-actions-btn" class="button">
             <span class="dashicons dashicons-admin-generic"></span>
             <?php _e('Bulk Actions', 'mobility-trailblazers'); ?>
         </button>
+        */ ?>
         <button id="mt-export-btn" class="button">
             <span class="dashicons dashicons-download"></span>
             <?php _e('Export', 'mobility-trailblazers'); ?>
@@ -281,9 +283,10 @@ function testAjax() {
             <div class="mt-form-group">
                 <label for="assignment_method"><?php _e('Assignment Method', 'mobility-trailblazers'); ?></label>
                 <select name="method" id="assignment_method" class="widefat">
-                    <option value="balanced"><?php _e('Balanced - Equal distribution', 'mobility-trailblazers'); ?></option>
-                    <option value="random"><?php _e('Random - Random distribution', 'mobility-trailblazers'); ?></option>
+                    <option value="balanced"><?php _e('Balanced - Distributes candidates evenly in order', 'mobility-trailblazers'); ?></option>
+                    <option value="random"><?php _e('Random - Randomly assigns candidates to jury members', 'mobility-trailblazers'); ?></option>
                 </select>
+                <p class="description"><?php _e('Balanced: First X candidates distributed round-robin. Random: Random selection from all candidates.', 'mobility-trailblazers'); ?></p>
             </div>
             
             <div class="mt-form-group">

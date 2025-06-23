@@ -5,6 +5,39 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6] - 2025-06-23
+
+### Fixed
+- **Assignment Management Page**: Completely restored all non-functional buttons and features
+  - **Auto-Assignment**: Fixed both balanced and random assignment methods
+  - **Clear All**: Fixed nonce verification and added double confirmation
+  - **Manual Assignment**: Fixed array parameter handling for bulk assignments
+  - **Export to CSV**: Fixed fatal errors and missing repository methods
+  - **AJAX Handler Registration**: Fixed handlers only loading during AJAX requests
+  - **Progress Display**: Now correctly shows evaluation completion percentage
+
+### Technical Details
+- **AJAX Registration Fix**: Removed conditional `wp_doing_ajax()` check in plugin initialization
+- **Post Type Correction**: Changed from `mt_jury` to `mt_jury_member` in queries
+- **Array Parameter Fix**: Updated `get_array_param()` to handle arrays without sanitization
+- **Repository Methods**: Added missing `get_by_jury_and_candidate()` method
+- **Nonce Standardization**: All AJAX endpoints now use `mt_admin_nonce`
+- **Permission Checks**: Standardized to use `manage_options` for admin functions
+
+### Files Modified
+- `includes/core/class-mt-plugin.php` - Always initialize AJAX handlers
+- `includes/ajax/class-mt-assignment-ajax.php` - Complete overhaul of all methods
+- `includes/ajax/class-mt-base-ajax.php` - Fixed array parameter handling
+- `includes/repositories/class-mt-assignment-repository.php` - Added missing methods
+- `templates/admin/assignments.php` - Updated UI descriptions
+- `doc/assignment-management-fixes.md` - Comprehensive documentation created
+
+### Impact
+- All assignment management features now fully functional
+- Administrators can efficiently manage jury-candidate assignments
+- Export functionality provides complete assignment data with evaluation status
+- Auto-assignment respects configured limits and distribution methods
+
 ## [2.0.5] - 2025-06-22
 
 ### Fixed
