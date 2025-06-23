@@ -129,5 +129,20 @@ class MT_Activator {
             'relevance' => 1,
             'visibility' => 1
         ]);
+        
+        // Dashboard customization settings
+        add_option('mt_dashboard_settings', [
+            'header_style' => 'gradient',
+            'primary_color' => '#667eea',
+            'secondary_color' => '#764ba2',
+            'progress_bar_style' => 'rounded',
+            'show_welcome_message' => 1,
+            'show_progress_bar' => 1,
+            'show_stats_cards' => 1,
+            'show_search_filter' => 1,
+            'card_layout' => 'grid',
+            'intro_text' => '',
+            'header_image_url' => ''
+        ]);
     }
 } 

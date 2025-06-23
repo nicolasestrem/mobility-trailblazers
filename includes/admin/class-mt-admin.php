@@ -138,6 +138,11 @@ class MT_Admin {
         register_setting('mt_criteria_settings', 'mt_criteria_weights', [
             'sanitize_callback' => [$this, 'sanitize_criteria_weights']
         ]);
+        
+        // Dashboard customization settings
+        register_setting('mt_dashboard_settings', 'mt_dashboard_settings', [
+            'sanitize_callback' => [$this, 'sanitize_dashboard_settings']
+        ]);
     }
     
     /**
@@ -478,6 +483,11 @@ class MT_Admin {
                 true
             );
         }
+        
+        // WordPress media scripts for settings page
+        if ($hook === 'mobility-trailblazers_page_mt-settings') {
+            wp_enqueue_media();
+        }
     }
     
     /**
@@ -529,6 +539,44 @@ class MT_Admin {
             $sanitized[$criterion] = isset($input[$criterion]) ? floatval($input[$criterion]) : 1;
             $sanitized[$criterion] = max(0.1, min(10, $sanitized[$criterion])); // Between 0.1 and 10
         }
+        
+        return $sanitized;
+    }
+    
+    /**
+     * Sanitize dashboard settings
+     *
+     * @param array $input Raw input data
+     * @return array Sanitized data
+     */
+    public function sanitize_dashboard_settings($input) {
+        $sanitized = [];
+        
+        // Header style
+        $sanitized['header_style'] = in_array($input['header_style'], ['gradient', 'solid', 'image']) 
+            ? $input['header_style'] : 'gradient';
+        
+        // Colors
+        $sanitized['primary_color'] = sanitize_hex_color($input['primary_color']) ?: '#667eea';
+        $sanitized['secondary_color'] = sanitize_hex_color($input['secondary_color']) ?: '#764ba2';
+        
+        // Progress bar style
+        $sanitized['progress_bar_style'] = in_array($input['progress_bar_style'], ['rounded', 'square', 'striped']) 
+            ? $input['progress_bar_style'] : 'rounded';
+        
+        // Boolean options
+        $sanitized['show_welcome_message'] = !empty($input['show_welcome_message']) ? 1 : 0;
+        $sanitized['show_progress_bar'] = !empty($input['show_progress_bar']) ? 1 : 0;
+        $sanitized['show_stats_cards'] = !empty($input['show_stats_cards']) ? 1 : 0;
+        $sanitized['show_search_filter'] = !empty($input['show_search_filter']) ? 1 : 0;
+        
+        // Layout
+        $sanitized['card_layout'] = in_array($input['card_layout'], ['grid', 'list', 'compact']) 
+            ? $input['card_layout'] : 'grid';
+        
+        // Text fields
+        $sanitized['intro_text'] = wp_kses_post($input['intro_text']);
+        $sanitized['header_image_url'] = esc_url_raw($input['header_image_url']);
         
         return $sanitized;
     }

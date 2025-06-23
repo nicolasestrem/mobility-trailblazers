@@ -43,15 +43,43 @@ $assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
 
 // Get user info
 $current_user = wp_get_current_user();
+
+// Get dashboard customization settings
+$dashboard_settings = get_option('mt_dashboard_settings', [
+    'header_style' => 'gradient',
+    'primary_color' => '#667eea',
+    'secondary_color' => '#764ba2',
+    'progress_bar_style' => 'rounded',
+    'show_welcome_message' => 1,
+    'show_progress_bar' => 1,
+    'show_stats_cards' => 1,
+    'show_search_filter' => 1,
+    'card_layout' => 'grid',
+    'intro_text' => ''
+]);
+
+// Apply custom styles
+$header_class = 'mt-dashboard-header mt-header-' . $dashboard_settings['header_style'];
+$progress_class = 'mt-progress-bar mt-progress-' . $dashboard_settings['progress_bar_style'];
+$layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
 ?>
 
 <div class="mt-jury-dashboard">
-    <div class="mt-dashboard-header">
-        <h1><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($current_user->display_name)); ?></h1>
-        <p><?php _e('Review and evaluate your assigned candidates for the Mobility Trailblazers Awards', 'mobility-trailblazers'); ?></p>
+    <div class="<?php echo esc_attr($header_class); ?>" 
+         style="<?php echo $dashboard_settings['header_style'] === 'solid' ? 'background-color: ' . esc_attr($dashboard_settings['primary_color']) : ''; ?>">
         
-        <?php if ($progress['total'] > 0) : ?>
-        <div class="mt-progress-bar">
+        <?php if ($dashboard_settings['show_welcome_message']) : ?>
+            <h1><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($current_user->display_name)); ?></h1>
+        <?php endif; ?>
+        
+        <?php if (!empty($dashboard_settings['intro_text'])) : ?>
+            <p><?php echo wp_kses_post($dashboard_settings['intro_text']); ?></p>
+        <?php else : ?>
+            <p><?php _e('Review and evaluate your assigned candidates for the Mobility Trailblazers Awards', 'mobility-trailblazers'); ?></p>
+        <?php endif; ?>
+        
+        <?php if ($dashboard_settings['show_progress_bar'] && $progress['total'] > 0) : ?>
+        <div class="<?php echo esc_attr($progress_class); ?>">
             <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress['completion_rate']); ?>%">
                 <span class="mt-progress-text"><?php echo esc_html($progress['completion_rate']); ?>%</span>
             </div>
@@ -59,6 +87,7 @@ $current_user = wp_get_current_user();
         <?php endif; ?>
     </div>
     
+    <?php if ($dashboard_settings['show_stats_cards']) : ?>
     <div class="mt-stats-grid">
         <div class="mt-stat-card">
             <p class="mt-stat-number"><?php echo esc_html($progress['total']); ?></p>
@@ -77,7 +106,9 @@ $current_user = wp_get_current_user();
             <p class="mt-stat-label"><?php _e('Pending', 'mobility-trailblazers'); ?></p>
         </div>
     </div>
+    <?php endif; ?>
     
+    <?php if ($dashboard_settings['show_search_filter']) : ?>
     <div class="mt-search-filters">
         <div class="mt-search-box">
             <input type="text" 
@@ -93,9 +124,10 @@ $current_user = wp_get_current_user();
             </select>
         </div>
     </div>
+    <?php endif; ?>
     
     <?php if (!empty($assignments)) : ?>
-        <div class="mt-candidates-list" id="mt-candidates-list">
+        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?>" id="mt-candidates-list">
             <?php foreach ($assignments as $assignment) : 
                 $candidate = get_post($assignment->candidate_id);
                 if (!$candidate) continue;

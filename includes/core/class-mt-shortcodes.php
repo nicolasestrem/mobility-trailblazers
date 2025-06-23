@@ -71,6 +71,9 @@ class MT_Shortcodes {
         // Start output buffering
         ob_start();
         
+        // Output custom CSS
+        echo '<style type="text/css">' . $this->generate_dashboard_custom_css() . '</style>';
+        
         // Include template
         include MT_PLUGIN_DIR . 'templates/frontend/jury-dashboard.php';
         
@@ -211,5 +214,63 @@ class MT_Shortcodes {
         $jury_members = get_posts($args);
         
         return !empty($jury_members) ? $jury_members[0] : null;
+    }
+    
+    /**
+     * Generate custom CSS for jury dashboard
+     *
+     * @return string
+     */
+    private function generate_dashboard_custom_css() {
+        $settings = get_option('mt_dashboard_settings', []);
+        $primary_color = $settings['primary_color'] ?? '#667eea';
+        $secondary_color = $settings['secondary_color'] ?? '#764ba2';
+        
+        $css = "
+        .mt-dashboard-header.mt-header-gradient {
+            background: linear-gradient(135deg, {$primary_color} 0%, {$secondary_color} 100%);
+        }
+        
+        .mt-dashboard-header.mt-header-image {
+            background-image: url('" . esc_url($settings['header_image_url'] ?? '') . "');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .mt-stat-number,
+        .mt-candidate-link:hover {
+            color: {$primary_color};
+        }
+        
+        .mt-btn-primary {
+            background-color: {$primary_color};
+        }
+        
+        .mt-progress-fill {
+            background: linear-gradient(to right, {$primary_color}, {$secondary_color});
+        }
+        ";
+        
+        if ($settings['progress_bar_style'] === 'striped') {
+            $css .= "
+            .mt-progress-striped .mt-progress-fill {
+                background-image: linear-gradient(
+                    45deg,
+                    rgba(255, 255, 255, .15) 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    rgba(255, 255, 255, .15) 50%,
+                    rgba(255, 255, 255, .15) 75%,
+                    transparent 75%,
+                    transparent
+                );
+                background-size: 1rem 1rem;
+                animation: progress-bar-stripes 1s linear infinite;
+            }
+            ";
+        }
+        
+        return $css;
     }
 } 

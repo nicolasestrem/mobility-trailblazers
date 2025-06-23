@@ -82,6 +82,9 @@ if (typeof mt_admin.i18n === 'undefined') {
                 dateFormat: 'yy-mm-dd'
             });
         }
+        
+        // Initialize media upload for settings page
+        initMediaUpload();
     });
     
     /**
@@ -866,5 +869,31 @@ if (typeof mt_admin.i18n === 'undefined') {
             console.log('Not on assignment page, skipping initialization');
         }
     });
+
+    /**
+     * Initialize media upload functionality
+     */
+    function initMediaUpload() {
+        // Media upload for header background
+        $('#upload_header_image').on('click', function(e) {
+            e.preventDefault();
+            
+            var mediaUploader = wp.media({
+                title: 'Choose Header Background Image',
+                button: {
+                    text: 'Use this image'
+                },
+                multiple: false
+            });
+            
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#header_image_url').val(attachment.url);
+                $('#header_image_preview').attr('src', attachment.url).show();
+            });
+            
+            mediaUploader.open();
+        });
+    }
 
 })(jQuery); 
