@@ -74,10 +74,8 @@ class MT_Plugin {
             $admin->init();
         }
         
-        // Initialize AJAX handlers
-        if (wp_doing_ajax()) {
-            $this->init_ajax_handlers();
-        }
+        // Initialize AJAX handlers - Always initialize, not just during AJAX requests
+        $this->init_ajax_handlers();
         
         // Register shortcodes
         $shortcodes = new MT_Shortcodes();
@@ -144,8 +142,18 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_admin_assets($hook) {
-        // Check if we're on our plugin pages
-        if (strpos($hook, 'mobility-trailblazers') === false) {
+        // Check if we're on our plugin pages - be more inclusive
+        $is_plugin_page = false;
+        
+        // Check various patterns
+        if (strpos($hook, 'mobility-trailblazers') !== false ||
+            strpos($hook, 'mt-') !== false ||
+            (isset($_GET['page']) && strpos($_GET['page'], 'mt-') === 0) ||
+            (isset($_GET['page']) && strpos($_GET['page'], 'mobility-trailblazers') !== false)) {
+            $is_plugin_page = true;
+        }
+        
+        if (!$is_plugin_page) {
             return;
         }
         
@@ -169,6 +177,7 @@ class MT_Plugin {
         // Localize script
         wp_localize_script('mt-admin', 'mt_admin', [
             'url' => admin_url('admin-ajax.php'),
+            'ajax_url' => admin_url('admin-ajax.php'), // Add both for compatibility
             'nonce' => wp_create_nonce('mt_admin_nonce'),
             'strings' => [
                 'confirm_delete' => __('Are you sure you want to delete this?', 'mobility-trailblazers'),

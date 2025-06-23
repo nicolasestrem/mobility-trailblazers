@@ -257,6 +257,25 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     }
     
     /**
+     * Get assignment by jury member and candidate
+     *
+     * @param int $jury_member_id Jury member ID
+     * @param int $candidate_id Candidate ID
+     * @return object|null
+     */
+    public function get_by_jury_and_candidate($jury_member_id, $candidate_id) {
+        global $wpdb;
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table_name} 
+             WHERE jury_member_id = %d AND candidate_id = %d
+             LIMIT 1",
+            $jury_member_id,
+            $candidate_id
+        ));
+    }
+    
+    /**
      * Bulk create assignments
      *
      * @param array $assignments Array of assignment data

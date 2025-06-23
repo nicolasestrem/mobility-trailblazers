@@ -362,15 +362,171 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function auto_assign() {
-        // Log the request
-        error_log('MT Auto Assign AJAX called');
-        error_log('POST data: ' . print_r($_POST, true));
+        // Verify nonce
+        $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : '';
+        if (!wp_verify_nonce($nonce, 'mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            return;
+        }
         
-        // Simple response for testing
-        wp_send_json_success([
-            'message' => 'Auto assign handler reached',
-            'received_data' => $_POST
-        ]);
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get parameters
+        $method = isset($_POST['method']) ? sanitize_text_field($_POST['method']) : 'balanced';
+        $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 5;
+        
+        // Log for debugging
+        error_log('MT Auto Assign: method=' . $method . ', candidates_per_jury=' . $candidates_per_jury);
+        
+        // Get active jury members
+        $jury_args = [
+            'post_type' => 'mt_jury',
+            'post_status' => 'publish',
+            'numberposts' => -1,
+            'meta_query' => [
+                [
+                    'key' => '_mt_status',
+                    'value' => 'active',
+                    'compare' => '='
+                ]
+            ]
+        ];
+        $jury_members = get_posts($jury_args);
+        
+        if (empty($jury_members)) {
+            wp_send_json_error(__('No active jury members found.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get candidates
+        $candidate_args = [
+            'post_type' => 'mt_candidate',
+            'post_status' => 'publish',
+            'numberposts' => -1
+        ];
+        $candidates = get_posts($candidate_args);
+        
+        if (empty($candidates)) {
+            wp_send_json_error(__('No candidates found.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Clear existing assignments if requested
+        if (isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true') {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'mt_jury_assignments';
+            $wpdb->query("TRUNCATE TABLE $table_name");
+        }
+        
+        $assignment_repo = new MT_Assignment_Repository();
+        $assignments_created = 0;
+        $errors = [];
+        
+        // Perform assignment based on method
+        if ($method === 'balanced') {
+            // Balanced distribution
+            $jury_count = count($jury_members);
+            $candidate_index = 0;
+            
+            foreach ($candidates as $candidate) {
+                $jury_index = $candidate_index % $jury_count;
+                $jury_member = $jury_members[$jury_index];
+                
+                // Check if assignment already exists
+                $existing = $assignment_repo->get_by_jury_and_candidate(
+                    $jury_member->ID,
+                    $candidate->ID
+                );
+                
+                if (!$existing) {
+                    $result = $assignment_repo->create([
+                        'jury_member_id' => $jury_member->ID,
+                        'candidate_id' => $candidate->ID
+                    ]);
+                    
+                    if ($result) {
+                        $assignments_created++;
+                    } else {
+                        $errors[] = sprintf(
+                            __('Failed to assign %s to %s', 'mobility-trailblazers'),
+                            $candidate->post_title,
+                            $jury_member->post_title
+                        );
+                    }
+                }
+                
+                $candidate_index++;
+            }
+        } else {
+            // Fixed number per jury
+            foreach ($jury_members as $jury_member) {
+                $assigned_count = 0;
+                
+                foreach ($candidates as $candidate) {
+                    if ($assigned_count >= $candidates_per_jury) {
+                        break;
+                    }
+                    
+                    // Check if assignment already exists
+                    $existing = $assignment_repo->get_by_jury_and_candidate(
+                        $jury_member->ID,
+                        $candidate->ID
+                    );
+                    
+                    if (!$existing) {
+                        $result = $assignment_repo->create([
+                            'jury_member_id' => $jury_member->ID,
+                            'candidate_id' => $candidate->ID
+                        ]);
+                        
+                        if ($result) {
+                            $assignments_created++;
+                            $assigned_count++;
+                        } else {
+                            $errors[] = sprintf(
+                                __('Failed to assign %s to %s', 'mobility-trailblazers'),
+                                $candidate->post_title,
+                                $jury_member->post_title
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Prepare response
+        if ($assignments_created > 0) {
+            $message = sprintf(
+                __('Auto-assignment completed successfully. %d assignments created.', 'mobility-trailblazers'),
+                $assignments_created
+            );
+            
+            if (!empty($errors)) {
+                $message .= ' ' . sprintf(
+                    __('However, %d errors occurred.', 'mobility-trailblazers'),
+                    count($errors)
+                );
+            }
+            
+            wp_send_json_success([
+                'message' => $message,
+                'created' => $assignments_created,
+                'errors' => $errors
+            ]);
+        } else {
+            if (empty($errors)) {
+                wp_send_json_error(__('No new assignments were created. All candidates may already be assigned.', 'mobility-trailblazers'));
+            } else {
+                wp_send_json_error([
+                    'message' => __('Auto-assignment failed.', 'mobility-trailblazers'),
+                    'errors' => $errors
+                ]);
+            }
+        }
     }
 
     /**
