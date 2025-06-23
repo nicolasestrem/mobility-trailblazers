@@ -161,7 +161,6 @@ Displays the jury member dashboard with evaluation interface. Must be placed on 
 #### 2. Candidates Grid
 `[mt_candidates_grid]`
 
-Shows a public grid of award candidates.
 
 **Parameters:**
 - `category` - Filter by award category slug (optional)
