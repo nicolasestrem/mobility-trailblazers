@@ -271,6 +271,97 @@ class MT_Shortcodes {
             ";
         }
         
+        // Add candidate presentation styles
+        $presentation = get_option('mt_candidate_presentation', []);
+
+        // Profile layout styles
+        if (($presentation['profile_layout'] ?? '') === 'stacked') {
+            $css .= "
+            .mt-layout-stacked .mt-candidate-profile {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .mt-layout-stacked .mt-candidate-photo {
+                margin: 0 auto;
+            }
+            ";
+        } elseif (($presentation['profile_layout'] ?? '') === 'card') {
+            $css .= "
+            .mt-layout-card {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                border: none;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+            .mt-layout-card .mt-candidate-profile {
+                background: rgba(255,255,255,0.9);
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px;
+            }
+            ";
+        }
+
+        // Photo styles
+        if (($presentation['photo_style'] ?? '') === 'circle') {
+            $css .= ".mt-photo-circle { border-radius: 50%; }";
+        } elseif (($presentation['photo_style'] ?? '') === 'rounded') {
+            $css .= ".mt-photo-rounded { border-radius: 12px; }";
+        }
+
+        // Photo sizes
+        $photo_sizes = [
+            'small' => '150px',
+            'medium' => '200px',
+            'large' => '300px'
+        ];
+        $size = $photo_sizes[$presentation['photo_size']] ?? '200px';
+        $css .= "
+        .mt-candidate-photo {
+            width: {$size};
+            height: {$size};
+        }
+        ";
+
+        // Form styles
+        if (($presentation['form_style'] ?? '') === 'wizard') {
+            $css .= "
+            .mt-form-wizard .mt-criteria-grid {
+                display: none;
+            }
+            .mt-form-wizard .mt-criterion-card.active {
+                display: block;
+            }
+            ";
+        }
+
+        // Animation styles
+        if (!empty($presentation['enable_animations'])) {
+            $css .= "
+            .mt-animated * {
+                transition: all 0.3s ease;
+            }
+            .mt-animated .mt-candidate-card:hover {
+                transform: translateY(-5px);
+            }
+            .mt-animated .mt-score-slider {
+                transition: all 0.2s ease;
+            }
+            ";
+        }
+
+        // Hover effects
+        if (!empty($presentation['enable_hover_effects'])) {
+            $css .= "
+            .mt-criterion-card:hover {
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+            .mt-candidate-photo:hover {
+                filter: brightness(1.05);
+            }
+            ";
+        }
+
         return $css;
     }
 } 

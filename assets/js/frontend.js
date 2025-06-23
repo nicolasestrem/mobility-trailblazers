@@ -582,4 +582,36 @@
         MTJuryDashboard.init();
     });
     
+    // Star rating functionality
+    if ($('.mt-star-rating').length) {
+        $('.mt-star-rating').each(function() {
+            var $rating = $(this);
+            var $input = $rating.find('input[type="hidden"]');
+            var $stars = $rating.find('.mt-star');
+            
+            $stars.on('click', function() {
+                var value = $(this).data('value');
+                $input.val(value).trigger('change');
+                updateStars($rating, value);
+            });
+            
+            $stars.on('mouseenter', function() {
+                var value = $(this).data('value');
+                updateStars($rating, value);
+            });
+            
+            $rating.on('mouseleave', function() {
+                var value = $input.val() || 0;
+                updateStars($rating, value);
+            });
+        });
+        
+        function updateStars($rating, value) {
+            $rating.find('.mt-star').each(function() {
+                var starValue = $(this).data('value');
+                $(this).toggleClass('filled', starValue <= value);
+            });
+        }
+    }
+    
 })(jQuery); 

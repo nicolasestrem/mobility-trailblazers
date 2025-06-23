@@ -144,5 +144,21 @@ class MT_Activator {
             'intro_text' => '',
             'header_image_url' => ''
         ]);
+        
+        // Candidate presentation settings
+        add_option('mt_candidate_presentation', [
+            'profile_layout' => 'side-by-side',
+            'photo_style' => 'rounded',
+            'photo_size' => 'medium',
+            'show_organization' => 1,
+            'show_position' => 1,
+            'show_category' => 1,
+            'show_innovation_summary' => 1,
+            'show_full_bio' => 1,
+            'form_style' => 'cards',
+            'scoring_style' => 'slider',
+            'enable_animations' => 1,
+            'enable_hover_effects' => 1
+        ]);
     }
 } 

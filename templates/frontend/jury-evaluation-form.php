@@ -34,6 +34,28 @@ $existing = $evaluation_repo->find_all([
 ]);
 $evaluation = !empty($existing) ? $existing[0] : null;
 
+// Get candidate presentation settings
+$presentation_settings = get_option('mt_candidate_presentation', [
+    'profile_layout' => 'side-by-side',
+    'photo_style' => 'rounded',
+    'photo_size' => 'medium',
+    'show_organization' => 1,
+    'show_position' => 1,
+    'show_category' => 1,
+    'show_innovation_summary' => 1,
+    'show_full_bio' => 1,
+    'form_style' => 'cards',
+    'scoring_style' => 'slider',
+    'enable_animations' => 1,
+    'enable_hover_effects' => 1
+]);
+
+// Apply layout classes
+$showcase_class = 'mt-candidate-showcase mt-layout-' . $presentation_settings['profile_layout'];
+$photo_class = 'mt-candidate-photo mt-photo-' . $presentation_settings['photo_style'] . ' mt-photo-' . $presentation_settings['photo_size'];
+$form_class = 'mt-evaluation-form mt-form-' . $presentation_settings['form_style'];
+$animation_class = $presentation_settings['enable_animations'] ? 'mt-animated' : '';
+
 // Evaluation criteria with icons and descriptions
 $criteria = [
     'courage' => [
@@ -92,53 +114,48 @@ $criteria = [
     </div>
     
     <!-- Candidate Information -->
-    <div class="mt-candidate-showcase">
+    <div class="<?php echo esc_attr($showcase_class . ' ' . $animation_class); ?>">
         <div class="mt-candidate-profile">
-            <?php if ($photo_id) : ?>
+            <?php if ($photo_id && $presentation_settings['profile_layout'] !== 'minimal') : ?>
                 <div class="mt-candidate-photo-wrap">
-                    <?php echo wp_get_attachment_image($photo_id, 'medium', false, ['class' => 'mt-candidate-photo']); ?>
+                    <?php echo wp_get_attachment_image($photo_id, 'medium', false, ['class' => $photo_class]); ?>
                 </div>
             <?php endif; ?>
             
             <div class="mt-candidate-details">
                 <h2 class="mt-candidate-name"><?php echo esc_html($candidate->post_title); ?></h2>
                 
-                <?php if ($organization || $position) : ?>
-                    <div class="mt-candidate-meta">
-                        <?php if ($position) : ?>
-                            <span class="mt-meta-item">
-                                <span class="dashicons dashicons-businessperson"></span>
-                                <?php echo esc_html($position); ?>
-                            </span>
-                        <?php endif; ?>
-                        
-                        <?php if ($organization) : ?>
-                            <span class="mt-meta-item">
-                                <span class="dashicons dashicons-building"></span>
-                                <?php echo esc_html($organization); ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                <div class="mt-candidate-meta">
+                    <?php if ($presentation_settings['show_organization'] && $organization) : ?>
+                        <div class="mt-meta-item">
+                            <span class="dashicons dashicons-building"></span>
+                            <span><?php echo esc_html($organization); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($presentation_settings['show_position'] && $position) : ?>
+                        <div class="mt-meta-item">
+                            <span class="dashicons dashicons-id"></span>
+                            <span><?php echo esc_html($position); ?></span>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($presentation_settings['show_category'] && !empty($categories)) : ?>
+                        <div class="mt-meta-item">
+                            <span class="dashicons dashicons-category"></span>
+                            <span><?php echo esc_html($categories[0]->name); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 
-                <?php if (!empty($categories)) : ?>
-                    <div class="mt-candidate-categories">
-                        <?php foreach ($categories as $category) : ?>
-                            <span class="mt-category-badge">
-                                <?php echo esc_html($category->name); ?>
-                            </span>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($innovation_summary) : ?>
+                <?php if ($presentation_settings['show_innovation_summary'] && $innovation_summary) : ?>
                     <div class="mt-innovation-summary">
                         <h3><?php _e('Innovation Summary', 'mobility-trailblazers'); ?></h3>
-                        <p><?php echo wp_kses_post($innovation_summary); ?></p>
+                        <p><?php echo esc_html($innovation_summary); ?></p>
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($candidate->post_content) : ?>
+                <?php if ($presentation_settings['show_full_bio'] && $candidate->post_content) : ?>
                     <div class="mt-candidate-bio">
                         <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
                         <div class="mt-bio-content">
@@ -151,7 +168,7 @@ $criteria = [
     </div>
     
     <!-- Evaluation Form -->
-    <form id="mt-evaluation-form" class="mt-evaluation-form" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
+    <form id="mt-evaluation-form" class="<?php echo esc_attr($form_class); ?>" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
         <?php wp_nonce_field('mt_evaluation_nonce', 'mt_nonce'); ?>
         <input type="hidden" name="candidate_id" value="<?php echo esc_attr($candidate_id); ?>">
         <input type="hidden" name="jury_member_id" value="<?php echo esc_attr($jury_member->ID); ?>">

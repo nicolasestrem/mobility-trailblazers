@@ -5,6 +5,99 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.7] - 2025-06-23
+
+[2.0.7] - 2025-06-23
+Added
+
+Comprehensive Dashboard Customization System: Full visual customization for jury dashboard
+
+Header Customization: Choose between gradient, solid color, or background image styles
+Color Theming: Customizable primary and secondary colors that apply throughout the interface
+Progress Bar Styles: Options for rounded, square, or animated striped progress indicators
+Display Controls: Toggle visibility of welcome messages, progress bars, stats cards, and search functionality
+Layout Options: Grid, list, or compact view for candidate cards
+Custom Messages: Editable dashboard introduction text for personalized jury experience
+
+
+Candidate Presentation Customization: Complete control over how candidates are displayed
+
+Profile Layouts: Side-by-side, stacked, card style, or minimal text-only presentation
+Photo Styling: Square, circle, or rounded corners with size options (small/medium/large)
+Information Display: Granular control over which candidate details are shown
+Evaluation Form Styles: Cards, list, compact, or wizard-style step-by-step evaluation
+Scoring Options: Slider, star rating, numeric input, or button selection methods
+Visual Effects: Optional animations and hover effects for enhanced interactivity
+
+
+Dynamic CSS Generation: Intelligent style generation based on admin settings
+
+Automatic color inheritance throughout UI elements
+Responsive design maintained across all customization options
+Performance-optimized CSS generation only when needed
+Support for custom background images with proper scaling
+
+
+Enhanced Settings Interface: Intuitive admin controls for all customization options
+
+Organized settings sections with clear descriptions
+Live preview capabilities (planned for future release)
+Default values for all options ensuring stable operation
+Comprehensive save validation and sanitization
+
+
+
+Technical Implementation
+
+New Database Options:
+
+mt_dashboard_settings - Stores dashboard appearance preferences
+mt_candidate_presentation - Stores candidate display preferences
+
+
+Modified Files:
+
+templates/admin/settings.php - Added customization sections
+includes/admin/class-mt-admin.php - Settings registration and sanitization
+templates/frontend/jury-dashboard.php - Dynamic setting application
+templates/frontend/jury-evaluation-form.php - Candidate presentation logic
+includes/core/class-mt-shortcodes.php - CSS generation system
+includes/core/class-mt-activator.php - Default settings initialization
+
+
+
+Documentation
+
+Created comprehensive customization guide in /doc/mt-customization-guide.md
+Detailed technical implementation notes
+Usage instructions for administrators
+Developer extension guidelines
+Troubleshooting section for common issues
+
+Benefits
+
+No Code Changes Required: Administrators can customize the entire jury experience through the UI
+Consistent Branding: Apply organizational colors and styles throughout the platform
+Improved User Experience: Tailor the interface to match jury preferences and expectations
+Future-Proof Design: Extensible system allows for easy addition of new customization options
+Performance Optimized: Minimal impact on page load times with intelligent CSS generation
+
+Security Enhancements
+
+All color inputs validated with sanitize_hex_color()
+Text inputs sanitized with appropriate WordPress functions
+Select options validated against whitelisted values
+No direct HTML output without proper escaping
+Admin-only access to customization settings
+
+Backwards Compatibility
+
+All existing installations will use sensible defaults
+No breaking changes to existing templates or functionality
+Graceful fallbacks for any missing settings
+Database migrations handled automatically on activation
+
+
 ## [2.0.6] - 2025-06-23
 
 ### Fixed

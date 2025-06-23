@@ -40,6 +40,25 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
         update_option('mt_dashboard_settings', $dashboard_settings);
     }
     
+    // Save candidate presentation settings
+    if (isset($_POST['mt_candidate_presentation'])) {
+        $candidate_presentation = [
+            'profile_layout' => sanitize_text_field($_POST['mt_candidate_presentation']['profile_layout']),
+            'photo_style' => sanitize_text_field($_POST['mt_candidate_presentation']['photo_style']),
+            'photo_size' => sanitize_text_field($_POST['mt_candidate_presentation']['photo_size']),
+            'show_organization' => isset($_POST['mt_candidate_presentation']['show_organization']) ? 1 : 0,
+            'show_position' => isset($_POST['mt_candidate_presentation']['show_position']) ? 1 : 0,
+            'show_category' => isset($_POST['mt_candidate_presentation']['show_category']) ? 1 : 0,
+            'show_innovation_summary' => isset($_POST['mt_candidate_presentation']['show_innovation_summary']) ? 1 : 0,
+            'show_full_bio' => isset($_POST['mt_candidate_presentation']['show_full_bio']) ? 1 : 0,
+            'form_style' => sanitize_text_field($_POST['mt_candidate_presentation']['form_style']),
+            'scoring_style' => sanitize_text_field($_POST['mt_candidate_presentation']['scoring_style']),
+            'enable_animations' => isset($_POST['mt_candidate_presentation']['enable_animations']) ? 1 : 0,
+            'enable_hover_effects' => isset($_POST['mt_candidate_presentation']['enable_hover_effects']) ? 1 : 0
+        ];
+        update_option('mt_candidate_presentation', $candidate_presentation);
+    }
+    
     // Save other settings
     update_option('mt_enable_notifications', isset($_POST['enable_notifications']) ? 1 : 0);
     update_option('mt_notification_email', sanitize_email($_POST['notification_email']));
@@ -68,6 +87,22 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
     'show_search_filter' => 1,
     'card_layout' => 'grid',
     'intro_text' => __('Welcome to the Mobility Trailblazers Jury Dashboard. Here you can evaluate candidates and track your progress.', 'mobility-trailblazers')
+]);
+
+// Get candidate presentation settings
+$candidate_presentation = get_option('mt_candidate_presentation', [
+    'profile_layout' => 'side-by-side',
+    'photo_style' => 'rounded',
+    'photo_size' => 'medium',
+    'show_organization' => 1,
+    'show_position' => 1,
+    'show_category' => 1,
+    'show_innovation_summary' => 1,
+    'show_full_bio' => 1,
+    'form_style' => 'cards',
+    'scoring_style' => 'slider',
+    'enable_animations' => 1,
+    'enable_hover_effects' => 1
 ]);
 
 $enable_notifications = get_option('mt_enable_notifications', 0);
@@ -271,6 +306,134 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                         echo esc_textarea($dashboard_settings['intro_text']); 
                     ?></textarea>
                     <p class="description"><?php _e('Custom message displayed at the top of the jury dashboard.', 'mobility-trailblazers'); ?></p>
+                </td>
+            </tr>
+        </table>
+        
+        <!-- Candidate Presentation Customization -->
+        <h2><?php _e('Candidate Presentation Settings', 'mobility-trailblazers'); ?></h2>
+        <p><?php _e('Customize how candidates are displayed to jury members during evaluation.', 'mobility-trailblazers'); ?></p>
+
+        <table class="form-table">
+            <!-- Candidate Profile Layout -->
+            <tr>
+                <th scope="row">
+                    <label for="candidate_profile_layout"><?php _e('Candidate Profile Layout', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="candidate_profile_layout" name="mt_candidate_presentation[profile_layout]">
+                        <option value="side-by-side" <?php selected($candidate_presentation['profile_layout'], 'side-by-side'); ?>><?php _e('Side by Side (Photo + Details)', 'mobility-trailblazers'); ?></option>
+                        <option value="stacked" <?php selected($candidate_presentation['profile_layout'], 'stacked'); ?>><?php _e('Stacked (Photo above Details)', 'mobility-trailblazers'); ?></option>
+                        <option value="card" <?php selected($candidate_presentation['profile_layout'], 'card'); ?>><?php _e('Card Style', 'mobility-trailblazers'); ?></option>
+                        <option value="minimal" <?php selected($candidate_presentation['profile_layout'], 'minimal'); ?>><?php _e('Minimal (Text Only)', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            
+            <!-- Photo Style -->
+            <tr>
+                <th scope="row">
+                    <label for="candidate_photo_style"><?php _e('Candidate Photo Style', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="candidate_photo_style" name="mt_candidate_presentation[photo_style]">
+                        <option value="square" <?php selected($candidate_presentation['photo_style'], 'square'); ?>><?php _e('Square', 'mobility-trailblazers'); ?></option>
+                        <option value="circle" <?php selected($candidate_presentation['photo_style'], 'circle'); ?>><?php _e('Circle', 'mobility-trailblazers'); ?></option>
+                        <option value="rounded" <?php selected($candidate_presentation['photo_style'], 'rounded'); ?>><?php _e('Rounded Corners', 'mobility-trailblazers'); ?></option>
+                    </select>
+                    
+                    <br/><br/>
+                    
+                    <label for="candidate_photo_size"><?php _e('Photo Size', 'mobility-trailblazers'); ?></label>
+                    <select id="candidate_photo_size" name="mt_candidate_presentation[photo_size]">
+                        <option value="small" <?php selected($candidate_presentation['photo_size'], 'small'); ?>><?php _e('Small (150px)', 'mobility-trailblazers'); ?></option>
+                        <option value="medium" <?php selected($candidate_presentation['photo_size'], 'medium'); ?>><?php _e('Medium (200px)', 'mobility-trailblazers'); ?></option>
+                        <option value="large" <?php selected($candidate_presentation['photo_size'], 'large'); ?>><?php _e('Large (300px)', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            
+            <!-- Display Options -->
+            <tr>
+                <th scope="row"><?php _e('Candidate Information Display', 'mobility-trailblazers'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[show_organization]" value="1" 
+                               <?php checked($candidate_presentation['show_organization'], 1); ?> />
+                        <?php _e('Show Organization/Company', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[show_position]" value="1" 
+                               <?php checked($candidate_presentation['show_position'], 1); ?> />
+                        <?php _e('Show Position/Title', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[show_category]" value="1" 
+                               <?php checked($candidate_presentation['show_category'], 1); ?> />
+                        <?php _e('Show Award Category', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[show_innovation_summary]" value="1" 
+                               <?php checked($candidate_presentation['show_innovation_summary'], 1); ?> />
+                        <?php _e('Show Innovation Summary', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[show_full_bio]" value="1" 
+                               <?php checked($candidate_presentation['show_full_bio'], 1); ?> />
+                        <?php _e('Show Full Biography', 'mobility-trailblazers'); ?>
+                    </label>
+                </td>
+            </tr>
+            
+            <!-- Evaluation Form Style -->
+            <tr>
+                <th scope="row">
+                    <label for="evaluation_form_style"><?php _e('Evaluation Form Style', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="evaluation_form_style" name="mt_candidate_presentation[form_style]">
+                        <option value="cards" <?php selected($candidate_presentation['form_style'], 'cards'); ?>><?php _e('Card-based Criteria', 'mobility-trailblazers'); ?></option>
+                        <option value="list" <?php selected($candidate_presentation['form_style'], 'list'); ?>><?php _e('List View', 'mobility-trailblazers'); ?></option>
+                        <option value="compact" <?php selected($candidate_presentation['form_style'], 'compact'); ?>><?php _e('Compact View', 'mobility-trailblazers'); ?></option>
+                        <option value="wizard" <?php selected($candidate_presentation['form_style'], 'wizard'); ?>><?php _e('Step-by-Step Wizard', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            
+            <!-- Scoring Display -->
+            <tr>
+                <th scope="row">
+                    <label for="scoring_display_style"><?php _e('Score Display Style', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="scoring_display_style" name="mt_candidate_presentation[scoring_style]">
+                        <option value="slider" <?php selected($candidate_presentation['scoring_style'], 'slider'); ?>><?php _e('Slider with Marks', 'mobility-trailblazers'); ?></option>
+                        <option value="stars" <?php selected($candidate_presentation['scoring_style'], 'stars'); ?>><?php _e('Star Rating', 'mobility-trailblazers'); ?></option>
+                        <option value="numeric" <?php selected($candidate_presentation['scoring_style'], 'numeric'); ?>><?php _e('Numeric Input', 'mobility-trailblazers'); ?></option>
+                        <option value="buttons" <?php selected($candidate_presentation['scoring_style'], 'buttons'); ?>><?php _e('Button Selection', 'mobility-trailblazers'); ?></option>
+                    </select>
+                </td>
+            </tr>
+            
+            <!-- Animation Options -->
+            <tr>
+                <th scope="row"><?php _e('Animation & Effects', 'mobility-trailblazers'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[enable_animations]" value="1" 
+                               <?php checked($candidate_presentation['enable_animations'], 1); ?> />
+                        <?php _e('Enable smooth transitions and animations', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[enable_hover_effects]" value="1" 
+                               <?php checked($candidate_presentation['enable_hover_effects'], 1); ?> />
+                        <?php _e('Enable hover effects on interactive elements', 'mobility-trailblazers'); ?>
+                    </label>
                 </td>
             </tr>
         </table>
