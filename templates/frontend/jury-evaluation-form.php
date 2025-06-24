@@ -54,7 +54,11 @@ $presentation_settings = get_option('mt_candidate_presentation', [
 $showcase_class = 'mt-candidate-showcase mt-layout-' . $presentation_settings['profile_layout'];
 $photo_class = 'mt-candidate-photo mt-photo-' . $presentation_settings['photo_style'] . ' mt-photo-' . $presentation_settings['photo_size'];
 $form_class = 'mt-evaluation-form mt-form-' . $presentation_settings['form_style'];
-$animation_class = $presentation_settings['enable_animations'] ? 'mt-animated' : '';
+
+// Add animation classes if enabled
+if (!empty($presentation_settings['enable_animations'])) {
+    $showcase_class .= ' mt-animated';
+}
 
 // Evaluation criteria with icons and descriptions
 $criteria = [
@@ -114,7 +118,7 @@ $criteria = [
     </div>
     
     <!-- Candidate Information -->
-    <div class="<?php echo esc_attr($showcase_class . ' ' . $animation_class); ?>">
+    <div class="<?php echo esc_attr($showcase_class); ?>">
         <div class="mt-candidate-profile">
             <?php if ($photo_id && $presentation_settings['profile_layout'] !== 'minimal') : ?>
                 <div class="mt-candidate-photo-wrap">
