@@ -126,6 +126,9 @@ class MT_Shortcodes {
         // Start output buffering
         ob_start();
         
+        // Output custom CSS
+        echo '<style type="text/css">' . $this->generate_candidates_grid_css() . '</style>';
+        
         // Include template
         include MT_PLUGIN_DIR . 'templates/frontend/candidates-grid.php';
         
@@ -158,6 +161,9 @@ class MT_Shortcodes {
         
         // Start output buffering
         ob_start();
+        
+        // Output custom CSS for stats
+        echo '<style type="text/css">' . $this->generate_stats_custom_css() . '</style>';
         
         // Include template
         include MT_PLUGIN_DIR . 'templates/frontend/evaluation-stats.php';
@@ -236,6 +242,23 @@ class MT_Shortcodes {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        .mt-dashboard-header.mt-header-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        .mt-dashboard-header.mt-header-image > * {
+            position: relative;
+            z-index: 2;
         }
         
         .mt-stat-number,
@@ -471,14 +494,138 @@ class MT_Shortcodes {
         }
         ";
 
-        // Form styles
-        if (($presentation['form_style'] ?? '') === 'wizard') {
+        // Form style variations
+        if (($presentation['form_style'] ?? '') === 'list') {
+            $css .= "
+            .mt-form-list .mt-criteria-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+            .mt-form-list .mt-criterion-card {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                padding: 20px;
+            }
+            .mt-form-list .mt-criterion-header {
+                flex: 0 0 300px;
+            }
+            .mt-form-list .mt-scoring-control {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            ";
+        } elseif (($presentation['form_style'] ?? '') === 'compact') {
+            $css .= "
+            .mt-form-compact .mt-criterion-card {
+                padding: 15px;
+            }
+            .mt-form-compact .mt-criterion-header {
+                margin-bottom: 10px;
+            }
+            .mt-form-compact .mt-criterion-icon {
+                font-size: 20px;
+            }
+            .mt-form-compact .mt-criterion-label {
+                font-size: 16px;
+            }
+            .mt-form-compact .mt-criterion-description {
+                display: none;
+            }
+            ";
+        } elseif (($presentation['form_style'] ?? '') === 'wizard') {
             $css .= "
             .mt-form-wizard .mt-criteria-grid {
+                position: relative;
+            }
+            .mt-form-wizard .mt-criterion-card {
                 display: none;
+                animation: fadeIn 0.3s ease-in;
             }
             .mt-form-wizard .mt-criterion-card.active {
                 display: block;
+            }
+            .mt-form-wizard .mt-wizard-navigation {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            ";
+        }
+
+        // Scoring display styles
+        if (($presentation['scoring_style'] ?? '') === 'stars') {
+            $css .= "
+            .mt-scoring-control .mt-score-slider-wrapper {
+                display: none;
+            }
+            .mt-scoring-control .mt-star-rating {
+                display: flex;
+                gap: 5px;
+                font-size: 30px;
+                color: #ddd;
+                cursor: pointer;
+            }
+            .mt-scoring-control .mt-star-rating .dashicons {
+                transition: color 0.2s;
+            }
+            .mt-scoring-control .mt-star-rating .dashicons.active,
+            .mt-scoring-control .mt-star-rating .dashicons:hover {
+                color: #f39c12;
+            }
+            ";
+        } elseif (($presentation['scoring_style'] ?? '') === 'numeric') {
+            $css .= "
+            .mt-scoring-control .mt-score-slider-wrapper {
+                display: none;
+            }
+            .mt-scoring-control .mt-numeric-input {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .mt-scoring-control .mt-numeric-input input {
+                width: 80px;
+                padding: 10px;
+                font-size: 20px;
+                text-align: center;
+                border: 2px solid #ddd;
+                border-radius: 5px;
+            }
+            ";
+        } elseif (($presentation['scoring_style'] ?? '') === 'buttons') {
+            $css .= "
+            .mt-scoring-control .mt-score-slider-wrapper {
+                display: none;
+            }
+            .mt-scoring-control .mt-button-group {
+                display: flex;
+                gap: 5px;
+                flex-wrap: wrap;
+            }
+            .mt-scoring-control .mt-score-button {
+                padding: 8px 15px;
+                border: 2px solid #ddd;
+                background: white;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .mt-scoring-control .mt-score-button:hover {
+                border-color: {$primary_color};
+                color: {$primary_color};
+            }
+            .mt-scoring-control .mt-score-button.active {
+                background: {$primary_color};
+                border-color: {$primary_color};
+                color: white;
             }
             ";
         }
@@ -511,6 +658,61 @@ class MT_Shortcodes {
             ";
         }
 
+        return $css;
+    }
+
+    /**
+     * Generate custom CSS for candidates grid
+     *
+     * @return string
+     */
+    private function generate_candidates_grid_css() {
+        $settings = get_option('mt_dashboard_settings', []);
+        $presentation = get_option('mt_candidate_presentation', []);
+        $primary_color = $settings['primary_color'] ?? '#667eea';
+        
+        $css = "
+        .mt-candidate-grid-item:hover {
+            border-color: {$primary_color};
+        }
+        .mt-category-tag {
+            background: {$primary_color};
+            color: white;
+        }
+        ";
+        
+        // Apply photo styles to grid
+        if (($presentation['photo_style'] ?? '') === 'circle') {
+            $css .= ".mt-candidate-grid-item .mt-candidate-photo { border-radius: 50%; }";
+        } elseif (($presentation['photo_style'] ?? '') === 'rounded') {
+            $css .= ".mt-candidate-grid-item .mt-candidate-photo { border-radius: 8px; }";
+        }
+        
+        return $css;
+    }
+
+    /**
+     * Generate custom CSS for evaluation statistics
+     *
+     * @return string
+     */
+    private function generate_stats_custom_css() {
+        $settings = get_option('mt_dashboard_settings', []);
+        $primary_color = $settings['primary_color'] ?? '#667eea';
+        $secondary_color = $settings['secondary_color'] ?? '#764ba2';
+        
+        $css = "
+        .mt-stat-number {
+            color: {$primary_color};
+        }
+        .mt-bar-fill {
+            background: linear-gradient(to right, {$primary_color}, {$secondary_color});
+        }
+        .mt-progress-mini-fill {
+            background: {$primary_color};
+        }
+        ";
+        
         return $css;
     }
 } 

@@ -613,5 +613,47 @@
             });
         }
     }
-    
+
+    // Star rating functionality
+    $(document).on('click', '.mt-star-rating .dashicons', function() {
+        const $star = $(this);
+        const value = $star.data('value');
+        const $rating = $star.parent();
+        
+        $rating.find('.dashicons').removeClass('active');
+        $rating.find('.dashicons').each(function() {
+            if ($(this).data('value') <= value) {
+                $(this).addClass('active');
+            }
+        });
+        
+        $rating.find('input[type="hidden"]').val(value);
+        updateScoreDisplay($star.closest('.mt-criterion-card'), value);
+    });
+
+    // Button scoring functionality
+    $(document).on('click', '.mt-score-button', function() {
+        const $button = $(this);
+        const value = $button.data('value');
+        const $group = $button.parent();
+        
+        $group.find('.mt-score-button').removeClass('active');
+        $button.addClass('active');
+        
+        $group.find('input[type="hidden"]').val(value);
+        updateScoreDisplay($button.closest('.mt-criterion-card'), value);
+    });
+
+    // Numeric input functionality
+    $(document).on('input', '.mt-score-input', function() {
+        const value = Math.min(10, Math.max(0, $(this).val()));
+        $(this).val(value);
+        updateScoreDisplay($(this).closest('.mt-criterion-card'), value);
+    });
+
+    // Update score display
+    function updateScoreDisplay($criterion, value) {
+        $criterion.find('.mt-score-value').text(value);
+    }
+
 })(jQuery); 

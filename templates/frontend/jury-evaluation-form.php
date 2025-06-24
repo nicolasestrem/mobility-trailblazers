@@ -202,20 +202,52 @@ $criteria = [
                         </div>
                         
                         <div class="mt-scoring-control">
-                            <div class="mt-score-slider-wrapper">
-                                <input type="range" 
-                                       name="<?php echo esc_attr($key); ?>_score" 
-                                       class="mt-score-slider" 
-                                       min="0" 
-                                       max="10" 
-                                       value="<?php echo esc_attr($score_value); ?>"
-                                       data-criterion="<?php echo esc_attr($key); ?>">
-                                <div class="mt-score-marks">
-                                    <?php for ($i = 0; $i <= 10; $i++) : ?>
-                                        <span class="mt-score-mark" data-value="<?php echo $i; ?>"><?php echo $i; ?></span>
-                                    <?php endfor; ?>
+                            <?php if ($presentation_settings['scoring_style'] === 'slider') : ?>
+                                <div class="mt-score-slider-wrapper">
+                                    <input type="range" 
+                                           name="<?php echo esc_attr($key); ?>_score" 
+                                           class="mt-score-slider" 
+                                           min="0" 
+                                           max="10" 
+                                           value="<?php echo esc_attr($score_value); ?>"
+                                           data-criterion="<?php echo esc_attr($key); ?>">
+                                    <div class="mt-score-marks">
+                                        <?php for ($i = 0; $i <= 10; $i++) : ?>
+                                            <span class="mt-score-mark" data-value="<?php echo $i; ?>"><?php echo $i; ?></span>
+                                        <?php endfor; ?>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php elseif ($presentation_settings['scoring_style'] === 'stars') : ?>
+                                <div class="mt-star-rating" data-criterion="<?php echo esc_attr($key); ?>">
+                                    <?php for ($i = 1; $i <= 10; $i++) : ?>
+                                        <span class="dashicons dashicons-star-empty <?php echo $i <= $score_value ? 'active' : ''; ?>" 
+                                              data-value="<?php echo $i; ?>"></span>
+                                    <?php endfor; ?>
+                                    <input type="hidden" name="<?php echo esc_attr($key); ?>_score" 
+                                           value="<?php echo esc_attr($score_value); ?>" />
+                                </div>
+                            <?php elseif ($presentation_settings['scoring_style'] === 'numeric') : ?>
+                                <div class="mt-numeric-input">
+                                    <input type="number" 
+                                           name="<?php echo esc_attr($key); ?>_score" 
+                                           min="0" 
+                                           max="10" 
+                                           value="<?php echo esc_attr($score_value); ?>"
+                                           class="mt-score-input" />
+                                    <span class="mt-score-label">/ 10</span>
+                                </div>
+                            <?php elseif ($presentation_settings['scoring_style'] === 'buttons') : ?>
+                                <div class="mt-button-group" data-criterion="<?php echo esc_attr($key); ?>">
+                                    <?php for ($i = 0; $i <= 10; $i++) : ?>
+                                        <button type="button" 
+                                                class="mt-score-button <?php echo $i == $score_value ? 'active' : ''; ?>" 
+                                                data-value="<?php echo $i; ?>"><?php echo $i; ?></button>
+                                    <?php endfor; ?>
+                                    <input type="hidden" name="<?php echo esc_attr($key); ?>_score" 
+                                           value="<?php echo esc_attr($score_value); ?>" />
+                                </div>
+                            <?php endif; ?>
+                            
                             <div class="mt-score-display" style="background-color: <?php echo esc_attr($criterion['color']); ?>">
                                 <span class="mt-score-value"><?php echo esc_html($score_value); ?></span>
                             </div>
