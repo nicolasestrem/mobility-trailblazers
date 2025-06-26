@@ -20,8 +20,8 @@ The Jury Rankings System provides a dynamic, real-time display of candidate rank
    - `jury-rankings.php` - Partial template for rankings display with progress rings
 
 4. **Frontend Assets**
-   - CSS Grid-based responsive design with modern animations
-   - JavaScript for dynamic updates and interactive features
+   - CSS Grid-based responsive design with modern animations.
+   - JavaScript for dynamic updates and interactive features.
 
 ## Database Schema
 
