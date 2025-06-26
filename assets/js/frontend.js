@@ -656,4 +656,40 @@
         $criterion.find('.mt-score-value').text(value);
     }
 
+    // Rankings update functionality
+    jQuery(document).ready(function($) {
+        // Auto-refresh rankings after evaluation submission
+        $(document).on('mt:evaluation:submitted', function() {
+            refreshRankings();
+        });
+        
+        // Refresh rankings function
+        function refreshRankings() {
+            $.ajax({
+                url: mt_ajax.url,
+                type: 'POST',
+                data: {
+                    action: 'mt_get_jury_rankings',
+                    nonce: mt_ajax.nonce,
+                    limit: 10
+                },
+                success: function(response) {
+                    if (response.success && response.data.html) {
+                        $('#mt-rankings-container').html(response.data.html);
+                        
+                        // Add animation
+                        $('.mt-ranking-item').each(function(index) {
+                            $(this).css('opacity', '0').delay(index * 50).animate({
+                                opacity: 1
+                            }, 300);
+                        });
+                    }
+                }
+            });
+        }
+        
+        // Optional: Refresh rankings periodically
+        setInterval(refreshRankings, 60000); // Every minute
+    });
+
 })(jQuery); 

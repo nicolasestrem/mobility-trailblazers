@@ -54,6 +54,7 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
     'show_progress_bar' => 1,
     'show_stats_cards' => 1,
     'show_search_filter' => 1,
+    'show_rankings' => 1,
     'card_layout' => 'grid',
     'intro_text' => ''
 ]);
@@ -125,7 +126,19 @@ $layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
         </div>
     </div>
     <?php endif; ?>
-    
+
+    <!-- Add Rankings Section -->
+    <?php if ($dashboard_settings['show_rankings'] ?? true) : ?>
+        <div id="mt-rankings-container" class="mt-rankings-container">
+            <?php 
+            // Get initial rankings
+            $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+            $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, 10);
+            include MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
+            ?>
+        </div>
+    <?php endif; ?>
+
     <?php if (!empty($assignments)) : ?>
         <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?>" id="mt-candidates-list">
             <?php foreach ($assignments as $assignment) : 

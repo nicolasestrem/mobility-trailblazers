@@ -1096,4 +1096,200 @@
     .mt-candidates-grid.columns-4 {
         grid-template-columns: repeat(4, 1fr);
     }
+}
+
+/* Rankings Section */
+.mt-rankings-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.mt-rankings-header {
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.mt-rankings-header h2 {
+    font-size: 24px;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.mt-rankings-description {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.mt-rankings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mt-ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.mt-ranking-item:hover {
+    background: #fff;
+    border-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Medal colors for top 3 */
+.mt-ranking-item.gold {
+    background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+    border-color: #ffd700;
+}
+
+.mt-ranking-item.silver {
+    background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+    border-color: #c0c0c0;
+}
+
+.mt-ranking-item.bronze {
+    background: linear-gradient(135deg, #fdf0e6 0%, #f9e5d6 100%);
+    border-color: #cd7f32;
+}
+
+.mt-ranking-position {
+    position: relative;
+    min-width: 50px;
+    text-align: center;
+}
+
+.mt-position-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.mt-medal-icon {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+}
+
+.gold .mt-medal-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>');
+}
+
+.silver .mt-medal-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23C0C0C0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>');
+}
+
+.bronze .mt-medal-icon {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23CD7F32"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>');
+}
+
+.mt-ranking-details {
+    flex: 1;
+}
+
+.mt-ranking-name {
+    font-size: 18px;
+    margin: 0 0 4px 0;
+}
+
+.mt-ranking-name a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.mt-ranking-name a:hover {
+    color: #667eea;
+}
+
+.mt-ranking-org {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.mt-ranking-scores {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.mt-total-score {
+    text-align: center;
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    border-radius: 8px;
+}
+
+.mt-score-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.mt-score-label {
+    display: block;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.mt-mini-scores {
+    display: flex;
+    gap: 10px;
+}
+
+.mt-mini-scores span {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    background: #f0f0f0;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: help;
+}
+
+.mt-ranking-actions {
+    margin-left: auto;
+}
+
+.mt-btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .mt-ranking-item {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .mt-ranking-scores {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .mt-ranking-actions {
+        width: 100%;
+        text-align: center;
+    }
 } 

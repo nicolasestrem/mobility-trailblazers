@@ -33,6 +33,8 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
             'show_progress_bar' => isset($_POST['mt_dashboard_settings']['show_progress_bar']) ? 1 : 0,
             'show_stats_cards' => isset($_POST['mt_dashboard_settings']['show_stats_cards']) ? 1 : 0,
             'show_search_filter' => isset($_POST['mt_dashboard_settings']['show_search_filter']) ? 1 : 0,
+            'show_rankings' => isset($_POST['mt_dashboard_settings']['show_rankings']) ? 1 : 0,
+            'rankings_limit' => intval($_POST['mt_dashboard_settings']['rankings_limit']),
             'card_layout' => sanitize_text_field($_POST['mt_dashboard_settings']['card_layout']),
             'intro_text' => sanitize_textarea_field($_POST['mt_dashboard_settings']['intro_text']),
             'header_image_url' => sanitize_text_field($_POST['mt_dashboard_settings']['header_image_url'] ?? '')
@@ -85,6 +87,8 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
     'show_progress_bar' => 1,
     'show_stats_cards' => 1,
     'show_search_filter' => 1,
+    'show_rankings' => 1,
+    'rankings_limit' => 10,
     'card_layout' => 'grid',
     'intro_text' => __('Welcome to the Mobility Trailblazers Jury Dashboard. Here you can evaluate candidates and track your progress.', 'mobility-trailblazers')
 ]);
@@ -278,7 +282,26 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                         <input type="checkbox" name="mt_dashboard_settings[show_search_filter]" value="1" 
                                <?php checked($dashboard_settings['show_search_filter'], 1); ?> />
                         <?php _e('Enable search and filter functionality', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_dashboard_settings[show_rankings]" value="1" 
+                               <?php checked($dashboard_settings['show_rankings'], 1); ?> />
+                        <?php _e('Show rankings section', 'mobility-trailblazers'); ?>
                     </label>
+                </td>
+            </tr>
+            
+            <!-- Rankings Settings -->
+            <tr>
+                <th scope="row">
+                    <label for="rankings_limit"><?php _e('Number of Rankings to Show', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <input type="number" name="mt_dashboard_settings[rankings_limit]" id="rankings_limit" 
+                           value="<?php echo esc_attr($dashboard_settings['rankings_limit']); ?>" 
+                           min="5" max="20" class="small-text">
+                    <p class="description"><?php _e('How many top candidates to display in the rankings section', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
             

@@ -438,9 +438,9 @@ const MTAjax = {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                this.handleSuccess(result.data);
+                mtShowNotification('Evaluation saved successfully!', 'success');
             } else {
-                this.handleError(result.data.message);
+                mtShowNotification(response.data.message, 'error');
             }
         })
         .catch(error => {
@@ -1149,6 +1149,344 @@ add_filter('query', function($query) {
     }
     return $query;
 });
+```
+
+## Jury Rankings System
+
+### Overview
+
+The Jury Rankings System provides dynamic, personalized rankings for jury members. It displays candidates in order of their evaluation scores with visual indicators and detailed score breakdowns.
+
+### Architecture
+
+#### Repository Methods
+
+```php
+// Get personalized rankings for a jury member
+$evaluation_repo = new MT_Evaluation_Repository();
+$rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member_id, $limit);
+
+// Get overall rankings across all juries
+$overall_rankings = $evaluation_repo->get_overall_rankings($limit);
+```
+
+#### AJAX Endpoint
+
+```php
+// AJAX action for dynamic updates
+add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
+
+// Handler method
+public function get_jury_rankings() {
+    // Security checks
+    if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+        wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+    }
+    
+    if (!current_user_can('mt_submit_evaluations')) {
+        wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+    }
+    
+    // Get rankings
+    $evaluation_repo = new MT_Evaluation_Repository();
+    $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member_id, $limit);
+    
+    wp_send_json_success([
+        'rankings' => $rankings,
+        'html' => $this->render_rankings_html($rankings)
+    ]);
+}
+```
+
+### Customizing Rankings Display
+
+#### Adding Custom Fields
+
+```php
+// Extend the repository query to include custom fields
+public function get_ranked_candidates_for_jury($jury_member_id, $limit = 10) {
+    global $wpdb;
+    
+    $query = "SELECT 
+                c.ID as candidate_id,
+                c.post_title as candidate_name,
+                e.total_score,
+                // ... existing fields ...
+                pm3.meta_value as custom_field
+              FROM {$wpdb->posts} c
+              INNER JOIN {$this->table_name} e ON c.ID = e.candidate_id
+              LEFT JOIN {$wpdb->postmeta} pm1 ON c.ID = pm1.post_id AND pm1.meta_key = '_mt_organization'
+              LEFT JOIN {$wpdb->postmeta} pm2 ON c.ID = pm2.post_id AND pm2.meta_key = '_mt_position'
+              LEFT JOIN {$wpdb->postmeta} pm3 ON c.ID = pm3.post_id AND pm3.meta_key = '_mt_custom_field'
+              WHERE e.jury_member_id = %d
+                AND c.post_type = 'mt_candidate'
+                AND c.post_status = 'publish'
+                AND e.status = 'completed'
+              ORDER BY e.total_score DESC
+              LIMIT %d";
+    
+    return $wpdb->get_results($wpdb->prepare($query, $jury_member_id, $limit));
+}
+```
+
+#### Custom Template Rendering
+
+```php
+// Create a custom template for different ranking styles
+public function render_custom_rankings_html($rankings, $style = 'default') {
+    ob_start();
+    
+    switch ($style) {
+        case 'compact':
+            include MT_PLUGIN_DIR . 'templates/frontend/partials/rankings-compact.php';
+            break;
+        case 'detailed':
+            include MT_PLUGIN_DIR . 'templates/frontend/partials/rankings-detailed.php';
+            break;
+        default:
+            include MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
+    }
+    
+    return ob_get_clean();
+}
+```
+
+#### Custom CSS Classes
+
+```css
+/* Custom ranking styles */
+.mt-ranking-item.custom-style {
+    background: linear-gradient(135deg, #custom-color1 0%, #custom-color2 100%);
+    border: 2px solid #custom-border;
+}
+
+.mt-ranking-item.custom-style .mt-position-number {
+    font-size: 28px;
+    color: #custom-text;
+}
+
+.mt-ranking-item.custom-style .mt-medal-icon {
+    background-image: url('path/to/custom-medal.svg');
+}
+```
+
+### Extending Rankings Functionality
+
+#### Custom Ranking Algorithms
+
+```php
+// Create a custom ranking service
+class MT_Custom_Ranking_Service {
+    private $evaluation_repo;
+    
+    public function __construct() {
+        $this->evaluation_repo = new MT_Evaluation_Repository();
+    }
+    
+    public function get_weighted_rankings($jury_member_id, $weights = []) {
+        $evaluations = $this->evaluation_repo->find_all([
+            'jury_member_id' => $jury_member_id,
+            'status' => 'completed'
+        ]);
+        
+        // Apply custom weighting
+        foreach ($evaluations as $evaluation) {
+            $evaluation->weighted_score = $this->calculate_weighted_score($evaluation, $weights);
+        }
+        
+        // Sort by weighted score
+        usort($evaluations, function($a, $b) {
+            return $b->weighted_score <=> $a->weighted_score;
+        });
+        
+        return $evaluations;
+    }
+    
+    private function calculate_weighted_score($evaluation, $weights) {
+        $default_weights = [
+            'courage' => 1,
+            'innovation' => 1,
+            'implementation' => 1,
+            'relevance' => 1,
+            'visibility' => 1
+        ];
+        
+        $weights = array_merge($default_weights, $weights);
+        
+        $weighted_sum = 0;
+        $weight_total = 0;
+        
+        foreach ($weights as $criterion => $weight) {
+            $score_field = $criterion . '_score';
+            if (isset($evaluation->$score_field)) {
+                $weighted_sum += $evaluation->$score_field * $weight;
+                $weight_total += $weight;
+            }
+        }
+        
+        return $weight_total > 0 ? $weighted_sum / $weight_total : 0;
+    }
+}
+```
+
+#### Custom AJAX Handlers
+
+```php
+// Add custom ranking endpoints
+add_action('wp_ajax_mt_get_custom_rankings', function() {
+    if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+        wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+    }
+    
+    $jury_member_id = get_current_user_id();
+    $weights = isset($_POST['weights']) ? $_POST['weights'] : [];
+    
+    $ranking_service = new MT_Custom_Ranking_Service();
+    $rankings = $ranking_service->get_weighted_rankings($jury_member_id, $weights);
+    
+    wp_send_json_success([
+        'rankings' => $rankings,
+        'html' => render_custom_rankings_html($rankings)
+    ]);
+});
+```
+
+#### JavaScript Extensions
+
+```javascript
+// Custom ranking update function
+function updateCustomRankings(weights = {}) {
+    jQuery.ajax({
+        url: mt_ajax.url,
+        type: 'POST',
+        data: {
+            action: 'mt_get_custom_rankings',
+            nonce: mt_ajax.nonce,
+            weights: weights
+        },
+        success: function(response) {
+            if (response.success && response.data.html) {
+                $('#mt-rankings-container').html(response.data.html);
+                
+                // Custom animations
+                $('.mt-ranking-item').each(function(index) {
+                    $(this).css('opacity', '0')
+                           .delay(index * 100)
+                           .animate({opacity: 1}, 500);
+                });
+            }
+        }
+    });
+}
+
+// Trigger custom rankings update
+$(document).on('mt:custom_rankings:update', function(e, weights) {
+    updateCustomRankings(weights);
+});
+```
+
+### Performance Optimization
+
+#### Caching Rankings
+
+```php
+// Cache rankings for better performance
+class MT_Rankings_Cache {
+    private static $cache_group = 'mt_rankings';
+    
+    public static function get_rankings($jury_member_id, $limit = 10) {
+        $cache_key = "rankings_{$jury_member_id}_{$limit}";
+        
+        $rankings = wp_cache_get($cache_key, self::$cache_group);
+        
+        if (false === $rankings) {
+            $evaluation_repo = new MT_Evaluation_Repository();
+            $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member_id, $limit);
+            
+            wp_cache_set($cache_key, $rankings, self::$cache_group, HOUR_IN_SECONDS);
+        }
+        
+        return $rankings;
+    }
+    
+    public static function clear_rankings_cache($jury_member_id = null) {
+        if ($jury_member_id) {
+            wp_cache_delete("rankings_{$jury_member_id}_*", self::$cache_group);
+        } else {
+            wp_cache_flush_group(self::$cache_group);
+        }
+    }
+}
+
+// Usage
+$rankings = MT_Rankings_Cache::get_rankings($jury_member_id, 10);
+
+// Clear cache when evaluation is submitted
+add_action('mt:evaluation:submitted', function($evaluation_id) {
+    $evaluation = (new MT_Evaluation_Repository())->find($evaluation_id);
+    if ($evaluation) {
+        MT_Rankings_Cache::clear_rankings_cache($evaluation->jury_member_id);
+    }
+});
+```
+
+#### Database Indexing
+
+```sql
+-- Add indexes for better query performance
+ALTER TABLE wp_mt_evaluations 
+ADD INDEX idx_jury_candidate_status (jury_member_id, candidate_id, status),
+ADD INDEX idx_total_score (total_score DESC),
+ADD INDEX idx_status_created (status, created_at DESC);
+```
+
+### Testing Rankings
+
+```php
+// Unit test for rankings functionality
+class Test_MT_Rankings extends WP_UnitTestCase {
+    
+    public function test_get_ranked_candidates_for_jury() {
+        // Create test data
+        $jury_member_id = $this->factory->post->create(['post_type' => 'mt_jury_member']);
+        $candidate_id = $this->factory->post->create(['post_type' => 'mt_candidate']);
+        
+        // Create evaluation
+        $evaluation_repo = new MT_Evaluation_Repository();
+        $evaluation_id = $evaluation_repo->create([
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id,
+            'total_score' => 8.5,
+            'status' => 'completed'
+        ]);
+        
+        // Test rankings
+        $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member_id, 10);
+        
+        $this->assertNotEmpty($rankings);
+        $this->assertEquals($candidate_id, $rankings[0]->candidate_id);
+        $this->assertEquals(8.5, $rankings[0]->total_score);
+    }
+    
+    public function test_rankings_ajax_endpoint() {
+        // Set up user
+        $user_id = $this->factory->user->create(['role' => 'mt_jury_member']);
+        wp_set_current_user($user_id);
+        
+        // Mock AJAX request
+        $_POST = [
+            'action' => 'mt_get_jury_rankings',
+            'nonce' => wp_create_nonce('mt_ajax_nonce'),
+            'limit' => 5
+        ];
+        
+        // Test AJAX response
+        $ajax_handler = new MT_Evaluation_Ajax();
+        $ajax_handler->get_jury_rankings();
+        
+        $this->expectOutputRegex('/"success":true/');
+    }
+}
 ```
 
 This developer guide provides comprehensive information for working with the Mobility Trailblazers plugin. Follow these guidelines to maintain code quality and consistency across the project. 

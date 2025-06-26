@@ -403,6 +403,70 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
     }
     
     /**
+     * Get ranked candidates for a specific jury member
+     *
+     * @param int $jury_member_id Jury member ID
+     * @param int $limit Number of candidates to return
+     * @return array
+     */
+    public function get_ranked_candidates_for_jury($jury_member_id, $limit = 10) {
+        global $wpdb;
+        
+        $query = "SELECT 
+                    c.ID as candidate_id,
+                    c.post_title as candidate_name,
+                    e.total_score,
+                    e.courage_score,
+                    e.innovation_score,
+                    e.implementation_score,
+                    e.relevance_score,
+                    e.visibility_score,
+                    e.status as evaluation_status,
+                    pm1.meta_value as organization,
+                    pm2.meta_value as position
+                  FROM {$wpdb->posts} c
+                  INNER JOIN {$this->table_name} e ON c.ID = e.candidate_id
+                  LEFT JOIN {$wpdb->postmeta} pm1 ON c.ID = pm1.post_id AND pm1.meta_key = '_mt_organization'
+                  LEFT JOIN {$wpdb->postmeta} pm2 ON c.ID = pm2.post_id AND pm2.meta_key = '_mt_position'
+                  WHERE e.jury_member_id = %d
+                    AND c.post_type = 'mt_candidate'
+                    AND c.post_status = 'publish'
+                    AND e.status = 'completed'
+                  ORDER BY e.total_score DESC
+                  LIMIT %d";
+        
+        return $wpdb->get_results($wpdb->prepare($query, $jury_member_id, $limit));
+    }
+    
+    /**
+     * Get all evaluated candidates with rankings across all juries
+     *
+     * @param int $limit Number of candidates to return
+     * @return array
+     */
+    public function get_overall_rankings($limit = 10) {
+        global $wpdb;
+        
+        $query = "SELECT 
+                    c.ID as candidate_id,
+                    c.post_title as candidate_name,
+                    AVG(e.total_score) as average_score,
+                    COUNT(DISTINCT e.jury_member_id) as evaluation_count,
+                    pm1.meta_value as organization
+                  FROM {$wpdb->posts} c
+                  INNER JOIN {$this->table_name} e ON c.ID = e.candidate_id
+                  LEFT JOIN {$wpdb->postmeta} pm1 ON c.ID = pm1.post_id AND pm1.meta_key = '_mt_organization'
+                  WHERE c.post_type = 'mt_candidate'
+                    AND c.post_status = 'publish'
+                    AND e.status = 'completed'
+                  GROUP BY c.ID
+                  ORDER BY average_score DESC
+                  LIMIT %d";
+        
+        return $wpdb->get_results($wpdb->prepare($query, $limit));
+    }
+    
+    /**
      * Calculate total score
      *
      * @param array $data Evaluation data with individual scores

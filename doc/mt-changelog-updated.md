@@ -5,6 +5,68 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.9] - 2025-06-26
+
+### Added
+- **Jury Rankings System**: Comprehensive dynamic rankings display for jury members
+  - **Personalized Rankings**: Each jury member sees their own ranking of evaluated candidates
+  - **Real-time Updates**: Rankings update automatically after evaluation submissions via AJAX
+  - **Visual Hierarchy**: Medal indicators (gold, silver, bronze) for top 3 positions
+  - **Score Breakdown**: Detailed display of all 5 evaluation criteria scores with tooltips
+  - **Interactive Elements**: Clickable candidate names linking to evaluation forms
+  - **Responsive Design**: Optimized for desktop and mobile devices with flexbox layouts
+
+### Enhanced
+- **Repository Layer**: Added `get_ranked_candidates_for_jury()` and `get_overall_rankings()` methods
+- **AJAX System**: New `mt_get_jury_rankings` endpoint with security and permission checks
+- **Dashboard Integration**: Seamless integration with existing jury dashboard layout
+- **Admin Controls**: Settings to enable/disable rankings and configure display limits
+
+### Technical Implementation
+
+#### Database Layer
+- **Optimized Queries**: Efficient SQL with proper JOINs and indexing for performance
+- **Meta Data Integration**: Includes organization and position information from post meta
+- **Status Filtering**: Only displays completed evaluations for accurate rankings
+- **Score Ordering**: Results ordered by total score in descending order
+- **Flexible Limits**: Configurable number of results (5-20 range)
+
+#### Frontend System
+- **Template Architecture**: Modular template system with partial templates
+- **CSS Framework**: Comprehensive styling with medal colors, hover effects, and animations
+- **JavaScript Integration**: Event-driven updates with smooth animations and periodic refresh
+- **Responsive Design**: Mobile-first approach with breakpoint-specific layouts
+
+#### Security Features
+- **Nonce Verification**: All AJAX requests protected against CSRF attacks
+- **Permission Checks**: Only authorized users with `mt_submit_evaluations` capability
+- **Input Validation**: Proper sanitization of all user inputs and parameters
+- **Data Isolation**: Each jury member sees only their own rankings
+
+### Files Modified
+- `includes/repositories/class-mt-evaluation-repository.php` - Added ranking methods
+- `includes/ajax/class-mt-evaluation-ajax.php` - Added AJAX handler and template rendering
+- `templates/frontend/partials/jury-rankings.php` - Created rankings display template
+- `templates/frontend/jury-dashboard.php` - Integrated rankings section with settings
+- `assets/css/frontend.css` - Added comprehensive rankings styling system
+- `assets/js/frontend.js` - Added dynamic update functionality with animations
+- `templates/admin/settings.php` - Added admin controls for rankings configuration
+
+### New Files Created
+- `templates/frontend/partials/jury-rankings.php` - Rankings display template
+- `doc/jury-rankings-system.md` - Comprehensive technical documentation
+
+### Benefits
+- **Enhanced User Experience**: Jury members can quickly see their evaluation progress
+- **Visual Feedback**: Clear ranking system with medal indicators for motivation
+- **Real-time Updates**: Immediate feedback after evaluation submissions
+- **Performance Optimized**: Efficient queries and minimal DOM updates
+- **Admin Control**: Flexible configuration options for different use cases
+
+### Settings Added
+- `show_rankings` - Toggle rankings section visibility (default: enabled)
+- `rankings_limit` - Number of candidates to display (default: 10, range: 5-20)
+
 ## [2.0.8] - 2025-06-24
 
 ### Added

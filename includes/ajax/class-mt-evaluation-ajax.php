@@ -34,6 +34,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_evaluation', [$this, 'get_evaluation']);
         add_action('wp_ajax_mt_get_candidate_details', [$this, 'get_candidate_details']);
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
+        add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
     }
     
     /**
@@ -299,6 +300,47 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $progress = $service->get_jury_progress($jury_member->ID);
         
         $this->success($progress);
+    }
+
+    /**
+     * Get ranked candidates for jury dashboard
+     */
+    public function get_jury_rankings() {
+        // Verify nonce
+        if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_submit_evaluations')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+        }
+        
+        $current_user_id = get_current_user_id();
+        $jury_member = $this->get_jury_member_by_user_id($current_user_id);
+        
+        if (!$jury_member) {
+            wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+        }
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 10;
+        
+        $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, $limit);
+        
+        wp_send_json_success([
+            'rankings' => $rankings,
+            'html' => $this->render_rankings_html($rankings)
+        ]);
+    }
+
+    /**
+     * Render rankings HTML
+     */
+    private function render_rankings_html($rankings) {
+        ob_start();
+        include MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
+        return ob_get_clean();
     }
     
     /**
