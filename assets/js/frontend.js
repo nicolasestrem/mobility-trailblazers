@@ -692,4 +692,40 @@
         setInterval(refreshRankings, 60000); // Every minute
     });
 
+    // Enhanced Rankings Interactivity
+    jQuery(document).ready(function($) {
+        // Animate score rings on page load
+        function animateScoreRings() {
+            $('.mt-score-ring-progress').each(function() {
+                const $this = $(this);
+                const offset = $this.css('stroke-dashoffset');
+                $this.css('stroke-dashoffset', '100');
+                
+                setTimeout(() => {
+                    $this.css('stroke-dashoffset', offset);
+                }, 100);
+            });
+        }
+        
+        // Initialize animations
+        if ($('.mt-rankings-section').length) {
+            animateScoreRings();
+        }
+        
+        // Hover effects for ranking cards
+        $('.mt-ranking-item').on('mouseenter', function() {
+            $(this).find('.mt-score-ring-progress').css('stroke', '#764ba2');
+        }).on('mouseleave', function() {
+            $(this).find('.mt-score-ring-progress').css('stroke', '#667eea');
+        });
+        
+        // Click feedback
+        $('.mt-ranking-item').on('click', function() {
+            $(this).css('transform', 'scale(0.98)');
+            setTimeout(() => {
+                $(this).css('transform', '');
+            }, 150);
+        });
+    });
+
 })(jQuery); 
