@@ -36,6 +36,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
         add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
         add_action('wp_ajax_mt_save_inline_evaluation', [$this, 'save_inline_evaluation']);
+        
+        // Test action for debugging
+        add_action('wp_ajax_mt_test_ajax', [$this, 'test_ajax']);
     }
     
     /**
@@ -397,11 +400,14 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * Save inline evaluation from rankings grid
      */
     public function save_inline_evaluation() {
-        // Log for debugging
+        // Debug: Check if method is being called
+        error_log('MT Inline Save - Method called at: ' . date('Y-m-d H:i:s'));
+        error_log('MT Inline Save - REQUEST_METHOD: ' . $_SERVER['REQUEST_METHOD']);
         error_log('MT Inline Save - POST data: ' . print_r($_POST, true));
         
         // Verify nonce
         if (!isset($_POST['mt_inline_nonce']) || !wp_verify_nonce($_POST['mt_inline_nonce'], 'mt_inline_evaluation')) {
+            error_log('MT Inline Save - Nonce verification failed');
             wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
@@ -501,5 +507,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         error_log('MT Inline Save - Success response: ' . print_r($response_data, true));
         
         wp_send_json_success($response_data);
+    }
+
+    /**
+     * Test AJAX action for debugging
+     */
+    public function test_ajax() {
+        error_log('MT Test AJAX - Method called successfully');
+        wp_send_json_success(['message' => 'AJAX is working!']);
     }
 } 

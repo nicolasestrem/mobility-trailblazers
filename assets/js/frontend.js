@@ -733,6 +733,27 @@
         initializeInlineEvaluations();
         
         function initializeInlineEvaluations() {
+            // Test AJAX functionality
+            console.log('Testing AJAX functionality...');
+            $.ajax({
+                url: mt_ajax.url,
+                type: 'POST',
+                data: {
+                    action: 'mt_test_ajax'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('AJAX test successful:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX test failed:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText
+                    });
+                }
+            });
+            
             // Initialize all score rings on page load
             $('.mt-score-ring-mini').each(function() {
                 const score = $(this).data('score');
@@ -813,9 +834,13 @@
                     scores: scores
                 };
                 
+                // Debug: Log the form data being sent
+                console.log('Sending AJAX request with data:', formData);
+                console.log('AJAX URL:', mt_ajax.url);
+                
                 // Save via AJAX
                 $.ajax({
-                    url: mt_ajax.ajax_url,
+                    url: mt_ajax.url,
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
@@ -931,7 +956,7 @@
             const $container = $('#mt-rankings-container');
             
             $.ajax({
-                url: mt_ajax.ajax_url,
+                url: mt_ajax.url,
                 type: 'POST',
                 data: {
                     action: 'mt_get_jury_rankings',
