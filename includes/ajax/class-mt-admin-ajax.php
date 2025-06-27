@@ -363,7 +363,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_clear_data');
         $this->check_permission('mt_manage_settings');
         
-        $type = $this->get_string_param('type');
+        $type = $this->get_param('type');
         
         if (!in_array($type, ['evaluations', 'assignments'])) {
             $this->error(__('Invalid data type.', 'mobility-trailblazers'));

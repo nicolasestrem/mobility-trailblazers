@@ -60,26 +60,26 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
 ]);
 
 // Apply custom styles
-$header_class = 'mt-dashboard-header mt-header-' . $dashboard_settings['header_style'];
-$progress_class = 'mt-progress-bar mt-progress-' . $dashboard_settings['progress_bar_style'];
-$layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
+$header_class = 'mt-dashboard-header mt-header-' . (isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient');
+$progress_class = 'mt-progress-bar mt-progress-' . (isset($dashboard_settings['progress_bar_style']) ? $dashboard_settings['progress_bar_style'] : 'rounded');
+$layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid');
 ?>
 
 <div class="mt-jury-dashboard">
     <div class="<?php echo esc_attr($header_class); ?>" 
-         style="<?php echo $dashboard_settings['header_style'] === 'solid' ? 'background-color: ' . esc_attr($dashboard_settings['primary_color']) : ''; ?>">
+         style="<?php echo (isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient') === 'solid' ? 'background-color: ' . esc_attr(isset($dashboard_settings['primary_color']) ? $dashboard_settings['primary_color'] : '#0073aa') : ''; ?>">
         
-        <?php if ($dashboard_settings['show_welcome_message']) : ?>
+        <?php if (isset($dashboard_settings['show_welcome_message']) ? $dashboard_settings['show_welcome_message'] : true) : ?>
             <h1><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($current_user->display_name)); ?></h1>
         <?php endif; ?>
         
-        <?php if (!empty($dashboard_settings['intro_text'])) : ?>
+        <?php if (!empty(isset($dashboard_settings['intro_text']) ? $dashboard_settings['intro_text'] : '')) : ?>
             <p><?php echo wp_kses_post($dashboard_settings['intro_text']); ?></p>
         <?php else : ?>
             <p><?php _e('Review and evaluate your assigned candidates for the Mobility Trailblazers Awards', 'mobility-trailblazers'); ?></p>
         <?php endif; ?>
         
-        <?php if ($dashboard_settings['show_progress_bar'] && $progress['total'] > 0) : ?>
+        <?php if ((isset($dashboard_settings['show_progress_bar']) ? $dashboard_settings['show_progress_bar'] : true) && $progress['total'] > 0) : ?>
         <div class="<?php echo esc_attr($progress_class); ?>">
             <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress['completion_rate']); ?>%">
                 <span class="mt-progress-text"><?php echo esc_html($progress['completion_rate']); ?>%</span>
@@ -88,7 +88,7 @@ $layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
         <?php endif; ?>
     </div>
     
-    <?php if ($dashboard_settings['show_stats_cards']) : ?>
+    <?php if (isset($dashboard_settings['show_stats_cards']) ? $dashboard_settings['show_stats_cards'] : true) : ?>
     <div class="mt-stats-grid">
         <div class="mt-stat-card">
             <p class="mt-stat-number"><?php echo esc_html($progress['total']); ?></p>
@@ -109,7 +109,7 @@ $layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
     </div>
     <?php endif; ?>
     
-    <?php if ($dashboard_settings['show_search_filter']) : ?>
+    <?php if (isset($dashboard_settings['show_search_filter']) ? $dashboard_settings['show_search_filter'] : true) : ?>
     <div class="mt-search-filters">
         <div class="mt-search-box">
             <input type="text" 
@@ -128,12 +128,12 @@ $layout_class = 'mt-candidates-' . $dashboard_settings['card_layout'];
     <?php endif; ?>
 
     <!-- Add Rankings Section -->
-    <?php if ($dashboard_settings['show_rankings'] ?? true) : ?>
+    <?php if (isset($dashboard_settings['show_rankings']) ? $dashboard_settings['show_rankings'] : true) : ?>
         <div id="mt-rankings-container" class="mt-rankings-container">
             <?php 
             // Get initial rankings
             $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-            $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, 10);
+            $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, isset($dashboard_settings['rankings_limit']) ? $dashboard_settings['rankings_limit'] : 10);
             include MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
             ?>
         </div>

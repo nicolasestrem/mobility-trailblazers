@@ -194,51 +194,50 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="dashboard_header_style" name="mt_dashboard_settings[header_style]">
-                        <option value="gradient" <?php selected($dashboard_settings['header_style'], 'gradient'); ?>><?php _e('Gradient (Default)', 'mobility-trailblazers'); ?></option>
-                        <option value="solid" <?php selected($dashboard_settings['header_style'], 'solid'); ?>><?php _e('Solid Color', 'mobility-trailblazers'); ?></option>
-                        <option value="image" <?php selected($dashboard_settings['header_style'], 'image'); ?>><?php _e('Background Image', 'mobility-trailblazers'); ?></option>
+                        <option value="gradient" <?php selected(isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient', 'gradient'); ?>><?php _e('Gradient (Default)', 'mobility-trailblazers'); ?></option>
+                        <option value="solid" <?php selected(isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient', 'solid'); ?>><?php _e('Solid Color', 'mobility-trailblazers'); ?></option>
+                        <option value="image" <?php selected(isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient', 'image'); ?>><?php _e('Background Image', 'mobility-trailblazers'); ?></option>
                     </select>
                     <p class="description"><?php _e('Choose the visual style for the dashboard header.', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
             
-            <!-- Color Scheme -->
+            <!-- Primary Color -->
             <tr>
                 <th scope="row">
                     <label for="dashboard_primary_color"><?php _e('Primary Color', 'mobility-trailblazers'); ?></label>
                 </th>
                 <td>
-                    <input type="color" id="dashboard_primary_color" name="mt_dashboard_settings[primary_color]" 
-                           value="<?php echo esc_attr($dashboard_settings['primary_color']); ?>" />
-                    <p class="description"><?php _e('Main accent color used throughout the dashboard.', 'mobility-trailblazers'); ?></p>
+                    <input type="color" id="dashboard_primary_color" name="mt_dashboard_settings[primary_color]"
+                           value="<?php echo esc_attr(isset($dashboard_settings['primary_color']) ? $dashboard_settings['primary_color'] : '#0073aa'); ?>" />
+                    <p class="description"><?php _e('Primary color for the dashboard theme', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
             
-            <!-- Header Background Image -->
+            <!-- Header Image URL -->
             <tr>
                 <th scope="row">
                     <label for="header_image_url"><?php _e('Header Background Image', 'mobility-trailblazers'); ?></label>
                 </th>
                 <td>
-                    <input type="text" id="header_image_url" name="mt_dashboard_settings[header_image_url]" 
-                           value="<?php echo esc_attr($dashboard_settings['header_image_url'] ?? ''); ?>" 
+                    <input type="text" id="header_image_url" name="mt_dashboard_settings[header_image_url]"
+                           value="<?php echo esc_attr(isset($dashboard_settings['header_image_url']) ? $dashboard_settings['header_image_url'] : ''); ?>"
                            class="regular-text" />
                     <button type="button" id="upload_header_image" class="button button-secondary">
                         <?php _e('Choose Image', 'mobility-trailblazers'); ?>
                     </button>
-                    <?php if (!empty($dashboard_settings['header_image_url'])) : ?>
-                        <div class="mt-image-preview">
-                            <img id="header_image_preview" src="<?php echo esc_url($dashboard_settings['header_image_url']); ?>" 
-                                 alt="<?php _e('Header background preview', 'mobility-trailblazers'); ?>" 
-                                 style="max-width: 200px; height: auto; margin-top: 10px;" />
-                        </div>
+                    <?php if (!empty(isset($dashboard_settings['header_image_url']) ? $dashboard_settings['header_image_url'] : '')) : ?>
+                    <div class="mt-image-preview">
+                        <img id="header_image_preview" src="<?php echo esc_url($dashboard_settings['header_image_url']); ?>"
+                             alt="Header preview" style="max-width: 200px; margin-top: 10px;" />
+                    </div>
                     <?php else : ?>
                         <div class="mt-image-preview" style="display: none;">
                             <img id="header_image_preview" src="" alt="<?php _e('Header background preview', 'mobility-trailblazers'); ?>" 
                                  style="max-width: 200px; height: auto; margin-top: 10px;" />
                         </div>
                     <?php endif; ?>
-                    <p class="description"><?php _e('Upload or choose an image for the dashboard header background. Only used when header style is set to "Background Image".', 'mobility-trailblazers'); ?></p>
+                    <p class="description"><?php _e('URL for header background image (optional)', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
             
@@ -249,44 +248,44 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="progress_bar_style" name="mt_dashboard_settings[progress_bar_style]">
-                        <option value="rounded" <?php selected($dashboard_settings['progress_bar_style'], 'rounded'); ?>><?php _e('Rounded', 'mobility-trailblazers'); ?></option>
-                        <option value="square" <?php selected($dashboard_settings['progress_bar_style'], 'square'); ?>><?php _e('Square', 'mobility-trailblazers'); ?></option>
-                        <option value="striped" <?php selected($dashboard_settings['progress_bar_style'], 'striped'); ?>><?php _e('Striped', 'mobility-trailblazers'); ?></option>
+                        <option value="rounded" <?php selected(isset($dashboard_settings['progress_bar_style']) ? $dashboard_settings['progress_bar_style'] : 'rounded', 'rounded'); ?>><?php _e('Rounded', 'mobility-trailblazers'); ?></option>
+                        <option value="square" <?php selected(isset($dashboard_settings['progress_bar_style']) ? $dashboard_settings['progress_bar_style'] : 'rounded', 'square'); ?>><?php _e('Square', 'mobility-trailblazers'); ?></option>
+                        <option value="striped" <?php selected(isset($dashboard_settings['progress_bar_style']) ? $dashboard_settings['progress_bar_style'] : 'rounded', 'striped'); ?>><?php _e('Striped', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
             
             <!-- Display Options -->
             <tr>
-                <th scope="row"><?php _e('Dashboard Elements', 'mobility-trailblazers'); ?></th>
+                <th scope="row"><?php _e('Display Options', 'mobility-trailblazers'); ?></th>
                 <td>
                     <label>
-                        <input type="checkbox" name="mt_dashboard_settings[show_welcome_message]" value="1" 
-                               <?php checked($dashboard_settings['show_welcome_message'], 1); ?> />
-                        <?php _e('Show personalized welcome message', 'mobility-trailblazers'); ?>
+                        <input type="checkbox" name="mt_dashboard_settings[show_welcome_message]" value="1"
+                               <?php checked(isset($dashboard_settings['show_welcome_message']) ? $dashboard_settings['show_welcome_message'] : 1, 1); ?> />
+                        <?php _e('Show welcome message', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
-                        <input type="checkbox" name="mt_dashboard_settings[show_progress_bar]" value="1" 
-                               <?php checked($dashboard_settings['show_progress_bar'], 1); ?> />
-                        <?php _e('Show progress bar in header', 'mobility-trailblazers'); ?>
+                        <input type="checkbox" name="mt_dashboard_settings[show_progress_bar]" value="1"
+                               <?php checked(isset($dashboard_settings['show_progress_bar']) ? $dashboard_settings['show_progress_bar'] : 1, 1); ?> />
+                        <?php _e('Show progress bar', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
-                        <input type="checkbox" name="mt_dashboard_settings[show_stats_cards]" value="1" 
-                               <?php checked($dashboard_settings['show_stats_cards'], 1); ?> />
+                        <input type="checkbox" name="mt_dashboard_settings[show_stats_cards]" value="1"
+                               <?php checked(isset($dashboard_settings['show_stats_cards']) ? $dashboard_settings['show_stats_cards'] : 1, 1); ?> />
                         <?php _e('Show statistics cards', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
-                        <input type="checkbox" name="mt_dashboard_settings[show_search_filter]" value="1" 
-                               <?php checked($dashboard_settings['show_search_filter'], 1); ?> />
-                        <?php _e('Enable search and filter functionality', 'mobility-trailblazers'); ?>
+                        <input type="checkbox" name="mt_dashboard_settings[show_search_filter]" value="1"
+                               <?php checked(isset($dashboard_settings['show_search_filter']) ? $dashboard_settings['show_search_filter'] : 1, 1); ?> />
+                        <?php _e('Show search and filter options', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_dashboard_settings[show_rankings]" value="1" 
-                               <?php checked($dashboard_settings['show_rankings'], 1); ?> />
+                               <?php checked(isset($dashboard_settings['show_rankings']) ? $dashboard_settings['show_rankings'] : 1, 1); ?> />
                         <?php _e('Show rankings section', 'mobility-trailblazers'); ?>
                     </label>
                 </td>
@@ -299,7 +298,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <input type="number" name="mt_dashboard_settings[rankings_limit]" id="rankings_limit" 
-                           value="<?php echo esc_attr($dashboard_settings['rankings_limit']); ?>" 
+                           value="<?php echo esc_attr(isset($dashboard_settings['rankings_limit']) ? $dashboard_settings['rankings_limit'] : 10); ?>" 
                            min="5" max="20" class="small-text">
                     <p class="description"><?php _e('How many top candidates to display in the rankings section', 'mobility-trailblazers'); ?></p>
                 </td>
@@ -312,9 +311,9 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="candidate_card_layout" name="mt_dashboard_settings[card_layout]">
-                        <option value="grid" <?php selected($dashboard_settings['card_layout'], 'grid'); ?>><?php _e('Grid View', 'mobility-trailblazers'); ?></option>
-                        <option value="list" <?php selected($dashboard_settings['card_layout'], 'list'); ?>><?php _e('List View', 'mobility-trailblazers'); ?></option>
-                        <option value="compact" <?php selected($dashboard_settings['card_layout'], 'compact'); ?>><?php _e('Compact View', 'mobility-trailblazers'); ?></option>
+                        <option value="grid" <?php selected(isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid', 'grid'); ?>><?php _e('Grid View', 'mobility-trailblazers'); ?></option>
+                        <option value="list" <?php selected(isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid', 'list'); ?>><?php _e('List View', 'mobility-trailblazers'); ?></option>
+                        <option value="compact" <?php selected(isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid', 'compact'); ?>><?php _e('Compact View', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
@@ -326,7 +325,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <textarea id="dashboard_intro_text" name="mt_dashboard_settings[intro_text]" rows="3" cols="50"><?php 
-                        echo esc_textarea($dashboard_settings['intro_text']); 
+                        echo esc_textarea(isset($dashboard_settings['intro_text']) ? $dashboard_settings['intro_text'] : ''); 
                     ?></textarea>
                     <p class="description"><?php _e('Custom message displayed at the top of the jury dashboard.', 'mobility-trailblazers'); ?></p>
                 </td>
@@ -345,10 +344,10 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="candidate_profile_layout" name="mt_candidate_presentation[profile_layout]">
-                        <option value="side-by-side" <?php selected($candidate_presentation['profile_layout'], 'side-by-side'); ?>><?php _e('Side by Side (Photo + Details)', 'mobility-trailblazers'); ?></option>
-                        <option value="stacked" <?php selected($candidate_presentation['profile_layout'], 'stacked'); ?>><?php _e('Stacked (Photo above Details)', 'mobility-trailblazers'); ?></option>
-                        <option value="card" <?php selected($candidate_presentation['profile_layout'], 'card'); ?>><?php _e('Card Style', 'mobility-trailblazers'); ?></option>
-                        <option value="minimal" <?php selected($candidate_presentation['profile_layout'], 'minimal'); ?>><?php _e('Minimal (Text Only)', 'mobility-trailblazers'); ?></option>
+                        <option value="side-by-side" <?php selected(isset($candidate_presentation['profile_layout']) ? $candidate_presentation['profile_layout'] : 'side-by-side', 'side-by-side'); ?>><?php _e('Side by Side (Photo + Details)', 'mobility-trailblazers'); ?></option>
+                        <option value="stacked" <?php selected(isset($candidate_presentation['profile_layout']) ? $candidate_presentation['profile_layout'] : 'side-by-side', 'stacked'); ?>><?php _e('Stacked (Photo above Details)', 'mobility-trailblazers'); ?></option>
+                        <option value="card" <?php selected(isset($candidate_presentation['profile_layout']) ? $candidate_presentation['profile_layout'] : 'side-by-side', 'card'); ?>><?php _e('Card Style', 'mobility-trailblazers'); ?></option>
+                        <option value="minimal" <?php selected(isset($candidate_presentation['profile_layout']) ? $candidate_presentation['profile_layout'] : 'side-by-side', 'minimal'); ?>><?php _e('Minimal (Text Only)', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
@@ -360,18 +359,18 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="candidate_photo_style" name="mt_candidate_presentation[photo_style]">
-                        <option value="square" <?php selected($candidate_presentation['photo_style'], 'square'); ?>><?php _e('Square', 'mobility-trailblazers'); ?></option>
-                        <option value="circle" <?php selected($candidate_presentation['photo_style'], 'circle'); ?>><?php _e('Circle', 'mobility-trailblazers'); ?></option>
-                        <option value="rounded" <?php selected($candidate_presentation['photo_style'], 'rounded'); ?>><?php _e('Rounded Corners', 'mobility-trailblazers'); ?></option>
+                        <option value="square" <?php selected(isset($candidate_presentation['photo_style']) ? $candidate_presentation['photo_style'] : 'rounded', 'square'); ?>><?php _e('Square', 'mobility-trailblazers'); ?></option>
+                        <option value="circle" <?php selected(isset($candidate_presentation['photo_style']) ? $candidate_presentation['photo_style'] : 'rounded', 'circle'); ?>><?php _e('Circle', 'mobility-trailblazers'); ?></option>
+                        <option value="rounded" <?php selected(isset($candidate_presentation['photo_style']) ? $candidate_presentation['photo_style'] : 'rounded', 'rounded'); ?>><?php _e('Rounded Corners', 'mobility-trailblazers'); ?></option>
                     </select>
                     
                     <br/><br/>
                     
                     <label for="candidate_photo_size"><?php _e('Photo Size', 'mobility-trailblazers'); ?></label>
                     <select id="candidate_photo_size" name="mt_candidate_presentation[photo_size]">
-                        <option value="small" <?php selected($candidate_presentation['photo_size'], 'small'); ?>><?php _e('Small (150px)', 'mobility-trailblazers'); ?></option>
-                        <option value="medium" <?php selected($candidate_presentation['photo_size'], 'medium'); ?>><?php _e('Medium (200px)', 'mobility-trailblazers'); ?></option>
-                        <option value="large" <?php selected($candidate_presentation['photo_size'], 'large'); ?>><?php _e('Large (300px)', 'mobility-trailblazers'); ?></option>
+                        <option value="small" <?php selected(isset($candidate_presentation['photo_size']) ? $candidate_presentation['photo_size'] : 'medium', 'small'); ?>><?php _e('Small (150px)', 'mobility-trailblazers'); ?></option>
+                        <option value="medium" <?php selected(isset($candidate_presentation['photo_size']) ? $candidate_presentation['photo_size'] : 'medium', 'medium'); ?>><?php _e('Medium (200px)', 'mobility-trailblazers'); ?></option>
+                        <option value="large" <?php selected(isset($candidate_presentation['photo_size']) ? $candidate_presentation['photo_size'] : 'medium', 'large'); ?>><?php _e('Large (300px)', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
@@ -382,31 +381,31 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[show_organization]" value="1" 
-                               <?php checked($candidate_presentation['show_organization'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['show_organization']) ? $candidate_presentation['show_organization'] : 1, 1); ?> />
                         <?php _e('Show Organization/Company', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[show_position]" value="1" 
-                               <?php checked($candidate_presentation['show_position'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['show_position']) ? $candidate_presentation['show_position'] : 1, 1); ?> />
                         <?php _e('Show Position/Title', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[show_category]" value="1" 
-                               <?php checked($candidate_presentation['show_category'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['show_category']) ? $candidate_presentation['show_category'] : 1, 1); ?> />
                         <?php _e('Show Award Category', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[show_innovation_summary]" value="1" 
-                               <?php checked($candidate_presentation['show_innovation_summary'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['show_innovation_summary']) ? $candidate_presentation['show_innovation_summary'] : 1, 1); ?> />
                         <?php _e('Show Innovation Summary', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[show_full_bio]" value="1" 
-                               <?php checked($candidate_presentation['show_full_bio'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['show_full_bio']) ? $candidate_presentation['show_full_bio'] : 1, 1); ?> />
                         <?php _e('Show Full Biography', 'mobility-trailblazers'); ?>
                     </label>
                 </td>
@@ -419,10 +418,10 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="evaluation_form_style" name="mt_candidate_presentation[form_style]">
-                        <option value="cards" <?php selected($candidate_presentation['form_style'], 'cards'); ?>><?php _e('Card-based Criteria', 'mobility-trailblazers'); ?></option>
-                        <option value="list" <?php selected($candidate_presentation['form_style'], 'list'); ?>><?php _e('List View', 'mobility-trailblazers'); ?></option>
-                        <option value="compact" <?php selected($candidate_presentation['form_style'], 'compact'); ?>><?php _e('Compact View', 'mobility-trailblazers'); ?></option>
-                        <option value="wizard" <?php selected($candidate_presentation['form_style'], 'wizard'); ?>><?php _e('Step-by-Step Wizard', 'mobility-trailblazers'); ?></option>
+                        <option value="cards" <?php selected(isset($candidate_presentation['form_style']) ? $candidate_presentation['form_style'] : 'cards', 'cards'); ?>><?php _e('Card-based Criteria', 'mobility-trailblazers'); ?></option>
+                        <option value="list" <?php selected(isset($candidate_presentation['form_style']) ? $candidate_presentation['form_style'] : 'cards', 'list'); ?>><?php _e('List View', 'mobility-trailblazers'); ?></option>
+                        <option value="compact" <?php selected(isset($candidate_presentation['form_style']) ? $candidate_presentation['form_style'] : 'cards', 'compact'); ?>><?php _e('Compact View', 'mobility-trailblazers'); ?></option>
+                        <option value="wizard" <?php selected(isset($candidate_presentation['form_style']) ? $candidate_presentation['form_style'] : 'cards', 'wizard'); ?>><?php _e('Step-by-Step Wizard', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
@@ -434,10 +433,10 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 </th>
                 <td>
                     <select id="scoring_display_style" name="mt_candidate_presentation[scoring_style]">
-                        <option value="slider" <?php selected($candidate_presentation['scoring_style'], 'slider'); ?>><?php _e('Slider with Marks', 'mobility-trailblazers'); ?></option>
-                        <option value="stars" <?php selected($candidate_presentation['scoring_style'], 'stars'); ?>><?php _e('Star Rating', 'mobility-trailblazers'); ?></option>
-                        <option value="numeric" <?php selected($candidate_presentation['scoring_style'], 'numeric'); ?>><?php _e('Numeric Input', 'mobility-trailblazers'); ?></option>
-                        <option value="buttons" <?php selected($candidate_presentation['scoring_style'], 'buttons'); ?>><?php _e('Button Selection', 'mobility-trailblazers'); ?></option>
+                        <option value="slider" <?php selected(isset($candidate_presentation['scoring_style']) ? $candidate_presentation['scoring_style'] : 'slider', 'slider'); ?>><?php _e('Slider with Marks', 'mobility-trailblazers'); ?></option>
+                        <option value="stars" <?php selected(isset($candidate_presentation['scoring_style']) ? $candidate_presentation['scoring_style'] : 'slider', 'stars'); ?>><?php _e('Star Rating', 'mobility-trailblazers'); ?></option>
+                        <option value="numeric" <?php selected(isset($candidate_presentation['scoring_style']) ? $candidate_presentation['scoring_style'] : 'slider', 'numeric'); ?>><?php _e('Numeric Input', 'mobility-trailblazers'); ?></option>
+                        <option value="buttons" <?php selected(isset($candidate_presentation['scoring_style']) ? $candidate_presentation['scoring_style'] : 'slider', 'buttons'); ?>><?php _e('Button Selection', 'mobility-trailblazers'); ?></option>
                     </select>
                 </td>
             </tr>
@@ -448,13 +447,13 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[enable_animations]" value="1" 
-                               <?php checked($candidate_presentation['enable_animations'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['enable_animations']) ? $candidate_presentation['enable_animations'] : 1, 1); ?> />
                         <?php _e('Enable smooth transitions and animations', 'mobility-trailblazers'); ?>
                     </label><br />
                     
                     <label>
                         <input type="checkbox" name="mt_candidate_presentation[enable_hover_effects]" value="1" 
-                               <?php checked($candidate_presentation['enable_hover_effects'], 1); ?> />
+                               <?php checked(isset($candidate_presentation['enable_hover_effects']) ? $candidate_presentation['enable_hover_effects'] : 1, 1); ?> />
                         <?php _e('Enable hover effects on interactive elements', 'mobility-trailblazers'); ?>
                     </label>
                 </td>
