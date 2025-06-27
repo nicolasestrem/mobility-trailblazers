@@ -10,6 +10,7 @@ namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
+use MobilityTrailblazers\Core\MT_Logger;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 
 // Exit if accessed directly
@@ -220,18 +221,34 @@ class MT_Evaluation_Service implements MT_Service_Interface {
      * @return bool
      */
     public function validate($data) {
+        $this->errors = []; // Clear previous errors
         $valid = true;
-        
-        // Required fields
-        if (empty($data['jury_member_id'])) {
-            $this->errors[] = __('Jury member ID is required.', 'mobility-trailblazers');
-            $valid = false;
-        }
-        
-        if (empty($data['candidate_id'])) {
-            $this->errors[] = __('Candidate ID is required.', 'mobility-trailblazers');
-            $valid = false;
-        }
+
+        try {
+            // Required fields validation
+            if (empty($data['jury_member_id'])) {
+                $this->errors[] = __('Jury member ID is required.', 'mobility-trailblazers');
+                $valid = false;
+            } elseif (!is_numeric($data['jury_member_id']) || $data['jury_member_id'] <= 0) {
+                $this->errors[] = __('Invalid jury member ID.', 'mobility-trailblazers');
+                $valid = false;
+            }
+
+            if (empty($data['candidate_id'])) {
+                $this->errors[] = __('Candidate ID is required.', 'mobility-trailblazers');
+                $valid = false;
+            } elseif (!is_numeric($data['candidate_id']) || $data['candidate_id'] <= 0) {
+                $this->errors[] = __('Invalid candidate ID.', 'mobility-trailblazers');
+                $valid = false;
+            }
+
+            // Validate that jury member and candidate exist
+            if (!empty($data['jury_member_id']) && !empty($data['candidate_id'])) {
+                if (!$this->validate_jury_candidate_relationship($data['jury_member_id'], $data['candidate_id'])) {
+                    $this->errors[] = __('Invalid jury member and candidate combination.', 'mobility-trailblazers');
+                    $valid = false;
+                }
+            }
         
         // Validate scores
         $score_fields = [
@@ -268,7 +285,52 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             }
         }
         
-        return apply_filters('mt_evaluation_validate', $valid, $data, $this);
+            if (!$valid) {
+                MT_Logger::warning('Evaluation validation failed', [
+                    'jury_member_id' => $data['jury_member_id'] ?? null,
+                    'candidate_id' => $data['candidate_id'] ?? null,
+                    'errors' => $this->errors
+                ]);
+            }
+
+            return apply_filters('mt_evaluation_validate', $valid, $data, $this);
+
+        } catch (\Exception $e) {
+            MT_Logger::critical('Exception during evaluation validation', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data_keys' => array_keys($data)
+            ]);
+            $this->errors[] = __('Validation error occurred. Please try again.', 'mobility-trailblazers');
+            return false;
+        }
+    }
+
+    /**
+     * Validate jury member and candidate relationship
+     *
+     * @param int $jury_member_id Jury member ID
+     * @param int $candidate_id Candidate ID
+     * @return bool
+     */
+    private function validate_jury_candidate_relationship($jury_member_id, $candidate_id) {
+        // Check if jury member exists
+        $jury_member = get_post($jury_member_id);
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member' || $jury_member->post_status !== 'publish') {
+            return false;
+        }
+
+        // Check if candidate exists
+        $candidate = get_post($candidate_id);
+        if (!$candidate || $candidate->post_type !== 'mt_candidate' || $candidate->post_status !== 'publish') {
+            return false;
+        }
+
+        // Check if assignment exists (optional - depends on business rules)
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $assignment = $assignment_repo->find_by_jury_and_candidate($jury_member_id, $candidate_id);
+
+        return !empty($assignment);
     }
     
     /**

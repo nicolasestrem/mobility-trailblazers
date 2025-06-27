@@ -9,6 +9,7 @@
 namespace MobilityTrailblazers\Repositories;
 
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -45,11 +46,28 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
      */
     public function find($id) {
         global $wpdb;
-        
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$this->table_name} WHERE id = %d",
-            $id
-        ));
+
+        try {
+            $result = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE id = %d",
+                $id
+            ));
+
+            if ($wpdb->last_error) {
+                MT_Logger::database_error('SELECT', $this->table_name, $wpdb->last_error, ['evaluation_id' => $id]);
+                return false;
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            MT_Logger::critical('Exception in evaluation repository find method', [
+                'evaluation_id' => $id,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
     
     /**
@@ -158,23 +176,40 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             }
         }
         
-        // Debug: Log the data and formats
-        error_log('MT Evaluation Repository - Inserting data: ' . print_r($data, true));
-        error_log('MT Evaluation Repository - Formats: ' . print_r($formats, true));
-        
-        $result = $wpdb->insert(
-            $this->table_name,
-            $data,
-            $formats
-        );
-        
-        if ($result) {
-            error_log('MT Evaluation Repository - Insert successful, ID: ' . $wpdb->insert_id);
-        } else {
-            error_log('MT Evaluation Repository - Insert failed, error: ' . $wpdb->last_error);
+        try {
+            MT_Logger::debug('Creating new evaluation', [
+                'jury_member_id' => $data['jury_member_id'] ?? null,
+                'candidate_id' => $data['candidate_id'] ?? null,
+                'status' => $data['status'] ?? null
+            ]);
+
+            $result = $wpdb->insert(
+                $this->table_name,
+                $data,
+                $formats
+            );
+
+            if ($result === false) {
+                MT_Logger::database_error('INSERT', $this->table_name, $wpdb->last_error, [
+                    'data_keys' => array_keys($data),
+                    'formats' => $formats
+                ]);
+                return false;
+            }
+
+            $evaluation_id = $wpdb->insert_id;
+            MT_Logger::info('Evaluation created successfully', ['evaluation_id' => $evaluation_id]);
+
+            return $evaluation_id;
+
+        } catch (\Exception $e) {
+            MT_Logger::critical('Exception during evaluation creation', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data_keys' => array_keys($data)
+            ]);
+            return false;
         }
-        
-        return $result ? $wpdb->insert_id : false;
     }
     
     /**
@@ -368,9 +403,7 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                 // Insert new evaluation
                 $insert_data = $data;
                 
-                // Remove fields that don't exist in the database
-                unset($insert_data['evaluation_date']);
-                unset($insert_data['last_modified']);
+                // Note: Deprecated column handling removed as of v2.0.11
                 
                 // Ensure we have all required fields
                 $defaults = [

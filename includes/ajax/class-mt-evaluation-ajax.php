@@ -343,7 +343,12 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      */
     private function render_rankings_html($rankings) {
         ob_start();
-        include MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
+        $template_file = MT_PLUGIN_DIR . 'templates/frontend/partials/jury-rankings.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="mt-error">' . __('Rankings template not found.', 'mobility-trailblazers') . '</div>';
+        }
         return ob_get_clean();
     }
     
@@ -400,14 +405,16 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * Save inline evaluation from rankings grid
      */
     public function save_inline_evaluation() {
-        // Debug: Check if method is being called
-        error_log('MT Inline Save - Method called at: ' . date('Y-m-d H:i:s'));
-        error_log('MT Inline Save - REQUEST_METHOD: ' . $_SERVER['REQUEST_METHOD']);
-        error_log('MT Inline Save - POST data: ' . print_r($_POST, true));
+        // Log inline evaluation attempt for debugging if WP_DEBUG is enabled
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT: Inline evaluation save attempt by user ' . get_current_user_id());
+        }
         
-        // Verify nonce
-        if (!isset($_POST['mt_inline_nonce']) || !wp_verify_nonce($_POST['mt_inline_nonce'], 'mt_inline_evaluation')) {
-            error_log('MT Inline Save - Nonce verification failed');
+        // Verify nonce using base class method
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MT: Inline evaluation nonce verification failed for user ' . get_current_user_id());
+            }
             wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
@@ -504,7 +511,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'refresh_rankings' => true
         ];
         
-        error_log('MT Inline Save - Success response: ' . print_r($response_data, true));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT: Inline evaluation saved successfully for candidate ' . $candidate_id);
+        }
         
         wp_send_json_success($response_data);
     }

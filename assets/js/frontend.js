@@ -5,7 +5,113 @@
 
 (function($) {
     'use strict';
-    
+
+    // Global error handler for uncaught JavaScript errors
+    window.addEventListener('error', function(e) {
+        if (window.MTErrorHandler) {
+            MTErrorHandler.logError('JavaScript Error', {
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                stack: e.error ? e.error.stack : 'No stack trace available'
+            });
+        }
+    });
+
+    // Initialize error handler
+    window.MTErrorHandler = {
+        /**
+         * Log error to console and potentially send to server
+         */
+        logError: function(message, details) {
+            var errorData = {
+                message: message,
+                details: details || {},
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            };
+
+            // Log to console in debug mode
+            if (window.console && console.error) {
+                console.error('MT Error:', errorData);
+            }
+        },
+
+        /**
+         * Show user-friendly error message
+         */
+        showUserError: function(message, type) {
+            type = type || 'error';
+            var alertClass = type === 'warning' ? 'mt-alert-warning' : 'mt-alert-error';
+
+            var $alert = $('<div class="mt-alert ' + alertClass + '">' +
+                '<span class="mt-alert-message">' + message + '</span>' +
+                '<button class="mt-alert-close" type="button">&times;</button>' +
+                '</div>');
+
+            // Remove existing alerts
+            $('.mt-alert').remove();
+
+            // Add new alert
+            $('body').prepend($alert);
+
+            // Auto-remove after 5 seconds
+            setTimeout(function() {
+                $alert.fadeOut(function() {
+                    $alert.remove();
+                });
+            }, 5000);
+
+            // Manual close
+            $alert.find('.mt-alert-close').on('click', function() {
+                $alert.fadeOut(function() {
+                    $alert.remove();
+                });
+            });
+        },
+
+        /**
+         * Handle AJAX errors with user-friendly messages
+         */
+        handleAjaxError: function(xhr, status, error, context) {
+            var errorMessage = 'An error occurred. Please try again.';
+            var logDetails = {
+                status: status,
+                error: error,
+                responseText: xhr.responseText,
+                context: context || 'Unknown'
+            };
+
+            // Try to extract meaningful error message
+            try {
+                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    errorMessage = xhr.responseJSON.data.message;
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (status === 'timeout') {
+                    errorMessage = 'Request timed out. Please check your connection and try again.';
+                } else if (status === 'abort') {
+                    errorMessage = 'Request was cancelled.';
+                } else if (xhr.status === 403) {
+                    errorMessage = 'You do not have permission to perform this action.';
+                } else if (xhr.status === 404) {
+                    errorMessage = 'The requested resource was not found.';
+                } else if (xhr.status >= 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                }
+            } catch (e) {
+                logDetails.parseError = e.message;
+            }
+
+            this.logError('AJAX Error in ' + context, logDetails);
+            this.showUserError(errorMessage);
+
+            return errorMessage;
+        }
+    };
+
     // Jury Dashboard
     var MTJuryDashboard = {
         init: function() {
@@ -63,9 +169,7 @@
             e.preventDefault();
             var $btn = $(this);
             var candidateId = $btn.data('candidate-id');
-            
-            console.log('MT JS - Button clicked, candidate ID from data:', candidateId);
-            
+
             if (candidateId) {
                 this.loadEvaluationForm(candidateId);
             } else {
@@ -75,12 +179,14 @@
         
         loadEvaluationForm: function(candidateId) {
             var self = this;
-            
-            console.log('MT JS - Loading evaluation form for candidate ID:', candidateId);
-            
+
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
-                self.showError('Security configuration error. Please refresh the page and try again.');
+                MTErrorHandler.logError('mt_ajax configuration missing', {
+                    mt_ajax_defined: typeof mt_ajax !== 'undefined',
+                    nonce_present: mt_ajax && mt_ajax.nonce ? true : false
+                });
+                MTErrorHandler.showUserError('Security configuration error. Please refresh the page and try again.');
                 return;
             }
             
@@ -95,26 +201,21 @@
                 nonce: mt_ajax.nonce
             })
             .done(function(response) {
-                console.log('MT JS - Candidate details response:', response);
                 if (response.success) {
-                    console.log('MT JS - Candidate data received:', response.data);
                     // The candidate data is nested under response.data.data
                     var candidateData = response.data.data || response.data;
-                    console.log('MT JS - Extracted candidate data:', candidateData);
                     self.displayEvaluationForm(candidateData);
                     self.loadExistingEvaluation(candidateId);
                 } else {
                     self.showError(response.data.message);
                 }
             })
-            .fail(function() {
-                self.showError('Failed to load candidate details.');
+            .fail(function(xhr, status, error) {
+                MTErrorHandler.handleAjaxError(xhr, status, error, 'loadEvaluationForm - candidate details');
             });
         },
         
         displayEvaluationForm: function(candidate) {
-            console.log('MT JS - Displaying evaluation form for candidate:', candidate);
-            console.log('MT JS - Candidate ID being set in form:', candidate.id);
             
             var formHtml = `
                 <div class="mt-evaluation-wrapper">
@@ -286,9 +387,7 @@
             
             $('.mt-jury-dashboard').html(formHtml);
             
-            // Debug: Check the hidden input after form is created
-            var hiddenInput = $('input[name="candidate_id"]');
-            console.log('MT JS - Hidden input created with value:', hiddenInput.val());
+            // Verify the hidden input was created successfully
         },
         
         loadExistingEvaluation: function(candidateId) {
@@ -394,10 +493,7 @@
             var $form = $(this);
             var $submitBtn = $form.find('button[type="submit"]');
             
-            // Debug: Check form selection
-            console.log('MT JS - Form element:', $form);
-            console.log('MT JS - Form ID:', $form.attr('id'));
-            console.log('MT JS - Form class:', $form.attr('class'));
+            // Validate form selection
             
             // Validate scores
             var isValid = true;
@@ -429,18 +525,6 @@
                 $targetForm = $form;
             }
             
-            console.log('MT JS - Target form found:', $targetForm.length);
-            
-            // Debug: Check what fields are found
-            var allFields = $targetForm.find('input, textarea, select');
-            console.log('MT JS - Found form fields:', allFields.length);
-            allFields.each(function(index) {
-                var $field = $(this);
-                var name = $field.attr('name');
-                var value = $field.val();
-                console.log('MT JS - Field ' + index + ':', name, '=', value);
-            });
-            
             // Add all form fields
             $targetForm.find('input, textarea, select').each(function() {
                 var $field = $(this);
@@ -456,15 +540,6 @@
             formData.action = 'mt_submit_evaluation';
             formData.nonce = mt_ajax.nonce;
             formData.status = 'completed';
-            
-            // Debug: Log form data being sent
-            console.log('MT JS - Form data being sent:', formData);
-            console.log('MT JS - Candidate ID in form data:', formData.candidate_id);
-            
-            // Debug: Manually check the hidden input value
-            var hiddenInput = $('input[name="candidate_id"]');
-            console.log('MT JS - Hidden input value before submission:', hiddenInput.val());
-            console.log('MT JS - Hidden input exists:', hiddenInput.length > 0);
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
@@ -518,7 +593,7 @@
                 $form = $('.mt-evaluation-form');
             }
             
-            console.log('MT JS - Save draft - Target form found:', $form.length);
+
             
             // Disable button and show loading
             $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Saving...');
@@ -808,14 +883,12 @@
                 // Prepare form data
                 const formData = {
                     action: 'mt_save_inline_evaluation',
-                    mt_inline_nonce: $form.find('input[name="mt_inline_nonce"]').val(),
+                    nonce: mt_ajax.nonce,
                     candidate_id: candidateId,
                     scores: scores
                 };
                 
-                // Debug: Log the form data being sent
-                console.log('Sending AJAX request with data:', formData);
-                console.log('AJAX URL:', mt_ajax.url);
+
                 
                 // Save via AJAX
                 $.ajax({
@@ -824,7 +897,6 @@
                     data: formData,
                     dataType: 'json',
                     success: function(response) {
-                        console.log('Save response:', response);
                         
                         if (response.success) {
                             // Show success animation
@@ -964,8 +1036,8 @@
                         });
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Rankings refresh error:', status, error);
+                error: function() {
+                    // Rankings refresh failed - fail silently in production
                 }
             });
         }

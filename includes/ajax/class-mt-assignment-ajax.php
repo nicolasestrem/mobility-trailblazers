@@ -92,7 +92,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function create_assignment() {
-        $this->verify_nonce('mt_admin_nonce');
+        $this->verify_nonce('mt_ajax_nonce');
         $this->check_permission('mt_manage_assignments');
         
         $data = [
@@ -213,19 +213,24 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Handle bulk assignment creation
      */
     public function bulk_create_assignments() {
-        error_log('MT Manual Assignment: Method called');
-        error_log('POST data: ' . print_r($_POST, true));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT: Manual assignment request by user ' . get_current_user_id());
+        }
         
-        // Verify nonce - use mt_admin_nonce like other methods
-        if (!$this->verify_nonce('mt_admin_nonce')) {
-            error_log('MT Manual Assignment: Nonce verification failed');
+        // Verify nonce - use standard mt_ajax_nonce
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MT: Manual assignment nonce verification failed for user ' . get_current_user_id());
+            }
             $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_assignments')) {
-            error_log('MT Manual Assignment: Permission check failed');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MT: Manual assignment permission denied for user ' . get_current_user_id());
+            }
             $this->send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
             return;
         }
@@ -317,9 +322,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Export assignments to CSV
      */
     public function export_assignments() {
-        // Verify nonce
-        $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : '';
-        if (!wp_verify_nonce($nonce, 'mt_admin_nonce')) {
+        // Verify nonce using base class method
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
             wp_die(__('Security check failed.', 'mobility-trailblazers'));
         }
         
@@ -401,9 +405,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function auto_assign() {
-        // Verify nonce
-        $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : '';
-        if (!wp_verify_nonce($nonce, 'mt_admin_nonce')) {
+        // Verify nonce using base class method
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
             wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }

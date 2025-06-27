@@ -335,7 +335,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function get_dashboard_stats() {
-        $this->verify_nonce('mt_admin_nonce');
+        $this->verify_nonce('mt_ajax_nonce');
         $this->check_permission('mt_view_all_evaluations');
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();

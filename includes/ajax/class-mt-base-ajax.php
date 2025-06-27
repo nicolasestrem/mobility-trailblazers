@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Ajax;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -27,8 +29,27 @@ abstract class MT_Base_Ajax {
      * @return bool
      */
     protected function verify_nonce($nonce_name = 'mt_ajax_nonce') {
-        $nonce = isset($_REQUEST['nonce']) ? $_REQUEST['nonce'] : '';
-        return wp_verify_nonce($nonce, $nonce_name);
+        try {
+            $nonce = isset($_REQUEST['nonce']) ? $_REQUEST['nonce'] : '';
+            $result = wp_verify_nonce($nonce, $nonce_name);
+
+            if (!$result) {
+                MT_Logger::security_event('Nonce verification failed', [
+                    'nonce_name' => $nonce_name,
+                    'action' => $_REQUEST['action'] ?? 'unknown',
+                    'provided_nonce' => $nonce ? 'present' : 'missing'
+                ]);
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            MT_Logger::critical('Exception during nonce verification', [
+                'exception' => $e->getMessage(),
+                'nonce_name' => $nonce_name
+            ]);
+            return false;
+        }
     }
     
     /**
@@ -38,8 +59,21 @@ abstract class MT_Base_Ajax {
      * @return void
      */
     protected function check_permission($capability) {
-        if (!current_user_can($capability)) {
-            $this->error(__('You do not have permission to perform this action.', 'mobility-trailblazers'));
+        try {
+            if (!current_user_can($capability)) {
+                MT_Logger::security_event('Permission denied', [
+                    'required_capability' => $capability,
+                    'user_id' => get_current_user_id(),
+                    'action' => $_REQUEST['action'] ?? 'unknown'
+                ]);
+                $this->error(__('You do not have permission to perform this action.', 'mobility-trailblazers'));
+            }
+        } catch (\Exception $e) {
+            MT_Logger::critical('Exception during permission check', [
+                'exception' => $e->getMessage(),
+                'capability' => $capability
+            ]);
+            $this->error(__('Permission check failed. Please try again.', 'mobility-trailblazers'));
         }
     }
     
@@ -65,8 +99,16 @@ abstract class MT_Base_Ajax {
      * @return void
      */
     protected function error($message = '', $data = null) {
+        $error_message = $message ?: __('An error occurred. Please try again.', 'mobility-trailblazers');
+
+        // Log the error
+        MT_Logger::ajax_error($_REQUEST['action'] ?? 'unknown', $error_message, [
+            'user_id' => get_current_user_id(),
+            'additional_data' => $data
+        ]);
+
         wp_send_json_error([
-            'message' => $message ?: __('An error occurred. Please try again.', 'mobility-trailblazers'),
+            'message' => $error_message,
             'data' => $data
         ]);
     }
@@ -157,11 +199,62 @@ abstract class MT_Base_Ajax {
         if (!isset($_REQUEST[$key])) {
             return $default;
         }
-        
+
         $value = $_REQUEST[$key];
         return is_array($value) ? $value : $default;
     }
-    
+
+    /**
+     * Handle exceptions in AJAX methods
+     *
+     * @param \Exception $e Exception object
+     * @param string $context Context description
+     * @return void
+     */
+    protected function handle_exception(\Exception $e, $context = '') {
+        MT_Logger::critical('AJAX Exception: ' . $context, [
+            'exception' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'action' => $_REQUEST['action'] ?? 'unknown',
+            'user_id' => get_current_user_id(),
+            'context' => $context
+        ]);
+
+        $this->error(__('An unexpected error occurred. Please try again.', 'mobility-trailblazers'));
+    }
+
+    /**
+     * Validate required parameters
+     *
+     * @param array $required_params Array of required parameter names
+     * @return bool
+     */
+    protected function validate_required_params($required_params) {
+        $missing_params = [];
+
+        foreach ($required_params as $param) {
+            if (!isset($_REQUEST[$param]) || empty($_REQUEST[$param])) {
+                $missing_params[] = $param;
+            }
+        }
+
+        if (!empty($missing_params)) {
+            MT_Logger::warning('Missing required AJAX parameters', [
+                'missing_params' => $missing_params,
+                'action' => $_REQUEST['action'] ?? 'unknown',
+                'user_id' => get_current_user_id()
+            ]);
+
+            $this->error(sprintf(
+                __('Missing required parameters: %s', 'mobility-trailblazers'),
+                implode(', ', $missing_params)
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Initialize AJAX handler
      *

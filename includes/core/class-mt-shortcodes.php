@@ -74,8 +74,13 @@ class MT_Shortcodes {
         // Output custom CSS
         echo '<style type="text/css">' . $this->generate_dashboard_custom_css() . '</style>';
         
-        // Include template
-        include MT_PLUGIN_DIR . 'templates/frontend/jury-dashboard.php';
+        // Include template with validation
+        $template_file = MT_PLUGIN_DIR . 'templates/frontend/jury-dashboard.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="mt-error">' . __('Jury dashboard template not found.', 'mobility-trailblazers') . '</div>';
+        }
         
         return ob_get_clean();
     }

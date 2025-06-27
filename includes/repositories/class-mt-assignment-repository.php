@@ -9,6 +9,7 @@
 namespace MobilityTrailblazers\Repositories;
 
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {

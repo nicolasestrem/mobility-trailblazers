@@ -36,6 +36,10 @@ class MT_Admin {
         
         // Add dashboard widgets
         add_action('wp_dashboard_setup', [$this, 'add_dashboard_widgets']);
+
+        // Initialize error monitor
+        $error_monitor = new \MobilityTrailblazers\Admin\MT_Error_Monitor();
+        $error_monitor->init();
     }
     
     /**
@@ -165,7 +169,12 @@ class MT_Admin {
             'order' => 'DESC'
         ]);
         
-        include MT_PLUGIN_DIR . 'templates/admin/dashboard.php';
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/dashboard.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="notice notice-error"><p>' . __('Dashboard template file not found.', 'mobility-trailblazers') . '</p></div>';
+        }
     }
     
     /**
@@ -418,8 +427,16 @@ class MT_Admin {
     public function render_dashboard_widget() {
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         $stats = $evaluation_repo->get_statistics();
-        
-        include MT_PLUGIN_DIR . 'templates/admin/dashboard-widget.php';
+
+        // Get error summary
+        $error_summary = \MobilityTrailblazers\Admin\MT_Error_Monitor::get_dashboard_summary();
+
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/dashboard-widget.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<p>' . __('Dashboard widget template not found.', 'mobility-trailblazers') . '</p>';
+        }
     }
     
     /**

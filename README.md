@@ -387,14 +387,16 @@ Text domain: `mobility-trailblazers`
 - **[Inline Evaluation System](doc/inline-evaluation-system.md)** - Inline controls documentation
 - **[Jury Rankings System](doc/jury-rankings-system.md)** - Rankings display system
 - **[Assignment Management](doc/assignment-management-fixes.md)** - Assignment system details
+- **[Error Handling System](doc/error-handling-system.md)** - Comprehensive error handling and logging
 
 ## 🤝 Support
 
 ### Getting Help
 1. **Check Documentation**: Review the comprehensive guides in the `/doc/` folder
 2. **Use Diagnostics**: Navigate to Mobility Trailblazers → Diagnostics for system health
-3. **Review Error Logs**: Check WordPress debug logs for specific errors
-4. **Debug Tools**: Use scripts in `/debug/` folder for troubleshooting
+3. **Error Monitor**: Access Mobility Trailblazers → Error Monitor for detailed error tracking
+4. **Review Error Logs**: Check WordPress debug logs for specific errors
+5. **Debug Tools**: Use scripts in `/debug/` folder for troubleshooting
 
 ### Reporting Issues
 - Include WordPress and PHP versions
