@@ -728,4 +728,199 @@
         });
     });
 
+    // Inline Evaluation Controls
+    jQuery(document).ready(function($) {
+        initializeInlineEvaluations();
+        
+        function initializeInlineEvaluations() {
+            // Score adjustment buttons
+            $(document).on('click', '.mt-score-adjust', function(e) {
+                e.preventDefault();
+                
+                const $button = $(this);
+                const $input = $button.siblings('.mt-score-input');
+                const action = $button.data('action');
+                const currentValue = parseFloat($input.val()) || 0;
+                let newValue = currentValue;
+                
+                if (action === 'increase' && currentValue < 10) {
+                    newValue = Math.min(10, currentValue + 0.5);
+                } else if (action === 'decrease' && currentValue > 0) {
+                    newValue = Math.max(0, currentValue - 0.5);
+                }
+                
+                $input.val(newValue).trigger('change');
+            });
+            
+            // Score input change handler
+            $(document).on('change', '.mt-score-input', function() {
+                const $input = $(this);
+                const value = parseFloat($input.val()) || 0;
+                
+                // Validate and constrain value
+                const constrainedValue = Math.max(0, Math.min(10, value));
+                if (value !== constrainedValue) {
+                    $input.val(constrainedValue);
+                }
+                
+                // Update mini ring
+                updateMiniScoreRing($input);
+                
+                // Update total score preview
+                updateTotalScorePreview($input.closest('.mt-ranking-item'));
+            });
+            
+            // Save inline evaluation
+            $(document).on('click', '.mt-btn-save-inline', function(e) {
+                e.preventDefault();
+                
+                const $button = $(this);
+                const $form = $button.closest('.mt-inline-evaluation-form');
+                const $rankingItem = $button.closest('.mt-ranking-item');
+                const candidateId = $form.data('candidate-id');
+                
+                // Prevent double submission
+                if ($button.hasClass('saving')) {
+                    return;
+                }
+                
+                // Collect scores
+                const scores = {};
+                $form.find('.mt-score-input').each(function() {
+                    const criterion = $(this).data('criterion');
+                    scores[criterion] = $(this).val();
+                });
+                
+                // Add loading state
+                $button.addClass('saving');
+                $rankingItem.addClass('updating');
+                
+                // Save via AJAX
+                $.ajax({
+                    url: mt_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'mt_save_inline_evaluation',
+                        nonce: $form.find('input[name*="mt_inline_nonce"]').val(),
+                        candidate_id: candidateId,
+                        scores: scores,
+                        status: 'completed' // Auto-complete when saving from inline
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success animation
+                            $rankingItem.removeClass('updating').addClass('success');
+                            
+                            // Update total score display
+                            const $scoreValue = $rankingItem.find('.mt-total-score-display .score-value');
+                            $scoreValue.text(response.data.total_score.toFixed(1) + '/10');
+                            $scoreValue.data('score', response.data.total_score);
+                            
+                            // Trigger rankings refresh after a delay
+                            setTimeout(function() {
+                                refreshRankings();
+                            }, 1000);
+                            
+                            // Remove success class after animation
+                            setTimeout(function() {
+                                $rankingItem.removeClass('success');
+                            }, 2000);
+                        } else {
+                            alert(response.data || 'Error saving evaluation');
+                            $rankingItem.removeClass('updating');
+                        }
+                    },
+                    error: function() {
+                        alert('Network error. Please try again.');
+                        $rankingItem.removeClass('updating');
+                    },
+                    complete: function() {
+                        $button.removeClass('saving');
+                    }
+                });
+            });
+        }
+        
+        function updateMiniScoreRing($input) {
+            const score = parseFloat($input.val()) || 0;
+            const $ring = $input.closest('.mt-criterion-inline').find('.mt-score-ring-mini');
+            const $progress = $ring.find('.mt-ring-progress');
+            
+            // Update ring
+            const dashArray = (score * 10) + ', 100';
+            $progress.attr('stroke-dasharray', dashArray);
+            $ring.attr('data-score', score);
+            
+            // Update color based on score
+            if (score >= 8) {
+                $progress.css('stroke', '#22c55e');
+            } else if (score >= 6) {
+                $progress.css('stroke', '#667eea');
+            } else if (score >= 4) {
+                $progress.css('stroke', '#f59e0b');
+            } else {
+                $progress.css('stroke', '#ef4444');
+            }
+        }
+        
+        function updateTotalScorePreview($rankingItem) {
+            const scores = [];
+            $rankingItem.find('.mt-score-input').each(function() {
+                const value = parseFloat($(this).val());
+                if (!isNaN(value)) {
+                    scores.push(value);
+                }
+            });
+            
+            if (scores.length > 0) {
+                const average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                const $scoreDisplay = $rankingItem.find('.mt-total-score-display .score-value');
+                $scoreDisplay.text(average.toFixed(1) + '/10');
+                
+                // Update color based on average
+                if (average >= 8) {
+                    $scoreDisplay.css('color', '#22c55e');
+                } else if (average >= 6) {
+                    $scoreDisplay.css('color', '#667eea');
+                } else if (average >= 4) {
+                    $scoreDisplay.css('color', '#f59e0b');
+                } else {
+                    $scoreDisplay.css('color', '#ef4444');
+                }
+            }
+        }
+        
+        function refreshRankings() {
+            const $container = $('#mt-rankings-container');
+            
+            $.ajax({
+                url: mt_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_get_jury_rankings',
+                    nonce: mt_ajax.nonce,
+                    limit: 10
+                },
+                success: function(response) {
+                    if (response.success && response.data.html) {
+                        $container.fadeOut(300, function() {
+                            $(this).html(response.data.html).fadeIn(300);
+                            
+                            // Reinitialize score rings
+                            $('.mt-score-ring-mini').each(function() {
+                                const score = $(this).data('score');
+                                updateMiniScoreRing($(this).find('.mt-score-input'));
+                            });
+                        });
+                    }
+                }
+            });
+        }
+        
+        // Auto-refresh rankings every 30 seconds if on dashboard
+        if ($('.mt-rankings-section').length > 0) {
+            setInterval(refreshRankings, 30000);
+        }
+    });
+
 })(jQuery); 

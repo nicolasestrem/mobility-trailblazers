@@ -1,175 +1,157 @@
 <?php
 /**
- * Enhanced Jury Rankings Grid Template
+ * Jury Rankings Partial Template
+ * Displays top-ranked candidates in a 5x2 grid with inline evaluation controls
  *
  * @package MobilityTrailblazers
- * @since 2.0.0
+ * @since 2.0.9
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Define criteria labels
-$criteria_labels = [
-    'courage' => __('Courage', 'mobility-trailblazers'),
-    'innovation' => __('Innovation', 'mobility-trailblazers'),
-    'implementation' => __('Impact', 'mobility-trailblazers'),
-    'relevance' => __('Relevance', 'mobility-trailblazers'),
-    'visibility' => __('Visibility', 'mobility-trailblazers')
-];
+// Ensure we have rankings data
+if (empty($rankings)) {
+    echo '<p class="mt-no-rankings">' . __('No rankings available yet.', 'mobility-trailblazers') . '</p>';
+    return;
+}
+
+// Get evaluation criteria
+$evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+$criteria = $evaluation_service->get_criteria();
 ?>
 
 <div class="mt-rankings-section">
     <div class="mt-rankings-header">
         <h2><?php _e('Top Ranked Candidates', 'mobility-trailblazers'); ?></h2>
-        <p class="mt-rankings-description">
-            <?php _e('Your evaluation rankings at a glance. Click any candidate card to review or update their scores.', 'mobility-trailblazers'); ?>
-        </p>
+        <p class="mt-rankings-subtitle"><?php _e('Real-time ranking based on evaluation scores', 'mobility-trailblazers'); ?></p>
     </div>
     
-    <?php if (!empty($rankings)) : ?>
-        <div class="mt-rankings-list">
-            <?php 
-            $position = 1;
-            foreach ($rankings as $candidate) : 
-                $score_percentage = ($candidate->total_score / 10) * 100;
-            ?>
-                <div class="mt-ranking-item" 
-                     data-candidate-id="<?php echo esc_attr($candidate->candidate_id); ?>"
-                     onclick="window.location.href='<?php echo esc_url(add_query_arg('evaluate', $candidate->candidate_id)); ?>'">
-                    
-                    <!-- Position Badge -->
-                    <div class="mt-ranking-position">
-                        <span class="mt-position-number"><?php echo $position; ?></span>
-                    </div>
-                    
-                    <div class="mt-ranking-content">
-                        <!-- Candidate Details -->
-                        <div class="mt-ranking-details">
-                            <h3 class="mt-ranking-name">
-                                <a href="<?php echo esc_url(add_query_arg('evaluate', $candidate->candidate_id)); ?>">
-                                    <?php echo esc_html($candidate->candidate_name); ?>
-                                </a>
-                            </h3>
-                            <?php if (!empty($candidate->organization)) : ?>
-                                <p class="mt-ranking-org"><?php echo esc_html($candidate->organization); ?></p>
-                            <?php endif; ?>
-                        </div>
+    <div class="mt-rankings-grid mt-rankings-5x2">
+        <?php 
+        $position = 1;
+        foreach ($rankings as $ranking) : 
+            $candidate_id = isset($ranking->candidate_id) ? $ranking->candidate_id : $ranking->ID;
+            $candidate_name = $ranking->candidate_name ?? $ranking->post_title ?? '';
+            $organization = $ranking->organization ?? '';
+            $position_title = $ranking->position ?? '';
+            $total_score = floatval($ranking->total_score ?? 0);
+            
+            // Parse criteria scores
+            $criteria_scores = [];
+            if (!empty($ranking->criteria_scores)) {
+                $criteria_scores = is_string($ranking->criteria_scores) 
+                    ? json_decode($ranking->criteria_scores, true) 
+                    : (array)$ranking->criteria_scores;
+            }
+            
+            // Position classes for medal styling
+            $position_class = '';
+            if ($position === 1) $position_class = 'position-gold';
+            elseif ($position === 2) $position_class = 'position-silver';
+            elseif ($position === 3) $position_class = 'position-bronze';
+        ?>
+            <div class="mt-ranking-item <?php echo esc_attr($position_class); ?>" 
+                 data-candidate-id="<?php echo esc_attr($candidate_id); ?>"
+                 data-position="<?php echo esc_attr($position); ?>">
+                
+                <!-- Position Badge -->
+                <div class="mt-position-badge">
+                    <span class="position-number"><?php echo $position; ?></span>
+                </div>
+                
+                <!-- Candidate Info -->
+                <div class="mt-candidate-info">
+                    <h3 class="mt-candidate-name"><?php echo esc_html($candidate_name); ?></h3>
+                    <?php if ($organization || $position_title) : ?>
+                        <p class="mt-candidate-meta">
+                            <?php if ($position_title) echo esc_html($position_title); ?>
+                            <?php if ($organization && $position_title) echo ' @ '; ?>
+                            <?php if ($organization) echo esc_html($organization); ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Total Score Display -->
+                <div class="mt-total-score-display">
+                    <span class="score-label"><?php _e('Total Score', 'mobility-trailblazers'); ?></span>
+                    <span class="score-value" data-score="<?php echo $total_score; ?>">
+                        <?php echo number_format($total_score, 1); ?>/10
+                    </span>
+                </div>
+                
+                <!-- Inline Evaluation Controls -->
+                <div class="mt-inline-evaluation-controls">
+                    <form class="mt-inline-evaluation-form" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
+                        <?php wp_nonce_field('mt_inline_evaluation_' . $candidate_id, 'mt_inline_nonce'); ?>
                         
-                        <!-- Score Display -->
-                        <div class="mt-ranking-scores">
-                            <!-- Total Score -->
-                            <div class="mt-total-score">
-                                <span class="mt-total-score-label"><?php _e('Total Score', 'mobility-trailblazers'); ?></span>
-                                <span class="mt-score-value"><?php echo number_format($candidate->total_score, 1); ?></span>
-                            </div>
-                            
-                            <!-- Score Breakdown -->
-                            <div class="mt-score-breakdown">
-                                <h4 class="mt-score-breakdown-title"><?php _e('Score Breakdown', 'mobility-trailblazers'); ?></h4>
-                                <div class="mt-criteria-scores">
-                                    <div class="mt-criteria-score">
-                                        <div class="mt-score-ring">
-                                            <svg width="40" height="40">
-                                                <circle class="mt-score-ring-bg" cx="20" cy="20" r="16"></circle>
-                                                <circle class="mt-score-ring-progress" 
-                                                        cx="20" cy="20" r="16"
-                                                        style="stroke-dasharray: 100; stroke-dashoffset: <?php echo 100 - ($candidate->courage_score * 10); ?>">
-                                                </circle>
-                                            </svg>
-                                            <span class="mt-criteria-score-value" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                <?php echo number_format($candidate->courage_score, 1); ?>
-                                            </span>
-                                        </div>
-                                        <span class="mt-criteria-score-label"><?php echo $criteria_labels['courage']; ?></span>
+                        <div class="mt-criteria-grid-inline">
+                            <?php foreach ($criteria as $key => $criterion) : 
+                                $score_key = str_replace('_score', '', $criterion['key']);
+                                $current_score = isset($criteria_scores[$score_key]) ? floatval($criteria_scores[$score_key]) : 0;
+                            ?>
+                                <div class="mt-criterion-inline">
+                                    <label class="mt-criterion-label" title="<?php echo esc_attr($criterion['description']); ?>">
+                                        <span class="dashicons <?php echo esc_attr($criterion['icon']); ?>"></span>
+                                        <span class="mt-criterion-short"><?php echo esc_html(mb_substr($criterion['label'], 0, 3)); ?></span>
+                                    </label>
+                                    <div class="mt-score-control">
+                                        <button type="button" class="mt-score-adjust mt-score-decrease" 
+                                                data-criterion="<?php echo esc_attr($criterion['key']); ?>"
+                                                data-action="decrease">
+                                            <span class="dashicons dashicons-minus"></span>
+                                        </button>
+                                        <input type="number" 
+                                               class="mt-score-input" 
+                                               name="<?php echo esc_attr($criterion['key']); ?>"
+                                               id="score_<?php echo esc_attr($candidate_id); ?>_<?php echo esc_attr($criterion['key']); ?>"
+                                               value="<?php echo esc_attr($current_score); ?>"
+                                               min="0" 
+                                               max="10" 
+                                               step="0.5"
+                                               data-criterion="<?php echo esc_attr($criterion['key']); ?>">
+                                        <button type="button" class="mt-score-adjust mt-score-increase" 
+                                                data-criterion="<?php echo esc_attr($criterion['key']); ?>"
+                                                data-action="increase">
+                                            <span class="dashicons dashicons-plus"></span>
+                                        </button>
                                     </div>
-                                    
-                                    <div class="mt-criteria-score">
-                                        <div class="mt-score-ring">
-                                            <svg width="40" height="40">
-                                                <circle class="mt-score-ring-bg" cx="20" cy="20" r="16"></circle>
-                                                <circle class="mt-score-ring-progress" 
-                                                        cx="20" cy="20" r="16"
-                                                        style="stroke-dasharray: 100; stroke-dashoffset: <?php echo 100 - ($candidate->innovation_score * 10); ?>">
-                                                </circle>
-                                            </svg>
-                                            <span class="mt-criteria-score-value" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                <?php echo number_format($candidate->innovation_score, 1); ?>
-                                            </span>
-                                        </div>
-                                        <span class="mt-criteria-score-label"><?php echo $criteria_labels['innovation']; ?></span>
-                                    </div>
-                                    
-                                    <div class="mt-criteria-score">
-                                        <div class="mt-score-ring">
-                                            <svg width="40" height="40">
-                                                <circle class="mt-score-ring-bg" cx="20" cy="20" r="16"></circle>
-                                                <circle class="mt-score-ring-progress" 
-                                                        cx="20" cy="20" r="16"
-                                                        style="stroke-dasharray: 100; stroke-dashoffset: <?php echo 100 - ($candidate->implementation_score * 10); ?>">
-                                                </circle>
-                                            </svg>
-                                            <span class="mt-criteria-score-value" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                <?php echo number_format($candidate->implementation_score, 1); ?>
-                                            </span>
-                                        </div>
-                                        <span class="mt-criteria-score-label"><?php echo $criteria_labels['implementation']; ?></span>
-                                    </div>
-                                    
-                                    <div class="mt-criteria-score">
-                                        <div class="mt-score-ring">
-                                            <svg width="40" height="40">
-                                                <circle class="mt-score-ring-bg" cx="20" cy="20" r="16"></circle>
-                                                <circle class="mt-score-ring-progress" 
-                                                        cx="20" cy="20" r="16"
-                                                        style="stroke-dasharray: 100; stroke-dashoffset: <?php echo 100 - ($candidate->relevance_score * 10); ?>">
-                                                </circle>
-                                            </svg>
-                                            <span class="mt-criteria-score-value" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                <?php echo number_format($candidate->relevance_score, 1); ?>
-                                            </span>
-                                        </div>
-                                        <span class="mt-criteria-score-label"><?php echo $criteria_labels['relevance']; ?></span>
-                                    </div>
-                                    
-                                    <div class="mt-criteria-score">
-                                        <div class="mt-score-ring">
-                                            <svg width="40" height="40">
-                                                <circle class="mt-score-ring-bg" cx="20" cy="20" r="16"></circle>
-                                                <circle class="mt-score-ring-progress" 
-                                                        cx="20" cy="20" r="16"
-                                                        style="stroke-dasharray: 100; stroke-dashoffset: <?php echo 100 - ($candidate->visibility_score * 10); ?>">
-                                                </circle>
-                                            </svg>
-                                            <span class="mt-criteria-score-value" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                <?php echo number_format($candidate->visibility_score, 1); ?>
-                                            </span>
-                                        </div>
-                                        <span class="mt-criteria-score-label"><?php echo $criteria_labels['visibility']; ?></span>
+                                    <div class="mt-score-ring-mini" data-score="<?php echo esc_attr($current_score); ?>">
+                                        <svg viewBox="0 0 36 36" class="mt-score-svg">
+                                            <path class="mt-ring-bg"
+                                                  d="M18 2.0845
+                                                     a 15.9155 15.9155 0 0 1 0 31.831
+                                                     a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                            <path class="mt-ring-progress"
+                                                  stroke-dasharray="<?php echo ($current_score * 10); ?>, 100"
+                                                  d="M18 2.0845
+                                                     a 15.9155 15.9155 0 0 1 0 31.831
+                                                     a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                        </svg>
                                     </div>
                                 </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                         
-                        <!-- Action Button -->
-                        <div class="mt-ranking-actions">
-                            <button type="button" class="mt-btn mt-btn-primary">
-                                <?php _e('Review Evaluation', 'mobility-trailblazers'); ?>
+                        <div class="mt-inline-actions">
+                            <button type="button" class="mt-btn-save-inline" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
+                                <span class="dashicons dashicons-saved"></span>
+                                <?php _e('Save', 'mobility-trailblazers'); ?>
                             </button>
+                            <a href="<?php echo esc_url(add_query_arg('evaluate', $candidate_id)); ?>" 
+                               class="mt-btn-full-evaluation">
+                                <span class="dashicons dashicons-visibility"></span>
+                                <?php _e('Full View', 'mobility-trailblazers'); ?>
+                            </a>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            <?php 
-                $position++;
-            endforeach; 
-            ?>
-        </div>
-    <?php else : ?>
-        <div class="mt-no-rankings">
-            <div class="mt-no-rankings-icon">📊</div>
-            <h3><?php _e('No Rankings Yet', 'mobility-trailblazers'); ?></h3>
-            <p><?php _e('Complete your first candidate evaluation to see rankings appear here.', 'mobility-trailblazers'); ?></p>
-        </div>
-    <?php endif; ?>
+            </div>
+        <?php 
+            $position++;
+            if ($position > 10) break; // Limit to 10 candidates (5x2 grid)
+        endforeach; 
+        ?>
+    </div>
 </div>

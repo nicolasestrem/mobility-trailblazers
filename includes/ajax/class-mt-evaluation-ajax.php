@@ -35,6 +35,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_candidate_details', [$this, 'get_candidate_details']);
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
         add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
+        add_action('wp_ajax_mt_save_inline_evaluation', [$this, 'save_inline_evaluation']);
     }
     
     /**
@@ -390,5 +391,68 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         return null;
+    }
+
+    /**
+     * Save inline evaluation from rankings grid
+     */
+    public function save_inline_evaluation() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_inline_evaluation_' . $_POST['candidate_id'])) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_submit_evaluations')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+        }
+        
+        $current_user_id = get_current_user_id();
+        $jury_member = $this->get_jury_member_by_user_id($current_user_id);
+        
+        if (!$jury_member) {
+            wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+        }
+        
+        $candidate_id = intval($_POST['candidate_id']);
+        $scores = $_POST['scores'];
+        
+        // Verify assignment
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        if (!$assignment_repo->exists($jury_member->ID, $candidate_id)) {
+            wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+        }
+        
+        // Prepare evaluation data
+        $evaluation_data = [
+            'jury_member_id' => $jury_member->ID,
+            'candidate_id' => $candidate_id,
+            'status' => sanitize_text_field($_POST['status'] ?? 'completed'),
+            'notes' => ''
+        ];
+        
+        // Add scores
+        foreach ($scores as $criterion => $score) {
+            $evaluation_data[$criterion] = floatval($score);
+        }
+        
+        // Save evaluation
+        $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+        $result = $evaluation_service->save_evaluation($evaluation_data);
+        
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+        
+        // Get updated evaluation data
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+        
+        wp_send_json_success([
+            'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
+            'evaluation_id' => $result,
+            'total_score' => $evaluation->total_score ?? 0,
+            'refresh_rankings' => true
+        ]);
     }
 } 
