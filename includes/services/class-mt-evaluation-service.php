@@ -182,13 +182,19 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         
         $data['total_score'] = $count > 0 ? ($total / $count) : 0;
         
-        // Set timestamps
-        if (!isset($data['evaluation_date'])) {
-            $data['evaluation_date'] = current_time('mysql');
+        // Set timestamps using correct field names
+        if (!isset($data['created_at'])) {
+            $data['created_at'] = current_time('mysql');
         }
         
-        if (!isset($data['last_modified'])) {
-            $data['last_modified'] = current_time('mysql');
+        if (!isset($data['updated_at'])) {
+            $data['updated_at'] = current_time('mysql');
+        }
+        
+        // Convert notes to comments if present
+        if (isset($data['notes']) && !isset($data['comments'])) {
+            $data['comments'] = $data['notes'];
+            unset($data['notes']);
         }
         
         // Save to repository

@@ -733,27 +733,6 @@
         initializeInlineEvaluations();
         
         function initializeInlineEvaluations() {
-            // Test AJAX functionality
-            console.log('Testing AJAX functionality...');
-            $.ajax({
-                url: mt_ajax.url,
-                type: 'POST',
-                data: {
-                    action: 'mt_test_ajax'
-                },
-                dataType: 'json',
-                success: function(response) {
-                    console.log('AJAX test successful:', response);
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX test failed:', {
-                        status: status,
-                        error: error,
-                        responseText: xhr.responseText
-                    });
-                }
-            });
-            
             // Initialize all score rings on page load
             $('.mt-score-ring-mini').each(function() {
                 const score = $(this).data('score');

@@ -36,9 +36,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
         add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
         add_action('wp_ajax_mt_save_inline_evaluation', [$this, 'save_inline_evaluation']);
-        
-        // Test action for debugging
-        add_action('wp_ajax_mt_test_ajax', [$this, 'test_ajax']);
     }
     
     /**
@@ -458,7 +455,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         // If we have an existing evaluation, preserve its data
         if ($existing_evaluation) {
             $evaluation_data['id'] = $existing_evaluation->id;
-            $evaluation_data['notes'] = $existing_evaluation->notes;
+            $evaluation_data['comments'] = $existing_evaluation->comments;
             $evaluation_data['courage_score'] = floatval($existing_evaluation->courage_score);
             $evaluation_data['innovation_score'] = floatval($existing_evaluation->innovation_score);
             $evaluation_data['implementation_score'] = floatval($existing_evaluation->implementation_score);
@@ -466,7 +463,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $evaluation_data['visibility_score'] = floatval($existing_evaluation->visibility_score);
         } else {
             // Initialize all scores to 0
-            $evaluation_data['notes'] = '';
+            $evaluation_data['comments'] = '';
             $evaluation_data['courage_score'] = 0;
             $evaluation_data['innovation_score'] = 0;
             $evaluation_data['implementation_score'] = 0;
@@ -507,13 +504,5 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         error_log('MT Inline Save - Success response: ' . print_r($response_data, true));
         
         wp_send_json_success($response_data);
-    }
-
-    /**
-     * Test AJAX action for debugging
-     */
-    public function test_ajax() {
-        error_log('MT Test AJAX - Method called successfully');
-        wp_send_json_success(['message' => 'AJAX is working!']);
     }
 } 

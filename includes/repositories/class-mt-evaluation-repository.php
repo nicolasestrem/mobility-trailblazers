@@ -335,8 +335,12 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             $id = $update_data['id'];
             unset($update_data['id']);
             
-            // Add last_modified timestamp
-            $update_data['last_modified'] = current_time('mysql');
+            // Remove fields that don't exist in the database
+            unset($update_data['evaluation_date']);
+            unset($update_data['last_modified']);
+            
+            // Add updated_at timestamp
+            $update_data['updated_at'] = current_time('mysql');
             
             $result = $wpdb->update(
                 $this->table_name,
@@ -364,12 +368,16 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                 // Insert new evaluation
                 $insert_data = $data;
                 
+                // Remove fields that don't exist in the database
+                unset($insert_data['evaluation_date']);
+                unset($insert_data['last_modified']);
+                
                 // Ensure we have all required fields
                 $defaults = [
-                    'evaluation_date' => current_time('mysql'),
-                    'last_modified' => current_time('mysql'),
+                    'created_at' => current_time('mysql'),
+                    'updated_at' => current_time('mysql'),
                     'status' => 'draft',
-                    'notes' => '',
+                    'comments' => '',
                     'courage_score' => 0,
                     'innovation_score' => 0,
                     'implementation_score' => 0,

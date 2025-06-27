@@ -133,10 +133,6 @@ class MT_Plugin {
             'url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_ajax_nonce')
         ]);
-        
-        // Debug: Log the AJAX URL being provided
-        error_log('MT Plugin - AJAX URL: ' . admin_url('admin-ajax.php'));
-        error_log('MT Plugin - Nonce: ' . wp_create_nonce('mt_ajax_nonce'));
     }
     
     /**
