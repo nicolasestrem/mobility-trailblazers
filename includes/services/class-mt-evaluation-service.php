@@ -141,6 +141,73 @@ class MT_Evaluation_Service implements MT_Service_Interface {
     }
     
     /**
+     * Save or update evaluation
+     *
+     * @param array $data Evaluation data
+     * @return int|WP_Error Evaluation ID or error
+     */
+    public function save_evaluation($data) {
+        // Validate data
+        if (!$this->validate($data)) {
+            return new \WP_Error('validation_failed', implode(', ', $this->get_errors()));
+        }
+        
+        // Ensure all score fields are present with defaults
+        $score_fields = [
+            'courage_score' => 0,
+            'innovation_score' => 0,
+            'implementation_score' => 0,
+            'relevance_score' => 0,
+            'visibility_score' => 0
+        ];
+        
+        // Merge with defaults
+        foreach ($score_fields as $field => $default) {
+            if (!isset($data[$field])) {
+                $data[$field] = $default;
+            } else {
+                $data[$field] = floatval($data[$field]);
+            }
+        }
+        
+        // Calculate total score (average of all scores)
+        $total = 0;
+        $count = 0;
+        foreach ($score_fields as $field => $default) {
+            if (isset($data[$field]) && $data[$field] > 0) {
+                $total += floatval($data[$field]);
+                $count++;
+            }
+        }
+        
+        $data['total_score'] = $count > 0 ? ($total / $count) : 0;
+        
+        // Set timestamps
+        if (!isset($data['evaluation_date'])) {
+            $data['evaluation_date'] = current_time('mysql');
+        }
+        
+        if (!isset($data['last_modified'])) {
+            $data['last_modified'] = current_time('mysql');
+        }
+        
+        // Save to repository
+        try {
+            $result = $this->repository->save($data);
+            
+            if ($result) {
+                do_action('mt_evaluation_submitted', $result, $data);
+                return $result;
+            }
+            
+            return new \WP_Error('save_failed', __('Failed to save evaluation', 'mobility-trailblazers'));
+            
+        } catch (\Exception $e) {
+            return new \WP_Error('save_error', $e->getMessage());
+        }
+    }
+    
+    /**
      * Validate evaluation data
      *
      * @param array $data Input data

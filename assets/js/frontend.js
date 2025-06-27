@@ -818,7 +818,10 @@
                     url: mt_ajax.ajax_url,
                     type: 'POST',
                     data: formData,
+                    dataType: 'json',
                     success: function(response) {
+                        console.log('Save response:', response);
+                        
                         if (response.success) {
                             // Show success animation
                             $rankingItem.removeClass('updating').addClass('success');
@@ -842,13 +845,30 @@
                                 $rankingItem.removeClass('success');
                             }, 2000);
                         } else {
+                            console.error('Save failed:', response.data);
                             alert(response.data || 'Error saving evaluation');
                             $rankingItem.removeClass('updating');
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('AJAX Error:', status, error);
-                        alert('Network error. Please try again.');
+                        console.error('AJAX Error:', {
+                            status: status,
+                            error: error,
+                            responseText: xhr.responseText,
+                            responseJSON: xhr.responseJSON
+                        });
+                        
+                        // Try to parse error message
+                        let errorMessage = 'Network error. Please try again.';
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.data) {
+                                errorMessage = xhr.responseJSON.data;
+                            }
+                        } catch (e) {
+                            // Use default message
+                        }
+                        
+                        alert(errorMessage);
                         $rankingItem.removeClass('updating');
                     },
                     complete: function() {

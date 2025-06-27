@@ -303,6 +303,99 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
     }
     
     /**
+     * Find evaluation by jury member and candidate
+     *
+     * @param int $jury_member_id Jury member ID
+     * @param int $candidate_id Candidate ID
+     * @return object|null
+     */
+    public function find_by_jury_and_candidate($jury_member_id, $candidate_id) {
+        global $wpdb;
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table_name} 
+             WHERE jury_member_id = %d AND candidate_id = %d",
+            $jury_member_id, $candidate_id
+        ));
+    }
+    
+    /**
+     * Save evaluation
+     *
+     * @param array $data Evaluation data
+     * @return int|false Evaluation ID or false on failure
+     */
+    public function save($data) {
+        global $wpdb;
+        
+        // Check if this is an update
+        if (isset($data['id']) && $data['id']) {
+            // Update existing evaluation
+            $update_data = $data;
+            $id = $update_data['id'];
+            unset($update_data['id']);
+            
+            // Add last_modified timestamp
+            $update_data['last_modified'] = current_time('mysql');
+            
+            $result = $wpdb->update(
+                $this->table_name,
+                $update_data,
+                ['id' => $id],
+                null,
+                ['%d']
+            );
+            
+            if ($result !== false) {
+                return $id;
+            }
+            
+            error_log('MT Evaluation Repository - Update failed: ' . $wpdb->last_error);
+            return false;
+        } else {
+            // Check if evaluation already exists
+            $existing = $this->find_by_jury_and_candidate($data['jury_member_id'], $data['candidate_id']);
+            
+            if ($existing) {
+                // Update existing
+                $data['id'] = $existing->id;
+                return $this->save($data);
+            } else {
+                // Insert new evaluation
+                $insert_data = $data;
+                
+                // Ensure we have all required fields
+                $defaults = [
+                    'evaluation_date' => current_time('mysql'),
+                    'last_modified' => current_time('mysql'),
+                    'status' => 'draft',
+                    'notes' => '',
+                    'courage_score' => 0,
+                    'innovation_score' => 0,
+                    'implementation_score' => 0,
+                    'relevance_score' => 0,
+                    'visibility_score' => 0,
+                    'total_score' => 0
+                ];
+                
+                $insert_data = array_merge($defaults, $insert_data);
+                
+                $result = $wpdb->insert(
+                    $this->table_name,
+                    $insert_data
+                );
+                
+                if ($result) {
+                    return $wpdb->insert_id;
+                }
+                
+                error_log('MT Evaluation Repository - Insert failed: ' . $wpdb->last_error);
+                return false;
+            }
+        }
+    }
+    
+    /**
      * Get statistics
      *
      * @param array $args Filter arguments

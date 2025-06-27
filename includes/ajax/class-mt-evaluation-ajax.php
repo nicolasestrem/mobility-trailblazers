@@ -397,14 +397,19 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * Save inline evaluation from rankings grid
      */
     public function save_inline_evaluation() {
+        // Log for debugging
+        error_log('MT Inline Save - POST data: ' . print_r($_POST, true));
+        
         // Verify nonce
         if (!isset($_POST['mt_inline_nonce']) || !wp_verify_nonce($_POST['mt_inline_nonce'], 'mt_inline_evaluation')) {
             wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            return;
         }
         
         // Check permissions
         if (!current_user_can('mt_submit_evaluations')) {
             wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            return;
         }
         
         $current_user_id = get_current_user_id();
@@ -412,62 +417,89 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         if (!$jury_member) {
             wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+            return;
         }
         
-        $candidate_id = intval($_POST['candidate_id']);
+        $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
+        if (!$candidate_id) {
+            wp_send_json_error(__('Invalid candidate ID', 'mobility-trailblazers'));
+            return;
+        }
+        
         $scores = isset($_POST['scores']) ? $_POST['scores'] : [];
+        
+        // Log scores for debugging
+        error_log('MT Inline Save - Scores: ' . print_r($scores, true));
         
         // Verify assignment
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
         if (!$assignment_repo->exists($jury_member->ID, $candidate_id)) {
             wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+            return;
         }
         
         // Get existing evaluation if any
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         $existing_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
         
-        // Prepare evaluation data - preserve existing data
+        // Prepare evaluation data
         $evaluation_data = [
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $candidate_id,
-            'status' => 'completed',
-            'notes' => $existing_evaluation ? $existing_evaluation->notes : ''
+            'status' => 'completed'
         ];
         
-        // Merge with existing scores
+        // If we have an existing evaluation, preserve its data
         if ($existing_evaluation) {
-            // Start with existing scores
-            $evaluation_data['courage_score'] = $existing_evaluation->courage_score;
-            $evaluation_data['innovation_score'] = $existing_evaluation->innovation_score;
-            $evaluation_data['implementation_score'] = $existing_evaluation->implementation_score;
-            $evaluation_data['relevance_score'] = $existing_evaluation->relevance_score;
-            $evaluation_data['visibility_score'] = $existing_evaluation->visibility_score;
+            $evaluation_data['id'] = $existing_evaluation->id;
+            $evaluation_data['notes'] = $existing_evaluation->notes;
+            $evaluation_data['courage_score'] = floatval($existing_evaluation->courage_score);
+            $evaluation_data['innovation_score'] = floatval($existing_evaluation->innovation_score);
+            $evaluation_data['implementation_score'] = floatval($existing_evaluation->implementation_score);
+            $evaluation_data['relevance_score'] = floatval($existing_evaluation->relevance_score);
+            $evaluation_data['visibility_score'] = floatval($existing_evaluation->visibility_score);
+        } else {
+            // Initialize all scores to 0
+            $evaluation_data['notes'] = '';
+            $evaluation_data['courage_score'] = 0;
+            $evaluation_data['innovation_score'] = 0;
+            $evaluation_data['implementation_score'] = 0;
+            $evaluation_data['relevance_score'] = 0;
+            $evaluation_data['visibility_score'] = 0;
         }
         
-        // Update with new scores
+        // Update with new scores from the form
         foreach ($scores as $criterion => $score) {
             if (!empty($criterion) && is_numeric($score)) {
                 $evaluation_data[$criterion] = floatval($score);
             }
         }
         
+        // Log final data for debugging
+        error_log('MT Inline Save - Final evaluation data: ' . print_r($evaluation_data, true));
+        
         // Save evaluation
         $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
         $result = $evaluation_service->save_evaluation($evaluation_data);
         
         if (is_wp_error($result)) {
+            error_log('MT Inline Save - Error: ' . $result->get_error_message());
             wp_send_json_error($result->get_error_message());
+            return;
         }
         
         // Get updated evaluation data
         $updated_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
         
-        wp_send_json_success([
+        $response_data = [
             'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
             'evaluation_id' => $result,
             'total_score' => $updated_evaluation ? floatval($updated_evaluation->total_score) : 0,
             'refresh_rankings' => true
-        ]);
+        ];
+        
+        error_log('MT Inline Save - Success response: ' . print_r($response_data, true));
+        
+        wp_send_json_success($response_data);
     }
 } 
