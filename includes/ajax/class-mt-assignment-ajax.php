@@ -92,7 +92,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function create_assignment() {
-        $this->verify_nonce('mt_ajax_nonce');
+        $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_manage_assignments');
         
         $data = [
@@ -217,8 +217,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             error_log('MT: Manual assignment request by user ' . get_current_user_id());
         }
         
-        // Verify nonce - use standard mt_ajax_nonce
-        if (!$this->verify_nonce('mt_ajax_nonce')) {
+        // Verify nonce - use mt_admin_nonce for admin actions
+        if (!$this->verify_nonce('mt_admin_nonce')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MT: Manual assignment nonce verification failed for user ' . get_current_user_id());
             }
@@ -323,7 +323,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      */
     public function export_assignments() {
         // Verify nonce using base class method
-        if (!$this->verify_nonce('mt_ajax_nonce')) {
+        if (!$this->verify_nonce('mt_admin_nonce')) {
             wp_die(__('Security check failed.', 'mobility-trailblazers'));
         }
         
@@ -406,7 +406,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      */
     public function auto_assign() {
         // Verify nonce using base class method
-        if (!$this->verify_nonce('mt_ajax_nonce')) {
+        if (!$this->verify_nonce('mt_admin_nonce')) {
             wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
