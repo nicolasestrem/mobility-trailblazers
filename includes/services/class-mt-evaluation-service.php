@@ -328,7 +328,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
 
         // Check if assignment exists (optional - depends on business rules)
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-        $assignment = $assignment_repo->find_by_jury_and_candidate($jury_member_id, $candidate_id);
+        $assignment = $assignment_repo->get_by_jury_and_candidate($jury_member_id, $candidate_id);
 
         return !empty($assignment);
     }
