@@ -59,7 +59,12 @@ if (!empty($jury_members)) {
             // Get the full evaluation data for this candidate
             $evaluation = null;
             if ($jury_member) {
-                $evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+                $evaluations = $evaluation_repo->find_all([
+                    'jury_member_id' => $jury_member->ID,
+                    'candidate_id' => $candidate_id,
+                    'limit' => 1
+                ]);
+                $evaluation = !empty($evaluations) ? $evaluations[0] : null;
             }
             
             // Position classes for medal styling
