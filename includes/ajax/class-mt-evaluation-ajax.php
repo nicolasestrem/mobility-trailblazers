@@ -36,6 +36,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
         add_action('wp_ajax_mt_get_jury_rankings', [$this, 'get_jury_rankings']);
         add_action('wp_ajax_mt_save_inline_evaluation', [$this, 'save_inline_evaluation']);
+        
+        // Test AJAX action to handle test calls gracefully
+        add_action('wp_ajax_mt_test_ajax', [$this, 'test_ajax']);
     }
     
     /**
@@ -504,5 +507,18 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         error_log('MT Inline Save - Success response: ' . print_r($response_data, true));
         
         wp_send_json_success($response_data);
+    }
+
+    /**
+     * Test AJAX endpoint for debugging
+     *
+     * @return void
+     */
+    public function test_ajax() {
+        $this->success([
+            'message' => 'AJAX is working correctly',
+            'timestamp' => current_time('mysql'),
+            'user_id' => get_current_user_id()
+        ], 'AJAX test successful');
     }
 } 
