@@ -2,529 +2,387 @@
 
 ## Overview
 
-The Inline Evaluation System is a revolutionary feature introduced in Mobility Trailblazers v2.0.11 that allows jury members to adjust candidate scores directly from the rankings view without navigating to separate evaluation pages.
+The Inline Evaluation System provides a streamlined interface for jury members to evaluate candidates directly from the jury dashboard without navigating to separate evaluation forms. This system implements a 2x5 grid layout with real-time score updates and AJAX-powered saving functionality.
 
-## Key Features
+## Features
 
-- **5x2 Grid Layout**: Fixed 10-candidate display in a 5-column by 2-row grid
-- **Inline Score Adjustment**: +/- buttons with 0.5 step increments
-- **Real-time Updates**: Instant visual feedback with mini progress rings
-- **AJAX-powered Saves**: Seamless backend integration without page refresh
-- **Responsive Design**: Works on all screen sizes with adaptive layouts
+### Core Functionality
+- **2x5 Grid Layout**: Displays 10 candidates in a responsive grid format
+- **Inline Score Adjustment**: Real-time score updates with +/- buttons (0.5 increments)
+- **Mini Progress Rings**: Visual score indicators with color-coded feedback
+- **AJAX Save**: Secure saving without page refresh
+- **Success Animations**: Visual feedback for successful operations
+- **Auto-refresh Rankings**: Automatic rankings update after saves
+- **Test AJAX Endpoint**: Proper debugging and testing capabilities
 
-## Implementation Summary
+### Visual Elements
+- **Mini Progress Rings**: Circular progress indicators showing current scores
+- **Score Adjustment Buttons**: +/- buttons for precise score control
+- **Save/Full View Actions**: Contextual action buttons for each candidate
+- **Color-coded Feedback**: Green (8+), Blue (6-7.9), Orange (4-5.9), Red (0-3.9)
 
-### Files Modified
-- `templates/frontend/partials/jury-rankings.php` - Complete overhaul with 5x2 grid and inline controls
-- `assets/css/frontend.css` - Added comprehensive 5x2 grid styling and inline evaluation styles
-- `assets/js/frontend.js` - Added inline evaluation JavaScript functionality and real-time updates
-- `includes/ajax/class-mt-evaluation-ajax.php` - Added `save_inline_evaluation()` method and AJAX registration
+## Technical Implementation
 
-### New AJAX Endpoint
-- `mt_save_inline_evaluation` - Handles inline evaluation saves with security validation
+### Frontend Components
 
-### Security Features
-- Candidate-specific nonce verification
-- Permission checks for jury members
-- Assignment validation
-- Input sanitization and validation
-
-This documentation will be expanded with detailed technical implementation details, code examples, and troubleshooting guides.
-
-## Architecture
-
-### Core Components
-
-1. **Frontend Interface** (`jury-rankings.php`)
-   - 5x2 grid layout with inline evaluation controls
-   - Real-time score adjustment with +/- buttons
-   - Mini progress rings for visual feedback
-   - Save and Full View action buttons
-
-2. **JavaScript Engine** (`frontend.js`)
-   - Event handling for score adjustments
-   - AJAX communication with backend
-   - Real-time UI updates and animations
-   - Auto-refresh functionality
-
-3. **Backend Handler** (`MT_Evaluation_Ajax`)
-   - `save_inline_evaluation()` method
-   - Security validation and permission checks
-   - Database operations and response handling
-
-4. **CSS Framework** (`frontend.css`)
-   - Responsive grid layout system
-   - Interactive control styling
-   - Animation and transition effects
-   - Mobile optimization
-
-## Implementation Details
-
-### 1. Template Structure
-
-#### Main Container
-```html
-<div class="mt-rankings-grid mt-rankings-5x2">
-    <!-- 10 candidate cards in 5x2 grid -->
-</div>
-```
-
-#### Individual Candidate Card
-```html
-<div class="mt-ranking-item position-gold" data-candidate-id="123" data-position="1">
-    <!-- Position Badge -->
-    <div class="mt-position-badge">
-        <span class="position-number">1</span>
-    </div>
-    
-    <!-- Candidate Info -->
-    <div class="mt-candidate-info">
-        <h3 class="mt-candidate-name">Candidate Name</h3>
-        <p class="mt-candidate-meta">Position @ Organization</p>
-    </div>
-    
-    <!-- Total Score Display -->
-    <div class="mt-total-score-display">
-        <span class="score-label">Total Score</span>
-        <span class="score-value" data-score="8.5">8.5/10</span>
-    </div>
-    
-    <!-- Inline Evaluation Controls -->
-    <div class="mt-inline-evaluation-controls">
-        <!-- Form with all interactive elements -->
-    </div>
-</div>
-```
-
-#### Inline Evaluation Form
-```html
-<form class="mt-inline-evaluation-form" data-candidate-id="123">
-    <?php wp_nonce_field('mt_inline_evaluation_' . $candidate_id, 'mt_inline_nonce'); ?>
-    
-    <div class="mt-criteria-grid-inline">
-        <!-- Individual criterion controls -->
-        <div class="mt-criterion-inline">
-            <label class="mt-criterion-label" title="Courage & Pioneer Spirit">
-                <span class="dashicons dashicons-superhero"></span>
-                <span class="mt-criterion-short">Cou</span>
-            </label>
-            <div class="mt-score-control">
-                <button type="button" class="mt-score-adjust mt-score-decrease" data-action="decrease">
-                    <span class="dashicons dashicons-minus"></span>
-                </button>
-                <input type="number" class="mt-score-input" value="8.5" min="0" max="10" step="0.5" data-criterion="courage_score">
-                <button type="button" class="mt-score-adjust mt-score-increase" data-action="increase">
-                    <span class="dashicons dashicons-plus"></span>
-                </button>
-            </div>
-            <div class="mt-score-ring-mini" data-score="8.5">
-                <!-- Mini progress ring SVG -->
-            </div>
-        </div>
-        <!-- Repeat for all 5 criteria -->
-    </div>
-    
-    <div class="mt-inline-actions">
-        <button type="button" class="mt-btn-save-inline" data-candidate-id="123">
-            <span class="dashicons dashicons-saved"></span>
-            Save
-        </button>
-        <a href="?evaluate=123" class="mt-btn-full-evaluation">
-            <span class="dashicons dashicons-visibility"></span>
-            Full View
-        </a>
-    </div>
-</form>
-```
-
-### 2. CSS Grid System
-
-#### Primary Grid Layout
-```css
-.mt-rankings-grid.mt-rankings-5x2 {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 20px;
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-```
-
-#### Responsive Breakpoints
-```css
-/* Large Desktop */
-@media (max-width: 1400px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-    }
-}
-
-/* Desktop */
-@media (max-width: 1024px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-    }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(5, 1fr);
-    }
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
-    }
-}
-```
-
-### 3. JavaScript Functionality
-
-#### Event Initialization
+#### JavaScript (`assets/js/frontend.js`)
 ```javascript
+// Inline evaluation initialization
 function initializeInlineEvaluations() {
-    // Score adjustment buttons
+    // Score ring initialization
+    $('.mt-score-ring-mini').each(function() {
+        const score = $(this).data('score');
+        updateMiniScoreRing($(this), score);
+    });
+    
+    // Score adjustment handlers
     $(document).on('click', '.mt-score-adjust', function(e) {
-        e.preventDefault();
-        handleScoreAdjustment($(this));
+        // Handle +/- button clicks
     });
     
-    // Score input changes
-    $(document).on('change', '.mt-score-input', function() {
-        handleScoreChange($(this));
-    });
-    
-    // Save button clicks
+    // AJAX save functionality
     $(document).on('click', '.mt-btn-save-inline', function(e) {
-        e.preventDefault();
-        handleInlineSave($(this));
+        // Handle inline evaluation saves
     });
 }
 ```
 
-#### Score Adjustment Logic
-```javascript
-function handleScoreAdjustment($button) {
-    const $input = $button.siblings('.mt-score-input');
-    const action = $button.data('action');
-    const currentValue = parseFloat($input.val()) || 0;
-    let newValue = currentValue;
-    
-    if (action === 'increase' && currentValue < 10) {
-        newValue = Math.min(10, currentValue + 0.5);
-    } else if (action === 'decrease' && currentValue > 0) {
-        newValue = Math.max(0, currentValue - 0.5);
-    }
-    
-    $input.val(newValue).trigger('change');
+#### CSS (`assets/css/frontend.css`)
+```css
+/* Grid layout */
+.mt-rankings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+/* Mini progress rings */
+.mt-score-ring-mini {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+/* Score adjustment buttons */
+.mt-score-adjust {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+/* Cross-browser compatibility */
+.mt-score-input {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
 }
 ```
 
-#### Score Change Handler
-```javascript
-function handleScoreChange($input) {
-    const value = parseFloat($input.val()) || 0;
-    
-    // Validate and constrain value
-    const constrainedValue = Math.max(0, Math.min(10, value));
-    if (value !== constrainedValue) {
-        $input.val(constrainedValue);
-    }
-    
-    // Update mini ring
-    updateMiniScoreRing($input);
-    
-    // Update total score preview
-    updateTotalScorePreview($input.closest('.mt-ranking-item'));
-}
-```
+### Backend Components
 
-#### Inline Save Handler
-```javascript
-function handleInlineSave($button) {
-    const $form = $button.closest('.mt-inline-evaluation-form');
-    const $rankingItem = $button.closest('.mt-ranking-item');
-    const candidateId = $form.data('candidate-id');
-    
-    // Prevent double submission
-    if ($button.hasClass('saving')) {
-        return;
-    }
-    
-    // Collect scores
-    const scores = {};
-    $form.find('.mt-score-input').each(function() {
-        const criterion = $(this).data('criterion');
-        scores[criterion] = $(this).val();
-    });
-    
-    // Add loading state
-    $button.addClass('saving');
-    $rankingItem.addClass('updating');
-    
-    // AJAX save
-    $.ajax({
-        url: mt_ajax.ajax_url,
-        type: 'POST',
-        data: {
-            action: 'mt_save_inline_evaluation',
-            nonce: $form.find('input[name*="mt_inline_nonce"]').val(),
-            candidate_id: candidateId,
-            scores: scores,
-            status: 'completed'
-        },
-        success: function(response) {
-            if (response.success) {
-                handleSaveSuccess($rankingItem, response.data);
-            } else {
-                handleSaveError($rankingItem, response.data);
-            }
-        },
-        error: function() {
-            handleSaveError($rankingItem, 'Network error. Please try again.');
-        },
-        complete: function() {
-            $button.removeClass('saving');
-        }
-    });
-}
-```
-
-### 4. Backend AJAX Handler
-
-#### Method Signature
+#### AJAX Handler (`includes/ajax/class-mt-evaluation-ajax.php`)
 ```php
 public function save_inline_evaluation() {
-    // Security verification
-    // Assignment validation
-    // Score processing
-    // Database update
-    // Response handling
+    // Verify nonce and permissions
+    $this->verify_nonce();
+    $this->check_permission('mt_submit_evaluations');
+    
+    // Load existing evaluation
+    $existing_evaluation = $evaluation_repo->get_by_jury_and_candidate(
+        $jury_member->ID, 
+        $candidate_id
+    );
+    
+    // Update scores while preserving existing data
+    $evaluation_data = $existing_evaluation ? $existing_evaluation->to_array() : [];
+    $evaluation_data['scores'] = $scores;
+    
+    // Save evaluation
+    $result = $service->save($evaluation_data);
+    
+    // Return updated data
+    $this->success([
+        'total_score' => $total_score,
+        'evaluation_id' => $result
+    ]);
+}
+
+// Test AJAX endpoint for debugging
+public function test_ajax() {
+    $this->success([
+        'message' => 'AJAX is working correctly',
+        'timestamp' => current_time('mysql'),
+        'user_id' => get_current_user_id()
+    ], 'AJAX test successful');
 }
 ```
 
-#### Security Implementation
+#### Repository (`includes/repositories/class-mt-evaluation-repository.php`)
 ```php
-// Verify nonce with candidate-specific nonce
-if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_inline_evaluation_' . $_POST['candidate_id'])) {
-    wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
-}
-
-// Check permissions
-if (!current_user_can('mt_submit_evaluations')) {
-    wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
-}
-
-// Get jury member
-$current_user_id = get_current_user_id();
-$jury_member = $this->get_jury_member_by_user_id($current_user_id);
-
-if (!$jury_member) {
-    wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+public function save($data) {
+    // Use correct column names
+    $update_data = [
+        'jury_member_id' => $data['jury_member_id'],
+        'candidate_id' => $data['candidate_id'],
+        'courage_score' => $data['courage_score'],
+        'innovation_score' => $data['innovation_score'],
+        'implementation_score' => $data['implementation_score'],
+        'relevance_score' => $data['relevance_score'],
+        'visibility_score' => $data['visibility_score'],
+        'comments' => $data['comments'], // Correct field name
+        'updated_at' => current_time('mysql') // Correct column name
+    ];
+    
+    return $this->wpdb->replace($this->table_name, $update_data);
 }
 ```
 
-#### Assignment Validation
+## Database Schema
+
+### Evaluation Table Structure
+```sql
+CREATE TABLE wp_mt_evaluations (
+    id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    jury_member_id bigint(20) unsigned NOT NULL,
+    candidate_id bigint(20) unsigned NOT NULL,
+    courage_score decimal(3,1) DEFAULT NULL,
+    innovation_score decimal(3,1) DEFAULT NULL,
+    implementation_score decimal(3,1) DEFAULT NULL,
+    relevance_score decimal(3,1) DEFAULT NULL,
+    visibility_score decimal(3,1) DEFAULT NULL,
+    comments text DEFAULT NULL,
+    status varchar(20) DEFAULT 'draft',
+    created_at datetime DEFAULT CURRENT_TIMESTAMP,
+    updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY jury_candidate (jury_member_id, candidate_id)
+);
+```
+
+### Key Schema Corrections
+- **Column Names**: `created_at` and `updated_at` (not `evaluation_date` and `last_modified`)
+- **Field Names**: `comments` (not `notes`)
+- **Data Types**: Proper decimal precision for scores
+- **Indexes**: Unique constraint on jury-candidate combination
+
+## Security Implementation
+
+### Nonce Verification
 ```php
-$candidate_id = intval($_POST['candidate_id']);
-$scores = $_POST['scores'];
+// Frontend nonce generation
+wp_nonce_field('mt_inline_evaluation', 'mt_inline_nonce');
 
-// Verify assignment exists
-$assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-if (!$assignment_repo->exists($jury_member->ID, $candidate_id)) {
-    wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
-}
+// Backend nonce verification
+$this->verify_nonce('mt_inline_evaluation');
 ```
 
-#### Data Processing
+### Permission Checks
 ```php
-// Prepare evaluation data
-$evaluation_data = [
-    'jury_member_id' => $jury_member->ID,
-    'candidate_id' => $candidate_id,
-    'status' => sanitize_text_field($_POST['status'] ?? 'completed'),
-    'notes' => ''
-];
+// Check jury member permissions
+$this->check_permission('mt_submit_evaluations');
 
-// Add scores with validation
-foreach ($scores as $criterion => $score) {
-    $evaluation_data[$criterion] = floatval($score);
-}
-
-// Save evaluation
-$evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
-$result = $evaluation_service->save_evaluation($evaluation_data);
-
-if (is_wp_error($result)) {
-    wp_send_json_error($result->get_error_message());
+// Verify jury-candidate assignment
+$has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);
+if (!$has_assignment) {
+    $this->error('Permission denied');
 }
 ```
 
-#### Response Handling
+### Data Validation
 ```php
-// Get updated evaluation data
-$evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-$evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+// Score validation
+$score = floatval($score);
+if ($score < 0 || $score > 10) {
+    $this->error('Invalid score value');
+}
 
-wp_send_json_success([
-    'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
-    'evaluation_id' => $result,
-    'total_score' => $evaluation->total_score ?? 0,
-    'refresh_rankings' => true
-]);
+// Input sanitization
+$comments = sanitize_textarea_field($comments);
 ```
 
-## Visual Design System
+## Error Handling
 
-### Color Coding
-- **Score Rings**: Dynamic colors based on score values
-  - 8-10: Green (#22c55e) - Excellent
-  - 6-7.9: Blue (#667eea) - Good
-  - 4-5.9: Orange (#f59e0b) - Average
-  - 0-3.9: Red (#ef4444) - Poor
+### AJAX Error Responses
+```javascript
+error: function(xhr, status, error) {
+    console.error('AJAX Error:', {
+        status: status,
+        error: error,
+        responseText: xhr.responseText
+    });
+    
+    // User-friendly error messages
+    let errorMessage = 'Network error. Please try again.';
+    try {
+        if (xhr.responseJSON && xhr.responseJSON.data) {
+            errorMessage = xhr.responseJSON.data;
+        }
+    } catch (e) {
+        // Use default message
+    }
+    
+    alert(errorMessage);
+}
+```
 
-### Animation System
-- **Loading States**: Spinner animation during AJAX operations
-- **Success Feedback**: Green pulse animation for saved evaluations
-- **Score Updates**: Smooth transitions for mini rings and total scores
-- **Hover Effects**: Elevation changes and color transitions
+### Backend Error Handling
+```php
+try {
+    $result = $service->save($evaluation_data);
+    if ($result) {
+        $this->success($response_data);
+    } else {
+        $this->error('Failed to save evaluation');
+    }
+} catch (Exception $e) {
+    error_log('Evaluation save error: ' . $e->getMessage());
+    $this->error('Database error occurred');
+}
+```
 
-### Interactive Elements
-- **Touch Targets**: Minimum 44px for all interactive elements
-- **Focus States**: Clear focus indicators for keyboard navigation
-- **Button States**: Active, hover, and disabled states for all buttons
-- **Form Validation**: Real-time validation with visual feedback
+## Performance Optimizations
 
-## Performance Optimization
+### Database Queries
+- **Efficient Loading**: Single query to load existing evaluations
+- **Batch Operations**: Bulk loading of candidate data
+- **Indexed Queries**: Proper indexing on frequently queried columns
 
 ### Frontend Performance
-- **Efficient DOM Updates**: Targeted element modifications
-- **Debounced Events**: Prevents excessive function calls
-- **GPU Acceleration**: Hardware-accelerated animations
-- **Lazy Loading**: Progressive enhancement approach
+- **Debounced Updates**: Prevent excessive AJAX calls
+- **Cached Data**: Store evaluation data locally
+- **Lazy Loading**: Load candidate details on demand
 
-### Backend Performance
-- **Optimized Queries**: Efficient database operations
-- **Caching**: Optional result caching for frequently accessed data
-- **Minimal Processing**: Streamlined data processing
-- **Error Handling**: Graceful fallbacks and recovery
+### Cache Management
+```php
+// Version-based cache busting
+define('MT_VERSION', '2.0.10');
 
-### Mobile Optimization
-- **Touch Interactions**: Optimized for touch devices
-- **Reduced Animations**: Simplified animations on mobile
-- **Responsive Design**: Adaptive layouts for all screen sizes
-- **Performance Monitoring**: Real-time performance tracking
-
-## Security Features
-
-### Multi-Layer Security
-1. **Nonce Verification**: Candidate-specific nonces prevent CSRF attacks
-2. **Permission Checks**: Only authorized users can modify evaluations
-3. **Assignment Validation**: Users can only evaluate assigned candidates
-4. **Input Sanitization**: All user inputs properly validated and sanitized
-
-### Data Protection
-- **SQL Injection Prevention**: Prepared statements and proper escaping
-- **XSS Prevention**: Output sanitization and escaping
-- **CSRF Protection**: Nonce verification for all AJAX requests
-- **Access Control**: Role-based permission system
-
-## Testing Strategy
-
-### Automated Testing
-- **Unit Tests**: PHPUnit tests for AJAX handlers
-- **Integration Tests**: End-to-end testing of inline evaluation workflow
-- **Frontend Tests**: JavaScript testing with Jest
-- **Accessibility Tests**: Automated accessibility testing
-
-### Manual Testing Checklist
-- [ ] Score adjustment buttons work correctly
-- [ ] Score validation prevents invalid values
-- [ ] AJAX saves work without page refresh
-- [ ] Success animations provide clear feedback
-- [ ] Auto-refresh updates rankings correctly
-- [ ] Error handling works gracefully
-- [ ] Keyboard navigation is fully functional
-- [ ] Screen readers can access all features
-- [ ] Touch interactions work on mobile devices
-- [ ] Responsive design works on all screen sizes
+// Asset enqueuing with version
+wp_enqueue_script(
+    'mt-frontend',
+    MT_PLUGIN_URL . 'assets/js/frontend.js',
+    ['jquery'],
+    MT_VERSION,
+    true
+);
+```
 
 ## Browser Compatibility
 
-### Supported Browsers
-- **Chrome**: 90+ (Full support)
-- **Firefox**: 88+ (Full support)
-- **Safari**: 14+ (Full support)
-- **Edge**: 90+ (Full support)
+### CSS Compatibility
+```css
+/* Cross-browser appearance reset */
+.mt-score-input {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+}
 
-### Fallback Support
-- **IE11**: Graceful degradation with basic functionality
-- **Older Mobile**: Simplified layout without advanced animations
-- **JavaScript Disabled**: Basic functionality with server-side rendering
+/* Vendor prefix support */
+.mt-score-ring-progress {
+    stroke-dasharray: 0, 100;
+    transition: stroke-dasharray 0.3s ease;
+}
+```
 
-## Future Enhancements
+### JavaScript Compatibility
+- **ES6+ Features**: Used with proper polyfills
+- **AJAX Support**: jQuery-based for broad compatibility
+- **Event Handling**: Cross-browser event delegation
 
-### Planned Features
-- **Drag and Drop**: Reorder candidates by dragging
-- **Bulk Operations**: Select multiple candidates for batch evaluation
-- **Advanced Filtering**: Filter by score ranges, categories, or status
-- **Export Functionality**: Export rankings to PDF or Excel
-- **Real-time Collaboration**: Live updates when other jury members save evaluations
+## Testing and Debugging
 
-### Performance Improvements
-- **WebSocket Integration**: Real-time updates without polling
-- **Service Worker**: Offline support for basic functionality
-- **Progressive Web App**: Installable dashboard with offline capabilities
-- **Advanced Caching**: Intelligent caching strategies for better performance
+### AJAX Testing
+```php
+// Test AJAX endpoint
+public function test_ajax() {
+    $this->success([
+        'message' => 'AJAX is working correctly',
+        'timestamp' => current_time('mysql'),
+        'user_id' => get_current_user_id()
+    ], 'AJAX test successful');
+}
+```
+
+### Console Debugging
+```javascript
+// Debug logging
+console.log('Sending AJAX request with data:', formData);
+console.log('AJAX URL:', mt_ajax.url);
+console.log('Save response:', response);
+```
+
+### Error Monitoring
+- **PHP Error Logging**: Comprehensive error logging
+- **JavaScript Console**: Detailed AJAX error reporting
+- **User Feedback**: Clear error messages for users
 
 ## Troubleshooting
 
 ### Common Issues
-1. **Scores Not Saving**: Check nonce generation and AJAX URL configuration
-2. **Grid Layout Issues**: Verify CSS Grid support and responsive breakpoints
-3. **Performance Problems**: Check database indexing and query optimization
-4. **Mobile Issues**: Verify touch targets and responsive design
 
-### Debug Mode
-```php
-// Enable debug logging
-if (defined('WP_DEBUG') && WP_DEBUG) {
-    error_log('MT Inline Evaluation Debug: ' . $debug_message);
-}
-```
+#### AJAX Test Errors
+**Problem**: Console shows "Testing AJAX functionality" errors
+**Solution**: 
+- Clear browser cache (Ctrl+F5)
+- Check plugin version is 2.0.10+
+- Verify AJAX endpoints are registered
 
-### Error Recovery
-- **Network Errors**: Automatic retry with exponential backoff
-- **Validation Errors**: Clear error messages with specific guidance
-- **Permission Errors**: Graceful fallback to read-only mode
-- **System Errors**: Fallback to traditional evaluation workflow
+#### Database Errors
+**Problem**: "Unknown column" errors
+**Solution**:
+- Run database upgrade: `MT_Database_Upgrade::run()`
+- Check column names match schema
+- Verify field names are consistent
 
-## API Reference
+#### Permission Errors
+**Problem**: "Permission denied" messages
+**Solution**:
+- Verify user has jury member role
+- Check jury-candidate assignment exists
+- Confirm user is logged in
 
-### JavaScript Events
-- `mt:inline:score:changed` - Fired when a score is adjusted
-- `mt:inline:evaluation:saved` - Fired when an evaluation is saved
-- `mt:inline:error:occurred` - Fired when an error occurs
+### Debug Steps
+1. **Check Console**: Look for JavaScript errors
+2. **Verify AJAX**: Test AJAX endpoints manually
+3. **Check Database**: Verify table structure
+4. **Review Logs**: Check PHP error logs
+5. **Test Permissions**: Verify user capabilities
 
-### CSS Classes
-- `.mt-ranking-item` - Individual candidate card
-- `.mt-inline-evaluation-controls` - Container for inline controls
-- `.mt-criterion-inline` - Individual criterion control
-- `.mt-score-control` - Score adjustment interface
-- `.mt-score-ring-mini` - Mini progress ring container
+## Usage Instructions
 
-### PHP Hooks
-- `mt_inline_evaluation_before_save` - Fired before saving inline evaluation
-- `mt_inline_evaluation_after_save` - Fired after saving inline evaluation
-- `mt_inline_evaluation_error` - Fired when an error occurs during save
+### For Jury Members
+1. **Access Dashboard**: Navigate to jury dashboard
+2. **View Candidates**: See assigned candidates in 2x5 grid
+3. **Adjust Scores**: Use +/- buttons to modify scores
+4. **Save Changes**: Click save button for each candidate
+5. **Monitor Progress**: Watch mini rings update in real-time
 
-This documentation provides a comprehensive overview of the Inline Evaluation System implementation, covering all aspects from frontend interface to backend processing, security considerations, and future enhancements. 
+### For Administrators
+1. **Monitor Usage**: Check evaluation progress in admin
+2. **Troubleshoot Issues**: Use diagnostics page for debugging
+3. **Manage Assignments**: Control jury-candidate assignments
+4. **Review Data**: Access evaluation data and reports
+
+## Future Enhancements
+
+### Planned Features
+- **Bulk Operations**: Save multiple evaluations at once
+- **Auto-save**: Automatic saving of changes
+- **Offline Support**: Work offline with sync on reconnect
+- **Advanced Analytics**: Detailed evaluation insights
+
+### Technical Improvements
+- **Real-time Collaboration**: Multiple jury members working simultaneously
+- **Advanced Validation**: More sophisticated score validation
+- **Performance Monitoring**: Detailed performance metrics
+- **Mobile Optimization**: Enhanced mobile experience
+
+---
+
+*Last updated: December 2024* 
