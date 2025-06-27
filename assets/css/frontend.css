@@ -1419,62 +1419,36 @@
     }
 }
 
-/* 5x2 Grid Layout for Rankings */
+/* 2x5 Grid Layout for Rankings */
 .mt-rankings-grid.mt-rankings-5x2 {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, auto);
+    gap: 24px;
     padding: 20px;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 /* Responsive adjustments */
-@media (max-width: 1400px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1024px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(4, 1fr);
-    }
-}
-
 @media (max-width: 768px) {
     .mt-rankings-grid.mt-rankings-5x2 {
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(5, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .mt-rankings-grid.mt-rankings-5x2 {
         grid-template-columns: 1fr;
-        grid-template-rows: auto;
+        gap: 20px;
     }
 }
 
-/* Enhanced Ranking Item Styling */
+/* Enhanced Ranking Item Styling - Adjusted for 2 column layout */
 .mt-ranking-item {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 20px;
+    padding: 24px;
     position: relative;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    min-height: 380px;
-}
-
-.mt-ranking-item:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
+    min-height: 320px;
 }
 
 /* Position Badge - Corner Style */

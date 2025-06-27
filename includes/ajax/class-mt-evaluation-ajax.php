@@ -398,7 +398,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      */
     public function save_inline_evaluation() {
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_inline_evaluation_' . $_POST['candidate_id'])) {
+        if (!isset($_POST['mt_inline_nonce']) || !wp_verify_nonce($_POST['mt_inline_nonce'], 'mt_inline_evaluation')) {
             wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
         }
         
@@ -415,7 +415,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         $candidate_id = intval($_POST['candidate_id']);
-        $scores = $_POST['scores'];
+        $scores = isset($_POST['scores']) ? $_POST['scores'] : [];
         
         // Verify assignment
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
@@ -423,17 +423,33 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
         }
         
-        // Prepare evaluation data
+        // Get existing evaluation if any
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $existing_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+        
+        // Prepare evaluation data - preserve existing data
         $evaluation_data = [
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $candidate_id,
-            'status' => sanitize_text_field($_POST['status'] ?? 'completed'),
-            'notes' => ''
+            'status' => 'completed',
+            'notes' => $existing_evaluation ? $existing_evaluation->notes : ''
         ];
         
-        // Add scores
+        // Merge with existing scores
+        if ($existing_evaluation) {
+            // Start with existing scores
+            $evaluation_data['courage_score'] = $existing_evaluation->courage_score;
+            $evaluation_data['innovation_score'] = $existing_evaluation->innovation_score;
+            $evaluation_data['implementation_score'] = $existing_evaluation->implementation_score;
+            $evaluation_data['relevance_score'] = $existing_evaluation->relevance_score;
+            $evaluation_data['visibility_score'] = $existing_evaluation->visibility_score;
+        }
+        
+        // Update with new scores
         foreach ($scores as $criterion => $score) {
-            $evaluation_data[$criterion] = floatval($score);
+            if (!empty($criterion) && is_numeric($score)) {
+                $evaluation_data[$criterion] = floatval($score);
+            }
         }
         
         // Save evaluation
@@ -445,13 +461,12 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get updated evaluation data
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-        $evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+        $updated_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
         
         wp_send_json_success([
             'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
             'evaluation_id' => $result,
-            'total_score' => $evaluation->total_score ?? 0,
+            'total_score' => $updated_evaluation ? floatval($updated_evaluation->total_score) : 0,
             'refresh_rankings' => true
         ]);
     }

@@ -1,7 +1,7 @@
 <?php
 /**
  * Jury Rankings Partial Template
- * Displays top-ranked candidates in a 5x2 grid with inline evaluation controls
+ * Displays top-ranked candidates in a 2x5 grid with inline evaluation controls
  *
  * @package MobilityTrailblazers
  * @since 2.0.9
@@ -17,9 +17,27 @@ if (empty($rankings)) {
     return;
 }
 
-// Get evaluation criteria
+// Get evaluation criteria and repository
 $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+$evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
 $criteria = $evaluation_service->get_criteria();
+
+// Get current jury member
+$current_user_id = get_current_user_id();
+$jury_member = null;
+
+// Find jury member by user ID
+$args = [
+    'post_type' => 'mt_jury_member',
+    'meta_key' => '_mt_user_id',
+    'meta_value' => $current_user_id,
+    'posts_per_page' => 1,
+    'post_status' => 'publish'
+];
+$jury_members = get_posts($args);
+if (!empty($jury_members)) {
+    $jury_member = $jury_members[0];
+}
 ?>
 
 <div class="mt-rankings-section">
@@ -38,12 +56,10 @@ $criteria = $evaluation_service->get_criteria();
             $position_title = $ranking->position ?? '';
             $total_score = floatval($ranking->total_score ?? 0);
             
-            // Parse criteria scores
-            $criteria_scores = [];
-            if (!empty($ranking->criteria_scores)) {
-                $criteria_scores = is_string($ranking->criteria_scores) 
-                    ? json_decode($ranking->criteria_scores, true) 
-                    : (array)$ranking->criteria_scores;
+            // Get the full evaluation data for this candidate
+            $evaluation = null;
+            if ($jury_member) {
+                $evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
             }
             
             // Position classes for medal styling
@@ -84,12 +100,14 @@ $criteria = $evaluation_service->get_criteria();
                 <!-- Inline Evaluation Controls -->
                 <div class="mt-inline-evaluation-controls">
                     <form class="mt-inline-evaluation-form" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
-                        <?php wp_nonce_field('mt_inline_evaluation_' . $candidate_id, 'mt_inline_nonce'); ?>
+                        <?php wp_nonce_field('mt_inline_evaluation', 'mt_inline_nonce'); ?>
+                        <input type="hidden" name="candidate_id" value="<?php echo esc_attr($candidate_id); ?>">
                         
                         <div class="mt-criteria-grid-inline">
                             <?php foreach ($criteria as $key => $criterion) : 
-                                $score_key = str_replace('_score', '', $criterion['key']);
-                                $current_score = isset($criteria_scores[$score_key]) ? floatval($criteria_scores[$score_key]) : 0;
+                                // Get current score from evaluation
+                                $score_field = $criterion['key'];
+                                $current_score = $evaluation && isset($evaluation->$score_field) ? floatval($evaluation->$score_field) : 0;
                             ?>
                                 <div class="mt-criterion-inline">
                                     <label class="mt-criterion-label" title="<?php echo esc_attr($criterion['description']); ?>">
@@ -150,7 +168,7 @@ $criteria = $evaluation_service->get_criteria();
             </div>
         <?php 
             $position++;
-            if ($position > 10) break; // Limit to 10 candidates (5x2 grid)
+            if ($position > 10) break; // Limit to 10 candidates (2x5 grid)
         endforeach; 
         ?>
     </div>

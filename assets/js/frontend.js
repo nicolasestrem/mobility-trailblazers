@@ -733,6 +733,12 @@
         initializeInlineEvaluations();
         
         function initializeInlineEvaluations() {
+            // Initialize all score rings on page load
+            $('.mt-score-ring-mini').each(function() {
+                const score = $(this).data('score');
+                updateMiniScoreRing($(this), score);
+            });
+            
             // Score adjustment buttons
             $(document).on('click', '.mt-score-adjust', function(e) {
                 e.preventDefault();
@@ -764,7 +770,8 @@
                 }
                 
                 // Update mini ring
-                updateMiniScoreRing($input);
+                const $ring = $input.closest('.mt-criterion-inline').find('.mt-score-ring-mini');
+                updateMiniScoreRing($ring, constrainedValue);
                 
                 // Update total score preview
                 updateTotalScorePreview($input.closest('.mt-ranking-item'));
@@ -787,39 +794,48 @@
                 // Collect scores
                 const scores = {};
                 $form.find('.mt-score-input').each(function() {
-                    const criterion = $(this).data('criterion');
-                    scores[criterion] = $(this).val();
+                    const criterion = $(this).attr('name');
+                    const value = $(this).val();
+                    if (criterion && value) {
+                        scores[criterion] = value;
+                    }
                 });
                 
                 // Add loading state
                 $button.addClass('saving');
                 $rankingItem.addClass('updating');
                 
+                // Prepare form data
+                const formData = {
+                    action: 'mt_save_inline_evaluation',
+                    mt_inline_nonce: $form.find('input[name="mt_inline_nonce"]').val(),
+                    candidate_id: candidateId,
+                    scores: scores
+                };
+                
                 // Save via AJAX
                 $.ajax({
                     url: mt_ajax.ajax_url,
                     type: 'POST',
-                    data: {
-                        action: 'mt_save_inline_evaluation',
-                        nonce: $form.find('input[name*="mt_inline_nonce"]').val(),
-                        candidate_id: candidateId,
-                        scores: scores,
-                        status: 'completed' // Auto-complete when saving from inline
-                    },
+                    data: formData,
                     success: function(response) {
                         if (response.success) {
                             // Show success animation
                             $rankingItem.removeClass('updating').addClass('success');
                             
                             // Update total score display
+                            const totalScore = response.data.total_score;
                             const $scoreValue = $rankingItem.find('.mt-total-score-display .score-value');
-                            $scoreValue.text(response.data.total_score.toFixed(1) + '/10');
-                            $scoreValue.data('score', response.data.total_score);
+                            $scoreValue.text(totalScore.toFixed(1) + '/10');
+                            $scoreValue.data('score', totalScore);
+                            
+                            // Update score color
+                            updateScoreColor($scoreValue, totalScore);
                             
                             // Trigger rankings refresh after a delay
                             setTimeout(function() {
                                 refreshRankings();
-                            }, 1000);
+                            }, 1500);
                             
                             // Remove success class after animation
                             setTimeout(function() {
@@ -830,7 +846,8 @@
                             $rankingItem.removeClass('updating');
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error);
                         alert('Network error. Please try again.');
                         $rankingItem.removeClass('updating');
                     },
@@ -841,9 +858,7 @@
             });
         }
         
-        function updateMiniScoreRing($input) {
-            const score = parseFloat($input.val()) || 0;
-            const $ring = $input.closest('.mt-criterion-inline').find('.mt-score-ring-mini');
+        function updateMiniScoreRing($ring, score) {
             const $progress = $ring.find('.mt-ring-progress');
             
             // Update ring
@@ -876,17 +891,19 @@
                 const average = scores.reduce((a, b) => a + b, 0) / scores.length;
                 const $scoreDisplay = $rankingItem.find('.mt-total-score-display .score-value');
                 $scoreDisplay.text(average.toFixed(1) + '/10');
-                
-                // Update color based on average
-                if (average >= 8) {
-                    $scoreDisplay.css('color', '#22c55e');
-                } else if (average >= 6) {
-                    $scoreDisplay.css('color', '#667eea');
-                } else if (average >= 4) {
-                    $scoreDisplay.css('color', '#f59e0b');
-                } else {
-                    $scoreDisplay.css('color', '#ef4444');
-                }
+                updateScoreColor($scoreDisplay, average);
+            }
+        }
+        
+        function updateScoreColor($element, score) {
+            if (score >= 8) {
+                $element.css('color', '#22c55e');
+            } else if (score >= 6) {
+                $element.css('color', '#667eea');
+            } else if (score >= 4) {
+                $element.css('color', '#f59e0b');
+            } else {
+                $element.css('color', '#ef4444');
             }
         }
         
@@ -903,16 +920,28 @@
                 },
                 success: function(response) {
                     if (response.success && response.data.html) {
+                        // Store current form values before refresh
+                        const currentValues = {};
+                        $('.mt-inline-evaluation-form').each(function() {
+                            const candidateId = $(this).data('candidate-id');
+                            currentValues[candidateId] = {};
+                            $(this).find('.mt-score-input').each(function() {
+                                const criterion = $(this).attr('name');
+                                currentValues[candidateId][criterion] = $(this).val();
+                            });
+                        });
+                        
+                        // Update the container
                         $container.fadeOut(300, function() {
-                            $(this).html(response.data.html).fadeIn(300);
-                            
-                            // Reinitialize score rings
-                            $('.mt-score-ring-mini').each(function() {
-                                const score = $(this).data('score');
-                                updateMiniScoreRing($(this).find('.mt-score-input'));
+                            $(this).html(response.data.html).fadeIn(300, function() {
+                                // Reinitialize everything
+                                initializeInlineEvaluations();
                             });
                         });
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Rankings refresh error:', status, error);
                 }
             });
         }
