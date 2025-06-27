@@ -43,11 +43,15 @@ if (!defined('ABSPATH')) {
         <button type="button" class="button button-primary" id="mt-refresh-stats">
             <?php _e('Refresh Stats', 'mobility-trailblazers'); ?>
         </button>
-        
+
+        <a href="<?php echo esc_url(add_query_arg('test_error', '1')); ?>" class="button">
+            <?php _e('Test Error Logging', 'mobility-trailblazers'); ?>
+        </a>
+
         <button type="button" class="button" id="mt-export-logs">
             <?php _e('Export Logs', 'mobility-trailblazers'); ?>
         </button>
-        
+
         <button type="button" class="button button-secondary" id="mt-clear-logs">
             <?php _e('Clear All Logs', 'mobility-trailblazers'); ?>
         </button>
