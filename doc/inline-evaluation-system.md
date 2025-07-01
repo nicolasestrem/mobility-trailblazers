@@ -2,23 +2,22 @@
 
 ## Overview
 
-The Inline Evaluation System provides a streamlined interface for jury members to evaluate candidates directly from the jury dashboard without navigating to separate evaluation forms. This system implements a 2x5 grid layout with real-time score updates and AJAX-powered saving functionality.
+The Inline Evaluation System provides a streamlined interface for jury members to evaluate candidates directly from the jury dashboard. This system implements a responsive grid layout (2x5 preferred) with real-time score updates and AJAX-powered saving functionality.
+
+*For architecture details, see [Architecture Documentation](mt-architecture-docs.md)*
 
 ## Features
 
 ### Core Functionality
-- **2x5 Grid Layout**: Displays 10 candidates in a responsive grid format
-- **Inline Score Adjustment**: Real-time score updates with +/- buttons (0.5 increments)
+- **Responsive Grid Layout**: Displays candidates in adaptive grid (2x5 preferred)
+- **Inline Score Adjustment**: Real-time updates with +/- buttons (0.5 increments)
 - **Mini Progress Rings**: Visual score indicators with color-coded feedback
 - **AJAX Save**: Secure saving without page refresh
-- **Success Animations**: Visual feedback for successful operations
-- **Auto-refresh Rankings**: Automatic rankings update after saves
-- **Test AJAX Endpoint**: Proper debugging and testing capabilities
+- **Auto-refresh Rankings**: Automatic updates after saves
 
 ### Visual Elements
-- **Mini Progress Rings**: Circular progress indicators showing current scores
-- **Score Adjustment Buttons**: +/- buttons for precise score control
-- **Save/Full View Actions**: Contextual action buttons for each candidate
+- **Mini Progress Rings**: Circular progress indicators
+- **Score Adjustment Buttons**: +/- buttons for precise control
 - **Color-coded Feedback**: Green (8+), Blue (6-7.9), Orange (4-5.9), Red (0-3.9)
 
 ## Technical Implementation

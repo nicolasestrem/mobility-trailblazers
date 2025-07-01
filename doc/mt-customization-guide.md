@@ -1,7 +1,12 @@
-# Mobility Trailblazers - Customization Quick Implementation Guide
+# Mobility Trailblazers - Customization Guide
+
+**Version:** 2.0.11
+**Last Updated:** July 2025
 
 ## Overview
-This guide provides step-by-step instructions for implementing the dashboard and candidate presentation customization features in your Mobility Trailblazers installation.
+This guide provides step-by-step instructions for implementing dashboard and candidate presentation customization features.
+
+*For architecture details, see [Architecture Documentation](mt-architecture-docs.md)*
 
 ## Required File Changes
 

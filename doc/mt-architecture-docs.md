@@ -1,7 +1,7 @@
 # Mobility Trailblazers - Architecture Documentation
 
-**Version:** 2.0.0  
-**Last Updated:** June 2126 2025
+**Version:** 2.0.11
+**Last Updated:** July 2025
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -12,6 +12,11 @@
 6. [Data Flow](#data-flow)
 7. [Security Architecture](#security-architecture)
 8. [Performance Considerations](#performance-considerations)
+
+## Related Documentation
+- **[Developer Guide](mt-developer-guide.md)** - Development practices and code examples
+- **[Customization Guide](mt-customization-guide.md)** - UI customization and theming
+- **[Error Handling System](error-handling-system.md)** - Error management implementation
 
 ## Overview
 
@@ -251,231 +256,53 @@ abstract class MT_Base_Ajax {
 
 ### Jury Evaluation Flow
 
-The jury evaluation process follows a specific flow optimized for dynamic form handling:
+The jury evaluation process follows a specific flow optimized for dynamic form handling and inline evaluation controls:
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Jury Member   │    │  Frontend JS    │    │  AJAX Handler   │
-│   Clicks        │───▶│  Loads Form     │───▶│  Returns        │
-│   Evaluate      │    │  Dynamically    │    │  Candidate Data │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Form Created  │    │  User Fills     │    │  Form Data      │
-│   with Hidden   │◀───│  Evaluation     │◀───│  Collected      │
-│   candidate_id  │    │  Form           │    │  Manually       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Form Submit   │    │  AJAX Request   │    │  Validation &   │
-│   Event         │───▶│  with All       │───▶│  Processing     │
-│   Triggered     │    │  Form Fields    │    │  in Service     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                        │
-                                ▼                        ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Success       │    │  Database       │    │  Assignment     │
-│   Response      │◀───│  Updated        │◀───│  Checked        │
-│   to User       │    │  via Repository │    │  via Repository │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
+1. **User Interaction** → Jury member clicks evaluate or uses inline controls
+2. **Frontend Processing** → JavaScript loads form dynamically or adjusts scores
+3. **AJAX Communication** → Secure request to backend with validation
+4. **Service Processing** → Business logic validation and data processing
+5. **Repository Update** → Database operations with assignment verification
+6. **Response Handling** → Success feedback and UI updates
 
 ### Form Submission Architecture
 
+The system supports both traditional form submission and inline evaluation controls:
+
 #### Dynamic Form Creation
+- AJAX-loaded candidate details with proper data binding
+- Nested data structure handling for complex responses
+- Secure nonce verification for all requests
 
-The evaluation form is created dynamically via JavaScript to ensure proper data binding:
+#### Robust Data Collection
+- Manual field collection for dynamically created forms
+- Fallback form selection with multiple selectors
+- Comprehensive validation on both client and server side
 
-```javascript
-// 1. Load candidate details via AJAX
-$.post(mt_ajax.url, {
-    action: 'mt_get_candidate_details',
-    candidate_id: candidateId,
-    nonce: mt_ajax.nonce
-})
-.done(function(response) {
-    if (response.success) {
-        // Handle nested data structure
-        var candidateData = response.data.data || response.data;
-        self.displayEvaluationForm(candidateData);
-    }
-});
-```
-
-#### Robust Form Data Collection
-
-To handle dynamically created forms, the system uses manual field collection:
-
-```javascript
-// Manual field collection ensures all fields are captured
-var formData = {};
-$targetForm.find('input, textarea, select').each(function() {
-    var $field = $(this);
-    var name = $field.attr('name');
-    var value = $field.val();
-    
-    if (name && value !== undefined) {
-        formData[name] = value;
-    }
-});
-```
-
-#### Fallback Form Selection
-
-Multiple selectors ensure the form is always found:
-
-```javascript
-// Try multiple selectors to find the form
-var $targetForm = $('#mt-evaluation-form');
-if ($targetForm.length === 0) {
-    $targetForm = $('.mt-evaluation-form');
-}
-if ($targetForm.length === 0) {
-    $targetForm = $form; // fallback to original reference
-}
-```
+*For detailed implementation examples, see [Developer Guide](mt-developer-guide.md)*
 
 ### Debugging Architecture
 
-The system includes comprehensive debugging capabilities at multiple levels:
+The system includes comprehensive debugging capabilities:
 
-#### Client-Side Debugging
+#### Multi-Level Debugging
+- **Client-Side**: Form selection, field collection, and data validation logging
+- **Server-Side**: AJAX handler debugging with detailed POST data logging
+- **Repository**: Database query debugging and assignment validation
+- **Error Handling**: Structured error responses with user-friendly messages
 
-```javascript
-// Form selection debugging
-console.log('MT JS - Form element:', $form);
-console.log('MT JS - Form ID:', $form.attr('id'));
-console.log('MT JS - Form class:', $form.attr('class'));
-
-// Field collection debugging
-var allFields = $targetForm.find('input, textarea, select');
-console.log('MT JS - Found form fields:', allFields.length);
-allFields.each(function(index) {
-    var $field = $(this);
-    var name = $field.attr('name');
-    var value = $field.val();
-    console.log('MT JS - Field ' + index + ':', name, '=', value);
-});
-
-// Final form data debugging
-console.log('MT JS - Form data being sent:', formData);
-console.log('MT JS - Candidate ID in form data:', formData.candidate_id);
-```
-
-#### Server-Side Debugging
-
-```php
-// AJAX handler debugging
-public function submit_evaluation() {
-    // Debug: Log raw POST data
-    error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
-    
-    // Debug: Check candidate_id specifically
-    $raw_candidate_id = $this->get_param('candidate_id');
-    error_log('MT AJAX - Raw candidate_id from POST: ' . var_export($raw_candidate_id, true));
-    $candidate_id = $this->get_int_param('candidate_id');
-    error_log('MT AJAX - Processed candidate_id: ' . $candidate_id);
-    
-    // Debug: Jury member lookup
-    $current_user_id = get_current_user_id();
-    $jury_member = $this->get_jury_member_by_user_id($current_user_id);
-    error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
-    
-    // Debug: Assignment check
-    $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-    $has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);
-    error_log('MT AJAX - Assignment check: jury_member_id=' . $jury_member->ID . ', candidate_id=' . $candidate_id . ', has_assignment=' . ($has_assignment ? 'true' : 'false'));
-}
-```
-
-#### Repository Debugging
-
-```php
-// Repository method debugging
-public function exists($jury_member_id, $candidate_id) {
-    $query = $this->wpdb->prepare(
-        "SELECT COUNT(*) FROM {$this->table_name} 
-         WHERE jury_member_id = %d AND candidate_id = %d",
-        $jury_member_id, $candidate_id
-    );
-    
-    error_log('MT Assignment Repository - Checking assignment with query: ' . $query);
-    
-    $count = $this->wpdb->get_var($query);
-    
-    error_log('MT Assignment Repository - Assignment count: ' . $count . ' for jury_member_id=' . $jury_member_id . ', candidate_id=' . $candidate_id);
-    
-    return (int) $count > 0;
-}
-```
+*For detailed debugging examples and troubleshooting, see [Developer Guide](mt-developer-guide.md)*
 
 ### Error Handling Architecture
 
-The system implements a multi-layered error handling approach:
+Multi-layered error handling approach:
 
-#### 1. Client-Side Validation
+1. **Client-Side Validation**: Form validation before submission with user feedback
+2. **Server-Side Validation**: AJAX handler validation with nonce and permission checks
+3. **Service Layer Validation**: Business logic validation with structured error responses
+4. **Database Constraint Validation**: Repository-level validation and constraint handling
 
-```javascript
-// Form validation before submission
-var isValid = true;
-$('.mt-score-slider').each(function() {
-    var value = parseInt($(this).val());
-    if (isNaN(value) || value < 0 || value > 10) {
-        isValid = false;
-        return false;
-    }
-});
-
-if (!isValid) {
-    MTJuryDashboard.showError('Please ensure all scores are between 0 and 10.');
-    return;
-}
-```
-
-#### 2. Server-Side Validation
-
-```php
-// AJAX handler validation
-public function submit_evaluation() {
-    $this->verify_nonce();
-    $this->check_permission('mt_submit_evaluations');
-    
-    $candidate_id = $this->get_int_param('candidate_id');
-    if (!$candidate_id) {
-        $this->error(__('Invalid candidate ID.', 'mobility-trailblazers'));
-    }
-    
-    // Additional validation in service layer
-    $service = new MT_Evaluation_Service();
-    if (!$service->validate($data)) {
-        $this->error(implode(', ', $service->get_errors()));
-    }
-}
-```
-
-#### 3. Database Constraint Validation
-
-```php
-// Repository-level validation
-public function create($data) {
-    // Check for existing evaluation
-    $existing = $this->find_all([
-        'jury_member_id' => $data['jury_member_id'],
-        'candidate_id' => $data['candidate_id'],
-        'limit' => 1
-    ]);
-    
-    if (!empty($existing)) {
-        // Update existing evaluation
-        return $this->update($existing[0]->id, $data);
-    }
-    
-    // Create new evaluation
-    return $this->insert($data);
-}
-```
+*For detailed error handling examples, see [Error Handling System](error-handling-system.md)*
 
 ## Security Architecture
 
