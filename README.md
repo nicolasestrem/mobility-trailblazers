@@ -4,6 +4,8 @@
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 
+01/07/2025
+
 A modern, clean WordPress plugin for managing mobility innovation awards in the DACH region. This platform enables jury members to evaluate candidates through a sophisticated scoring system while providing administrators with powerful management tools.
 
 ## 🎯 Overview
