@@ -62,8 +62,6 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
     }
     
     // Save other settings
-    update_option('mt_enable_notifications', isset($_POST['enable_notifications']) ? 1 : 0);
-    update_option('mt_notification_email', sanitize_email($_POST['notification_email']));
     update_option('mt_evaluations_per_page', intval($_POST['evaluations_per_page']));
     
     echo '<div class="notice notice-success"><p>' . __('Settings saved successfully!', 'mobility-trailblazers') . '</p></div>';
@@ -109,8 +107,6 @@ $candidate_presentation = get_option('mt_candidate_presentation', [
     'enable_hover_effects' => 1
 ]);
 
-$enable_notifications = get_option('mt_enable_notifications', 0);
-$notification_email = get_option('mt_notification_email', get_option('admin_email'));
 $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
 ?>
 
@@ -460,34 +456,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
             </tr>
         </table>
         
-        <!-- Notification Settings -->
-        <h2><?php _e('Notification Settings', 'mobility-trailblazers'); ?></h2>
-        
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="enable_notifications"><?php _e('Enable Email Notifications', 'mobility-trailblazers'); ?></label>
-                </th>
-                <td>
-                    <label>
-                        <input type="checkbox" name="enable_notifications" id="enable_notifications" 
-                               value="1" <?php checked($enable_notifications, 1); ?>>
-                        <?php _e('Send email notifications when evaluations are submitted', 'mobility-trailblazers'); ?>
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="notification_email"><?php _e('Notification Email', 'mobility-trailblazers'); ?></label>
-                </th>
-                <td>
-                    <input type="email" name="notification_email" id="notification_email" 
-                           value="<?php echo esc_attr($notification_email); ?>" 
-                           class="regular-text">
-                    <p class="description"><?php _e('Email address to receive notifications', 'mobility-trailblazers'); ?></p>
-                </td>
-            </tr>
-        </table>
+
         
         <!-- Display Settings -->
         <h2><?php _e('Display Settings', 'mobility-trailblazers'); ?></h2>

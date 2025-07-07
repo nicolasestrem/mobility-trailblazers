@@ -264,7 +264,7 @@ All AJAX methods include:
 1. **Bulk Actions**: Implement bulk operations on selected assignments
 2. **Assignment Templates**: Save/load assignment configurations
 3. **Assignment History**: Track changes and allow rollback
-4. **Email Notifications**: Notify jury members of new assignments
+4. **System Integration**: Enhanced integration with evaluation system
 5. **Assignment Deadlines**: Set and track evaluation deadlines
 
 ## Troubleshooting

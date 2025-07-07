@@ -136,8 +136,7 @@ foreach ($mt_capabilities as $cap) {
 // 6. Plugin Settings
 $diagnostics['settings'] = [
     'criteria_weights' => get_option('mt_criteria_weights', []),
-    'enable_notifications' => get_option('mt_enable_notifications', 0),
-    'notification_email' => get_option('mt_notification_email', ''),
+    
     'evaluations_per_page' => get_option('mt_evaluations_per_page', 10)
 ];
 
@@ -499,14 +498,7 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                         ?>
                     </td>
                 </tr>
-                <tr>
-                    <th><?php _e('Email Notifications', 'mobility-trailblazers'); ?></th>
-                    <td><?php echo $diagnostics['settings']['enable_notifications'] ? __('Enabled', 'mobility-trailblazers') : __('Disabled', 'mobility-trailblazers'); ?></td>
-                </tr>
-                <tr>
-                    <th><?php _e('Notification Email', 'mobility-trailblazers'); ?></th>
-                    <td><?php echo esc_html($diagnostics['settings']['notification_email'] ?: __('Not set', 'mobility-trailblazers')); ?></td>
-                </tr>
+                
             </tbody>
         </table>
     </div>

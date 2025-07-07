@@ -21,14 +21,9 @@ This document tracks known issues, needed fixes, and planned improvements for th
 
 ### 🟡 High Priority
 
-#### 1. Email Notifications Not Implemented
-- **Issue**: No email notifications sent when evaluations are submitted
-- **Impact**: Admins not notified of new evaluations
-- **Workaround**: Check dashboard regularly
-- **Solution**: Implement notification service with wp_mail
-- **ETA**: v2.1.0
 
-#### 2. Missing Bulk Actions for Evaluations
+
+#### 1. Missing Bulk Actions for Evaluations
 - **Issue**: Cannot bulk approve/reject evaluations
 - **Impact**: Time-consuming for admins with many evaluations
 - **Workaround**: Process individually
@@ -37,21 +32,21 @@ This document tracks known issues, needed fixes, and planned improvements for th
 
 ### 🟢 Medium Priority
 
-#### 3. Limited Export Formats
+#### 2. Limited Export Formats
 - **Issue**: Only CSV export available
 - **Impact**: Some users need Excel or PDF formats
 - **Workaround**: Convert CSV manually
 - **Solution**: Add XLSX and PDF export options
 - **ETA**: v2.2.0
 
-#### 4. No Evaluation History
+#### 3. No Evaluation History
 - **Issue**: Cannot view previous versions of draft evaluations
 - **Impact**: No audit trail for changes
 - **Workaround**: Manual documentation
 - **Solution**: Implement revision system
 - **ETA**: v2.2.0
 
-#### 5. Basic Search Functionality
+#### 4. Basic Search Functionality
 - **Issue**: Search only covers candidate names
 - **Impact**: Hard to find by other criteria
 - **Workaround**: Use filters
@@ -60,14 +55,14 @@ This document tracks known issues, needed fixes, and planned improvements for th
 
 ### 🔵 Low Priority
 
-#### 6. No Dark Mode Support
+#### 5. No Dark Mode Support
 - **Issue**: No dark theme option
 - **Impact**: Eye strain in low light
 - **Workaround**: Browser extensions
 - **Solution**: Add theme toggle
 - **ETA**: v2.3.0
 
-#### 7. Limited Keyboard Navigation
+#### 6. Limited Keyboard Navigation
 - **Issue**: Not all functions keyboard accessible
 - **Impact**: Reduced accessibility
 - **Workaround**: Use mouse
@@ -185,11 +180,10 @@ This document tracks known issues, needed fixes, and planned improvements for th
 ## Community Feedback
 
 ### Most Requested Features
-1. Email notifications (in progress)
-2. Bulk operations (planned)
-3. Advanced reporting (planned)
-4. Mobile app (future)
-5. Real-time updates (research)
+1. Bulk operations (planned)
+2. Advanced reporting (planned)
+3. Mobile app (future)
+4. Real-time updates (research)
 
 ### User Experience Improvements
 1. Simplified evaluation form
@@ -214,7 +208,6 @@ This document tracks known issues, needed fixes, and planned improvements for th
 ## Resolution Timeline
 
 ### Q1 2024 (v2.1.0)
-- Email notifications
 - Bulk actions
 - Improved search
 
@@ -245,7 +238,7 @@ This document tracks known issues, needed fixes, and planned improvements for th
 3. **Submit report** via:
    - GitHub issues
    - Support forum
-   - Email to development team
+   - Contact development team
 
 ## Contributing
 

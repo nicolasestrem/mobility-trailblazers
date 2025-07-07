@@ -152,10 +152,7 @@ class MT_Admin {
             'sanitize_callback' => [$this, 'sanitize_general_settings']
         ]);
         
-        // Email settings
-        register_setting('mt_email_settings', 'mt_email_settings', [
-            'sanitize_callback' => [$this, 'sanitize_email_settings']
-        ]);
+
         
         // Criteria weights
         register_setting('mt_criteria_settings', 'mt_criteria_weights', [
@@ -579,22 +576,7 @@ class MT_Admin {
         return $sanitized;
     }
     
-    /**
-     * Sanitize email settings
-     *
-     * @param array $input Raw input
-     * @return array
-     */
-    public function sanitize_email_settings($input) {
-        $sanitized = [];
-        
-        $sanitized['enable_notifications'] = !empty($input['enable_notifications']);
-        $sanitized['admin_email'] = sanitize_email($input['admin_email'] ?? '');
-        $sanitized['evaluation_reminder'] = !empty($input['evaluation_reminder']);
-        $sanitized['reminder_days_before'] = intval($input['reminder_days_before'] ?? 3);
-        
-        return $sanitized;
-    }
+
     
     /**
      * Sanitize criteria weights

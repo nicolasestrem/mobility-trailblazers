@@ -113,13 +113,7 @@ class MT_Activator {
             'show_results_publicly' => false
         ]);
         
-        // Email settings
-        add_option('mt_email_settings', [
-            'enable_notifications' => true,
-            'admin_email' => get_option('admin_email'),
-            'evaluation_reminder' => true,
-            'reminder_days_before' => 3
-        ]);
+
         
         // Evaluation criteria weights (all equal by default)
         add_option('mt_criteria_weights', [

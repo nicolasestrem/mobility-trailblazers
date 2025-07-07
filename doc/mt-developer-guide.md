@@ -294,7 +294,7 @@ namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 
-class MT_Notification_Service implements MT_Service_Interface {
+class MT_Statistics_Service implements MT_Service_Interface {
     private $errors = [];
     
     public function process($data) {
@@ -302,17 +302,17 @@ class MT_Notification_Service implements MT_Service_Interface {
             return false;
         }
         
-        return $this->send_notification($data);
+        return $this->calculate_statistics($data);
     }
     
     public function validate($data) {
-        if (empty($data['recipient'])) {
-            $this->errors[] = __('Recipient is required', 'mobility-trailblazers');
+        if (empty($data['evaluation_ids'])) {
+            $this->errors[] = __('Evaluation IDs are required', 'mobility-trailblazers');
             return false;
         }
         
-        if (!is_email($data['recipient'])) {
-            $this->errors[] = __('Invalid email address', 'mobility-trailblazers');
+        if (!is_array($data['evaluation_ids'])) {
+            $this->errors[] = __('Invalid evaluation IDs format', 'mobility-trailblazers');
             return false;
         }
         
@@ -323,15 +323,14 @@ class MT_Notification_Service implements MT_Service_Interface {
         return $this->errors;
     }
     
-    private function send_notification($data) {
-        $subject = sprintf(
-            __('New Evaluation for %s', 'mobility-trailblazers'),
-            $data['candidate_name']
-        );
+    private function calculate_statistics($data) {
+        // Calculate evaluation statistics
+        $stats = [];
+        foreach ($data['evaluation_ids'] as $id) {
+            // Process evaluation statistics
+        }
         
-        $message = $this->build_message($data);
-        
-        return wp_mail($data['recipient'], $subject, $message);
+        return $stats;
     }
 }
 ```
@@ -342,7 +341,7 @@ class MT_Notification_Service implements MT_Service_Interface {
 // In AJAX handler
 public function handle_evaluation_submission() {
     $evaluation_service = new MT_Evaluation_Service();
-    $notification_service = new MT_Notification_Service();
+    $statistics_service = new MT_Statistics_Service();
     
     $result = $evaluation_service->process($_POST);
     
@@ -350,10 +349,10 @@ public function handle_evaluation_submission() {
         return $this->error($result->get_error_message());
     }
     
-    // Send notification
-    $notification_service->process([
-        'recipient' => get_option('admin_email'),
-        'candidate_name' => get_the_title($_POST['candidate_id']),
+    // Update statistics
+    $statistics_service->process([
+        'evaluation_ids' => [$result],
+        'action' => 'evaluation_submitted',
         'jury_member' => wp_get_current_user()->display_name,
     ]);
     
@@ -532,7 +531,7 @@ $('#mt-evaluation-form').on('submit', function(e) {
 - Modal opening/closing functionality
 - Confirmation dialogs for destructive actions
 - AJAX form handling with error management
-- Utility functions for notifications and data handling
+- Utility functions for UI notifications and data handling
 
 **Usage Example**:
 ```javascript

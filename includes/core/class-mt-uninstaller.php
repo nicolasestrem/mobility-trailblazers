@@ -73,7 +73,7 @@ class MT_Uninstaller {
         $options = [
             'mt_db_version',
             'mt_settings',
-            'mt_email_settings',
+
             'mt_criteria_weights',
             'mt_remove_data_on_uninstall'
         ];

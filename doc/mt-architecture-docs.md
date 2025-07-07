@@ -81,7 +81,7 @@ The Mobility Trailblazers plugin follows a modern, layered architecture designed
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │                    Service Classes                    │   │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │   │
-│  │  │ Evaluation   │  │ Assignment   │  │Notification│ │   │
+│  │  │ Evaluation   │  │ Assignment   │  │Statistics │ │   │
 │  │  │  Service     │  │  Service     │  │  Service   │ │   │
 │  │  └──────────────┘  └──────────────┘  └───────────┘ │   │
 │  └─────────────────────────────────────────────────────┘   │

@@ -254,9 +254,7 @@ msgstr ""
 msgid "Current Phase"
 msgstr ""
 
-#: admin/views/vote-reset.php:138
-msgid "Notify jury members"
-msgstr ""
+
 
 #: admin/views/vote-reset.php:142
 msgid "Reset for Phase Transition"
@@ -278,9 +276,7 @@ msgstr ""
 msgid "Create backup before reset"
 msgstr ""
 
-#: admin/views/vote-reset.php:161
-msgid "Send notification emails"
-msgstr ""
+
 
 #: admin/views/vote-reset.php:165
 msgid "Full System Reset"

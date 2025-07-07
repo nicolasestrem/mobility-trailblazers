@@ -684,7 +684,7 @@ This project uses Semantic Versioning:
 ## Roadmap
 
 ### Planned for 2.1.0
-- Email notification system
+
 - Advanced reporting features
 - Bulk evaluation tools
 - API endpoints
