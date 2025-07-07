@@ -887,6 +887,161 @@ add_filter('mt_evaluation_criteria', function($criteria) {
 });
 ```
 
+### Implementing Bulk Operations
+
+The plugin includes a comprehensive bulk operations system. Here's how to extend it:
+
+#### Adding New Bulk Operations
+
+1. **Frontend UI** - Add checkboxes and bulk action dropdown:
+```php
+// In your admin template
+<div class="tablenav top">
+    <div class="alignleft actions bulkactions">
+        <select name="bulk_action" id="bulk-action-selector">
+            <option value=""><?php _e('Bulk Actions', 'mobility-trailblazers'); ?></option>
+            <option value="custom_action"><?php _e('Custom Action', 'mobility-trailblazers'); ?></option>
+        </select>
+        <button type="button" class="button action" id="doaction"><?php _e('Apply', 'mobility-trailblazers'); ?></button>
+    </div>
+</div>
+```
+
+2. **JavaScript Handler** - Process bulk actions:
+```javascript
+// Handle bulk action
+$('#doaction').on('click', function() {
+    const action = $('#bulk-action-selector').val();
+    const selectedIds = [];
+    
+    $('input[name="item_ids[]"]:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    if (selectedIds.length === 0) {
+        alert('Please select items to process.');
+        return;
+    }
+    
+    // Perform AJAX request
+    $.ajax({
+        url: mt_admin.url,
+        type: 'POST',
+        data: {
+            action: 'mt_bulk_custom_action',
+            nonce: mt_admin.nonce,
+            bulk_action: action,
+            item_ids: selectedIds
+        },
+        success: function(response) {
+            if (response.success) {
+                alert(response.data.message);
+                location.reload();
+            } else {
+                alert(response.data || 'An error occurred');
+            }
+        }
+    });
+});
+```
+
+3. **Backend AJAX Handler** - Process the bulk operation:
+```php
+// In your AJAX handler class
+public function bulk_custom_action() {
+    // Verify nonce
+    if (!$this->verify_nonce('mt_admin_nonce')) {
+        wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+    }
+    
+    // Check permissions
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+    }
+    
+    // Get parameters
+    $action = isset($_POST['bulk_action']) ? sanitize_text_field($_POST['bulk_action']) : '';
+    $item_ids = isset($_POST['item_ids']) && is_array($_POST['item_ids']) 
+        ? array_map('intval', $_POST['item_ids']) 
+        : [];
+    
+    if (empty($item_ids)) {
+        wp_send_json_error(__('No items selected', 'mobility-trailblazers'));
+    }
+    
+    // Process items
+    $success_count = 0;
+    $error_count = 0;
+    
+    foreach ($item_ids as $item_id) {
+        $result = $this->process_single_item($item_id, $action);
+        if ($result) {
+            $success_count++;
+        } else {
+            $error_count++;
+        }
+    }
+    
+    // Return results
+    $message = sprintf(
+        __('Processed %d items successfully, %d errors', 'mobility-trailblazers'),
+        $success_count,
+        $error_count
+    );
+    
+    wp_send_json_success(['message' => $message]);
+}
+```
+
+#### Bulk Operations Best Practices
+
+1. **Security**: Always verify nonces and check user permissions
+2. **Validation**: Validate all input data before processing
+3. **Feedback**: Provide clear success/error counts to users
+4. **Performance**: Consider batch processing for large operations
+5. **Confirmation**: Add confirmation dialogs for destructive operations
+
+#### Example: Bulk Export Implementation
+
+```php
+// Generate CSV for bulk export
+public function bulk_export_items() {
+    // Verify permissions
+    if (!current_user_can('export')) {
+        wp_die(__('Permission denied', 'mobility-trailblazers'));
+    }
+    
+    // Get selected items
+    $item_ids = isset($_POST['item_ids']) ? array_map('intval', $_POST['item_ids']) : [];
+    
+    // Set headers for CSV download
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="export-' . date('Y-m-d') . '.csv"');
+    
+    // Create output stream
+    $output = fopen('php://output', 'w');
+    
+    // Add CSV headers
+    fputcsv($output, ['ID', 'Title', 'Status', 'Date']);
+    
+    // Export selected items
+    foreach ($item_ids as $item_id) {
+        $item = get_post($item_id);
+        if ($item) {
+            fputcsv($output, [
+                $item->ID,
+                $item->post_title,
+                $item->post_status,
+                $item->post_date
+            ]);
+        }
+    }
+    
+    fclose($output);
+    exit;
+}
+```
+
 ### Creating a Custom Report
 
 ```php

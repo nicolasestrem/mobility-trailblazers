@@ -41,6 +41,11 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
         add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign']);
         
+        // Bulk operations
+        add_action('wp_ajax_mt_bulk_remove_assignments', [$this, 'bulk_remove_assignments']);
+        add_action('wp_ajax_mt_bulk_reassign_assignments', [$this, 'bulk_reassign_assignments']);
+        add_action('wp_ajax_mt_bulk_export_assignments', [$this, 'bulk_export_assignments']);
+        
         // Add test handler
         add_action('wp_ajax_mt_test', [$this, 'test_handler']);
     }
@@ -584,9 +589,298 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
     }
 
     /**
-     * Test AJAX handler
+     * Handle bulk removal of assignments
      *
      * @return void
+     */
+    public function bulk_remove_assignments() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_assignments')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get assignment IDs
+        $assignment_ids = isset($_POST['assignment_ids']) && is_array($_POST['assignment_ids']) 
+            ? array_map('intval', $_POST['assignment_ids']) 
+            : array();
+        
+        if (empty($assignment_ids)) {
+            wp_send_json_error(__('No assignments selected', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Log for debugging
+        error_log('MT Bulk Remove: count=' . count($assignment_ids));
+        
+        $assignment_repo = new MT_Assignment_Repository();
+        $success_count = 0;
+        $errors = [];
+        
+        foreach ($assignment_ids as $assignment_id) {
+            $result = $assignment_repo->delete($assignment_id);
+            
+            if ($result) {
+                $success_count++;
+            } else {
+                $errors[] = sprintf(__('Failed to remove assignment ID: %d', 'mobility-trailblazers'), $assignment_id);
+            }
+        }
+        
+        if ($success_count > 0) {
+            $message = sprintf(
+                __('%d assignments removed successfully.', 'mobility-trailblazers'),
+                $success_count
+            );
+            
+            if (!empty($errors)) {
+                $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
+            }
+            
+            wp_send_json_success([
+                'message' => $message,
+                'success_count' => $success_count,
+                'errors' => $errors
+            ]);
+        } else {
+            wp_send_json_error(__('No assignments could be removed.', 'mobility-trailblazers'));
+        }
+    }
+    
+    /**
+     * Handle bulk reassignment of assignments
+     *
+     * @return void
+     */
+    public function bulk_reassign_assignments() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_assignments')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get parameters
+        $assignment_ids = isset($_POST['assignment_ids']) && is_array($_POST['assignment_ids']) 
+            ? array_map('intval', $_POST['assignment_ids']) 
+            : array();
+        $new_jury_member_id = isset($_POST['new_jury_member_id']) ? intval($_POST['new_jury_member_id']) : 0;
+        
+        if (empty($assignment_ids) || !$new_jury_member_id) {
+            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Verify new jury member exists
+        $jury_member = get_post($new_jury_member_id);
+        if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
+            wp_send_json_error(__('Invalid jury member selected', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Log for debugging
+        error_log('MT Bulk Reassign: count=' . count($assignment_ids) . ', new_jury_member_id=' . $new_jury_member_id);
+        
+        $assignment_repo = new MT_Assignment_Repository();
+        $success_count = 0;
+        $errors = [];
+        $skipped = 0;
+        
+        foreach ($assignment_ids as $assignment_id) {
+            // Get the existing assignment
+            $assignment = $assignment_repo->find($assignment_id);
+            
+            if (!$assignment) {
+                $errors[] = sprintf(__('Assignment ID %d not found', 'mobility-trailblazers'), $assignment_id);
+                continue;
+            }
+            
+            // Check if new assignment already exists
+            $existing = $assignment_repo->get_by_jury_and_candidate($new_jury_member_id, $assignment->candidate_id);
+            
+            if ($existing) {
+                $skipped++;
+                error_log('MT Bulk Reassign: Assignment already exists for jury ' . $new_jury_member_id . ' and candidate ' . $assignment->candidate_id);
+                continue;
+            }
+            
+            // Create new assignment
+            $new_assignment = $assignment_repo->create([
+                'jury_member_id' => $new_jury_member_id,
+                'candidate_id' => $assignment->candidate_id
+            ]);
+            
+            if ($new_assignment) {
+                // Delete old assignment
+                $delete_result = $assignment_repo->delete($assignment_id);
+                if ($delete_result) {
+                    $success_count++;
+                } else {
+                    // If we can't delete the old one, remove the new one to maintain consistency
+                    $assignment_repo->delete($new_assignment);
+                    $errors[] = sprintf(__('Failed to remove old assignment ID: %d', 'mobility-trailblazers'), $assignment_id);
+                }
+            } else {
+                $errors[] = sprintf(__('Failed to create new assignment for candidate ID: %d', 'mobility-trailblazers'), $assignment->candidate_id);
+            }
+        }
+        
+        if ($success_count > 0 || $skipped > 0) {
+            $message = '';
+            
+            if ($success_count > 0) {
+                $message = sprintf(
+                    __('%d assignments reassigned successfully.', 'mobility-trailblazers'),
+                    $success_count
+                );
+            }
+            
+            if ($skipped > 0) {
+                $skip_message = sprintf(
+                    __('%d assignments skipped (already exist).', 'mobility-trailblazers'),
+                    $skipped
+                );
+                $message = $message ? $message . ' ' . $skip_message : $skip_message;
+            }
+            
+            if (!empty($errors)) {
+                $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
+            }
+            
+            wp_send_json_success([
+                'message' => $message,
+                'success_count' => $success_count,
+                'skipped' => $skipped,
+                'errors' => $errors
+            ]);
+        } else {
+            wp_send_json_error(__('No assignments could be reassigned.', 'mobility-trailblazers'));
+        }
+    }
+    
+    /**
+     * Handle bulk export of assignments
+     *
+     * @return void
+     */
+    public function bulk_export_assignments() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_die(__('Security check failed.', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to export data.', 'mobility-trailblazers'));
+        }
+        
+        // Get assignment IDs
+        $assignment_ids = isset($_POST['assignment_ids']) && is_array($_POST['assignment_ids']) 
+            ? array_map('intval', $_POST['assignment_ids']) 
+            : array();
+        
+        if (empty($assignment_ids)) {
+            wp_die(__('No assignments selected for export.', 'mobility-trailblazers'));
+        }
+        
+        $assignment_repo = new MT_Assignment_Repository();
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=selected-assignments-' . date('Y-m-d') . '.csv');
+        
+        // Create output stream
+        $output = fopen('php://output', 'w');
+        
+        // Add BOM for Excel compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Add headers
+        fputcsv($output, array(
+            __('Assignment ID', 'mobility-trailblazers'),
+            __('Jury Member', 'mobility-trailblazers'),
+            __('Email', 'mobility-trailblazers'),
+            __('Candidate', 'mobility-trailblazers'),
+            __('Category', 'mobility-trailblazers'),
+            __('Assigned Date', 'mobility-trailblazers'),
+            __('Evaluation Status', 'mobility-trailblazers'),
+            __('Total Score', 'mobility-trailblazers')
+        ));
+        
+        // Add data for selected assignments
+        foreach ($assignment_ids as $assignment_id) {
+            $assignment = $assignment_repo->find($assignment_id);
+            
+            if (!$assignment) {
+                continue;
+            }
+            
+            $jury = get_post($assignment->jury_member_id);
+            $candidate = get_post($assignment->candidate_id);
+            $user = get_user_by('ID', get_post_meta($assignment->jury_member_id, '_mt_user_id', true));
+            
+            // Get categories safely
+            $category_name = '';
+            $categories = wp_get_post_terms($assignment->candidate_id, 'mt_category');
+            if (!is_wp_error($categories) && !empty($categories)) {
+                $category_name = $categories[0]->name;
+            }
+            
+            // Check if evaluation exists
+            $evaluations = $evaluation_repo->find_all([
+                'jury_member_id' => $assignment->jury_member_id,
+                'candidate_id' => $assignment->candidate_id,
+                'limit' => 1
+            ]);
+            $evaluation = !empty($evaluations) ? $evaluations[0] : null;
+            $status = $evaluation ? __('Completed', 'mobility-trailblazers') : __('Pending', 'mobility-trailblazers');
+            
+            // Calculate total score if evaluation exists
+            $total_score = '';
+            if ($evaluation) {
+                $total_score = floatval($evaluation->courage_score) + 
+                               floatval($evaluation->innovation_score) + 
+                               floatval($evaluation->implementation_score) + 
+                               floatval($evaluation->relevance_score) + 
+                               floatval($evaluation->visibility_score);
+            }
+            
+            // Format date safely
+            $assigned_date = '';
+            if (!empty($assignment->created_at)) {
+                $assigned_date = date('Y-m-d', strtotime($assignment->created_at));
+            }
+            
+            fputcsv($output, array(
+                $assignment_id,
+                $jury ? $jury->post_title : '',
+                $user ? $user->user_email : '',
+                $candidate ? $candidate->post_title : '',
+                $category_name,
+                $assigned_date,
+                $status,
+                $total_score
+            ));
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Test handler
      */
     public function test_handler() {
         wp_send_json_success(['message' => 'AJAX is working!', 'time' => current_time('mysql')]);

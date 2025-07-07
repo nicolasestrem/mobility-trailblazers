@@ -871,6 +871,255 @@ if (typeof mt_admin.i18n === 'undefined') {
     });
 
     /**
+     * Bulk Operations Manager
+     */
+    const MTBulkOperations = {
+        selectedItems: [],
+        
+        init: function() {
+            this.bindEvents();
+        },
+        
+        bindEvents: function() {
+            const self = this;
+            
+            // Bulk actions button
+            $('#mt-bulk-actions-btn').on('click', function() {
+                self.toggleBulkMode();
+            });
+            
+            // Cancel bulk action
+            $('#mt-cancel-bulk-action').on('click', function() {
+                self.exitBulkMode();
+            });
+            
+            // Apply bulk action
+            $('#mt-apply-bulk-action').on('click', function() {
+                self.applyBulkAction();
+            });
+            
+            // Select all checkbox
+            $('#mt-select-all-assignments').on('change', function() {
+                const isChecked = $(this).prop('checked');
+                $('.mt-assignment-checkbox').prop('checked', isChecked);
+                self.updateSelectedCount();
+            });
+            
+            // Individual checkboxes
+            $(document).on('change', '.mt-assignment-checkbox', function() {
+                self.updateSelectedCount();
+                
+                // Update select all checkbox
+                const totalCheckboxes = $('.mt-assignment-checkbox').length;
+                const checkedCheckboxes = $('.mt-assignment-checkbox:checked').length;
+                $('#mt-select-all-assignments').prop('checked', totalCheckboxes === checkedCheckboxes);
+            });
+        },
+        
+        toggleBulkMode: function() {
+            const inBulkMode = $('.check-column').is(':visible');
+            
+            if (inBulkMode) {
+                this.exitBulkMode();
+            } else {
+                this.enterBulkMode();
+            }
+        },
+        
+        enterBulkMode: function() {
+            $('.check-column').show();
+            $('#mt-bulk-actions-container').slideDown();
+            $('#mt-bulk-actions-btn').addClass('active');
+            this.updateSelectedCount();
+        },
+        
+        exitBulkMode: function() {
+            $('.check-column').hide();
+            $('#mt-bulk-actions-container').slideUp();
+            $('#mt-bulk-actions-btn').removeClass('active');
+            $('.mt-assignment-checkbox').prop('checked', false);
+            $('#mt-select-all-assignments').prop('checked', false);
+        },
+        
+        updateSelectedCount: function() {
+            const count = $('.mt-assignment-checkbox:checked').length;
+            const text = count === 1 ? '1 item selected' : count + ' items selected';
+            
+            // Update UI to show count
+            if ($('#mt-selected-count').length === 0) {
+                $('#mt-bulk-actions-container').prepend('<span id="mt-selected-count" style="margin-right: 10px;">' + text + '</span>');
+            } else {
+                $('#mt-selected-count').text(text);
+            }
+        },
+        
+        applyBulkAction: function() {
+            const action = $('#mt-bulk-action-select').val();
+            const selectedIds = [];
+            
+            $('.mt-assignment-checkbox:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            
+            if (!action) {
+                alert('Please select a bulk action');
+                return;
+            }
+            
+            if (selectedIds.length === 0) {
+                alert('Please select at least one assignment');
+                return;
+            }
+            
+            switch (action) {
+                case 'remove':
+                    this.bulkRemove(selectedIds);
+                    break;
+                case 'reassign':
+                    this.bulkReassign(selectedIds);
+                    break;
+                case 'export':
+                    this.bulkExport(selectedIds);
+                    break;
+            }
+        },
+        
+        bulkRemove: function(assignmentIds) {
+            if (!confirm('Are you sure you want to remove ' + assignmentIds.length + ' assignments?')) {
+                return;
+            }
+            
+            $.ajax({
+                url: mt_admin.url,
+                type: 'POST',
+                data: {
+                    action: 'mt_bulk_remove_assignments',
+                    nonce: mt_admin.nonce,
+                    assignment_ids: assignmentIds
+                },
+                beforeSend: function() {
+                    $('#mt-apply-bulk-action').prop('disabled', true).text('Processing...');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.data.message || 'Assignments removed successfully');
+                        location.reload();
+                    } else {
+                        alert(response.data || 'An error occurred');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
+                },
+                complete: function() {
+                    $('#mt-apply-bulk-action').prop('disabled', false).text('Apply');
+                }
+            });
+        },
+        
+        bulkReassign: function(assignmentIds) {
+            // Show modal for selecting new jury member
+            const juryOptions = $('#mt-filter-jury').html();
+            const modalHtml = `
+                <div id="mt-reassign-modal" class="mt-modal" style="display: block;">
+                    <div class="mt-modal-content">
+                        <div class="mt-modal-header">
+                            <h2>Reassign Assignments</h2>
+                            <button type="button" class="mt-modal-close">&times;</button>
+                        </div>
+                        <div class="mt-modal-body">
+                            <p>Select a jury member to reassign ${assignmentIds.length} assignments to:</p>
+                            <select id="mt-reassign-jury-select" class="widefat">
+                                ${juryOptions}
+                            </select>
+                        </div>
+                        <div class="mt-modal-footer">
+                            <button type="button" id="mt-confirm-reassign" class="button button-primary">Reassign</button>
+                            <button type="button" class="button mt-modal-close">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('body').append(modalHtml);
+            
+            $('#mt-confirm-reassign').on('click', function() {
+                const newJuryId = $('#mt-reassign-jury-select').val();
+                if (!newJuryId) {
+                    alert('Please select a jury member');
+                    return;
+                }
+                
+                $.ajax({
+                    url: mt_admin.url,
+                    type: 'POST',
+                    data: {
+                        action: 'mt_bulk_reassign_assignments',
+                        nonce: mt_admin.nonce,
+                        assignment_ids: assignmentIds,
+                        new_jury_id: newJuryId
+                    },
+                    beforeSend: function() {
+                        $('#mt-confirm-reassign').prop('disabled', true).text('Processing...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.data.message || 'Assignments reassigned successfully');
+                            location.reload();
+                        } else {
+                            alert(response.data || 'An error occurred');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+            
+            $('.mt-modal-close').on('click', function() {
+                $('#mt-reassign-modal').remove();
+            });
+        },
+        
+        bulkExport: function(assignmentIds) {
+            // Create form for export
+            const $form = $('<form>', {
+                method: 'POST',
+                action: mt_admin.url
+            });
+            
+            $form.append($('<input>', {
+                type: 'hidden',
+                name: 'action',
+                value: 'mt_bulk_export_assignments'
+            }));
+            
+            $form.append($('<input>', {
+                type: 'hidden',
+                name: 'nonce',
+                value: mt_admin.nonce
+            }));
+            
+            assignmentIds.forEach(function(id) {
+                $form.append($('<input>', {
+                    type: 'hidden',
+                    name: 'assignment_ids[]',
+                    value: id
+                }));
+            });
+            
+            $form.appendTo('body').submit().remove();
+        }
+    };
+    
+    // Initialize bulk operations on assignment page
+    $(document).ready(function() {
+        if ($('.mt-assignments-table').length > 0) {
+            MTBulkOperations.init();
+        }
+    });
+
+    /**
      * Initialize media upload functionality
      */
     function initMediaUpload() {

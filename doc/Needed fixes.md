@@ -1,7 +1,7 @@
 # Mobility Trailblazers - Known Issues & Needed Fixes
 
-**Version:** 2.0.0  
-**Last Updated:** June 21, 2025
+**Version:** 2.0.11  
+**Last Updated:** July 2025
 
 ## Overview
 
@@ -17,36 +17,28 @@ This document tracks known issues, needed fixes, and planned improvements for th
 ## Current Issues
 
 ### 🔴 Critical Issues
-*No critical issues identified in v2.0.0*
+*No critical issues identified in v2.0.11*
 
 ### 🟡 High Priority
-
-
-
-#### 1. Missing Bulk Actions for Evaluations
-- **Issue**: Cannot bulk approve/reject evaluations
-- **Impact**: Time-consuming for admins with many evaluations
-- **Workaround**: Process individually
-- **Solution**: Add bulk action dropdown and handlers
-- **ETA**: v2.1.0
+*No high priority issues - bulk operations have been implemented in v2.0.11*
 
 ### 🟢 Medium Priority
 
-#### 2. Limited Export Formats
+#### 1. Limited Export Formats
 - **Issue**: Only CSV export available
 - **Impact**: Some users need Excel or PDF formats
 - **Workaround**: Convert CSV manually
 - **Solution**: Add XLSX and PDF export options
 - **ETA**: v2.2.0
 
-#### 3. No Evaluation History
+#### 2. No Evaluation History
 - **Issue**: Cannot view previous versions of draft evaluations
 - **Impact**: No audit trail for changes
 - **Workaround**: Manual documentation
 - **Solution**: Implement revision system
 - **ETA**: v2.2.0
 
-#### 4. Basic Search Functionality
+#### 3. Basic Search Functionality
 - **Issue**: Search only covers candidate names
 - **Impact**: Hard to find by other criteria
 - **Workaround**: Use filters
@@ -55,19 +47,28 @@ This document tracks known issues, needed fixes, and planned improvements for th
 
 ### 🔵 Low Priority
 
-#### 5. No Dark Mode Support
+#### 4. No Dark Mode Support
 - **Issue**: No dark theme option
 - **Impact**: Eye strain in low light
 - **Workaround**: Browser extensions
 - **Solution**: Add theme toggle
 - **ETA**: v2.3.0
 
-#### 6. Limited Keyboard Navigation
+#### 5. Limited Keyboard Navigation
 - **Issue**: Not all functions keyboard accessible
 - **Impact**: Reduced accessibility
 - **Workaround**: Use mouse
 - **Solution**: Add keyboard shortcuts
 - **ETA**: v2.2.0
+
+## Recently Completed Features (v2.0.11)
+
+### ✅ Bulk Operations (Completed)
+- **Evaluations**: Bulk approve/reject/reset/delete functionality
+- **Assignments**: Bulk remove/reassign/export operations
+- **Candidates**: New management page with bulk status changes and category management
+- **Implementation**: Full AJAX integration with security checks and user feedback
+- **Documentation**: See [Bulk Operations Implementation](bulk-operations-implementation.md)
 
 ## Enhancement Requests
 
@@ -149,16 +150,19 @@ This document tracks known issues, needed fixes, and planned improvements for th
 - [ ] Repository layer tests
 - [ ] Service layer tests
 - [ ] AJAX handler tests
+- [ ] Bulk operations tests
 
 ### Integration Tests
 - [ ] Full evaluation workflow
 - [ ] Assignment distribution
 - [ ] Import/Export functionality
+- [ ] Bulk operations workflow
 
 ### End-to-End Tests
 - [ ] Jury member complete workflow
 - [ ] Admin management workflow
 - [ ] Multi-user scenarios
+- [ ] Bulk operations scenarios
 
 ## Documentation Gaps
 
@@ -166,6 +170,7 @@ This document tracks known issues, needed fixes, and planned improvements for th
    - Installation walkthrough
    - Jury member guide
    - Admin tutorial
+   - Bulk operations guide
 
 2. **API Documentation**
    - Hook reference
@@ -180,7 +185,7 @@ This document tracks known issues, needed fixes, and planned improvements for th
 ## Community Feedback
 
 ### Most Requested Features
-1. Bulk operations (planned)
+1. ~~Bulk operations~~ ✅ (implemented in v2.0.11)
 2. Advanced reporting (planned)
 3. Mobile app (future)
 4. Real-time updates (research)
@@ -207,17 +212,17 @@ This document tracks known issues, needed fixes, and planned improvements for th
 
 ## Resolution Timeline
 
-### Q1 2024 (v2.1.0)
-- Bulk actions
-- Improved search
+### Q3 2025 (v2.1.0)
+- Improved search functionality
+- Performance optimizations
 
-### Q2 2024 (v2.2.0)
-- Export formats
+### Q4 2025 (v2.2.0)
+- Export formats (XLSX, PDF)
 - Evaluation history
 - Multi-language support
 - Keyboard navigation
 
-### Q3 2024 (v2.3.0)
+### Q1 2026 (v2.3.0)
 - API development
 - Dark mode
 - Advanced analytics
@@ -251,4 +256,4 @@ We welcome contributions! Priority areas:
 
 ---
 
-This document is regularly updated. Last review: January 21, 2024 
+This document is regularly updated. Last review: July 2025 

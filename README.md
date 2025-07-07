@@ -29,7 +29,11 @@ Mobility Trailblazers is a complete award management solution designed for recog
 
 ### 🛠️ Administration
 - **Assignment Management**: Flexible candidate-to-jury assignment system
-- **Bulk Operations**: Auto-assignment with balanced or random distribution
+- **Bulk Operations**: Comprehensive bulk actions for evaluations, assignments, and candidates
+  - Bulk approve/reject evaluations
+  - Bulk remove/reassign assignments
+  - Bulk status changes for candidates
+  - Category management in bulk
 - **Import/Export**: CSV support for data management
 - **Settings Control**: Evaluation criteria weights and dashboard customization
 - **Statistics Dashboard**: Real-time insights into evaluation progress

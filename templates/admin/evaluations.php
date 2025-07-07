@@ -88,12 +88,29 @@ $candidates = get_posts([
                 <input type="submit" class="button" value="<?php esc_attr_e('Filter', 'mobility-trailblazers'); ?>">
             </div>
         </form>
+        
+        <!-- Bulk Actions -->
+        <div class="alignleft actions bulkactions">
+            <label for="bulk-action-selector-top" class="screen-reader-text"><?php _e('Select bulk action', 'mobility-trailblazers'); ?></label>
+            <select name="action" id="bulk-action-selector-top">
+                <option value="-1"><?php _e('Bulk Actions', 'mobility-trailblazers'); ?></option>
+                <option value="approve"><?php _e('Approve', 'mobility-trailblazers'); ?></option>
+                <option value="reject"><?php _e('Reject', 'mobility-trailblazers'); ?></option>
+                <option value="reset-to-draft"><?php _e('Reset to Draft', 'mobility-trailblazers'); ?></option>
+                <option value="delete"><?php _e('Delete', 'mobility-trailblazers'); ?></option>
+            </select>
+            <input type="button" id="doaction" class="button action" value="<?php esc_attr_e('Apply', 'mobility-trailblazers'); ?>">
+        </div>
     </div>
     
     <!-- Evaluations Table -->
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
+                <td id="cb" class="manage-column column-cb check-column">
+                    <label class="screen-reader-text" for="cb-select-all-1"><?php _e('Select All', 'mobility-trailblazers'); ?></label>
+                    <input id="cb-select-all-1" type="checkbox">
+                </td>
                 <th><?php _e('ID', 'mobility-trailblazers'); ?></th>
                 <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
                 <th><?php _e('Candidate', 'mobility-trailblazers'); ?></th>
@@ -110,6 +127,12 @@ $candidates = get_posts([
                     $candidate = get_post($evaluation->candidate_id);
                 ?>
                     <tr>
+                        <th scope="row" class="check-column">
+                            <label class="screen-reader-text" for="cb-select-<?php echo esc_attr($evaluation->id); ?>">
+                                <?php printf(__('Select evaluation %s', 'mobility-trailblazers'), $evaluation->id); ?>
+                            </label>
+                            <input id="cb-select-<?php echo esc_attr($evaluation->id); ?>" type="checkbox" name="evaluation[]" value="<?php echo esc_attr($evaluation->id); ?>">
+                        </th>
                         <td><?php echo esc_html($evaluation->id); ?></td>
                         <td>
                             <?php if ($jury_member) : ?>
@@ -147,11 +170,41 @@ $candidates = get_posts([
                 <?php endforeach; ?>
             <?php else : ?>
                 <tr>
-                    <td colspan="7"><?php _e('No evaluations found.', 'mobility-trailblazers'); ?></td>
+                    <td colspan="8"><?php _e('No evaluations found.', 'mobility-trailblazers'); ?></td>
                 </tr>
             <?php endif; ?>
         </tbody>
+        <tfoot>
+            <tr>
+                <td class="manage-column column-cb check-column">
+                    <label class="screen-reader-text" for="cb-select-all-2"><?php _e('Select All', 'mobility-trailblazers'); ?></label>
+                    <input id="cb-select-all-2" type="checkbox">
+                </td>
+                <th><?php _e('ID', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Candidate', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Total Score', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Status', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Date', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Actions', 'mobility-trailblazers'); ?></th>
+            </tr>
+        </tfoot>
     </table>
+    
+    <!-- Bottom Bulk Actions -->
+    <div class="tablenav bottom">
+        <div class="alignleft actions bulkactions">
+            <label for="bulk-action-selector-bottom" class="screen-reader-text"><?php _e('Select bulk action', 'mobility-trailblazers'); ?></label>
+            <select name="action2" id="bulk-action-selector-bottom">
+                <option value="-1"><?php _e('Bulk Actions', 'mobility-trailblazers'); ?></option>
+                <option value="approve"><?php _e('Approve', 'mobility-trailblazers'); ?></option>
+                <option value="reject"><?php _e('Reject', 'mobility-trailblazers'); ?></option>
+                <option value="reset-to-draft"><?php _e('Reset to Draft', 'mobility-trailblazers'); ?></option>
+                <option value="delete"><?php _e('Delete', 'mobility-trailblazers'); ?></option>
+            </select>
+            <input type="button" id="doaction2" class="button action" value="<?php esc_attr_e('Apply', 'mobility-trailblazers'); ?>">
+        </div>
+    </div>
 </div>
 
 <!-- Evaluation Details Modal -->
@@ -164,14 +217,98 @@ $candidates = get_posts([
 <style>
 .status-draft { color: #996800; }
 .status-completed { color: #46b450; }
+.status-approved { color: #46b450; font-weight: bold; }
+.status-rejected { color: #dc3232; }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
+    // View details functionality
     $('.view-details').on('click', function() {
         var evaluationId = $(this).data('evaluation-id');
         // TODO: Implement AJAX call to load evaluation details
         alert('View evaluation ' + evaluationId + ' details - To be implemented');
+    });
+    
+    // Select all checkboxes
+    $('#cb-select-all-1, #cb-select-all-2').on('click', function() {
+        var checked = $(this).prop('checked');
+        $('input[name="evaluation[]"]').prop('checked', checked);
+        $('#cb-select-all-1, #cb-select-all-2').prop('checked', checked);
+    });
+    
+    // Individual checkbox click
+    $('input[name="evaluation[]"]').on('click', function() {
+        var allChecked = $('input[name="evaluation[]"]').length === $('input[name="evaluation[]"]:checked').length;
+        $('#cb-select-all-1, #cb-select-all-2').prop('checked', allChecked);
+    });
+    
+    // Bulk actions
+    $('#doaction, #doaction2').on('click', function() {
+        var action = $(this).prev('select').val();
+        if (action === '-1') {
+            alert('<?php _e('Please select a bulk action', 'mobility-trailblazers'); ?>');
+            return;
+        }
+        
+        var selected = [];
+        $('input[name="evaluation[]"]:checked').each(function() {
+            selected.push($(this).val());
+        });
+        
+        if (selected.length === 0) {
+            alert('<?php _e('Please select at least one evaluation', 'mobility-trailblazers'); ?>');
+            return;
+        }
+        
+        var confirmMessage = '';
+        switch(action) {
+            case 'approve':
+                confirmMessage = '<?php _e('Are you sure you want to approve the selected evaluations?', 'mobility-trailblazers'); ?>';
+                break;
+            case 'reject':
+                confirmMessage = '<?php _e('Are you sure you want to reject the selected evaluations?', 'mobility-trailblazers'); ?>';
+                break;
+            case 'reset-to-draft':
+                confirmMessage = '<?php _e('Are you sure you want to reset the selected evaluations to draft?', 'mobility-trailblazers'); ?>';
+                break;
+            case 'delete':
+                confirmMessage = '<?php _e('Are you sure you want to delete the selected evaluations? This action cannot be undone.', 'mobility-trailblazers'); ?>';
+                break;
+        }
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        // Perform bulk action via AJAX
+        $.ajax({
+            url: mt_admin.url,
+            type: 'POST',
+            data: {
+                action: 'mt_bulk_evaluation_action',
+                bulk_action: action,
+                evaluation_ids: selected,
+                nonce: mt_admin.nonce
+            },
+            beforeSend: function() {
+                $('#doaction, #doaction2').prop('disabled', true).val('<?php _e('Processing...', 'mobility-trailblazers'); ?>');
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert(response.data.message || '<?php _e('Bulk action completed successfully', 'mobility-trailblazers'); ?>');
+                    location.reload();
+                } else {
+                    alert(response.data || '<?php _e('An error occurred', 'mobility-trailblazers'); ?>');
+                }
+            },
+            error: function() {
+                alert('<?php _e('An error occurred. Please try again.', 'mobility-trailblazers'); ?>');
+            },
+            complete: function() {
+                $('#doaction, #doaction2').prop('disabled', false).val('<?php _e('Apply', 'mobility-trailblazers'); ?>');
+            }
+        });
     });
 });
 </script> 

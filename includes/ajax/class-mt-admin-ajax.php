@@ -41,6 +41,9 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         // Data management actions
         add_action('wp_ajax_mt_clear_data', [$this, 'clear_data']);
         add_action('wp_ajax_mt_force_db_upgrade', [$this, 'force_db_upgrade']);
+        
+        // Bulk candidate operations
+        add_action('wp_ajax_mt_bulk_candidate_action', [$this, 'bulk_candidate_action']);
     }
     
     /**
@@ -405,6 +408,217 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         } catch (Exception $e) {
             $this->error(__('Database upgrade failed: ', 'mobility-trailblazers') . $e->getMessage());
         }
+    }
+    
+    /**
+     * Handle bulk candidate actions
+     *
+     * @return void
+     */
+    public function bulk_candidate_action() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get parameters
+        $action = isset($_POST['bulk_action']) ? sanitize_text_field($_POST['bulk_action']) : '';
+        $candidate_ids = isset($_POST['candidate_ids']) && is_array($_POST['candidate_ids']) 
+            ? array_map('intval', $_POST['candidate_ids']) 
+            : array();
+        
+        if (empty($action) || empty($candidate_ids)) {
+            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Log for debugging
+        error_log('MT Bulk Candidate: action=' . $action . ', count=' . count($candidate_ids));
+        
+        $success_count = 0;
+        $errors = [];
+        
+        foreach ($candidate_ids as $candidate_id) {
+            // Verify it's a candidate
+            $candidate = get_post($candidate_id);
+            if (!$candidate || $candidate->post_type !== 'mt_candidate') {
+                $errors[] = sprintf(__('Invalid candidate ID: %d', 'mobility-trailblazers'), $candidate_id);
+                continue;
+            }
+            
+            $result = false;
+            
+            switch ($action) {
+                case 'publish':
+                    $result = wp_update_post([
+                        'ID' => $candidate_id,
+                        'post_status' => 'publish'
+                    ]);
+                    break;
+                    
+                case 'draft':
+                    $result = wp_update_post([
+                        'ID' => $candidate_id,
+                        'post_status' => 'draft'
+                    ]);
+                    break;
+                    
+                case 'trash':
+                    $result = wp_trash_post($candidate_id);
+                    break;
+                    
+                case 'delete':
+                    // Check if user can delete
+                    if (!current_user_can('delete_posts')) {
+                        $errors[] = __('You do not have permission to delete candidates', 'mobility-trailblazers');
+                        continue 2;
+                    }
+                    $result = wp_delete_post($candidate_id, true);
+                    break;
+                    
+                case 'add_category':
+                    $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+                    if ($category) {
+                        $result = wp_set_object_terms($candidate_id, $category, 'mt_award_category', true);
+                        $result = !is_wp_error($result);
+                    }
+                    break;
+                    
+                case 'remove_category':
+                    $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+                    if ($category) {
+                        $current_terms = wp_get_object_terms($candidate_id, 'mt_award_category', ['fields' => 'slugs']);
+                        if (!is_wp_error($current_terms)) {
+                            $new_terms = array_diff($current_terms, [$category]);
+                            $result = wp_set_object_terms($candidate_id, $new_terms, 'mt_award_category');
+                            $result = !is_wp_error($result);
+                        }
+                    }
+                    break;
+                    
+                case 'export':
+                    // Handle export separately
+                    $this->bulk_export_candidates($candidate_ids);
+                    return;
+                    
+                default:
+                    $errors[] = sprintf(__('Unknown action: %s', 'mobility-trailblazers'), $action);
+                    continue 2;
+            }
+            
+            if ($result) {
+                $success_count++;
+            } else {
+                $errors[] = sprintf(__('Failed to %s candidate ID: %d', 'mobility-trailblazers'), $action, $candidate_id);
+            }
+        }
+        
+        if ($success_count > 0) {
+            $message = sprintf(
+                __('%d candidates %s successfully.', 'mobility-trailblazers'),
+                $success_count,
+                $this->get_candidate_action_past_tense($action)
+            );
+            
+            if (!empty($errors)) {
+                $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
+            }
+            
+            wp_send_json_success([
+                'message' => $message,
+                'success_count' => $success_count,
+                'errors' => $errors
+            ]);
+        } else {
+            wp_send_json_error(__('No candidates could be processed.', 'mobility-trailblazers'));
+        }
+    }
+    
+    /**
+     * Get past tense of candidate action for messages
+     *
+     * @param string $action Action name
+     * @return string Past tense
+     */
+    private function get_candidate_action_past_tense($action) {
+        $past_tense = [
+            'publish' => 'published',
+            'draft' => 'set to draft',
+            'trash' => 'moved to trash',
+            'delete' => 'deleted',
+            'add_category' => 'updated',
+            'remove_category' => 'updated'
+        ];
+        
+        return isset($past_tense[$action]) ? $past_tense[$action] : $action;
+    }
+    
+    /**
+     * Bulk export selected candidates
+     *
+     * @param array $candidate_ids Array of candidate IDs
+     * @return void
+     */
+    private function bulk_export_candidates($candidate_ids) {
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=selected-candidates-' . date('Y-m-d') . '.csv');
+        
+        // Create output stream
+        $output = fopen('php://output', 'w');
+        
+        // Add BOM for Excel compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Add headers
+        fputcsv($output, array(
+            __('ID', 'mobility-trailblazers'),
+            __('Name', 'mobility-trailblazers'),
+            __('Organization', 'mobility-trailblazers'),
+            __('Position', 'mobility-trailblazers'),
+            __('Categories', 'mobility-trailblazers'),
+            __('Status', 'mobility-trailblazers'),
+            __('Average Score', 'mobility-trailblazers'),
+            __('Evaluation Count', 'mobility-trailblazers'),
+            __('Bio', 'mobility-trailblazers')
+        ));
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        // Add data for selected candidates
+        foreach ($candidate_ids as $candidate_id) {
+            $candidate = get_post($candidate_id);
+            
+            if (!$candidate || $candidate->post_type !== 'mt_candidate') {
+                continue;
+            }
+            
+            $categories = wp_get_post_terms($candidate->ID, 'mt_award_category', ['fields' => 'names']);
+            $avg_score = $evaluation_repo->get_average_score_for_candidate($candidate->ID);
+            $evaluations = $evaluation_repo->get_by_candidate($candidate->ID);
+            
+            fputcsv($output, array(
+                $candidate->ID,
+                $candidate->post_title,
+                get_post_meta($candidate->ID, '_mt_organization', true),
+                get_post_meta($candidate->ID, '_mt_position', true),
+                implode(', ', $categories),
+                $candidate->post_status,
+                $avg_score,
+                count($evaluations),
+                wp_strip_all_tags($candidate->post_content)
+            ));
+        }
+        
+        fclose($output);
+        exit;
     }
     
     /**

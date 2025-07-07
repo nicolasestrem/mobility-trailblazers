@@ -144,7 +144,7 @@ function testAjax() {
         </div>
     </div>
     
-    <!-- Action Bar -->
+    <!-- Action Buttons -->
     <div class="mt-action-bar">
         <button id="mt-auto-assign-btn" class="button button-primary">
             <span class="dashicons dashicons-randomize"></span>
@@ -154,12 +154,10 @@ function testAjax() {
             <span class="dashicons dashicons-plus-alt"></span>
             <?php _e('Manual Assignment', 'mobility-trailblazers'); ?>
         </button>
-        <?php /* Bulk Actions - Not implemented yet
         <button id="mt-bulk-actions-btn" class="button">
             <span class="dashicons dashicons-admin-generic"></span>
             <?php _e('Bulk Actions', 'mobility-trailblazers'); ?>
         </button>
-        */ ?>
         <button id="mt-export-btn" class="button">
             <span class="dashicons dashicons-download"></span>
             <?php _e('Export', 'mobility-trailblazers'); ?>
@@ -173,103 +171,138 @@ function testAjax() {
     </div>
     
     <!-- Search and Filters -->
-    <div class="mt-filters-row">
+    <div class="mt-filters">
         <div class="mt-search-box">
-            <input type="text" id="mt-search-assignments" placeholder="<?php esc_attr_e('Search jury members or candidates...', 'mobility-trailblazers'); ?>" />
+            <input type="text" id="mt-assignment-search" placeholder="<?php esc_attr_e('Search assignments...', 'mobility-trailblazers'); ?>">
         </div>
-        <div class="mt-filter-box">
-            <select id="mt-filter-status">
-                <option value=""><?php _e('All Status', 'mobility-trailblazers'); ?></option>
-                <option value="complete"><?php _e('Complete', 'mobility-trailblazers'); ?></option>
-                <option value="partial"><?php _e('Partial', 'mobility-trailblazers'); ?></option>
-                <option value="none"><?php _e('No Assignments', 'mobility-trailblazers'); ?></option>
+        <div class="mt-filter-group">
+            <select id="mt-filter-jury">
+                <option value=""><?php _e('All Jury Members', 'mobility-trailblazers'); ?></option>
+                <?php foreach ($jury_members as $jury) : ?>
+                    <option value="<?php echo esc_attr($jury->ID); ?>"><?php echo esc_html($jury->post_title); ?></option>
+                <?php endforeach; ?>
             </select>
-        </div>
-        <div class="mt-filter-box">
-            <select id="mt-filter-category">
-                <option value=""><?php _e('All Categories', 'mobility-trailblazers'); ?></option>
-                <?php
-                $categories = get_terms(array(
-                    'taxonomy' => 'mt_category',
-                    'hide_empty' => false
-                ));
-                if (!is_wp_error($categories) && !empty($categories)) {
-                    foreach ($categories as $category) {
-                        if (is_object($category)) {
-                            echo '<option value="' . esc_attr($category->slug) . '">' . esc_html($category->name) . '</option>';
-                        }
-                    }
-                }
-                ?>
+            <select id="mt-filter-status">
+                <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
+                <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
+                <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
     </div>
     
-    <!-- Assignment Grid -->
-    <div class="mt-assignment-grid">
-        <?php foreach ($jury_members as $jury) : 
-            $jury_assignments = isset($assignments_by_jury[$jury->ID]) ? $assignments_by_jury[$jury->ID] : [];
-            $user = get_user_by('ID', get_post_meta($jury->ID, '_mt_user_id', true));
-            $progress = $evaluation_service->get_assignment_progress($jury->ID);
-            $percentage = $progress['percentage'];
-        ?>
-        <div class="mt-jury-card" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
-            <div class="mt-jury-header">
-                <div class="mt-jury-info">
-                    <h3><?php echo esc_html($jury->post_title); ?></h3>
-                    <?php if ($user) : ?>
-                    <p class="mt-jury-email"><?php echo esc_html($user->user_email); ?></p>
-                    <?php endif; ?>
-                </div>
-                <div class="mt-jury-stats">
-                    <span class="mt-assignment-count"><?php echo count($jury_assignments); ?></span>
-                    <span class="mt-assignment-label"><?php _e('assignments', 'mobility-trailblazers'); ?></span>
-                </div>
-            </div>
-            
-            <div class="mt-progress-bar">
-                <div class="mt-progress-fill" style="width: <?php echo $percentage; ?>%"></div>
-                <span class="mt-progress-text"><?php echo $percentage; ?>%</span>
-            </div>
-            
-            <div class="mt-jury-assignments">
-                <?php if (!empty($jury_assignments)) : ?>
-                    <div class="mt-assignment-list">
-                        <?php foreach (array_slice($jury_assignments, 0, 5) as $assignment) : 
-                            $candidate = get_post($assignment->candidate_id);
-                            if ($candidate) :
-                        ?>
-                        <div class="mt-assignment-item" data-assignment-id="<?php echo esc_attr($assignment->id); ?>">
-                            <a href="<?php echo get_edit_post_link($candidate->ID); ?>" class="mt-candidate-link">
-                                <?php echo esc_html($candidate->post_title); ?>
-                            </a>
-                            <button class="mt-remove-assignment" data-assignment-id="<?php echo esc_attr($assignment->id); ?>" title="<?php esc_attr_e('Remove assignment', 'mobility-trailblazers'); ?>">
-                                <span class="dashicons dashicons-no"></span>
-                            </button>
-                        </div>
-                        <?php endif; endforeach; ?>
-                    </div>
-                    <?php if (count($jury_assignments) > 5) : ?>
-                    <p class="mt-more-assignments">
-                        <?php printf(__('and %d more...', 'mobility-trailblazers'), count($jury_assignments) - 5); ?>
-                    </p>
-                    <?php endif; ?>
-                <?php else : ?>
-                    <p class="mt-no-assignments"><?php _e('No assignments yet', 'mobility-trailblazers'); ?></p>
-                <?php endif; ?>
-            </div>
-            
-            <div class="mt-jury-actions">
-                <button class="button button-small mt-view-details" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
-                    <?php _e('View Details', 'mobility-trailblazers'); ?>
-                </button>
-                <button class="button button-small mt-add-assignment" data-jury-id="<?php echo esc_attr($jury->ID); ?>">
-                    <?php _e('Add', 'mobility-trailblazers'); ?>
-                </button>
-            </div>
-        </div>
-        <?php endforeach; ?>
+    <!-- Bulk Actions Dropdown (Hidden by default) -->
+    <div id="mt-bulk-actions-container" class="mt-bulk-actions" style="display: none;">
+        <select id="mt-bulk-action-select">
+            <option value=""><?php _e('Select Bulk Action', 'mobility-trailblazers'); ?></option>
+            <option value="remove"><?php _e('Remove Selected Assignments', 'mobility-trailblazers'); ?></option>
+            <option value="reassign"><?php _e('Reassign to Another Jury Member', 'mobility-trailblazers'); ?></option>
+            <option value="export"><?php _e('Export Selected', 'mobility-trailblazers'); ?></option>
+        </select>
+        <button id="mt-apply-bulk-action" class="button"><?php _e('Apply', 'mobility-trailblazers'); ?></button>
+        <button id="mt-cancel-bulk-action" class="button"><?php _e('Cancel', 'mobility-trailblazers'); ?></button>
     </div>
+    
+    <!-- Assignments Table -->
+    <table class="wp-list-table widefat fixed striped mt-assignments-table">
+        <thead>
+            <tr>
+                <td class="check-column" style="display: none;">
+                    <input type="checkbox" id="mt-select-all-assignments">
+                </td>
+                <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Candidate', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Category', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Assigned', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Status', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Progress', 'mobility-trailblazers'); ?></th>
+                <th><?php _e('Actions', 'mobility-trailblazers'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (!empty($assignments)) : ?>
+                <?php foreach ($assignments as $assignment) : 
+                    $jury = get_post($assignment->jury_member_id);
+                    $candidate = get_post($assignment->candidate_id);
+                    
+                    if (!$jury || !$candidate) continue;
+                    
+                    // Get evaluation status
+                    $evaluation = $evaluation_repo->find_by_jury_and_candidate(
+                        $assignment->jury_member_id,
+                        $assignment->candidate_id
+                    );
+                    
+                    $status = $evaluation ? $evaluation->status : 'pending';
+                    $progress = $evaluation && $evaluation->status === 'completed' ? 100 : ($evaluation ? 50 : 0);
+                    
+                    // Get category
+                    $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
+                    $category_name = !empty($categories) ? $categories[0]->name : __('Uncategorized', 'mobility-trailblazers');
+                ?>
+                    <tr data-assignment-id="<?php echo esc_attr($assignment->id); ?>">
+                        <td class="check-column" style="display: none;">
+                            <input type="checkbox" class="mt-assignment-checkbox" value="<?php echo esc_attr($assignment->id); ?>" 
+                                   data-jury-id="<?php echo esc_attr($assignment->jury_member_id); ?>"
+                                   data-candidate-id="<?php echo esc_attr($assignment->candidate_id); ?>">
+                        </td>
+                        <td>
+                            <strong><?php echo esc_html($jury->post_title); ?></strong>
+                            <?php
+                            $user_id = get_post_meta($jury->ID, '_mt_user_id', true);
+                            if ($user_id) {
+                                $user = get_user_by('ID', $user_id);
+                                if ($user) {
+                                    echo '<br><small>' . esc_html($user->user_email) . '</small>';
+                                }
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <strong><?php echo esc_html($candidate->post_title); ?></strong>
+                            <?php
+                            $organization = get_post_meta($candidate->ID, '_mt_organization', true);
+                            if ($organization) {
+                                echo '<br><small>' . esc_html($organization) . '</small>';
+                            }
+                            ?>
+                        </td>
+                        <td><?php echo esc_html($category_name); ?></td>
+                        <td>
+                            <?php 
+                            $assigned_date = !empty($assignment->assigned_at) 
+                                ? date_i18n(get_option('date_format'), strtotime($assignment->assigned_at))
+                                : __('N/A', 'mobility-trailblazers');
+                            echo esc_html($assigned_date);
+                            ?>
+                        </td>
+                        <td>
+                            <span class="mt-status mt-status-<?php echo esc_attr($status); ?>">
+                                <?php echo esc_html(ucfirst($status)); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="mt-progress-bar">
+                                <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress); ?>%"></div>
+                            </div>
+                            <span class="mt-progress-text"><?php echo esc_html($progress); ?>%</span>
+                        </td>
+                        <td>
+                            <button class="button button-small mt-remove-assignment" 
+                                    data-assignment-id="<?php echo esc_attr($assignment->id); ?>"
+                                    data-jury="<?php echo esc_attr($jury->post_title); ?>"
+                                    data-candidate="<?php echo esc_attr($candidate->post_title); ?>">
+                                <?php _e('Remove', 'mobility-trailblazers'); ?>
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <tr>
+                    <td colspan="8" class="no-items"><?php _e('No assignments found.', 'mobility-trailblazers'); ?></td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
 </div>
 
 <!-- Auto-Assignment Modal -->
