@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
 $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
 $assignment_service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
 $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
+$evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
 
 // Get statistics
 $total_candidates = wp_count_posts('mt_candidate')->publish;
@@ -219,8 +220,8 @@ function testAjax() {
             </tr>
         </thead>
         <tbody>
-            <?php if (!empty($assignments)) : ?>
-                <?php foreach ($assignments as $assignment) : 
+            <?php if (!empty($all_assignments)) : ?>
+                <?php foreach ($all_assignments as $assignment) : 
                     $jury = get_post($assignment->jury_member_id);
                     $candidate = get_post($assignment->candidate_id);
                     

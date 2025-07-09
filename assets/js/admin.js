@@ -640,12 +640,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             console.log('submitAutoAssignment called with:', {
                 method: method,
                 candidatesPerJury: candidatesPerJury,
-                ajax_url: mt_admin.url,
+                ajax_url: mt_admin.ajax_url,
                 nonce: mt_admin.nonce
             });
             
             $.ajax({
-                url: mt_admin.url,
+                url: mt_admin.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_auto_assign',
@@ -990,7 +990,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             }
             
             $.ajax({
-                url: mt_admin.url,
+                url: mt_admin.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_bulk_remove_assignments',
@@ -1051,7 +1051,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
                 
                 $.ajax({
-                    url: mt_admin.url,
+                    url: mt_admin.ajax_url,
                     type: 'POST',
                     data: {
                         action: 'mt_bulk_reassign_assignments',
@@ -1085,7 +1085,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             // Create form for export
             const $form = $('<form>', {
                 method: 'POST',
-                action: mt_admin.url
+                action: mt_admin.ajax_url
             });
             
             $form.append($('<input>', {
