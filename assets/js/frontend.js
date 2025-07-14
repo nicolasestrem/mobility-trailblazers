@@ -1049,3 +1049,151 @@
     });
 
 })(jQuery); 
+
+// === Jury Rankings Table Interactivity ===
+(function($) {
+    // Only run if the rankings table exists
+    $(document).ready(function() {
+        var $table = $('.mt-evaluation-table');
+        if (!$table.length) return;
+
+        // --- 1. Live total score calculation and color coding ---
+        function updateRowTotal($row) {
+            var total = 0;
+            var count = 0;
+            $row.find('.mt-eval-score-input').each(function() {
+                var val = parseFloat($(this).val());
+                if (!isNaN(val)) {
+                    total += val;
+                    count++;
+                }
+            });
+            var avg = count > 0 ? (total / count) : 0;
+            $row.find('.mt-eval-total-value').text(avg.toFixed(1));
+            // Color code total
+            var $totalCell = $row.find('.mt-eval-total-score');
+            $totalCell.removeClass('score-high score-low');
+            if (avg >= 8) $totalCell.addClass('score-high');
+            else if (avg <= 3) $totalCell.addClass('score-low');
+        }
+
+        function updateScoreColor($input) {
+            var val = parseFloat($input.val());
+            $input.removeClass('score-high score-low');
+            if (val >= 8) $input.addClass('score-high');
+            else if (val <= 3) $input.addClass('score-low');
+        }
+
+        // --- 2. Mark row as unsaved on change ---
+        $table.on('input change', '.mt-eval-score-input', function() {
+            var $input = $(this);
+            var $row = $input.closest('tr');
+            updateScoreColor($input);
+            updateRowTotal($row);
+            $row.addClass('unsaved').removeClass('saving');
+            $row.find('.mt-btn-save-eval').addClass('unsaved').removeClass('saving');
+        });
+
+        // --- 3. Save button AJAX ---
+        $table.on('click', '.mt-btn-save-eval', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var $row = $btn.closest('tr');
+            if ($btn.hasClass('saving')) return; // Prevent double submit
+            $btn.addClass('saving').removeClass('unsaved');
+            $row.addClass('saving').removeClass('unsaved');
+            $btn.html('<span class="mt-eval-spinner"></span> Saving...');
+
+            // Collect scores
+            var candidateId = $btn.data('candidate-id');
+            var scores = {};
+            $row.find('.mt-eval-score-input').each(function() {
+                var name = $(this).attr('name');
+                var val = $(this).val();
+                scores[name] = val;
+            });
+
+            // Prepare AJAX data
+            var ajaxData = {
+                action: 'mt_save_inline_evaluation',
+                nonce: (typeof mt_ajax !== 'undefined' && mt_ajax.nonce) ? mt_ajax.nonce : '',
+                candidate_id: candidateId,
+                scores: scores
+            };
+
+            $.ajax({
+                url: (typeof mt_ajax !== 'undefined' && mt_ajax.url) ? mt_ajax.url : '',
+                type: 'POST',
+                data: ajaxData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $row.removeClass('unsaved saving').addClass('saved');
+                        $btn.removeClass('saving').html('<span class="dashicons dashicons-saved"></span> Saved');
+                        setTimeout(function() {
+                            $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                            $row.removeClass('saved');
+                        }, 1200);
+                        // Update total score if returned
+                        if (response.data && response.data.total_score !== undefined) {
+                            $row.find('.mt-eval-total-value').text(parseFloat(response.data.total_score).toFixed(1));
+                        }
+                    } else {
+                        $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> Error');
+                        $row.removeClass('saving').addClass('unsaved');
+                        setTimeout(function() {
+                            $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                        }, 2000);
+                        if (window.MTErrorHandler) {
+                            MTErrorHandler.showUserError(response.data || 'Error saving evaluation');
+                        } else {
+                            alert(response.data || 'Error saving evaluation');
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> Error');
+                    $row.removeClass('saving').addClass('unsaved');
+                    setTimeout(function() {
+                        $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                    }, 2000);
+                    if (window.MTErrorHandler) {
+                        MTErrorHandler.handleAjaxError(xhr, status, error, 'jury-rankings-table');
+                    } else {
+                        alert('Network error. Please try again.');
+                    }
+                }
+            });
+        });
+
+        // --- 4. Tooltips for headers (native title attribute is used, but enhance for accessibility) ---
+        $table.find('th[title]').each(function() {
+            var $th = $(this);
+            $th.attr('tabindex', '0');
+            $th.on('focus mouseenter', function() {
+                var title = $th.attr('title');
+                if (!title) return;
+                var $tip = $('<div class="mt-tooltip"></div>').text(title).appendTo('body');
+                var offset = $th.offset();
+                $tip.css({
+                    top: offset.top + $th.outerHeight() + 4,
+                    left: offset.left + $th.outerWidth()/2 - $tip.outerWidth()/2
+                });
+                $th.data('mt-tooltip', $tip);
+            });
+            $th.on('blur mouseleave', function() {
+                var $tip = $th.data('mt-tooltip');
+                if ($tip) $tip.remove();
+            });
+        });
+
+        // --- 5. Initial color coding and total calculation ---
+        $table.find('tbody tr').each(function() {
+            var $row = $(this);
+            $row.find('.mt-eval-score-input').each(function() {
+                updateScoreColor($(this));
+            });
+            updateRowTotal($row);
+        });
+    });
+})(jQuery); 

@@ -5,6 +5,81 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.12] - 2025-06-14
+
+### Changed
+- **Table-Based Rankings Layout**: Replaced grid layout with condensed table format for better data density
+  - Inline editable score inputs for each criterion
+  - Real-time total score calculation
+  - Individual row saving with AJAX
+  - Color-coded scores (high ≥8 green, low ≤3 orange)
+  - Visual row states (unsaved/saving/saved)
+  - Responsive table with horizontal scrolling on mobile
+
+### Fixed
+- **Color Scheme Implementation**: Fixed visibility issues throughout the plugin
+  - Replaced all hardcoded colors with CSS variables from documented brand colors
+  - Fixed white text on clear backgrounds issue
+  - Updated medal colors to use brand colors instead of traditional gold/silver/bronze
+  - Fixed "Evaluation Overview" component styling
+  - Improved contrast for better readability
+
+### Added
+- **Evaluation Statistics Component**: Added comprehensive statistics display
+  - Overall evaluation progress with visual indicators
+  - Criteria-specific average scores with bar charts
+  - Category-based statistics breakdown
+  - Jury member performance metrics
+  - Progress bars and visual data representation
+
+### Enhanced
+- **User Experience**: 
+  - Direct inline editing without page navigation
+  - Live feedback with color coding and animations
+  - Tooltips on table headers for criterion descriptions
+  - Save state indicators for each row
+  - Improved mobile responsiveness
+
+### Technical Implementation
+- **Frontend**: 
+  - jQuery-based table interactivity system
+  - Real-time calculation and validation
+  - Efficient DOM manipulation for performance
+  - CSS animations for visual feedback
+- **Backend**: 
+  - Enhanced AJAX handler for row-specific saves
+  - Proper error handling and user feedback
+  - Security validation for each operation
+- **Styling**: 
+  - Complete CSS variable system for maintainability
+  - Consistent color scheme across admin and frontend
+  - Modern table design with sticky headers
+
+### Files Modified
+- `templates/frontend/partials/jury-rankings.php` - Complete rewrite for table layout
+- `assets/css/frontend.css` - Table styling and color scheme fixes
+- `assets/css/admin.css` - Color scheme implementation
+- `assets/js/frontend.js` - Table interactivity and AJAX handling
+- `templates/frontend/evaluation-stats.php` - Statistics component template
+- `doc/jury-rankings-system.md` - Updated documentation for table implementation
+- `doc/color-scheme-implementation.md` - Documented color system
+
+### Color Palette Implemented
+- Primary: `#003C3D` - Dark teal
+- Secondary: `#004C5F` - Deep blue
+- Body Text: `#302C37` - Dark purple-gray
+- Accent: `#C1693C` - Burnt orange
+- Blue Accent: `#A4DCD5` - Light blue-green
+- BG Beige: `#F5E6D3` - Light beige
+- BG Base: `#FFFFFF` - White
+
+### Benefits
+- More efficient data display with higher information density
+- Better performance with targeted updates
+- Improved accessibility with proper color contrast
+- Consistent branding throughout the plugin
+- Enhanced user experience with inline editing
+
 ## [2.0.11] - 2025-07-09
 
 ### Added
