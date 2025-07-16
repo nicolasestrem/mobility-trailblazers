@@ -79,7 +79,7 @@ class MT_Shortcodes {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="mt-error">' . __('Jury dashboard template not found.', 'mobility-trailblazers') . '</div>';
+            echo '<div class="mt-error">' . esc_html__('Jury dashboard template not found.', 'mobility-trailblazers') . '</div>';
         }
         
         return ob_get_clean();
@@ -125,7 +125,7 @@ class MT_Shortcodes {
         $candidates = new \WP_Query($args);
         
         if (!$candidates->have_posts()) {
-            return '<div class="mt-notice">' . __('No candidates found.', 'mobility-trailblazers') . '</div>';
+            return '<div class="mt-notice">' . esc_html__('No candidates found.', 'mobility-trailblazers') . '</div>';
         }
         
         // Start output buffering
@@ -195,7 +195,7 @@ class MT_Shortcodes {
         $winners = $evaluation_repo->get_top_candidates($atts['limit'], $atts['category']);
         
         if (empty($winners)) {
-            return '<div class="mt-notice">' . __('Winners have not been announced yet.', 'mobility-trailblazers') . '</div>';
+            return '<div class="mt-notice">' . esc_html__('Winners have not been announced yet.', 'mobility-trailblazers') . '</div>';
         }
         
         // Start output buffering

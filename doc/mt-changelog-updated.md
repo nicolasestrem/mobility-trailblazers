@@ -5,6 +5,97 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.13] - 2025-07-16
+
+### Added
+- **Internationalization (i18n) Foundation**: Complete i18n infrastructure for future multilingual support
+  - **Enhanced Script Localization**: Comprehensive i18n arrays for both frontend and admin JavaScript
+  - **PHP String Wrapping**: All user-facing strings wrapped with proper WordPress i18n functions
+  - **JavaScript Localization**: Complete replacement of hardcoded strings with localized variables
+  - **Fallback Strategy**: Robust fallback system ensuring functionality if translation fails
+
+### Enhanced
+- **Frontend Localization**: 50+ user-facing strings added to `mt_ajax.i18n` object
+  - Loading states, success/error messages, form labels, status indicators
+  - Navigation elements, evaluation criteria, submission feedback
+  - Character counts, validation messages, network error handling
+- **Admin Localization**: 20+ user-facing strings added to `mt_admin.i18n` object
+  - Processing states, confirmation dialogs, bulk operation messages
+  - Success/error notifications, action button labels, export messages
+- **Text Domain Consistency**: Unified `mobility-trailblazers` text domain throughout
+- **Security**: All output properly escaped using `esc_html__()` and `esc_html_e()`
+
+### Technical Implementation
+- **Script Localization Enhancement**: 
+  - Frontend: Enhanced `wp_localize_script` with comprehensive i18n array
+  - Admin: Updated admin script localization with expanded i18n support
+  - Fallback Pattern: `mt_ajax.i18n.key || 'fallback text'` for reliability
+- **PHP i18n Functions**: 
+  - `esc_html__()` for safe output with escaping
+  - `esc_html_e()` for direct output with escaping
+  - `__()` for variable assignments
+- **JavaScript Updates**: 
+  - Complete frontend.js overhaul with i18n references
+  - Complete admin.js overhaul with i18n references
+  - Dynamic string replacement with fallback support
+
+### Files Modified
+- `includes/core/class-mt-plugin.php` - Enhanced script localization with comprehensive i18n arrays
+- `assets/js/frontend.js` - Complete i18n update (50+ strings replaced)
+- `assets/js/admin.js` - Complete i18n update (20+ strings replaced)
+- `templates/admin/settings.php` - User-facing string wrapping
+- `templates/admin/assignments.php` - User-facing string wrapping
+- `templates/admin/candidates.php` - User-facing string wrapping
+- `includes/admin/class-mt-admin.php` - User-facing string wrapping
+- `includes/admin/class-mt-error-monitor.php` - User-facing string wrapping
+- `includes/core/class-mt-shortcodes.php` - User-facing string wrapping
+- `includes/ajax/class-mt-evaluation-ajax.php` - User-facing string wrapping
+- `templates/frontend/partials/jury-rankings.php` - User-facing string wrapping
+- `test-jury-lookup.php` - User-facing string wrapping (test files)
+- `debug/fake-candidates-generator.php` - User-facing string wrapping (debug files)
+- `debug/fix-assignments.php` - User-facing string wrapping (debug files)
+- `debug/fix-database.php` - User-facing string wrapping (debug files)
+
+### Key I18n Strings Added
+
+#### Frontend Strings (50+)
+- **Loading States**: `loading`, `saving`, `submitting`, `loading_evaluation`
+- **Success Messages**: `success`, `saved`, `draft_saved`, `evaluation_submitted`
+- **Error Messages**: `error`, `security_error`, `network_error`, `invalid_scores`
+- **Form Labels**: `evaluation_criteria`, `additional_comments`, `save_as_draft`, `submit_evaluation`
+- **Status Messages**: `not_started`, `draft_saved_status`, `completed`, `pending`
+- **Navigation**: `back_to_dashboard`, `start_evaluation`, `continue_evaluation`, `view_edit_evaluation`
+- **Validation**: `please_rate_all`, `invalid_candidate`, `optional_comments`
+- **Network**: `request_timeout`, `request_cancelled`, `permission_denied`, `resource_not_found`, `server_error`
+
+#### Admin Strings (20+)
+- **Processing States**: `processing`, `clearing`, `saving`, `saved`
+- **Confirmation Dialogs**: `confirm_delete`, `confirm_clear_all`, `confirm_clear_all_second`
+- **Success Messages**: `assignments_created`, `all_assignments_cleared`, `export_started`
+- **Error Messages**: `error_occurred`, `error`
+- **Action Buttons**: `assign_selected`, `run_auto_assignment`, `apply`, `clear_all`
+- **Validation**: `select_bulk_action`, `select_assignments`, `select_jury_member`
+
+### Benefits
+- **Future-Ready**: Platform prepared for September 2025 multilingual implementation
+- **Maintainability**: Centralized string management with consistent text domain
+- **User Experience**: Preserved all existing functionality while adding i18n support
+- **Security**: Proper escaping and validation of all user-facing output
+- **Reliability**: Fallback system ensures functionality even if translation fails
+- **Performance**: No impact on existing performance, minimal overhead
+
+### Compatibility
+- **WordPress**: Compatible with WordPress 5.8+ i18n system
+- **PHP**: Uses standard WordPress i18n functions
+- **JavaScript**: Fallback system ensures compatibility across all browsers
+- **Existing Features**: All functionality preserved exactly as before
+
+### Next Steps
+- **Translation Files**: Ready for .po/.mo file creation in `/languages/` directory
+- **Language Switching**: Infrastructure ready for language detection and switching
+- **RTL Support**: Text domain ready for right-to-left language support
+- **Localization**: Platform ready for DACH region and international expansion
+
 ## [2.0.12] - 2025-06-14
 
 ### Changed

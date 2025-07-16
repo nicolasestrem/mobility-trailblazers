@@ -59,9 +59,9 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
         $result = $assignment_service->auto_assign($method, $candidates_per_jury);
         
         if ($result) {
-            echo '<div class="notice notice-success"><p>' . __('Auto-assignment completed successfully!', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-success"><p>' . esc_html__('Auto-assignment completed successfully!', 'mobility-trailblazers') . '</p></div>';
         } else {
-            echo '<div class="notice notice-error"><p>' . __('Auto-assignment failed. Please check the logs.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Auto-assignment failed. Please check the logs.', 'mobility-trailblazers') . '</p></div>';
         }
     }
 }

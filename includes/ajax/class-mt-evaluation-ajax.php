@@ -350,7 +350,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="mt-error">' . __('Rankings template not found.', 'mobility-trailblazers') . '</div>';
+            echo '<div class="mt-error">' . esc_html__('Rankings template not found.', 'mobility-trailblazers') . '</div>';
         }
         return ob_get_clean();
     }

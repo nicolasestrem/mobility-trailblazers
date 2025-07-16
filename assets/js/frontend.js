@@ -76,7 +76,7 @@
          * Handle AJAX errors with user-friendly messages
          */
         handleAjaxError: function(xhr, status, error, context) {
-            var errorMessage = 'An error occurred. Please try again.';
+            var errorMessage = mt_ajax.i18n.error || 'An error occurred. Please try again.';
             var logDetails = {
                 status: status,
                 error: error,
@@ -91,15 +91,15 @@
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     errorMessage = xhr.responseJSON.message;
                 } else if (status === 'timeout') {
-                    errorMessage = 'Request timed out. Please check your connection and try again.';
+                    errorMessage = mt_ajax.i18n.request_timeout || 'Request timed out. Please check your connection and try again.';
                 } else if (status === 'abort') {
-                    errorMessage = 'Request was cancelled.';
+                    errorMessage = mt_ajax.i18n.request_cancelled || 'Request was cancelled.';
                 } else if (xhr.status === 403) {
-                    errorMessage = 'You do not have permission to perform this action.';
+                    errorMessage = mt_ajax.i18n.permission_denied || 'You do not have permission to perform this action.';
                 } else if (xhr.status === 404) {
-                    errorMessage = 'The requested resource was not found.';
+                    errorMessage = mt_ajax.i18n.resource_not_found || 'The requested resource was not found.';
                 } else if (xhr.status >= 500) {
-                    errorMessage = 'Server error. Please try again later.';
+                    errorMessage = mt_ajax.i18n.server_error || 'Server error. Please try again later.';
                 }
             } catch (e) {
                 logDetails.parseError = e.message;
@@ -173,7 +173,7 @@
             if (candidateId) {
                 this.loadEvaluationForm(candidateId);
             } else {
-                this.showError('Invalid candidate ID.');
+                this.showError(mt_ajax.i18n.invalid_candidate || 'Invalid candidate ID.');
             }
         },
         
@@ -186,13 +186,13 @@
                     mt_ajax_defined: typeof mt_ajax !== 'undefined',
                     nonce_present: mt_ajax && mt_ajax.nonce ? true : false
                 });
-                MTErrorHandler.showUserError('Security configuration error. Please refresh the page and try again.');
+                MTErrorHandler.showUserError(mt_ajax.i18n.security_error || 'Security configuration error. Please refresh the page and try again.');
                 return;
             }
             
             // Show loading state
             var $container = $('.mt-jury-dashboard');
-            $container.html('<div class="mt-loading">Loading evaluation form...</div>');
+            $container.html('<div class="mt-loading">' + (mt_ajax.i18n.loading_evaluation || 'Loading evaluation form...') + '</div>');
             
             // Load candidate details
             $.post(mt_ajax.url, {
@@ -369,17 +369,17 @@
                         </div>
                         
                         <div class="mt-comments-section">
-                            <label for="mt-comments" class="mt-comments-label">Additional Comments (Optional)</label>
+                            <label for="mt-comments" class="mt-comments-label">${mt_ajax.i18n.additional_comments || 'Additional Comments (Optional)'}</label>
                             <textarea name="comments" id="mt-comments" class="mt-comments-textarea" rows="5"></textarea>
                             <div class="mt-char-count">
-                                <span id="mt-char-current">0</span> / 1000 characters
+                                <span id="mt-char-current">0</span> / 1000 ${mt_ajax.i18n.characters || 'characters'}
                             </div>
                         </div>
                         
                         <div class="mt-form-actions">
-                            <button type="button" class="mt-btn mt-btn-secondary mt-save-draft">Save as Draft</button>
-                            <button type="submit" class="mt-btn mt-btn-primary">Submit Evaluation</button>
-                            <a href="${window.location.pathname}" class="mt-btn mt-btn-secondary">Back to Dashboard</a>
+                            <button type="button" class="mt-btn mt-btn-secondary mt-save-draft">${mt_ajax.i18n.save_as_draft || 'Save as Draft'}</button>
+                            <button type="submit" class="mt-btn mt-btn-primary">${mt_ajax.i18n.submit_evaluation || 'Submit Evaluation'}</button>
+                            <a href="${window.location.pathname}" class="mt-btn mt-btn-secondary">${mt_ajax.i18n.back_to_dashboard || 'Back to Dashboard'}</a>
                         </div>
                     </form>
                 </div>
@@ -393,7 +393,7 @@
         loadExistingEvaluation: function(candidateId) {
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
-                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                MTJuryDashboard.showError(mt_ajax.i18n.security_error || 'Security configuration error. Please refresh the page and try again.');
                 return;
             }
             
@@ -416,7 +416,7 @@
                     
                     // Show status
                     if (evaluation.status === 'completed') {
-                        $('.mt-form-actions').prepend('<div class="mt-notice mt-notice-success">This evaluation has been submitted. You can still edit and resubmit.</div>');
+                        $('.mt-form-actions').prepend('<div class="mt-notice mt-notice-success">' + (mt_ajax.i18n.evaluation_submitted_editable || 'This evaluation has been submitted. You can still edit and resubmit.') + '</div>');
                     }
                 }
             });
@@ -486,7 +486,7 @@
             
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
-                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                MTJuryDashboard.showError(mt_ajax.i18n.security_error || 'Security configuration error. Please refresh the page and try again.');
                 return;
             }
             
@@ -506,12 +506,12 @@
             });
             
             if (!isValid) {
-                MTJuryDashboard.showError('Please ensure all scores are between 0 and 10.');
+                MTJuryDashboard.showError(mt_ajax.i18n.invalid_scores || 'Please ensure all scores are between 0 and 10.');
                 return;
             }
             
             // Disable button and show loading
-            $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Submitting...');
+            $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> ' + (mt_ajax.i18n.submitting || 'Submitting...'));
             
             // Get form data including all fields
             var formData = {};
@@ -550,16 +550,16 @@
                         // Update status badge
                         var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
                         if ($statusBadge.length) {
-                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text('Evaluation Submitted');
+                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text(mt_ajax.i18n.evaluation_submitted || 'Evaluation Submitted');
                         } else {
-                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">Evaluation Submitted</span>');
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">' + (mt_ajax.i18n.evaluation_submitted || 'Evaluation Submitted') + '</span>');
                         }
                         
                         // Scroll to top
                         $('html, body').animate({ scrollTop: 0 }, 300);
                         
                         // Re-enable button
-                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + (mt_ajax.i18n.submit_evaluation || 'Submit Evaluation'));
                         
                         // Redirect after 3 seconds
                         setTimeout(function() {
@@ -567,12 +567,12 @@
                         }, 3000);
                     } else {
                         MTJuryDashboard.showError(response.data.message);
-                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + (mt_ajax.i18n.submit_evaluation || 'Submit Evaluation'));
                     }
                 })
                 .fail(function() {
-                    MTJuryDashboard.showError('An error occurred. Please try again.');
-                    $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> Submit Evaluation');
+                    MTJuryDashboard.showError(mt_ajax.i18n.error || 'An error occurred. Please try again.');
+                    $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + (mt_ajax.i18n.submit_evaluation || 'Submit Evaluation'));
                 });
         },
         
@@ -581,7 +581,7 @@
             
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
-                MTJuryDashboard.showError('Security configuration error. Please refresh the page and try again.');
+                MTJuryDashboard.showError(mt_ajax.i18n.security_error || 'Security configuration error. Please refresh the page and try again.');
                 return;
             }
             
@@ -596,7 +596,7 @@
 
             
             // Disable button and show loading
-            $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> Saving...');
+            $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> ' + (mt_ajax.i18n.saving || 'Saving...'));
             
             // Get form data including all fields
             var formData = {};
@@ -621,27 +621,27 @@
                 .done(function(response) {
                     if (response.success) {
                         // Show success message temporarily
-                        $btn.html('<span class="dashicons dashicons-saved"></span> Draft Saved!');
+                        $btn.html('<span class="dashicons dashicons-saved"></span> ' + (mt_ajax.i18n.draft_saved || 'Draft Saved!'));
                         
                         // Update or add status badge
                         var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
                         if ($statusBadge.length) {
-                            $statusBadge.removeClass('mt-status-completed').addClass('mt-status-draft').text('Draft Saved');
+                            $statusBadge.removeClass('mt-status-completed').addClass('mt-status-draft').text(mt_ajax.i18n.draft_saved_status || 'Draft Saved');
                         } else {
-                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-draft">Draft Saved</span>');
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-draft">' + (mt_ajax.i18n.draft_saved_status || 'Draft Saved') + '</span>');
                         }
                         
                         setTimeout(function() {
-                            $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
+                            $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + (mt_ajax.i18n.save_as_draft || 'Save as Draft'));
                         }, 2000);
                     } else {
                         MTJuryDashboard.showError(response.data.message);
-                        $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
+                        $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + (mt_ajax.i18n.save_as_draft || 'Save as Draft'));
                     }
                 })
                 .fail(function() {
-                    MTJuryDashboard.showError('Failed to save draft.');
-                    $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> Save as Draft');
+                    MTJuryDashboard.showError(mt_ajax.i18n.error || 'Failed to save draft.');
+                    $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + (mt_ajax.i18n.save_as_draft || 'Save as Draft'));
                 });
         },
         
@@ -1102,7 +1102,7 @@
             if ($btn.hasClass('saving')) return; // Prevent double submit
             $btn.addClass('saving').removeClass('unsaved');
             $row.addClass('saving').removeClass('unsaved');
-            $btn.html('<span class="mt-eval-spinner"></span> Saving...');
+            $btn.html('<span class="mt-eval-spinner"></span> ' + (mt_ajax.i18n.saving || 'Saving...'));
 
             // Collect scores
             var candidateId = $btn.data('candidate-id');
@@ -1129,9 +1129,9 @@
                 success: function(response) {
                     if (response.success) {
                         $row.removeClass('unsaved saving').addClass('saved');
-                        $btn.removeClass('saving').html('<span class="dashicons dashicons-saved"></span> Saved');
+                        $btn.removeClass('saving').html('<span class="dashicons dashicons-saved"></span> ' + (mt_ajax.i18n.saved || 'Saved'));
                         setTimeout(function() {
-                            $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                            $btn.html('<span class="dashicons dashicons-saved"></span> ' + (mt_ajax.i18n.save || 'Save'));
                             $row.removeClass('saved');
                         }, 1200);
                         // Update total score if returned
@@ -1139,28 +1139,28 @@
                             $row.find('.mt-eval-total-value').text(parseFloat(response.data.total_score).toFixed(1));
                         }
                     } else {
-                        $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> Error');
+                        $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> ' + (mt_ajax.i18n.error || 'Error'));
                         $row.removeClass('saving').addClass('unsaved');
                         setTimeout(function() {
-                            $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                            $btn.html('<span class="dashicons dashicons-saved"></span> ' + (mt_ajax.i18n.save || 'Save'));
                         }, 2000);
                         if (window.MTErrorHandler) {
-                            MTErrorHandler.showUserError(response.data || 'Error saving evaluation');
+                            MTErrorHandler.showUserError(response.data || (mt_ajax.i18n.error_saving_evaluation || 'Error saving evaluation'));
                         } else {
-                            alert(response.data || 'Error saving evaluation');
+                            alert(response.data || (mt_ajax.i18n.error_saving_evaluation || 'Error saving evaluation'));
                         }
                     }
                 },
                 error: function(xhr, status, error) {
-                    $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> Error');
+                    $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> ' + (mt_ajax.i18n.error || 'Error'));
                     $row.removeClass('saving').addClass('unsaved');
                     setTimeout(function() {
-                        $btn.html('<span class="dashicons dashicons-saved"></span> Save');
+                        $btn.html('<span class="dashicons dashicons-saved"></span> ' + (mt_ajax.i18n.save || 'Save'));
                     }, 2000);
                     if (window.MTErrorHandler) {
                         MTErrorHandler.handleAjaxError(xhr, status, error, 'jury-rankings-table');
                     } else {
-                        alert('Network error. Please try again.');
+                        alert(mt_ajax.i18n.network_error || 'Network error. Please try again.');
                     }
                 }
             });

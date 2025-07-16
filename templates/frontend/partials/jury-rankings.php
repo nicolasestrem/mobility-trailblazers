@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 // Ensure we have rankings data
 if (empty($rankings)) {
-    echo '<p class="mt-no-rankings">' . __('No rankings available yet.', 'mobility-trailblazers') . '</p>';
+    echo '<p class="mt-no-rankings">' . esc_html__('No rankings available yet.', 'mobility-trailblazers') . '</p>';
     return;
 }
 

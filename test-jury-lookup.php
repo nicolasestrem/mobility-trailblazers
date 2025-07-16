@@ -8,7 +8,7 @@
 // Load WordPress
 require_once('wp-config.php');
 
-echo "<h1>Jury Member Lookup Test</h1>\n";
+echo '<h1>' . esc_html__('Jury Member Lookup Test', 'mobility-trailblazers') . '</h1>\n';
 
 // Get current user
 $current_user_id = get_current_user_id();
@@ -34,7 +34,7 @@ if (current_user_can('mt_evaluate_candidates')) {
 echo "</ul>\n";
 
 // Test jury member lookup
-echo "<h2>Jury Member Lookup Test</h2>\n";
+echo '<h2>' . esc_html__('Jury Member Lookup Test', 'mobility-trailblazers') . '</h2>\n';
 
 $args = [
     'post_type' => 'mt_jury_member',
@@ -64,7 +64,7 @@ if (!empty($jury_members)) {
     echo "</ul>\n";
     
     // Test assignment lookup
-    echo "<h2>Assignment Test</h2>\n";
+    echo '<h2>' . esc_html__('Assignment Test', 'mobility-trailblazers') . '</h2>\n';
     
     global $wpdb;
     $assignments_table = $wpdb->prefix . 'mt_jury_assignments';
@@ -106,7 +106,7 @@ if (!empty($jury_members)) {
     echo "<p style='color: red;'>✗ No jury member found for user ID {$current_user_id}</p>\n";
     
     // Let's check what jury members exist and their meta
-    echo "<h3>All Jury Members:</h3>\n";
+    echo '<h3>' . esc_html__('All Jury Members:', 'mobility-trailblazers') . '</h3>\n';
     $all_jury_members = get_posts([
         'post_type' => 'mt_jury_member',
         'posts_per_page' => -1,
@@ -129,5 +129,5 @@ if (!empty($jury_members)) {
     }
 }
 
-echo "<h2>Test Complete</h2>\n";
+echo '<h2>' . esc_html__('Test Complete', 'mobility-trailblazers') . '</h2>\n';
 ?> 

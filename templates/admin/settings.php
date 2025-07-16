@@ -64,7 +64,7 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
     // Save other settings
     update_option('mt_evaluations_per_page', intval($_POST['evaluations_per_page']));
     
-    echo '<div class="notice notice-success"><p>' . __('Settings saved successfully!', 'mobility-trailblazers') . '</p></div>';
+    echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved successfully!', 'mobility-trailblazers') . '</p></div>';
 }
 
 // Get current settings

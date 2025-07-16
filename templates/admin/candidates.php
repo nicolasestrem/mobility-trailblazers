@@ -201,10 +201,10 @@ $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Reposito
                             $status_label = '';
                             switch ($status) {
                                 case 'publish':
-                                    $status_label = '<span class="status-badge status-publish">' . __('Published', 'mobility-trailblazers') . '</span>';
+                                    $status_label = '<span class="status-badge status-publish">' . esc_html__('Published', 'mobility-trailblazers') . '</span>';
                                     break;
                                 case 'draft':
-                                    $status_label = '<span class="status-badge status-draft">' . __('Draft', 'mobility-trailblazers') . '</span>';
+                                    $status_label = '<span class="status-badge status-draft">' . esc_html__('Draft', 'mobility-trailblazers') . '</span>';
                                     break;
                                 default:
                                     $status_label = '<span class="status-badge">' . ucfirst($status) . '</span>';

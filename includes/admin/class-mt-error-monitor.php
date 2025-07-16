@@ -75,7 +75,7 @@ class MT_Error_Monitor {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="notice notice-error"><p>' . __('Error monitor template not found.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Error monitor template not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     

@@ -155,7 +155,7 @@ if (typeof mt_admin.i18n === 'undefined') {
      */
     function initConfirmations() {
         $('.mt-confirm').on('click', function(e) {
-            const message = $(this).data('confirm') || 'Are you sure?';
+            const message = $(this).data('confirm') || (mt_admin.i18n.confirm_delete || 'Are you sure?');
             
             if (!confirm(message)) {
                 e.preventDefault();
@@ -176,7 +176,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             const originalText = $submitBtn.text();
             
             // Disable submit button
-            $submitBtn.prop('disabled', true).text('Processing...');
+            $submitBtn.prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');
             
             $.ajax({
                 url: $form.attr('action'),
@@ -199,7 +199,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 error: function() {
                     // Show error message
-                    $('<div class="notice notice-error"><p>An error occurred. Please try again.</p></div>')
+                    $('<div class="notice notice-error"><p>' + (mt_admin.i18n.error_occurred || 'An error occurred. Please try again.') + '</p></div>')
                         .insertAfter($form)
                         .delay(3000)
                         .fadeOut();
@@ -655,7 +655,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 beforeSend: () => {
                     console.log('AJAX request starting...');
-                    $form.find('button[type="submit"]').prop('disabled', true).text('Processing...');
+                    $form.find('button[type="submit"]').prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');
                 },
                 success: (response) => {
                     console.log('AJAX Success Response:', response);
@@ -678,7 +678,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 complete: () => {
                     console.log('AJAX request completed');
-                    $form.find('button[type="submit"]').prop('disabled', false).text('Run Auto-Assignment');
+                    $form.find('button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.run_auto_assignment || 'Run Auto-Assignment');
                 }
             });
         },
@@ -962,12 +962,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
             
             if (!action) {
-                alert('Please select a bulk action');
+                alert(mt_admin.i18n.select_bulk_action || 'Please select a bulk action');
                 return;
             }
             
             if (selectedIds.length === 0) {
-                alert('Please select at least one assignment');
+                alert(mt_admin.i18n.select_assignments || 'Please select at least one assignment');
                 return;
             }
             
@@ -998,7 +998,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                     assignment_ids: assignmentIds
                 },
                 beforeSend: function() {
-                    $('#mt-apply-bulk-action').prop('disabled', true).text('Processing...');
+                    $('#mt-apply-bulk-action').prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1009,10 +1009,10 @@ if (typeof mt_admin.i18n === 'undefined') {
                     }
                 },
                 error: function() {
-                    alert('An error occurred. Please try again.');
+                    alert(mt_admin.i18n.error_occurred || 'An error occurred. Please try again.');
                 },
                 complete: function() {
-                    $('#mt-apply-bulk-action').prop('disabled', false).text('Apply');
+                    $('#mt-apply-bulk-action').prop('disabled', false).text(mt_admin.i18n.apply || 'Apply');
                 }
             });
         },
@@ -1046,7 +1046,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             $('#mt-confirm-reassign').on('click', function() {
                 const newJuryId = $('#mt-reassign-jury-select').val();
                 if (!newJuryId) {
-                    alert('Please select a jury member');
+                    alert(mt_admin.i18n.select_jury_member || 'Please select a jury member');
                     return;
                 }
                 
@@ -1060,7 +1060,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                         new_jury_id: newJuryId
                     },
                     beforeSend: function() {
-                        $('#mt-confirm-reassign').prop('disabled', true).text('Processing...');
+                        $('#mt-confirm-reassign').prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');
                     },
                     success: function(response) {
                         if (response.success) {
@@ -1071,7 +1071,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                         }
                     },
                     error: function() {
-                        alert('An error occurred. Please try again.');
+                        alert(mt_admin.i18n.error_occurred || 'An error occurred. Please try again.');
                     }
                 });
             });

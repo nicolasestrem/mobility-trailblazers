@@ -19,7 +19,7 @@ if (!current_user_can('manage_options')) {
     wp_die('Insufficient permissions');
 }
 
-echo "<h1>Assignment Fix Script</h1>";
+echo '<h1>' . esc_html__('Assignment Fix Script', 'mobility-trailblazers') . '</h1>';
 
 // Get all jury members
 $jury_members = get_posts([
@@ -35,13 +35,13 @@ $candidates = get_posts([
     'post_status' => 'publish'
 ]);
 
-echo "<h2>Current Status</h2>";
+echo '<h2>' . esc_html__('Current Status', 'mobility-trailblazers') . '</h2>';
 echo "<p>Found " . count($jury_members) . " jury members and " . count($candidates) . " candidates.</p>";
 
 // Check assignments
 $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
 
-echo "<h2>Assignment Analysis</h2>";
+echo '<h2>' . esc_html__('Assignment Analysis', 'mobility-trailblazers') . '</h2>';
 
 $missing_assignments = [];
 $total_assignments = 0;
@@ -66,12 +66,12 @@ foreach ($jury_members as $jury_member) {
     }
 }
 
-echo "<h2>Summary</h2>";
+echo '<h2>' . esc_html__('Summary', 'mobility-trailblazers') . '</h2>';
 echo "<p>Total assignments: " . $total_assignments . "</p>";
 echo "<p>Jury members without assignments: " . count($missing_assignments) . "</p>";
 
 // Check specific assignment mentioned in error log
-echo "<h2>Specific Assignment Check</h2>";
+echo '<h2>' . esc_html__('Specific Assignment Check', 'mobility-trailblazers') . '</h2>';
 $specific_jury_id = 1039;
 $specific_candidate_id = 997;
 
@@ -89,12 +89,12 @@ if (!$has_assignment) {
     echo "<p>Candidate 997 exists: " . ($candidate_exists ? "✅ Yes" : "❌ No") . "</p>";
     
     if ($jury_exists && $candidate_exists) {
-        echo "<h3>Fix Options</h3>";
+        echo '<h3>' . esc_html__('Fix Options', 'mobility-trailblazers') . '</h3>';
         echo "<form method='post'>";
         echo "<input type='hidden' name='action' value='create_assignment'>";
         echo "<input type='hidden' name='jury_id' value='$specific_jury_id'>";
         echo "<input type='hidden' name='candidate_id' value='$specific_candidate_id'>";
-        echo "<button type='submit' style='background: #0073aa; color: white; padding: 10px 20px; border: none; cursor: pointer;'>Create Assignment</button>";
+        echo "<button type='submit' style='background: #0073aa; color: white; padding: 10px 20px; border: none; cursor: pointer;'>" . esc_html__('Create Assignment', 'mobility-trailblazers') . "</button>";
         echo "</form>";
     }
 }
@@ -119,7 +119,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'create_assignment') {
 }
 
 // Show all assignments in database
-echo "<h2>All Assignments in Database</h2>";
+echo '<h2>' . esc_html__('All Assignments in Database', 'mobility-trailblazers') . '</h2>';
 global $wpdb;
 $assignments = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}mt_jury_assignments ORDER BY jury_member_id, candidate_id");
 
@@ -145,7 +145,7 @@ if ($assignments) {
     echo "<p>No assignments found in database.</p>";
 }
 
-echo "<h2>Database Table Info</h2>";
+echo '<h2>' . esc_html__('Database Table Info', 'mobility-trailblazers') . '</h2>';
 $table_name = $wpdb->prefix . 'mt_jury_assignments';
 $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
 
@@ -156,7 +156,7 @@ if ($table_exists) {
     
     // Show table structure
     $columns = $wpdb->get_results("DESCRIBE $table_name");
-    echo "<h3>Table Structure</h3>";
+    echo '<h3>' . esc_html__('Table Structure', 'mobility-trailblazers') . '</h3>';
     echo "<table border='1' style='border-collapse: collapse;'>";
     echo "<tr><th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th></tr>";
     foreach ($columns as $column) {

@@ -199,7 +199,7 @@ class MT_Admin {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="notice notice-error"><p>' . __('Dashboard template file not found.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Dashboard template file not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     
@@ -213,7 +213,7 @@ class MT_Admin {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="notice notice-error"><p>' . __('Candidates template file not found.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Candidates template file not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     
@@ -438,7 +438,7 @@ class MT_Admin {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="notice notice-error"><p>' . __('Error monitor template not found.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Error monitor template not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     
@@ -511,7 +511,7 @@ class MT_Admin {
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<p>' . __('Dashboard widget template not found.', 'mobility-trailblazers') . '</p>';
+            echo '<p>' . esc_html__('Dashboard widget template not found.', 'mobility-trailblazers') . '</p>';
         }
     }
     

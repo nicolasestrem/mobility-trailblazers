@@ -311,8 +311,8 @@ function generate_500_candidates() {
     $imported_count = 0;
     $errors = array();
     
-    echo "Starting generation of 500 Mobility Trailblazers candidates...\n";
-    echo "Distribution: 200 Established Companies, 200 Start-ups & New Makers, 100 Infrastructure/Politics/Public\n\n";
+    echo esc_html__('Starting generation of 500 Mobility Trailblazers candidates...', 'mobility-trailblazers') . "\n";
+    echo esc_html__('Distribution: 200 Established Companies, 200 Start-ups & New Makers, 100 Infrastructure/Politics/Public', 'mobility-trailblazers') . "\n\n";
     
     // Distribution: 200 established, 200 startups, 100 infrastructure
     $categories = array(
@@ -324,13 +324,13 @@ function generate_500_candidates() {
     $overall_index = 1;
     
     foreach ($categories as $category => $count) {
-        echo "Generating {$count} candidates for category: {$category}\n";
+        echo esc_html__('Generating ', 'mobility-trailblazers') . $count . esc_html__(' candidates for category: ', 'mobility-trailblazers') . $category . "\n";
         
         for ($i = 1; $i <= $count; $i++) {
             try {
                 $candidate = generate_candidate($category, $data_sets, $i);
                 
-                echo "Creating candidate {$overall_index}/500: {$candidate['name']} ({$candidate['company']})\n";
+                echo esc_html__('Creating candidate ', 'mobility-trailblazers') . $overall_index . esc_html__('/500: ', 'mobility-trailblazers') . $candidate['name'] . esc_html__(' (', 'mobility-trailblazers') . $candidate['company'] . esc_html__(')', 'mobility-trailblazers') . "\n";
                 
                 // Create WordPress post
                 $post_id = wp_insert_post(array(
@@ -396,40 +396,40 @@ function generate_500_candidates() {
                 
                 // Add small delay to prevent overwhelming the system
                 if ($overall_index % 50 == 0) {
-                    echo "  → Processed {$overall_index} candidates, taking a short break...\n";
+                    echo esc_html__('  → Processed ', 'mobility-trailblazers') . $overall_index . esc_html__(' candidates, taking a short break...', 'mobility-trailblazers') . "\n";
                     sleep(1);
                 }
                 
             } catch (Exception $e) {
-                $error_msg = "Error creating candidate {$overall_index}: " . $e->getMessage();
+                $error_msg = esc_html__('Error creating candidate ', 'mobility-trailblazers') . $overall_index . esc_html__(': ', 'mobility-trailblazers') . $e->getMessage();
                 $errors[] = $error_msg;
-                echo "  ✗ " . $error_msg . "\n";
+                echo esc_html__('  ✗ ', 'mobility-trailblazers') . $error_msg . "\n";
                 $overall_index++;
             }
         }
         
-        echo "Completed {$category}: {$count} candidates processed\n\n";
+        echo esc_html__('Completed ', 'mobility-trailblazers') . $category . esc_html__(': ', 'mobility-trailblazers') . $count . esc_html__(' candidates processed', 'mobility-trailblazers') . "\n\n";
     }
     
     // Generate summary statistics
-    echo "=== GENERATION SUMMARY ===\n";
-    echo "Total candidates processed: 500\n";
-    echo "Successfully created: {$imported_count}\n";
-    echo "Errors: " . count($errors) . "\n\n";
+    echo esc_html__('=== GENERATION SUMMARY ===', 'mobility-trailblazers') . "\n";
+    echo esc_html__('Total candidates processed: ', 'mobility-trailblazers') . 500 . "\n";
+    echo esc_html__('Successfully created: ', 'mobility-trailblazers') . $imported_count . "\n";
+    echo esc_html__('Errors: ', 'mobility-trailblazers') . count($errors) . "\n\n";
     
     if (!empty($errors)) {
-        echo "Errors encountered:\n";
+        echo esc_html__('Errors encountered:', 'mobility-trailblazers') . "\n";
         foreach (array_slice($errors, 0, 10) as $error) { // Show only first 10 errors
-            echo "- {$error}\n";
+            echo esc_html__('- ', 'mobility-trailblazers') . $error . "\n";
         }
         if (count($errors) > 10) {
-            echo "... and " . (count($errors) - 10) . " more errors\n";
+            echo esc_html__('... and ', 'mobility-trailblazers') . (count($errors) - 10) . esc_html__(' more errors', 'mobility-trailblazers') . "\n";
         }
         echo "\n";
     }
     
     // Verification
-    echo "=== VERIFICATION ===\n";
+    echo esc_html__('=== VERIFICATION ===', 'mobility-trailblazers') . "\n";
     
     // Count by category
     foreach ($categories as $category => $expected_count) {
@@ -445,12 +445,12 @@ function generate_500_candidates() {
                 )
             )
         ));
-        echo "Category '{$category}': " . count($actual_count) . " candidates\n";
+        echo esc_html__('Category ', 'mobility-trailblazers') . "'" . $category . "'" . esc_html__(': ', 'mobility-trailblazers') . count($actual_count) . esc_html__(' candidates', 'mobility-trailblazers') . "\n";
     }
     
     // Count by status
     $all_statuses = array('nominated', 'under-review', 'shortlisted', 'finalist', 'winner', 'not-selected');
-    echo "\nStatus distribution:\n";
+    echo "\n" . esc_html__('Status distribution:', 'mobility-trailblazers') . "\n";
     foreach ($all_statuses as $status) {
         $status_count = get_posts(array(
             'post_type' => 'mt_candidate',
@@ -464,31 +464,31 @@ function generate_500_candidates() {
                 )
             )
         ));
-        echo "Status '{$status}': " . count($status_count) . " candidates\n";
+        echo esc_html__('Status ', 'mobility-trailblazers') . "'" . $status . "'" . esc_html__(': ', 'mobility-trailblazers') . count($status_count) . esc_html__(' candidates', 'mobility-trailblazers') . "\n";
     }
     
     // Total verification
     $total_count = wp_count_posts('mt_candidate')->publish;
-    echo "\nTotal published candidates in database: {$total_count}\n";
+    echo "\n" . esc_html__('Total published candidates in database: ', 'mobility-trailblazers') . $total_count . "\n";
     
-    echo "\n=== NEXT STEPS ===\n";
-    echo "1. Visit WordPress admin to view candidates: MT Award System → Candidates\n";
-    echo "2. Test jury evaluation interface with generated candidates\n";
-    echo "3. Test public voting with shortcoded candidate displays\n";
-    echo "4. Verify all candidate metadata is properly displayed\n";
-    echo "5. Test filtering and search functionality\n";
+    echo "\n" . esc_html__('=== NEXT STEPS ===', 'mobility-trailblazers') . "\n";
+    echo esc_html__('1. Visit WordPress admin to view candidates: MT Award System → Candidates', 'mobility-trailblazers') . "\n";
+    echo esc_html__('2. Test jury evaluation interface with generated candidates', 'mobility-trailblazers') . "\n";
+    echo esc_html__('3. Test public voting with shortcoded candidate displays', 'mobility-trailblazers') . "\n";
+    echo esc_html__('4. Verify all candidate metadata is properly displayed', 'mobility-trailblazers') . "\n";
+    echo esc_html__('5. Test filtering and search functionality', 'mobility-trailblazers') . "\n";
     
-    echo "\nCandidate generation completed successfully!\n";
+    echo "\n" . esc_html__('Candidate generation completed successfully!', 'mobility-trailblazers') . "\n";
 }
 
 // Run the generation only if MT plugin is active
 if (!function_exists('wp_count_posts')) {
-    die("WordPress post functions not available. Please run this script through WP-CLI.\n");
+    die(esc_html__('WordPress post functions not available. Please run this script through WP-CLI.', 'mobility-trailblazers') . "\n");
 }
 
 // Check if Mobility Trailblazers plugin is active
 if (!post_type_exists('mt_candidate')) {
-    die("Mobility Trailblazers plugin not active or candidate post type not registered.\n");
+    die(esc_html__('Mobility Trailblazers plugin not active or candidate post type not registered.', 'mobility-trailblazers') . "\n");
 }
 
 generate_500_candidates();

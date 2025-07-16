@@ -18,7 +18,7 @@ if (!current_user_can('manage_options')) {
     die('Access denied. You must be an administrator.');
 }
 
-echo "<h1>Mobility Trailblazers Database Fix</h1>\n";
+echo '<h1>' . esc_html__('Mobility Trailblazers Database Fix', 'mobility-trailblazers') . '</h1>\n';
 
 // Check if plugin is active
 if (!defined('MT_VERSION')) {
@@ -28,7 +28,7 @@ if (!defined('MT_VERSION')) {
 echo "<p>Plugin version: " . MT_VERSION . "</p>\n";
 
 // Run database upgrade
-echo "<h2>Running Database Upgrade...</h2>\n";
+echo '<h2>' . esc_html__('Running Database Upgrade...', 'mobility-trailblazers') . '</h2>\n';
 
 try {
     // Force database upgrade
@@ -39,7 +39,7 @@ try {
 }
 
 // Check database tables
-echo "<h2>Checking Database Tables...</h2>\n";
+echo '<h2>' . esc_html__('Checking Database Tables...', 'mobility-trailblazers') . '</h2>\n';
 
 global $wpdb;
 
@@ -76,7 +76,7 @@ if ($assign_exists) {
 }
 
 // Test assignment repository
-echo "<h2>Testing Assignment Repository...</h2>\n";
+echo '<h2>' . esc_html__('Testing Assignment Repository...', 'mobility-trailblazers') . '</h2>\n';
 
 try {
     $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
@@ -87,7 +87,7 @@ try {
 }
 
 // Test assignment service
-echo "<h2>Testing Assignment Service...</h2>\n";
+echo '<h2>' . esc_html__('Testing Assignment Service...', 'mobility-trailblazers') . '</h2>\n';
 
 try {
     $assignment_service = new \MobilityTrailblazers\Services\MT_Assignment_Service();
@@ -104,8 +104,8 @@ try {
     echo "<p style='color: red;'>✗ Assignment service error: " . $e->getMessage() . "</p>\n";
 }
 
-echo "<h2>Database Fix Complete!</h2>\n";
-echo "<p>If you still see errors, try:</p>\n";
+echo '<h2>' . esc_html__('Database Fix Complete!', 'mobility-trailblazers') . '</h2>\n';
+echo '<p>' . esc_html__('If you still see errors, try:', 'mobility-trailblazers') . '</p>\n';
 echo "<ul>\n";
 echo "<li>Clear any caching plugins</li>\n";
 echo "<li>Deactivate and reactivate the plugin</li>\n";
