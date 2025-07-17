@@ -367,15 +367,16 @@ class MT_I18n {
     private function is_plugin_context() {
         // Check if we're on a plugin admin page
         if (is_admin()) {
-            $screen = get_current_screen();
-            if ($screen && (
-                strpos($screen->id, 'mobility-trailblazers') !== false ||
-                strpos($screen->id, 'mt-') !== false
-            )) {
-                return true;
+            if (function_exists('get_current_screen')) {
+                $screen = \get_current_screen();
+                if ($screen && (
+                    strpos($screen->id, 'mobility-trailblazers') !== false ||
+                    strpos($screen->id, 'mt-') !== false
+                )) {
+                    return true;
+                }
             }
         }
-        
         // Check if we're on a frontend page with our shortcodes
         if (!is_admin()) {
             global $post;
@@ -388,7 +389,6 @@ class MT_I18n {
                 return true;
             }
         }
-        
         return false;
     }
     
