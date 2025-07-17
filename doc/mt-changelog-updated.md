@@ -5,10 +5,59 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.13] - 2025-07-16
+## [2.0.13] - 2025-07-17
 
 ### Added
-- **Internationalization (i18n) Foundation**: Complete i18n infrastructure for future multilingual support
+- **📁 Project Organization**: Restructured Tech Stack folder for better organization and navigation
+- **📚 Documentation Update**: Comprehensive README update with clear folder structure and navigation guide
+- **🔧 Code Organization**: Better file structure and namespace consistency
+- **🧹 Cleanup**: Systematic file organization and removal of scattered files
+- **🗂️ Folder Structure**: Implemented logical hierarchy for all project files
+- **📋 Navigation Guide**: Created comprehensive project navigation documentation
+- **🚀 Version Management**: Clear versioning strategy with legacy version handling
+
+### Enhanced
+- **Project Structure**: Organized all files into logical categories
+  - Platform/ - All development files
+  - Documentation/ - All business and technical documentation
+  - Backups/ - Database backups organized by type
+  - Assets/ - Templates, configurations, and project assets
+  - Archive/ - Historical files
+- **Documentation Hierarchy**: Clear separation between plugin-specific and project-wide documentation
+- **Development Workflow**: Streamlined development process with clear file locations
+- **Version Control**: Better organization for version management and upgrades
+
+### Moved Files
+- **Documentation**: Moved all business docs to `Documentation/Project-Management/`
+- **Backups**: Moved all wpvivid backups to `Backups/Database/`
+- **Assets**: Moved configs and templates to `Assets/Templates/`
+- **Legacy Code**: Moved older versions to `Platform/legacy/`
+- **Infrastructure**: Moved Docker and git configs to `Platform/infrastructure/`
+
+### Created
+- **NAVIGATION.md**: Comprehensive project navigation guide
+- **New Folder Structure**: Organized hierarchy for all project files
+- **Documentation Folders**: Separate folders for different types of documentation
+- **Version Directories**: Clear separation of current and legacy versions
+
+### Technical Implementation
+- **File Organization**: Systematic approach to file placement and naming
+- **Path Updates**: Updated all references to new file locations
+- **Documentation Links**: Updated all documentation cross-references
+- **Version Tracking**: Clear version progression from v2.0.12 to v2.0.13
+
+### Benefits
+- **🎯 Better Navigation**: Easy to find any file or documentation
+- **🔧 Improved Development**: Clear separation of concerns
+- **📚 Enhanced Documentation**: Logical organization of all project docs
+- **🚀 Easier Maintenance**: Simplified backup and upgrade processes
+- **👥 Better Collaboration**: Clear structure for team members
+
+### Files Modified
+- `mobility-trailblazers.php` - Updated version number to 2.0.13
+- `README.md` - Complete rewrite with new folder structure and navigation
+- `NAVIGATION.md` - New comprehensive navigation guide (created)
+- `doc/mt-changelog-updated.md` - Updated changelog with v2.0.13 changes
   - **Enhanced Script Localization**: Comprehensive i18n arrays for both frontend and admin JavaScript
   - **PHP String Wrapping**: All user-facing strings wrapped with proper WordPress i18n functions
   - **JavaScript Localization**: Complete replacement of hardcoded strings with localized variables

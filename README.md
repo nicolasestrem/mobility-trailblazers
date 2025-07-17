@@ -1,6 +1,6 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.0.12
+**Version:** 2.0.13
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 **Last Updated:** July 2025
@@ -10,6 +10,34 @@ A modern WordPress plugin for managing mobility innovation awards in the DACH re
 ## 🎯 Overview
 
 Mobility Trailblazers is a complete award management solution designed for recognizing pioneers in mobility transformation. The platform focuses on jury-based evaluation with a streamlined, professional interface.
+
+## 📁 Project Structure
+
+```
+E:\OneDrive\CoWorkSpace\Tech Stack\
+├── 📁 Platform/
+│   ├── 📁 plugin/                       # Current active plugin
+│   │   └── 📁 mobility-trailblazers/    # Main plugin code
+│   │       ├── 📁 assets/               # CSS, JS, images
+│   │       ├── 📁 includes/             # PHP classes
+│   │       ├── 📁 templates/            # HTML templates
+│   │       ├── 📁 languages/            # Translation files
+│   │       ├── 📁 doc/                  # Plugin documentation
+│   │       ├── mobility-trailblazers.php # Main plugin file
+│   │       └── README.md                # This file
+│   ├── 📁 legacy/                       # Previous versions
+│   └── 📁 infrastructure/               # Docker, configs, keys
+├── 📁 Documentation/
+│   ├── 📁 Project-Management/           # Business docs, reports
+│   ├── 📁 Technical/                    # Architecture, guides
+│   └── 📁 User-Manual/                  # End-user documentation
+├── 📁 Backups/
+│   └── 📁 Database/                     # Database backups
+├── 📁 Assets/
+│   └── 📁 Templates/                    # Templates, configs
+├── 📁 Archive/                          # Historical files
+└── 📁 VPN/                              # VPN configurations
+```
 
 ## ✨ Key Features
 
@@ -22,7 +50,12 @@ Mobility Trailblazers is a complete award management solution designed for recog
 - **Modern Dashboard**: Responsive interface with 2x5 grid rankings display
 - **Inline Evaluation Controls**: Direct score adjustment without page navigation
 - **Real-time Rankings**: Dynamic rankings that update automatically
-- **5-Criteria Evaluation System**: Courage & Pioneer Spirit, Innovation Degree, Implementation & Impact, Mobility Transformation Relevance, Role Model & Visibility
+- **5-Criteria Evaluation System**: 
+  - Courage & Pioneer Spirit
+  - Innovation Degree
+  - Implementation & Impact
+  - Mobility Transformation Relevance
+  - Role Model & Visibility
 - **Progress Visualizations**: SVG-based circular progress indicators
 - **Draft Support**: Save evaluations as drafts before final submission
 - **Real-time Search**: Filter and find assigned candidates instantly
@@ -135,7 +168,13 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 
 ## 📝 Recent Updates
 
-### Version 2.0.11 (July 2025)
+### Version 2.0.13 (July 2025)
+- **📁 Project Organization**: Restructured Tech Stack folder for better organization
+- **📚 Documentation Update**: Improved README with clear folder structure
+- **🔧 Code Organization**: Better file structure and namespace consistency
+- **🧹 Cleanup**: Systematic file organization and improved project navigation
+
+### Version 2.0.12 (July 2025)
 - **2x5 Grid Layout System**: Responsive rankings display with inline evaluation controls
 - **Enhanced User Experience**: Direct score adjustment without page navigation
 - **Performance Optimization**: Improved efficiency and AJAX-powered updates
@@ -161,22 +200,50 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 - **[Rankings System](doc/jury-rankings-system.md)** - Rankings display system
 - **[Error Handling](doc/error-handling-system.md)** - Error management and logging
 
+### Project Documentation
+Located in `../../Documentation/`:
+- **Project-Management/**: Business documentation, reports, progress tracking
+- **Technical/**: Technical guides, implementation details
+- **User-Manual/**: End-user documentation and guides
+
 ### Documentation Hierarchy
 ```
 README.md (Overview & Quick Start)
 ├── Developer Guide (Development & Troubleshooting)
 ├── Architecture Docs (Technical Details & Security)
 ├── Customization Guide (UI Customization)
-└── Feature Docs (Implementation Specifics)
+├── Feature Docs (Implementation Specifics)
+└── Project Docs (Business & Management)
 ```
+
+## 🚀 Development Workflow
+
+### Working with Current Plugin
+1. **Main development** happens in `Platform/plugin/mobility-trailblazers/`
+2. **Documentation** is in both local `doc/` and project-wide `Documentation/`
+3. **Testing** using local WordPress setup or staging environment
+4. **Version control** with Git in the main plugin directory
+
+### File Locations
+- **Plugin Code**: `Platform/plugin/mobility-trailblazers/`
+- **Documentation**: `Documentation/` (project-wide) and `doc/` (plugin-specific)
+- **Backups**: `Backups/Database/`
+- **Assets**: `Assets/Templates/`
+- **Legacy Code**: `Platform/legacy/`
 
 ## 🤝 Support
 
 ### Getting Help
-1. Check documentation in `/doc/` folder
-2. Use Diagnostics page for system health checks
-3. Review WordPress debug logs for errors
-4. Include WordPress/PHP versions when reporting issues
+1. Check documentation in `/doc/` folder (plugin-specific)
+2. Review project documentation in `../../Documentation/` folder
+3. Use Diagnostics page for system health checks
+4. Review WordPress debug logs for errors
+5. Include WordPress/PHP versions when reporting issues
+
+### Development Support
+- **Setup Guide**: See [Developer Guide](doc/mt-developer-guide.md)
+- **Architecture**: See [Architecture Documentation](doc/mt-architecture-docs.md)
+- **Troubleshooting**: Common issues and solutions in documentation
 
 ## 📄 License
 
@@ -184,7 +251,7 @@ GPL v2 or later
 
 ## 🚀 Development Status
 
-**Current Version: 2.0.11** - Production-ready with active development
+**Current Version: 2.0.13** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -192,4 +259,4 @@ GPL v2 or later
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: July 2025 | Version 2.0.11*
+*Last updated: July 2025 | Version 2.0.13*
