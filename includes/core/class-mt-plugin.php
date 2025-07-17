@@ -53,6 +53,14 @@ class MT_Plugin {
      * @return void
      */
     public function init() {
+        // Initialize i18n first
+        $i18n = new MT_I18n();
+        $i18n->init();
+        
+        // Initialize language switcher widget
+        $language_switcher = new \MobilityTrailblazers\Widgets\MT_Language_Switcher();
+        $language_switcher->init();
+        
         // Check for database upgrades
         MT_Database_Upgrade::run();
         
@@ -235,6 +243,15 @@ class MT_Plugin {
             'mt-admin',
             MT_PLUGIN_URL . 'assets/js/admin.js',
             ['jquery', 'wp-util'],
+            MT_VERSION,
+            true
+        );
+        
+        // I18n admin script
+        wp_enqueue_script(
+            'mt-i18n-admin',
+            MT_PLUGIN_URL . 'assets/js/i18n-admin.js',
+            ['jquery', 'mt-admin'],
             MT_VERSION,
             true
         );
