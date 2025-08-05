@@ -148,6 +148,46 @@ class MT_Admin {
                 'mt-error-monitor',
                 [$this, 'render_error_monitor_page']
             );
+            
+            // Profile Migration submenu
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Migrate Profiles', 'mobility-trailblazers'),
+                __('Migrate Profiles', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-migrate-profiles',
+                [$this, 'render_migrate_profiles_page']
+            );
+            
+            // Test Profile System (temporary)
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Test Profile System', 'mobility-trailblazers'),
+                __('Test Profile System', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-test-profiles',
+                [$this, 'render_test_profiles_page']
+            );
+            
+            // Generate Sample Profiles
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Generate Samples', 'mobility-trailblazers'),
+                __('Generate Samples', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-generate-samples',
+                [$this, 'render_generate_samples_page']
+            );
+            
+            // Import Profiles
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Import Profiles', 'mobility-trailblazers'),
+                __('Import Profiles', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-import-profiles',
+                [$this, 'render_import_profiles_page']
+            );
         }
     }
     
@@ -406,6 +446,46 @@ class MT_Admin {
         include MT_PLUGIN_DIR . 'templates/admin/diagnostics.php';
     }
 
+    /**
+     * Render migrate profiles page
+     *
+     * @return void
+     */
+    public function render_migrate_profiles_page() {
+        // Include the migration script
+        include MT_PLUGIN_DIR . 'debug/migrate-candidate-profiles.php';
+    }
+    
+    /**
+     * Render test profiles page
+     *
+     * @return void
+     */
+    public function render_test_profiles_page() {
+        // Include the test script
+        include MT_PLUGIN_DIR . 'debug/test-profile-system.php';
+    }
+    
+    /**
+     * Render generate samples page
+     *
+     * @return void
+     */
+    public function render_generate_samples_page() {
+        // Include the sample generator script
+        include MT_PLUGIN_DIR . 'debug/generate-sample-profiles.php';
+    }
+    
+    /**
+     * Render import profiles page
+     *
+     * @return void
+     */
+    public function render_import_profiles_page() {
+        // Include the import script
+        include MT_PLUGIN_DIR . 'debug/import-profiles.php';
+    }
+    
     /**
      * Render error monitor page
      *
