@@ -1,4 +1,8 @@
 <?php
+// Security check - CLI only
+if (php_sapi_name() !== 'cli') {
+    die('This script can only be run from the command line.');
+}
 /**
  * Migrate Candidate Profiles
  * 
@@ -138,16 +142,28 @@ if (isset($_GET['page']) && $_GET['page'] === 'mt-migrate-profiles' && isset($_G
         </div>
         
         <p>
-            <a href="<?php echo admin_url('admin.php?page=mt-migrate-profiles&run=true'); ?>" 
+            <a href="<?php
+// Security check - CLI only
+if (php_sapi_name() !== 'cli') {
+    die('This script can only be run from the command line.');
+} echo admin_url('admin.php?page=mt-migrate-profiles&run=true'); ?>" 
                class="button button-primary"
                onclick="return confirm('Are you ready to run the migration? Make sure you have a backup first.');">
                 Run Migration
             </a>
-            <a href="<?php echo admin_url('edit.php?post_type=mt_candidate'); ?>" class="button">
+            <a href="<?php
+// Security check - CLI only
+if (php_sapi_name() !== 'cli') {
+    die('This script can only be run from the command line.');
+} echo admin_url('edit.php?post_type=mt_candidate'); ?>" class="button">
                 Cancel
             </a>
         </p>
     </div>
     <?php
+// Security check - CLI only
+if (php_sapi_name() !== 'cli') {
+    die('This script can only be run from the command line.');
+}
 }
 ?>

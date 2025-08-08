@@ -79,6 +79,7 @@ $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Reposito
                     <?php endforeach; ?>
                 </select>
                 
+                <?php wp_nonce_field('mt_filter_candidates', 'mt_filter_nonce'); ?>
                 <select name="status" id="filter-by-status">
                     <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
                     <option value="publish" <?php selected(isset($_GET['status']) ? $_GET['status'] : '', 'publish'); ?>><?php _e('Published', 'mobility-trailblazers'); ?></option>
@@ -173,7 +174,7 @@ $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Reposito
                     ?>
                     <tr>
                         <th scope="row" class="check-column">
-                            <input type="checkbox" class="candidate-checkbox" name="candidate[]" value="<?php echo $candidate_id; ?>" style="display: none;">
+                            <input type="checkbox" class="candidate-checkbox" name="candidate[]" value="<?php echo esc_attr($candidate_id); ?>" style="display: none;">
                         </th>
                         <td class="title column-title column-primary">
                             <strong>
@@ -209,7 +210,7 @@ $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Reposito
                                 default:
                                     $status_label = '<span class="status-badge">' . ucfirst($status) . '</span>';
                             }
-                            echo $status_label;
+                            echo esc_html($status_label);
                             ?>
                         </td>
                         <td>
@@ -222,7 +223,7 @@ $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Reposito
                         <td>
                             <?php if ($eval_count > 0): ?>
                                 <a href="<?php echo admin_url('admin.php?page=mt-evaluations&candidate_id=' . $candidate_id); ?>">
-                                    <?php echo $eval_count; ?>
+                                    <?php echo esc_html($eval_count); ?>
                                 </a>
                             <?php else: ?>
                                 0

@@ -1,4 +1,9 @@
 <?php
+// Security check
+if (!defined('ABSPATH')) {
+    die('Direct access forbidden.');
+}
+
 /**
  * Jury Member Lookup Test
  * 

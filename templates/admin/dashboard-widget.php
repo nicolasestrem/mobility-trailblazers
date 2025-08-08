@@ -36,15 +36,15 @@ $recent_jury = get_posts(array(
 <div class="mt-dashboard-widget">
     <div class="mt-stats-grid">
         <div class="mt-stat-card">
-            <h3><?php echo $candidate_count; ?></h3>
+            <h3><?php echo esc_html($candidate_count); ?></h3>
             <p><?php _e('Candidates', 'mobility-trailblazers'); ?></p>
         </div>
         <div class="mt-stat-card">
-            <h3><?php echo $jury_count; ?></h3>
+            <h3><?php echo esc_html($jury_count); ?></h3>
             <p><?php _e('Jury Members', 'mobility-trailblazers'); ?></p>
         </div>
         <div class="mt-stat-card">
-            <h3><?php echo $evaluation_count; ?></h3>
+            <h3><?php echo esc_html($evaluation_count); ?></h3>
             <p><?php _e('Evaluations', 'mobility-trailblazers'); ?></p>
         </div>
     </div>

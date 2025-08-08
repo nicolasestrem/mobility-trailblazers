@@ -378,8 +378,8 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                         <td><?php echo esc_html($name); ?></td>
                         <td><code><?php echo esc_html($info['table_name']); ?></code></td>
                         <td>
-                            <span style="color: <?php echo $info['exists'] ? 'green' : 'red'; ?>;">
-                                <?php echo $info['exists'] ? '✓' : '✗'; ?>
+                            <span style="color: <?php echo esc_attr($info['exists'] ? 'green' : 'red'); ?>;">
+                                <?php echo esc_html($info['exists'] ? '✓' : '✗'); ?>
                             </span>
                         </td>
                         <td><?php echo intval($info['row_count']); ?></td>
@@ -409,8 +409,8 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                     <tr>
                         <td><code><?php echo esc_html($post_type); ?></code></td>
                         <td>
-                            <span style="color: <?php echo $info['registered'] ? 'green' : 'red'; ?>;">
-                                <?php echo $info['registered'] ? '✓' : '✗'; ?>
+                            <span style="color: <?php echo esc_attr($info['registered'] ? 'green' : 'red'); ?>;">
+                                <?php echo esc_html($info['registered'] ? '✓' : '✗'); ?>
                             </span>
                         </td>
                         <td><?php echo intval($info['published']); ?></td>
@@ -435,8 +435,8 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                     <tr>
                         <td><code><?php echo esc_html($taxonomy); ?></code></td>
                         <td>
-                            <span style="color: <?php echo $info['registered'] ? 'green' : 'red'; ?>;">
-                                <?php echo $info['registered'] ? '✓' : '✗'; ?>
+                            <span style="color: <?php echo esc_attr($info['registered'] ? 'green' : 'red'); ?>;">
+                                <?php echo esc_html($info['registered'] ? '✓' : '✗'); ?>
                             </span>
                         </td>
                         <td><?php echo intval($info['term_count']); ?></td>
@@ -469,8 +469,8 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                     <tr>
                         <th><code><?php echo esc_html($cap); ?></code></th>
                         <td>
-                            <span style="color: <?php echo $has_cap ? 'green' : 'red'; ?>;">
-                                <?php echo $has_cap ? '✓' : '✗'; ?>
+                            <span style="color: <?php echo esc_attr($has_cap ? 'green' : 'red'); ?>;">
+                                <?php echo esc_html($has_cap ? '✓' : '✗'); ?>
                             </span>
                         </td>
                     </tr>
@@ -533,24 +533,24 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                 <tr>
                     <th><?php _e('Debug Mode', 'mobility-trailblazers'); ?></th>
                     <td>
-                        <span style="color: <?php echo $diagnostics['errors']['debug_enabled'] ? 'green' : 'red'; ?>;">
-                            <?php echo $diagnostics['errors']['debug_enabled'] ? __('Enabled', 'mobility-trailblazers') : __('Disabled', 'mobility-trailblazers'); ?>
+                        <span style="color: <?php echo esc_attr($diagnostics['errors']['debug_enabled'] ? 'green' : 'red'); ?>;">
+                            <?php echo esc_html($diagnostics['errors']['debug_enabled'] ? __('Enabled', 'mobility-trailblazers') : __('Disabled', 'mobility-trailblazers')); ?>
                         </span>
                     </td>
                 </tr>
                 <tr>
                     <th><?php _e('Debug Log', 'mobility-trailblazers'); ?></th>
                     <td>
-                        <span style="color: <?php echo $diagnostics['errors']['debug_log_enabled'] ? 'green' : 'red'; ?>;">
-                            <?php echo $diagnostics['errors']['debug_log_enabled'] ? __('Enabled', 'mobility-trailblazers') : __('Disabled', 'mobility-trailblazers'); ?>
+                        <span style="color: <?php echo esc_attr($diagnostics['errors']['debug_log_enabled'] ? 'green' : 'red'); ?>;">
+                            <?php echo esc_html($diagnostics['errors']['debug_log_enabled'] ? __('Enabled', 'mobility-trailblazers') : __('Disabled', 'mobility-trailblazers')); ?>
                         </span>
                     </td>
                 </tr>
                 <tr>
                     <th><?php _e('Error Log File', 'mobility-trailblazers'); ?></th>
                     <td>
-                        <span style="color: <?php echo $diagnostics['errors']['error_log_exists'] ? 'green' : 'red'; ?>;">
-                            <?php echo $diagnostics['errors']['error_log_exists'] ? __('Exists', 'mobility-trailblazers') : __('Not Found', 'mobility-trailblazers'); ?>
+                        <span style="color: <?php echo esc_attr($diagnostics['errors']['error_log_exists'] ? 'green' : 'red'); ?>;">
+                            <?php echo esc_html($diagnostics['errors']['error_log_exists'] ? __('Exists', 'mobility-trailblazers') : __('Not Found', 'mobility-trailblazers')); ?>
                         </span>
                     </td>
                 </tr>
