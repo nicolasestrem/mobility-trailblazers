@@ -1,0 +1,29 @@
+{
+  // PHP Validation Settings for Docker Environment
+  "php.validate.enable": false,
+  
+  // Alternative: If you install PHP locally for IntelliSense
+  // "php.validate.executablePath": "C:\\path\\to\\php.exe",
+  
+  // PHP IntelliSense Extension Settings (if using)
+  "php.suggest.basic": false,
+  
+  // Files to exclude from VS Code
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/vendor": true
+  },
+  
+  // Docker-specific settings
+  "remote.containers.defaultExtensions": [
+    "bmewburn.vscode-intelephense-client",
+    "felixfbecker.php-debug"
+  ],
+  
+  // Format on save
+  "editor.formatOnSave": true,
+  "[php]": {
+    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+  }
+}

@@ -9,8 +9,19 @@
     "vscode": {
       "extensions": [
         "bmewburn.vscode-intelephense-client",
-        "xdebug.php-debug"
-      ]
+        "xdebug.php-debug",
+        "wordpresstoolbox.wordpress-toolbox",
+        "johnbillion.vscode-wordpress-hooks"
+      ],
+      "settings": {
+        "php.validate.enable": true,
+        "php.validate.executablePath": "/usr/local/bin/php",
+        "intelephense.environment.phpVersion": "8.2.0",
+        "intelephense.environment.includePaths": [
+          "/var/www/html"
+        ]
+      }
     }
-  }
+  },
+  "postCreateCommand": "cd /var/www/html && wp --allow-root plugin activate mobility-trailblazers || true"
 }
