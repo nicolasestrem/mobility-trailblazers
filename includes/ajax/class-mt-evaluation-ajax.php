@@ -50,8 +50,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function submit_evaluation() {
-        $this->verify_nonce();
-        $this->check_permission('mt_submit_evaluations');
+        // Verify nonce with proper error handling
+        if (!$this->verify_nonce()) {
+            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!$this->check_permission('mt_submit_evaluations')) {
+            wp_send_json_error(__('You do not have permission to submit evaluations.', 'mobility-trailblazers'));
+            return;
+        }
         
         // Debug: Log raw POST data
         error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
@@ -142,8 +151,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function save_draft() {
-        $this->verify_nonce();
-        $this->check_permission('mt_submit_evaluations');
+        // Verify nonce with proper error handling
+        if (!$this->verify_nonce()) {
+            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!$this->check_permission('mt_submit_evaluations')) {
+            wp_send_json_error(__('You do not have permission to save drafts.', 'mobility-trailblazers'));
+            return;
+        }
         
         // Get current user as jury member
         $current_user_id = get_current_user_id();
@@ -205,8 +223,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function get_evaluation() {
-        $this->verify_nonce();
-        $this->check_permission('mt_submit_evaluations');
+        // Verify nonce with proper error handling
+        if (!$this->verify_nonce()) {
+            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!$this->check_permission('mt_submit_evaluations')) {
+            wp_send_json_error(__('You do not have permission to view evaluations.', 'mobility-trailblazers'));
+            return;
+        }
         
         $candidate_id = $this->get_int_param('candidate_id');
         if (!$candidate_id) {
@@ -243,8 +270,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function get_candidate_details() {
-        $this->verify_nonce();
-        $this->check_permission('mt_submit_evaluations');
+        // Verify nonce with proper error handling
+        if (!$this->verify_nonce()) {
+            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!$this->check_permission('mt_submit_evaluations')) {
+            wp_send_json_error(__('You do not have permission to view candidate details.', 'mobility-trailblazers'));
+            return;
+        }
         
         $candidate_id = $this->get_int_param('candidate_id');
         if (!$candidate_id) {
@@ -291,8 +327,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function get_jury_progress() {
-        $this->verify_nonce();
-        $this->check_permission('mt_submit_evaluations');
+        // Verify nonce with proper error handling
+        if (!$this->verify_nonce()) {
+            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!$this->check_permission('mt_submit_evaluations')) {
+            wp_send_json_error(__('You do not have permission to view progress.', 'mobility-trailblazers'));
+            return;
+        }
         
         // Get current user as jury member
         $current_user_id = get_current_user_id();

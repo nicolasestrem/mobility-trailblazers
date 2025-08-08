@@ -265,14 +265,20 @@ class MT_Admin {
     public function render_evaluations_page() {
         // Check if viewing single evaluation
         if (isset($_GET['evaluation_id'])) {
-            $this->render_single_evaluation();
+            $evaluation_id = absint($_GET['evaluation_id']);
+            if ($evaluation_id > 0) {
+                $this->render_single_evaluation($evaluation_id);
+            } else {
+                wp_die(__('Invalid evaluation ID.', 'mobility-trailblazers'));
+            }
             return;
         }
         
         // Get evaluations
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         
-        $page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $page = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+        $page = max(1, $page);
         $per_page = 20;
         $offset = ($page - 1) * $per_page;
         
@@ -310,8 +316,14 @@ class MT_Admin {
      *
      * @return void
      */
-    private function render_single_evaluation() {
-        $evaluation_id = intval($_GET['evaluation_id']);
+    private function render_single_evaluation($evaluation_id = null) {
+        if ($evaluation_id === null) {
+            $evaluation_id = isset($_GET['evaluation_id']) ? absint($_GET['evaluation_id']) : 0;
+        }
+        
+        if (!$evaluation_id) {
+            wp_die(__('Invalid evaluation ID.', 'mobility-trailblazers'));
+        }
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         $evaluation = $evaluation_repo->find($evaluation_id);
         

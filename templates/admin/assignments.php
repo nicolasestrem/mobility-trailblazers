@@ -67,25 +67,28 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
 }
 ?>
 
-<!-- Debug Section -->
+<?php if (defined('WP_DEBUG') && WP_DEBUG) : ?>
+<!-- Debug Section (Development Only) -->
 <div style="background: #f0f0f0; padding: 10px; margin: 20px 0; border: 1px solid #ccc;">
     <h3>Debug Information</h3>
     <p>Page: <?php echo esc_html($_GET['page'] ?? 'unknown'); ?></p>
     <p>Current User Can Manage: <?php echo current_user_can('manage_options') ? 'Yes' : 'No'; ?></p>
-    <p>AJAX URL: <?php echo admin_url('admin-ajax.php'); ?></p>
-    <p>Nonce: <?php echo wp_create_nonce('mt_admin_nonce'); ?></p>
+    <p>AJAX URL: <?php echo esc_url(admin_url('admin-ajax.php')); ?></p>
+    <p>Nonce: <?php echo esc_attr(wp_create_nonce('mt_admin_nonce')); ?></p>
     <button onclick="testAjax()">Test AJAX</button>
 </div>
+<?php endif; ?>
 
 <script>
 function testAjax() {
+    if (!confirm('This is a debug function. Continue?')) return;
     console.log('Testing AJAX...');
     jQuery.ajax({
-        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+        url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
         type: 'POST',
         data: {
             action: 'mt_auto_assign',
-            nonce: '<?php echo wp_create_nonce('mt_admin_nonce'); ?>',
+            nonce: '<?php echo esc_js(wp_create_nonce('mt_admin_nonce')); ?>',
             method: 'balanced',
             candidates_per_jury: 5
         },

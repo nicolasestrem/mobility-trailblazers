@@ -35,7 +35,7 @@ if (!defined('ABSPATH')) {
             <p><?php _e('Drafts', 'mobility-trailblazers'); ?></p>
         </div>
         <div class="mt-stat-box">
-            <h3><?php echo number_format($eval_stats['average_score'], 1); ?></h3>
+            <h3><?php echo esc_html(number_format($eval_stats['average_score'], 1)); ?></h3>
             <p><?php _e('Average Score', 'mobility-trailblazers'); ?></p>
         </div>
     </div>
@@ -122,11 +122,11 @@ jQuery(document).ready(function($) {
             datasets: [{
                 label: '<?php _e("Average Score", "mobility-trailblazers"); ?>',
                 data: [
-                    <?php echo $eval_stats['by_criteria']['courage']; ?>,
-                    <?php echo $eval_stats['by_criteria']['innovation']; ?>,
-                    <?php echo $eval_stats['by_criteria']['implementation']; ?>,
-                    <?php echo $eval_stats['by_criteria']['relevance']; ?>,
-                    <?php echo $eval_stats['by_criteria']['visibility']; ?>
+                    <?php echo esc_js($eval_stats['by_criteria']['courage']); ?>,
+                    <?php echo esc_js($eval_stats['by_criteria']['innovation']); ?>,
+                    <?php echo esc_js($eval_stats['by_criteria']['implementation']); ?>,
+                    <?php echo esc_js($eval_stats['by_criteria']['relevance']); ?>,
+                    <?php echo esc_js($eval_stats['by_criteria']['visibility']); ?>
                 ],
                 backgroundColor: 'rgba(102, 126, 234, 0.5)',
                 borderColor: 'rgba(102, 126, 234, 1)',

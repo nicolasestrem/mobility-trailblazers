@@ -1,0 +1,49 @@
+{
+    "name": "mobility-trailblazers/wordpress-plugin",
+    "description": "Award management platform for recognizing mobility innovators in the DACH region",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Nicolas Estrem",
+            "email": "contact@mobility-trailblazers.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7",
+        "wp-coding-standards/wpcs": "^3.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "install-codestandards": [
+            "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
+        ],
+        "security-scan": [
+            "@php ./vendor/bin/phpcs --standard=WordPress-Security --severity=5 --extensions=php --report=full ."
+        ],
+        "security-scan-summary": [
+            "@php ./vendor/bin/phpcs --standard=WordPress-Security --extensions=php --report=summary ."
+        ],
+        "check-nonce": [
+            "@php ./vendor/bin/phpcs --standard=WordPress-Security --sniffs=WordPress.Security.NonceVerification --extensions=php ."
+        ],
+        "check-escaping": [
+            "@php ./vendor/bin/phpcs --standard=WordPress-Security --sniffs=WordPress.Security.EscapeOutput --extensions=php ."
+        ],
+        "check-sql": [
+            "@php ./vendor/bin/phpcs --standard=WordPress-Security --sniffs=WordPress.DB.PreparedSQL --extensions=php ."
+        ],
+        "fix-security": [
+            "@php ./vendor/bin/phpcbf --standard=WordPress-Security --extensions=php ."
+        ]
+    }
+}
