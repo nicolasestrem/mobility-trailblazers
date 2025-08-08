@@ -1,0 +1,16 @@
+{
+  "name": "Mobility Trailblazers Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "wordpress",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [8080, 8081, 3306, 6379],
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug"
+      ]
+    }
+  }
+}
