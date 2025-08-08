@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   wordpress:
-    image: wordpress:php8.2-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: wordpress:php8.2-apache
     container_name: mobility_wordpress_dev
     restart: unless-stopped
     ports:

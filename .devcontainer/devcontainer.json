@@ -10,8 +10,7 @@
       "extensions": [
         "bmewburn.vscode-intelephense-client",
         "xdebug.php-debug",
-        "wordpresstoolbox.wordpress-toolbox",
-        "johnbillion.vscode-wordpress-hooks"
+        "wordpresstoolbox.wordpress-toolbox"
       ],
       "settings": {
         "php.validate.enable": true,
@@ -19,9 +18,11 @@
         "intelephense.environment.phpVersion": "8.2.0",
         "intelephense.environment.includePaths": [
           "/var/www/html"
-        ]
+        ],
+        "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
-  "postCreateCommand": "cd /var/www/html && wp --allow-root plugin activate mobility-trailblazers || true"
+  "postCreateCommand": "git --version && echo 'Container ready!'",
+  "remoteUser": "root"
 }
