@@ -5,6 +5,51 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.14] - 2025-08-08
+
+### Fixed
+- **Assignment Management Page Color Scheme**: Resolved visibility and contrast issues
+  - Fixed dark teal backgrounds causing poor text readability
+  - Updated statistics cards to use white backgrounds with accent borders
+  - Improved status badges with accessible color combinations
+  - Enhanced table styling with proper contrast ratios
+  - Fixed modal and form element styling for consistency
+
+### Enhanced
+- **Admin Interface Consistency**: Unified color scheme across all admin pages
+  - Statistics cards now use consistent white backgrounds
+  - Icons use secondary color (deep blue) for better visibility
+  - Progress bars use brand gradient for visual consistency
+  - Status indicators use accessible color combinations (yellow/green with dark text)
+  - Form elements properly styled with brand colors
+
+### Technical Implementation
+- **CSS Improvements**: Added 250+ lines of targeted CSS for Assignment Management
+  - Specific styles for `.mt-stats-dashboard` grid layout
+  - Enhanced `.mt-action-bar` and `.mt-filters` sections
+  - Improved `.mt-assignments-table` with proper contrast
+  - Updated modal styles (`.mt-modal-content`) for consistency
+  - Responsive design improvements for mobile devices
+
+### Color Accessibility
+- **WCAG Compliance**: All color combinations now meet WCAG AA standards
+  - White backgrounds with dark text for main content
+  - Dark headers with white text for proper contrast
+  - Status badges use high-contrast color combinations
+  - Interactive elements have clear hover states
+
+### Files Modified
+- `assets/css/admin.css` - Added Assignment Management specific styles
+- `doc/mt-changelog-updated.md` - Updated changelog with v2.0.14 changes
+- `doc/color-scheme-implementation.md` - Updated color implementation documentation
+
+### Benefits
+- **Improved Readability**: Clear contrast between text and backgrounds
+- **Brand Consistency**: Proper use of brand colors throughout the interface
+- **Better UX**: Visual hierarchy guides users through the interface
+- **Accessibility**: Meets web accessibility standards for color contrast
+- **Professional Appearance**: Clean, modern design that maintains branding
+
 ## [2.0.13] - 2025-07-17
 
 ### Added

@@ -68,6 +68,12 @@ The CSS has been carefully crafted to:
 4. **Buttons**: Primary (accent color) and secondary (deep blue) buttons
 5. **Forms**: Input fields with blue accent borders
 6. **Status Badges**: Color-coded status indicators
+7. **Assignment Management Page** (v2.0.14):
+   - White background statistics cards with accent borders
+   - Icons in secondary color for visibility
+   - Accessible status badges with proper contrast
+   - Gradient progress bars using brand colors
+   - Clean modal designs with consistent styling
 
 ### Frontend Display
 1. **Candidate Cards**: Headers use a gradient from primary to secondary
@@ -115,6 +121,16 @@ To modify colors in the future:
 
 - **Admin Styles**: `/assets/css/admin.css`
 - **Frontend Styles**: `/assets/css/frontend.css`
+
+## Recent Updates
+
+### Version 2.0.14 (August 2025)
+- **Assignment Management Page Fix**: Resolved visibility issues caused by dark teal backgrounds
+- **Statistics Cards**: Changed from dark backgrounds to white with accent borders
+- **Status Badges**: Updated to use accessible color combinations
+- **Table Improvements**: Enhanced contrast for better readability
+- **Modal Styling**: Consistent white backgrounds with brand color accents
+- **Progress Bars**: Now use brand gradient for visual consistency
 
 ## Browser Support
 

@@ -474,13 +474,264 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
+/* Assignment Management Page Specific Styles */
+.mt-stats-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mt-stats-dashboard .mt-stat-card {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.mt-stats-dashboard .mt-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--mt-secondary);
+}
+
+.mt-stat-card .mt-stat-icon {
+    font-size: 32px;
+    color: var(--mt-secondary);
+    margin-bottom: 10px;
+}
+
+.mt-stat-card .mt-stat-icon .dashicons {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+}
+
+.mt-stat-card .mt-stat-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: var(--mt-body-text);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mt-stat-card .mt-stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--mt-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+/* Action Bar */
+.mt-action-bar {
+    background: var(--mt-bg-base);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--mt-blue-accent);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mt-action-bar .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mt-action-bar .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Filters Section */
+.mt-filters {
+    background: var(--mt-bg-base);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--mt-blue-accent);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mt-search-box {
+    flex: 1;
+    min-width: 200px;
+}
+
+.mt-search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 4px;
+    background: var(--mt-bg-base);
+    color: var(--mt-body-text);
+}
+
+.mt-filter-group {
+    display: flex;
+    gap: 10px;
+}
+
+.mt-filter-group select {
+    padding: 8px 12px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 4px;
+    background: var(--mt-bg-base);
+    color: var(--mt-body-text);
+}
+
+/* Bulk Actions */
+.mt-bulk-actions {
+    background: #fff8dc;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid var(--mt-kupfer-soft);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Assignments Table */
+.mt-assignments-table {
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+}
+
+.mt-assignments-table thead th {
+    background: var(--mt-primary);
+    color: white;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.mt-assignments-table tbody tr {
+    background: var(--mt-bg-base);
+}
+
+.mt-assignments-table tbody tr:hover {
+    background: rgba(164, 220, 213, 0.1);
+}
+
+.mt-assignments-table tbody td {
+    color: var(--mt-body-text);
+    padding: 12px;
+}
+
+/* Progress Bar in Table */
+.mt-assignments-table .mt-progress-bar {
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    display: inline-block;
+    width: 100px;
+    margin-right: 10px;
+}
+
+.mt-assignments-table .mt-progress-fill {
+    background: linear-gradient(90deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.mt-progress-text {
+    font-size: 12px;
+    color: var(--mt-body-text);
+    font-weight: 600;
+}
+
+/* Status Badge Updates */
+.mt-status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+
+.mt-status-completed {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #28a745;
+}
+
+/* Modal Updates */
+.mt-modal-content {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-secondary);
+}
+
+.mt-modal-content h2 {
+    color: var(--mt-primary);
+    border-bottom: 2px solid var(--mt-blue-accent);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.mt-form-group {
+    margin-bottom: 20px;
+}
+
+.mt-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--mt-body-text);
+}
+
+.mt-form-group .description {
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.mt-candidates-checklist {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--mt-blue-accent);
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.mt-candidate-checkbox {
+    display: block;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.mt-candidate-checkbox:hover {
+    background: rgba(164, 220, 213, 0.2);
+}
+
+.mt-modal-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--mt-blue-accent);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
 /* Responsive */
 @media screen and (max-width: 782px) {
     .mt-container {
         padding: 10px;
     }
     
-    .mt-stats-row {
+    .mt-stats-row,
+    .mt-stats-dashboard {
         grid-template-columns: 1fr;
     }
     
@@ -494,5 +745,15 @@
     
     .mt-assignment-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .mt-action-bar,
+    .mt-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .mt-search-box {
+        width: 100%;
     }
 } 
