@@ -1,9 +1,9 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.0.13
+**Version:** 2.2.0
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
-**Last Updated:** July 2025
+**Last Updated:** August 2025
 
 A modern WordPress plugin for managing mobility innovation awards in the DACH region. This platform enables jury members to evaluate candidates through a sophisticated scoring system while providing administrators with powerful management tools.
 
@@ -168,6 +168,12 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 
 ## 📝 Recent Updates
 
+### Version 2.2.0 (August 2025)
+- **Enhanced CSV Import System**: Complete bulk import functionality with intelligent field mapping
+- **Bilingual Support**: Automatic recognition of English and German CSV headers
+- **Import Validation**: Dry-run mode, URL validation, and duplicate detection
+- **CSV Formatter Tool**: Standalone utility for data preparation
+
 ### Version 2.0.13 (July 2025)
 - **📁 Project Organization**: Restructured Tech Stack folder for better organization
 - **📚 Documentation Update**: Improved README with clear folder structure
@@ -251,7 +257,7 @@ GPL v2 or later
 
 ## 🚀 Development Status
 
-**Current Version: 2.0.13** - Production-ready with active development
+**Current Version: 2.2.0** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -259,4 +265,4 @@ GPL v2 or later
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: July 2025 | Version 2.0.13*
+*Last updated: August 2025 | Version 2.2.0*

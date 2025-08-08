@@ -494,8 +494,19 @@ class MT_Admin {
      * @return void
      */
     public function render_import_profiles_page() {
-        // Include the import script
-        include MT_PLUGIN_DIR . 'debug/import-profiles.php';
+        // Include the import template
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/import-profiles.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            // Fallback to debug script if template doesn't exist
+            $debug_file = MT_PLUGIN_DIR . 'debug/import-profiles.php';
+            if (file_exists($debug_file)) {
+                include $debug_file;
+            } else {
+                echo '<div class="notice notice-error"><p>' . esc_html__('Import profiles template not found.', 'mobility-trailblazers') . '</p></div>';
+            }
+        }
     }
     
     /**

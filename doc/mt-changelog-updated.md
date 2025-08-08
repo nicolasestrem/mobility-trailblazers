@@ -5,6 +5,43 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-08-08
+
+### Added
+- **Enhanced CSV Import System**: Complete bulk import functionality for candidate profiles with intelligent field mapping
+- **CSV Data Formatter Tool**: Standalone HTML/JavaScript utility for teams to prepare candidate data offline
+- **Import Admin Interface**: Dedicated admin page with dry-run testing, statistics, and detailed error reporting
+- **Bilingual Header Support**: Automatic recognition of both English and German CSV headers
+- **Smart CSV Detection**: Automatic delimiter detection (comma, semicolon, tab, pipe) and header row discovery
+- **Validation System**: URL validation, required field checking, and duplicate detection
+- **Photo Import Support**: Capability to import photos from URLs or match existing media library items
+
+### Enhanced
+- **Profile Importer Class**: Replaced basic importer with `MT_Enhanced_Profile_Importer` featuring comprehensive error handling and reporting
+- **Import Workflow**: Added dry-run mode to preview changes before committing to database
+- **Field Mapping**: Intelligent mapping system recognizing multiple header variations for each field
+- **Category Management**: Automatic creation of award categories if they don't exist
+- **Meta Field Support**: Extended support for all evaluation criteria fields
+- **Error Recovery**: Row-by-row processing ensures partial imports succeed even with some errors
+
+### Fixed
+- **UTF-8 Support**: Proper handling of German special characters (ä, ö, ü, ß) in CSV imports
+- **Empty Row Handling**: Skips empty rows and metadata rows automatically
+- **Update Logic**: Correct handling of existing candidates with update/skip options
+
+### Technical Details
+- Created `includes/admin/class-mt-enhanced-profile-importer.php` with 600+ lines of import logic
+- Added `templates/admin/import-profiles.php` admin interface template
+- Modified `includes/admin/class-mt-admin.php` to integrate new import system
+- Built standalone CSV formatter utility for data preparation
+- Supports categories: Start-ups/Scale-ups, Governance & Verwaltungen, Etablierte Unternehmen
+
+### Files Modified
+- `includes/admin/class-mt-enhanced-profile-importer.php` - New enhanced importer class
+- `templates/admin/import-profiles.php` - New import interface template
+- `includes/admin/class-mt-admin.php` - Integration of new import system
+- `mobility-trailblazers.php` - Version bump to 2.2.0
+
 ## [2.0.14] - 2025-08-08
 
 ### Fixed
