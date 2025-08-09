@@ -1,24 +1,183 @@
-At the end of this message, I will ask you to do something. Please follow the "Explore, Plan, Code, Test" workflow when you start.
+# Mobility Trailblazers Development Workflow
 
-#Explore
-First, use parallel subagents to find and read all files that may be useful for implementing the ticket, either as examples or as edit targets. The subagents should return relevant file paths, and any other info that may be useful.
+When implementing features or fixes in this WordPress plugin, follow this structured workflow:
 
-#Plan
-Next, think hard and write up a detailed implementation plan. Don't forget to include tests, lookbook components, and documentation. Use your judgement as to what is necessary, given the standards of this repo.
+## 1. EXPLORE
+Before making any changes:
+- Search for existing implementations using pattern matching (MT_*, includes/, admin/, public/)
+- Review relevant documentation in /doc/ directory
+- Understand the Repository-Service-Controller architecture pattern
+- Check for existing similar features or patterns to maintain consistency
 
-If there are things you are not sure about, use parallel subagents to do some web research. They should only return useful information, no noise.
+## 2. PLAN
+Create a detailed implementation plan that includes:
+- Database schema changes (if needed) with mt_ prefix
+- WordPress hooks and filters to use
+- Security measures (nonces, capability checks, sanitization)
+- Internationalization requirements (mobility-trailblazers text domain)
+- Impact on existing features (assignments, evaluations, candidates)
 
-If there are things you still do not understand or questions you have for the user, pause here to ask them before continuing.
+## 3. CODE
+Follow these project-specific standards:
 
-#Code
-When you have a thorough implementation plan, you are ready to start writing code. Follow the style of the existing codebase (e.g. we prefer clearly named variables and methods to extensive comments). Make sure to run our autoformatting script when you're done, and fix linter warnings that seem reasonable to you.
+### Naming Conventions
+- **Classes**: PascalCase with MT_ prefix (e.g., MT_Assignment_Service)
+- **Methods**: snake_case (e.g., process_auto_assignment())
+- **Files**: kebab-case with class- prefix (e.g., class-mt-assignment-service.php)
+- **Database tables**: mt_ prefix (e.g., mt_assignments)
+- **CSS classes**: mt- prefix with BEM structure (e.g., mt-assignment__header)
 
-#Test
-Use parallel subagents to run tests, and make sure they all pass.
+### Security Requirements
+- ALWAYS verify nonces for all AJAX and form submissions
+- Check user capabilities before any operation
+- Sanitize ALL input data using WordPress functions
+- Escape ALL output using appropriate WordPress escaping functions
+- Use prepared statements for database queries
 
-If your changes touch the UX in a major way, use the browser to make sure that everything works correctly. Make a list of what to test for, and use a subagent for this step.
+### Code Patterns
+```php
+// AJAX Handler Pattern
+public function handle_ajax_request() {
+    // 1. Verify nonce
+    if (!wp_verify_nonce($_POST['nonce'], 'mt_ajax_nonce')) {
+        wp_send_json_error(['message' => __('Security check failed', 'mobility-trailblazers')]);
+    }
+    
+    // 2. Check capabilities
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['message' => __('Insufficient permissions', 'mobility-trailblazers')]);
+    }
+    
+    // 3. Sanitize input
+    $data = array_map('sanitize_text_field', $_POST['data']);
+    
+    // 4. Process with error handling
+    try {
+        $result = $this->service->process($data);
+        wp_send_json_success($result);
+    } catch (Exception $e) {
+        MT_Error_Handler::log_error($e);
+        wp_send_json_error(['message' => __('An error occurred', 'mobility-trailblazers')]);
+    }
+}
+```
 
-If your testing shows problems, go back to the planning stage and think ultrahard.
+### Repository Pattern
+```php
+class MT_Assignment_Repository {
+    private $table_name;
+    
+    public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'mt_assignments';
+    }
+    
+    public function find_by_id($id) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table_name} WHERE id = %d",
+            $id
+        ));
+    }
+}
+```
 
-#Write up your work
-When you are happy with your work, write up a short report that could be used as the PR description. Include what you set out to do, the choices you made with their brief justification, and any commands you ran in the process that may be useful for future developers to know about.
+## 4. TEST
+Run comprehensive tests before marking complete:
+
+### Security Scans
+```bash
+composer security-scan          # Full security audit
+composer check-nonce            # Verify nonce implementations
+composer check-escaping         # Check output escaping
+composer check-sql              # SQL injection prevention
+composer fix-security           # Auto-fix security issues
+```
+
+### Manual Testing Checklist
+- [ ] Test with different user roles (admin, editor, subscriber)
+- [ ] Verify AJAX operations work correctly
+- [ ] Check responsive design on mobile/tablet
+- [ ] Test with WordPress debug mode enabled
+- [ ] Verify internationalization (text appears translatable)
+- [ ] Check error handling (invalid inputs, network issues)
+- [ ] Test bulk operations with large datasets (100+ records)
+
+### Color Scheme Verification
+Ensure UI elements follow the brand colors:
+- Primary: #26a69a (teal)
+- Primary Dark: #00897b
+- Primary Light: #4db6ac
+- Text on Primary: #ffffff
+
+## 5. DOCUMENT
+Update relevant documentation:
+- Add/update inline code documentation
+- Update /doc/ files if architecture changes
+- Add entries to mt-changelog-updated.md
+- Document any new hooks/filters for developers
+
+## Important Commands
+
+```bash
+# Development
+composer install --dev          # Install dev dependencies
+composer security-scan          # Run security audit
+composer check-escaping         # Verify output escaping
+
+# Database
+wp db query "SHOW TABLES LIKE '%mt_%'"  # List plugin tables
+wp db optimize                          # Optimize database
+
+# Debugging
+wp config set WP_DEBUG true --raw       # Enable debug mode
+tail -f wp-content/debug.log            # Monitor debug log
+```
+
+## Project-Specific Features
+
+### Evaluation System
+- Inline evaluation with scoring (0-100)
+- Automated vs manual evaluation modes
+- Progress tracking and completion status
+- Comprehensive jury rankings with multiple criteria
+
+### Assignment Management
+- Auto-assignment based on availability
+- Conflict checking and resolution
+- Color-coded status indicators
+- Bulk operations support
+
+### Candidate Profiles
+- Multi-section profiles with rich data
+- Document management system
+- Import/export capabilities
+- Advanced search and filtering
+
+## Error Handling
+Use the multi-layer error handling system:
+1. Try-catch blocks for all operations
+2. Log errors using MT_Error_Handler::log_error()
+3. Show user-friendly messages via admin notices
+4. Return proper HTTP status codes for AJAX
+
+## Performance Considerations
+- Use transients for expensive queries
+- Implement pagination for large datasets (50 items default)
+- Optimize database queries with proper indexes
+- Lazy load resources when possible
+
+## Emergency Procedures
+If something breaks:
+1. Check wp-content/debug.log for errors
+2. Verify database integrity (wp db check)
+3. Clear transients (wp transient delete --all)
+4. Check for JavaScript errors in browser console
+5. Verify nonce expiration issues
+
+## Key Documentation References
+- Architecture: /doc/mt-architecture-docs.md
+- Developer Guide: /doc/mt-developer-guide.md
+- Error Handling: /doc/error-handling-system.md
+- Color Scheme: /doc/color-scheme-implementation.md
+- Bulk Operations: /doc/bulk-operations-implementation.md
