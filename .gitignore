@@ -113,3 +113,6 @@ desktop.ini
 !/development/security/reports/.gitkeep
 !/documentation/business/meeting-minutes/.gitkeep
 !/assets/branding/logos/.gitkeepplugin/mobility-trailblazers/
+
+# Claude AI context files
+.claude/
