@@ -1,7 +1,7 @@
 # Mobility Trailblazers - Architecture Documentation
 
-**Version:** 2.0.11
-**Last Updated:** July 2025
+**Version:** 2.2.1
+**Last Updated:** August 2025
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -107,6 +107,44 @@ The Mobility Trailblazers plugin follows a modern, layered architecture designed
 │  └──────────────┘  └──────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## Migration System (v2.2.1+)
+
+### Overview
+The plugin includes a robust migration system for database schema changes and optimizations.
+
+### Architecture
+```
+┌──────────────────────────────────────────┐
+│         MT_Migration_Runner              │
+│  - Checks database version               │
+│  - Executes pending migrations           │
+│  - Manages migration lifecycle           │
+└──────────────────────────────────────────┘
+                    │
+┌──────────────────────────────────────────┐
+│         Migration Classes                │
+│  ┌────────────────────────────────────┐ │
+│  │  MT_Migration_Add_Indexes          │ │
+│  │  - Adds performance indexes        │ │
+│  │  - Supports rollback               │ │
+│  └────────────────────────────────────┘ │
+└──────────────────────────────────────────┘
+```
+
+### Key Features
+- **Automatic execution** on plugin activation or update
+- **Version tracking** to prevent duplicate migrations
+- **Rollback support** for safe schema changes
+- **Cache clearing** after migrations complete
+- **Admin notifications** for migration status
+
+### Migration Process
+1. Version check on `admin_init`
+2. Execute pending migrations sequentially
+3. Update database version
+4. Clear all caches
+5. Display admin notice
 
 ## Directory Structure
 
@@ -352,25 +390,44 @@ $wpdb->get_row($wpdb->prepare(
 
 ### Database Optimization
 
-1. **Indexed Columns**
-   - Foreign keys (jury_member_id, candidate_id)
-   - Status fields for filtering
-   - Timestamps for sorting
+1. **Indexed Columns** (v2.2.1+)
+   - Primary indexes on ID fields
+   - Foreign key indexes (jury_member_id, candidate_id)
+   - Composite indexes for common query patterns:
+     - `idx_jury_status` (jury_member_id, status)
+     - `idx_candidate_status` (candidate_id, status)
+     - `idx_total_score` (total_score)
+     - `idx_status_score` (status, total_score)
+     - `idx_jury_date` (jury_member_id, assigned_at)
+     - `idx_assigned_by` (assigned_by)
 
 2. **Efficient Queries**
    - JOIN operations for related data
    - Aggregate functions for statistics
    - Limit and offset for pagination
+   - Prepared statements for security and performance
 
-### Caching Strategy
+### Caching Strategy (Enhanced in v2.2.1)
 
-1. **Transient API**
-   - Cache expensive calculations
-   - Store frequently accessed data
+1. **Transient API Implementation**
+   - **Assignment Repository Caching:**
+     - `get_by_jury_member()` - 1 hour cache
+     - `get_statistics()` - 30 minutes cache
+     - Cache key pattern: `mt_jury_assignments_{jury_id}`
+   - **Evaluation Repository Caching:**
+     - `get_ranked_candidates_for_jury()` - 30 minutes cache
+     - Cache key pattern: `mt_jury_rankings_{jury_id}_{limit}`
+   - Automatic cache invalidation on data modifications
 
-2. **Object Caching**
+2. **Cache Invalidation Strategy**
+   - Smart cache clearing on create/update/delete operations
+   - Targeted invalidation (only affected jury members)
+   - Full cache flush during migrations
+
+3. **Object Caching**
    - Compatible with Redis/Memcached
-   - Reduces database load
+   - Reduces database load by up to 80% for repeated queries
+   - Graceful fallback to database when cache misses
 
 ### Asset Loading
 

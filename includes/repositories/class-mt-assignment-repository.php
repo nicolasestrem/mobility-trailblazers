@@ -153,6 +153,8 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             error_log('MT Assignment Repository - Insert failed. Last error: ' . $wpdb->last_error);
         } else {
             error_log('MT Assignment Repository - Insert successful. ID: ' . $wpdb->insert_id);
+            // Clear related caches
+            $this->clear_assignment_caches($data['jury_member_id'] ?? null);
         }
         
         return $result ? $wpdb->insert_id : false;
@@ -168,6 +170,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function update($id, $data) {
         global $wpdb;
         
+        // Get existing assignment to clear appropriate caches
+        $existing = $this->find($id);
+        
         $formats = [];
         foreach ($data as $key => $value) {
             if (in_array($key, ['jury_member_id', 'candidate_id', 'assigned_by'])) {
@@ -177,13 +182,23 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             }
         }
         
-        return $wpdb->update(
+        $result = $wpdb->update(
             $this->table_name,
             $data,
             ['id' => $id],
             $formats,
             ['%d']
         ) !== false;
+        
+        if ($result && $existing) {
+            // Clear caches for affected jury members
+            $this->clear_assignment_caches($existing->jury_member_id);
+            if (isset($data['jury_member_id']) && $data['jury_member_id'] != $existing->jury_member_id) {
+                $this->clear_assignment_caches($data['jury_member_id']);
+            }
+        }
+        
+        return $result;
     }
     
     /**
@@ -195,11 +210,21 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function delete($id) {
         global $wpdb;
         
-        return $wpdb->delete(
+        // Get existing assignment to clear appropriate caches
+        $existing = $this->find($id);
+        
+        $result = $wpdb->delete(
             $this->table_name,
             ['id' => $id],
             ['%d']
         ) !== false;
+        
+        if ($result && $existing) {
+            // Clear caches
+            $this->clear_assignment_caches($existing->jury_member_id);
+        }
+        
+        return $result;
     }
     
     /**
@@ -237,7 +262,16 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function get_by_jury_member($jury_member_id) {
         global $wpdb;
         
-        return $wpdb->get_results($wpdb->prepare(
+        // Check transient cache first
+        $cache_key = 'mt_jury_assignments_' . $jury_member_id;
+        $cached = get_transient($cache_key);
+        
+        if ($cached !== false) {
+            return $cached;
+        }
+        
+        // Query database if not cached
+        $results = $wpdb->get_results($wpdb->prepare(
             "SELECT a.*, c.post_title as candidate_name 
              FROM {$this->table_name} a
              INNER JOIN {$wpdb->posts} c ON a.candidate_id = c.ID
@@ -245,6 +279,11 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
              ORDER BY c.post_title ASC",
             $jury_member_id
         ));
+        
+        // Cache for 1 hour
+        set_transient($cache_key, $results, HOUR_IN_SECONDS);
+        
+        return $results;
     }
     
     /**
@@ -365,6 +404,14 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function get_statistics() {
         global $wpdb;
         
+        // Check transient cache first
+        $cache_key = 'mt_assignment_statistics';
+        $cached = get_transient($cache_key);
+        
+        if ($cached !== false) {
+            return $cached;
+        }
+        
         $stats = [
             'total_assignments' => 0,
             'assigned_candidates' => 0,
@@ -405,6 +452,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             ];
         }
         
+        // Cache for 30 minutes
+        set_transient($cache_key, $stats, 30 * MINUTE_IN_SECONDS);
+        
         return $stats;
     }
     
@@ -437,7 +487,45 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function clear_all() {
         global $wpdb;
         
-        return $wpdb->query("DELETE FROM {$this->table_name}") !== false;
+        $result = $wpdb->query("DELETE FROM {$this->table_name}") !== false;
+        
+        if ($result) {
+            // Clear all related caches
+            $this->clear_all_assignment_caches();
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Clear assignment caches
+     *
+     * @param int|null $jury_member_id Optional specific jury member
+     */
+    private function clear_assignment_caches($jury_member_id = null) {
+        // Clear statistics cache
+        delete_transient('mt_assignment_statistics');
+        
+        // Clear specific jury member cache if provided
+        if ($jury_member_id) {
+            delete_transient('mt_jury_assignments_' . $jury_member_id);
+        }
+    }
+    
+    /**
+     * Clear all assignment caches
+     */
+    private function clear_all_assignment_caches() {
+        global $wpdb;
+        
+        // Clear statistics cache
+        delete_transient('mt_assignment_statistics');
+        
+        // Clear all jury member caches
+        $query = "DELETE FROM {$wpdb->options} 
+                  WHERE option_name LIKE '_transient_mt_jury_assignments_%' 
+                  OR option_name LIKE '_transient_timeout_mt_jury_assignments_%'";
+        $wpdb->query($query);
     }
     
     /**

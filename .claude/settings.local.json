@@ -1,8 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(composer security-scan:*)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "E:\\OneDrive\\CoWorkSpace"
+    ]
   }
 }

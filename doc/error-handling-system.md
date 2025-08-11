@@ -197,6 +197,65 @@ window.MTErrorHandler = {
 };
 ```
 
+## Migration and Cache Error Handling (v2.2.1+)
+
+### Migration Errors
+
+Migration errors are handled at multiple levels:
+
+```php
+// Migration execution with error handling
+try {
+    $result = MT_Migration_Add_Indexes::run();
+    if (!$result) {
+        MT_Logger::error('Migration failed', ['migration' => 'add_indexes']);
+    }
+} catch (Exception $e) {
+    MT_Logger::critical('Migration exception', [
+        'migration' => 'add_indexes',
+        'error' => $e->getMessage()
+    ]);
+}
+```
+
+### Cache Operation Errors
+
+Cache operations fail gracefully with fallback to database:
+
+```php
+// Safe cache retrieval
+$cached = false;
+try {
+    $cached = get_transient($cache_key);
+} catch (Exception $e) {
+    MT_Logger::warning('Cache retrieval failed', [
+        'cache_key' => $cache_key,
+        'error' => $e->getMessage()
+    ]);
+}
+
+// Fallback to database if cache fails
+if ($cached === false) {
+    $data = $this->fetch_from_database();
+}
+```
+
+### File Upload Error Handling
+
+Enhanced CSV import validation (v2.2.1):
+
+```php
+// File type validation with detailed errors
+if (!in_array($file_info['ext'], $allowed_types)) {
+    MT_Logger::warning('Invalid file upload attempt', [
+        'file_type' => $file_info['ext'],
+        'allowed_types' => $allowed_types,
+        'user_id' => get_current_user_id()
+    ]);
+    return ['error' => __('Invalid file type', 'mobility-trailblazers')];
+}
+```
+
 ## Error Monitoring and Reporting
 
 ### Admin Error Monitor

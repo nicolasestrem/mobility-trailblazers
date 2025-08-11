@@ -53,6 +53,43 @@ class MT_Enhanced_Profile_Importer {
             return $results;
         }
         
+        // Validate file type
+        $file_info = wp_check_filetype($file_path);
+        $allowed_types = ['csv', 'txt'];
+        if (!in_array(strtolower($file_info['ext']), $allowed_types)) {
+            $results['messages'][] = sprintf(
+                __('Invalid file type "%s". Only CSV and TXT files are allowed.', 'mobility-trailblazers'),
+                $file_info['ext'] ?: 'unknown'
+            );
+            return $results;
+        }
+        
+        // Validate MIME type for additional security
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $file_path);
+        finfo_close($finfo);
+        
+        $allowed_mimes = ['text/csv', 'text/plain', 'application/csv', 'application/x-csv'];
+        if (!in_array($mime_type, $allowed_mimes)) {
+            $results['messages'][] = sprintf(
+                __('Invalid file MIME type "%s". File must be a valid CSV file.', 'mobility-trailblazers'),
+                $mime_type
+            );
+            return $results;
+        }
+        
+        // Check file size (max 10MB)
+        $max_size = 10 * MB_IN_BYTES;
+        $file_size = filesize($file_path);
+        if ($file_size > $max_size) {
+            $results['messages'][] = sprintf(
+                __('File too large. Maximum size is %s. Your file is %s.', 'mobility-trailblazers'),
+                size_format($max_size),
+                size_format($file_size)
+            );
+            return $results;
+        }
+        
         // Open file with UTF-8 encoding support
         $handle = fopen($file_path, 'r');
         if (!$handle) {

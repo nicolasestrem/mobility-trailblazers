@@ -199,6 +199,9 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
 
             $evaluation_id = $wpdb->insert_id;
             MT_Logger::info('Evaluation created successfully', ['evaluation_id' => $evaluation_id]);
+            
+            // Clear related caches
+            $this->clear_evaluation_caches($data['jury_member_id'] ?? null);
 
             return $evaluation_id;
 
@@ -221,6 +224,9 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
      */
     public function update($id, $data) {
         global $wpdb;
+        
+        // Get existing evaluation to clear appropriate caches
+        $existing = $this->find($id);
         
         $data['updated_at'] = current_time('mysql');
         
@@ -254,13 +260,23 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             }
         }
         
-        return $wpdb->update(
+        $result = $wpdb->update(
             $this->table_name,
             $data,
             ['id' => $id],
             $formats,
             ['%d']
         ) !== false;
+        
+        if ($result && $existing) {
+            // Clear caches for affected jury members
+            $this->clear_evaluation_caches($existing->jury_member_id);
+            if (isset($data['jury_member_id']) && $data['jury_member_id'] != $existing->jury_member_id) {
+                $this->clear_evaluation_caches($data['jury_member_id']);
+            }
+        }
+        
+        return $result;
     }
     
     /**
@@ -272,11 +288,21 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
     public function delete($id) {
         global $wpdb;
         
-        return $wpdb->delete(
+        // Get existing evaluation to clear appropriate caches
+        $existing = $this->find($id);
+        
+        $result = $wpdb->delete(
             $this->table_name,
             ['id' => $id],
             ['%d']
         ) !== false;
+        
+        if ($result && $existing) {
+            // Clear caches
+            $this->clear_evaluation_caches($existing->jury_member_id);
+        }
+        
+        return $result;
     }
     
     /**
@@ -546,6 +572,14 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
     public function get_ranked_candidates_for_jury($jury_member_id, $limit = 10) {
         global $wpdb;
         
+        // Check transient cache first
+        $cache_key = 'mt_jury_rankings_' . $jury_member_id . '_' . $limit;
+        $cached = get_transient($cache_key);
+        
+        if ($cached !== false) {
+            return $cached;
+        }
+        
         $query = "SELECT 
                     c.ID as candidate_id,
                     c.post_title as candidate_name,
@@ -569,7 +603,12 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                   ORDER BY e.total_score DESC
                   LIMIT %d";
         
-        return $wpdb->get_results($wpdb->prepare($query, $jury_member_id, $limit));
+        $results = $wpdb->get_results($wpdb->prepare($query, $jury_member_id, $limit));
+        
+        // Cache for 30 minutes
+        set_transient($cache_key, $results, 30 * MINUTE_IN_SECONDS);
+        
+        return $results;
     }
     
     /**
@@ -659,5 +698,35 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         }
         
         return false;
+    }
+    
+    /**
+     * Clear evaluation caches
+     *
+     * @param int|null $jury_member_id Optional specific jury member
+     */
+    private function clear_evaluation_caches($jury_member_id = null) {
+        global $wpdb;
+        
+        if ($jury_member_id) {
+            // Clear specific jury member ranking caches
+            $query = "DELETE FROM {$wpdb->options} 
+                      WHERE option_name LIKE '_transient_mt_jury_rankings_{$jury_member_id}_%' 
+                      OR option_name LIKE '_transient_timeout_mt_jury_rankings_{$jury_member_id}_%'";
+            $wpdb->query($query);
+        }
+    }
+    
+    /**
+     * Clear all evaluation caches
+     */
+    public function clear_all_evaluation_caches() {
+        global $wpdb;
+        
+        // Clear all jury ranking caches
+        $query = "DELETE FROM {$wpdb->options} 
+                  WHERE option_name LIKE '_transient_mt_jury_rankings_%' 
+                  OR option_name LIKE '_transient_timeout_mt_jury_rankings_%'";
+        $wpdb->query($query);
     }
 } 

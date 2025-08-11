@@ -15,6 +15,18 @@ if (!defined('ABSPATH')) {
 if (isset($_GET['evaluate']) && is_numeric($_GET['evaluate'])) {
     $candidate_id = intval($_GET['evaluate']);
     
+    // Verify candidate exists and is valid
+    $candidate = get_post($candidate_id);
+    if (!$candidate || $candidate->post_type !== 'mt_candidate') {
+        echo '<div class="mt-notice mt-notice-error">' . 
+             __('Invalid candidate.', 'mobility-trailblazers') . 
+             '</div>';
+        echo '<a href="' . esc_url(remove_query_arg('evaluate')) . '" class="mt-btn mt-btn-secondary">' . 
+             __('Back to Dashboard', 'mobility-trailblazers') . 
+             '</a>';
+        return;
+    }
+    
     // Verify assignment
     $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
     $has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);

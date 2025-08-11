@@ -248,6 +248,94 @@ __('String', 'mobility-trailblazers');
 4. **Compile**: Use `msgfmt` to create .mo files
 5. **Deploy**: Place .mo files in `/languages/` directory
 
+## Database Migrations (v2.2.1+)
+
+### Creating a New Migration
+
+1. Create a new class in `includes/migrations/`:
+```php
+<?php
+namespace MobilityTrailblazers\Migrations;
+
+class MT_Migration_Your_Name {
+    public static function run() {
+        // Your migration logic here
+        return true; // Return false on failure
+    }
+    
+    public static function is_needed() {
+        // Check if migration is needed
+        return !get_option('mt_migration_your_name_done', false);
+    }
+    
+    public static function rollback() {
+        // Optional rollback logic
+        return true;
+    }
+}
+```
+
+2. Register it in `MT_Migration_Runner::run_migrations()`:
+```php
+if (version_compare($current_version, '2.3.0', '<')) {
+    self::run_your_migration();
+}
+```
+
+### Migration Best Practices
+- Always check if migration is needed before running
+- Provide rollback functionality for schema changes
+- Clear relevant caches after migration
+- Log migration status for debugging
+- Test migrations thoroughly on staging first
+
+### Available Migrations
+- **MT_Migration_Add_Indexes** (v2.2.1) - Adds performance indexes
+
+## Caching Strategy (v2.2.1+)
+
+### Implementing Cache in Repositories
+
+```php
+public function get_expensive_data($param) {
+    // Check cache first
+    $cache_key = 'mt_cache_prefix_' . $param;
+    $cached = get_transient($cache_key);
+    
+    if ($cached !== false) {
+        return $cached;
+    }
+    
+    // Fetch from database
+    $data = $this->fetch_from_database($param);
+    
+    // Cache for appropriate duration
+    set_transient($cache_key, $data, HOUR_IN_SECONDS);
+    
+    return $data;
+}
+```
+
+### Cache Invalidation
+
+```php
+private function clear_related_caches($id) {
+    // Clear specific cache
+    delete_transient('mt_cache_prefix_' . $id);
+    
+    // Clear pattern-based caches
+    global $wpdb;
+    $wpdb->query("DELETE FROM {$wpdb->options} 
+                  WHERE option_name LIKE '_transient_mt_cache_prefix_%'");
+}
+```
+
+### Cache Duration Guidelines
+- User-specific data: 1 hour
+- Statistics/aggregates: 30 minutes
+- Rarely changing data: 12 hours
+- Real-time data: No caching
+
 ## Database Schema
 
 ### Core Tables
