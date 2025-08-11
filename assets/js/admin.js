@@ -1061,7 +1061,131 @@ if (typeof mt_admin.i18n === 'undefined') {
         }
     };
     
-
+    /**
+     * Evaluation Management Module - Encapsulated for Evaluations Page Only
+     */
+    const MTEvaluationManager = {
+        init: function() {
+            console.log('MTEvaluationManager initializing...');
+            this.bindEvents();
+            console.log('MTEvaluationManager initialized');
+        },
+        
+        bindEvents: function() {
+            console.log('Binding evaluation events...');
+            
+            // View details buttons
+            $('.view-details').on('click', (e) => {
+                e.preventDefault();
+                const evaluationId = $(e.currentTarget).data('evaluation-id');
+                this.viewEvaluationDetails(evaluationId);
+            });
+            
+            // Select all checkboxes
+            $('#cb-select-all-1, #cb-select-all-2').on('click', (e) => {
+                this.handleSelectAll($(e.currentTarget));
+            });
+            
+            // Individual checkbox click
+            $('input[name="evaluation[]"]').on('click', () => {
+                this.updateSelectAllCheckbox();
+            });
+            
+            // Bulk actions
+            $('#doaction, #doaction2').on('click', (e) => {
+                e.preventDefault();
+                this.handleBulkAction($(e.currentTarget));
+            });
+        },
+        
+        viewEvaluationDetails: function(evaluationId) {
+            // TODO: Implement AJAX call to load evaluation details
+            alert('View evaluation ' + evaluationId + ' details - To be implemented');
+        },
+        
+        handleSelectAll: function($checkbox) {
+            const checked = $checkbox.prop('checked');
+            $('input[name="evaluation[]"]').prop('checked', checked);
+            $('#cb-select-all-1, #cb-select-all-2').prop('checked', checked);
+        },
+        
+        updateSelectAllCheckbox: function() {
+            const allChecked = $('input[name="evaluation[]"]').length === $('input[name="evaluation[]"]:checked').length;
+            $('#cb-select-all-1, #cb-select-all-2').prop('checked', allChecked);
+        },
+        
+        handleBulkAction: function($button) {
+            const action = $button.prev('select').val();
+            
+            if (action === '-1') {
+                alert('Please select a bulk action');
+                return;
+            }
+            
+            const selected = [];
+            $('input[name="evaluation[]"]:checked').each(function() {
+                selected.push($(this).val());
+            });
+            
+            if (selected.length === 0) {
+                alert('Please select at least one evaluation');
+                return;
+            }
+            
+            const confirmMessage = this.getConfirmMessage(action);
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            this.performBulkAction(action, selected, $button);
+        },
+        
+        getConfirmMessage: function(action) {
+            switch(action) {
+                case 'approve':
+                    return 'Are you sure you want to approve the selected evaluations?';
+                case 'reject':
+                    return 'Are you sure you want to reject the selected evaluations?';
+                case 'reset-to-draft':
+                    return 'Are you sure you want to reset the selected evaluations to draft?';
+                case 'delete':
+                    return 'Are you sure you want to delete the selected evaluations? This action cannot be undone.';
+                default:
+                    return 'Are you sure you want to perform this action?';
+            }
+        },
+        
+        performBulkAction: function(action, evaluationIds, $button) {
+            $.ajax({
+                url: mt_admin.url || mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_bulk_evaluation_action',
+                    bulk_action: action,
+                    evaluation_ids: evaluationIds,
+                    nonce: mt_admin.nonce
+                },
+                beforeSend: () => {
+                    $('#doaction, #doaction2').prop('disabled', true).val('Processing...');
+                },
+                success: (response) => {
+                    if (response.success) {
+                        alert(response.data.message || 'Bulk action completed successfully');
+                        location.reload();
+                    } else {
+                        alert(response.data || 'An error occurred');
+                    }
+                },
+                error: () => {
+                    alert('An error occurred. Please try again.');
+                },
+                complete: () => {
+                    $('#doaction, #doaction2').prop('disabled', false).val('Apply');
+                }
+            });
+        }
+    };
 
     /**
      * Initialize media upload functionality
@@ -1137,6 +1261,18 @@ if (typeof mt_admin.i18n === 'undefined') {
         } else {
             console.log('Not on assignment page, skipping assignment-specific modules');
         }
+        
+        // Check if we're on the Evaluations page
+        // Look for unique elements of the evaluations page
+        if ($('.wrap h1:contains("Evaluations")').length > 0 && 
+            $('.wp-list-table').length > 0 &&
+            $('input[name="evaluation[]"]').length > 0) {
+            
+            console.log('Evaluations page detected, initializing evaluation module...');
+            MTEvaluationManager.init();
+        } else {
+            console.log('Not on evaluations page, skipping evaluation-specific module');
+        }
     });
 
-})(jQuery); 
+})(jQuery);
