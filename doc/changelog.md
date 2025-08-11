@@ -38,6 +38,7 @@
 - Preserved backward compatibility with existing AJAX endpoints
 - No database schema changes required
 - Code follows WordPress coding standards and plugin conventions
+- Replaced direct SQL queries with repository methods for better maintainability
 
 ## [2.2.0] - 2025-08-01
 

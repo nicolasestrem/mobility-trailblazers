@@ -311,12 +311,11 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         $assignment_repo = new MT_Assignment_Repository();
         
-        // Use proper method to delete all
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mt_jury_assignments';
-        $result = $wpdb->query("TRUNCATE TABLE $table_name");
+        // Use repository method to clear all assignments
+        // This properly handles cache clearing and any future hooks
+        $result = $assignment_repo->clear_all();
         
-        if ($result !== false) {
+        if ($result) {
             $this->send_json_success(__('All assignments have been cleared.', 'mobility-trailblazers'));
         } else {
             $this->send_json_error(__('Failed to clear assignments.', 'mobility-trailblazers'));
@@ -460,15 +459,18 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             return;
         }
         
+        // Initialize repository
+        $assignment_repo = new MT_Assignment_Repository();
+        
         // Clear existing assignments if requested
         if (isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'mt_jury_assignments';
-            $wpdb->query("TRUNCATE TABLE $table_name");
-            error_log('MT Auto Assign: Cleared existing assignments');
+            $clear_result = $assignment_repo->clear_all();
+            if ($clear_result) {
+                error_log('MT Auto Assign: Cleared all existing assignments');
+            } else {
+                error_log('MT Auto Assign: Failed to clear existing assignments');
+            }
         }
-        
-        $assignment_repo = new MT_Assignment_Repository();
         $assignments_created = 0;
         $errors = [];
         
