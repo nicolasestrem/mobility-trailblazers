@@ -1,6 +1,6 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.2.0
+**Version:** 2.2.1
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 **Last Updated:** August 2025
@@ -168,6 +168,12 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 
 ## 📝 Recent Updates
 
+### Version 2.2.1 (August 2025)
+- **Auto-Assignment Algorithm Fix**: Complete refactoring of jury assignment distribution
+- **Balanced Distribution**: Fair and even candidate distribution with assignment tracking
+- **True Random Distribution**: Proper randomization with performance improvements
+- **Enhanced Logging**: Detailed debugging information for assignment operations
+
 ### Version 2.2.0 (August 2025)
 - **Enhanced CSV Import System**: Complete bulk import functionality with intelligent field mapping
 - **Bilingual Support**: Automatic recognition of English and German CSV headers
@@ -257,7 +263,7 @@ GPL v2 or later
 
 ## 🚀 Development Status
 
-**Current Version: 2.2.0** - Production-ready with active development
+**Current Version: 2.2.1** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -265,4 +271,4 @@ GPL v2 or later
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 2025 | Version 2.2.0*
+*Last updated: August 2025 | Version 2.2.1*

@@ -427,6 +427,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 5;
         
         // Log for debugging
+        error_log('MT Auto Assign: Starting auto-assignment');
         error_log('MT Auto Assign: method=' . $method . ', candidates_per_jury=' . $candidates_per_jury);
         
         // Get active jury members
@@ -438,13 +439,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $jury_members = get_posts($jury_args);
         
         error_log('MT Auto Assign: Found ' . count($jury_members) . ' jury members');
-        
-        // Log jury member details for debugging
-        if (!empty($jury_members)) {
-            foreach ($jury_members as $jury) {
-                error_log('MT Auto Assign: Jury Member - ID: ' . $jury->ID . ', Title: ' . $jury->post_title);
-            }
-        }
         
         if (empty($jury_members)) {
             wp_send_json_error(__('No jury members found.', 'mobility-trailblazers'));
@@ -471,32 +465,84 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             global $wpdb;
             $table_name = $wpdb->prefix . 'mt_jury_assignments';
             $wpdb->query("TRUNCATE TABLE $table_name");
+            error_log('MT Auto Assign: Cleared existing assignments');
         }
         
         $assignment_repo = new MT_Assignment_Repository();
         $assignments_created = 0;
         $errors = [];
         
+        // Log distribution method being used
+        error_log('MT Auto Assign: Using distribution method: ' . $method);
+        
         // Perform assignment based on method
         if ($method === 'balanced') {
-            // Balanced distribution - but respect the candidates_per_jury limit
-            $jury_count = count($jury_members);
-            $total_to_assign = min(count($candidates), $jury_count * $candidates_per_jury);
-            $candidate_index = 0;
+            // BALANCED DISTRIBUTION
+            // Goal: Each candidate should be reviewed by roughly the same number of jury members
+            // while each jury member reviews exactly candidates_per_jury candidates
             
-            // Only assign up to candidates_per_jury for each jury member
-            for ($i = 0; $i < $total_to_assign; $i++) {
-                $jury_index = $i % $jury_count;
-                $jury_member = $jury_members[$jury_index];
-                $candidate = $candidates[$i];
+            $jury_count = count($jury_members);
+            $candidate_count = count($candidates);
+            
+            // Calculate how many times each candidate should be reviewed
+            $total_assignments_needed = $jury_count * $candidates_per_jury;
+            $reviews_per_candidate = floor($total_assignments_needed / $candidate_count);
+            $extra_reviews = $total_assignments_needed % $candidate_count;
+            
+            error_log('MT Auto Assign: Balanced - Total assignments needed: ' . $total_assignments_needed);
+            error_log('MT Auto Assign: Balanced - Reviews per candidate: ' . $reviews_per_candidate);
+            error_log('MT Auto Assign: Balanced - Extra reviews to distribute: ' . $extra_reviews);
+            
+            // Create an array to track how many times each candidate is assigned
+            $candidate_assignment_count = [];
+            foreach ($candidates as $candidate) {
+                $candidate_assignment_count[$candidate->ID] = 0;
+            }
+            
+            // Track existing assignments if we're not clearing them
+            if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
+                // Get all existing assignments
+                $existing_assignments = $assignment_repo->find_all();
+                foreach ($existing_assignments as $assignment) {
+                    if (isset($candidate_assignment_count[$assignment->candidate_id])) {
+                        $candidate_assignment_count[$assignment->candidate_id]++;
+                    }
+                }
+            }
+            
+            // Create assignments for each jury member
+            foreach ($jury_members as $jury_member) {
+                $jury_assignments = 0;
                 
-                // Check if assignment already exists
-                $existing = $assignment_repo->get_by_jury_and_candidate(
-                    $jury_member->ID,
-                    $candidate->ID
-                );
+                // Get existing assignments for this jury member if not clearing
+                $existing_for_jury = [];
+                if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
+                    $existing_jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
+                    foreach ($existing_jury_assignments as $existing) {
+                        $existing_for_jury[$existing->candidate_id] = true;
+                        $jury_assignments++;
+                    }
+                }
                 
-                if (!$existing) {
+                // Sort candidates by assignment count (ascending) to prioritize those with fewer assignments
+                $sorted_candidates = $candidates;
+                usort($sorted_candidates, function($a, $b) use ($candidate_assignment_count) {
+                    return $candidate_assignment_count[$a->ID] - $candidate_assignment_count[$b->ID];
+                });
+                
+                // Assign candidates to this jury member
+                foreach ($sorted_candidates as $candidate) {
+                    // Stop if we've reached the desired number of assignments for this jury member
+                    if ($jury_assignments >= $candidates_per_jury) {
+                        break;
+                    }
+                    
+                    // Skip if this assignment already exists
+                    if (isset($existing_for_jury[$candidate->ID])) {
+                        continue;
+                    }
+                    
+                    // Create the assignment
                     $result = $assignment_repo->create([
                         'jury_member_id' => $jury_member->ID,
                         'candidate_id' => $candidate->ID
@@ -504,58 +550,109 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                     
                     if ($result) {
                         $assignments_created++;
+                        $jury_assignments++;
+                        $candidate_assignment_count[$candidate->ID]++;
+                        
+                        error_log('MT Auto Assign: Assigned candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
                     } else {
                         $errors[] = sprintf(
                             __('Failed to assign %s to %s', 'mobility-trailblazers'),
                             $candidate->post_title,
                             $jury_member->post_title
                         );
+                        error_log('MT Auto Assign: Failed to assign candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
                     }
                 }
+                
+                // Log if jury member didn't get enough assignments
+                if ($jury_assignments < $candidates_per_jury) {
+                    error_log('MT Auto Assign: Warning - Jury member ' . $jury_member->ID . ' only got ' . $jury_assignments . ' assignments (requested: ' . $candidates_per_jury . ')');
+                }
             }
+            
         } else {
-            // Fixed number per jury (random selection)
-            // Shuffle candidates for random distribution
+            // RANDOM DISTRIBUTION
+            // Goal: Each jury member gets exactly candidates_per_jury candidates, selected randomly
+            
+            error_log('MT Auto Assign: Random - Starting random distribution');
+            
+            // Shuffle the candidates array once for efficiency
             $shuffled_candidates = $candidates;
             shuffle($shuffled_candidates);
-            $candidate_index = 0;
             
+            error_log('MT Auto Assign: Random - Shuffled ' . count($shuffled_candidates) . ' candidates');
+            
+            // Process each jury member
             foreach ($jury_members as $jury_member) {
-                $assigned_count = 0;
+                $jury_assignments = 0;
+                $candidates_checked = 0;
                 
-                // Start from where we left off in the shuffled array
-                for ($i = $candidate_index; $i < count($shuffled_candidates) && $assigned_count < $candidates_per_jury; $i++) {
-                    $candidate = $shuffled_candidates[$i];
+                // Get existing assignments for this jury member if not clearing
+                $existing_for_jury = [];
+                if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
+                    $existing_jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
+                    foreach ($existing_jury_assignments as $existing) {
+                        $existing_for_jury[$existing->candidate_id] = true;
+                        $jury_assignments++;
+                    }
                     
-                    // Check if assignment already exists
-                    $existing = $assignment_repo->get_by_jury_and_candidate(
-                        $jury_member->ID,
-                        $candidate->ID
-                    );
+                    error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' has ' . count($existing_for_jury) . ' existing assignments');
+                }
+                
+                // Try to assign candidates from the shuffled list
+                foreach ($shuffled_candidates as $candidate) {
+                    $candidates_checked++;
                     
-                    if (!$existing) {
-                        $result = $assignment_repo->create([
-                            'jury_member_id' => $jury_member->ID,
-                            'candidate_id' => $candidate->ID
-                        ]);
+                    // Stop if we've reached the desired number of assignments
+                    if ($jury_assignments >= $candidates_per_jury) {
+                        break;
+                    }
+                    
+                    // Skip if this assignment already exists
+                    if (isset($existing_for_jury[$candidate->ID])) {
+                        continue;
+                    }
+                    
+                    // Create the assignment
+                    $result = $assignment_repo->create([
+                        'jury_member_id' => $jury_member->ID,
+                        'candidate_id' => $candidate->ID
+                    ]);
+                    
+                    if ($result) {
+                        $assignments_created++;
+                        $jury_assignments++;
                         
-                        if ($result) {
-                            $assignments_created++;
-                            $assigned_count++;
-                        } else {
-                            $errors[] = sprintf(
-                                __('Failed to assign %s to %s', 'mobility-trailblazers'),
-                                $candidate->post_title,
-                                $jury_member->post_title
-                            );
-                        }
+                        error_log('MT Auto Assign: Random - Assigned candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
+                    } else {
+                        $errors[] = sprintf(
+                            __('Failed to assign %s to %s', 'mobility-trailblazers'),
+                            $candidate->post_title,
+                            $jury_member->post_title
+                        );
+                        error_log('MT Auto Assign: Random - Failed to assign candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
                     }
                 }
                 
-                // Move the index forward for the next jury member
-                $candidate_index += $assigned_count;
+                // Log statistics for this jury member
+                error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' got ' . $jury_assignments . ' assignments after checking ' . $candidates_checked . ' candidates');
+                
+                // Warn if jury member didn't get enough assignments
+                if ($jury_assignments < $candidates_per_jury) {
+                    $warning_msg = sprintf(
+                        __('Jury member %s only received %d assignments (requested: %d). Not enough available candidates.', 'mobility-trailblazers'),
+                        $jury_member->post_title,
+                        $jury_assignments,
+                        $candidates_per_jury
+                    );
+                    $errors[] = $warning_msg;
+                    error_log('MT Auto Assign: Random - Warning: ' . $warning_msg);
+                }
             }
         }
+        
+        // Log final statistics
+        error_log('MT Auto Assign: Completed - ' . $assignments_created . ' assignments created, ' . count($errors) . ' errors');
         
         // Prepare response
         if ($assignments_created > 0) {
@@ -566,7 +663,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             if (!empty($errors)) {
                 $message .= ' ' . sprintf(
-                    __('However, %d errors occurred.', 'mobility-trailblazers'),
+                    __('However, %d issues occurred.', 'mobility-trailblazers'),
                     count($errors)
                 );
             }
