@@ -5,6 +5,35 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.3] - 2025-08-11
+
+### Fixed
+- **JavaScript Error Handling**: Comprehensive fix for frontend JavaScript errors
+  - Fixed "Cannot read properties of undefined" errors in evaluation forms
+  - Added safe i18n text access with `getI18nText()` helper function
+  - Implemented proper null checks for `mt_ajax` object access
+  - Enhanced error handling for AJAX calls with graceful degradation
+  - Fixed evaluation form loading, submission, and draft saving functionality
+  - Resolved inline evaluation and rankings refresh errors
+  - Added console warnings for configuration issues instead of hard failures
+
+### Enhanced
+- **Error Resilience**: Improved frontend stability across different loading scenarios
+  - Graceful fallback to default text when i18n is unavailable
+  - Better user experience with meaningful error messages
+  - Maintained functionality even when WordPress localization fails
+  - Added comprehensive error logging for debugging
+
+### Technical Details
+- Created `getI18nText()` helper function for safe internationalized text access
+- Updated 50+ instances of unsafe `mt_ajax.i18n` access
+- Added null checks for AJAX URL and nonce validation
+- Enhanced error handler with better context information
+- Fixed critical paths in evaluation form, rankings, and inline evaluation systems
+
+### Files Modified
+- `assets/js/frontend.js` - Complete JavaScript error handling overhaul
+
 ## [2.2.2] - 2025-08-11
 
 ### Fixed
