@@ -1,18 +1,22 @@
 /**
  * Mobility Trailblazers Frontend JavaScript
- * Version: 2.0.1
+ * Version: 2.2.3
  */
 
 (function($) {
     'use strict';
 
     // Helper function to safely access mt_ajax.i18n values
-    function getI18nText(key, defaultValue) {
+    // Make it globally accessible for all sections
+    window.getI18nText = function(key, defaultValue) {
         if (typeof mt_ajax !== 'undefined' && mt_ajax && mt_ajax.i18n && mt_ajax.i18n[key]) {
             return mt_ajax.i18n[key];
         }
         return defaultValue || '';
-    }
+    };
+    
+    // Create local reference for convenience
+    var getI18nText = window.getI18nText;
 
     // Global error handler for uncaught JavaScript errors
     window.addEventListener('error', function(e) {

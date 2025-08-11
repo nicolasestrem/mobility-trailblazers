@@ -1,5 +1,20 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.3] - 2025-08-12
+
+### Fixed
+- **Frontend JavaScript Scope Issue**: Fixed "getI18nText is not defined" error in Jury Rankings Table
+  - Made `getI18nText` function globally accessible by attaching it to the window object
+  - Resolved scope issue between multiple IIFE closures in frontend.js
+  - Fixed vote modification arrows functionality in the evaluation table
+  - Maintained backward compatibility with all existing code
+
+### Technical Details
+- The issue occurred because `getI18nText` was defined inside the first IIFE closure and wasn't accessible to the second IIFE that handles Jury Rankings Table interactions
+- Solution: Attached the function to `window.getI18nText` making it globally available while keeping a local reference for the first closure
+- Affected functionality: Vote adjustment arrows in the jury evaluation table were throwing console errors when clicked
+- No functionality changes - only scope accessibility fix
+
 ## [2.2.2] - 2025-08-11
 
 ### Refactored
