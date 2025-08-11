@@ -55,7 +55,6 @@ $candidates = get_posts([
     
     <hr class="wp-header-end">
     
-    <!-- Filters -->
     <div class="tablenav top">
         <form method="get" action="">
             <input type="hidden" name="page" value="mt-evaluations">
@@ -89,7 +88,6 @@ $candidates = get_posts([
             </div>
         </form>
         
-        <!-- Bulk Actions -->
         <div class="alignleft actions bulkactions">
             <label for="bulk-action-selector-top" class="screen-reader-text"><?php _e('Select bulk action', 'mobility-trailblazers'); ?></label>
             <select name="action" id="bulk-action-selector-top">
@@ -103,7 +101,6 @@ $candidates = get_posts([
         </div>
     </div>
     
-    <!-- Evaluations Table -->
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -191,7 +188,6 @@ $candidates = get_posts([
         </tfoot>
     </table>
     
-    <!-- Bottom Bulk Actions -->
     <div class="tablenav bottom">
         <div class="alignleft actions bulkactions">
             <label for="bulk-action-selector-bottom" class="screen-reader-text"><?php _e('Select bulk action', 'mobility-trailblazers'); ?></label>
@@ -207,16 +203,7 @@ $candidates = get_posts([
     </div>
 </div>
 
-<!-- Evaluation Details Modal -->
 <div id="evaluation-details-modal" style="display:none;">
     <div class="evaluation-details-content">
-        <!-- Content will be loaded via AJAX -->
-    </div>
+        </div>
 </div>
-
-<style>
-.status-draft { color: #996800; }
-.status-completed { color: #46b450; }
-.status-approved { color: #46b450; font-weight: bold; }
-.status-rejected { color: #dc3232; }
-</style>
