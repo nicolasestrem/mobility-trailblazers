@@ -143,8 +143,7 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         $defaults = [
             'created_at' => current_time('mysql'),
             'updated_at' => current_time('mysql'),
-            'status' => 'draft',
-            'user_id' => get_current_user_id()
+            'status' => 'draft'
         ];
         
         $data = wp_parse_args($data, $defaults);
@@ -160,7 +159,6 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
             switch ($key) {
                 case 'jury_member_id':
                 case 'candidate_id':
-                case 'user_id':
                     $formats[] = '%d';
                     break;
                 case 'courage_score':

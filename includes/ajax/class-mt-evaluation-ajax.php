@@ -40,6 +40,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         // Test AJAX action to handle test calls gracefully
         add_action('wp_ajax_mt_test_ajax', [$this, 'test_ajax']);
         
+        // Debug AJAX action to check user capabilities
+        add_action('wp_ajax_mt_debug_user', [$this, 'debug_user']);
+        
         // Bulk operations
         add_action('wp_ajax_mt_bulk_evaluation_action', [$this, 'bulk_evaluation_action']);
     }
@@ -56,9 +59,15 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             return;
         }
         
+        // Debug: Log user capabilities
+        $current_user_id = get_current_user_id();
+        $user = wp_get_current_user();
+        error_log('MT AJAX - User ID: ' . $current_user_id);
+        error_log('MT AJAX - User roles: ' . implode(', ', $user->roles));
+        error_log('MT AJAX - Can submit evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'true' : 'false'));
+        
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
-            wp_send_json_error(__('You do not have permission to submit evaluations.', 'mobility-trailblazers'));
             return;
         }
         
@@ -74,6 +83,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         if (!$jury_member) {
             error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            return;
         }
         
         error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
@@ -120,6 +130,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         if (!$has_assignment) {
             $this->error(__('You do not have permission to evaluate this candidate. Please contact an administrator.', 'mobility-trailblazers'));
+            return;
         }
         
         // Process evaluation
@@ -159,7 +170,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
-            wp_send_json_error(__('You do not have permission to save drafts.', 'mobility-trailblazers'));
             return;
         }
         
@@ -231,7 +241,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
-            wp_send_json_error(__('You do not have permission to view evaluations.', 'mobility-trailblazers'));
             return;
         }
         
@@ -278,7 +287,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
-            wp_send_json_error(__('You do not have permission to view candidate details.', 'mobility-trailblazers'));
             return;
         }
         
@@ -335,7 +343,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
-            wp_send_json_error(__('You do not have permission to view progress.', 'mobility-trailblazers'));
             return;
         }
         
@@ -683,5 +690,29 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'timestamp' => current_time('mysql'),
             'user_id' => get_current_user_id()
         ], 'AJAX test successful');
+    }
+    
+    /**
+     * Debug user capabilities
+     *
+     * @return void
+     */
+    public function debug_user() {
+        $current_user_id = get_current_user_id();
+        $user = wp_get_current_user();
+        
+        $debug_info = [
+            'user_id' => $current_user_id,
+            'user_login' => $user->user_login,
+            'user_email' => $user->user_email,
+            'roles' => $user->roles,
+            'capabilities' => $user->allcaps,
+            'can_submit_evaluations' => current_user_can('mt_submit_evaluations'),
+            'is_logged_in' => is_user_logged_in(),
+            'has_jury_member_role' => in_array('mt_jury_member', $user->roles),
+            'has_administrator_role' => in_array('administrator', $user->roles)
+        ];
+        
+        $this->success($debug_info, 'User debug information');
     }
 } 

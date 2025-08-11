@@ -551,19 +551,24 @@
             formData.nonce = mt_ajax.nonce;
             formData.status = 'completed';
             
+            console.log('Submitting evaluation with data:', formData); // Debug log
+            
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
+                    console.log('AJAX Response:', response); // Debug log
+                    
                     if (response.success) {
-                        // Show success message
-                        $('.mt-evaluation-header').after('<div class="mt-notice mt-notice-success">' + response.data.message + '</div>');
+                        // Show success message - message is in response.data.message
+                        var successMessage = response.data && response.data.message ? response.data.message : getI18nText('evaluation_submitted', 'Evaluation submitted successfully!');
+                        $('.mt-evaluation-header').after('<div class="mt-notice mt-notice-success">' + successMessage + '</div>');
                         
                         // Update status badge
                         var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
                         if ($statusBadge.length) {
-                                                    $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text(getI18nText('evaluation_submitted', 'Evaluation Submitted'));
-                    } else {
-                        $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">' + getI18nText('evaluation_submitted', 'Evaluation Submitted') + '</span>');
-                    }
+                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text(getI18nText('evaluation_submitted', 'Evaluation Submitted'));
+                        } else {
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">' + getI18nText('evaluation_submitted', 'Evaluation Submitted') + '</span>');
+                        }
                         
                         // Scroll to top
                         $('html, body').animate({ scrollTop: 0 }, 300);
@@ -576,7 +581,9 @@
                             window.location.href = window.location.pathname;
                         }, 3000);
                     } else {
-                        MTJuryDashboard.showError(response.data.message);
+                        // Error message is in response.data.message
+                        var errorMessage = response.data && response.data.message ? response.data.message : getI18nText('error', 'An error occurred. Please try again.');
+                        MTJuryDashboard.showError(errorMessage);
                         $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
                     }
                 })
@@ -627,8 +634,12 @@
             formData.nonce = mt_ajax.nonce;
             formData.status = 'draft';
             
+            console.log('Saving draft with data:', formData); // Debug log
+            
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
+                    console.log('Draft Save Response:', response); // Debug log
+                    
                     if (response.success) {
                         // Show success message temporarily
                         $btn.html('<span class="dashicons dashicons-saved"></span> ' + getI18nText('draft_saved', 'Draft Saved!'));
@@ -645,7 +656,9 @@
                             $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + getI18nText('save_as_draft', 'Save as Draft'));
                         }, 2000);
                     } else {
-                        MTJuryDashboard.showError(response.data.message);
+                        // Error message is in response.data.message
+                        var errorMessage = response.data && response.data.message ? response.data.message : getI18nText('error', 'Failed to save draft.');
+                        MTJuryDashboard.showError(errorMessage);
                         $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + getI18nText('save_as_draft', 'Save as Draft'));
                     }
                 })

@@ -98,6 +98,8 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 return $existing->id;
             } else {
                 error_log('MT Evaluation Service - Update failed');
+                $this->errors[] = __('Failed to update existing evaluation.', 'mobility-trailblazers');
+                return false;
             }
         } else {
             // Create new evaluation
@@ -111,6 +113,8 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 return $result;
             } else {
                 error_log('MT Evaluation Service - Create failed');
+                $this->errors[] = __('Failed to create new evaluation.', 'mobility-trailblazers');
+                return false;
             }
         }
         

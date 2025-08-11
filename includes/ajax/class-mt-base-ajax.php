@@ -56,7 +56,7 @@ abstract class MT_Base_Ajax {
      * Check user permission
      *
      * @param string $capability Required capability
-     * @return void
+     * @return bool
      */
     protected function check_permission($capability) {
         try {
@@ -67,13 +67,16 @@ abstract class MT_Base_Ajax {
                     'action' => $_REQUEST['action'] ?? 'unknown'
                 ]);
                 $this->error(__('You do not have permission to perform this action.', 'mobility-trailblazers'));
+                return false;
             }
+            return true;
         } catch (\Exception $e) {
             MT_Logger::critical('Exception during permission check', [
                 'exception' => $e->getMessage(),
                 'capability' => $capability
             ]);
             $this->error(__('Permission check failed. Please try again.', 'mobility-trailblazers'));
+            return false;
         }
     }
     
