@@ -1,5 +1,159 @@
 # Mobility Trailblazers Developer Guide
 
+## JavaScript Architecture
+
+### Overview
+The admin JavaScript is organized into modular components that load conditionally based on the current admin page. The main file `assets/js/admin.js` contains both general utilities and page-specific modules.
+
+### Module Structure
+
+#### General Utilities (Loaded on All Admin Pages)
+- `initTooltips()` - Initialize tooltip functionality
+- `initTabs()` - Tab navigation system
+- `initModals()` - Modal dialog handling
+- `initConfirmations()` - Confirmation dialogs for destructive actions
+- `initAjaxForms()` - AJAX form submissions
+- `initMediaUpload()` - WordPress media library integration
+- Global utility functions:
+  - `mtShowNotification()` - Display admin notices
+  - `mtHandleAjaxError()` - Standardized error handling
+  - `mtSerializeForm()` - Form data serialization
+  - `mtUpdateUrlParam()` / `mtGetUrlParam()` - URL parameter management
+  - `mtFormatNumber()` - Number formatting for DACH region
+  - `mtDebounce()` - Function debouncing utility
+
+#### Assignment Management Module (`MTAssignmentManager`)
+Loaded only on the Assignment Management page. Handles:
+- Auto-assignment modal and processing
+- Manual assignment interface
+- Individual assignment removal
+- Bulk clear operations
+- Assignment export
+- Real-time filtering and search
+- Progress tracking and statistics updates
+
+**Key Methods:**
+- `init()` - Entry point, sets up all event handlers
+- `showAutoAssignModal()` / `showManualAssignModal()` - Modal management
+- `submitAutoAssignment()` / `submitManualAssignment()` - AJAX submissions
+- `removeAssignment()` - Individual assignment deletion
+- `clearAllAssignments()` - Bulk removal with double confirmation
+- `exportAssignments()` - CSV export functionality
+- `filterAssignments()` / `applyFilters()` - Real-time filtering
+
+#### Bulk Operations Module (`MTBulkOperations`)
+Loaded when assignment tables are present. Provides:
+- Checkbox selection system
+- Bulk actions (remove, reassign, export)
+- Selection count tracking
+- Modal-based reassignment interface
+
+### Conditional Loading
+
+The system detects the Assignment Management page using multiple checks:
+```javascript
+if ($('#mt-auto-assign-btn').length > 0 ||          // Auto-assign button
+    $('.mt-assignments-table').length > 0 ||         // Assignment table
+    $('.mt-assignment-management').length > 0 ||     // Page wrapper
+    $('body').hasClass('mobility-trailblazers_page_mt-assignment-management') ||
+    window.location.href.includes('mt-assignment-management')) {
+    
+    // Initialize assignment-specific modules
+    MTAssignmentManager.init();
+    
+    if ($('.mt-assignments-table').length > 0) {
+        MTBulkOperations.init();
+    }
+}
+```
+
+### Global Objects
+
+#### `mt_admin` Object
+Provides configuration and localization:
+```javascript
+mt_admin = {
+    ajax_url: '/wp-admin/admin-ajax.php',
+    nonce: 'security_nonce',
+    admin_url: '/wp-admin/',
+    i18n: {
+        // Localized strings
+        confirm_remove_assignment: 'Are you sure?',
+        processing: 'Processing...',
+        // ... more translations
+    }
+}
+```
+
+### Event Handling Patterns
+
+#### Delegation for Dynamic Content
+```javascript
+$(document).on('click', '.mt-remove-assignment', (e) => {
+    e.preventDefault();
+    this.removeAssignment($(e.currentTarget));
+});
+```
+
+#### Direct Binding for Static Elements
+```javascript
+$('#mt-auto-assign-btn').on('click', (e) => {
+    e.preventDefault();
+    this.showAutoAssignModal();
+});
+```
+
+### AJAX Pattern
+
+Standardized AJAX calls with proper error handling:
+```javascript
+$.ajax({
+    url: mt_admin.ajax_url,
+    type: 'POST',
+    data: {
+        action: 'mt_action_name',
+        nonce: mt_admin.nonce,
+        // ... additional data
+    },
+    beforeSend: () => {
+        // Disable UI, show loading state
+    },
+    success: (response) => {
+        if (response.success) {
+            // Handle success
+        } else {
+            // Handle application error
+        }
+    },
+    error: (xhr, status, error) => {
+        // Handle network/server error
+    },
+    complete: () => {
+        // Re-enable UI
+    }
+});
+```
+
+### Debugging
+
+The code includes extensive console logging for debugging:
+- Module initialization confirmations
+- Button detection results
+- AJAX request/response details
+- Page detection logic
+
+To enable verbose logging, check the browser console on page load.
+
+### Best Practices
+
+1. **Encapsulation**: All assignment-specific code is contained within the `MTAssignmentManager` object
+2. **Single Entry Point**: Each module has one `init()` method as the entry point
+3. **Conditional Loading**: Page-specific code only loads where needed
+4. **Consistent Patterns**: Standardized AJAX, event handling, and error management
+5. **Localization Ready**: All user-facing strings use the `mt_admin.i18n` object
+6. **Graceful Degradation**: Checks for optional libraries (Select2, Datepicker) before use
+7. **Memory Management**: Proper cleanup of dynamic elements and event handlers
+
 ## Auto-Assignment System
 
 ### Overview

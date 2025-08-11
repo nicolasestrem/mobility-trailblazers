@@ -1,5 +1,43 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.2] - 2025-08-11
+
+### Refactored
+- **Admin JavaScript Module Architecture**: Restructured `assets/js/admin.js` for better maintainability and performance
+  - Encapsulated assignment-specific functionality into dedicated `MTAssignmentManager` object
+  - Implemented conditional loading - assignment modules only initialize on Assignment Management page
+  - Consolidated multiple `$(document).ready()` calls into single main initialization
+  - Separated general utilities from page-specific modules
+
+### Improved  
+- **Code Organization**:
+  - Assignment Management logic now fully contained in `MTAssignmentManager` object with single `init()` entry point
+  - Bulk Operations logic encapsulated in `MTBulkOperations` object
+  - General utilities (tooltips, modals, tabs) remain globally available for all admin pages
+  - Clear separation of concerns between different functional areas
+
+- **Performance**:
+  - Reduced memory footprint by only loading assignment-specific code when needed
+  - Eliminated potential conflicts from global scope pollution
+  - Faster page loads on non-assignment admin pages
+
+- **Maintainability**:
+  - Single source of truth for assignment page detection logic
+  - Easier debugging with modular structure
+  - Better code reusability and testability
+  - Consistent initialization pattern across all modules
+
+### Technical Details
+- Assignment page detection checks for multiple indicators:
+  - Presence of `#mt-auto-assign-btn` button
+  - Existence of `.mt-assignments-table` element  
+  - `.mt-assignment-management` wrapper class
+  - Body class `mobility-trailblazers_page_mt-assignment-management`
+  - URL containing "mt-assignment-management"
+- No functionality changes - pure refactoring for code quality
+- Maintains backward compatibility with all existing features
+- Preserves all event bindings and AJAX interactions
+
 ## [2.2.1] - 2025-08-11
 
 ### Fixed

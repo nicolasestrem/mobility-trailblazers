@@ -52,40 +52,6 @@ if (typeof mt_admin.i18n === 'undefined') {
     'use strict';
 
     console.log('Admin JS loading...');
-
-    // Wait for document ready
-    $(document).ready(function() {
-        
-        // Initialize tooltips
-        initTooltips();
-        
-        // Initialize tabs
-        initTabs();
-        
-        // Initialize modals
-        initModals();
-        
-        // Initialize confirmations
-        initConfirmations();
-        
-        // Initialize AJAX forms
-        initAjaxForms();
-        
-        // Initialize select2 if available
-        if ($.fn.select2) {
-            $('.mt-select2').select2();
-        }
-        
-        // Initialize date pickers if available
-        if ($.fn.datepicker) {
-            $('.mt-datepicker').datepicker({
-                dateFormat: 'yy-mm-dd'
-            });
-        }
-        
-        // Initialize media upload for settings page
-        initMediaUpload();
-    });
     
     /**
      * Initialize tooltips
@@ -343,7 +309,7 @@ if (typeof mt_admin.i18n === 'undefined') {
     };
 
     /**
-     * Assignment Management Module
+     * Assignment Management Module - Encapsulated for Assignment Page Only
      */
     const MTAssignmentManager = {
         init: function() {
@@ -853,25 +819,8 @@ if (typeof mt_admin.i18n === 'undefined') {
         }
     };
     
-    // Try multiple initialization methods
-    $(document).ready(function() {
-        console.log('Document ready - checking for assignment page');
-        
-        // More inclusive check
-        if ($('#mt-auto-assign-btn').length > 0 || 
-            $('.mt-assignment-management').length > 0 ||
-            $('body').hasClass('mobility-trailblazers_page_mt-assignment-management') ||
-            window.location.href.includes('mt-assignment-management')) {
-            
-            console.log('Assignment page detected, initializing...');
-            MTAssignmentManager.init();
-        } else {
-            console.log('Not on assignment page, skipping initialization');
-        }
-    });
-
     /**
-     * Bulk Operations Manager
+     * Bulk Operations Manager - For Assignment Page Tables
      */
     const MTBulkOperations = {
         selectedItems: [],
@@ -1112,12 +1061,7 @@ if (typeof mt_admin.i18n === 'undefined') {
         }
     };
     
-    // Initialize bulk operations on assignment page
-    $(document).ready(function() {
-        if ($('.mt-assignments-table').length > 0) {
-            MTBulkOperations.init();
-        }
-    });
+
 
     /**
      * Initialize media upload functionality
@@ -1144,5 +1088,55 @@ if (typeof mt_admin.i18n === 'undefined') {
             mediaUploader.open();
         });
     }
+
+    /**
+     * Main initialization on document ready
+     */
+    $(document).ready(function() {
+        console.log('Document ready - initializing general admin functions');
+        
+        // Initialize general utilities (run on all admin pages)
+        initTooltips();
+        initTabs();
+        initModals();
+        initConfirmations();
+        initAjaxForms();
+        
+        // Initialize select2 if available
+        if ($.fn.select2) {
+            $('.mt-select2').select2();
+        }
+        
+        // Initialize date pickers if available
+        if ($.fn.datepicker) {
+            $('.mt-datepicker').datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+        }
+        
+        // Initialize media upload for settings page
+        initMediaUpload();
+        
+        // Check if we're on the Assignment Management page
+        // Only initialize assignment-specific modules if we detect the page elements
+        if ($('#mt-auto-assign-btn').length > 0 || 
+            $('.mt-assignments-table').length > 0 ||
+            $('.mt-assignment-management').length > 0 ||
+            $('body').hasClass('mobility-trailblazers_page_mt-assignment-management') ||
+            window.location.href.includes('mt-assignment-management')) {
+            
+            console.log('Assignment Management page detected, initializing assignment modules...');
+            
+            // Initialize Assignment Manager
+            MTAssignmentManager.init();
+            
+            // Initialize Bulk Operations if table exists
+            if ($('.mt-assignments-table').length > 0) {
+                MTBulkOperations.init();
+            }
+        } else {
+            console.log('Not on assignment page, skipping assignment-specific modules');
+        }
+    });
 
 })(jQuery); 
