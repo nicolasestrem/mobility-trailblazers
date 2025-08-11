@@ -602,14 +602,49 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         $scores = isset($_POST['scores']) ? $_POST['scores'] : [];
         
-        // Log scores for debugging
-        error_log('MT Inline Save - Scores: ' . print_r($scores, true));
+        // Enhanced debugging for assignment verification
+        error_log('MT Inline Save - Debug Info:');
+        error_log('  - Current User ID: ' . $current_user_id);
+        error_log('  - User Roles: ' . implode(', ', wp_get_current_user()->roles));
+        error_log('  - Jury Member ID: ' . $jury_member->ID);
+        error_log('  - Candidate ID: ' . $candidate_id);
+        error_log('  - Scores: ' . print_r($scores, true));
+        error_log('  - Is Administrator: ' . (current_user_can('administrator') ? 'YES' : 'NO'));
+        error_log('  - Can Manage Evaluations: ' . (current_user_can('mt_manage_evaluations') ? 'YES' : 'NO'));
         
         // Verify assignment
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-        if (!$assignment_repo->exists($jury_member->ID, $candidate_id)) {
-            wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
-            return;
+        $assignment_exists = $assignment_repo->exists($jury_member->ID, $candidate_id);
+        
+        error_log('  - Assignment exists: ' . ($assignment_exists ? 'YES' : 'NO'));
+        
+        // If assignment doesn't exist, let's check what assignments this jury member has
+        if (!$assignment_exists) {
+            $jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
+            error_log('  - Total assignments for jury member: ' . count($jury_assignments));
+            if (!empty($jury_assignments)) {
+                error_log('  - Assigned candidate IDs:');
+                foreach ($jury_assignments as $assignment) {
+                    error_log('    - Candidate ID: ' . $assignment->candidate_id);
+                }
+            }
+            
+            // Check if user has special permissions that allow evaluating any candidate
+            $can_evaluate_all = current_user_can('administrator') || current_user_can('mt_manage_evaluations');
+            
+            // For table views from admin or managers, allow evaluation without assignment
+            $is_table_view = isset($_POST['context']) && $_POST['context'] === 'table';
+            
+            if ($can_evaluate_all) {
+                error_log('  - User has admin/manager permissions - allowing evaluation');
+            } elseif ($is_table_view) {
+                // Even for table view, regular jury members need assignments
+                wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+                return;
+            } else {
+                wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+                return;
+            }
         }
         
         // Get existing evaluation if any

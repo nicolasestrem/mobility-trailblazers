@@ -1159,13 +1159,18 @@
                 var val = $(this).val();
                 scores[name] = val;
             });
+            
+            // Debug logging
+            console.log('Saving evaluation for candidate:', candidateId);
+            console.log('Scores to save:', scores);
 
             // Prepare AJAX data
             var ajaxData = {
                 action: 'mt_save_inline_evaluation',
                 nonce: (typeof mt_ajax !== 'undefined' && mt_ajax.nonce) ? mt_ajax.nonce : '',
                 candidate_id: candidateId,
-                scores: scores
+                scores: scores,
+                context: 'table' // Add context to indicate this is from the evaluation table
             };
 
             $.ajax({
@@ -1186,28 +1191,69 @@
                             $row.find('.mt-eval-total-value').text(parseFloat(response.data.total_score).toFixed(1));
                         }
                     } else {
+                        // Log detailed error information
+                        console.error('Save failed - Full response:', response);
+                        var errorMessage = '';
+                        if (response && response.data) {
+                            if (typeof response.data === 'string') {
+                                errorMessage = response.data;
+                            } else if (response.data.message) {
+                                errorMessage = response.data.message;
+                            } else if (response.data.errors) {
+                                errorMessage = response.data.errors.join(', ');
+                            }
+                        }
+                        errorMessage = errorMessage || getI18nText('error_saving_evaluation', 'Error saving evaluation');
+                        
                         $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> ' + getI18nText('error', 'Error'));
                         $row.removeClass('saving').addClass('unsaved');
                         setTimeout(function() {
                             $btn.html('<span class="dashicons dashicons-saved"></span> ' + getI18nText('save', 'Save'));
                         }, 2000);
                         if (window.MTErrorHandler) {
-                            MTErrorHandler.showUserError(response.data || getI18nText('error_saving_evaluation', 'Error saving evaluation'));
+                            MTErrorHandler.showUserError(errorMessage);
                         } else {
-                            alert(response.data || getI18nText('error_saving_evaluation', 'Error saving evaluation'));
+                            alert(errorMessage);
                         }
                     }
                 },
                 error: function(xhr, status, error) {
+                    // Log detailed error information
+                    console.error('AJAX Save Error:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        responseJSON: xhr.responseJSON,
+                        readyState: xhr.readyState,
+                        statusText: xhr.statusText
+                    });
+                    
                     $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> ' + getI18nText('error', 'Error'));
                     $row.removeClass('saving').addClass('unsaved');
                     setTimeout(function() {
                         $btn.html('<span class="dashicons dashicons-saved"></span> ' + getI18nText('save', 'Save'));
                     }, 2000);
+                    
+                    // Try to get a meaningful error message
+                    var errorMessage = getI18nText('network_error', 'Network error. Please try again.');
+                    if (xhr.responseJSON && xhr.responseJSON.data) {
+                        errorMessage = xhr.responseJSON.data;
+                    } else if (xhr.responseText) {
+                        // Check if responseText contains an error message
+                        try {
+                            var parsed = JSON.parse(xhr.responseText);
+                            if (parsed.data) {
+                                errorMessage = parsed.data;
+                            }
+                        } catch(e) {
+                            // Not JSON, use default message
+                        }
+                    }
+                    
                     if (window.MTErrorHandler) {
                         MTErrorHandler.handleAjaxError(xhr, status, error, 'jury-rankings-table');
                     } else {
-                        alert(getI18nText('network_error', 'Network error. Please try again.'));
+                        alert(errorMessage);
                     }
                 }
             });

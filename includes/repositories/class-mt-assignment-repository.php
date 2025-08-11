@@ -487,14 +487,20 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     public function clear_all() {
         global $wpdb;
         
-        $result = $wpdb->query("DELETE FROM {$this->table_name}") !== false;
+        // Use TRUNCATE for better performance and to reset auto-increment
+        // TRUNCATE is safe here as we're intentionally removing all data
+        $result = $wpdb->query("TRUNCATE TABLE {$this->table_name}");
         
-        if ($result) {
+        // TRUNCATE returns 0 on success, false on failure
+        // DELETE returns number of rows affected or false on failure
+        // We consider the operation successful if it doesn't return false
+        if ($result !== false) {
             // Clear all related caches
             $this->clear_all_assignment_caches();
+            return true;
         }
         
-        return $result;
+        return false;
     }
     
     /**
