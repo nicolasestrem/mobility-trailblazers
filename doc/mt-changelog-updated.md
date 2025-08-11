@@ -5,6 +5,48 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2025-08-11
+
+### Fixed
+- **Enhanced Profile Import System**: Complete overhaul of CSV import functionality
+  - Fixed file type validation to accept more MIME types (Excel, octet-stream)
+  - Improved header detection with case-insensitive matching
+  - Enhanced delimiter detection algorithm with multi-line analysis
+  - Added UTF-8 BOM handling for Excel-exported files
+  - Replaced deprecated `get_page_by_title()` with `WP_Query`
+
+### Added
+- **Debug Tools Suite**: Three new administrative tools for profile management
+  - **Migrate Profiles Tool**: Ensures existing profiles have correct meta field structure
+  - **Test Profile System**: Debug and verify profile system functionality
+  - **Generate Sample Profiles**: Create test data with German names and organizations
+- **Import Debugging**: Enhanced error messages and debugging information
+  - Shows detected MIME type and delimiter
+  - Displays found headers for verification
+  - Row-by-row error reporting with specific issues
+
+### Enhanced
+- **Import Robustness**: Made import process more fault-tolerant
+  - Warnings instead of hard failures for file type issues
+  - Better handling of empty rows and metadata
+  - Improved field mapping with multiple header variations
+  - Support for German and English header names
+
+### Technical Details
+- Created `debug/` directory with three utility scripts
+- Updated `class-mt-enhanced-profile-importer.php` with 5 major improvements
+- Added comprehensive documentation in `doc/import-system-complete-guide.md`
+
+### Files Created
+- `debug/migrate-candidate-profiles.php` - Profile migration tool
+- `debug/test-profile-system.php` - System testing utility
+- `debug/generate-sample-profiles.php` - Sample data generator
+- `doc/import-system-complete-guide.md` - Complete import system documentation
+
+### Files Modified
+- `includes/admin/class-mt-enhanced-profile-importer.php` - Major import fixes
+- `includes/admin/class-mt-admin.php` - Added debug tool menu items
+
 ## [2.2.1] - 2025-08-11
 
 ### Added

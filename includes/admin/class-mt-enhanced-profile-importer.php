@@ -53,29 +53,35 @@ class MT_Enhanced_Profile_Importer {
             return $results;
         }
         
-        // Validate file type
+        // Validate file type (more lenient)
         $file_info = wp_check_filetype($file_path);
-        $allowed_types = ['csv', 'txt'];
-        if (!in_array(strtolower($file_info['ext']), $allowed_types)) {
+        $allowed_types = ['csv', 'txt', 'text'];
+        // Allow if extension is in allowed list or if no extension (could be temp file)
+        if (!empty($file_info['ext']) && !in_array(strtolower($file_info['ext']), $allowed_types)) {
             $results['messages'][] = sprintf(
-                __('Invalid file type "%s". Only CSV and TXT files are allowed.', 'mobility-trailblazers'),
-                $file_info['ext'] ?: 'unknown'
+                __('Warning: Unexpected file extension "%s". Processing as CSV.', 'mobility-trailblazers'),
+                $file_info['ext']
             );
-            return $results;
+            // Don't return - continue processing
         }
         
-        // Validate MIME type for additional security
+        // Validate MIME type for additional security (more lenient check)
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($finfo, $file_path);
         finfo_close($finfo);
         
-        $allowed_mimes = ['text/csv', 'text/plain', 'application/csv', 'application/x-csv'];
-        if (!in_array($mime_type, $allowed_mimes)) {
+        $allowed_mimes = ['text/csv', 'text/plain', 'application/csv', 'application/x-csv', 'application/vnd.ms-excel', 'text/x-csv', 'text/comma-separated-values', 'application/octet-stream'];
+        // Allow if MIME type contains 'text' or 'csv'
+        $is_valid_mime = in_array($mime_type, $allowed_mimes) || 
+                        strpos($mime_type, 'text') !== false || 
+                        strpos($mime_type, 'csv') !== false;
+        
+        if (!$is_valid_mime) {
             $results['messages'][] = sprintf(
-                __('Invalid file MIME type "%s". File must be a valid CSV file.', 'mobility-trailblazers'),
+                __('Warning: Unexpected file MIME type "%s". Attempting to process as CSV anyway.', 'mobility-trailblazers'),
                 $mime_type
             );
-            return $results;
+            // Don't return here - continue processing
         }
         
         // Check file size (max 10MB)
@@ -91,38 +97,84 @@ class MT_Enhanced_Profile_Importer {
         }
         
         // Open file with UTF-8 encoding support
+        // Try to detect if file has BOM and handle accordingly
+        $bom = file_get_contents($file_path, false, null, 0, 3);
+        $has_bom = ($bom === "\xEF\xBB\xBF");
+        
         $handle = fopen($file_path, 'r');
         if (!$handle) {
             $results['messages'][] = __('Could not open file.', 'mobility-trailblazers');
             return $results;
         }
         
+        // Skip BOM if present
+        if ($has_bom) {
+            fread($handle, 3);
+        }
+        
         // Detect delimiter
         $delimiter = self::detect_delimiter($file_path);
+        
+        // Add debug info
+        $results['messages'][] = sprintf(
+            __('File info: MIME type: %s, Delimiter detected: %s', 'mobility-trailblazers'),
+            isset($mime_type) ? $mime_type : 'unknown',
+            $delimiter === '\t' ? 'TAB' : $delimiter
+        );
         
         // Find the actual header row (skip metadata rows)
         $headers = null;
         $row_number = 0;
+        
+        // Reset file pointer to beginning
+        rewind($handle);
+        
         while (($data = fgetcsv($handle, 0, $delimiter)) !== FALSE) {
             $row_number++;
             
-            // Look for the row that contains 'ID' and 'Name'
-            if (in_array('ID', $data) || in_array('Name', $data)) {
+            // Skip empty rows
+            if (empty(array_filter($data))) {
+                continue;
+            }
+            
+            // Look for the row that contains key headers (case-insensitive)
+            $has_id = false;
+            $has_name = false;
+            
+            foreach ($data as $cell) {
+                $cell_lower = strtolower(trim($cell));
+                if ($cell_lower === 'id' || $cell_lower === 'nummer') {
+                    $has_id = true;
+                }
+                if ($cell_lower === 'name' || strpos($cell_lower, 'name') !== false) {
+                    $has_name = true;
+                }
+            }
+            
+            // If we found ID or Name columns, this is likely our header row
+            if ($has_id || $has_name) {
                 $headers = $data;
                 break;
             }
             
             // Stop if we've checked too many rows
-            if ($row_number > 10) {
+            if ($row_number > 20) {
                 break;
             }
         }
         
         if (!$headers) {
-            $results['messages'][] = __('No valid headers found in CSV.', 'mobility-trailblazers');
+            $results['messages'][] = __('No valid headers found in CSV. Please ensure your CSV has a header row with columns like "ID", "Name", etc.', 'mobility-trailblazers');
             fclose($handle);
             return $results;
         }
+        
+        // Debug: Show detected headers
+        $results['messages'][] = sprintf(
+            __('Found %d columns in header row: %s', 'mobility-trailblazers'),
+            count($headers),
+            implode(', ', array_slice($headers, 0, 5)) . (count($headers) > 5 ? '...' : '')
+        );
         
         // Map headers to fields
         $field_map = self::map_csv_headers($headers);
@@ -213,17 +265,47 @@ class MT_Enhanced_Profile_Importer {
     private static function detect_delimiter($file_path) {
         $delimiters = [',', ';', '\t', '|'];
         $handle = fopen($file_path, 'r');
-        $firstLine = fgets($handle);
+        
+        // Read multiple lines to better detect delimiter
+        $sample_lines = [];
+        for ($i = 0; $i < 5; $i++) {
+            $line = fgets($handle);
+            if ($line === false) break;
+            // Skip empty lines
+            if (trim($line) !== '') {
+                $sample_lines[] = $line;
+            }
+        }
         fclose($handle);
+        
+        if (empty($sample_lines)) {
+            return ',';
+        }
         
         $delimiter = ',';
         $maxCount = 0;
+        $mostConsistent = ',';
+        $bestConsistency = 0;
         
         foreach ($delimiters as $d) {
-            $count = count(str_getcsv($firstLine, $d));
-            if ($count > $maxCount) {
-                $maxCount = $count;
+            $counts = [];
+            foreach ($sample_lines as $line) {
+                $counts[] = count(str_getcsv($line, $d));
+            }
+            
+            // Check for consistency across lines
+            $avg_count = array_sum($counts) / count($counts);
+            $variance = 0;
+            foreach ($counts as $count) {
+                $variance += pow($count - $avg_count, 2);
+            }
+            $variance = $variance / count($counts);
+            
+            // Prefer delimiter with highest count and lowest variance
+            if ($avg_count > 1 && ($avg_count > $maxCount || ($avg_count == $maxCount && $variance < $bestConsistency))) {
+                $maxCount = $avg_count;
                 $delimiter = $d;
+                $bestConsistency = $variance;
             }
         }
         
@@ -356,8 +438,14 @@ class MT_Enhanced_Profile_Importer {
             }
         }
         
-        // Check if exists
-        $existing = get_page_by_title($data['name'], OBJECT, 'mt_candidate');
+        // Check if exists (using WP_Query for better compatibility)
+        $existing_query = new \WP_Query([
+            'post_type' => 'mt_candidate',
+            'title' => $data['name'],
+            'posts_per_page' => 1,
+            'post_status' => 'any'
+        ]);
+        $existing = $existing_query->have_posts() ? $existing_query->posts[0] : null;
         
         if ($existing && !$options['update_existing']) {
             return [
@@ -389,8 +477,14 @@ class MT_Enhanced_Profile_Importer {
             return $validation;
         }
         
-        // Check if candidate exists
-        $existing = get_page_by_title($data['name'], OBJECT, 'mt_candidate');
+        // Check if candidate exists (using WP_Query for better compatibility)
+        $existing_query = new \WP_Query([
+            'post_type' => 'mt_candidate',
+            'title' => $data['name'],
+            'posts_per_page' => 1,
+            'post_status' => 'any'
+        ]);
+        $existing = $existing_query->have_posts() ? $existing_query->posts[0] : null;
         
         if ($existing) {
             if (!$options['update_existing']) {

@@ -458,6 +458,15 @@ class MT_Example_Ajax extends MT_Base_Ajax {
 - Maintain API documentation
 - Update user guides
 
+## Additional Resources
+
+- [Changelog](mt-changelog-updated.md) - Complete version history and release notes
+- [Architecture Documentation](mt-architecture-docs.md) - Detailed architecture and system design
+- [Customization Guide](mt-customization-guide.md) - UI/UX customization options
+- [Import System Complete Guide](import-system-complete-guide.md) - Comprehensive CSV import and profile management
+- [Error Handling System](error-handling-system.md) - Error monitoring and debugging
+- [Bulk Operations Implementation](bulk-operations-implementation.md) - Bulk data management features
+
 ### Code Review
 - Review all changes
 - Check i18n compliance
