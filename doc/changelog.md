@@ -1,5 +1,43 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.6] - 2025-08-12
+
+### Fixed
+- **Assignment Management Button Functionality**: Completed JavaScript implementation for all assignment management buttons
+  - Fixed non-functional "Manual Assignment", "Bulk Actions", and "Export" buttons
+  - Implemented complete event handlers for all assignment management operations
+  - Added missing AJAX handlers for manual assignment, bulk operations, and export functionality
+  - Fixed modal interactions for auto-assign and manual assign dialogs
+
+### Added
+- **Complete Assignment Management JavaScript Module**:
+  - `submitAutoAssignment()`: Handles auto-assignment form submission with AJAX
+  - `submitManualAssignment()`: Processes manual candidate-to-jury assignments
+  - `removeAssignment()`: Individual assignment removal with confirmation
+  - `clearAllAssignments()`: Bulk clear with double confirmation for safety
+  - `exportAssignments()`: CSV export via form submission
+  - `toggleBulkActions()`: Show/hide bulk action interface with checkboxes
+  - `applyBulkAction()`: Process bulk remove, export, or reassign operations
+  - `bulkRemoveAssignments()`: Batch removal of selected assignments
+  - `bulkExportAssignments()`: Export selected assignments to CSV
+  - `filterAssignments()`: Real-time search filtering
+  - `applyFilters()`: Advanced filtering by jury member and status
+
+### Enhanced
+- **User Experience**:
+  - All buttons now provide visual feedback during processing
+  - Proper loading states with disabled buttons during AJAX operations
+  - Confirmation dialogs for destructive actions (remove, clear all)
+  - Success/error notifications for all operations
+  - Smooth animations for row removal and modal transitions
+
+### Technical Details
+- Completed partial JavaScript refactoring from v2.2.2
+- Maintained module architecture with MTAssignmentManager object
+- All AJAX calls use proper nonce verification
+- Error handling with user-friendly messages
+- No breaking changes - enhancement of existing functionality
+
 ## [2.2.5] - 2025-08-12
 
 ### Added

@@ -22,24 +22,46 @@ The admin JavaScript is organized into modular components that load conditionall
   - `mtFormatNumber()` - Number formatting for DACH region
   - `mtDebounce()` - Function debouncing utility
 
-#### Assignment Management Module (`MTAssignmentManager`)
-Loaded only on the Assignment Management page. Handles:
+#### Assignment Management Module (`MTAssignmentManager`) - COMPLETE
+Loaded only on the Assignment Management page. Provides full assignment management functionality:
+
+**Core Features:**
 - Auto-assignment modal and processing
-- Manual assignment interface
+- Manual assignment interface  
 - Individual assignment removal
-- Bulk clear operations
-- Assignment export
+- Bulk operations (remove, export, reassign)
+- Assignment export to CSV
 - Real-time filtering and search
 - Progress tracking and statistics updates
 
 **Key Methods:**
-- `init()` - Entry point, sets up all event handlers
-- `showAutoAssignModal()` / `showManualAssignModal()` - Modal management
-- `submitAutoAssignment()` / `submitManualAssignment()` - AJAX submissions
-- `removeAssignment()` - Individual assignment deletion
-- `clearAllAssignments()` - Bulk removal with double confirmation
-- `exportAssignments()` - CSV export functionality
-- `filterAssignments()` / `applyFilters()` - Real-time filtering
+- `init()` - Entry point, sets up all event handlers and initializes bulk actions
+- `bindEvents()` - Attaches all event listeners for buttons, forms, and filters
+- `initBulkActions()` - Sets up bulk action checkboxes and handlers
+
+**Modal Management:**
+- `showAutoAssignModal()` - Displays auto-assignment configuration dialog
+- `showManualAssignModal()` - Opens manual assignment interface
+- `submitAutoAssignment()` - Processes auto-assignment with selected method
+- `submitManualAssignment()` - Creates assignments for selected candidates
+
+**Assignment Operations:**
+- `removeAssignment($button)` - Removes individual assignment with confirmation
+- `clearAllAssignments()` - Bulk removal with double confirmation for safety
+- `exportAssignments()` - Exports all assignments to CSV via form submission
+
+**Bulk Operations:**
+- `toggleBulkActions()` - Shows/hides bulk action interface with checkboxes
+- `applyBulkAction()` - Routes to appropriate bulk handler
+- `bulkRemoveAssignments(ids)` - Batch removal of selected assignments
+- `bulkExportAssignments(ids)` - Export selected assignments to CSV
+
+**Filtering & Search:**
+- `filterAssignments(searchTerm)` - Real-time text search across all table data
+- `applyFilters()` - Advanced filtering by jury member and evaluation status
+
+**Implementation Status:** ✅ COMPLETE (v2.2.6)
+All methods fully implemented with proper error handling, loading states, and user feedback.
 
 #### Bulk Operations Module (`MTBulkOperations`)
 Loaded when assignment tables are present. Provides:
