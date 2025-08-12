@@ -259,7 +259,7 @@ README.md (Overview & Quick Start)
 
 ## 📄 License
 
-GPL v2 or later
+GPL 2.0 . or later. See the LICENSE file.
 
 ## 🚀 Development Status
 
