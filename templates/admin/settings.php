@@ -23,6 +23,9 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
     ];
     update_option('mt_criteria_weights', $weights);
     
+    // Save data management settings
+    update_option('mt_remove_data_on_uninstall', isset($_POST['mt_remove_data_on_uninstall']) ? '1' : '0');
+    
     // Save dashboard settings
     if (isset($_POST['mt_dashboard_settings'])) {
         $dashboard_settings = [
@@ -518,6 +521,45 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                            value="<?php echo esc_attr($evaluations_per_page); ?>" 
                            min="5" max="100" class="small-text">
                     <p class="description"><?php _e('Number of evaluations to display per page in admin', 'mobility-trailblazers'); ?></p>
+                </td>
+            </tr>
+        </table>
+        
+        <!-- Data Management -->
+        <h2><?php _e('Data Management', 'mobility-trailblazers'); ?></h2>
+        <p><?php _e('Configure how plugin data is handled during various operations.', 'mobility-trailblazers'); ?></p>
+        
+        <table class="form-table">
+            <tr>
+                <th scope="row"><?php _e('Uninstall Options', 'mobility-trailblazers'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="mt_remove_data_on_uninstall" value="1"
+                               <?php checked(get_option('mt_remove_data_on_uninstall', '0'), '1'); ?> />
+                        <strong><?php _e('Remove all data when plugin is uninstalled', 'mobility-trailblazers'); ?></strong>
+                    </label>
+                    <div class="notice notice-warning inline" style="margin-top: 10px;">
+                        <p>
+                            <strong><?php _e('⚠️ WARNING:', 'mobility-trailblazers'); ?></strong> 
+                            <?php _e('Checking this box will cause ALL plugin data to be PERMANENTLY DELETED when the plugin is uninstalled. This includes:', 'mobility-trailblazers'); ?>
+                        </p>
+                        <ul style="list-style-type: disc; margin-left: 20px;">
+                            <li><?php _e('All candidate profiles and information', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All jury member profiles', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All evaluations and scores', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All assignments and relationships', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All audit logs and history', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All custom database tables (mt_*)', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('All plugin settings and configurations', 'mobility-trailblazers'); ?></li>
+                        </ul>
+                        <p style="color: #d63638;">
+                            <strong><?php _e('This action cannot be undone!', 'mobility-trailblazers'); ?></strong> 
+                            <?php _e('Only enable this if you are absolutely certain you want to completely remove all traces of this plugin from your WordPress installation.', 'mobility-trailblazers'); ?>
+                        </p>
+                    </div>
+                    <p class="description" style="margin-top: 10px;">
+                        <?php _e('If unchecked (recommended), deactivating or uninstalling the plugin will preserve all data for potential future use.', 'mobility-trailblazers'); ?>
+                    </p>
                 </td>
             </tr>
         </table>

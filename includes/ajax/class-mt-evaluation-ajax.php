@@ -58,7 +58,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function submit_evaluation() {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
-            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
             return;
         }
         
@@ -167,7 +167,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function save_draft() {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
-            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
             return;
         }
         
@@ -238,7 +238,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function get_evaluation() {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
-            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
             return;
         }
         
@@ -284,7 +284,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function get_candidate_details() {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
-            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
             return;
         }
         
@@ -340,7 +340,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function get_jury_progress() {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
-            wp_send_json_error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
             return;
         }
         
@@ -370,19 +370,19 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function get_jury_rankings() {
         // Verify nonce
         if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
         }
         
         // Check permissions
         if (!current_user_can('mt_submit_evaluations')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
         }
         
         $current_user_id = get_current_user_id();
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+            $this->error(__('Jury member not found', 'mobility-trailblazers'));
         }
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
@@ -467,13 +467,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function bulk_evaluation_action() {
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_evaluations')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
             return;
         }
         
@@ -484,7 +484,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             : array();
         
         if (empty($action) || empty($evaluation_ids)) {
-            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            $this->error(__('Invalid parameters', 'mobility-trailblazers'));
             return;
         }
         
@@ -602,7 +602,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 'errors' => $errors
             ]);
         } else {
-            wp_send_json_error(__('No evaluations could be processed.', 'mobility-trailblazers'));
+            $this->error(__('No evaluations could be processed.', 'mobility-trailblazers'));
         }
     }
     
@@ -637,13 +637,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MT: Inline evaluation nonce verification failed for user ' . get_current_user_id());
             }
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_submit_evaluations')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
             return;
         }
         
@@ -651,13 +651,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            wp_send_json_error(__('Jury member not found', 'mobility-trailblazers'));
+            $this->error(__('Jury member not found', 'mobility-trailblazers'));
             return;
         }
         
         $candidate_id = isset($_POST['candidate_id']) ? intval($_POST['candidate_id']) : 0;
         if (!$candidate_id) {
-            wp_send_json_error(__('Invalid candidate ID', 'mobility-trailblazers'));
+            $this->error(__('Invalid candidate ID', 'mobility-trailblazers'));
             return;
         }
         
@@ -700,10 +700,10 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 error_log('  - User has admin/manager permissions - allowing evaluation');
             } elseif ($is_table_view) {
                 // Even for table view, regular jury members need assignments
-                wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+                $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
                 return;
             } else {
-                wp_send_json_error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+                $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
                 return;
             }
         }
@@ -754,7 +754,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         if (is_wp_error($result)) {
             error_log('MT Inline Save - Error: ' . $result->get_error_message());
-            wp_send_json_error($result->get_error_message());
+            $this->error($result->get_error_message());
             return;
         }
         

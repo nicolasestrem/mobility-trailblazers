@@ -418,13 +418,13 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
     public function bulk_candidate_action() {
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('edit_posts')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
             return;
         }
         
@@ -435,7 +435,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             : array();
         
         if (empty($action) || empty($candidate_ids)) {
-            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            $this->error(__('Invalid parameters', 'mobility-trailblazers'));
             return;
         }
         
@@ -537,7 +537,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
                 'errors' => $errors
             ]);
         } else {
-            wp_send_json_error(__('No candidates could be processed.', 'mobility-trailblazers'));
+            $this->error(__('No candidates could be processed.', 'mobility-trailblazers'));
         }
     }
     

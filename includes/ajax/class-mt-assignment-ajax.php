@@ -229,7 +229,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
@@ -245,7 +245,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         error_log('MT Manual Assignment: candidate_ids=' . print_r($candidate_ids, true));
         
         if (!$jury_member_id || empty($candidate_ids)) {
-            wp_send_json_error(__('Please select a jury member and at least one candidate.', 'mobility-trailblazers'));
+            $this->error(__('Please select a jury member and at least one candidate.', 'mobility-trailblazers'));
             return;
         }
         
@@ -298,9 +298,9 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             wp_send_json_success(['message' => $message]);
         } else if ($already_exists > 0) {
-            wp_send_json_error(__('All selected assignments already exist.', 'mobility-trailblazers'));
+            $this->error(__('All selected assignments already exist.', 'mobility-trailblazers'));
         } else {
-            wp_send_json_error(__('Failed to create assignments.', 'mobility-trailblazers'));
+            $this->error(__('Failed to create assignments.', 'mobility-trailblazers'));
         }
     }
 
@@ -417,7 +417,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
     public function auto_assign() {
         // Verify nonce using base class method
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
@@ -443,7 +443,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         error_log('MT Auto Assign: Found ' . count($jury_members) . ' jury members');
         
         if (empty($jury_members)) {
-            wp_send_json_error(__('No jury members found.', 'mobility-trailblazers'));
+            $this->error(__('No jury members found.', 'mobility-trailblazers'));
             return;
         }
         
@@ -458,7 +458,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         error_log('MT Auto Assign: Found ' . count($candidates) . ' candidates');
         
         if (empty($candidates)) {
-            wp_send_json_error(__('No candidates found.', 'mobility-trailblazers'));
+            $this->error(__('No candidates found.', 'mobility-trailblazers'));
             return;
         }
         
@@ -680,10 +680,9 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             ]);
         } else {
             if (empty($errors)) {
-                wp_send_json_error(__('No new assignments were created. All candidates may already be assigned.', 'mobility-trailblazers'));
+                $this->error(__('No new assignments were created. All candidates may already be assigned.', 'mobility-trailblazers'));
             } else {
-                wp_send_json_error([
-                    'message' => __('Auto-assignment failed.', 'mobility-trailblazers'),
+                $this->error(__('Auto-assignment failed.', 'mobility-trailblazers'), [
                     'errors' => $errors
                 ]);
             }
@@ -698,13 +697,13 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
     public function bulk_remove_assignments() {
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_assignments')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
             return;
         }
         
@@ -714,7 +713,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             : array();
         
         if (empty($assignment_ids)) {
-            wp_send_json_error(__('No assignments selected', 'mobility-trailblazers'));
+            $this->error(__('No assignments selected', 'mobility-trailblazers'));
             return;
         }
         
@@ -751,7 +750,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 'errors' => $errors
             ]);
         } else {
-            wp_send_json_error(__('No assignments could be removed.', 'mobility-trailblazers'));
+            $this->error(__('No assignments could be removed.', 'mobility-trailblazers'));
         }
     }
     
@@ -763,13 +762,13 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
     public function bulk_reassign_assignments() {
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_assignments')) {
-            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
             return;
         }
         
@@ -780,14 +779,14 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $new_jury_member_id = isset($_POST['new_jury_member_id']) ? intval($_POST['new_jury_member_id']) : 0;
         
         if (empty($assignment_ids) || !$new_jury_member_id) {
-            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            $this->error(__('Invalid parameters', 'mobility-trailblazers'));
             return;
         }
         
         // Verify new jury member exists
         $jury_member = get_post($new_jury_member_id);
         if (!$jury_member || $jury_member->post_type !== 'mt_jury_member') {
-            wp_send_json_error(__('Invalid jury member selected', 'mobility-trailblazers'));
+            $this->error(__('Invalid jury member selected', 'mobility-trailblazers'));
             return;
         }
         
@@ -867,7 +866,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 'errors' => $errors
             ]);
         } else {
-            wp_send_json_error(__('No assignments could be reassigned.', 'mobility-trailblazers'));
+            $this->error(__('No assignments could be reassigned.', 'mobility-trailblazers'));
         }
     }
     

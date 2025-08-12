@@ -1,5 +1,27 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.13] - 2025-08-12
+
+### Added
+- **Data Management Settings**: New settings section for controlling plugin data handling
+  - Added 'Remove Data on Uninstall' option with comprehensive warning
+  - Setting allows admins to choose whether to preserve or delete all plugin data on uninstall
+  - Strong visual warnings about permanent data deletion consequences
+  - Default is to preserve data (unchecked) for safety
+
+### Improved
+- **AJAX Error Handling Standardization**: Consistent error responses across all AJAX handlers
+  - Replaced all direct wp_send_json_error() calls with $this->error() method
+  - All AJAX errors now automatically logged through MT_Logger system
+  - Standardized error message format and logging across platform
+  - Better debugging capability with centralized error tracking
+
+### Technical Details
+- Settings page enhanced with Data Management section before System Information
+- All AJAX handler classes (MT_Evaluation_Ajax, MT_Assignment_Ajax, MT_Admin_Ajax) now use base class error method
+- Error logging includes action context, user ID, and additional debugging data
+- No breaking changes - error response format remains compatible
+
 ## [2.2.12] - 2025-08-12
 
 ### Enhanced
