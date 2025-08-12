@@ -250,7 +250,7 @@ $assignment_ajax->auto_assign();
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `method` | string | 'balanced' | Distribution method: 'balanced' or 'random' |
-| `candidates_per_jury` | int | 5 | Number of candidates each jury member should evaluate |
+| `candidates_per_jury` | int | 10 | Number of candidates each jury member should evaluate (1-50) |
 | `clear_existing` | string | 'false' | Whether to clear all existing assignments first |
 
 ### Edge Cases

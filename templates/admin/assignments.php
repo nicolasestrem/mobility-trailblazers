@@ -328,8 +328,19 @@ function testAjax() {
             
             <div class="mt-form-group">
                 <label for="candidates_per_jury"><?php _e('Candidates per Jury Member', 'mobility-trailblazers'); ?></label>
-                <input type="number" name="candidates_per_jury" id="candidates_per_jury" value="5" min="1" max="20" class="widefat">
+                <input type="number" name="candidates_per_jury" id="candidates_per_jury" value="10" min="1" max="50" class="widefat">
                 <p class="description"><?php _e('Each jury member will evaluate this many candidates.', 'mobility-trailblazers'); ?></p>
+            </div>
+            
+            <div class="mt-form-group">
+                <label>
+                    <input type="checkbox" name="clear_existing" id="clear_existing" value="true">
+                    <?php _e('Clear all existing assignments before auto-assigning', 'mobility-trailblazers'); ?>
+                </label>
+                <p class="description" style="color: #d63638; margin-left: 24px;">
+                    <strong><?php _e('Warning:', 'mobility-trailblazers'); ?></strong> 
+                    <?php _e('This will permanently remove ALL current assignments. Use with caution!', 'mobility-trailblazers'); ?>
+                </p>
             </div>
             
             <div class="mt-modal-actions">

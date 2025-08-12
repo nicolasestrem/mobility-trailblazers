@@ -173,6 +173,7 @@ if (typeof mt_admin.i18n === 'undefined') {
         submitAutoAssignment: function() {
             const method = $('#assignment_method').val();
             const candidatesPerJury = $('#candidates_per_jury').val();
+            const clearExisting = $('#clear_existing').is(':checked') ? 'true' : 'false';
             
             $.ajax({
                 url: mt_admin.ajax_url,
@@ -181,7 +182,8 @@ if (typeof mt_admin.i18n === 'undefined') {
                     action: 'mt_auto_assign',
                     nonce: mt_admin.nonce,
                     method: method,
-                    candidates_per_jury: candidatesPerJury
+                    candidates_per_jury: candidatesPerJury,
+                    clear_existing: clearExisting
                 },
                 beforeSend: () => {
                     $('#mt-auto-assign-modal button[type="submit"]').prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');

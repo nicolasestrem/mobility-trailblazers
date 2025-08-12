@@ -1,5 +1,26 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.14] - 2025-08-12
+
+### Fixed
+- **Auto-Assignment Functionality**: Resolved issue where auto-assignment failed when jury members already had existing assignments
+  - Added "Clear existing assignments" checkbox option to Auto-Assignment modal
+  - Allows users to either clear all assignments before reassigning or add to existing assignments
+  - Fixed JavaScript to properly send the clear_existing parameter via AJAX
+
+### Enhanced
+- **Assignment Capacity**: Increased maximum candidates per jury member from 20 to 50
+  - Updated form validation to accept up to 50 candidates per jury member
+  - Changed default value from 5 to 10 candidates for better initial distribution
+  - Supports larger evaluation pools for comprehensive jury review processes
+
+### Technical Details
+- Modified `templates/admin/assignments.php` to include clear_existing checkbox with warning message
+- Updated `assets/js/admin.js` submitAutoAssignment() to capture and send clear_existing parameter
+- Increased max attribute in candidates_per_jury input field from 20 to 50
+- No database changes required - uses existing assignment infrastructure
+- Maintains backward compatibility with existing assignments
+
 ## [2.2.7] - 2025-08-12
 
 ### Fixed

@@ -1,6 +1,6 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.2.1
+**Version:** 2.2.14
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 **Last Updated:** August 2025
@@ -62,6 +62,10 @@ E:\OneDrive\CoWorkSpace\Tech Stack\
 
 ### 🛠️ Administration
 - **Assignment Management**: Flexible candidate-to-jury assignment system
+  - Auto-assignment with balanced or random distribution
+  - Support for up to 50 candidates per jury member
+  - Option to clear existing assignments before reassigning
+  - Manual assignment with checkbox selection
 - **Bulk Operations**: Comprehensive bulk actions for evaluations, assignments, and candidates
   - Bulk approve/reject evaluations
   - Bulk remove/reassign assignments
@@ -171,6 +175,12 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 
 ## 📝 Recent Updates
 
+### Version 2.2.14 (August 2025)
+- **Auto-Assignment Fix**: Resolved issue where auto-assignment failed with existing assignments
+- **Clear Assignments Option**: Added checkbox to optionally clear all assignments before auto-assigning
+- **Increased Capacity**: Maximum candidates per jury member increased from 20 to 50
+- **Improved Defaults**: Default candidates per jury changed from 5 to 10 for better distribution
+
 ### Version 2.2.1 (August 2025)
 - **Auto-Assignment Algorithm Fix**: Complete refactoring of jury assignment distribution
 - **Balanced Distribution**: Fair and even candidate distribution with assignment tracking
@@ -266,7 +276,7 @@ GPL 2.0 . or later. See the LICENSE file.
 
 ## 🚀 Development Status
 
-**Current Version: 2.2.1** - Production-ready with active development
+**Current Version: 2.2.14** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -274,4 +284,4 @@ GPL 2.0 . or later. See the LICENSE file.
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 2025 | Version 2.2.1*
+*Last updated: August 2025 | Version 2.2.14*
