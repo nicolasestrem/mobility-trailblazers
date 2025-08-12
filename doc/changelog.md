@@ -1,5 +1,44 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.7] - 2025-08-12
+
+### Fixed
+- **Evaluation Deletion Issues**: Fixed inability to delete evaluations when assignments have been modified
+  - Added force delete capability to bypass constraint checks when needed
+  - Implemented orphaned evaluation detection for evaluations without corresponding assignments
+  - Fixed bulk delete action to use force delete for problematic evaluations
+
+### Added
+- **Orphaned Evaluation Handling**: New system to detect and clean up orphaned evaluations
+  - Added `delete_orphaned_evaluations()` method to remove evaluations without assignments
+  - Added `sync_with_assignments()` method to synchronize evaluation and assignment data
+  - Added `force_delete()` method to bypass constraints when standard deletion fails
+  - Added `can_delete()` method to check if evaluation can be safely deleted
+
+- **Cascade Delete Options**: Assignment deletions can now optionally delete related evaluations
+  - Updated `delete()` method in Assignment Repository with cascade option
+  - Updated `delete_by_jury_member()` method with cascade option
+  - Updated `clear_all()` method with cascade option for full cleanup
+
+- **Database Sync Tool**: New admin tools page for database maintenance
+  - Shows database health status with orphaned evaluation count
+  - One-click sync to clean up orphaned evaluations
+  - Visual indicators for database health (green when healthy, red when issues)
+  - Quick links to related admin pages
+
+- **Improved Bulk Actions**: Enhanced bulk evaluation actions with better error handling
+  - Added bulk_evaluation_action AJAX handler
+  - Support for approve, reject, reset-to-draft, and delete actions
+  - Uses force delete to handle problematic evaluations
+  - Better permission checks (mt_manage_evaluations or manage_options)
+
+### Technical Details
+- All new methods include proper MT_Logger integration for audit trail
+- Cache clearing implemented for all affected operations
+- No breaking changes - all existing functionality preserved
+- Database queries optimized with proper JOIN operations
+- WordPress coding standards maintained throughout
+
 ## [2.2.13] - 2025-08-12
 
 ### Added

@@ -810,4 +810,113 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         $this->success($debug_info, 'User debug information');
     }
+    
+    /**
+     * Handle bulk evaluation actions
+     *
+     * @return void
+     */
+    public function bulk_evaluation_action() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_evaluations') && !current_user_can('manage_options')) {
+            wp_send_json_error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get parameters
+        $action = isset($_POST['bulk_action']) ? sanitize_text_field($_POST['bulk_action']) : '';
+        $evaluation_ids = isset($_POST['evaluation_ids']) && is_array($_POST['evaluation_ids']) 
+            ? array_map('intval', $_POST['evaluation_ids']) 
+            : array();
+        
+        if (empty($action) || empty($evaluation_ids)) {
+            wp_send_json_error(__('Invalid parameters', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Log for debugging
+        error_log('MT Bulk Evaluation: action=' . $action . ', count=' . count($evaluation_ids));
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $success_count = 0;
+        $errors = [];
+        
+        foreach ($evaluation_ids as $evaluation_id) {
+            $result = false;
+            
+            switch ($action) {
+                case 'approve':
+                    $result = $evaluation_repo->update($evaluation_id, ['status' => 'approved']);
+                    break;
+                    
+                case 'reject':
+                    $result = $evaluation_repo->update($evaluation_id, ['status' => 'rejected']);
+                    break;
+                    
+                case 'reset':
+                case 'reset-to-draft':
+                    $result = $evaluation_repo->update($evaluation_id, ['status' => 'draft']);
+                    break;
+                    
+                case 'delete':
+                    // Use force delete to bypass constraints
+                    $result = $evaluation_repo->force_delete($evaluation_id);
+                    break;
+                    
+                default:
+                    $errors[] = sprintf(__('Unknown action: %s', 'mobility-trailblazers'), $action);
+                    continue 2;
+            }
+            
+            if ($result) {
+                $success_count++;
+            } else {
+                $errors[] = sprintf(__('Failed to %s evaluation ID: %d', 'mobility-trailblazers'), $action, $evaluation_id);
+            }
+        }
+        
+        if ($success_count > 0) {
+            $message = sprintf(
+                __('%d evaluations %s successfully.', 'mobility-trailblazers'),
+                $success_count,
+                $this->get_action_past_tense($action)
+            );
+            
+            if (!empty($errors)) {
+                $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
+            }
+            
+            wp_send_json_success([
+                'message' => $message,
+                'success_count' => $success_count,
+                'errors' => $errors
+            ]);
+        } else {
+            wp_send_json_error(__('No evaluations could be processed.', 'mobility-trailblazers'));
+        }
+    }
+    
+    /**
+     * Get past tense of action for messages
+     *
+     * @param string $action Action name
+     * @return string Past tense
+     */
+    private function get_action_past_tense($action) {
+        $past_tense = [
+            'approve' => 'approved',
+            'reject' => 'rejected',
+            'reset' => 'reset to draft',
+            'reset-to-draft' => 'reset to draft',
+            'delete' => 'deleted'
+        ];
+        
+        return isset($past_tense[$action]) ? $past_tense[$action] : $action;
+    }
 } 

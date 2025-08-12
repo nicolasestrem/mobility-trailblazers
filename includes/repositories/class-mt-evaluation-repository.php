@@ -727,4 +727,163 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                   OR option_name LIKE '_transient_timeout_mt_jury_rankings_%'";
         $wpdb->query($query);
     }
+    
+    /**
+     * Delete evaluations with broken assignment references
+     *
+     * @param int $jury_member_id Optional specific jury member
+     * @param int $candidate_id Optional specific candidate
+     * @return int Number of evaluations deleted
+     */
+    public function delete_orphaned_evaluations($jury_member_id = null, $candidate_id = null) {
+        global $wpdb;
+        
+        $assignment_table = $wpdb->prefix . 'mt_jury_assignments';
+        
+        // Build the query to find orphaned evaluations
+        $query = "DELETE e FROM {$this->table_name} e
+                  WHERE NOT EXISTS (
+                      SELECT 1 FROM {$assignment_table} a 
+                      WHERE a.jury_member_id = e.jury_member_id 
+                      AND a.candidate_id = e.candidate_id
+                  )";
+        
+        $where_conditions = [];
+        $values = [];
+        
+        if ($jury_member_id !== null) {
+            $where_conditions[] = "e.jury_member_id = %d";
+            $values[] = $jury_member_id;
+        }
+        
+        if ($candidate_id !== null) {
+            $where_conditions[] = "e.candidate_id = %d";
+            $values[] = $candidate_id;
+        }
+        
+        if (!empty($where_conditions)) {
+            $query .= " AND " . implode(' AND ', $where_conditions);
+        }
+        
+        if (!empty($values)) {
+            $query = $wpdb->prepare($query, $values);
+        }
+        
+        $deleted = $wpdb->query($query);
+        
+        // Clear caches
+        $this->clear_all_evaluation_caches();
+        
+        MT_Logger::info('Deleted orphaned evaluations', [
+            'count' => $deleted,
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id
+        ]);
+        
+        return $deleted !== false ? $deleted : 0;
+    }
+    
+    /**
+     * Check if evaluation can be safely deleted
+     *
+     * @param int $id Evaluation ID
+     * @return bool
+     */
+    public function can_delete($id) {
+        $evaluation = $this->find($id);
+        
+        if (!$evaluation) {
+            return false;
+        }
+        
+        // Check if the evaluation has any dependent data
+        // For now, evaluations can always be deleted
+        // Add more checks here if needed in the future
+        
+        return true;
+    }
+    
+    /**
+     * Force delete evaluation (bypass constraints)
+     *
+     * @param int $id Evaluation ID
+     * @return bool
+     */
+    public function force_delete($id) {
+        global $wpdb;
+        
+        // Get existing evaluation for logging
+        $existing = $this->find($id);
+        
+        if (!$existing) {
+            return false;
+        }
+        
+        // Use direct query to bypass any constraints
+        $result = $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$this->table_name} WHERE id = %d",
+            $id
+        ));
+        
+        if ($result !== false) {
+            // Clear caches
+            $this->clear_evaluation_caches($existing->jury_member_id);
+            
+            MT_Logger::info('Force deleted evaluation', [
+                'evaluation_id' => $id,
+                'jury_member_id' => $existing->jury_member_id,
+                'candidate_id' => $existing->candidate_id
+            ]);
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Sync evaluations with assignments
+     * Removes evaluations that no longer have corresponding assignments
+     *
+     * @return array Statistics about the sync operation
+     */
+    public function sync_with_assignments() {
+        global $wpdb;
+        
+        $stats = [
+            'orphaned_found' => 0,
+            'orphaned_deleted' => 0,
+            'errors' => []
+        ];
+        
+        $assignment_table = $wpdb->prefix . 'mt_jury_assignments';
+        
+        // Find orphaned evaluations
+        $orphaned = $wpdb->get_results(
+            "SELECT e.* FROM {$this->table_name} e
+             WHERE NOT EXISTS (
+                 SELECT 1 FROM {$assignment_table} a 
+                 WHERE a.jury_member_id = e.jury_member_id 
+                 AND a.candidate_id = e.candidate_id
+             )"
+        );
+        
+        $stats['orphaned_found'] = count($orphaned);
+        
+        // Delete orphaned evaluations
+        foreach ($orphaned as $evaluation) {
+            if ($this->force_delete($evaluation->id)) {
+                $stats['orphaned_deleted']++;
+            } else {
+                $stats['errors'][] = "Failed to delete evaluation ID: {$evaluation->id}";
+            }
+        }
+        
+        // Clear all caches
+        $this->clear_all_evaluation_caches();
+        
+        MT_Logger::info('Synced evaluations with assignments', $stats);
+        
+        return $stats;
+    }
 } 

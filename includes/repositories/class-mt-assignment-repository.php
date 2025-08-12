@@ -205,13 +205,27 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
      * Delete assignment
      *
      * @param int $id Assignment ID
+     * @param bool $cascade_evaluations Whether to delete related evaluations
      * @return bool
      */
-    public function delete($id) {
+    public function delete($id, $cascade_evaluations = false) {
         global $wpdb;
         
         // Get existing assignment to clear appropriate caches
         $existing = $this->find($id);
+        
+        if (!$existing) {
+            return false;
+        }
+        
+        // Optionally delete related evaluations first
+        if ($cascade_evaluations) {
+            $evaluation_repo = new MT_Evaluation_Repository();
+            $evaluation_repo->delete_orphaned_evaluations(
+                $existing->jury_member_id, 
+                $existing->candidate_id
+            );
+        }
         
         $result = $wpdb->delete(
             $this->table_name,
@@ -222,6 +236,13 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         if ($result && $existing) {
             // Clear caches
             $this->clear_assignment_caches($existing->jury_member_id);
+            
+            MT_Logger::info('Deleted assignment', [
+                'assignment_id' => $id,
+                'jury_member_id' => $existing->jury_member_id,
+                'candidate_id' => $existing->candidate_id,
+                'cascade_evaluations' => $cascade_evaluations
+            ]);
         }
         
         return $result;
@@ -368,16 +389,28 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
      * Delete all assignments for jury member
      *
      * @param int $jury_member_id Jury member ID
+     * @param bool $cascade_evaluations Whether to delete related evaluations
      * @return int Number of assignments deleted
      */
-    public function delete_by_jury_member($jury_member_id) {
+    public function delete_by_jury_member($jury_member_id, $cascade_evaluations = false) {
         global $wpdb;
         
-        return $wpdb->delete(
+        // Optionally delete related evaluations first
+        if ($cascade_evaluations) {
+            $evaluation_repo = new MT_Evaluation_Repository();
+            $evaluation_repo->delete_orphaned_evaluations($jury_member_id);
+        }
+        
+        $deleted = $wpdb->delete(
             $this->table_name,
             ['jury_member_id' => $jury_member_id],
             ['%d']
         );
+        
+        // Clear caches
+        $this->clear_assignment_caches($jury_member_id);
+        
+        return $deleted;
     }
     
     /**
@@ -482,10 +515,17 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
     /**
      * Clear all assignments
      *
+     * @param bool $cascade_evaluations Whether to delete all evaluations too
      * @return bool
      */
-    public function clear_all() {
+    public function clear_all($cascade_evaluations = false) {
         global $wpdb;
+        
+        // Optionally delete all evaluations first
+        if ($cascade_evaluations) {
+            $evaluation_repo = new MT_Evaluation_Repository();
+            $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}mt_evaluations");
+        }
         
         // Use TRUNCATE for better performance and to reset auto-increment
         // TRUNCATE is safe here as we're intentionally removing all data

@@ -118,6 +118,16 @@ class MT_Admin {
             [$this, 'render_settings_page']
         );
         
+        // Tools submenu
+        add_submenu_page(
+            'mobility-trailblazers',
+            __('Tools', 'mobility-trailblazers'),
+            __('Tools', 'mobility-trailblazers'),
+            'manage_options',
+            'mt-tools',
+            [$this, 'render_tools_page']
+        );
+        
         // Diagnostics submenu (for admins and jury admins)
         if (current_user_can('manage_options') || current_user_can('mt_jury_admin')) {
             add_submenu_page(
@@ -441,6 +451,20 @@ class MT_Admin {
      */
     public function render_settings_page() {
         include MT_PLUGIN_DIR . 'templates/admin/settings.php';
+    }
+    
+    /**
+     * Render tools page
+     *
+     * @return void
+     */
+    public function render_tools_page() {
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/tools.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Tools template file not found.', 'mobility-trailblazers') . '</p></div>';
+        }
     }
     
     /**
