@@ -1,4 +1,6 @@
 <?php
+// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Nicolas Estrem
+
 /**
  * Admin Class
  *
@@ -169,6 +171,16 @@ class MT_Admin {
                 'manage_options',
                 'mt-import-profiles',
                 [$this, 'render_import_profiles_page']
+            );
+            
+            // Audit Log
+            add_submenu_page(
+                'mobility-trailblazers',
+                __('Audit Log', 'mobility-trailblazers'),
+                __('Audit Log', 'mobility-trailblazers'),
+                'manage_options',
+                'mt-audit-log',
+                [$this, 'render_audit_log_page']
             );
         }
     }
@@ -488,6 +500,67 @@ class MT_Admin {
             } else {
                 echo '<div class="notice notice-error"><p>' . esc_html__('Import profiles template not found.', 'mobility-trailblazers') . '</p></div>';
             }
+        }
+    }
+    
+    /**
+     * Render audit log page
+     *
+     * @return void
+     */
+    public function render_audit_log_page() {
+        // Get filter parameters
+        $page = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+        $per_page = isset($_GET['per_page']) ? absint($_GET['per_page']) : 20;
+        $per_page = min(100, max(10, $per_page)); // Between 10 and 100
+        
+        $args = [
+            'page' => $page,
+            'per_page' => $per_page,
+            'orderby' => isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'created_at',
+            'order' => isset($_GET['order']) ? strtoupper(sanitize_text_field($_GET['order'])) : 'DESC'
+        ];
+        
+        // Apply filters
+        if (!empty($_GET['user_id'])) {
+            $args['user_id'] = absint($_GET['user_id']);
+        }
+        
+        if (!empty($_GET['action_filter'])) {
+            $args['action'] = sanitize_text_field($_GET['action_filter']);
+        }
+        
+        if (!empty($_GET['object_type'])) {
+            $args['object_type'] = sanitize_text_field($_GET['object_type']);
+        }
+        
+        if (!empty($_GET['date_from'])) {
+            $args['date_from'] = sanitize_text_field($_GET['date_from']) . ' 00:00:00';
+        }
+        
+        if (!empty($_GET['date_to'])) {
+            $args['date_to'] = sanitize_text_field($_GET['date_to']) . ' 23:59:59';
+        }
+        
+        // Get audit log data
+        $audit_repo = new \MobilityTrailblazers\Repositories\MT_Audit_Log_Repository();
+        $logs_data = $audit_repo->get_logs($args);
+        $unique_actions = $audit_repo->get_unique_actions();
+        $unique_object_types = $audit_repo->get_unique_object_types();
+        
+        // Get users for filter dropdown
+        $users = get_users([
+            'fields' => ['ID', 'display_name'],
+            'number' => 100,
+            'orderby' => 'display_name'
+        ]);
+        
+        // Include template
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/audit-log.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Audit log template file not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     

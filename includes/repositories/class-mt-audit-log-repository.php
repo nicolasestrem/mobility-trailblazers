@@ -1,0 +1,252 @@
+<?php
+/**
+ * Audit Log Repository
+ *
+ * @package MobilityTrailblazers
+ * @since 2.2.2
+ */
+
+namespace MobilityTrailblazers\Repositories;
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * Class MT_Audit_Log_Repository
+ *
+ * Handles database operations for audit log
+ */
+class MT_Audit_Log_Repository {
+    
+    /**
+     * Table name
+     *
+     * @var string
+     */
+    private $table_name;
+    
+    /**
+     * Constructor
+     */
+    public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'mt_audit_log';
+    }
+    
+    /**
+     * Get audit logs
+     *
+     * @param array $args Query arguments
+     * @return array
+     */
+    public function get_logs($args = []) {
+        global $wpdb;
+        
+        // Default arguments
+        $defaults = [
+            'page' => 1,
+            'per_page' => 20,
+            'orderby' => 'created_at',
+            'order' => 'DESC',
+            'user_id' => null,
+            'action' => null,
+            'object_type' => null,
+            'object_id' => null,
+            'date_from' => null,
+            'date_to' => null
+        ];
+        
+        $args = wp_parse_args($args, $defaults);
+        
+        // Build WHERE clause
+        $where_conditions = ['1=1'];
+        $prepare_values = [];
+        
+        if (!empty($args['user_id'])) {
+            $where_conditions[] = 'user_id = %d';
+            $prepare_values[] = $args['user_id'];
+        }
+        
+        if (!empty($args['action'])) {
+            $where_conditions[] = 'action = %s';
+            $prepare_values[] = $args['action'];
+        }
+        
+        if (!empty($args['object_type'])) {
+            $where_conditions[] = 'object_type = %s';
+            $prepare_values[] = $args['object_type'];
+        }
+        
+        if (!empty($args['object_id'])) {
+            $where_conditions[] = 'object_id = %d';
+            $prepare_values[] = $args['object_id'];
+        }
+        
+        if (!empty($args['date_from'])) {
+            $where_conditions[] = 'created_at >= %s';
+            $prepare_values[] = $args['date_from'];
+        }
+        
+        if (!empty($args['date_to'])) {
+            $where_conditions[] = 'created_at <= %s';
+            $prepare_values[] = $args['date_to'];
+        }
+        
+        $where_clause = implode(' AND ', $where_conditions);
+        
+        // Build ORDER BY clause
+        $allowed_orderby = ['id', 'user_id', 'action', 'object_type', 'object_id', 'created_at'];
+        $orderby = in_array($args['orderby'], $allowed_orderby) ? $args['orderby'] : 'created_at';
+        $order = strtoupper($args['order']) === 'ASC' ? 'ASC' : 'DESC';
+        
+        // Calculate pagination
+        $offset = ($args['page'] - 1) * $args['per_page'];
+        
+        // Build the main query
+        $query = "SELECT al.*, u.display_name as user_name, u.user_email
+                  FROM {$this->table_name} al
+                  LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
+                  WHERE {$where_clause}
+                  ORDER BY al.{$orderby} {$order}
+                  LIMIT %d OFFSET %d";
+        
+        $prepare_values[] = $args['per_page'];
+        $prepare_values[] = $offset;
+        
+        // Execute query
+        if (!empty($prepare_values)) {
+            $results = $wpdb->get_results($wpdb->prepare($query, $prepare_values));
+        } else {
+            $results = $wpdb->get_results($query);
+        }
+        
+        // Get total count for pagination
+        $count_query = "SELECT COUNT(*) FROM {$this->table_name} WHERE {$where_clause}";
+        if (!empty($prepare_values)) {
+            // Remove LIMIT and OFFSET values for count query
+            $count_prepare_values = array_slice($prepare_values, 0, -2);
+            if (!empty($count_prepare_values)) {
+                $total_items = $wpdb->get_var($wpdb->prepare($count_query, $count_prepare_values));
+            } else {
+                $total_items = $wpdb->get_var($count_query);
+            }
+        } else {
+            $total_items = $wpdb->get_var($count_query);
+        }
+        
+        return [
+            'items' => $results ? $results : [],
+            'total_items' => (int) $total_items,
+            'total_pages' => ceil($total_items / $args['per_page']),
+            'current_page' => $args['page'],
+            'per_page' => $args['per_page']
+        ];
+    }
+    
+    /**
+     * Get log by ID
+     *
+     * @param int $id Log ID
+     * @return object|null
+     */
+    public function get_by_id($id) {
+        global $wpdb;
+        
+        $query = "SELECT al.*, u.display_name as user_name, u.user_email
+                  FROM {$this->table_name} al
+                  LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
+                  WHERE al.id = %d";
+        
+        return $wpdb->get_row($wpdb->prepare($query, $id));
+    }
+    
+    /**
+     * Get unique actions
+     *
+     * @return array
+     */
+    public function get_unique_actions() {
+        global $wpdb;
+        
+        $query = "SELECT DISTINCT action FROM {$this->table_name} ORDER BY action";
+        $results = $wpdb->get_col($query);
+        
+        return $results ? $results : [];
+    }
+    
+    /**
+     * Get unique object types
+     *
+     * @return array
+     */
+    public function get_unique_object_types() {
+        global $wpdb;
+        
+        $query = "SELECT DISTINCT object_type FROM {$this->table_name} ORDER BY object_type";
+        $results = $wpdb->get_col($query);
+        
+        return $results ? $results : [];
+    }
+    
+    /**
+     * Delete logs older than specified days
+     *
+     * @param int $days Number of days
+     * @return int Number of deleted rows
+     */
+    public function cleanup_old_logs($days = 90) {
+        global $wpdb;
+        
+        $cutoff_date = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        
+        return $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$this->table_name} WHERE created_at < %s",
+            $cutoff_date
+        ));
+    }
+    
+    /**
+     * Get statistics
+     *
+     * @return array
+     */
+    public function get_statistics() {
+        global $wpdb;
+        
+        // Total logs
+        $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}");
+        
+        // Logs by action
+        $actions = $wpdb->get_results(
+            "SELECT action, COUNT(*) as count 
+             FROM {$this->table_name} 
+             GROUP BY action 
+             ORDER BY count DESC"
+        );
+        
+        // Logs by user (top 10)
+        $users = $wpdb->get_results(
+            "SELECT al.user_id, u.display_name as user_name, COUNT(*) as count 
+             FROM {$this->table_name} al
+             LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
+             GROUP BY al.user_id 
+             ORDER BY count DESC
+             LIMIT 10"
+        );
+        
+        // Recent activity (last 7 days)
+        $recent_activity = $wpdb->get_var(
+            "SELECT COUNT(*) FROM {$this->table_name} 
+             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+        );
+        
+        return [
+            'total_logs' => (int) $total_logs,
+            'actions' => $actions ? $actions : [],
+            'top_users' => $users ? $users : [],
+            'recent_activity' => (int) $recent_activity
+        ];
+    }
+}

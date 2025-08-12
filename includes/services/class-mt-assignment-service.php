@@ -10,6 +10,7 @@ namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
+use MobilityTrailblazers\Core\MT_Audit_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -88,6 +89,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
         
         if ($result) {
             do_action('mt_assignment_created', $result, $assignment_data);
+            MT_Audit_Logger::log('assignment_created', 'assignment', $result, $assignment_data);
             return true;
         }
         
@@ -185,6 +187,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
         
         if ($result) {
             do_action('mt_assignment_removed', $jury_member_id, $candidate_id);
+            MT_Audit_Logger::log('assignment_removed', 'assignment', $assignments[0]->id);
             return true;
         }
         

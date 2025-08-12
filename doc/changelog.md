@@ -1,5 +1,49 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.5] - 2025-08-12
+
+### Added
+- **Comprehensive Audit Logging System**: Complete audit trail for platform security and compliance
+  - New MT_Audit_Logger class provides centralized logging for all platform actions
+  - Automatically tracks assignment creation/removal, evaluation submissions, and profile updates
+  - Audit logs stored in dedicated wp_mt_audit_log database table with proper indexes
+  - Full admin interface with advanced filtering, sorting, and pagination capabilities
+
+- **Audit Log Admin Interface**: Professional audit log viewer under Mobility Trailblazers menu
+  - Filter by user, action type, object type, and date range
+  - Sortable columns with WordPress-standard pagination
+  - JSON details viewer with collapsible format for detailed action data
+  - Color-coded object type badges for visual organization
+  - Restricted to admin users only (manage_options capability)
+
+- **MT_Audit_Log_Repository**: Full-featured repository for audit log management
+  - Pagination support with configurable items per page
+  - Advanced filtering with multiple criteria
+  - Statistics and cleanup utilities for log maintenance
+  - Optimized database queries with proper JOIN operations
+
+### Enhanced
+- **Platform Security**: All critical actions now generate audit entries automatically
+  - Assignment operations (create/remove) logged with complete context
+  - Evaluation submissions tracked with draft/final status distinction
+  - Candidate and jury member profile updates monitored
+  - User context preserved for accountability
+
+### Cleaned
+- **Code Maintenance**: Removed legacy automated reminder system references
+  - Cleaned wp_clear_scheduled_hook('mt_evaluation_reminder') from deactivator
+  - Removed "Email automation for jury reminders" from CLAUDE.md focus areas
+  - Updated documentation to remove email template references
+
+### Technical Details
+- Database schema includes new wp_mt_audit_log table with:
+  - Auto-incrementing ID, user tracking, action classification
+  - Object type/ID linking, JSON details storage, timestamp indexing
+- Audit logging integrated at service layer for comprehensive coverage
+- Repository pattern maintains separation of concerns
+- WordPress coding standards throughout with proper sanitization and escaping
+- No breaking changes - purely additive functionality
+
 ## [2.2.4] - 2025-08-12
 
 ### Refactored

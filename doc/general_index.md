@@ -39,6 +39,7 @@
 - **repositories/class-mt-evaluation-repository.php** - Database operations for evaluations
 - **repositories/class-mt-assignment-repository.php** - Database operations for assignments
 - **repositories/class-mt-candidate-repository.php** - Candidate data management
+- **repositories/class-mt-audit-log-repository.php** - Audit log data access and filtering
 
 ### Core Components
 - **core/class-mt-database.php** - Database table creation and management
@@ -49,6 +50,7 @@
 - **core/class-mt-roles.php** - User role and capability management
 - **core/class-mt-shortcodes.php** - Platform shortcode implementations
 - **core/class-mt-i18n.php** - Internationalization and translation setup
+- **core/class-mt-audit-logger.php** - Centralized audit logging for security compliance
 
 ## 📁 /templates/ - Display Templates
 
@@ -62,6 +64,7 @@
 - **admin/diagnostics.php** - System health and debugging tools
 - **admin/error-monitor.php** - Error log viewer and monitoring
 - **admin/import-profiles.php** - Profile import wizard interface
+- **admin/audit-log.php** - Security audit log viewer with filtering and pagination
 
 ### Frontend Templates
 - **frontend/jury-dashboard.php** - Main jury member evaluation interface
@@ -144,7 +147,7 @@
 
 1. **WordPress Hooks** - Plugin integrates via standard WP action/filter system
 2. **AJAX Endpoints** - All AJAX calls route through wp-admin/admin-ajax.php
-3. **Database Tables** - Custom tables prefixed with 'mt_' for data isolation
+3. **Database Tables** - Custom tables prefixed with 'mt_' for data isolation (includes audit logging)
 4. **User Roles** - Extends WordPress roles with custom capabilities
 5. **Shortcodes** - [mt_jury_dashboard], [mt_voting_form], [mt_rankings]
 

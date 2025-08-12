@@ -1,7 +1,7 @@
 # CLAUDE.md - Mobility Trailblazers WordPress Plugin
 
 **AI Development Guide for Claude Code & Claude Desktop**  
-**Version:** 2.2.1  
+**Version:** 2.2.5  
 **Last Updated:** August 2025  
 **Local Path:** `C:\Users\nicol\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` or `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` depending on the computer Claude is running on.
 

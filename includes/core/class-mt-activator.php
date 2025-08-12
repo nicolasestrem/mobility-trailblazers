@@ -1,4 +1,6 @@
 <?php
+// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Nicolas Estrem
+
 /**
  * Plugin Activator
  *
@@ -91,9 +93,27 @@ class MT_Activator {
             KEY idx_candidate (candidate_id)
         ) $charset_collate;";
         
+        // Audit log table
+        $audit_log_table = $wpdb->prefix . 'mt_audit_log';
+        $audit_log_sql = "CREATE TABLE IF NOT EXISTS $audit_log_table (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            action varchar(255) NOT NULL,
+            object_type varchar(100) NOT NULL,
+            object_id bigint(20) NOT NULL,
+            details longtext,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_user_id (user_id),
+            KEY idx_action (action),
+            KEY idx_object (object_type, object_id),
+            KEY idx_created_at (created_at)
+        ) $charset_collate;";
+        
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($evaluations_sql);
         dbDelta($assignments_sql);
+        dbDelta($audit_log_sql);
         
         // Update database version
         update_option('mt_db_version', MT_VERSION);

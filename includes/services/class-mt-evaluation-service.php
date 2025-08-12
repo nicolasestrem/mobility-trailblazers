@@ -1,4 +1,6 @@
 <?php
+// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Nicolas Estrem
+
 /**
  * Evaluation Service
  *
@@ -12,6 +14,7 @@ use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
 use MobilityTrailblazers\Core\MT_Logger;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
+use MobilityTrailblazers\Core\MT_Audit_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -94,6 +97,13 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             if ($result) {
                 // Trigger action
                 do_action('mt_evaluation_updated', $existing->id, $evaluation_data);
+                
+                // Audit log
+                $action = isset($evaluation_data['status']) && $evaluation_data['status'] === 'completed' 
+                    ? 'evaluation_submitted' 
+                    : 'evaluation_draft_saved';
+                MT_Audit_Logger::log($action, 'evaluation', $existing->id, $evaluation_data);
+                
                 error_log('MT Evaluation Service - Update successful, returning ID: ' . $existing->id);
                 return $existing->id;
             } else {
@@ -109,6 +119,13 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             if ($result) {
                 // Trigger action
                 do_action('mt_evaluation_submitted', $result, $evaluation_data);
+                
+                // Audit log
+                $action = isset($evaluation_data['status']) && $evaluation_data['status'] === 'completed' 
+                    ? 'evaluation_submitted' 
+                    : 'evaluation_draft_saved';
+                MT_Audit_Logger::log($action, 'evaluation', $result, $evaluation_data);
+                
                 error_log('MT Evaluation Service - Create successful, returning ID: ' . $result);
                 return $result;
             } else {
@@ -208,6 +225,13 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             
             if ($result) {
                 do_action('mt_evaluation_submitted', $result, $data);
+                
+                // Audit log
+                $action = isset($data['status']) && $data['status'] === 'completed' 
+                    ? 'evaluation_submitted' 
+                    : 'evaluation_draft_saved';
+                MT_Audit_Logger::log($action, 'evaluation', $result, $data);
+                
                 return $result;
             }
             

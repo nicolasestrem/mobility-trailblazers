@@ -1,4 +1,6 @@
 <?php
+// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Nicolas Estrem
+
 /**
  * PSR-4 Autoloader for Mobility Trailblazers
  *

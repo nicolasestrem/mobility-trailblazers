@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Core;
 
+use MobilityTrailblazers\Core\MT_Audit_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -291,6 +293,14 @@ class MT_Post_Types {
             if (isset($_POST['mt_website'])) {
                 update_post_meta($post_id, '_mt_website', esc_url_raw($_POST['mt_website']));
             }
+            
+            // Log candidate update
+            MT_Audit_Logger::log('candidate_updated', 'candidate', $post_id, [
+                'organization' => sanitize_text_field($_POST['mt_organization'] ?? ''),
+                'position' => sanitize_text_field($_POST['mt_position'] ?? ''),
+                'linkedin' => esc_url_raw($_POST['mt_linkedin'] ?? ''),
+                'website' => esc_url_raw($_POST['mt_website'] ?? '')
+            ]);
         }
         
         if (isset($_POST['post_type']) && 'mt_jury_member' === $_POST['post_type']) {
@@ -305,6 +315,12 @@ class MT_Post_Types {
             if (isset($_POST['mt_expertise'])) {
                 update_post_meta($post_id, '_mt_expertise', sanitize_textarea_field($_POST['mt_expertise']));
             }
+            
+            // Log jury member update
+            MT_Audit_Logger::log('jury_member_updated', 'jury_member', $post_id, [
+                'user_id' => intval($_POST['mt_user_id'] ?? 0),
+                'expertise' => sanitize_textarea_field($_POST['mt_expertise'] ?? '')
+            ]);
         }
     }
 } 
