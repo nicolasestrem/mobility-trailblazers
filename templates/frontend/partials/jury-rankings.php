@@ -136,7 +136,6 @@ if (!empty($jury_members)) {
                 </tr>
             <?php 
                 $position++;
-                if ($position > 10) break;
             endforeach; ?>
             </tbody>
         </table>
