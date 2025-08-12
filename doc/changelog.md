@@ -1,5 +1,30 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.4] - 2025-08-12
+
+### Refactored
+- **Error Monitoring Architecture**: Consolidated all error monitoring functionality into dedicated MT_Error_Monitor class
+  - Moved all error monitoring methods from MT_Admin class to MT_Error_Monitor class for better separation of concerns
+  - Fixed menu registration to use correct parent slug 'mobility-trailblazers' instead of 'mt-dashboard'
+  - Removed duplicate error monitoring code and AJAX handlers from MT_Admin class
+  - Updated MT_Plugin initialization to properly instantiate MT_Error_Monitor for admin users
+  - Maintained all existing functionality while improving code organization
+
+### Cleaned
+- **Code Organization**: Removed unused debug file jury-import-simple.php (corrupted placeholder)
+- **Single Responsibility**: Error monitoring now has its own dedicated class following plugin architecture patterns
+- **Maintainability**: Easier to maintain and extend error monitoring features with consolidated codebase
+
+### Technical Details
+- MT_Error_Monitor class now handles:
+  - Admin menu registration under 'mobility-trailblazers' parent
+  - All AJAX actions: mt_clear_error_logs, mt_export_error_logs, mt_get_error_stats
+  - Scheduled cleanup event registration and handling (mt_cleanup_error_logs)
+  - Error statistics and reporting methods
+- MT_Admin class cleaned of all error monitoring responsibilities
+- Plugin initialization updated to include error monitor for users with 'manage_options' capability
+- No functional changes - purely architectural improvement
+
 ## [2.2.3] - 2025-08-12
 
 ### Fixed

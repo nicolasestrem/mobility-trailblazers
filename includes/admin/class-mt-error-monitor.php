@@ -47,7 +47,7 @@ class MT_Error_Monitor {
      */
     public function add_admin_menu() {
         add_submenu_page(
-            'mt-dashboard',
+            'mobility-trailblazers',
             __('Error Monitor', 'mobility-trailblazers'),
             __('Error Monitor', 'mobility-trailblazers'),
             'manage_options',

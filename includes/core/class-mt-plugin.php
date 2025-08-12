@@ -80,6 +80,12 @@ class MT_Plugin {
         if (is_admin()) {
             $admin = new \MobilityTrailblazers\Admin\MT_Admin();
             $admin->init();
+            
+            // Initialize error monitor for admin users
+            if (current_user_can('manage_options')) {
+                $error_monitor = new \MobilityTrailblazers\Admin\MT_Error_Monitor();
+                $error_monitor->init();
+            }
         }
         
         // Initialize AJAX handlers - Always initialize, not just during AJAX requests
