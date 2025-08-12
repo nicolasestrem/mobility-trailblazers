@@ -1,5 +1,20 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.10] - 2025-08-12
+
+### Enhanced
+- **Dashboard Widget Synchronization**: Completed full synchronization between main admin dashboard and dashboard widget
+  - Dashboard widget now displays dynamic evaluation count from database using MT_Evaluation_Repository
+  - Added "Recent Evaluations" section to widget showing last 5 evaluations with jury member, candidate, and date
+  - Widget layout updated to three-column grid matching main dashboard structure
+  - Both interfaces now use consistent data sources for accurate real-time statistics
+
+### Technical Details
+- Widget uses same MT_Evaluation_Repository::get_statistics() method as main dashboard
+- Recent evaluations fetched using repository's find_all() method with proper limit and ordering
+- Maintained consistent UI/UX with existing widget sections (Recent Candidates, Recent Jury Members)
+- No database changes required - uses existing data structures
+
 ## [2.2.9] - 2025-08-12
 
 ### Enhanced
