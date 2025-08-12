@@ -1,5 +1,25 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.11] - 2025-08-12
+
+### Fixed
+- **Database Integrity**: Verified assigned_by field is properly populated in bulk assignment operations
+  - Confirmed bulk_create() method in MT_Assignment_Repository correctly sets assigned_by with current user ID
+  - All bulk assignments now maintain proper audit trail with user attribution
+
+### Refactored
+- **Assignment Removal Standardization**: Consolidated duplicate assignment removal methods
+  - Removed redundant delete_assignment() method from MT_Assignment_Ajax class
+  - Standardized on single remove_assignment() method that accepts assignment_id parameter
+  - Eliminated duplicate AJAX action registration for mt_delete_assignment
+  - JavaScript already correctly calls mt_remove_assignment action with assignment_id
+
+### Technical Details
+- bulk_create() method already implements assigned_by = get_current_user_id() for each assignment
+- Consolidated assignment removal logic reduces code duplication and potential maintenance issues
+- No breaking changes - JavaScript interface remains unchanged
+- Maintains backward compatibility with existing AJAX calls
+
 ## [2.2.10] - 2025-08-12
 
 ### Enhanced

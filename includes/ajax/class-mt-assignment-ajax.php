@@ -34,7 +34,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_unassigned_candidates', [$this, 'get_unassigned_candidates']);
         add_action('wp_ajax_mt_create_assignment', [$this, 'create_assignment']);
         add_action('wp_ajax_mt_remove_assignment', [$this, 'remove_assignment']);
-        add_action('wp_ajax_mt_delete_assignment', [$this, 'delete_assignment']);
         add_action('wp_ajax_mt_bulk_assign', [$this, 'bulk_assign']);
         add_action('wp_ajax_mt_bulk_create_assignments', [$this, 'bulk_create_assignments']);
         add_action('wp_ajax_mt_manual_assign', [$this, 'manual_assign']); // Add this handler
@@ -127,34 +126,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function remove_assignment() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_manage_assignments');
-        
-        $jury_member_id = $this->get_int_param('jury_member_id');
-        $candidate_id = $this->get_int_param('candidate_id');
-        
-        $service = new MT_Assignment_Service();
-        $result = $service->remove_assignment($jury_member_id, $candidate_id);
-        
-        if ($result) {
-            $this->success(
-                null,
-                __('Assignment removed successfully.', 'mobility-trailblazers')
-            );
-        } else {
-            $this->error(
-                __('Failed to remove assignment.', 'mobility-trailblazers'),
-                ['errors' => $service->get_errors()]
-            );
-        }
-    }
-    
-    /**
-     * Delete a single assignment
-     *
-     * @return void
-     */
-    public function delete_assignment() {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_manage_assignments');
         
