@@ -531,11 +531,10 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
                 $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
             }
             
-            wp_send_json_success([
-                'message' => $message,
+            $this->success([
                 'success_count' => $success_count,
                 'errors' => $errors
-            ]);
+            ], $message);
         } else {
             $this->error(__('No candidates could be processed.', 'mobility-trailblazers'));
         }

@@ -296,7 +296,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 );
             }
             
-            wp_send_json_success(['message' => $message]);
+            $this->success(['message' => $message]);
         } else if ($already_exists > 0) {
             $this->error(__('All selected assignments already exist.', 'mobility-trailblazers'));
         } else {
@@ -317,7 +317,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MT: Manual assignment nonce verification failed for user ' . get_current_user_id());
             }
-            $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
@@ -326,7 +326,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MT: Manual assignment permission denied for user ' . get_current_user_id());
             }
-            $this->send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
+            $this->error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
             return;
         }
         
@@ -341,7 +341,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         if (!$jury_member_id || empty($candidate_ids)) {
             error_log('MT Manual Assignment: Invalid data - jury_member_id or candidate_ids empty');
-            $this->send_json_error(__('Invalid data provided.', 'mobility-trailblazers'));
+            $this->error(__('Invalid data provided.', 'mobility-trailblazers'));
             return;
         }
         
@@ -377,9 +377,9 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 );
             }
             
-            $this->send_json_success($message);
+            $this->success(null, $message);
         } else {
-            $this->send_json_error(__('No assignments could be created. They may already exist.', 'mobility-trailblazers'));
+            $this->error(__('No assignments could be created. They may already exist.', 'mobility-trailblazers'));
         }
     }
 
@@ -389,7 +389,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
     public function clear_all_assignments() {
         // Verify nonce - use mt_admin_nonce like other methods
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            $this->send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            $this->error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
@@ -403,9 +403,9 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $result = $assignment_repo->clear_all();
         
         if ($result) {
-            $this->send_json_success(__('All assignments have been cleared.', 'mobility-trailblazers'));
+            $this->success(null, __('All assignments have been cleared.', 'mobility-trailblazers'));
         } else {
-            $this->send_json_error(__('Failed to clear assignments.', 'mobility-trailblazers'));
+            $this->error(__('Failed to clear assignments.', 'mobility-trailblazers'));
         }
     }
 
@@ -673,11 +673,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 );
             }
             
-            wp_send_json_success([
-                'message' => $message,
+            $this->success([
                 'created' => $assignments_created,
                 'errors' => $errors
-            ]);
+            ], $message);
         } else {
             if (empty($errors)) {
                 $this->error(__('No new assignments were created. All candidates may already be assigned.', 'mobility-trailblazers'));
@@ -744,11 +743,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
             }
             
-            wp_send_json_success([
-                'message' => $message,
+            $this->success([
                 'success_count' => $success_count,
                 'errors' => $errors
-            ]);
+            ], $message);
         } else {
             $this->error(__('No assignments could be removed.', 'mobility-trailblazers'));
         }
@@ -859,12 +857,11 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
             }
             
-            wp_send_json_success([
-                'message' => $message,
+            $this->success([
                 'success_count' => $success_count,
                 'skipped' => $skipped,
                 'errors' => $errors
-            ]);
+            ], $message);
         } else {
             $this->error(__('No assignments could be reassigned.', 'mobility-trailblazers'));
         }
@@ -982,6 +979,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Test handler
      */
     public function test_handler() {
-        wp_send_json_success(['message' => 'AJAX is working!', 'time' => current_time('mysql')]);
+        $this->success(['time' => current_time('mysql')], 'AJAX is working!');
     }
 } 

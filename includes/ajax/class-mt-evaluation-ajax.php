@@ -390,7 +390,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, $limit);
         
-        wp_send_json_success([
+        $this->success([
             'rankings' => $rankings,
             'html' => $this->render_rankings_html($rankings)
         ]);
@@ -596,11 +596,10 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 $message .= ' ' . sprintf(__('%d failed.', 'mobility-trailblazers'), count($errors));
             }
             
-            wp_send_json_success([
-                'message' => $message,
+            $this->success([
                 'success_count' => $success_count,
                 'errors' => $errors
-            ]);
+            ], $message);
         } else {
             $this->error(__('No evaluations could be processed.', 'mobility-trailblazers'));
         }
@@ -772,7 +771,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             error_log('MT: Inline evaluation saved successfully for candidate ' . $candidate_id);
         }
         
-        wp_send_json_success($response_data);
+        $this->success($response_data);
     }
 
     /**

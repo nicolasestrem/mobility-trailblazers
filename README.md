@@ -90,6 +90,9 @@ E:\OneDrive\CoWorkSpace\Tech Stack\
 
 ### Initial Setup
 1. **Configure Settings** → Set evaluation criteria weights and dashboard customization
+   - **Data Management**: Choose whether to preserve or delete all plugin data on uninstall
+   - **Criteria Weights**: Adjust importance of each evaluation criterion
+   - **Dashboard Appearance**: Customize colors, layouts, and display options
 2. **Create Award Categories** → Add categories like "Innovation Leader", "Sustainability Champion"
 3. **Add Candidates** → Fill in details, assign categories, upload photos
 4. **Setup Jury Members** → Create WordPress users and link to jury member profiles
