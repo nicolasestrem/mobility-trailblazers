@@ -292,7 +292,6 @@ class MT_New_Shortcode {
 2. **Communication Setup**
    - Newsletter integration (Mailchimp/similar)
    - LinkedIn company page content
-   - Email automation for jury reminders
 
 3. **Platform Enhancements**
    - Public nomination form

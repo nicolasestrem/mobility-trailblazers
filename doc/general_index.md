@@ -137,7 +137,7 @@
 - **Code/** - Version snapshots and rollback points
 
 ### Assets (../../Assets/)
-- **Templates/** - Email templates and communication materials
+- **Templates/** - Communication materials and content templates  
 - **Branding/** - Logo files and brand guidelines
 
 ## 🔑 Key Integration Points

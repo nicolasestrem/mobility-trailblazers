@@ -43,6 +43,5 @@ class MT_Deactivator {
      */
     private function clear_scheduled_hooks() {
         wp_clear_scheduled_hook('mt_daily_cron');
-        wp_clear_scheduled_hook('mt_evaluation_reminder');
     }
 } 
