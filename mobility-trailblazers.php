@@ -14,6 +14,23 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
+/**
+ * Copyright (c) 2025 Nicolas Estrem
+ *
+ * This program is free software. You can redistribute it and or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation. Either version 2 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but without any warranty. Without even the implied warranty of
+ * merchantability or fitness for a particular purpose. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+ */
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
