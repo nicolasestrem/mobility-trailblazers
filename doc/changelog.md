@@ -1,5 +1,29 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.8] - 2025-08-12
+
+### Security
+- **User Role and Capability System Cleanup**: Standardized user roles and capability checks for better security and consistency
+  - Defined missing 'Jury Admin' (mt_jury_admin) role with appropriate capabilities: mt_view_all_evaluations, mt_manage_assignments, mt_view_reports, mt_export_data
+  - Standardized all AJAX capability checks to use consistent custom capabilities instead of generic WordPress capabilities
+  - Export functions now consistently use mt_export_data capability across all AJAX handlers
+  - Settings and data-clearing functions now use mt_manage_settings capability
+  - Assignment management functions use mt_manage_assignments capability consistently
+
+### Enhanced
+- **Role-Based Access Control**: Improved granular permission system for different user types
+  - Administrators retain full access to all capabilities
+  - Jury Admins can manage assignments and view reports but not modify core settings
+  - Jury Members maintain evaluation submission capabilities only
+  - Editors can view evaluations and reports for content management
+
+### Technical Details
+- Updated MT_Roles class to properly define and manage mt_jury_admin role during plugin activation
+- Replaced direct current_user_can('manage_options') checks with role-appropriate capability checks in MT_Assignment_Ajax
+- Maintained backward compatibility - existing user permissions unchanged
+- All capability checks now use the base AJAX class check_permission() method for consistent error handling and logging
+- No database schema changes required - uses WordPress core user/role management
+
 ## [2.2.7] - 2025-08-12
 
 ### Fixed

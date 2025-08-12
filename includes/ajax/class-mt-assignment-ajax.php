@@ -230,10 +230,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
-            return;
-        }
+        $this->check_permission('mt_manage_assignments');
         
         $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
         $candidate_ids = isset($_POST['candidate_ids']) && is_array($_POST['candidate_ids']) 
@@ -392,11 +389,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             return;
         }
         
-        // Check permissions - only administrators
-        if (!current_user_can('manage_options')) {
-            $this->send_json_error(__('Only administrators can clear all assignments.', 'mobility-trailblazers'));
-            return;
-        }
+        // Check permissions - requires manage_settings capability
+        $this->check_permission('mt_manage_settings');
         
         $assignment_repo = new MT_Assignment_Repository();
         
@@ -420,10 +414,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             wp_die(__('Security check failed.', 'mobility-trailblazers'));
         }
         
-        // Check permissions - use manage_options instead of mt_export_data
-        if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to export data.', 'mobility-trailblazers'));
-        }
+        // Check permissions
+        $this->check_permission('mt_export_data');
         
         $assignment_repo = new MT_Assignment_Repository();
         $assignments = $assignment_repo->find_all();
@@ -505,10 +497,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions.', 'mobility-trailblazers'));
-            return;
-        }
+        $this->check_permission('mt_manage_assignments');
         
         // Get parameters
         $method = isset($_POST['method']) ? sanitize_text_field($_POST['method']) : 'balanced';
@@ -969,9 +958,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to export data.', 'mobility-trailblazers'));
-        }
+        $this->check_permission('mt_export_data');
         
         // Get assignment IDs
         $assignment_ids = isset($_POST['assignment_ids']) && is_array($_POST['assignment_ids']) 

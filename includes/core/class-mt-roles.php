@@ -32,6 +32,15 @@ class MT_Roles {
             'mt_view_assigned_candidates' => true,
             'upload_files' => true
         ]);
+        
+        add_role('mt_jury_admin', __('Jury Admin', 'mobility-trailblazers'), [
+            'read' => true,
+            'mt_view_all_evaluations' => true,
+            'mt_manage_assignments' => true,
+            'mt_view_reports' => true,
+            'mt_export_data' => true,
+            'upload_files' => true
+        ]);
     }
     
     /**
@@ -125,6 +134,23 @@ class MT_Roles {
                 $jury_role->add_cap($cap);
             }
         }
+        
+        // Jury admin capabilities (ensure they're set)
+        $jury_admin_role = get_role('mt_jury_admin');
+        if ($jury_admin_role) {
+            $jury_admin_caps = [
+                'read',
+                'mt_view_all_evaluations',
+                'mt_manage_assignments',
+                'mt_view_reports',
+                'mt_export_data',
+                'upload_files'
+            ];
+            
+            foreach ($jury_admin_caps as $cap) {
+                $jury_admin_role->add_cap($cap);
+            }
+        }
     }
     
     /**
@@ -171,7 +197,7 @@ class MT_Roles {
             'mt_jury_admin'
         ];
         
-        $roles = ['administrator', 'editor', 'mt_jury_member'];
+        $roles = ['administrator', 'editor', 'mt_jury_member', 'mt_jury_admin'];
         
         foreach ($roles as $role_name) {
             $role = get_role($role_name);
