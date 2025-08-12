@@ -44,7 +44,7 @@ define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MT_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 // Require the autoloader
-require_once MT_PLUGIN_DIR . 'includes/class-mt-autoloader.php';
+require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';
 
 // Register autoloader
 MobilityTrailblazers\Core\MT_Autoloader::register();
