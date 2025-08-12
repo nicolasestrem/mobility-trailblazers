@@ -2,6 +2,7 @@
 
 ## Project Overview
 This is a WordPress plugin called "Mobility Trailblazers" that helps users track and manage mobility-related activities and achievements.
+**Local Path:** `C:\Users\nicol\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` or `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` depending on the computer Claude is running on.
 
 ## Code Standards
 - Follow WordPress coding standards
