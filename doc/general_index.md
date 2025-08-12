@@ -162,10 +162,34 @@ The platform follows a **Repository-Service-Controller** pattern:
 ## 🔒 Security Features
 
 - Nonce verification on all forms and AJAX calls
-- Capability checking for user permissions
+- Capability checking for user permissions with role-based access control
 - Input sanitization using WordPress functions
 - SQL injection prevention via prepared statements
 - XSS protection through output escaping
+- Comprehensive audit logging for all critical actions
+- Full traceability with before/after state tracking
+
+## 📊 Recent Updates (v2.2.10 - v2.2.12)
+
+### Dashboard Enhancements
+- **Widget Synchronization** - Dashboard widget now shows real-time evaluation statistics
+- **Recent Evaluations** - Widget displays latest 5 evaluations with jury → candidate mapping
+- **Consistent Data Sources** - Both main dashboard and widget use same repository methods
+
+### Security & Compliance
+- **Extended Audit Logging** - All bulk operations and status changes now logged
+- **Assignment Tracking** - Full context captured before deletion including names
+- **User Attribution** - All actions tracked with performing user ID
+
+### Code Quality
+- **Method Consolidation** - Removed duplicate assignment removal methods
+- **Database Integrity** - Verified assigned_by field population in all operations
+- **Standardized Permissions** - Consistent capability checks across all AJAX handlers
+
+### User Roles
+- **Jury Admin Role** - Intermediate role with assignment management capabilities
+- **Granular Permissions** - Fine-tuned capabilities for different user types
+- **Delegation Support** - Admins can delegate specific tasks without full access
 
 ---
-*Last Updated: August 2025 | Version 2.2.1*
+*Last Updated: August 2025 | Version 2.2.12*

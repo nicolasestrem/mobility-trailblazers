@@ -380,6 +380,19 @@ Common issues and solutions:
 
 ### Version History
 
+- **v2.2.12** (2025-08-12): Extended audit logging coverage
+  - Added audit logging for bulk evaluation status changes
+  - Enhanced assignment removal logging with full context
+  - All critical actions now tracked in audit trail
+
+- **v2.2.11** (2025-08-12): Code standardization and cleanup
+  - Consolidated duplicate assignment removal methods
+  - Verified database integrity for bulk operations
+
+- **v2.2.10** (2025-08-12): Dashboard widget synchronization
+  - Dynamic evaluation count from database
+  - Added Recent Evaluations section to widget
+
 - **v2.2.1** (2025-08-11): Complete refactoring of auto-assignment algorithms
   - Fixed balanced distribution logic
   - Implemented true random distribution
@@ -388,4 +401,139 @@ Common issues and solutions:
 
 - **v2.0.0** (2024-01): Initial implementation
   - Basic round-robin assignment
+
+## Dashboard Widget Synchronization
+
+### Overview
+The admin dashboard widget provides a quick overview of platform statistics and recent activity. As of v2.2.10, it's fully synchronized with the main dashboard.
+
+### Data Sources
+Both the main dashboard and widget use the same repository methods:
+- `MT_Evaluation_Repository::get_statistics()` for evaluation counts
+- `MT_Evaluation_Repository::find_all()` for recent evaluations
+- WordPress post counts for candidates and jury members
+
+### Widget Features
+- **Statistics Grid**: Displays total candidates, jury members, and evaluations
+- **Recent Candidates**: Shows 5 most recently added candidates
+- **Recent Jury Members**: Lists 5 newest jury members
+- **Recent Evaluations**: Displays 5 latest evaluation submissions with jury → candidate mapping
+- **Quick Actions**: Shortcut buttons for common tasks
+
+### Implementation
+Located in `templates/admin/dashboard-widget.php`, the widget:
+1. Fetches real-time statistics from repositories
+2. Uses consistent data formatting with main dashboard
+3. Provides three-column responsive layout
+4. Updates automatically when dashboard refreshes
+
+## Audit Logging System
+
+### Overview
+The platform includes comprehensive audit logging for compliance and security tracking. All critical actions are logged with full context.
+
+### Logged Actions
+
+#### Evaluation Actions
+- `evaluation_submitted` - When evaluation is finalized
+- `evaluation_saved_draft` - Draft saves
+- `evaluation_approved` - Admin approval
+- `evaluation_rejected` - Admin rejection
+- `evaluation_reset` - Status reset to draft
+- `evaluation_deleted` - Evaluation removal
+
+#### Assignment Actions
+- `assignment_created` - New assignment
+- `assignment_removed` - Assignment deletion (with full context)
+- `bulk_assignments_created` - Bulk assignment operations
+
+#### Profile Actions
+- `candidate_updated` - Candidate profile changes
+- `jury_member_updated` - Jury member modifications
+
+### Audit Log Details
+Each log entry captures:
+- User ID and username who performed action
+- Action type and timestamp
+- Object type and ID affected
+- Additional context in JSON format
+- Before/after states for changes
+
+### Usage Example
+```php
+use MobilityTrailblazers\Core\MT_Audit_Logger;
+
+// Log an action with context
+MT_Audit_Logger::log(
+    'evaluation_approved',
+    'evaluation',
+    $evaluation_id,
+    [
+        'jury_member_id' => $evaluation->jury_member_id,
+        'candidate_id' => $evaluation->candidate_id,
+        'previous_status' => 'draft',
+        'new_status' => 'approved',
+        'score' => $evaluation->score
+    ]
+);
+```
+
+### Viewing Audit Logs
+Access via **Mobility Trailblazers → Audit Logs** in admin menu:
+- Filter by user, action, object type, date range
+- Sort by any column
+- View detailed JSON data for each entry
+- Export functionality for compliance reports
+
+## User Roles and Capabilities
+
+### Role Definitions
+
+#### Administrator
+Full platform access with all capabilities:
+- `mt_manage_evaluations`
+- `mt_manage_assignments`
+- `mt_manage_settings`
+- `mt_view_reports`
+- `mt_export_data`
+- `mt_view_audit_logs`
+
+#### Jury Admin (`mt_jury_admin`)
+Intermediate role for delegation (v2.2.9):
+- `mt_view_all_evaluations` - View all evaluation data
+- `mt_manage_assignments` - Create/remove assignments
+- `mt_view_reports` - Access reporting features
+- `mt_export_data` - Export capabilities
+
+#### Jury Member (`mt_jury_member`)
+Limited to evaluation duties:
+- `mt_submit_evaluation` - Submit evaluations
+- `mt_view_own_evaluations` - View their evaluations
+
+### Capability Checks
+All AJAX handlers use standardized capability checking:
+```php
+// In AJAX handler
+$this->check_permission('mt_manage_assignments');
+
+// Direct check
+if (current_user_can('mt_export_data')) {
+    // Allow export
+}
+```
+
+### Assignment Management
+
+#### Database Integrity
+The `assigned_by` field is automatically populated:
+- Single assignments: Set in `create()` method
+- Bulk assignments: Set in `bulk_create()` method
+- Always uses `get_current_user_id()`
+
+#### Removal Standardization
+As of v2.2.11, assignment removal is standardized:
+- Single method `remove_assignment()` handles all deletions
+- Accepts `assignment_id` parameter
+- Captures full context before deletion for audit log
+- Includes jury/candidate names in audit trail
   - Simple random selection
