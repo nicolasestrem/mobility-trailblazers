@@ -183,11 +183,37 @@ class MT_Assignment_Service implements MT_Service_Interface {
             return false;
         }
         
-        $result = $this->repository->delete($assignments[0]->id);
+        $assignment = $assignments[0];
+        
+        // Capture assignment details before deletion for audit log
+        $assignment_details = [
+            'jury_member_id' => $assignment->jury_member_id,
+            'candidate_id' => $assignment->candidate_id,
+            'assigned_at' => $assignment->assigned_at ?? null,
+            'assigned_by' => $assignment->assigned_by ?? null,
+            'removed_by' => get_current_user_id()
+        ];
+        
+        // Get jury member and candidate names for better audit trail
+        $jury_member = get_post($assignment->jury_member_id);
+        $candidate = get_post($assignment->candidate_id);
+        if ($jury_member) {
+            $assignment_details['jury_member_name'] = $jury_member->post_title;
+        }
+        if ($candidate) {
+            $assignment_details['candidate_name'] = $candidate->post_title;
+        }
+        
+        $result = $this->repository->delete($assignment->id);
         
         if ($result) {
             do_action('mt_assignment_removed', $jury_member_id, $candidate_id);
-            MT_Audit_Logger::log('assignment_removed', 'assignment', $assignments[0]->id);
+            MT_Audit_Logger::log(
+                'assignment_removed', 
+                'assignment', 
+                $assignment->id,
+                $assignment_details
+            );
             return true;
         }
         

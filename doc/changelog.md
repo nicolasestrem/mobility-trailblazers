@@ -1,5 +1,26 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.12] - 2025-08-12
+
+### Enhanced
+- **Audit Logging Coverage**: Extended audit logging to cover all critical platform actions
+  - Added comprehensive audit logging for bulk evaluation status changes (approve, reject, reset, delete)
+  - Enhanced assignment removal to capture full context before deletion including names and user attribution
+  - All evaluation status changes now tracked with previous and new status for complete traceability
+
+### Security
+- **Complete Audit Trail**: Ensured all destructive and status-changing operations are logged
+  - Bulk evaluation actions now log each individual status change with full context
+  - Assignment deletions capture jury member and candidate names for better readability
+  - Added 'removed_by' field to track which admin performed assignment removals
+  - Evaluation deletions preserve all data (score, status, participants) in audit log before removal
+
+### Technical Details
+- MT_Audit_Logger integrated into bulk_evaluation_action() in MT_Evaluation_Ajax class
+- Enhanced remove_assignment() in both service layer and AJAX handler for complete coverage
+- Audit logs capture entity details before deletion to maintain historical record
+- All logged actions include user context via get_current_user_id()
+
 ## [2.2.11] - 2025-08-12
 
 ### Fixed

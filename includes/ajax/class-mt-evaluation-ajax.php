@@ -11,6 +11,7 @@
 namespace MobilityTrailblazers\Ajax;
 
 use MobilityTrailblazers\Services\MT_Evaluation_Service;
+use MobilityTrailblazers\Core\MT_Audit_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -497,21 +498,79 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         foreach ($evaluation_ids as $evaluation_id) {
             $result = false;
             
+            // Get evaluation details for audit log
+            $evaluation = $evaluation_repo->find($evaluation_id);
+            
             switch ($action) {
                 case 'approve':
                     $result = $evaluation_repo->update($evaluation_id, ['status' => 'approved']);
+                    if ($result) {
+                        MT_Audit_Logger::log(
+                            'evaluation_approved',
+                            'evaluation',
+                            $evaluation_id,
+                            [
+                                'jury_member_id' => $evaluation->jury_member_id ?? null,
+                                'candidate_id' => $evaluation->candidate_id ?? null,
+                                'previous_status' => $evaluation->status ?? 'unknown',
+                                'new_status' => 'approved'
+                            ]
+                        );
+                    }
                     break;
                     
                 case 'reject':
                     $result = $evaluation_repo->update($evaluation_id, ['status' => 'rejected']);
+                    if ($result) {
+                        MT_Audit_Logger::log(
+                            'evaluation_rejected',
+                            'evaluation',
+                            $evaluation_id,
+                            [
+                                'jury_member_id' => $evaluation->jury_member_id ?? null,
+                                'candidate_id' => $evaluation->candidate_id ?? null,
+                                'previous_status' => $evaluation->status ?? 'unknown',
+                                'new_status' => 'rejected'
+                            ]
+                        );
+                    }
                     break;
                     
                 case 'reset':
                     $result = $evaluation_repo->update($evaluation_id, ['status' => 'draft']);
+                    if ($result) {
+                        MT_Audit_Logger::log(
+                            'evaluation_reset',
+                            'evaluation',
+                            $evaluation_id,
+                            [
+                                'jury_member_id' => $evaluation->jury_member_id ?? null,
+                                'candidate_id' => $evaluation->candidate_id ?? null,
+                                'previous_status' => $evaluation->status ?? 'unknown',
+                                'new_status' => 'draft'
+                            ]
+                        );
+                    }
                     break;
                     
                 case 'delete':
+                    // Capture evaluation details before deletion
+                    $deleted_details = $evaluation ? [
+                        'jury_member_id' => $evaluation->jury_member_id,
+                        'candidate_id' => $evaluation->candidate_id,
+                        'status' => $evaluation->status,
+                        'score' => $evaluation->score ?? null
+                    ] : [];
+                    
                     $result = $evaluation_repo->delete($evaluation_id);
+                    if ($result) {
+                        MT_Audit_Logger::log(
+                            'evaluation_deleted',
+                            'evaluation',
+                            $evaluation_id,
+                            $deleted_details
+                        );
+                    }
                     break;
                     
                 default:
