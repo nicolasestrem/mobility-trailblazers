@@ -501,6 +501,106 @@ if (typeof mt_admin.i18n === 'undefined') {
                     $row.hide();
                 }
             });
+        },
+        
+        showReassignModal: function(assignmentIds) {
+            // Store the assignment IDs for later use
+            this.pendingReassignments = assignmentIds;
+            
+            // Check if modal exists, if not create it
+            if ($('#mt-reassign-modal').length === 0) {
+                this.createReassignModal();
+            }
+            
+            // Show the modal
+            $('#mt-reassign-modal').fadeIn(300);
+        },
+        
+        createReassignModal: function() {
+            // Get jury members from the filter dropdown as a quick solution
+            const juryOptions = $('#mt-filter-jury option').clone();
+            
+            const modalHtml = `
+                <div id="mt-reassign-modal" class="mt-modal" style="display: none;">
+                    <div class="mt-modal-content">
+                        <h2>${mt_admin.i18n.reassign_assignments || 'Reassign Assignments'}</h2>
+                        <p>${mt_admin.i18n.reassign_description || 'Select a new jury member to reassign the selected assignments to:'}</p>
+                        <form id="mt-reassign-form">
+                            <div class="mt-form-group">
+                                <label for="reassign_jury_member">${mt_admin.i18n.new_jury_member || 'New Jury Member'}</label>
+                                <select name="new_jury_member_id" id="reassign_jury_member" class="widefat" required>
+                                    <option value="">${mt_admin.i18n.select_jury_member || 'Select Jury Member'}</option>
+                                </select>
+                            </div>
+                            <div class="mt-modal-actions">
+                                <button type="submit" class="button button-primary">${mt_admin.i18n.reassign || 'Reassign'}</button>
+                                <button type="button" class="button mt-modal-close">${mt_admin.i18n.cancel || 'Cancel'}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Append modal to body
+            $('body').append(modalHtml);
+            
+            // Populate jury options
+            $('#reassign_jury_member').html(juryOptions);
+            
+            // Bind close event
+            $('#mt-reassign-modal .mt-modal-close').on('click', (e) => {
+                e.preventDefault();
+                $('#mt-reassign-modal').fadeOut(300);
+            });
+            
+            // Bind form submit
+            $('#mt-reassign-form').on('submit', (e) => {
+                e.preventDefault();
+                this.submitReassignment();
+            });
+        },
+        
+        submitReassignment: function() {
+            const newJuryMemberId = $('#reassign_jury_member').val();
+            
+            if (!newJuryMemberId) {
+                alert(mt_admin.i18n.select_jury_member || 'Please select a jury member');
+                return;
+            }
+            
+            if (!this.pendingReassignments || this.pendingReassignments.length === 0) {
+                alert(mt_admin.i18n.no_assignments_selected || 'No assignments selected');
+                return;
+            }
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_bulk_reassign_assignments',
+                    nonce: mt_admin.nonce,
+                    assignment_ids: this.pendingReassignments,
+                    new_jury_member_id: newJuryMemberId
+                },
+                beforeSend: () => {
+                    $('#mt-reassign-form button[type="submit"]').prop('disabled', true).text(mt_admin.i18n.processing || 'Processing...');
+                },
+                success: (response) => {
+                    if (response.success) {
+                        alert(response.data.message || 'Assignments reassigned successfully');
+                        $('#mt-reassign-modal').fadeOut(300);
+                        location.reload();
+                    } else {
+                        alert(response.data || 'An error occurred');
+                    }
+                },
+                error: () => {
+                    alert(mt_admin.i18n.error_occurred || 'An error occurred');
+                },
+                complete: () => {
+                    $('#mt-reassign-form button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.reassign || 'Reassign');
+                }
+            });
         }
     };
 

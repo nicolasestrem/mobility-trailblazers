@@ -37,6 +37,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_delete_assignment', [$this, 'delete_assignment']);
         add_action('wp_ajax_mt_bulk_assign', [$this, 'bulk_assign']);
         add_action('wp_ajax_mt_bulk_create_assignments', [$this, 'bulk_create_assignments']);
+        add_action('wp_ajax_mt_manual_assign', [$this, 'manual_assign']); // Add this handler
         add_action('wp_ajax_mt_clear_all_assignments', [$this, 'clear_all_assignments']);
         add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
         add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign']);
@@ -211,6 +212,94 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             );
         } else {
             $this->error(__('No assignments were created. They may already exist.', 'mobility-trailblazers'));
+        }
+    }
+
+    /**
+     * Handle manual assignment of candidates to a jury member
+     */
+    public function manual_assign() {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT: Manual assignment request by user ' . get_current_user_id());
+        }
+        
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            wp_send_json_error(__('Security check failed.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        $jury_member_id = isset($_POST['jury_member_id']) ? intval($_POST['jury_member_id']) : 0;
+        $candidate_ids = isset($_POST['candidate_ids']) && is_array($_POST['candidate_ids']) 
+            ? array_map('intval', $_POST['candidate_ids']) 
+            : array();
+        
+        error_log('MT Manual Assignment: jury_member_id=' . $jury_member_id);
+        error_log('MT Manual Assignment: candidate_ids=' . print_r($candidate_ids, true));
+        
+        if (!$jury_member_id || empty($candidate_ids)) {
+            wp_send_json_error(__('Please select a jury member and at least one candidate.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        $assignment_repo = new MT_Assignment_Repository();
+        $created = 0;
+        $errors = 0;
+        $already_exists = 0;
+        
+        foreach ($candidate_ids as $candidate_id) {
+            // Check if assignment already exists
+            $existing = $assignment_repo->get_by_jury_and_candidate($jury_member_id, $candidate_id);
+            
+            if ($existing) {
+                $already_exists++;
+                continue;
+            }
+            
+            // Create the assignment
+            $result = $assignment_repo->create([
+                'jury_member_id' => $jury_member_id,
+                'candidate_id' => $candidate_id
+            ]);
+            
+            if ($result) {
+                $created++;
+            } else {
+                $errors++;
+            }
+        }
+        
+        if ($created > 0) {
+            $message = sprintf(
+                __('%d assignments created successfully.', 'mobility-trailblazers'),
+                $created
+            );
+            
+            if ($already_exists > 0) {
+                $message .= ' ' . sprintf(
+                    __('%d assignments already existed.', 'mobility-trailblazers'),
+                    $already_exists
+                );
+            }
+            
+            if ($errors > 0) {
+                $message .= ' ' . sprintf(
+                    __('%d assignments failed.', 'mobility-trailblazers'),
+                    $errors
+                );
+            }
+            
+            wp_send_json_success(['message' => $message]);
+        } else if ($already_exists > 0) {
+            wp_send_json_error(__('All selected assignments already exist.', 'mobility-trailblazers'));
+        } else {
+            wp_send_json_error(__('Failed to create assignments.', 'mobility-trailblazers'));
         }
     }
 

@@ -8,6 +8,8 @@
   - Implemented complete event handlers for all assignment management operations
   - Added missing AJAX handlers for manual assignment, bulk operations, and export functionality
   - Fixed modal interactions for auto-assign and manual assign dialogs
+  - **Fixed 400 Bad Request error**: Added missing `mt_manual_assign` AJAX handler registration and implementation
+  - **Fixed TypeError for bulk reassignment**: Added missing `showReassignModal`, `createReassignModal`, and `submitReassignment` methods
 
 ### Added
 - **Complete Assignment Management JavaScript Module**:
@@ -22,6 +24,9 @@
   - `bulkExportAssignments()`: Export selected assignments to CSV
   - `filterAssignments()`: Real-time search filtering
   - `applyFilters()`: Advanced filtering by jury member and status
+  - `showReassignModal()`: Display modal for bulk reassignment
+  - `createReassignModal()`: Dynamically create reassignment modal HTML
+  - `submitReassignment()`: Process bulk reassignment to new jury member
 
 ### Enhanced
 - **User Experience**:
