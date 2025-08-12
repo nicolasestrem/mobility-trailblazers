@@ -14,7 +14,11 @@ if (!defined('ABSPATH')) {
 // Get statistics
 $candidate_count = wp_count_posts('mt_candidate')->publish;
 $jury_count = wp_count_posts('mt_jury_member')->publish;
-$evaluation_count = 0; // TODO: Get from evaluations table
+
+// Get evaluation statistics using the same method as main dashboard
+$evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+$eval_stats = $evaluation_repo->get_statistics();
+$evaluation_count = $eval_stats['total'];
 
 // Get recent candidates
 $recent_candidates = get_posts(array(
@@ -31,6 +35,13 @@ $recent_jury = get_posts(array(
     'orderby' => 'date',
     'order' => 'DESC'
 ));
+
+// Get recent evaluations using the same method as main dashboard
+$recent_evaluations = $evaluation_repo->find_all([
+    'limit' => 5,
+    'orderby' => 'updated_at',
+    'order' => 'DESC'
+]);
 ?>
 
 <div class="mt-dashboard-widget">
@@ -83,6 +94,29 @@ $recent_jury = get_posts(array(
                 </ul>
             <?php else : ?>
                 <p><?php _e('No jury members yet.', 'mobility-trailblazers'); ?></p>
+            <?php endif; ?>
+        </div>
+        
+        <div class="mt-recent-section">
+            <h4><?php _e('Recent Evaluations', 'mobility-trailblazers'); ?></h4>
+            <?php if (!empty($recent_evaluations)) : ?>
+                <ul>
+                    <?php foreach ($recent_evaluations as $evaluation) : 
+                        $jury_member = get_post($evaluation->jury_member_id);
+                        $candidate = get_post($evaluation->candidate_id);
+                    ?>
+                        <li>
+                            <div>
+                                <?php echo $jury_member ? esc_html($jury_member->post_title) : __('Unknown', 'mobility-trailblazers'); ?>
+                                <span style="color: #666; font-size: 11px;"> → </span>
+                                <?php echo $candidate ? esc_html($candidate->post_title) : __('Unknown', 'mobility-trailblazers'); ?>
+                            </div>
+                            <span class="mt-date"><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($evaluation->updated_at))); ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else : ?>
+                <p><?php _e('No evaluations yet.', 'mobility-trailblazers'); ?></p>
             <?php endif; ?>
         </div>
     </div>
@@ -138,7 +172,7 @@ $recent_jury = get_posts(array(
 
 .mt-recent-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
     margin-bottom: 20px;
 }
