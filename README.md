@@ -191,7 +191,7 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 - **Enhanced User Experience**: Direct score adjustment without page navigation
 - **Performance Optimization**: Improved efficiency and AJAX-powered updates
 
-### Version 2.0.0 (January 2024)
+### Version 2.0.0 (June 2025)
 - Complete rebuild with modern architecture and Repository pattern
 - Removed public voting system dependencies
 - Modern, responsive UI with improved security
