@@ -16,7 +16,7 @@
 - **class-mt-plugin.php** - Main plugin initialization and component registration
 - **class-mt-activator.php** - Handles plugin activation setup and database creation
 - **class-mt-deactivator.php** - Manages plugin deactivation cleanup tasks
-- **class-mt-uninstaller.php** - Complete removal of plugin data when uninstalled
+- **class-mt-uninstaller.php** - Handles plugin uninstall with optional data preservation (v2.2.13)
 
 ### Administrative Interface
 - **admin/class-mt-admin.php** - Admin menu setup and page rendering management
@@ -24,11 +24,11 @@
 - **admin/class-mt-profile-importer.php** - CSV import functionality for candidate profiles
 - **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation
 
-### AJAX Handlers
-- **ajax/class-mt-base-ajax.php** - Base class with common AJAX functionality
-- **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions via AJAX
-- **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations
-- **ajax/class-mt-admin-ajax.php** - General admin AJAX operations and bulk actions
+### AJAX Handlers (v2.2.13 - Standardized error handling)
+- **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
+- **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with standardized error responses
+- **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
+- **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
 
 ### Business Logic Services
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation
@@ -60,7 +60,7 @@
 - **admin/evaluations.php** - Evaluation review and management
 - **admin/assignments.php** - Jury assignment management page
 - **admin/import-export.php** - Data import/export interface
-- **admin/settings.php** - Plugin configuration settings
+- **admin/settings.php** - Plugin configuration settings including data management options (v2.2.13)
 - **admin/diagnostics.php** - System health and debugging tools
 - **admin/error-monitor.php** - Error log viewer and monitoring
 - **admin/import-profiles.php** - Profile import wizard interface
@@ -191,5 +191,15 @@ The platform follows a **Repository-Service-Controller** pattern:
 - **Granular Permissions** - Fine-tuned capabilities for different user types
 - **Delegation Support** - Admins can delegate specific tasks without full access
 
+### Data Management (v2.2.13)
+- **Uninstall Options** - Administrator control over data preservation vs deletion
+- **Settings Protection** - Strong visual warnings for destructive operations
+- **Complete Data Removal** - Optional removal of all plugin data on uninstall
+
+### Error Handling (v2.2.13)
+- **Standardized AJAX Responses** - All handlers use base class error/success methods
+- **Centralized Logging** - Automatic error logging with context via MT_Logger
+- **Consistent Format** - Uniform error response structure across platform
+
 ---
-*Last Updated: August 2025 | Version 2.2.12*
+*Last Updated: August 2025 | Version 2.2.13*

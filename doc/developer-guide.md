@@ -536,4 +536,93 @@ As of v2.2.11, assignment removal is standardized:
 - Accepts `assignment_id` parameter
 - Captures full context before deletion for audit log
 - Includes jury/candidate names in audit trail
-  - Simple random selection
+
+## Plugin Settings
+
+### Data Management Settings (v2.2.13)
+
+The plugin now includes comprehensive data management controls in the Settings page:
+
+#### Remove Data on Uninstall
+Location: **Mobility Trailblazers → Settings → Data Management**
+
+This critical setting controls whether plugin data is preserved or deleted when uninstalling:
+- **Default**: Unchecked (data preserved)
+- **Option Name**: `mt_remove_data_on_uninstall`
+- **Warning Level**: Strong visual warning with red text and warning icon
+
+When enabled, the following data will be permanently deleted on uninstall:
+- All candidate profiles and information
+- All jury member profiles
+- All evaluations and scores
+- All assignments and relationships
+- All audit logs and history
+- All custom database tables (mt_*)
+- All plugin settings and configurations
+
+Implementation in `uninstall.php`:
+```php
+// Check if data should be removed
+if (get_option('mt_remove_data_on_uninstall', '0') === '1') {
+    // Delete all plugin data
+    MT_Uninstaller::remove_all_data();
+}
+```
+
+### Settings Structure
+
+All settings are stored as WordPress options with the `mt_` prefix:
+- `mt_criteria_weights` - Evaluation criteria importance weights
+- `mt_dashboard_settings` - Dashboard customization options
+- `mt_candidate_presentation` - Candidate display settings
+- `mt_default_language` - Default platform language
+- `mt_enable_language_switcher` - Language switcher visibility
+- `mt_auto_detect_language` - Browser language detection
+- `mt_evaluations_per_page` - Pagination settings
+- `mt_remove_data_on_uninstall` - Data deletion on uninstall
+
+## AJAX Error Handling Standardization (v2.2.13)
+
+### Overview
+All AJAX handlers now use standardized error handling through the base class `MT_Base_Ajax`.
+
+### Implementation
+Instead of direct `wp_send_json_error()` calls, all handlers use:
+```php
+// For errors
+$this->error($message, $additional_data);
+
+// For success
+$this->success($data, $message);
+```
+
+### Benefits
+1. **Centralized Logging**: All errors automatically logged via MT_Logger
+2. **Consistent Format**: Uniform error response structure
+3. **Better Debugging**: Error context includes user ID, action, timestamp
+4. **Maintainability**: Single point of control for error handling
+
+### Affected Classes
+- `MT_Admin_Ajax`: 1 instance standardized
+- `MT_Assignment_Ajax`: 12 instances standardized
+- `MT_Evaluation_Ajax`: 3 instances standardized
+
+### Error Response Format
+```json
+{
+    "success": false,
+    "data": {
+        "message": "Error message",
+        "additional_data": {...}
+    }
+}
+```
+
+### Logging
+All AJAX errors are logged with:
+- Action name
+- User ID
+- Error message
+- Additional context data
+- Timestamp
+- Request parameters (sanitized)
