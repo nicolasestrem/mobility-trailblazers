@@ -1,19 +1,35 @@
 /* Mobility Trailblazers Admin Styles */
 
-/* Color Variables */
+/* Mobility Trailblazers Official Brand Colors */
 :root {
-    --mt-primary: #003C3D;
-    --mt-secondary: #004C5F;
-    --mt-body-text: #302C37;
-    --mt-accent: #C1693C;
-    --mt-kupfer-soft: #B86F52;
-    --mt-kupfer-bold: #C1693C;
-    --mt-overlay-bg: #004C5FCC;
-    --mt-blue-accent: #A4DCD5;
-    --mt-bg-beige: #F5E6D3;
-    --mt-bg-base: #FFFFFF;
-    --mt-full-transparency: rgba(255, 255, 255, 0.1);
-    --mt-deep-blue: #004C5F;
+    /* System Colors (Primary Palette) */
+    --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
+    --mt-secondary: #004C5F;         /* Dark Indigo - Links, Secondary Elements */
+    --mt-body-text: #302C37;         /* Dark Gray - Body Text */
+    --mt-accent: #C1693C;            /* Copper - CTAs, Highlights */
+    
+    /* Custom Colors (Extended Palette) */
+    --mt-kupfer-soft: #B86F52;       /* Soft Copper - Hover States */
+    --mt-kupfer-bold: #C1693C;       /* Bold Copper - Active States */
+    --mt-blue-accent: #A4DCD5;       /* Light Turquoise - Info, Borders */
+    --mt-bg-beige: #F5E6D3;          /* Soft Beige - Background Sections */
+    --mt-bg-base: #FFFFFF;           /* White - Base Background */
+    --mt-overlay-bg: #004C5FCC;      /* Indigo Overlay with Transparency */
+    --mt-deep-blue: #004C5F;         /* Deep Blue (same as secondary) */
+    
+    /* Additional Utility Colors */
+    --mt-success: #28a745;           /* Success Green */
+    --mt-warning: #ffc107;           /* Warning Yellow */
+    --mt-error: #dc3545;             /* Error Red */
+    --mt-info: #17a2b8;              /* Info Blue */
+    
+    /* Shadows and Effects */
+    --mt-shadow-sm: 0 2px 4px rgba(48, 44, 55, 0.1);
+    --mt-shadow-md: 0 4px 12px rgba(48, 44, 55, 0.15);
+    --mt-shadow-lg: 0 8px 24px rgba(0, 60, 61, 0.2);
+    
+    /* Transitions */
+    --mt-transition: all 0.3s ease;
 }
 
 /* Reset box-sizing for MT elements to prevent layout issues */
@@ -149,28 +165,46 @@
     background: rgba(164, 220, 213, 0.1);
 }
 
-/* Status badges */
+/* Status badges - Using brand colors */
 .mt-status {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--mt-transition);
 }
 
 .mt-status-completed {
     background: var(--mt-primary);
     color: white;
+    border: 1px solid var(--mt-primary);
 }
 
 .mt-status-draft {
-    background: var(--mt-blue-accent);
-    color: var(--mt-primary);
+    background: rgba(164, 220, 213, 0.2);
+    color: var(--mt-secondary);
+    border: 1px solid var(--mt-blue-accent);
 }
 
 .mt-status-pending {
-    background: var(--mt-kupfer-soft);
+    background: rgba(193, 105, 60, 0.1);
+    color: var(--mt-accent);
+    border: 1px solid var(--mt-accent);
+}
+
+.mt-status-approved {
+    background: var(--mt-secondary);
     color: white;
+    border: 1px solid var(--mt-secondary);
+}
+
+.mt-status-rejected {
+    background: rgba(184, 111, 82, 0.1);
+    color: var(--mt-kupfer-soft);
+    border: 1px solid var(--mt-kupfer-soft);
 }
 
 /* Navigation Tabs - Target specific MT pages */
@@ -187,22 +221,28 @@
     margin-bottom: 20px;
 }
 
-/* Buttons - Only within MT context */
+/* Buttons - Brand Consistent Styling */
 .mt-admin-dashboard .button-primary,
 .mt-container .button-primary,
 .mt-card .button-primary {
     background: var(--mt-accent) !important;
     border-color: var(--mt-accent) !important;
     color: white !important;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 4px;
+    transition: var(--mt-transition);
+    box-shadow: var(--mt-shadow-sm);
 }
 
 .mt-admin-dashboard .button-primary:hover,
 .mt-container .button-primary:hover,
 .mt-card .button-primary:hover {
-    background: var(--mt-kupfer-bold) !important;
-    border-color: var(--mt-kupfer-bold) !important;
+    background: var(--mt-kupfer-soft) !important;
+    border-color: var(--mt-kupfer-soft) !important;
     color: white !important;
+    transform: translateY(-1px);
+    box-shadow: var(--mt-shadow-md);
 }
 
 .mt-admin-dashboard .button-secondary,
@@ -211,14 +251,38 @@
     background: var(--mt-secondary) !important;
     border-color: var(--mt-secondary) !important;
     color: white !important;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 4px;
+    transition: var(--mt-transition);
 }
 
 .mt-admin-dashboard .button-secondary:hover,
 .mt-container .button-secondary:hover,
 .mt-card .button-secondary:hover {
-    background: var(--mt-deep-blue) !important;
-    border-color: var(--mt-deep-blue) !important;
+    background: var(--mt-primary) !important;
+    border-color: var(--mt-primary) !important;
     color: white !important;
+    transform: translateY(-1px);
+    box-shadow: var(--mt-shadow-md);
+}
+
+/* Outline Buttons */
+.mt-button-outline {
+    background: transparent !important;
+    border: 2px solid var(--mt-accent) !important;
+    color: var(--mt-accent) !important;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 4px;
+    transition: var(--mt-transition);
+}
+
+.mt-button-outline:hover {
+    background: var(--mt-accent) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: var(--mt-shadow-md);
 }
 
 /* Dashboard Widget - Specific to MT widget */
@@ -722,6 +786,112 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+/* Processing States and Loading Indicators */
+tr.processing {
+    position: relative;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+tr.processing td {
+    position: relative;
+}
+
+tr.processing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 1;
+}
+
+/* Spinner animation for bulk actions */
+.spinner.is-active {
+    visibility: visible;
+}
+
+/* Enhanced button states */
+.button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.button:disabled:hover {
+    background: inherit !important;
+    border-color: inherit !important;
+}
+
+/* Notification styles - Brand Consistent */
+.mt-notification {
+    position: fixed;
+    top: 32px;
+    right: 20px;
+    z-index: 99999;
+    min-width: 300px;
+    max-width: 500px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: var(--mt-shadow-lg);
+    animation: slideInRight 0.3s ease-out;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.mt-notification.success {
+    background: rgba(0, 60, 61, 0.05);
+    border-left: 4px solid var(--mt-primary);
+    color: var(--mt-primary);
+}
+
+.mt-notification.error {
+    background: rgba(193, 105, 60, 0.05);
+    border-left: 4px solid var(--mt-accent);
+    color: var(--mt-kupfer-soft);
+}
+
+.mt-notification.warning {
+    background: rgba(193, 105, 60, 0.1);
+    border-left: 4px solid var(--mt-kupfer-soft);
+    color: var(--mt-accent);
+}
+
+.mt-notification.info {
+    background: rgba(164, 220, 213, 0.15);
+    border-left: 4px solid var(--mt-blue-accent);
+    color: var(--mt-secondary);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Visual feedback for selected rows */
+.mt-assignments-table tbody tr.selected,
+.mt-evaluations-table tbody tr.selected {
+    background: rgba(164, 220, 213, 0.2);
+}
+
+.mt-assignments-table tbody tr.selected td,
+.mt-evaluations-table tbody tr.selected td {
+    font-weight: 600;
+}
+
+/* Improved checkbox styling */
+input[type="checkbox"]:checked + label,
+input[type="checkbox"]:checked {
+    accent-color: var(--mt-primary);
 }
 
 /* Responsive */

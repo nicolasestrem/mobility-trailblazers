@@ -614,6 +614,23 @@ if (typeof mt_admin.i18n === 'undefined') {
             console.log('MTEvaluationManager initialized.');
             this.bindEvents();
         },
+        
+        /**
+         * Get confirmation message based on the action type
+         * Provides more specific and helpful messages for different actions
+         */
+        getConfirmMessage: function(action) {
+            const messages = {
+                'delete': mt_admin.i18n.confirm_delete_evaluations || 'Are you sure you want to permanently delete the selected evaluations? This cannot be undone.',
+                'approve': mt_admin.i18n.confirm_approve_evaluations || 'Are you sure you want to approve the selected evaluations?',
+                'reject': mt_admin.i18n.confirm_reject_evaluations || 'Are you sure you want to reject the selected evaluations?',
+                'reset': mt_admin.i18n.confirm_reset_evaluations || 'Are you sure you want to reset the selected evaluations to draft status?',
+                'export': mt_admin.i18n.confirm_export_evaluations || 'Are you sure you want to export the selected evaluations?'
+            };
+            
+            // Return specific message or default
+            return messages[action] || 'Are you sure you want to ' + action + ' the selected evaluations?';
+        },
         bindEvents: function() {
             // Bind all event listeners for the evaluations page.
             $('.view-details').on('click', (e) => {
@@ -658,44 +675,91 @@ if (typeof mt_admin.i18n === 'undefined') {
                 return;
             }
             
-            // Confirmation logic for destructive actions
-            // This is a simplified version, you can expand it with more i18n strings
-            if (action === 'delete') {
-                if (!confirm('Are you sure you want to delete the selected evaluations? This cannot be undone.')) {
-                    return;
-                }
-            } else {
-                 if (!confirm('Are you sure you want to ' + action + ' the selected evaluations?')) {
-                    return;
-                }
+            // Use the improved confirmation message function
+            const confirmMessage = this.getConfirmMessage(action);
+            if (!confirm(confirmMessage)) {
+                return;
             }
 
-            // Perform bulk action via AJAX
+            // Perform bulk action via AJAX with improved loading indicators
+            this.performBulkAction(action, selected);
+        },
+        
+        /**
+         * Perform the bulk action with proper loading indicators and error handling
+         */
+        performBulkAction: function(action, evaluationIds) {
+            // Store original button text
+            const $buttons = $('#doaction, #doaction2');
+            const originalText = $buttons.first().val();
+            
+            // Show loading spinner if available
+            const $spinner = $('.spinner');
+            if ($spinner.length) {
+                $spinner.addClass('is-active');
+            }
+            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_bulk_evaluation_action',
                     bulk_action: action,
-                    evaluation_ids: selected,
+                    evaluation_ids: evaluationIds,
                     nonce: mt_admin.nonce
                 },
                 beforeSend: function() {
-                    $('#doaction, #doaction2').prop('disabled', true).val(mt_admin.i18n.processing || 'Processing...');
+                    // Disable buttons and show processing text
+                    $buttons.prop('disabled', true).val(mt_admin.i18n.processing || 'Processing...');
+                    
+                    // Add visual feedback to selected rows
+                    $('input[name="evaluation[]"]:checked').closest('tr').addClass('processing').css('opacity', '0.6');
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert(response.data.message || 'Bulk action completed successfully');
-                        location.reload();
+                        // Show success message
+                        if (typeof mtShowNotification === 'function') {
+                            mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
+                        } else {
+                            alert(response.data.message || 'Bulk action completed successfully');
+                        }
+                        
+                        // Reload page after a short delay to show the message
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
                     } else {
-                        alert(response.data || 'An error occurred');
+                        // Show error message
+                        if (typeof mtShowNotification === 'function') {
+                            mtShowNotification(response.data || 'An error occurred', 'error');
+                        } else {
+                            alert(response.data || 'An error occurred');
+                        }
+                        
+                        // Remove processing state from rows
+                        $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');
                     }
                 },
-                error: function() {
-                    alert(mt_admin.i18n.error_occurred || 'An error occurred. Please try again.');
+                error: function(xhr, status, error) {
+                    // Show detailed error message
+                    const errorMsg = mt_admin.i18n.error_occurred || 'An error occurred. Please try again.';
+                    if (typeof mtShowNotification === 'function') {
+                        mtShowNotification(errorMsg + ' (' + error + ')', 'error');
+                    } else {
+                        alert(errorMsg);
+                    }
+                    
+                    // Remove processing state from rows
+                    $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');
                 },
                 complete: function() {
-                    $('#doaction, #doaction2').prop('disabled', false).val(mt_admin.i18n.apply || 'Apply');
+                    // Re-enable buttons and restore original text
+                    $buttons.prop('disabled', false).val(originalText || 'Apply');
+                    
+                    // Hide loading spinner
+                    if ($spinner.length) {
+                        $spinner.removeClass('is-active');
+                    }
                 }
             });
         }
@@ -729,7 +793,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             MTAssignmentManager.init();
         }
 
-        // Check for the Evaluations page
+        // Check for the Evaluations page using body class (more reliable than checking page title)
         if ($('body').hasClass('mobility-trailblazers_page_mt-evaluations')) {
              MTEvaluationManager.init();
         }

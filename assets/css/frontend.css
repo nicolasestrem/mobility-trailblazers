@@ -1,19 +1,35 @@
 /* Mobility Trailblazers Frontend Styles */
 
-/* Color Variables */
+/* Mobility Trailblazers Official Brand Colors */
 :root {
-    --mt-primary: #003C3D;
-    --mt-secondary: #004C5F;
-    --mt-body-text: #302C37;
-    --mt-accent: #C1693C;
-    --mt-kupfer-soft: #B86F52;
-    --mt-kupfer-bold: #C1693C;
-    --mt-overlay-bg: #004C5FCC;
-    --mt-blue-accent: #A4DCD5;
-    --mt-bg-beige: #F5E6D3;
-    --mt-bg-base: #FFFFFF;
-    --mt-full-transparency: rgba(255, 255, 255, 0.1);
-    --mt-deep-blue: #004C5F;
+    /* System Colors (Primary Palette) */
+    --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
+    --mt-secondary: #004C5F;         /* Dark Indigo - Links, Secondary Elements */
+    --mt-body-text: #302C37;         /* Dark Gray - Body Text */
+    --mt-accent: #C1693C;            /* Copper - CTAs, Highlights */
+    
+    /* Custom Colors (Extended Palette) */
+    --mt-kupfer-soft: #B86F52;       /* Soft Copper - Hover States */
+    --mt-kupfer-bold: #C1693C;       /* Bold Copper - Active States */
+    --mt-blue-accent: #A4DCD5;       /* Light Turquoise - Info, Borders */
+    --mt-bg-beige: #F5E6D3;          /* Soft Beige - Background Sections */
+    --mt-bg-base: #FFFFFF;           /* White - Base Background */
+    --mt-overlay-bg: #004C5FCC;      /* Indigo Overlay with Transparency */
+    --mt-deep-blue: #004C5F;         /* Deep Blue (same as secondary) */
+    
+    /* Additional Utility Colors */
+    --mt-success: #28a745;           /* Success Green */
+    --mt-warning: #ffc107;           /* Warning Yellow */
+    --mt-error: #dc3545;             /* Error Red */
+    --mt-info: #17a2b8;              /* Info Blue */
+    
+    /* Shadows and Effects */
+    --mt-shadow-sm: 0 2px 4px rgba(48, 44, 55, 0.1);
+    --mt-shadow-md: 0 4px 12px rgba(48, 44, 55, 0.15);
+    --mt-shadow-lg: 0 8px 24px rgba(0, 60, 61, 0.2);
+    
+    /* Transitions */
+    --mt-transition: all 0.3s ease;
 }
 
 /* General Frontend Styles */

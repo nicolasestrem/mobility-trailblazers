@@ -196,7 +196,7 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 
 ### Version 2.0.0 (June 2025)
 - Complete rebuild with modern architecture and Repository pattern
-- Removed public voting system dependencies
+- Focus on jury evaluation system
 - Modern, responsive UI with improved security
 
 *For complete changelog, see [Changelog](doc/mt-changelog-updated.md)*
