@@ -1,5 +1,25 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.9] - 2025-08-12
+
+### Enhanced
+- **Jury Admin Role Definition**: Formally defined the mt_jury_admin role with specific capabilities
+  - Role includes: mt_view_all_evaluations, mt_manage_assignments, mt_view_reports, mt_export_data
+  - Provides intermediate access level between administrators and regular jury members
+  - Enables delegation of assignment management without full admin privileges
+
+### Fixed
+- **Code Consolidation**: Removed duplicate export_assignments function from MT_Assignment_Ajax class
+  - Eliminated redundancy by centralizing export functionality in MT_Admin_Ajax class
+  - Prevents potential conflicts from duplicate AJAX action registrations
+  - Maintains single source of truth for assignment export logic
+
+### Technical Details
+- MT_Roles class already properly defines mt_jury_admin role during plugin activation
+- Capability check in clear_all_assignments already uses standardized check_permission('mt_manage_settings')
+- Removed duplicate wp_ajax_mt_export_assignments action hook registration from assignment handler
+- All export functionality now properly routes through the admin AJAX handler
+
 ## [2.2.8] - 2025-08-12
 
 ### Security

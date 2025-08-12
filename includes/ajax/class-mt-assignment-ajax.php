@@ -39,7 +39,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_bulk_create_assignments', [$this, 'bulk_create_assignments']);
         add_action('wp_ajax_mt_manual_assign', [$this, 'manual_assign']); // Add this handler
         add_action('wp_ajax_mt_clear_all_assignments', [$this, 'clear_all_assignments']);
-        add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
         add_action('wp_ajax_mt_auto_assign', [$this, 'auto_assign']);
         
         // Bulk operations
@@ -403,85 +402,6 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         } else {
             $this->send_json_error(__('Failed to clear assignments.', 'mobility-trailblazers'));
         }
-    }
-
-    /**
-     * Export assignments to CSV
-     */
-    public function export_assignments() {
-        // Verify nonce using base class method
-        if (!$this->verify_nonce('mt_admin_nonce')) {
-            wp_die(__('Security check failed.', 'mobility-trailblazers'));
-        }
-        
-        // Check permissions
-        $this->check_permission('mt_export_data');
-        
-        $assignment_repo = new MT_Assignment_Repository();
-        $assignments = $assignment_repo->find_all();
-        
-        // Set headers for CSV download
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=assignments-' . date('Y-m-d') . '.csv');
-        
-        // Create output stream
-        $output = fopen('php://output', 'w');
-        
-        // Add BOM for Excel compatibility
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
-        // Add headers
-        fputcsv($output, array(
-            __('Jury Member', 'mobility-trailblazers'),
-            __('Email', 'mobility-trailblazers'),
-            __('Candidate', 'mobility-trailblazers'),
-            __('Category', 'mobility-trailblazers'),
-            __('Assigned Date', 'mobility-trailblazers'),
-            __('Evaluation Status', 'mobility-trailblazers')
-        ));
-        
-        // Add data
-        foreach ($assignments as $assignment) {
-            $jury = get_post($assignment->jury_member_id);
-            $candidate = get_post($assignment->candidate_id);
-            $user = get_user_by('ID', get_post_meta($assignment->jury_member_id, '_mt_user_id', true));
-            
-            // Get categories safely
-            $category_name = '';
-            $categories = wp_get_post_terms($assignment->candidate_id, 'mt_category');
-            if (!is_wp_error($categories) && !empty($categories)) {
-                $category_name = $categories[0]->name;
-            }
-            
-            // Check if evaluation exists
-            $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
-            // Use find_all with filters instead of get_by_jury_and_candidate
-            $evaluations = $evaluation_repo->find_all([
-                'jury_member_id' => $assignment->jury_member_id,
-                'candidate_id' => $assignment->candidate_id,
-                'limit' => 1
-            ]);
-            $evaluation = !empty($evaluations) ? $evaluations[0] : null;
-            $status = $evaluation ? __('Completed', 'mobility-trailblazers') : __('Pending', 'mobility-trailblazers');
-            
-            // Format date safely
-            $assigned_date = '';
-            if (!empty($assignment->created_at)) {
-                $assigned_date = date('Y-m-d', strtotime($assignment->created_at));
-            }
-            
-            fputcsv($output, array(
-                $jury ? $jury->post_title : '',
-                $user ? $user->user_email : '',
-                $candidate ? $candidate->post_title : '',
-                $category_name,
-                $assigned_date,
-                $status
-            ));
-        }
-        
-        fclose($output);
-        exit;
     }
 
     /**
