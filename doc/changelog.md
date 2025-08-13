@@ -1,5 +1,60 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.16] - 2025-08-13
+
+### Added
+- **AJAX-Based CSV Import**: Implemented JavaScript-based CSV import with file picker dialog
+  - Created `assets/js/candidate-import.js` with complete AJAX file upload functionality
+  - File picker dialog using browser's native file selection
+  - Real-time progress overlay during import process
+  - Visual feedback with success/error statistics display
+  - Support for up to 10MB CSV files
+  - Comprehensive error reporting with row-specific details
+
+- **Secure AJAX Import Handler**: New dedicated AJAX handler for CSV imports
+  - Created `includes/ajax/class-mt-import-ajax.php` extending MT_Base_Ajax
+  - Full security implementation with nonce verification and capability checks
+  - Extensive file validation (type, size, MIME type)
+  - Integration with MT_Logger for audit trail
+  - Support for both create and update operations
+  - Detailed error messages with internationalization
+
+- **German Evaluation Criteria Parsing**: Enhanced CSV import with regex-based German text extraction
+  - Added `parse_evaluation_criteria()` method for extracting evaluation fields from Description
+  - Regex patterns for: Mut & Pioniergeist, Innovationsgrad, Umsetzungsstärke, Relevanz & Impact, Sichtbarkeit & Reichweite
+  - Full UTF-8 support for German special characters (ä, ö, ü, ß)
+  - Automatic trimming and formatting of extracted content
+
+### Enhanced
+- **Script Enqueuing System**: Improved JavaScript loading for candidates page
+  - Updated both `class-mt-admin.php` and `class-mt-plugin.php` for proper script loading
+  - Added localized strings for all import-related messages
+  - Proper nonce generation and AJAX URL configuration
+  - Conditional loading only on candidates list page
+
+- **Field Mapping System**: Exact CSV column to meta field mapping
+  - Added `get_field_mapping()` static method for consistent mapping
+  - Support for German column headers: Organisation, LinkedIn-Link, Webseite
+  - Proper handling of special post fields (post_title, post_content)
+  - Category normalization for consistent data storage
+
+### Technical Details
+- **New Files Created**:
+  - `assets/js/candidate-import.js` - AJAX import JavaScript module
+  - `includes/ajax/class-mt-import-ajax.php` - AJAX handler class
+
+- **Files Modified**:
+  - `includes/admin/class-mt-admin.php` - Added script enqueuing for candidate import
+  - `includes/admin/class-mt-enhanced-profile-importer.php` - Added field mapping and criteria parsing
+  - `includes/core/class-mt-plugin.php` - Added MT_Import_Ajax initialization note
+
+- **Security Features**:
+  - MIME type validation for uploaded files
+  - File size limits (10MB max)
+  - Proper nonce verification
+  - Capability checks for import permission
+  - Comprehensive error logging
+
 ## [2.2.15] - 2025-08-13
 
 ### Added

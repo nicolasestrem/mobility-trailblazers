@@ -30,6 +30,7 @@
 - **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with standardized error responses
 - **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
+- **ajax/class-mt-import-ajax.php** - CSV import AJAX handler with file validation and security (v2.2.16)
 
 ### Business Logic Services
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation
@@ -86,6 +87,7 @@
 - **js/frontend.js** - Public interface interactions and form handling
 - **js/jury-evaluation.js** - Evaluation form validation and submission
 - **js/charts.js** - Data visualization for statistics and progress
+- **js/candidate-import.js** - AJAX-based CSV import with file picker dialog (v2.2.16)
 
 ### Images
 - **images/logo.png** - Platform logo and branding assets
@@ -205,5 +207,19 @@ The platform follows a **Repository-Service-Controller** pattern:
 - **Centralized Logging** - Automatic error logging with context via MT_Logger
 - **Consistent Format** - Uniform error response structure across platform
 
+## 📊 Recent Updates (v2.2.15 - v2.2.16)
+
+### CSV Import System (v2.2.16)
+- **AJAX-Based Import** - JavaScript file picker with real-time progress overlay
+- **German Text Parsing** - Regex extraction of evaluation criteria from Description field
+- **Enhanced Security** - MIME type validation, file size limits, comprehensive logging
+- **Field Mapping** - Exact CSV column to meta field mapping with German support
+
+### Candidate Management (v2.2.15)
+- **Menu Consolidation** - Removed duplicate candidates admin page
+- **Custom Columns** - Import ID, Organization, Category with icons, Top 50 status
+- **Sortable Lists** - All custom columns support sorting
+- **Export Enhancement** - Full UTF-8 support with BOM for Excel
+
 ---
-*Last Updated: August 2025 | Version 2.2.13*
+*Last Updated: August 2025 | Version 2.2.16*

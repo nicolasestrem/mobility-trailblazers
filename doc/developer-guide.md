@@ -537,6 +537,229 @@ As of v2.2.11, assignment removal is standardized:
 - Captures full context before deletion for audit log
 - Includes jury/candidate names in audit trail
 
+## CSV Import System (v2.2.16)
+
+### Overview
+The platform provides a comprehensive CSV import system for candidate data with AJAX-based file upload, German text parsing, and extensive validation.
+
+### Architecture
+
+#### Frontend Components
+- **JavaScript Module**: `assets/js/candidate-import.js`
+  - File picker dialog using native browser file selection
+  - AJAX file upload with FormData API
+  - Real-time progress overlay
+  - Success/error reporting with statistics
+
+#### Backend Components
+- **AJAX Handler**: `includes/ajax/class-mt-import-ajax.php`
+  - Extends `MT_Base_Ajax` for consistent security
+  - Comprehensive file validation
+  - Integration with import service
+  - Audit trail logging
+
+- **Import Service**: `includes/admin/class-mt-enhanced-profile-importer.php`
+  - CSV parsing with UTF-8 support
+  - Field mapping system
+  - German text extraction
+  - URL validation and normalization
+
+### CSV Format
+
+#### Required Columns (German)
+```csv
+ID,Name,Organisation,Position,LinkedIn-Link,Webseite,Article about coming of age,Description,Category,Status
+```
+
+#### Field Mapping
+| CSV Column | Meta Field | Type |
+|------------|------------|------|
+| ID | `_mt_candidate_id` | String |
+| Name | `post_title` | Post field |
+| Organisation | `_mt_organization` | Meta |
+| Position | `_mt_position` | Meta |
+| LinkedIn-Link | `_mt_linkedin_url` | URL |
+| Webseite | `_mt_website_url` | URL |
+| Article about coming of age | `_mt_article_url` | URL |
+| Description | `post_content` | Post field |
+| Category | `_mt_category_type` | Enum (Startup/Gov/Tech) |
+| Status | `_mt_top_50_status` | Boolean |
+
+### German Text Parsing
+
+The system extracts evaluation criteria from the Description field using regex patterns:
+
+```php
+// Evaluation criteria patterns
+$patterns = [
+    '_mt_evaluation_courage' => '/Mut\s*&\s*Pioniergeist:\s*(.+?)(?=(?:Innovationsgrad:|...|$))/isu',
+    '_mt_evaluation_innovation' => '/Innovationsgrad:\s*(.+?)(?=(?:Umsetzungsstärke:|...|$))/isu',
+    '_mt_evaluation_implementation' => '/Umsetzungsstärke:\s*(.+?)(?=(?:Relevanz\s*&\s*Impact:|...|$))/isu',
+    '_mt_evaluation_relevance' => '/Relevanz\s*&\s*Impact:\s*(.+?)(?=(?:Sichtbarkeit\s*&\s*Reichweite:|...|$))/isu',
+    '_mt_evaluation_visibility' => '/Sichtbarkeit\s*&\s*Reichweite:\s*(.+?)$/isu'
+];
+```
+
+### JavaScript Implementation
+
+#### File Upload Handler
+```javascript
+jQuery('#mt-import-candidates').on('click', function(e) {
+    e.preventDefault();
+    
+    // Create file input
+    var fileInput = jQuery('<input type="file" accept=".csv" />');
+    
+    fileInput.on('change', function(e) {
+        var file = e.target.files[0];
+        
+        // Validate file
+        if (!file || !file.name.endsWith('.csv')) {
+            alert(mt_import.i18n.invalid_file_type);
+            return;
+        }
+        
+        // Upload via AJAX
+        var formData = new FormData();
+        formData.append('action', 'mt_import_candidates');
+        formData.append('csv_file', file);
+        formData.append('nonce', mt_import.nonce);
+        
+        jQuery.ajax({
+            url: mt_import.ajax_url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Handle response
+            }
+        });
+    });
+    
+    fileInput.click();
+});
+```
+
+### Security Features
+
+#### File Validation
+1. **File Type Check**: Extension and MIME type validation
+2. **Size Limit**: Maximum 10MB per file
+3. **MIME Types Allowed**:
+   - text/csv
+   - text/plain
+   - application/csv
+   - application/vnd.ms-excel
+
+#### Permission Checks
+- Nonce verification: `mt_ajax_nonce`
+- Capability check: `edit_posts` or `import`
+- User context logging for audit trail
+
+### Error Handling
+
+The system provides detailed error reporting at multiple levels:
+
+#### Row-Level Errors
+```php
+$result['error_details'][] = [
+    'row' => $row_number,
+    'error' => 'Invalid email format',
+    'data' => $row_data
+];
+```
+
+#### Import Statistics
+```json
+{
+    "success": true,
+    "data": {
+        "imported": 25,
+        "updated": 10,
+        "skipped": 5,
+        "errors": 2,
+        "error_details": [...]
+    }
+}
+```
+
+### Custom Columns Display
+
+The `MT_Candidate_Columns` class adds custom columns to the candidates list:
+
+#### Column Definitions
+- **Import ID**: Displays with code styling
+- **Organization**: Company/institution name
+- **Position**: Role/title
+- **Category**: Color-coded with icons
+  - Startup: Green lightbulb
+  - Gov: Blue building
+  - Tech: Red desktop
+- **Top 50**: Checkmark indicator
+- **Links**: Icons for LinkedIn, Website, Article
+
+### Performance Considerations
+
+1. **File Size**: Limited to 10MB to prevent timeouts
+2. **Batch Processing**: Processes rows sequentially
+3. **Memory Management**: Clears buffers after each row
+4. **Database Operations**: Uses WordPress post functions for caching
+
+### Testing the Import
+
+#### Sample CSV Data
+```csv
+ID,Name,Organisation,Position,LinkedIn-Link,Webseite,Article about coming of age,Description,Category,Status
+MT001,Max Müller,TechStart GmbH,CEO,https://linkedin.com/in/maxmueller,https://techstart.de,https://article.com/max,"Mut & Pioniergeist: Revolutionäre Ideen...",Startup,Top50
+```
+
+#### Validation Checklist
+- [ ] File uploads successfully
+- [ ] Progress overlay appears
+- [ ] German characters preserved (ä, ö, ü, ß)
+- [ ] URLs validated and normalized
+- [ ] Categories mapped correctly
+- [ ] Evaluation criteria extracted
+- [ ] Import statistics displayed
+- [ ] Error details shown for failures
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **"Invalid file type" error**
+   - Ensure file has .csv extension
+   - Check MIME type is text/csv or text/plain
+
+2. **German characters corrupted**
+   - Save CSV as UTF-8 with BOM
+   - Use Excel's "CSV UTF-8" format
+
+3. **URLs not importing**
+   - Ensure URLs start with http:// or https://
+   - System auto-adds https:// if missing
+
+4. **Categories not recognized**
+   - Use exact values: Startup, Gov, Tech
+   - Case-insensitive matching
+
+### Extending the Import
+
+#### Adding Custom Fields
+1. Update field mapping in `get_field_mapping()`
+2. Add validation in `validate_row()`
+3. Update meta field saving in `import_csv()`
+
+#### Custom Validation
+```php
+// Add to MT_Enhanced_Profile_Importer
+public static function validate_custom_field($value) {
+    // Custom validation logic
+    return $validated_value;
+}
+```
+
 ## Plugin Settings
 
 ### Data Management Settings (v2.2.13)
