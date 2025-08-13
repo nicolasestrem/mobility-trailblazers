@@ -124,9 +124,9 @@ class MT_Plugin {
         $admin_ajax = new \MobilityTrailblazers\Ajax\MT_Admin_Ajax();
         $admin_ajax->init();
         
-        // Candidate Import AJAX
-        $import_ajax = new \MobilityTrailblazers\Ajax\MT_Candidate_Import_Ajax();
-        $import_ajax->init();
+        // Import AJAX (handles candidate CSV imports)
+        // Note: MT_Import_Ajax is self-initializing, no need to call init()
+        // The class constructor handles the action hook registration
     }
     
     /**
