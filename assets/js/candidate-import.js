@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
     
     // Check if mt_ajax is available
     if (typeof mt_ajax === 'undefined') {
-        console.error('MT Import: mt_ajax object not found. Script localization may have failed.');
+        // MT Import: mt_ajax object not found. Script localization may have failed.
     }
     
     // Handle import button click - use event delegation since button is added dynamically
@@ -99,16 +99,7 @@ jQuery(document).ready(function($) {
                 $('body').append($overlay);
             }
             
-            // Debug: Log the request details
-            console.log('MT Import: Sending AJAX request to:', mt_ajax.ajax_url || ajaxurl);
-            console.log('MT Import: FormData entries:');
-            for (var pair of formData.entries()) {
-                if (pair[0] === 'csv_file') {
-                    console.log('  - csv_file:', pair[1].name, '(' + pair[1].size + ' bytes)');
-                } else {
-                    console.log('  - ' + pair[0] + ':', pair[1]);
-                }
-            }
+            // Debug: Request details logged silently
             
             // Send AJAX request
             $.ajax({

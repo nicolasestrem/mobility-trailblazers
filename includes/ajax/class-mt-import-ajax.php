@@ -55,12 +55,9 @@ class MT_Import_Ajax extends MT_Base_Ajax {
             }
             
             // Step 2: Check user capability
-            if (!$this->check_permission('import')) {
-                // Also check alternative capability if 'import' doesn't exist
-                if (!current_user_can('edit_posts')) {
-                    $this->error(__('You do not have permission to import candidates.', 'mobility-trailblazers'));
-                    return;
-                }
+            if (!current_user_can('edit_posts')) {
+                $this->error(__('You do not have permission to import candidates.', 'mobility-trailblazers'));
+                return;
             }
             
             // Step 3: Validate uploaded file

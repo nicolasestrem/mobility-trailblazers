@@ -246,14 +246,14 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        alert(response.data.message || mt_admin.i18n.assignments_created);
+                        mtShowNotification(response.data.message || mt_admin.i18n.assignments_created, 'success');
                         location.reload();
                     } else {
-                        alert(response.data || mt_admin.i18n.error_occurred);
+                        mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
-                    alert(mt_admin.i18n.error_occurred);
+                    mtShowNotification(mt_admin.i18n.error_occurred, 'error');
                 },
                 complete: () => {
                     $('#mt-auto-assign-modal button[type="submit"]').prop('disabled', false).text('Run Auto-Assignment');
@@ -270,7 +270,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
             
             if (!juryMemberId || candidateIds.length === 0) {
-                alert(mt_admin.i18n.select_jury_and_candidates);
+                mtShowNotification(mt_admin.i18n.select_jury_and_candidates, 'warning');
                 return;
             }
             
@@ -288,14 +288,14 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        alert(response.data.message || mt_admin.i18n.assignments_created);
+                        mtShowNotification(response.data.message || mt_admin.i18n.assignments_created, 'success');
                         location.reload();
                     } else {
-                        alert(response.data || mt_admin.i18n.error_occurred);
+                        mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
-                    alert(mt_admin.i18n.error_occurred);
+                    mtShowNotification(mt_admin.i18n.error_occurred, 'error');
                 },
                 complete: () => {
                     $('#mt-manual-assignment-form button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.assign_selected);
@@ -332,13 +332,13 @@ if (typeof mt_admin.i18n === 'undefined') {
                                 $('.mt-assignments-table tbody').html('<tr><td colspan="8" class="no-items">' + mt_admin.i18n.no_assignments + '</td></tr>');
                             }
                         });
-                        alert(mt_admin.i18n.assignment_removed);
+                        mtShowNotification(mt_admin.i18n.assignment_removed, 'success');
                     } else {
-                        alert(response.data || mt_admin.i18n.error_occurred);
+                        mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
-                    alert(mt_admin.i18n.error_occurred);
+                    mtShowNotification(mt_admin.i18n.error_occurred, 'error');
                 },
                 complete: () => {
                     $button.prop('disabled', false).text('Remove');
@@ -367,14 +367,14 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        alert(mt_admin.i18n.all_assignments_cleared);
+                        mtShowNotification(mt_admin.i18n.all_assignments_cleared, 'success');
                         location.reload();
                     } else {
-                        alert(response.data || mt_admin.i18n.error_occurred);
+                        mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
                 },
                 error: () => {
-                    alert(mt_admin.i18n.error_occurred);
+                    mtShowNotification(mt_admin.i18n.error_occurred, 'error');
                 },
                 complete: () => {
                     $('#mt-clear-all-btn').prop('disabled', false).html('<span class="dashicons dashicons-trash"></span> ' + mt_admin.i18n.clear_all);
@@ -403,7 +403,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             
             form.appendTo('body').submit().remove();
             
-            alert(mt_admin.i18n.export_started);
+            mtShowNotification(mt_admin.i18n.export_started, 'info');
         },
         
         toggleBulkActions: function() {
@@ -430,12 +430,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
             
             if (!action) {
-                alert('Please select a bulk action');
+                mtShowNotification('Please select a bulk action', 'warning');
                 return;
             }
             
             if (selectedIds.length === 0) {
-                alert('Please select at least one assignment');
+                mtShowNotification('Please select at least one assignment', 'warning');
                 return;
             }
             
@@ -466,14 +466,14 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        alert(response.data.message || 'Assignments removed successfully');
+                        mtShowNotification(response.data.message || 'Assignments removed successfully', 'success');
                         location.reload();
                     } else {
-                        alert(response.data || 'An error occurred');
+                        mtShowNotification(response.data || 'An error occurred', 'error');
                     }
                 },
                 error: () => {
-                    alert('An error occurred');
+                    mtShowNotification('An error occurred', 'error');
                 },
                 complete: () => {
                     $('#mt-apply-bulk-action').prop('disabled', false).text('Apply');
@@ -622,12 +622,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             const newJuryMemberId = $('#reassign_jury_member').val();
             
             if (!newJuryMemberId) {
-                alert(mt_admin.i18n.select_jury_member || 'Please select a jury member');
+                mtShowNotification(mt_admin.i18n.select_jury_member || 'Please select a jury member', 'warning');
                 return;
             }
             
             if (!this.pendingReassignments || this.pendingReassignments.length === 0) {
-                alert(mt_admin.i18n.no_assignments_selected || 'No assignments selected');
+                mtShowNotification(mt_admin.i18n.no_assignments_selected || 'No assignments selected', 'warning');
                 return;
             }
             
@@ -645,15 +645,15 @@ if (typeof mt_admin.i18n === 'undefined') {
                 },
                 success: (response) => {
                     if (response.success) {
-                        alert(response.data.message || 'Assignments reassigned successfully');
+                        mtShowNotification(response.data.message || 'Assignments reassigned successfully', 'success');
                         $('#mt-reassign-modal').fadeOut(300);
                         location.reload();
                     } else {
-                        alert(response.data || 'An error occurred');
+                        mtShowNotification(response.data || 'An error occurred', 'error');
                     }
                 },
                 error: () => {
-                    alert(mt_admin.i18n.error_occurred || 'An error occurred');
+                    mtShowNotification(mt_admin.i18n.error_occurred || 'An error occurred', 'error');
                 },
                 complete: () => {
                     $('#mt-reassign-form button[type="submit"]').prop('disabled', false).text(mt_admin.i18n.reassign || 'Reassign');
@@ -851,7 +851,7 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         applyBulkAction: function(action) {
             if (action === '-1') {
-                alert(mt_admin.i18n.select_bulk_action || 'Please select a bulk action');
+                mtShowNotification(mt_admin.i18n.select_bulk_action || 'Please select a bulk action', 'warning');
                 return;
             }
 
@@ -861,7 +861,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
 
             if (selected.length === 0) {
-                alert(mt_admin.i18n.select_assignments || 'Please select at least one evaluation');
+                mtShowNotification(mt_admin.i18n.select_assignments || 'Please select at least one evaluation', 'warning');
                 return;
             }
             
@@ -911,7 +911,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                         if (typeof mtShowNotification === 'function') {
                             mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
                         } else {
-                            alert(response.data.message || 'Bulk action completed successfully');
+                            mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
                         }
                         
                         // Reload page after a short delay to show the message
@@ -923,7 +923,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                         if (typeof mtShowNotification === 'function') {
                             mtShowNotification(response.data || 'An error occurred', 'error');
                         } else {
-                            alert(response.data || 'An error occurred');
+                            mtShowNotification(response.data || 'An error occurred', 'error');
                         }
                         
                         // Remove processing state from rows
@@ -936,7 +936,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                     if (typeof mtShowNotification === 'function') {
                         mtShowNotification(errorMsg + ' (' + error + ')', 'error');
                     } else {
-                        alert(errorMsg);
+                        mtShowNotification(errorMsg, 'error');
                     }
                     
                     // Remove processing state from rows

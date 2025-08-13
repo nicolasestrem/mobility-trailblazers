@@ -555,11 +555,11 @@
             formData.nonce = mt_ajax.nonce;
             formData.status = 'completed';
             
-            console.log('Submitting evaluation with data:', formData); // Debug log
+            // Submitting evaluation with data
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
-                    console.log('AJAX Response:', response); // Debug log
+                    // AJAX Response received
                     
                     if (response.success) {
                         // Show success message - message is in response.data.message
@@ -638,11 +638,11 @@
             formData.nonce = mt_ajax.nonce;
             formData.status = 'draft';
             
-            console.log('Saving draft with data:', formData); // Debug log
+            // Saving draft with data
             
             $.post(mt_ajax.url, formData)
                 .done(function(response) {
-                    console.log('Draft Save Response:', response); // Debug log
+                    // Draft Save Response received
                     
                     if (response.success) {
                         // Show success message temporarily

@@ -2,6 +2,27 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.20] - 2025-08-13
+
+### Fixed
+- **Import Permission Check**: Fixed incorrect capability check in MT_Import_Ajax - now properly uses 'edit_posts' capability
+- **JavaScript Alert Replacement**: Replaced all browser alert() calls with WordPress admin notices using mtShowNotification
+  - Updated admin.js to use proper notification types (success, error, warning, info)
+  - Provides better user experience with dismissible notices
+- **Debug Code Cleanup**: Removed console.log statements from production JavaScript files
+  - Cleaned frontend.js debug logging
+  - Cleaned candidate-import.js debug logging
+  - Improves security by not exposing internal information
+- **Uninstaller Bug**: Fixed table name typo (mt_error_logs → mt_error_log) ensuring complete data removal
+
+### Changed
+- **Code Quality**: Improved JavaScript notification handling for consistent user feedback
+- **Security**: Removed debug output that could expose sensitive information
+
+### Verified
+- **View Details Modal**: Confirmed working properly with full implementation
+- **AJAX Response Format**: Verified all handlers use standardized success/error format from base class
+
 ## [2.2.19] - 2025-08-13
 
 ### Fixed
