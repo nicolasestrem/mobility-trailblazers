@@ -123,6 +123,10 @@ class MT_Plugin {
         // Admin AJAX
         $admin_ajax = new \MobilityTrailblazers\Ajax\MT_Admin_Ajax();
         $admin_ajax->init();
+        
+        // Candidate Import AJAX
+        $import_ajax = new \MobilityTrailblazers\Ajax\MT_Candidate_Import_Ajax();
+        $import_ajax->init();
     }
     
     /**
@@ -267,6 +271,37 @@ class MT_Plugin {
             MT_VERSION,
             true
         );
+        
+        // Candidate import script (only on candidates page)
+        $screen = get_current_screen();
+        if ($screen && $screen->id === 'edit-mt_candidate') {
+            wp_enqueue_script(
+                'mt-candidate-import',
+                MT_PLUGIN_URL . 'assets/js/candidate-import.js',
+                ['jquery'],
+                MT_VERSION,
+                true
+            );
+            
+            // Localize for import script
+            wp_localize_script('mt-candidate-import', 'mt_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_ajax_nonce'),
+                'i18n' => [
+                    'importing' => __('Importing...', 'mobility-trailblazers'),
+                    'import_complete' => __('Import complete!', 'mobility-trailblazers'),
+                    'import_failed' => __('Import failed!', 'mobility-trailblazers'),
+                    'import_error' => __('An error occurred during import.', 'mobility-trailblazers'),
+                    'invalid_file_type' => __('Please select a CSV file.', 'mobility-trailblazers'),
+                    'file_too_large' => __('File is too large. Maximum size is 10MB.', 'mobility-trailblazers'),
+                    'created' => __('created', 'mobility-trailblazers'),
+                    'updated' => __('updated', 'mobility-trailblazers'),
+                    'skipped' => __('skipped', 'mobility-trailblazers'),
+                    'errors' => __('errors', 'mobility-trailblazers'),
+                    'error_details' => __('Error details:', 'mobility-trailblazers')
+                ]
+            ]);
+        }
         
         // Localize script
         wp_localize_script('mt-admin', 'mt_admin', [

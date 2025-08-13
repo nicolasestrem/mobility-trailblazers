@@ -217,110 +217,14 @@ class MT_Candidate_Columns {
             <script type="text/javascript">
             jQuery(document).ready(function($) {
                 // Add import button next to the Add New button
-                var importButton = '<a href="#" id="mt-import-csv" class="page-title-action"><?php echo esc_js(__('Import CSV', 'mobility-trailblazers')); ?></a>';
+                var importButton = '<a href="#" id="mt-import-candidates" class="page-title-action"><?php echo esc_js(__('Import CSV', 'mobility-trailblazers')); ?></a>';
                 $('.wrap .page-title-action').first().after(importButton);
                 
                 // Add export button
                 var exportButton = '<a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_export_candidates'), 'mt_export_candidates'); ?>" class="page-title-action"><?php echo esc_js(__('Export CSV', 'mobility-trailblazers')); ?></a>';
-                $('#mt-import-csv').after(exportButton);
-                
-                // Handle import button click
-                $('#mt-import-csv').on('click', function(e) {
-                    e.preventDefault();
-                    $('#mt-csv-import-dialog').dialog('open');
-                });
+                $('#mt-import-candidates').after(exportButton);
             });
             </script>
-            
-            <!-- Import Dialog -->
-            <div id="mt-csv-import-dialog" style="display:none;" title="<?php esc_attr_e('Import Candidates from CSV', 'mobility-trailblazers'); ?>">
-                <form method="post" enctype="multipart/form-data" action="">
-                    <?php wp_nonce_field('mt_import_csv', 'mt_import_nonce'); ?>
-                    <input type="hidden" name="mt_action" value="import_csv">
-                    
-                    <p>
-                        <label for="csv_file"><?php _e('Select CSV File:', 'mobility-trailblazers'); ?></label><br>
-                        <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
-                    </p>
-                    
-                    <p>
-                        <label>
-                            <input type="checkbox" name="update_existing" value="1">
-                            <?php _e('Update existing candidates (match by email)', 'mobility-trailblazers'); ?>
-                        </label>
-                    </p>
-                    
-                    <p>
-                        <label>
-                            <input type="checkbox" name="skip_duplicates" value="1" checked>
-                            <?php _e('Skip duplicate entries', 'mobility-trailblazers'); ?>
-                        </label>
-                    </p>
-                    
-                    <div class="mt-csv-format-info">
-                        <h4><?php _e('CSV Format Requirements:', 'mobility-trailblazers'); ?></h4>
-                        <p><?php _e('The CSV file should have the following columns (header row required):', 'mobility-trailblazers'); ?></p>
-                        <ul style="list-style: disc; margin-left: 20px;">
-                            <li><strong>ID</strong> <?php _e('(unique identifier)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Name</strong> <?php _e('(required)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Organisation</strong></li>
-                            <li><strong>Position</strong></li>
-                            <li><strong>LinkedIn-Link</strong> <?php _e('(will be validated)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Webseite</strong> <?php _e('(will be validated)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Article about coming of age</strong> <?php _e('(URL)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Description</strong> <?php _e('(full description)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Category</strong> <?php _e('(Startup/Gov/Tech)', 'mobility-trailblazers'); ?></li>
-                            <li><strong>Status</strong> <?php _e('(Yes/No for Top 50)', 'mobility-trailblazers'); ?></li>
-                        </ul>
-                        <p style="margin-top: 10px;">
-                            <strong><?php _e('Note:', 'mobility-trailblazers'); ?></strong> 
-                            <?php _e('The system properly handles German special characters (ä, ö, ü, ß) and validates all URLs before saving.', 'mobility-trailblazers'); ?>
-                        </p>
-                        <p>
-                            <a href="<?php echo MT_PLUGIN_URL; ?>assets/sample-candidates.csv" download>
-                                <?php _e('Download Sample CSV', 'mobility-trailblazers'); ?>
-                            </a>
-                        </p>
-                    </div>
-                    
-                    <div class="dialog-buttons" style="margin-top: 20px;">
-                        <input type="submit" class="button button-primary" value="<?php esc_attr_e('Import', 'mobility-trailblazers'); ?>">
-                        <button type="button" class="button dialog-cancel"><?php _e('Cancel', 'mobility-trailblazers'); ?></button>
-                    </div>
-                </form>
-            </div>
-            
-            <script>
-            jQuery(document).ready(function($) {
-                // Initialize dialog
-                $('#mt-csv-import-dialog').dialog({
-                    autoOpen: false,
-                    modal: true,
-                    width: 500,
-                    height: 'auto',
-                    close: function() {
-                        $('#csv_file').val('');
-                    }
-                });
-                
-                // Handle cancel button
-                $('.dialog-cancel').on('click', function() {
-                    $('#mt-csv-import-dialog').dialog('close');
-                });
-            });
-            </script>
-            
-            <style>
-            .mt-csv-format-info {
-                background: #f1f1f1;
-                border-left: 4px solid #00736C;
-                padding: 10px;
-                margin: 15px 0;
-            }
-            .mt-csv-format-info h4 {
-                margin-top: 0;
-            }
-            </style>
             <?php
         }
     }
