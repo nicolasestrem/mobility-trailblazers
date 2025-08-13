@@ -160,7 +160,7 @@ class MT_Plugin {
         
         // Localize script
         wp_localize_script('mt-frontend', 'mt_ajax', [
-            'url' => admin_url('admin-ajax.php'),
+            'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_ajax_nonce'),
             'i18n' => [
                 'loading' => __('Loading...', 'mobility-trailblazers'),
@@ -359,8 +359,7 @@ class MT_Plugin {
         
         // Localize script
         wp_localize_script('mt-admin', 'mt_admin', [
-            'url' => admin_url('admin-ajax.php'),
-            'ajax_url' => admin_url('admin-ajax.php'), // Add both for compatibility
+            'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_admin_nonce'),
             'i18n' => [
                 'confirm_delete' => __('Are you sure you want to delete this?', 'mobility-trailblazers'),

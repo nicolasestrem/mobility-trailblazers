@@ -5,6 +5,15 @@
 ## [2.2.27] - 2025-08-13
 
 ### Fixed
+- **PHP Localization Consistency**:
+  - Changed frontend wp_localize_script to use `ajax_url` instead of `url`
+  - Removed redundant `url` key from mt_admin localization
+  - Standardized all AJAX URL references to use `ajax_url` key
+  - Added missing i18n strings (select_bulk_action, select_assignments) to admin localization
+
+- **Documentation**:
+  - Updated README.md version from 2.2.22 to 2.2.27 in both header and footer
+
 - **i18n Consistency**:
   - Fixed hardcoded English strings in admin.js bulk actions
   - Now uses `mt_admin.i18n` for all user-facing strings

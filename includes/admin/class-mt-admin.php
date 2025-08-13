@@ -693,6 +693,8 @@ class MT_Admin {
                 'clear_all' => __('Clear All', 'mobility-trailblazers'),
                 'all_assignments_cleared' => __('All assignments have been cleared.', 'mobility-trailblazers'),
                 'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
+                'select_bulk_action' => __('Please select a bulk action', 'mobility-trailblazers'),
+                'select_assignments' => __('Please select at least one assignment', 'mobility-trailblazers'),
             )
         ));
         
