@@ -44,7 +44,7 @@ E:\OneDrive\CoWorkSpace\Tech Stack\
 ### 🏆 Award Management
 - **Candidate Profiles**: Comprehensive profiles with photos, biographies, and achievements
 - **Category Management**: Organize candidates by award categories
-- **Multi-criteria Evaluation**: 5-point scoring system across key innovation criteria
+- **Multi-criteria Evaluation**: 0-10 scoring system (with 0.5 increments) across 5 key innovation criteria
 
 ### 👥 Jury System
 - **Modern Dashboard**: Responsive interface with 2x5 grid rankings display

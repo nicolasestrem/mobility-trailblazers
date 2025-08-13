@@ -247,7 +247,11 @@ if (typeof mt_admin.i18n === 'undefined') {
                 success: (response) => {
                     if (response.success) {
                         mtShowNotification(response.data.message || mt_admin.i18n.assignments_created, 'success');
-                        location.reload();
+                        $('#mt-auto-assign-modal').fadeOut(300);
+                        // Add small delay to show success message before reload
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
                     } else {
                         mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
@@ -289,7 +293,10 @@ if (typeof mt_admin.i18n === 'undefined') {
                 success: (response) => {
                     if (response.success) {
                         mtShowNotification(response.data.message || mt_admin.i18n.assignments_created, 'success');
-                        location.reload();
+                        $('#mt-manual-assign-modal').fadeOut(300);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
                     } else {
                         mtShowNotification(response.data || mt_admin.i18n.error_occurred, 'error');
                     }
@@ -692,8 +699,9 @@ if (typeof mt_admin.i18n === 'undefined') {
         bindEvents: function() {
             // Bind all event listeners for the evaluations page.
             $('.view-details').on('click', (e) => {
-                const evaluationId = $(e.currentTarget).data('evaluation-id');
-                this.viewDetails(evaluationId);
+                const $trigger = $(e.currentTarget);
+                const evaluationId = $trigger.data('evaluation-id');
+                this.viewDetails(evaluationId, $trigger);
             });
 
             $('#cb-select-all-1, #cb-select-all-2').on('click', this.handleSelectAll);
@@ -704,11 +712,15 @@ if (typeof mt_admin.i18n === 'undefined') {
                 this.applyBulkAction(action);
             });
         },
-        viewDetails: function(evaluationId) {
+        viewDetails: function(evaluationId, $trigger) {
             // Show loading state
             const $modal = this.createModal();
+            $modal.data('trigger', $trigger); // Store trigger for focus return
             $modal.find('.mt-modal-body').html('<div class="mt-loading">Loading evaluation details...</div>');
-            $modal.fadeIn();
+            $modal.fadeIn(300, function() {
+                // Focus on modal body for screen readers
+                $modal.find('.mt-modal-body').focus();
+            });
             
             // Fetch evaluation details via AJAX
             $.ajax({
@@ -742,16 +754,16 @@ if (typeof mt_admin.i18n === 'undefined') {
             // Check if modal already exists
             let $modal = $('#mt-evaluation-modal');
             if ($modal.length === 0) {
-                // Create modal HTML
+                // Create modal HTML with accessibility attributes
                 const modalHtml = `
-                    <div id="mt-evaluation-modal" class="mt-modal" style="display:none;">
-                        <div class="mt-modal-overlay"></div>
+                    <div id="mt-evaluation-modal" class="mt-modal" role="dialog" aria-modal="true" aria-labelledby="mt-modal-title" style="display:none;">
+                        <div class="mt-modal-overlay" aria-hidden="true"></div>
                         <div class="mt-modal-content">
                             <div class="mt-modal-header">
-                                <h2>Evaluation Details</h2>
-                                <button class="mt-modal-close" aria-label="Close">&times;</button>
+                                <h2 id="mt-modal-title">Evaluation Details</h2>
+                                <button class="mt-modal-close" aria-label="Close dialog" type="button">&times;</button>
                             </div>
-                            <div class="mt-modal-body"></div>
+                            <div class="mt-modal-body" tabindex="0"></div>
                         </div>
                     </div>
                 `;
@@ -760,17 +772,26 @@ if (typeof mt_admin.i18n === 'undefined') {
                 
                 // Bind close events
                 $modal.find('.mt-modal-close, .mt-modal-overlay').on('click', () => {
-                    $modal.fadeOut();
+                    this.closeModal($modal);
                 });
                 
                 // Close on ESC key
                 $(document).on('keydown', (e) => {
                     if (e.key === 'Escape' && $modal.is(':visible')) {
-                        $modal.fadeOut();
+                        this.closeModal($modal);
                     }
                 });
             }
             return $modal;
+        },
+        
+        closeModal: function($modal) {
+            $modal.fadeOut(300, function() {
+                // Return focus to triggering element if stored
+                if ($modal.data('trigger')) {
+                    $modal.data('trigger').focus();
+                }
+            });
         },
         renderEvaluationDetails: function(data) {
             let scoresHtml = '';
@@ -908,11 +929,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 success: function(response) {
                     if (response.success) {
                         // Show success message
-                        if (typeof mtShowNotification === 'function') {
-                            mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
-                        } else {
-                            mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
-                        }
+                        mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
                         
                         // Reload page after a short delay to show the message
                         setTimeout(function() {
@@ -920,11 +937,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                         }, 1000);
                     } else {
                         // Show error message
-                        if (typeof mtShowNotification === 'function') {
-                            mtShowNotification(response.data || 'An error occurred', 'error');
-                        } else {
-                            mtShowNotification(response.data || 'An error occurred', 'error');
-                        }
+                        mtShowNotification(response.data || 'An error occurred', 'error');
                         
                         // Remove processing state from rows
                         $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');
@@ -933,11 +946,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                 error: function(xhr, status, error) {
                     // Show detailed error message
                     const errorMsg = mt_admin.i18n.error_occurred || 'An error occurred. Please try again.';
-                    if (typeof mtShowNotification === 'function') {
-                        mtShowNotification(errorMsg + ' (' + error + ')', 'error');
-                    } else {
-                        mtShowNotification(errorMsg, 'error');
-                    }
+                    mtShowNotification(errorMsg + ' (' + error + ')', 'error');
                     
                     // Remove processing state from rows
                     $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');

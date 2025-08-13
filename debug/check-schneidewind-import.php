@@ -10,6 +10,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Security check - require admin capabilities
+if (!current_user_can('manage_options')) {
+    wp_die(__('You do not have sufficient permissions to access this page.', 'mobility-trailblazers'));
+}
+
+// Verify nonce if accessed via admin
+if (isset($_GET['_wpnonce']) && !wp_verify_nonce($_GET['_wpnonce'], 'mt_debug_access')) {
+    wp_die(__('Security check failed.', 'mobility-trailblazers'));
+}
+
 ?>
 <div class="wrap">
     <h1>Check Import: Prof. Dr. Uwe Schneidewind</h1>

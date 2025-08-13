@@ -33,11 +33,48 @@ if (isset($_POST['mt_import_action'])) {
         if (!empty($_FILES['import_file']['tmp_name'])) {
             $uploaded_file = $_FILES['import_file'];
             
+            // Validate file size (max 10MB)
+            $max_size = 10 * MB_IN_BYTES;
+            if ($uploaded_file['size'] > $max_size) {
+                $error = sprintf(
+                    __('File size exceeds maximum of %s', 'mobility-trailblazers'),
+                    size_format($max_size)
+                );
+            }
             // Check file type
-            $file_type = wp_check_filetype($uploaded_file['name']);
-            if (!in_array($file_type['ext'], ['csv', 'txt'])) {
-                $error = __('Please upload a valid CSV file.', 'mobility-trailblazers');
-            } else {
+            elseif (!wp_check_filetype($uploaded_file['name'])['ext']) {
+                $error = __('Invalid file type.', 'mobility-trailblazers');
+            }
+            // Validate extension
+            else {
+                $file_type = wp_check_filetype($uploaded_file['name']);
+                if (!in_array($file_type['ext'], ['csv', 'txt'])) {
+                    $error = __('Please upload a valid CSV file.', 'mobility-trailblazers');
+                } 
+                // Additional MIME type validation
+                else {
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mime_type = finfo_file($finfo, $uploaded_file['tmp_name']);
+                    finfo_close($finfo);
+                    
+                    $allowed_mimes = [
+                        'text/csv',
+                        'text/plain',
+                        'application/csv',
+                        'application/vnd.ms-excel',
+                        'text/comma-separated-values'
+                    ];
+                    
+                    $is_valid_mime = in_array($mime_type, $allowed_mimes) || 
+                                    strpos($mime_type, 'text') !== false;
+                    
+                    if (!$is_valid_mime) {
+                        $error = __('Invalid file format. Please upload a valid CSV file.', 'mobility-trailblazers');
+                    }
+                }
+            }
+            
+            if (empty($error)) {
                 // Process import
                 require_once MT_PLUGIN_DIR . 'includes/admin/class-mt-import-handler.php';
                 

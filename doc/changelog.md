@@ -2,6 +2,42 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.26] - 2025-08-13
+
+### Fixed
+- **JavaScript Improvements**:
+  - Removed redundant `typeof mtShowNotification === 'function'` checks in admin.js
+  - Fixed modal display issues by adding proper initial `display: none` state
+  - Improved modal accessibility with ARIA attributes and focus management
+
+- **Documentation Updates**:
+  - Corrected README scoring scale from "5-point" to "0-10 (with 0.5 increments)"
+  - Updated evaluation criteria documentation to match implementation
+
+- **Database Consistency**:
+  - Fixed table name mismatch in uninstaller (added mt_audit_log to removal list)
+  - Ensured consistent table naming across activator and uninstaller
+
+- **Security Enhancements**:
+  - Added capability checks to debug scripts (require `manage_options`)
+  - Added nonce verification to debug pages
+  - Enhanced import file validation with MIME type and size checks
+
+- **UX Improvements**:
+  - Added 1.5 second delay before page reload to show success messages
+  - Modal fadeOut on successful operations before reload
+  - Better visual feedback during operations
+
+### Added
+- **Development Files**:
+  - Created `.distignore` file to exclude debug scripts from releases
+  - Excludes `/debug/`, test files, and development artifacts
+
+- **Import Validation**:
+  - File size limit (10MB) in import-profiles.php template
+  - MIME type validation for CSV imports
+  - Enhanced security checks matching AJAX handlers
+
 ## [2.2.25] - 2025-08-13
 
 ### Refactored

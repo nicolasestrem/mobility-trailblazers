@@ -56,7 +56,8 @@ class MT_Uninstaller {
         
         $tables = [
             $wpdb->prefix . 'mt_evaluations',
-            $wpdb->prefix . 'mt_jury_assignments'
+            $wpdb->prefix . 'mt_jury_assignments',
+            $wpdb->prefix . 'mt_audit_log'
         ];
         
         foreach ($tables as $table) {
