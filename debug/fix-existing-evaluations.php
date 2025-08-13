@@ -32,7 +32,7 @@ if (!defined('ABSPATH')) {
                     echo '<div class="notice notice-info"><p>Description length: ' . strlen($description) . ' characters</p></div>';
                     
                     // Parse the evaluation criteria
-                    $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+                    $criteria = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($description);
                     
                     echo '<div class="notice notice-info"><p>Parsed criteria: <pre>' . print_r($criteria, true) . '</pre></p></div>';
                     
@@ -85,7 +85,7 @@ if (!defined('ABSPATH')) {
                 
                 if (!empty($description)) {
                     // Parse the evaluation criteria
-                    $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+                    $criteria = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($description);
                     
                     // Save each criterion
                     $updated = 0;
@@ -236,7 +236,7 @@ if (!defined('ABSPATH')) {
                 <h4>Parsed Criteria:</h4>
                 <?php
                 if (!empty($description)) {
-                    $parsed = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+                    $parsed = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($description);
                     ?>
                     <table class="wp-list-table widefat fixed striped">
                         <tr>

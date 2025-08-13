@@ -21,18 +21,17 @@
 ### Administrative Interface
 - **admin/class-mt-admin.php** - Admin menu setup and page rendering management (v2.2.15 - removed duplicate candidates menu)
 - **admin/class-mt-admin-notices.php** - System for displaying admin notifications
-- **admin/class-mt-profile-importer.php** - CSV import functionality for candidate profiles
-- **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation (v2.2.15 - German character support, URL validation)
-- **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.15)
-- **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.23)
-- **admin/class-mt-import-handler.php** - Centralized CSV processing for all import types (v2.2.24)
+- **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.25 - uses MT_Import_Handler)
+- **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.25 - uses MT_Import_Handler)
+- **admin/class-mt-import-handler.php** - Centralized CSV processing for all import types (v2.2.25 - consolidated all import logic)
+- **admin/class-mt-error-monitor.php** - Error monitoring and logging system
 
 ### AJAX Handlers (v2.2.13 - Standardized error handling)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
 - **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with standardized error responses
 - **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
-- **ajax/class-mt-import-ajax.php** - CSV import AJAX handler with file validation and security (v2.2.16)
+- **ajax/class-mt-import-ajax.php** - Quick CSV import handler for candidates page (v2.2.25 - uses MT_Import_Handler)
 - **ajax/class-mt-csv-import-ajax.php** - Comprehensive CSV import with progress tracking (v2.2.24)
 
 ### Business Logic Services
@@ -232,6 +231,16 @@ The platform follows a **Repository-Service-Controller** pattern:
 - **Sortable Lists** - All custom columns support sorting
 - **Export Enhancement** - Full UTF-8 support with BOM for Excel
 
+## 📊 Recent Updates (v2.2.25)
+
+### Import System Consolidation
+- **Reduced Complexity** - Consolidated from 7 import files to 4 with clear separation
+- **Single Source of Truth** - All import logic now in MT_Import_Handler class
+- **Removed Duplicates** - Deleted unused MT_Profile_Importer and MT_Enhanced_Profile_Importer
+- **Method Migration** - Moved parse_evaluation_criteria() to MT_Import_Handler
+- **Updated References** - All import operations now use consolidated handler
+- **Cleaner Architecture** - Each file has specific purpose without overlap
+
 ## 📊 Recent Updates (v2.2.24)
 
 ### Complete CSV Import System
@@ -245,4 +254,4 @@ The platform follows a **Repository-Service-Controller** pattern:
 - **File Validation** - Pre-upload validation for size, type, and format
 
 ---
-*Last Updated: August 2025 | Version 2.2.24*
+*Last Updated: August 2025 | Version 2.2.25*

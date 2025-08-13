@@ -2,6 +2,49 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.25] - 2025-08-13
+
+### Refactored
+- **Import System Consolidation**: Reduced from 7 import files to 4 with clear separation of concerns
+  - Consolidated all import logic into `MT_Import_Handler` class
+  - Removed duplicate and unused import classes
+  - Moved `parse_evaluation_criteria()` method to centralized location
+  - Updated all references to use single import handler
+
+### Removed
+- **Deprecated Import Classes**:
+  - `class-mt-profile-importer.php` - Unused legacy importer
+  - `class-mt-enhanced-profile-importer.php` - Functionality moved to MT_Import_Handler
+  - Created deprecation notice documenting migration path
+
+### Changed
+- **Import Architecture**:
+  - All import operations now use `MT_Import_Handler` as single source of truth
+  - `MT_Import_Ajax` updated to use MT_Import_Handler instead of MT_Enhanced_Profile_Importer
+  - `MT_Candidate_Columns` now uses MT_Import_Handler for CSV processing
+  - `import-profiles.php` template updated to use consolidated handler
+  - Debug files updated to reference new import handler
+
+### Technical Improvements
+- **Code Organization**:
+  - MT_Import_Handler: Core import logic and CSV processing
+  - MT_Import_Export: Admin UI and export functionality
+  - MT_CSV_Import_Ajax: AJAX with progress tracking
+  - MT_Import_Ajax: Quick import functionality
+  
+- **Method Consolidation**:
+  - `parse_evaluation_criteria()` now in MT_Import_Handler (public static method)
+  - Field mappings centralized as class constants
+  - Consistent error handling across all import paths
+
+### Files Updated
+- `includes/ajax/class-mt-import-ajax.php` - Uses MT_Import_Handler
+- `includes/admin/class-mt-candidate-columns.php` - Uses MT_Import_Handler
+- `includes/admin/class-mt-import-export.php` - References MT_Import_Handler
+- `includes/admin/class-mt-import-handler.php` - Added parse_evaluation_criteria()
+- `templates/admin/import-profiles.php` - Updated to use MT_Import_Handler
+- `debug/*.php` - Updated references to new handler
+
 ## [2.2.24] - 2025-08-13
 
 ### Added

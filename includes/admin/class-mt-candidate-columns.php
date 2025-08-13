@@ -333,7 +333,7 @@ class MT_Candidate_Columns {
     }
     
     /**
-     * Process CSV import using enhanced importer
+     * Process CSV import using MT_Import_Handler
      *
      * @param string $file File path
      * @param bool $update_existing Update existing candidates
@@ -341,16 +341,14 @@ class MT_Candidate_Columns {
      * @return array Result
      */
     private function process_csv_import($file, $update_existing, $skip_duplicates) {
-        // Use the enhanced profile importer
-        $options = [
-            'update_existing' => $update_existing,
-            'skip_empty_fields' => false,
-            'validate_urls' => true,
-            'import_photos' => true,
-            'dry_run' => false
-        ];
+        // Use the MT_Import_Handler for consistency
+        $handler = new \MobilityTrailblazers\Admin\MT_Import_Handler();
         
-        $result = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::import_csv($file, $options);
+        $result = $handler->process_csv_import(
+            $file,
+            'candidates',
+            $update_existing
+        );
         
         if (!empty($result['messages'])) {
             // Log messages for debugging
@@ -364,7 +362,7 @@ class MT_Candidate_Columns {
             'imported' => $result['success'],
             'updated' => $result['updated'],
             'skipped' => $result['skipped'],
-            'errors' => $result['error_details']
+            'errors' => $result['error_details'] ?? []
         ];
     }
     

@@ -359,8 +359,8 @@ class MT_Import_Export {
         update_post_meta($post_id, '_mt_article_url', $article);
         
         // Parse and save evaluation criteria if present in description
-        if (!empty($description) && class_exists('\MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer')) {
-            $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+        if (!empty($description)) {
+            $criteria = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($description);
             foreach ($criteria as $key => $value) {
                 if (!empty($value)) {
                     update_post_meta($post_id, $key, $value);

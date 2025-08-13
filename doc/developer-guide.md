@@ -510,6 +510,56 @@ print_r(\$result);
 "
 ```
 
+### Import System Architecture (v2.2.25)
+
+The import system has been consolidated into 4 main classes:
+
+#### 1. MT_Import_Handler
+**Purpose**: Core import processing engine
+- CSV parsing and validation
+- BOM detection and delimiter detection  
+- Field mapping for candidates and jury members
+- parse_evaluation_criteria() for German text parsing
+- Single source of truth for all import operations
+
+#### 2. MT_Import_Export
+**Purpose**: Admin UI and export functionality
+- Handles Import/Export admin page
+- Form submissions and validation
+- Template downloads
+- Export operations for candidates, evaluations, assignments
+
+#### 3. MT_CSV_Import_Ajax
+**Purpose**: Modern AJAX import with progress tracking
+- Real-time progress updates
+- File upload via FormData API
+- Comprehensive error reporting
+- Uses MT_Import_Handler for processing
+
+#### 4. MT_Import_Ajax  
+**Purpose**: Quick import for candidates page
+- Simple file picker interface
+- Lightweight AJAX import
+- Uses MT_Import_Handler for processing
+
+### Deprecated Classes (v2.2.25)
+
+The following classes have been removed:
+- **MT_Profile_Importer** - Legacy importer, not used
+- **MT_Enhanced_Profile_Importer** - Functionality moved to MT_Import_Handler
+
+Migration guide:
+```php
+// Old way (deprecated)
+MT_Enhanced_Profile_Importer::import_csv($file, $options);
+MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+
+// New way (v2.2.25+)
+$handler = new MT_Import_Handler();
+$handler->process_csv_import($file, 'candidates', $update_existing);
+MT_Import_Handler::parse_evaluation_criteria($description);
+```
+
 ### Customization Hooks
 
 While the current implementation doesn't include filters, you can extend functionality by:

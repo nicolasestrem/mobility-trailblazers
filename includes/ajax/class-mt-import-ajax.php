@@ -9,7 +9,7 @@
 namespace MobilityTrailblazers\Ajax;
 
 use MobilityTrailblazers\Core\MT_Logger;
-use MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer;
+use MobilityTrailblazers\Admin\MT_Import_Handler;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -144,10 +144,14 @@ class MT_Import_Ajax extends MT_Base_Ajax {
                 'user_id' => get_current_user_id()
             ]);
             
-            // Step 8: Call the import method
-            $result = MT_Enhanced_Profile_Importer::import_csv(
+            // Step 8: Call the import method using MT_Import_Handler
+            $handler = new MT_Import_Handler();
+            $update_existing = isset($options['update_existing']) ? $options['update_existing'] : false;
+            
+            $result = $handler->process_csv_import(
                 $_FILES['csv_file']['tmp_name'],
-                $options
+                'candidates',  // Import type for candidates
+                $update_existing
             );
             
             // Step 9: Process results

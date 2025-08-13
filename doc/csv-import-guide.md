@@ -208,24 +208,37 @@ All custom columns are sortable for easy data management.
 - Export requires `edit_posts` capability
 - Only administrators can bulk delete
 
-## Developer Notes
+## Developer Notes (v2.2.25)
 
-### Extending Import Functionality
-The import system uses two main classes:
-- `MT_Enhanced_Profile_Importer`: Core import logic
-- `MT_Candidate_Columns`: UI and column management
+### Import System Architecture
+The import system has been consolidated into a single handler:
+- `MT_Import_Handler`: Core import logic for all types
+- `MT_Import_Export`: Admin UI and exports
+- `MT_CSV_Import_Ajax`: AJAX with progress tracking
+- `MT_Import_Ajax`: Quick import functionality
 
-### Filter Hooks
+### Using the Import Handler
 ```php
-// Modify import data before processing
-apply_filters('mt_csv_import_data', $data, $row_number);
+// Import candidates
+$handler = new \MobilityTrailblazers\Admin\MT_Import_Handler();
+$result = $handler->process_csv_import($file, 'candidates', $update_existing);
 
-// Modify field mapping
-apply_filters('mt_csv_field_mapping', $mapping, $headers);
+// Import jury members
+$result = $handler->process_csv_import($file, 'jury_members', $update_existing);
+
+// Parse evaluation criteria from description
+$criteria = MT_Import_Handler::parse_evaluation_criteria($description);
 ```
 
-### Custom Validation
-Add custom validation in `MT_Enhanced_Profile_Importer::validate_candidate()`
+### Field Mappings
+Access field mappings via class constants:
+```php
+// Candidate fields
+MT_Import_Handler::CANDIDATE_FIELD_MAPPING
+
+// Jury member fields  
+MT_Import_Handler::JURY_FIELD_MAPPING
+```
 
 ## Support
 

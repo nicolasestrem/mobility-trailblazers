@@ -60,7 +60,7 @@ $candidates = get_posts([
         
         if (!empty($description)) {
             // Parse using the fixed function
-            $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+            $criteria = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($description);
             
             echo '<table>';
             echo '<tr><th>Field</th><th>Status</th><th>Value</th></tr>';

@@ -24,7 +24,7 @@ $test_description = "Mut & Pioniergeist: Als Oberbürgermeister wagt er mutige S
         <h2>Parsed Evaluation Criteria:</h2>
         <?php
         // Parse the criteria
-        $parsed = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($test_description);
+        $parsed = \MobilityTrailblazers\Admin\MT_Import_Handler::parse_evaluation_criteria($test_description);
         
         $labels = [
             '_mt_evaluation_courage' => 'Mut & Pioniergeist',

@@ -586,13 +586,12 @@ class MT_Import_Handler {
      * @return void
      */
     private function parse_evaluation_criteria($post_id, $description) {
-        if (class_exists('\MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer')) {
-            $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
-            
-            foreach ($criteria as $key => $value) {
-                if (!empty($value)) {
-                    update_post_meta($post_id, $key, $value);
-                }
+        // Parse evaluation criteria from description
+        $criteria = self::parse_evaluation_criteria($description);
+        
+        foreach ($criteria as $key => $value) {
+            if (!empty($value)) {
+                update_post_meta($post_id, $key, $value);
             }
         }
     }
@@ -646,5 +645,70 @@ class MT_Import_Handler {
             return implode(' ', $parts);
         }
         return '';
+    }
+    
+    /**
+     * Parse evaluation criteria from German description text
+     * Moved from MT_Enhanced_Profile_Importer for consolidation
+     *
+     * @param string $description Description text containing evaluation criteria
+     * @return array Parsed criteria with scores
+     * @since 2.2.24
+     */
+    public static function parse_evaluation_criteria($description) {
+        $criteria = [
+            '_mt_evaluation_courage' => '',
+            '_mt_evaluation_innovation' => '',
+            '_mt_evaluation_implementation' => '',
+            '_mt_evaluation_relevance' => '',
+            '_mt_evaluation_visibility' => '',
+            '_mt_evaluation_personality' => ''
+        ];
+        
+        if (empty($description)) {
+            return $criteria;
+        }
+        
+        // Use a more robust approach - split by known labels
+        // This regex splits the text by any of the known section headers
+        $split_pattern = '/(Mut\s*&\s*Pioniergeist\s*:|Innovationsgrad\s*:|Umsetzungskraft\s*&\s*Wirkung\s*:|Relevanz\s*für\s*die\s*Mobilitätswende\s*:|Vorbildfunktion\s*&\s*Sichtbarkeit\s*:|Persönlichkeit\s*&\s*Motivation\s*:)/u';
+        
+        $sections = preg_split($split_pattern, $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        
+        // Map labels to field names
+        $label_map = [
+            'Mut & Pioniergeist' => '_mt_evaluation_courage',
+            'Innovationsgrad' => '_mt_evaluation_innovation',
+            'Umsetzungskraft & Wirkung' => '_mt_evaluation_implementation',
+            'Relevanz für die Mobilitätswende' => '_mt_evaluation_relevance',
+            'Vorbildfunktion & Sichtbarkeit' => '_mt_evaluation_visibility',
+            'Persönlichkeit & Motivation' => '_mt_evaluation_personality'
+        ];
+        
+        // Process sections - labels and their content alternate
+        for ($i = 0; $i < count($sections); $i++) {
+            $section = trim($sections[$i]);
+            
+            // Check if this section is a label
+            foreach ($label_map as $label_text => $field_name) {
+                // Check if section contains the label (ignoring colons and extra spaces)
+                $clean_section = preg_replace('/\s+/', ' ', rtrim($section, ':'));
+                $clean_label = preg_replace('/\s+/', ' ', $label_text);
+                
+                if (stripos($clean_section, $clean_label) !== false) {
+                    // The next section should be the content for this label
+                    if (isset($sections[$i + 1])) {
+                        $content = trim($sections[$i + 1]);
+                        // Clean up the content
+                        $content = preg_replace('/\s+/', ' ', $content);
+                        $content = trim($content, " \t\n\r\0\x0B.,;:");
+                        $criteria[$field_name] = $content;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return $criteria;
     }
 }
