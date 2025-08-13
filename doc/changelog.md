@@ -2,6 +2,28 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.22] - 2025-08-13
+
+### Fixed
+- **Debug Code Cleanup**: Removed all remaining console.log/warn/error statements from production JavaScript
+  - Cleaned admin.js debug statements
+  - Removed all console logging from frontend.js
+  - Production code now free of debug output
+- **SQL Injection Prevention**: Fixed unescaped SQL queries in error monitor
+  - Added proper `$wpdb->prepare()` for SHOW TABLES queries
+  - All dynamic SQL now properly escaped
+- **Performance Optimization**: Added limits to unbounded queries
+  - Assignment display queries limited to 1000 records
+  - Prevents memory exhaustion on large datasets
+
+### Security
+- **XSS Prevention**: Identified and documented areas using `.html()` that need sanitization
+- **SQL Safety**: All table name interpolation now uses prepare statements
+
+### Code Quality
+- **Debug Cleanup**: All debug output removed or commented out
+- **Query Optimization**: Large result sets now properly limited
+
 ## [2.2.21] - 2025-08-13
 
 ### Fixed

@@ -4,7 +4,7 @@
 
 // Ensure mt_admin object exists with fallback values
 if (typeof mt_admin === 'undefined') {
-    console.warn('mt_admin object not found, creating fallback');
+    // mt_admin object not found, creating fallback
     window.mt_admin = {
         ajax_url: ajaxurl || '/wp-admin/admin-ajax.php',
         nonce: $('#mt_admin_nonce').val() || '',
@@ -127,7 +127,7 @@ if (typeof mt_admin.i18n === 'undefined') {
     const MTAssignmentManager = {
         init: function() {
             // This method is the entry point for all assignment page functionality.
-            console.log('MTAssignmentManager initialized.');
+            // MTAssignmentManager initialized
             this.bindEvents();
             this.initBulkActions();
         },
@@ -669,7 +669,7 @@ if (typeof mt_admin.i18n === 'undefined') {
     const MTEvaluationManager = {
         init: function() {
             // Entry point for all evaluation page functionality.
-            console.log('MTEvaluationManager initialized.');
+            // MTEvaluationManager initialized
             this.bindEvents();
         },
         
@@ -960,7 +960,7 @@ if (typeof mt_admin.i18n === 'undefined') {
      * This runs on every admin page load.
      */
     $(document).ready(function() {
-        console.log('Mobility Trailblazers Admin JS Loaded.');
+        // Mobility Trailblazers Admin JS Loaded
 
         // Initialize general scripts that run on all pages
         initTooltips();

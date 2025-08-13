@@ -90,7 +90,7 @@ class MT_Error_Monitor {
         $table_name = $wpdb->prefix . 'mt_error_log';
         
         // Check if table exists
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
             return [
                 'total_errors' => 0,
                 'errors_today' => 0,
@@ -132,7 +132,7 @@ class MT_Error_Monitor {
         $table_name = $wpdb->prefix . 'mt_error_log';
         
         // Check if table exists
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
             return [];
         }
         
@@ -296,7 +296,7 @@ class MT_Error_Monitor {
         $table_name = $wpdb->prefix . 'mt_error_log';
         
         // Check if table exists
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
             return [
                 'recent_errors' => 0,
                 'critical_errors' => 0,

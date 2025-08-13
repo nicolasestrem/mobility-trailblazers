@@ -1,6 +1,6 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.2.21
+**Version:** 2.2.22
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 **Last Updated:** August 2025
@@ -276,7 +276,7 @@ GPL 2.0 . or later. See the LICENSE file.
 
 ## 🚀 Development Status
 
-**Current Version: 2.2.21** - Production-ready with active development
+**Current Version: 2.2.22** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -284,4 +284,4 @@ GPL 2.0 . or later. See the LICENSE file.
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 2025 | Version 2.2.21*
+*Last updated: August 2025 | Version 2.2.22*

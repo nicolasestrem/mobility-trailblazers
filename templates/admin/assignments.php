@@ -40,9 +40,9 @@ $jury_members = get_posts(array(
     'post_status' => 'publish'
 ));
 
-// Get assignments grouped by jury member
+// Get assignments grouped by jury member (limit to 1000 for performance)
 $assignments_by_jury = array();
-$all_assignments = $assignment_repo->find_all();
+$all_assignments = $assignment_repo->find_all(['limit' => 1000]);
 foreach ($all_assignments as $assignment) {
     if (!isset($assignments_by_jury[$assignment->jury_member_id])) {
         $assignments_by_jury[$assignment->jury_member_id] = array();
@@ -80,7 +80,7 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
     <h4>Assignment Distribution Analysis</h4>
     <?php 
     $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-    $all_assignments = $assignment_repo->find_all();
+    $all_assignments = $assignment_repo->find_all(['limit' => 1000]);
     $distribution = [];
     foreach ($all_assignments as $assignment) {
         if (!isset($distribution[$assignment->jury_member_id])) {

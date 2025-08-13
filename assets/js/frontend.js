@@ -46,8 +46,8 @@
             };
 
             // Log to console in debug mode
-            if (window.console && console.error) {
-                console.error('MT Error:', errorData);
+            if (window.console && // console.error) {
+                // console.error('MT Error:', errorData);
             }
         },
 
@@ -769,7 +769,7 @@
         function refreshRankings() {
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.url || !mt_ajax.nonce) {
-                console.warn('mt_ajax not available for rankings refresh');
+                // console.warn('mt_ajax not available for rankings refresh');
                 return;
             }
             
@@ -916,7 +916,7 @@
                 // Prepare form data
                 // Check if mt_ajax is available
                 if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce || !mt_ajax.url) {
-                    console.warn('mt_ajax not available for inline evaluation save');
+                    // console.warn('mt_ajax not available for inline evaluation save');
                     alert('Configuration error. Please refresh the page and try again.');
                     $rankingItem.removeClass('updating');
                     return;
@@ -962,13 +962,13 @@
                                 $rankingItem.removeClass('success');
                             }, 2000);
                         } else {
-                            console.error('Save failed:', response.data);
+                            // console.error('Save failed:', response.data);
                             alert(response.data || 'Error saving evaluation');
                             $rankingItem.removeClass('updating');
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('AJAX Error:', {
+                        // console.error('AJAX Error:', {
                             status: status,
                             error: error,
                             responseText: xhr.responseText,
@@ -1047,7 +1047,7 @@
         function refreshRankings() {
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.url || !mt_ajax.nonce) {
-                console.warn('mt_ajax not available for rankings refresh');
+                // console.warn('mt_ajax not available for rankings refresh');
                 return;
             }
             
@@ -1161,8 +1161,8 @@
             });
             
             // Debug logging
-            console.log('Saving evaluation for candidate:', candidateId);
-            console.log('Scores to save:', scores);
+            // console.log('Saving evaluation for candidate:', candidateId);
+            // console.log('Scores to save:', scores);
 
             // Prepare AJAX data
             var ajaxData = {
@@ -1192,7 +1192,7 @@
                         }
                     } else {
                         // Log detailed error information
-                        console.error('Save failed - Full response:', response);
+                        // console.error('Save failed - Full response:', response);
                         var errorMessage = '';
                         if (response && response.data) {
                             if (typeof response.data === 'string') {
@@ -1219,7 +1219,7 @@
                 },
                 error: function(xhr, status, error) {
                     // Log detailed error information
-                    console.error('AJAX Save Error:', {
+                    // console.error('AJAX Save Error:', {
                         status: status,
                         error: error,
                         responseText: xhr.responseText,
