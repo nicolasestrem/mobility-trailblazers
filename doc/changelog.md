@@ -1,5 +1,59 @@
 # Mobility Trailblazers Changelog
 
+## [2.2.15] - 2025-08-13
+
+### Added
+- **Enhanced CSV Import System**: Complete overhaul of candidate CSV import functionality
+  - Support for specific CSV format with German column headers
+  - Proper handling of German special characters (ä, ö, ü, ß) with UTF-8 encoding
+  - URL validation for LinkedIn, Website, and Article fields
+  - Automatic protocol addition for URLs missing https://
+  - Category mapping to standardized format (Startup/Gov/Tech)
+  - Import ID field for unique candidate identification
+  - Article URL field for "coming of age" articles
+  - Full description field for detailed candidate information
+
+- **Custom Columns for Candidates List**: New admin columns for better data visibility
+  - Import ID with styled code display
+  - Organization and Position fields
+  - Category with color-coded icons (Startup: green/lightbulb, Gov: blue/building, Tech: red/desktop)
+  - Top 50 status with checkmark indicator
+  - Links column with icons for LinkedIn, Website, and Article URLs
+  - All columns are sortable for better data management
+
+- **CSV Export Improvements**: Updated export to include all new fields
+  - Export includes Import ID, Category Type, Top 50 Status, Article URL
+  - Maintains UTF-8 encoding with BOM for Excel compatibility
+  - Properly formatted for reimport capability
+
+### Changed
+- **Menu Consolidation**: Removed duplicate "Candidates" menu item
+  - Removed custom candidates page (admin.php?page=mt-candidates)
+  - Now using native WordPress post type interface for candidates
+  - Cleaner admin menu structure without duplicates
+
+- **Import Dialog Enhancements**: Improved import interface
+  - Updated column requirements display with exact field names
+  - Added note about German character support
+  - Clear indication of URL validation
+  - Download sample CSV with proper format
+
+### Technical Details
+- Created `includes/admin/class-mt-candidate-columns.php` for custom columns and import
+- Modified `includes/admin/class-mt-enhanced-profile-importer.php` with new column mapping
+- Updated meta field mappings:
+  - `_mt_candidate_id` for Import ID
+  - `_mt_organization` for Organization
+  - `_mt_position` for Position
+  - `_mt_category_type` for Category
+  - `_mt_top_50_status` for Top 50 status
+  - `_mt_linkedin_url` for LinkedIn
+  - `_mt_website_url` for Website
+  - `_mt_article_url` for Article
+  - `_mt_description_full` for Description
+- Removed duplicate menu registration in `class-mt-admin.php`
+- Updated sample CSV with German examples and proper column structure
+
 ## [2.2.14] - 2025-08-12
 
 ### Fixed

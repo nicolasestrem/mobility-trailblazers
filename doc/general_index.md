@@ -19,10 +19,11 @@
 - **class-mt-uninstaller.php** - Handles plugin uninstall with optional data preservation (v2.2.13)
 
 ### Administrative Interface
-- **admin/class-mt-admin.php** - Admin menu setup and page rendering management
+- **admin/class-mt-admin.php** - Admin menu setup and page rendering management (v2.2.15 - removed duplicate candidates menu)
 - **admin/class-mt-admin-notices.php** - System for displaying admin notifications
 - **admin/class-mt-profile-importer.php** - CSV import functionality for candidate profiles
-- **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation
+- **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation (v2.2.15 - German character support, URL validation)
+- **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.15)
 
 ### AJAX Handlers (v2.2.13 - Standardized error handling)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
@@ -56,7 +57,7 @@
 
 ### Admin Templates
 - **admin/dashboard.php** - Main admin dashboard with statistics
-- **admin/candidates.php** - Candidate management interface
+- **admin/candidates.php** - Candidate management interface (v2.2.15 - deprecated, functionality moved to post type)
 - **admin/evaluations.php** - Evaluation review and management
 - **admin/assignments.php** - Jury assignment management page
 - **admin/import-export.php** - Data import/export interface
@@ -89,6 +90,9 @@
 ### Images
 - **images/logo.png** - Platform logo and branding assets
 - **images/icons/** - Interface icons and UI elements
+
+### Data Files
+- **sample-candidates.csv** - Example CSV file for candidate import (v2.2.15 - German format)
 
 ## 📁 /languages/ - Internationalization
 

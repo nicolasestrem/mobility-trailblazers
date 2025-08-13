@@ -68,16 +68,6 @@ class MT_Admin {
             [$this, 'render_dashboard_page']
         );
         
-        // Candidates submenu
-        add_submenu_page(
-            'mobility-trailblazers',
-            __('Candidates', 'mobility-trailblazers'),
-            __('Candidates', 'mobility-trailblazers'),
-            'edit_posts',
-            'mt-candidates',
-            [$this, 'render_candidates_page']
-        );
-        
         // Evaluations submenu
         add_submenu_page(
             'mobility-trailblazers',
@@ -244,20 +234,6 @@ class MT_Admin {
             include $template_file;
         } else {
             echo '<div class="notice notice-error"><p>' . esc_html__('Dashboard template file not found.', 'mobility-trailblazers') . '</p></div>';
-        }
-    }
-    
-    /**
-     * Render candidates page
-     *
-     * @return void
-     */
-    public function render_candidates_page() {
-        $template_file = MT_PLUGIN_DIR . 'templates/admin/candidates.php';
-        if (file_exists($template_file)) {
-            include $template_file;
-        } else {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Candidates template file not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     

@@ -83,6 +83,10 @@ class MT_Plugin {
             $admin = new \MobilityTrailblazers\Admin\MT_Admin();
             $admin->init();
             
+            // Initialize candidate columns and CSV import
+            $candidate_columns = new \MobilityTrailblazers\Admin\MT_Candidate_Columns();
+            $candidate_columns->init();
+            
             // Initialize error monitor for admin users
             if (current_user_can('manage_options')) {
                 $error_monitor = new \MobilityTrailblazers\Admin\MT_Error_Monitor();

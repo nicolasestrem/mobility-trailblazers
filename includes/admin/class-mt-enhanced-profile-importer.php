@@ -313,7 +313,7 @@ class MT_Enhanced_Profile_Importer {
     }
     
     /**
-     * Enhanced CSV header mapping
+     * Enhanced CSV header mapping for specific format
      *
      * @param array $headers CSV headers
      * @return array Field mapping
@@ -321,30 +321,23 @@ class MT_Enhanced_Profile_Importer {
     private static function map_csv_headers($headers) {
         $mapping = [];
         
-        // Define comprehensive header variations
+        // Define comprehensive header variations for the specific format:
+        // ID, Name, Organisation, Position, LinkedIn-Link, Webseite, Article about coming of age, Description, Category, Status
         $field_variations = [
             'id' => ['id', 'candidate_id', 'nummer'],
             'name' => ['name', 'candidate name', 'full name', 'display name', 'kandidat', 'name des kandidaten'],
-            'organization' => ['organization', 'organisation', 'company', 'firma', 'unternehmen', 'organisation'],
-            'position' => ['position', 'title', 'job title', 'rolle', 'position', 'funktion'],
-            'linkedin' => ['linkedin', 'linkedin url', 'linkedin profile', 'linkedin-link'],
-            'website' => ['website', 'website url', 'web', 'webseite', 'homepage'],
-            'email' => ['email', 'e-mail', 'email address', 'mail'],
-            'category' => ['category', 'kategorie', 'award category', 'kategorie'],
-            'top50' => ['top 50', 'top50', 'finalist', 'shortlist'],
-            'nominator' => ['nominator', 'nominiert von', 'nominated by', 'nominator'],
-            'notes' => ['notes', 'erste notizen/nachricht', 'erste notizen', 'nachricht', 'bemerkungen'],
-            'photo' => ['photo', 'foto', 'bild', 'image'],
+            'organization' => ['organisation', 'organization', 'company', 'firma', 'unternehmen'],
+            'position' => ['position', 'title', 'job title', 'rolle', 'funktion'],
+            'linkedin' => ['linkedin-link', 'linkedin', 'linkedin url', 'linkedin profile'],
+            'website' => ['webseite', 'website', 'website url', 'web', 'homepage'],
+            'article' => ['article about coming of age', 'article', 'artikel', 'coming of age'],
             'description' => ['description', 'beschreibung', 'bio', 'biography', 'profil'],
-            
-            // Evaluation criteria fields
-            'courage' => ['mut & pioniergeist', 'mut', 'courage', 'pioneer spirit'],
-            'innovation' => ['innovationsgrad', 'innovation', 'innovation level'],
-            'implementation' => ['umsetzungskraft & wirkung', 'umsetzungskraft', 'implementation', 'impact'],
-            'relevance' => ['relevanz für die mobilitätswende', 'relevanz', 'relevance', 'mobility relevance'],
-            'visibility' => ['vorbildfunktion & sichtbarkeit', 'vorbildfunktion', 'visibility', 'role model'],
-            'personality' => ['persönlichkeit & motivation', 'persönlichkeit', 'personality', 'motivation']
-        ];
+            'category' => ['category', 'kategorie', 'award category'],
+            'status' => ['status', 'top 50', 'top50', 'finalist', 'shortlist'],
+            'email' => ['email', 'e-mail', 'email address', 'mail'],
+            'nominator' => ['nominator', 'nominiert von', 'nominated by'],
+            'notes' => ['notes', 'erste notizen/nachricht', 'erste notizen', 'nachricht', 'bemerkungen'],
+            'photo' => ['photo', 'foto', 'bild', 'image']
         
         // Map headers
         foreach ($headers as $index => $header) {
@@ -364,7 +357,7 @@ class MT_Enhanced_Profile_Importer {
     }
     
     /**
-     * Map row data using field mapping
+     * Map row data using field mapping with proper encoding
      *
      * @param array $data Row data
      * @param array $field_map Field mapping
@@ -375,25 +368,39 @@ class MT_Enhanced_Profile_Importer {
         
         foreach ($field_map as $field => $index) {
             if (isset($data[$index])) {
+                // Handle German special characters properly
                 $value = trim($data[$index]);
+                
+                // Ensure UTF-8 encoding for German characters (ä, ö, ü, ß)
+                if (!mb_check_encoding($value, 'UTF-8')) {
+                    $value = mb_convert_encoding($value, 'UTF-8', 'auto');
+                }
                 
                 // Clean specific fields
                 switch ($field) {
                     case 'linkedin':
                     case 'website':
-                        $value = esc_url_raw($value);
+                    case 'article':
+                        // Validate and clean URLs
+                        $value = self::validate_and_clean_url($value);
                         break;
                     case 'email':
                         $value = sanitize_email($value);
                         break;
-                    case 'top50':
-                        $value = in_array(strtolower($value), ['ja', 'yes', '1', 'true']) ? 'yes' : 'no';
+                    case 'status':
+                        // Handle Status field for Top 50
+                        $value = in_array(strtolower($value), ['ja', 'yes', '1', 'true', 'top 50', 'top50']) ? 'yes' : 'no';
+                        break;
+                    case 'category':
+                        // Map category types
+                        $value = self::map_category_type($value);
                         break;
                     case 'description':
-                        // Preserve line breaks in description
+                        // Preserve line breaks and German characters in description
                         $value = wp_kses_post($value);
                         break;
                     default:
+                        // Preserve German characters while sanitizing
                         $value = sanitize_text_field($value);
                 }
                 
@@ -402,6 +409,52 @@ class MT_Enhanced_Profile_Importer {
         }
         
         return $mapped;
+    }
+    
+    /**
+     * Validate and clean URL
+     *
+     * @param string $url URL to validate
+     * @return string Cleaned URL or empty string if invalid
+     */
+    private static function validate_and_clean_url($url) {
+        if (empty($url)) {
+            return '';
+        }
+        
+        // Add protocol if missing
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            $url = 'https://' . $url;
+        }
+        
+        // Validate URL
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            return esc_url_raw($url);
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Map category type to standardized format
+     *
+     * @param string $category Category from CSV
+     * @return string Standardized category
+     */
+    private static function map_category_type($category) {
+        $category_lower = strtolower(trim($category));
+        
+        // Map to standardized categories
+        if (strpos($category_lower, 'startup') !== false || strpos($category_lower, 'start-up') !== false) {
+            return 'Startup';
+        } elseif (strpos($category_lower, 'gov') !== false || strpos($category_lower, 'verwaltung') !== false || strpos($category_lower, 'government') !== false) {
+            return 'Gov';
+        } elseif (strpos($category_lower, 'tech') !== false || strpos($category_lower, 'technology') !== false || strpos($category_lower, 'technologie') !== false) {
+            return 'Tech';
+        }
+        
+        // Return original if no match
+        return sanitize_text_field($category);
     }
     
     /**
@@ -528,24 +581,20 @@ class MT_Enhanced_Profile_Importer {
             $action = 'created';
         }
         
-        // Update meta fields
+        // Update meta fields with correct mapping
         $meta_fields = [
-            'name' => '_mt_display_name',
+            'id' => '_mt_candidate_id',
             'organization' => '_mt_organization',
             'position' => '_mt_position',
-            'linkedin' => '_mt_linkedin',
-            'website' => '_mt_website',
+            'linkedin' => '_mt_linkedin_url',
+            'website' => '_mt_website_url',
+            'article' => '_mt_article_url',
+            'description' => '_mt_description_full',
+            'category' => '_mt_category_type',
+            'status' => '_mt_top_50_status',
             'email' => '_mt_email',
-            'top50' => '_mt_top50',
             'nominator' => '_mt_nominator',
-            'notes' => '_mt_notes',
-            'courage' => '_mt_courage',
-            'innovation' => '_mt_innovation',
-            'implementation' => '_mt_implementation',
-            'relevance' => '_mt_relevance',
-            'visibility' => '_mt_visibility',
-            'personality' => '_mt_personality'
-        ];
+            'notes' => '_mt_notes'
         
         foreach ($meta_fields as $field => $meta_key) {
             if (isset($data[$field]) && (!$options['skip_empty_fields'] || !empty($data[$field]))) {
@@ -662,46 +711,51 @@ class MT_Enhanced_Profile_Importer {
         $headers = [
             'ID',
             'Name',
-            'Position',
             'Organisation',
-            'Category',
-            'Top 50',
-            'Nominator',
-            'Erste Notizen/Nachricht',
+            'Position',
             'LinkedIn-Link',
             'Webseite',
-            'Foto',
-            'Description'
-        ];
+            'Article about coming of age',
+            'Description',
+            'Category',
+            'Status'
         
         $sample_data = [
             [
-                '1',
-                'Dr. Maria Beispiel',
-                'CEO & Founder',
+                'CAND-001',
+                'Dr. Maria Müller',
                 'Beispiel Mobility GmbH',
-                'Start-ups, Scale-ups & Katalysatoren',
-                'Ja',
-                'Max Mustermann',
-                'Innovative Lösung für urbane Mobilität',
-                'https://linkedin.com/in/mariabeispiel',
+                'CEO & Gründerin',
+                'https://linkedin.com/in/mariamueller',
                 'https://beispiel-mobility.de',
-                'Ja',
-                'Mut & Pioniergeist: Maria Beispiel hat mit der Gründung ihrer Firma großen Mut bewiesen...'
+                'https://example.com/article-maria',
+                'Dr. Maria Müller ist eine Pionierin der nachhaltigen Mobilität in Deutschland. Ihre innovative Lösung für urbane Verkehrsprobleme hat bereits mehrere Städte transformiert.',
+                'Startup',
+                'Ja'
             ],
             [
-                '2',
-                'Prof. Dr. Hans Schmidt',
+                'CAND-002',
+                'Prof. Dr. Hans Schäfer',
+                'Stadt München',
                 'Oberbürgermeister',
-                'Stadt Musterstadt',
-                'Governance & Verwaltungen',
-                'Nein',
-                'Anna Weber',
-                'Vorreiter in der kommunalen Verkehrswende',
-                'https://linkedin.com/in/hansschmidt',
-                'https://musterstadt.de',
-                'Nein',
-                'Innovationsgrad: Schmidt hat innovative Konzepte für die Verkehrswende entwickelt...'
+                'https://linkedin.com/in/hansschaefer',
+                'https://muenchen.de',
+                'https://example.com/article-hans',
+                'Prof. Dr. Hans Schäfer hat als Oberbürgermeister wegweisende Mobilitätskonzepte für München entwickelt und erfolgreich umgesetzt.',
+                'Gov',
+                'Nein'
+            ],
+            [
+                'CAND-003',
+                'Anna Böhm',
+                'Tech Innovations AG',
+                'CTO',
+                'https://linkedin.com/in/annaboehm',
+                'https://tech-innovations.de',
+                'https://example.com/article-anna',
+                'Anna Böhm entwickelt KI-basierte Lösungen für autonomes Fahren und hat mehrere Patente im Bereich der Mobilitätstechnologie.',
+                'Tech',
+                'Ja'
             ]
         ];
         

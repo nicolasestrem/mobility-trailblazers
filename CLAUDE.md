@@ -1,82 +1,148 @@
-# CLAUDE.md - Mobility Trailblazers WordPress Plugin
+# Mobility Trailblazers WordPress Plugin
 
-**AI Development Guide for Claude Code & Claude Desktop**  
-**Version:** 2.2.14  
-**Last Updated:** August 2025  
-**Local Path:** `C:\Users\nicol\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` or `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` depending on the computer Claude is running on.
+Award platform for "25 Mobility Trailblazers in 25" - DACH region mobility innovators.
 
-## 🎯 Project Overview
+## 🚨 CRITICAL PROJECT RULES
 
-You're working on the **Mobility Trailblazers Award Platform** - a WordPress plugin for managing awards recognizing mobility innovation pioneers in the DACH region (Germany, Austria, Switzerland). The platform handles jury evaluations, candidate management, public voting, and award administration.
+**PROJECT LOCATION**: `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers`
 
-### Current Status
-- **Phase:** Platform Development In Progress
-- **Infrastructure:** ✅ Complete (Docker, Database, Security)  
-- **Core Features:** ✅ Complete (Evaluation System, Dashboard, Assignments, Voting)
-- **Elementor Integration:** ✅ Complete (8 Custom Widgets)
-- **Next Focus:** Content population, candidate profiles, event integration
+### Non-Negotiable Rules
+- **NEVER remove features without asking first**
+- **NEVER use --no-verify when committing**
+- **ALWAYS verify nonces in AJAX handlers**
+- **ALWAYS check existing code before implementing**
+- **ALWAYS start by reviewing ALL code files to understand context**
 
-### Business Context
-- **Partnership:** Handelsblatt Media Group
-- **Event:** Award ceremony October 30, 2025
-- **Stakeholders:** 25 jury members, 50+ candidates, media partners
-- **Languages:** German (primary), English (secondary)
-- **Mission:** "Weil mobiler Wandel Mut braucht" (Because mobility transformation takes courage)
+## 🏗️ ARCHITECTURE & PATTERNS
 
-## 🏗️ Technical Architecture
-
-### Stack
-- **WordPress:** 5.8+ with modern PHP 7.4+
-- **Frontend:** Vanilla JS, AJAX, Responsive CSS Grid
-- **Database:** MySQL 5.7+ with custom tables (mt_ prefix)
-- **Infrastructure:** Docker containers managed via Komodo
-- **Design:** Corporate colors (Teal #00736C, Copper #C27A5E, Beige #F6E8DE)
-
-### Plugin Structure
+### File Structure
 ```
-mobility-trailblazers/
-├── assets/               # CSS, JS, images
-│   ├── css/             # Admin and frontend styles
-│   ├── js/              # Modular JavaScript
-│   └── images/          # Logos, icons
-├── includes/            # PHP classes (PSR-4 autoloading)
-│   ├── admin/          # Admin functionality
-│   ├── ajax/           # AJAX handlers
-│   ├── core/           # Core plugin classes
-│   ├── repositories/   # Data access layer
-│   ├── services/       # Business logic
-│   └── shortcodes/     # Frontend shortcodes
-├── templates/           # PHP/HTML templates
-│   ├── admin/          # Admin interface templates
-│   └── frontend/       # Public-facing templates
-├── languages/          # i18n files (de_DE, en_US)
-├── doc/               # Technical documentation
-└── mobility-trailblazers.php  # Main plugin file
+includes/
+├── core/           # MT_Plugin, MT_Activator
+├── admin/          # MT_Admin, dashboards
+├── ajax/           # AJAX handlers (MUST verify nonces)
+├── repositories/   # Data access layer
+├── services/       # Business logic
+└── widgets/        # Elementor widgets
 ```
 
-## 📋 DEVELOPMENT WORKFLOW
+### Naming Conventions
+- **Classes**: `MT_Assignment_Service`
+- **Methods**: `process_auto_assignment()`
+- **Files**: `class-mt-assignment-service.php`
+- **Tables**: `wp_mt_assignments`
+- **CSS**: `.mt-assignment__header`
+- **Text Domain**: `'mobility-trailblazers'`
 
-### 1. EXPLORE
-Before making any changes:
-- Review this CLAUDE.md file completely
-- Search for existing implementations using pattern matching
-- Review relevant documentation in `/doc/` directory
-- Check `/doc/general_index.md` for file overview
-- Understand the Repository-Service-Controller architecture
-- Check for existing similar features to maintain consistency
+### Required Code Patterns
 
+#### AJAX Handler Template (MANDATORY)
+```php
+if (!wp_verify_nonce($_POST['nonce'], 'mt_ajax_nonce')) {
+    wp_send_json_error(['message' => __('Security check failed', 'mobility-trailblazers')]);
+    return;
+}
+if (!current_user_can('edit_posts')) {
+    wp_send_json_error(['message' => __('Security check failed', 'mobility-trailblazers')]);
+    return;
+}
+$data = array_map('sanitize_text_field', $_POST['data']);
+```
+
+## 📊 DATABASE & CORE FEATURES
+
+### Database Tables
+- **wp_mt_evaluations**: criterion_1-5, comments, status, jury_member_id
+- **wp_mt_assignments**: jury_member_id, candidate_id, status
+- **wp_posts**: post_type='mt_candidate'
+
+### Core Features
+- **Evaluation System**: 5 criteria (0-100), inline AJAX save, draft/submitted states
+- **Assignments**: Auto-assignment, conflict detection, bulk operations
+- **Candidates**: Custom post type `mt_candidate`, CSV import/export
+- **Jury Dashboard**: Progress tracking, personalized evaluation interface
+
+## 🛠️ DEVELOPMENT WORKFLOW
+
+### 1. Before Starting Any Task
 ```bash
-# Search for similar implementations
+# Check existing implementation
 grep -r "MT_" includes/
-grep -r "mt_" templates/
-# Check documentation
-cat doc/mt-developer-guide.md
-cat doc/general_index.md
 ```
 
-### 2. PLAN
-Create a detailed implementation plan that includes:
-- Database schema changes (if needed) with `mt_` prefix
-- WordPress hooks and filters to use
-- Security measures (nonces, capability checks, sanitization)
-- Internationalization requirements (`mobility-trailbl
+### 2. Development Process
+1. Read relevant docs in `/doc/`
+2. Follow Repository-Service-Controller pattern
+3. Test with different user roles
+4. Update documentation when done
+
+### 3. Common Commands
+```bash
+# Security & Testing
+composer security-scan
+composer check-nonce
+composer check-escaping
+wp db check
+
+# Development & Debug
+tail -f wp-content/debug.log
+wp transient delete --all
+wp db query "SHOW TABLES LIKE '%mt_%'"
+```
+
+## ✅ QUALITY ASSURANCE
+
+### Security Checklist (MANDATORY)
+- [ ] All user inputs sanitized: `sanitize_text_field()`, `wp_kses_post()`
+- [ ] All outputs escaped: `esc_html()`, `esc_url()`, `esc_attr()`
+- [ ] Nonces verified for forms and AJAX
+- [ ] Capability checks: `current_user_can()`
+- [ ] SQL injection prevention: `$wpdb->prepare()`
+
+### Testing Checklist (BEFORE COMPLETION)
+- [ ] Test with sample data
+- [ ] Test edge cases (empty fields, special characters)
+- [ ] Verify backward compatibility
+- [ ] Check for PHP errors with WP_DEBUG enabled
+- [ ] Test on different user roles
+- [ ] Verify database queries are optimized
+
+### Code Standards Checklist
+- [ ] No hardcoded values (use constants or options)
+- [ ] All strings translatable: `__('text', 'mobility-trailblazers')`
+- [ ] SQL queries use `$wpdb->prepare()`
+- [ ] AJAX calls include nonce verification
+- [ ] JavaScript uses proper jQuery no-conflict mode
+- [ ] CSS classes prefixed with `mt-`
+
+## 📚 DOCUMENTATION REQUIREMENTS
+
+### Files to Update After Changes
+Whenever relevant update these files in `/doc/`:
+- **changelog.md**: Add entry with version, date, and changes
+- **general_index.md**: Update if files added/modified
+- **mt-developer-guide.md**: Update implementation details
+- Create specific guides for new features
+- Suggest a commit title and description in the terminal
+
+### Important Documentation Files
+- **Main Plugin**: `mobility-trailblazers.php`
+- **Architecture**: `/doc/mt-architecture-docs.md`
+- **Changelog**: `/doc/mt-changelog-updated.md`
+- **Index**: `/doc/general_index.md`
+
+## 🎨 BRAND & STYLING
+
+### Brand Colors
+- **Primary**: #26a69a
+- **Success**: #4caf50
+- **Warning**: #ff9800
+- **Error**: #f44336
+
+## 🔄 EDIT PREFERENCES
+
+### Code Editing Guidelines
+- Use existing files and file structure when possible
+- Indicate code edits for cursor tracking
+- Prefer file modifications over complete rewrites
+- Maintain existing feature set unless explicitly requested otherwise
