@@ -1,5 +1,99 @@
 # Mobility Trailblazers Changelog
 
+> **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
+
+## [2.2.18] - 2025-08-13
+
+### Fixed
+- **PHP Parse Error**: Fixed syntax error in class-mt-enhanced-profile-importer.php line 763
+  - Cleaned up whitespace around array declaration to ensure proper parsing
+  - Verified array syntax is correct with proper closing brackets
+  
+- **Header Already Sent Warning**: Fixed header output issue in import-export.php
+  - Removed export logic from template file (should be handled via admin hooks)
+  - Converted to use admin-post.php actions for proper header handling
+  - Cleaned up template to only display UI elements
+  
+- **Import Button Not Working**: Fixed non-functional import button on All Candidates page
+  - Changed event handler to use event delegation for dynamically added button
+  - Fixed JavaScript localization object name mismatch (mt_import vs mt_ajax)
+  - Added timing delay to ensure DOM is ready before adding buttons
+  - Improved script enqueuing detection for candidates page
+  - Added debugging console logs to help troubleshoot button creation
+  - Added validation to check if mt_ajax object is available before using it
+
+- **Duplicate AJAX Handler Conflict**: Fixed conflicting import handlers causing nonce verification failure
+  - Removed duplicate `import_candidates` handler from MT_Admin_Ajax class
+  - MT_Import_Ajax::handle_candidate_import is now the sole handler for CSV imports
+  - This fixes the "Security Event: Nonce verification failed" error
+  
+- **Improved File Type Validation**: Enhanced error messages for wrong file types
+  - Added specific message for Excel files (.xlsx, .xls) directing users to convert to CSV
+  - Clearer guidance on how to convert Excel files using "Save As" → CSV format
+
+- **Fixed MT_Import_Ajax Class Loading**: Resolved 400 Bad Request error on CSV import
+  - Added explicit require_once for class-mt-import-ajax.php in MT_Plugin init
+  - Fixed namespace issue in self-initialization (was missing namespace prefix)
+  - Added debug logging to help troubleshoot FormData contents
+  - This ensures the AJAX handler is properly registered before any import attempts
+
+- **Fixed BOM (Byte Order Mark) Handling in CSV Import**: Resolved "No candidates imported" error
+  - Fixed rewind() operation that was re-reading BOM after initially skipping it
+  - Added BOM detection and removal in detect_delimiter() function
+  - Added explicit BOM removal from header cells during parsing
+  - CSV files exported from Excel with UTF-8 BOM are now properly handled
+  - Headers like "\ufeffID" are now correctly recognized as "ID"
+
+- **Fixed Case-Sensitivity in Field Validation**: Fixed "Name field not found" validation error
+  - Changed field validation from checking 'name' to 'Name' to match actual field mapping
+  - Added debug messages to show mapped fields and available headers for troubleshooting
+  - This fixes imports failing even when the Name column is present
+
+## [2.2.17] - 2025-08-13
+
+### Fixed
+- **Version Numbering**: Corrected duplicate version 2.2.7 entries in changelog
+  - Second 2.2.7 entry renamed to 2.2.7b to maintain chronological accuracy
+  - Added clarification note about the hotfix versioning
+  
+- **Critical Uninstall Bug**: Implemented missing data removal functionality
+  - Added comprehensive `remove_all_data()` method to MT_Uninstaller class
+  - Created `uninstall.php` file that properly checks the user preference
+  - Method now removes all plugin data when option is enabled:
+    - All custom post types (mt_candidate, mt_jury_member)
+    - All database tables (evaluations, assignments, audit logs, error logs)
+    - All plugin options and settings
+    - User roles and capabilities
+    - Uploaded files in custom directories
+    - Scheduled cron events
+    - Transients and cache data
+  - Preserves data by default unless explicitly opted in
+
+### Improved
+- **Assignment Removal Efficiency**: Optimized assignment removal operations
+  - Added `remove_by_id()` method to MT_Assignment_Service for direct ID-based deletion
+  - Eliminated unnecessary database query in removal process
+  - Deprecated `remove_assignment()` method that required jury_member_id and candidate_id lookup
+  - Updated MT_Assignment_Ajax to use service layer instead of direct repository access
+  - Maintained all audit logging and validation in service layer
+
+### Fixed
+- **Version 2.2.15 Issues**:
+  - Removed outdated `debug/import-profiles.php` file that used old MT_Profile_Importer
+  - Implemented missing bulk actions `mt_assign_category` and `mt_remove_category`
+  - Added JavaScript UI for category selection in bulk actions
+  - Added success message handling for bulk category operations
+  - Note: Column sorting was already properly implemented via `custom_orderby()` method
+
+### Technical Details
+- **Performance Improvement**: Assignment removal now uses 1 query instead of 2
+  - Before: `find_all()` to get assignment, then `delete()`
+  - After: `find()` to get assignment for audit, then `delete()`
+- **Code Architecture**: Improved separation of concerns
+  - AJAX handler delegates to service layer
+  - Service layer handles business logic and audit logging
+  - Repository layer handles database operations
+
 ## [2.2.16] - 2025-08-13
 
 ### Added
@@ -291,7 +385,7 @@
 - All capability checks now use the base AJAX class check_permission() method for consistent error handling and logging
 - No database schema changes required - uses WordPress core user/role management
 
-## [2.2.7] - 2025-08-12
+## [2.2.7b] - 2025-08-12
 
 ### Fixed
 - **Dashboard Widget Data Synchronization**: Synchronized evaluation data between main dashboard and dashboard widget

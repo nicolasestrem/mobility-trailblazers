@@ -216,13 +216,63 @@ class MT_Candidate_Columns {
             ?>
             <script type="text/javascript">
             jQuery(document).ready(function($) {
-                // Add import button next to the Add New button
-                var importButton = '<a href="#" id="mt-import-candidates" class="page-title-action"><?php echo esc_js(__('Import CSV', 'mobility-trailblazers')); ?></a>';
-                $('.wrap .page-title-action').first().after(importButton);
+                // Use a small delay to ensure DOM is fully ready
+                setTimeout(function() {
+                    // Check if button area exists
+                    if ($('.wrap .page-title-action').length === 0) {
+                        console.error('MT Import: Cannot find page-title-action element to add import button');
+                        return;
+                    }
+                    
+                    // Add import button next to the Add New button
+                    var importButton = '<a href="#" id="mt-import-candidates" class="page-title-action"><?php echo esc_js(__('Import CSV', 'mobility-trailblazers')); ?></a>';
+                    $('.wrap .page-title-action').first().after(importButton);
+                    
+                    // Add export button
+                    var exportButton = '<a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_export_candidates'), 'mt_export_candidates'); ?>" class="page-title-action"><?php echo esc_js(__('Export CSV', 'mobility-trailblazers')); ?></a>';
+                    $('#mt-import-candidates').after(exportButton);
+                    
+                    console.log('MT Import: Buttons added successfully');
+                }, 100);
                 
-                // Add export button
-                var exportButton = '<a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_export_candidates'), 'mt_export_candidates'); ?>" class="page-title-action"><?php echo esc_js(__('Export CSV', 'mobility-trailblazers')); ?></a>';
-                $('#mt-import-candidates').after(exportButton);
+                // Handle category assignment bulk action
+                var originalBulkAction = $('#bulk-action-selector-top').clone();
+                
+                // Monitor bulk action selection
+                $('#bulk-action-selector-top, #bulk-action-selector-bottom').on('change', function() {
+                    var $this = $(this);
+                    var $wrapper = $this.closest('.bulkactions');
+                    
+                    // Remove any existing category selector
+                    $wrapper.find('.mt-category-selector').remove();
+                    
+                    if ($this.val() === 'mt_assign_category') {
+                        // Add category selector
+                        var categorySelector = '<select name="mt_category" class="mt-category-selector" style="margin-left: 5px;">' +
+                            '<option value=""><?php echo esc_js(__('Select Category', 'mobility-trailblazers')); ?></option>' +
+                            '<option value="startup"><?php echo esc_js(__('Startup', 'mobility-trailblazers')); ?></option>' +
+                            '<option value="gov"><?php echo esc_js(__('Government', 'mobility-trailblazers')); ?></option>' +
+                            '<option value="tech"><?php echo esc_js(__('Technology', 'mobility-trailblazers')); ?></option>' +
+                            '</select>';
+                        
+                        $this.after(categorySelector);
+                    }
+                });
+                
+                // Validate category selection before applying bulk action
+                $('#doaction, #doaction2').on('click', function(e) {
+                    var $form = $(this).closest('form');
+                    var $selector = $(this).siblings('select[name="action"], select[name="action2"]').first();
+                    
+                    if ($selector.val() === 'mt_assign_category') {
+                        var $categorySelector = $selector.siblings('.mt-category-selector');
+                        if (!$categorySelector.val()) {
+                            e.preventDefault();
+                            alert('<?php echo esc_js(__('Please select a category to assign.', 'mobility-trailblazers')); ?>');
+                            return false;
+                        }
+                    }
+                });
             });
             </script>
             <?php
@@ -537,6 +587,42 @@ class MT_Candidate_Columns {
             exit;
         }
         
+        // Handle category assignment
+        if ($doaction === 'mt_assign_category') {
+            // Check for category parameter
+            $category = isset($_REQUEST['mt_category']) ? sanitize_text_field($_REQUEST['mt_category']) : '';
+            
+            if (!empty($category) && !empty($post_ids)) {
+                $updated = 0;
+                foreach ($post_ids as $post_id) {
+                    update_post_meta($post_id, '_mt_category_type', $category);
+                    $updated++;
+                }
+                
+                // Add success message
+                $redirect_to = add_query_arg([
+                    'mt_bulk_action' => 'category_assigned',
+                    'updated' => $updated,
+                    'category' => $category
+                ], $redirect_to);
+            }
+        }
+        
+        // Handle category removal
+        if ($doaction === 'mt_remove_category' && !empty($post_ids)) {
+            $updated = 0;
+            foreach ($post_ids as $post_id) {
+                delete_post_meta($post_id, '_mt_category_type');
+                $updated++;
+            }
+            
+            // Add success message
+            $redirect_to = add_query_arg([
+                'mt_bulk_action' => 'category_removed',
+                'updated' => $updated
+            ], $redirect_to);
+        }
+        
         return $redirect_to;
     }
     
@@ -677,36 +763,66 @@ class MT_Candidate_Columns {
     }
     
     /**
-     * Display import notices
+     * Display import and bulk action notices
      *
      * @return void
      */
     public function display_import_notices() {
-        if (!isset($_GET['mt_import'])) {
-            return;
-        }
-        
         $screen = get_current_screen();
         if (!$screen || $screen->id !== 'edit-mt_candidate') {
             return;
         }
         
-        if ($_GET['mt_import'] === 'success') {
-            $imported = isset($_GET['imported']) ? intval($_GET['imported']) : 0;
+        // Handle import notices
+        if (isset($_GET['mt_import'])) {
+            if ($_GET['mt_import'] === 'success') {
+                $imported = isset($_GET['imported']) ? intval($_GET['imported']) : 0;
+                $updated = isset($_GET['updated']) ? intval($_GET['updated']) : 0;
+                $skipped = isset($_GET['skipped']) ? intval($_GET['skipped']) : 0;
+                
+                $message = sprintf(
+                    __('CSV import completed. %d candidates imported, %d updated, %d skipped.', 'mobility-trailblazers'),
+                    $imported,
+                    $updated,
+                    $skipped
+                );
+                
+                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($message) . '</p></div>';
+            } elseif ($_GET['mt_import'] === 'error') {
+                $error = isset($_GET['error']) ? urldecode($_GET['error']) : __('An error occurred during import.', 'mobility-trailblazers');
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($error) . '</p></div>';
+            }
+        }
+        
+        // Handle bulk action notices
+        if (isset($_GET['mt_bulk_action'])) {
             $updated = isset($_GET['updated']) ? intval($_GET['updated']) : 0;
-            $skipped = isset($_GET['skipped']) ? intval($_GET['skipped']) : 0;
             
-            $message = sprintf(
-                __('CSV import completed. %d candidates imported, %d updated, %d skipped.', 'mobility-trailblazers'),
-                $imported,
-                $updated,
-                $skipped
-            );
-            
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($message) . '</p></div>';
-        } elseif ($_GET['mt_import'] === 'error') {
-            $error = isset($_GET['error']) ? urldecode($_GET['error']) : __('An error occurred during import.', 'mobility-trailblazers');
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($error) . '</p></div>';
+            if ($_GET['mt_bulk_action'] === 'category_assigned' && $updated > 0) {
+                $category = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+                $message = sprintf(
+                    _n(
+                        'Category "%s" assigned to %d candidate.',
+                        'Category "%s" assigned to %d candidates.',
+                        $updated,
+                        'mobility-trailblazers'
+                    ),
+                    ucfirst($category),
+                    $updated
+                );
+                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($message) . '</p></div>';
+            } elseif ($_GET['mt_bulk_action'] === 'category_removed' && $updated > 0) {
+                $message = sprintf(
+                    _n(
+                        'Category removed from %d candidate.',
+                        'Category removed from %d candidates.',
+                        $updated,
+                        'mobility-trailblazers'
+                    ),
+                    $updated
+                );
+                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($message) . '</p></div>';
+            }
         }
     }
 }

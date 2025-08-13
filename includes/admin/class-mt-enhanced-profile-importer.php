@@ -189,8 +189,11 @@ class MT_Enhanced_Profile_Importer {
         $headers = null;
         $row_number = 0;
         
-        // Reset file pointer to beginning
+        // Reset file pointer to beginning (but skip BOM if present)
         rewind($handle);
+        if ($has_bom) {
+            fread($handle, 3);
+        }
         
         while (($data = fgetcsv($handle, 0, $delimiter)) !== FALSE) {
             $row_number++;
@@ -204,7 +207,11 @@ class MT_Enhanced_Profile_Importer {
             $has_id = false;
             $has_name = false;
             
-            foreach ($data as $cell) {
+            foreach ($data as $index => $cell) {
+                // Remove BOM from first cell if present
+                if ($index === 0) {
+                    $cell = str_replace("\xEF\xBB\xBF", '', $cell);
+                }
                 $cell_lower = strtolower(trim($cell));
                 if ($cell_lower === 'id' || $cell_lower === 'nummer') {
                     $has_id = true;
@@ -216,7 +223,11 @@ class MT_Enhanced_Profile_Importer {
             
             // If we found ID or Name columns, this is likely our header row
             if ($has_id || $has_name) {
-                $headers = $data;
+                // Clean headers - remove BOM from first header if present
+                $headers = array_map('trim', $data);
+                if (!empty($headers[0])) {
+                    $headers[0] = str_replace("\xEF\xBB\xBF", '', $headers[0]);
+                }
                 break;
             }
             
@@ -242,9 +253,22 @@ class MT_Enhanced_Profile_Importer {
         // Map headers to fields
         $field_map = self::map_csv_headers($headers);
         
-        // Validate required fields
-        if (!isset($field_map['name'])) {
+        // Debug: Show mapped fields
+        $mapped_fields = array_keys($field_map);
+        if (!empty($mapped_fields)) {
+            $results['messages'][] = sprintf(
+                __('Mapped fields: %s', 'mobility-trailblazers'),
+                implode(', ', $mapped_fields)
+            );
+        }
+        
+        // Validate required fields - check if 'Name' header was mapped
+        if (!isset($field_map['Name'])) {
             $results['messages'][] = __('Required field "Name" not found in CSV headers.', 'mobility-trailblazers');
+            $results['messages'][] = sprintf(
+                __('Available headers: %s', 'mobility-trailblazers'),
+                implode(', ', $headers)
+            );
             fclose($handle);
             return $results;
         }
@@ -328,6 +352,13 @@ class MT_Enhanced_Profile_Importer {
     private static function detect_delimiter($file_path) {
         $delimiters = [',', ';', '\t', '|'];
         $handle = fopen($file_path, 'r');
+        
+        // Check for BOM and skip if present
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            // Not a BOM, rewind to start
+            rewind($handle);
+        }
         
         // Read multiple lines to better detect delimiter
         $sample_lines = [];
@@ -759,7 +790,8 @@ class MT_Enhanced_Profile_Importer {
             'Description',
             'Category',
             'Status'
-        
+        ];
+
         $sample_data = [
             [
                 'CAND-001',

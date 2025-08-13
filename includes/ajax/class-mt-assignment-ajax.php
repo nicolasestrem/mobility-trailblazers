@@ -132,49 +132,19 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $assignment_id = $this->get_int_param('assignment_id');
         if (!$assignment_id) {
             $this->error(__('Invalid assignment ID.', 'mobility-trailblazers'));
-        }
-        
-        $assignment_repo = new MT_Assignment_Repository();
-        
-        // Get assignment details before deletion for audit log
-        $assignment = $assignment_repo->find($assignment_id);
-        if (!$assignment) {
-            $this->error(__('Assignment not found.', 'mobility-trailblazers'));
             return;
         }
         
-        // Capture assignment details for audit trail
-        $assignment_details = [
-            'jury_member_id' => $assignment->jury_member_id,
-            'candidate_id' => $assignment->candidate_id,
-            'assigned_at' => $assignment->assigned_at ?? null,
-            'assigned_by' => $assignment->assigned_by ?? null,
-            'removed_by' => get_current_user_id()
-        ];
-        
-        // Get jury member and candidate names for better audit trail
-        $jury_member = get_post($assignment->jury_member_id);
-        $candidate = get_post($assignment->candidate_id);
-        if ($jury_member) {
-            $assignment_details['jury_member_name'] = $jury_member->post_title;
-        }
-        if ($candidate) {
-            $assignment_details['candidate_name'] = $candidate->post_title;
-        }
-        
-        $result = $assignment_repo->delete($assignment_id);
+        // Use the service method for consistency and efficiency
+        // The service handles all the audit logging and validation
+        $assignment_service = new MT_Assignment_Service();
+        $result = $assignment_service->remove_by_id($assignment_id);
         
         if ($result) {
-            // Log the removal in audit trail
-            \MobilityTrailblazers\Core\MT_Audit_Logger::log(
-                'assignment_removed',
-                'assignment',
-                $assignment_id,
-                $assignment_details
-            );
             $this->success(__('Assignment removed successfully.', 'mobility-trailblazers'));
         } else {
-            $this->error(__('Failed to remove assignment.', 'mobility-trailblazers'));
+            $errors = $assignment_service->get_errors();
+            $this->error(!empty($errors) ? $errors[0] : __('Failed to remove assignment.', 'mobility-trailblazers'));
         }
     }
     

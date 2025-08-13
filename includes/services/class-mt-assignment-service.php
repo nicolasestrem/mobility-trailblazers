@@ -162,28 +162,21 @@ class MT_Assignment_Service implements MT_Service_Interface {
     }
     
     /**
-     * Remove assignment
+     * Remove assignment by ID (efficient method)
      *
-     * @param int $jury_member_id Jury member ID
-     * @param int $candidate_id Candidate ID
+     * @param int $assignment_id Assignment ID
      * @return bool
      */
-    public function remove_assignment($jury_member_id, $candidate_id) {
+    public function remove_by_id($assignment_id) {
         $this->errors = [];
         
-        // Find the assignment
-        $assignments = $this->repository->find_all([
-            'jury_member_id' => $jury_member_id,
-            'candidate_id' => $candidate_id,
-            'limit' => 1
-        ]);
+        // Get assignment directly by ID
+        $assignment = $this->repository->find($assignment_id);
         
-        if (empty($assignments)) {
+        if (!$assignment) {
             $this->errors[] = __('Assignment not found.', 'mobility-trailblazers');
             return false;
         }
-        
-        $assignment = $assignments[0];
         
         // Capture assignment details before deletion for audit log
         $assignment_details = [
@@ -204,14 +197,14 @@ class MT_Assignment_Service implements MT_Service_Interface {
             $assignment_details['candidate_name'] = $candidate->post_title;
         }
         
-        $result = $this->repository->delete($assignment->id);
+        $result = $this->repository->delete($assignment_id);
         
         if ($result) {
-            do_action('mt_assignment_removed', $jury_member_id, $candidate_id);
+            do_action('mt_assignment_removed', $assignment->jury_member_id, $assignment->candidate_id);
             MT_Audit_Logger::log(
                 'assignment_removed', 
                 'assignment', 
-                $assignment->id,
+                $assignment_id,
                 $assignment_details
             );
             return true;
@@ -219,6 +212,33 @@ class MT_Assignment_Service implements MT_Service_Interface {
         
         $this->errors[] = __('Failed to remove assignment.', 'mobility-trailblazers');
         return false;
+    }
+    
+    /**
+     * Remove assignment by jury member and candidate IDs (legacy method)
+     *
+     * @deprecated Use remove_by_id() for better performance
+     * @param int $jury_member_id Jury member ID
+     * @param int $candidate_id Candidate ID
+     * @return bool
+     */
+    public function remove_assignment($jury_member_id, $candidate_id) {
+        $this->errors = [];
+        
+        // Find the assignment (inefficient - requires additional query)
+        $assignments = $this->repository->find_all([
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id,
+            'limit' => 1
+        ]);
+        
+        if (empty($assignments)) {
+            $this->errors[] = __('Assignment not found.', 'mobility-trailblazers');
+            return false;
+        }
+        
+        // Use the efficient method
+        return $this->remove_by_id($assignments[0]->id);
     }
     
     /**

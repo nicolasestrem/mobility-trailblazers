@@ -290,4 +290,4 @@ class MT_Import_Ajax extends MT_Base_Ajax {
 }
 
 // Initialize the class
-new MT_Import_Ajax();
+new \MobilityTrailblazers\Ajax\MT_Import_Ajax();

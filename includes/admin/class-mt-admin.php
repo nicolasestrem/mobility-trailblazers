@@ -645,8 +645,14 @@ class MT_Admin {
      * @return void
      */
     public function enqueue_admin_assets($hook) {
-        // Only on our plugin pages
-        if (strpos($hook, 'mobility-trailblazers') === false && strpos($hook, 'mt-') === false) {
+        // Get current screen for more accurate detection
+        $screen = get_current_screen();
+        
+        // Check if we're on the candidates list page specifically
+        $is_candidates_page = ($screen && $screen->post_type === 'mt_candidate' && $screen->base === 'edit');
+        
+        // Only on our plugin pages or candidates page
+        if (!$is_candidates_page && strpos($hook, 'mobility-trailblazers') === false && strpos($hook, 'mt-') === false) {
             return;
         }
         
@@ -706,8 +712,7 @@ class MT_Admin {
         }
         
         // Candidate import script for candidates list page
-        $screen = get_current_screen();
-        if ($screen && $screen->post_type === 'mt_candidate' && $screen->base === 'edit') {
+        if ($is_candidates_page) {
             wp_enqueue_script(
                 'mt-candidate-import',
                 MT_PLUGIN_URL . 'assets/js/candidate-import.js',
@@ -717,7 +722,7 @@ class MT_Admin {
             );
             
             // Localize script for import functionality
-            wp_localize_script('mt-candidate-import', 'mt_import', [
+            wp_localize_script('mt-candidate-import', 'mt_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('mt_ajax_nonce'),
                 'i18n' => [

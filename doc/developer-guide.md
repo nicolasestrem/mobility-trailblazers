@@ -776,21 +776,38 @@ This critical setting controls whether plugin data is preserved or deleted when 
 
 When enabled, the following data will be permanently deleted on uninstall:
 - All candidate profiles and information
-- All jury member profiles
+- All jury member profiles  
 - All evaluations and scores
 - All assignments and relationships
 - All audit logs and history
 - All custom database tables (mt_*)
 - All plugin settings and configurations
+- All uploaded files in custom directories
+- All scheduled cron events
+- All transients and cache data
 
 Implementation in `uninstall.php`:
 ```php
 // Check if data should be removed
 if (get_option('mt_remove_data_on_uninstall', '0') === '1') {
     // Delete all plugin data
-    MT_Uninstaller::remove_all_data();
+    \MobilityTrailblazers\Core\MT_Uninstaller::remove_all_data();
+} else {
+    // Only clear temporary data
+    wp_clear_scheduled_hook('mt_cleanup_error_logs');
+    // Clear transients only
 }
 ```
+
+The `remove_all_data()` method performs comprehensive cleanup:
+1. Removes all custom post types and meta data
+2. Drops all database tables
+3. Deletes all plugin options (mt_* prefix and specific known options)
+4. Removes user roles (mt_jury_member, mt_jury_admin)
+5. Removes all custom capabilities from existing roles
+6. Deletes uploaded files from /wp-content/uploads/mobility-trailblazers/
+7. Clears all scheduled events
+8. Removes all transients and site transients
 
 ### Settings Structure
 

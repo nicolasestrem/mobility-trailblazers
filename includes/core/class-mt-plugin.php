@@ -125,8 +125,8 @@ class MT_Plugin {
         $admin_ajax->init();
         
         // Import AJAX (handles candidate CSV imports)
-        // Note: MT_Import_Ajax is self-initializing, no need to call init()
-        // The class constructor handles the action hook registration
+        // The file self-initializes when loaded, creating an instance at the bottom
+        require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-import-ajax.php';
     }
     
     /**

@@ -32,7 +32,8 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
         
         // Import actions
-        add_action('wp_ajax_mt_import_candidates', [$this, 'import_candidates']);
+        // Removed - using MT_Import_Ajax::handle_candidate_import instead
+        // add_action('wp_ajax_mt_import_candidates', [$this, 'import_candidates']);
         add_action('wp_ajax_mt_upload_import_file', [$this, 'upload_import_file']);
         
         // Dashboard actions

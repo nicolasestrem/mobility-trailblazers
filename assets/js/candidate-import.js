@@ -10,9 +10,20 @@
 jQuery(document).ready(function($) {
     'use strict';
     
-    // Handle import button click
-    $('#mt-import-candidates').on('click', function(e) {
+    // Check if mt_ajax is available
+    if (typeof mt_ajax === 'undefined') {
+        console.error('MT Import: mt_ajax object not found. Script localization may have failed.');
+    }
+    
+    // Handle import button click - use event delegation since button is added dynamically
+    $(document).on('click', '#mt-import-candidates', function(e) {
         e.preventDefault();
+        
+        // Double-check mt_ajax exists
+        if (typeof mt_ajax === 'undefined') {
+            alert('Import functionality is not properly initialized. Please refresh the page and try again.');
+            return;
+        }
         
         // Create a temporary file input
         var fileInput = $('<input>', {
@@ -38,7 +49,12 @@ jQuery(document).ready(function($) {
             // Validate file type
             var fileName = file.name.toLowerCase();
             if (!fileName.endsWith('.csv')) {
-                alert(mt_ajax.i18n.invalid_file_type || 'Please select a CSV file.');
+                var fileExt = fileName.split('.').pop();
+                if (fileExt === 'xlsx' || fileExt === 'xls') {
+                    alert('Please convert your Excel file to CSV format first. Use "Save As" in Excel and choose "CSV (Comma delimited)" as the file type.');
+                } else {
+                    alert(mt_ajax.i18n.invalid_file_type || 'Please select a CSV file.');
+                }
                 fileInput.remove();
                 return;
             }
@@ -81,6 +97,17 @@ jQuery(document).ready(function($) {
                     style: 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;'
                 }).html('<div style="background: white; padding: 20px; border-radius: 5px;"><p>' + (mt_ajax.i18n.importing || 'Importing...') + '</p><div class="spinner is-active" style="float: none;"></div></div>');
                 $('body').append($overlay);
+            }
+            
+            // Debug: Log the request details
+            console.log('MT Import: Sending AJAX request to:', mt_ajax.ajax_url || ajaxurl);
+            console.log('MT Import: FormData entries:');
+            for (var pair of formData.entries()) {
+                if (pair[0] === 'csv_file') {
+                    console.log('  - csv_file:', pair[1].name, '(' + pair[1].size + ' bytes)');
+                } else {
+                    console.log('  - ' + pair[0] + ':', pair[1]);
+                }
             }
             
             // Send AJAX request
@@ -222,8 +249,14 @@ jQuery(document).ready(function($) {
                 var file = files[0];
                 
                 // Validate file type
-                if (!file.name.toLowerCase().endsWith('.csv')) {
-                    alert(mt_ajax.i18n.invalid_file_type || 'Please select a CSV file.');
+                var fileName = file.name.toLowerCase();
+                if (!fileName.endsWith('.csv')) {
+                    var fileExt = fileName.split('.').pop();
+                    if (fileExt === 'xlsx' || fileExt === 'xls') {
+                        alert('Please convert your Excel file to CSV format first. Use "Save As" in Excel and choose "CSV (Comma delimited)" as the file type.');
+                    } else {
+                        alert(mt_ajax.i18n.invalid_file_type || 'Please select a CSV file.');
+                    }
                     return;
                 }
                 
