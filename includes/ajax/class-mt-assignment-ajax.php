@@ -475,29 +475,30 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             }
             
             // Track existing assignments if we're not clearing them
+            $existing_assignments_by_jury = [];
             if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
                 // Get all existing assignments
                 $existing_assignments = $assignment_repo->find_all();
                 foreach ($existing_assignments as $assignment) {
+                    // Track candidate assignment counts
                     if (isset($candidate_assignment_count[$assignment->candidate_id])) {
                         $candidate_assignment_count[$assignment->candidate_id]++;
                     }
+                    // Track existing assignments by jury member
+                    if (!isset($existing_assignments_by_jury[$assignment->jury_member_id])) {
+                        $existing_assignments_by_jury[$assignment->jury_member_id] = [];
+                    }
+                    $existing_assignments_by_jury[$assignment->jury_member_id][$assignment->candidate_id] = true;
                 }
             }
             
             // Create assignments for each jury member
             foreach ($jury_members as $jury_member) {
-                $jury_assignments = 0;
-                
-                // Get existing assignments for this jury member if not clearing
-                $existing_for_jury = [];
-                if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
-                    $existing_jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
-                    foreach ($existing_jury_assignments as $existing) {
-                        $existing_for_jury[$existing->candidate_id] = true;
-                        $jury_assignments++;
-                    }
-                }
+                // Use pre-calculated existing assignments for this jury member
+                $existing_for_jury = isset($existing_assignments_by_jury[$jury_member->ID]) 
+                    ? $existing_assignments_by_jury[$jury_member->ID] 
+                    : [];
+                $jury_assignments = count($existing_for_jury);
                 
                 // Sort candidates by assignment count (ascending) to prioritize those with fewer assignments
                 $sorted_candidates = $candidates;
@@ -559,19 +560,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             // Process each jury member
             foreach ($jury_members as $jury_member) {
-                $jury_assignments = 0;
                 $candidates_checked = 0;
                 
-                // Get existing assignments for this jury member if not clearing
-                $existing_for_jury = [];
-                if (!isset($_POST['clear_existing']) || $_POST['clear_existing'] !== 'true') {
-                    $existing_jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
-                    foreach ($existing_jury_assignments as $existing) {
-                        $existing_for_jury[$existing->candidate_id] = true;
-                        $jury_assignments++;
-                    }
-                    
-                    error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' has ' . count($existing_for_jury) . ' existing assignments');
+                // Use pre-calculated existing assignments for this jury member
+                $existing_for_jury = isset($existing_assignments_by_jury[$jury_member->ID]) 
+                    ? $existing_assignments_by_jury[$jury_member->ID] 
+                    : [];
+                $jury_assignments = count($existing_for_jury);
+                
+                if ($jury_assignments > 0) {
+                    error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' has ' . $jury_assignments . ' existing assignments');
                 }
                 
                 // Try to assign candidates from the shuffled list

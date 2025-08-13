@@ -48,6 +48,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Bulk operations
         add_action('wp_ajax_mt_bulk_evaluation_action', [$this, 'bulk_evaluation_action']);
+        
+        // View details modal
+        add_action('wp_ajax_mt_get_evaluation_details', [$this, 'get_evaluation_details']);
     }
     
     /**
@@ -417,32 +420,44 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return WP_Post|null
      */
     private function get_jury_member_by_user_id($user_id) {
-        // Try different meta keys that might be used
-        $meta_keys = ['_mt_user_id', 'mt_user_id', 'user_id', '_user_id'];
+        // Standardized to use only _mt_user_id meta key
+        $args = [
+            'post_type' => 'mt_jury_member',
+            'meta_key' => '_mt_user_id',
+            'meta_value' => $user_id,
+            'posts_per_page' => 1,
+            'post_status' => 'publish'
+        ];
         
-        foreach ($meta_keys as $meta_key) {
-            $args = [
-                'post_type' => 'mt_jury_member',
-                'meta_key' => $meta_key,
-                'meta_value' => $user_id,
-                'posts_per_page' => 1,
-                'post_status' => 'publish'
-            ];
-            
-            error_log('MT AJAX - Trying meta key "' . $meta_key . '" with args: ' . print_r($args, true));
-            
+        error_log('MT AJAX - Looking for jury member with _mt_user_id = ' . $user_id);
+        
+        $jury_members = get_posts($args);
+        
+        if (!empty($jury_members)) {
+            error_log('MT AJAX - Jury member found: ID=' . $jury_members[0]->ID . ', Title=' . $jury_members[0]->post_title);
+            return $jury_members[0];
+        }
+        
+        // If not found, try to migrate old meta keys to the standardized one
+        $old_meta_keys = ['mt_user_id', 'user_id', '_user_id'];
+        
+        foreach ($old_meta_keys as $old_key) {
+            $args['meta_key'] = $old_key;
             $jury_members = get_posts($args);
             
-            error_log('MT AJAX - Found ' . count($jury_members) . ' jury members for user ' . $user_id . ' with meta key "' . $meta_key . '"');
-            
             if (!empty($jury_members)) {
-                error_log('MT AJAX - Jury member found with meta key "' . $meta_key . '": ID=' . $jury_members[0]->ID . ', Title=' . $jury_members[0]->post_title);
-                return $jury_members[0];
+                // Found with old key, migrate to new standardized key
+                $jury_member = $jury_members[0];
+                update_post_meta($jury_member->ID, '_mt_user_id', $user_id);
+                delete_post_meta($jury_member->ID, $old_key, $user_id);
+                
+                error_log('MT AJAX - Migrated jury member ' . $jury_member->ID . ' from meta key "' . $old_key . '" to "_mt_user_id"');
+                return $jury_member;
             }
         }
         
-        // If no jury member found with any meta key, let's check what meta keys exist
-        error_log('MT AJAX - No jury member found with any meta key for user ' . $user_id);
+        // If still no jury member found, log additional debug info
+        error_log('MT AJAX - No jury member found for user ' . $user_id . ' even after migration attempt');
         
         // Get all jury members and check their meta
         $all_jury_members = get_posts([
@@ -811,5 +826,93 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $this->success($debug_info, 'User debug information');
     }
     
+    /**
+     * Get evaluation details for modal display
+     *
+     * @return void
+     */
+    public function get_evaluation_details() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_evaluations') && !current_user_can('administrator')) {
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get evaluation ID
+        $evaluation_id = $this->get_int_param('evaluation_id');
+        if (!$evaluation_id) {
+            $this->error(__('Invalid evaluation ID', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get evaluation data
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation = $evaluation_repo->find($evaluation_id);
+        
+        if (!$evaluation) {
+            $this->error(__('Evaluation not found', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get related data
+        $jury_member = get_post($evaluation->jury_member_id);
+        $candidate = get_post($evaluation->candidate_id);
+        
+        // Get categories
+        $categories = wp_get_post_terms($evaluation->candidate_id, 'mt_category', ['fields' => 'names']);
+        
+        // Prepare response data
+        $data = [
+            'id' => $evaluation->id,
+            'jury_member' => $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
+            'candidate' => $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
+            'organization' => get_post_meta($evaluation->candidate_id, '_mt_organization', true),
+            'categories' => implode(', ', $categories),
+            'scores' => [
+                'courage' => [
+                    'label' => __('Courage & Pioneer Spirit', 'mobility-trailblazers'),
+                    'value' => floatval($evaluation->courage_score)
+                ],
+                'innovation' => [
+                    'label' => __('Innovation Degree', 'mobility-trailblazers'),
+                    'value' => floatval($evaluation->innovation_score)
+                ],
+                'implementation' => [
+                    'label' => __('Implementation & Impact', 'mobility-trailblazers'),
+                    'value' => floatval($evaluation->implementation_score)
+                ],
+                'relevance' => [
+                    'label' => __('Mobility Transformation Relevance', 'mobility-trailblazers'),
+                    'value' => floatval($evaluation->relevance_score)
+                ],
+                'visibility' => [
+                    'label' => __('Role Model & Visibility', 'mobility-trailblazers'),
+                    'value' => floatval($evaluation->visibility_score)
+                ]
+            ],
+            'total_score' => floatval($evaluation->courage_score) + 
+                           floatval($evaluation->innovation_score) + 
+                           floatval($evaluation->implementation_score) + 
+                           floatval($evaluation->relevance_score) + 
+                           floatval($evaluation->visibility_score),
+            'average_score' => (floatval($evaluation->courage_score) + 
+                              floatval($evaluation->innovation_score) + 
+                              floatval($evaluation->implementation_score) + 
+                              floatval($evaluation->relevance_score) + 
+                              floatval($evaluation->visibility_score)) / 5,
+            'comments' => $evaluation->comments,
+            'status' => $evaluation->status,
+            'created_at' => mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $evaluation->created_at),
+            'updated_at' => mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $evaluation->updated_at)
+        ];
+        
+        $this->success($data);
+    }
 
 } 

@@ -348,9 +348,9 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             return false;
         }
 
-        // Check if candidate exists
+        // Check if candidate exists - allow both draft and published candidates
         $candidate = get_post($candidate_id);
-        if (!$candidate || $candidate->post_type !== 'mt_candidate' || $candidate->post_status !== 'publish') {
+        if (!$candidate || $candidate->post_type !== 'mt_candidate' || !in_array($candidate->post_status, ['publish', 'draft'])) {
             return false;
         }
 

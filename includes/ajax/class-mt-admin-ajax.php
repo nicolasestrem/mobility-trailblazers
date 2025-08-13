@@ -37,8 +37,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         add_action('admin_post_mt_export_assignments', [$this, 'export_assignments_download']);
         
         // Import actions
-        // Removed - using MT_Import_Ajax::handle_candidate_import instead
-        // add_action('wp_ajax_mt_import_candidates', [$this, 'import_candidates']);
+        // Using MT_Import_Ajax::handle_candidate_import for all import functionality
         add_action('wp_ajax_mt_upload_import_file', [$this, 'upload_import_file']);
         
         // Dashboard actions
@@ -402,84 +401,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      *
      * @return void
      */
-    public function import_candidates() {
-        $this->verify_nonce('mt_admin_nonce');
-        $this->check_permission('mt_import_data');
-        
-        $file_id = $this->get_int_param('file_id');
-        if (!$file_id) {
-            $this->error(__('No file provided.', 'mobility-trailblazers'));
-        }
-        
-        $file_path = get_attached_file($file_id);
-        if (!$file_path || !file_exists($file_path)) {
-            $this->error(__('File not found.', 'mobility-trailblazers'));
-        }
-        
-        $csv_data = $this->parse_csv($file_path);
-        if (empty($csv_data)) {
-            $this->error(__('Invalid CSV file.', 'mobility-trailblazers'));
-        }
-        
-        $imported = 0;
-        $errors = [];
-        
-        foreach ($csv_data as $row_num => $row) {
-            // Skip header row
-            if ($row_num === 0) {
-                continue;
-            }
-            
-            // Validate required fields
-            if (empty($row[0])) { // Name
-                $errors[] = sprintf(__('Row %d: Name is required.', 'mobility-trailblazers'), $row_num + 1);
-                continue;
-            }
-            
-            // Create candidate
-            $candidate_data = [
-                'post_title' => sanitize_text_field($row[0]),
-                'post_type' => 'mt_candidate',
-                'post_status' => 'publish',
-                'post_content' => isset($row[4]) ? wp_kses_post($row[4]) : '', // Bio
-            ];
-            
-            $candidate_id = wp_insert_post($candidate_data);
-            
-            if (is_wp_error($candidate_id)) {
-                $errors[] = sprintf(__('Row %d: %s', 'mobility-trailblazers'), $row_num + 1, $candidate_id->get_error_message());
-                continue;
-            }
-            
-            // Add meta data
-            if (!empty($row[1])) { // Organization
-                update_post_meta($candidate_id, '_mt_organization', sanitize_text_field($row[1]));
-            }
-            if (!empty($row[2])) { // Position
-                update_post_meta($candidate_id, '_mt_position', sanitize_text_field($row[2]));
-            }
-            
-            // Add categories
-            if (!empty($row[3])) { // Categories
-                $categories = array_map('trim', explode(',', $row[3]));
-                wp_set_object_terms($candidate_id, $categories, 'mt_award_category');
-            }
-            
-            $imported++;
-        }
-        
-        // Clean up
-        wp_delete_attachment($file_id, true);
-        
-        if ($imported > 0) {
-            $this->success([
-                'imported' => $imported,
-                'errors' => $errors
-            ], sprintf(__('%d candidates imported successfully.', 'mobility-trailblazers'), $imported));
-        } else {
-            $this->error(__('No candidates were imported.', 'mobility-trailblazers'), ['errors' => $errors]);
-        }
-    }
+    // import_candidates method removed - functionality moved to MT_Import_Ajax
     
     /**
      * Upload import file

@@ -511,31 +511,176 @@
 
 /* Modal styles */
 .mt-modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
     z-index: 100000;
-}
-
-.mt-modal.active {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.mt-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
 .mt-modal-content {
+    position: relative;
     background: var(--mt-bg-base);
     border-radius: 8px;
-    max-width: 600px;
+    max-width: 700px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    padding: 30px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.mt-modal-header {
+    padding: 20px 30px;
+    border-bottom: 2px solid var(--mt-blue-accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-modal-header h2 {
+    margin: 0;
+    color: var(--mt-primary);
+    font-size: 24px;
+}
+
+.mt-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--mt-body-text);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--mt-transition);
+}
+
+.mt-modal-close:hover {
+    color: var(--mt-error);
+    transform: rotate(90deg);
+}
+
+.mt-modal-body {
+    padding: 30px;
+}
+
+/* Evaluation Details Modal Specific */
+.mt-evaluation-details .mt-detail-section {
+    margin-bottom: 30px;
+}
+
+.mt-evaluation-details .mt-detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.mt-evaluation-details h3 {
+    color: var(--mt-secondary);
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    border-bottom: 1px solid var(--mt-blue-accent);
+    padding-bottom: 8px;
+}
+
+.mt-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mt-detail-table th {
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--mt-body-text);
+    font-weight: 600;
+    width: 35%;
+}
+
+.mt-detail-table td {
+    padding: 8px 12px;
+    color: var(--mt-body-text);
+}
+
+.mt-detail-table tr:nth-child(even) {
+    background: rgba(164, 220, 213, 0.05);
+}
+
+/* Score Display */
+.mt-score-item {
+    margin-bottom: 15px;
+}
+
+.mt-score-item label {
+    display: block;
+    color: var(--mt-body-text);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.mt-score-value {
+    color: var(--mt-primary);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.mt-score-bar {
+    background: #e0e0e0;
+    border-radius: 5px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.mt-score-fill {
+    background: linear-gradient(90deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.mt-score-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--mt-bg-beige);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.mt-comments {
+    padding: 15px;
+    background: rgba(164, 220, 213, 0.1);
+    border-left: 3px solid var(--mt-secondary);
+    border-radius: 4px;
+    white-space: pre-wrap;
+}
+
+.mt-timestamps {
+    text-align: right;
+    color: #666;
+    font-size: 12px;
+    padding-top: 15px;
+    border-top: 1px solid var(--mt-blue-accent);
+}
+
+.mt-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--mt-body-text);
+    font-size: 16px;
 }
 
 /* Assignment Management Page Specific Styles */

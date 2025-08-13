@@ -705,8 +705,140 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
         },
         viewDetails: function(evaluationId) {
-            // TODO: Implement AJAX call to load evaluation details into a modal.
-            alert('View evaluation ' + evaluationId + ' details - To be implemented');
+            // Show loading state
+            const $modal = this.createModal();
+            $modal.find('.mt-modal-body').html('<div class="mt-loading">Loading evaluation details...</div>');
+            $modal.fadeIn();
+            
+            // Fetch evaluation details via AJAX
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_get_evaluation_details',
+                    nonce: mt_admin.nonce,
+                    evaluation_id: evaluationId
+                },
+                success: (response) => {
+                    if (response.success) {
+                        const html = this.renderEvaluationDetails(response.data);
+                        $modal.find('.mt-modal-body').html(html);
+                    } else {
+                        $modal.find('.mt-modal-body').html(
+                            '<div class="notice notice-error"><p>' + 
+                            (response.data?.message || 'Failed to load evaluation details') + 
+                            '</p></div>'
+                        );
+                    }
+                },
+                error: () => {
+                    $modal.find('.mt-modal-body').html(
+                        '<div class="notice notice-error"><p>An error occurred while loading evaluation details</p></div>'
+                    );
+                }
+            });
+        },
+        createModal: function() {
+            // Check if modal already exists
+            let $modal = $('#mt-evaluation-modal');
+            if ($modal.length === 0) {
+                // Create modal HTML
+                const modalHtml = `
+                    <div id="mt-evaluation-modal" class="mt-modal" style="display:none;">
+                        <div class="mt-modal-overlay"></div>
+                        <div class="mt-modal-content">
+                            <div class="mt-modal-header">
+                                <h2>Evaluation Details</h2>
+                                <button class="mt-modal-close" aria-label="Close">&times;</button>
+                            </div>
+                            <div class="mt-modal-body"></div>
+                        </div>
+                    </div>
+                `;
+                $('body').append(modalHtml);
+                $modal = $('#mt-evaluation-modal');
+                
+                // Bind close events
+                $modal.find('.mt-modal-close, .mt-modal-overlay').on('click', () => {
+                    $modal.fadeOut();
+                });
+                
+                // Close on ESC key
+                $(document).on('keydown', (e) => {
+                    if (e.key === 'Escape' && $modal.is(':visible')) {
+                        $modal.fadeOut();
+                    }
+                });
+            }
+            return $modal;
+        },
+        renderEvaluationDetails: function(data) {
+            let scoresHtml = '';
+            for (const [key, score] of Object.entries(data.scores)) {
+                scoresHtml += `
+                    <div class="mt-score-item">
+                        <label>${score.label}:</label>
+                        <span class="mt-score-value">${score.value}/10</span>
+                        <div class="mt-score-bar">
+                            <div class="mt-score-fill" style="width: ${score.value * 10}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="mt-evaluation-details">
+                    <div class="mt-detail-section">
+                        <h3>Basic Information</h3>
+                        <table class="mt-detail-table">
+                            <tr>
+                                <th>Jury Member:</th>
+                                <td>${data.jury_member}</td>
+                            </tr>
+                            <tr>
+                                <th>Candidate:</th>
+                                <td>${data.candidate}</td>
+                            </tr>
+                            <tr>
+                                <th>Organization:</th>
+                                <td>${data.organization || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th>Categories:</th>
+                                <td>${data.categories || '-'}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td><span class="mt-status mt-status-${data.status}">${data.status}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-detail-section">
+                        <h3>Scores</h3>
+                        ${scoresHtml}
+                        <div class="mt-score-summary">
+                            <strong>Total Score:</strong> ${data.total_score.toFixed(1)}/50
+                            <br>
+                            <strong>Average Score:</strong> ${data.average_score.toFixed(1)}/10
+                        </div>
+                    </div>
+                    
+                    ${data.comments ? `
+                        <div class="mt-detail-section">
+                            <h3>Comments</h3>
+                            <div class="mt-comments">${data.comments}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mt-detail-section mt-timestamps">
+                        <small>
+                            Created: ${data.created_at}<br>
+                            Last Updated: ${data.updated_at}
+                        </small>
+                    </div>
+                </div>
+            `;
         },
         handleSelectAll: function() {
             const isChecked = $(this).prop('checked');
