@@ -1,51 +1,82 @@
-# Claude Instructions for Mobility Trailblazers Plugin
+# CLAUDE.md - Mobility Trailblazers WordPress Plugin
 
-## Project Overview
-This is a WordPress plugin called "Mobility Trailblazers" that helps users track and manage mobility-related activities and achievements.
+**AI Development Guide for Claude Code & Claude Desktop**  
+**Version:** 2.2.14  
+**Last Updated:** August 2025  
 **Local Path:** `C:\Users\nicol\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` or `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers` depending on the computer Claude is running on.
 
-## Code Standards
-- Follow WordPress coding standards
-- Follow /doc/developer-guide.md guide
-- Use proper PHP namespacing
-- Follow PSR-4 autoloading standards
-- Use proper WordPress hooks and filters
-- Include proper security measures (nonces, sanitization, validation)
-- Comment your code clearly
-- Use semantic versioning for releases
+## 🎯 Project Overview
 
-## File Structure
-- Main plugin file: `mobility-trailblazers.php`
-- File summary in /doc/general_index.md
-- Classes in `includes/` directory
-- Templates in `templates/` directory
-- Assets in `assets/` directory
-- Language files in `languages/` directory
+You're working on the **Mobility Trailblazers Award Platform** - a WordPress plugin for managing awards recognizing mobility innovation pioneers in the DACH region (Germany, Austria, Switzerland). The platform handles jury evaluations, candidate management, public voting, and award administration.
 
-## WordPress Standards
-- Use WordPress-specific functions when available
-- Follow WordPress security best practices
-- Use proper escaping and sanitization
-- Include proper capability checks
-- Use WordPress database abstraction layer
-- Follow WordPress HTML/CSS guidelines
+### Current Status
+- **Phase:** Platform Development In Progress
+- **Infrastructure:** ✅ Complete (Docker, Database, Security)  
+- **Core Features:** ✅ Complete (Evaluation System, Dashboard, Assignments, Voting)
+- **Elementor Integration:** ✅ Complete (8 Custom Widgets)
+- **Next Focus:** Content population, candidate profiles, event integration
 
-## Testing
-- Always test changes thoroughly
-- Consider backward compatibility
-- Test with different WordPress versions when possible
-- Include unit tests when adding new features
+### Business Context
+- **Partnership:** Handelsblatt Media Group
+- **Event:** Award ceremony October 30, 2025
+- **Stakeholders:** 25 jury members, 50+ candidates, media partners
+- **Languages:** German (primary), English (secondary)
+- **Mission:** "Weil mobiler Wandel Mut braucht" (Because mobility transformation takes courage)
 
-## When Making Changes
-- Update version number in main plugin file when making significant changes
-- Update changelog in README.md
-- Follow semantic versioning (MAJOR.MINOR.PATCH)
-- Consider database migration needs
-- Update documentation as needed
+## 🏗️ Technical Architecture
 
-## Security
-- Always validate and sanitize user inputs
-- Use nonces for form submissions
-- Check user capabilities before performing actions
-- Escape output properly
-- Follow WordPress security guidelines
+### Stack
+- **WordPress:** 5.8+ with modern PHP 7.4+
+- **Frontend:** Vanilla JS, AJAX, Responsive CSS Grid
+- **Database:** MySQL 5.7+ with custom tables (mt_ prefix)
+- **Infrastructure:** Docker containers managed via Komodo
+- **Design:** Corporate colors (Teal #00736C, Copper #C27A5E, Beige #F6E8DE)
+
+### Plugin Structure
+```
+mobility-trailblazers/
+├── assets/               # CSS, JS, images
+│   ├── css/             # Admin and frontend styles
+│   ├── js/              # Modular JavaScript
+│   └── images/          # Logos, icons
+├── includes/            # PHP classes (PSR-4 autoloading)
+│   ├── admin/          # Admin functionality
+│   ├── ajax/           # AJAX handlers
+│   ├── core/           # Core plugin classes
+│   ├── repositories/   # Data access layer
+│   ├── services/       # Business logic
+│   └── shortcodes/     # Frontend shortcodes
+├── templates/           # PHP/HTML templates
+│   ├── admin/          # Admin interface templates
+│   └── frontend/       # Public-facing templates
+├── languages/          # i18n files (de_DE, en_US)
+├── doc/               # Technical documentation
+└── mobility-trailblazers.php  # Main plugin file
+```
+
+## 📋 DEVELOPMENT WORKFLOW
+
+### 1. EXPLORE
+Before making any changes:
+- Review this CLAUDE.md file completely
+- Search for existing implementations using pattern matching
+- Review relevant documentation in `/doc/` directory
+- Check `/doc/general_index.md` for file overview
+- Understand the Repository-Service-Controller architecture
+- Check for existing similar features to maintain consistency
+
+```bash
+# Search for similar implementations
+grep -r "MT_" includes/
+grep -r "mt_" templates/
+# Check documentation
+cat doc/mt-developer-guide.md
+cat doc/general_index.md
+```
+
+### 2. PLAN
+Create a detailed implementation plan that includes:
+- Database schema changes (if needed) with `mt_` prefix
+- WordPress hooks and filters to use
+- Security measures (nonces, capability checks, sanitization)
+- Internationalization requirements (`mobility-trailbl
