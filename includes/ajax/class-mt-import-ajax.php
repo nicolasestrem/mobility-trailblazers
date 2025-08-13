@@ -54,9 +54,9 @@ class MT_Import_Ajax extends MT_Base_Ajax {
                 return;
             }
             
-            // Step 2: Check user capability
-            if (!current_user_can('edit_posts')) {
-                $this->error(__('You do not have permission to import candidates.', 'mobility-trailblazers'));
+            // Step 2: Check user capability - requires admin access for imports
+            if (!current_user_can('manage_options')) {
+                $this->error(__('You do not have permission to import candidates. Administrator access required.', 'mobility-trailblazers'));
                 return;
             }
             

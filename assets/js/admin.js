@@ -437,12 +437,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
             
             if (!action) {
-                mtShowNotification('Please select a bulk action', 'warning');
+                mtShowNotification(mt_admin.i18n.select_bulk_action || 'Please select a bulk action', 'warning');
                 return;
             }
             
             if (selectedIds.length === 0) {
-                mtShowNotification('Please select at least one assignment', 'warning');
+                mtShowNotification(mt_admin.i18n.select_assignments || 'Please select at least one assignment', 'warning');
                 return;
             }
             

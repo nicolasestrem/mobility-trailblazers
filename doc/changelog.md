@@ -2,6 +2,30 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.27] - 2025-08-13
+
+### Fixed
+- **i18n Consistency**:
+  - Fixed hardcoded English strings in admin.js bulk actions
+  - Now uses `mt_admin.i18n` for all user-facing strings
+
+- **AJAX URL Standardization**:
+  - Changed frontend.js to use `mt_ajax.ajax_url` instead of `mt_ajax.url`
+  - Ensures consistency across all JavaScript files
+
+- **Security Enhancement**:
+  - Strengthened import capability check from `edit_posts` to `manage_options`
+  - Import operations now require administrator access only
+  - Updated error messages to clarify permission requirements
+
+- **Documentation**:
+  - Fixed license typo in README.md (removed extra period)
+  - Consistent GPL v2 or later across all files
+
+### Verified
+- **mtShowNotification Function**: Confirmed globally available in admin.js (line 71)
+- **CSS Units**: No spacing issues found in current codebase
+
 ## [2.2.26] - 2025-08-13
 
 ### Fixed

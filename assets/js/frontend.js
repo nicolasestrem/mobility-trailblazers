@@ -208,7 +208,7 @@
             $container.html('<div class="mt-loading">' + loadingText + '</div>');
             
             // Load candidate details
-            $.post(mt_ajax.url, {
+            $.post(mt_ajax.ajax_url, {
                 action: 'mt_get_candidate_details',
                 candidate_id: candidateId,
                 nonce: mt_ajax.nonce
@@ -410,7 +410,7 @@
                 return;
             }
             
-            $.post(mt_ajax.url, {
+            $.post(mt_ajax.ajax_url, {
                 action: 'mt_get_evaluation',
                 candidate_id: candidateId,
                 nonce: mt_ajax.nonce
@@ -557,7 +557,7 @@
             
             // Submitting evaluation with data
             
-            $.post(mt_ajax.url, formData)
+            $.post(mt_ajax.ajax_url, formData)
                 .done(function(response) {
                     // AJAX Response received
                     
@@ -640,7 +640,7 @@
             
             // Saving draft with data
             
-            $.post(mt_ajax.url, formData)
+            $.post(mt_ajax.ajax_url, formData)
                 .done(function(response) {
                     // Draft Save Response received
                     
@@ -768,13 +768,13 @@
         // Refresh rankings function
         function refreshRankings() {
             // Check if mt_ajax is available
-            if (typeof mt_ajax === 'undefined' || !mt_ajax.url || !mt_ajax.nonce) {
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.ajax_url || !mt_ajax.nonce) {
                 // console.warn('mt_ajax not available for rankings refresh');
                 return;
             }
             
             $.ajax({
-                url: mt_ajax.url,
+                url: mt_ajax.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_get_jury_rankings',
@@ -915,7 +915,7 @@
                 
                 // Prepare form data
                 // Check if mt_ajax is available
-                if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce || !mt_ajax.url) {
+                if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce || !mt_ajax.ajax_url) {
                     // console.warn('mt_ajax not available for inline evaluation save');
                     alert('Configuration error. Please refresh the page and try again.');
                     $rankingItem.removeClass('updating');
@@ -933,7 +933,7 @@
                 
                 // Save via AJAX
                 $.ajax({
-                    url: mt_ajax.url,
+                    url: mt_ajax.ajax_url,
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
@@ -1046,7 +1046,7 @@
         
         function refreshRankings() {
             // Check if mt_ajax is available
-            if (typeof mt_ajax === 'undefined' || !mt_ajax.url || !mt_ajax.nonce) {
+            if (typeof mt_ajax === 'undefined' || !mt_ajax.ajax_url || !mt_ajax.nonce) {
                 // console.warn('mt_ajax not available for rankings refresh');
                 return;
             }
@@ -1054,7 +1054,7 @@
             const $container = $('#mt-rankings-container');
             
             $.ajax({
-                url: mt_ajax.url,
+                url: mt_ajax.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'mt_get_jury_rankings',
@@ -1174,7 +1174,7 @@
             };
 
             $.ajax({
-                url: (typeof mt_ajax !== 'undefined' && mt_ajax.url) ? mt_ajax.url : '',
+                url: (typeof mt_ajax !== 'undefined' && mt_ajax.ajax_url) ? mt_ajax.ajax_url : '',
                 type: 'POST',
                 data: ajaxData,
                 dataType: 'json',
