@@ -123,7 +123,7 @@ Whenever relevant update these files in `/doc/`:
 - **general_index.md**: Update if files added/modified
 - **mt-developer-guide.md**: Update implementation details
 - Create specific guides for new features
-- Suggest a commit title and description in the terminal
+- Suggest a commit title and description do not commit yourself
 
 ### Important Documentation Files
 - **Main Plugin**: `mobility-trailblazers.php`

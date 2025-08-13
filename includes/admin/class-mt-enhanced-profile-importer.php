@@ -21,6 +21,69 @@ if (!defined('ABSPATH')) {
 class MT_Enhanced_Profile_Importer {
     
     /**
+     * Get field mapping for CSV columns to WordPress fields
+     *
+     * @return array Field mapping
+     */
+    public static function get_field_mapping() {
+        return [
+            'ID' => '_mt_candidate_id',
+            'Name' => 'post_title',
+            'Organisation' => '_mt_organization',
+            'Position' => '_mt_position',
+            'LinkedIn-Link' => '_mt_linkedin_url',
+            'Webseite' => '_mt_website_url',
+            'Article about coming of age' => '_mt_article_url',
+            'Description' => '_mt_description_full',
+            'Category' => '_mt_category_type',
+            'Status' => '_mt_top_50_status'
+        ];
+    }
+    
+    /**
+     * Parse evaluation criteria from German description text
+     *
+     * @param string $description Description text containing evaluation criteria
+     * @return array Parsed criteria with scores
+     */
+    public static function parse_evaluation_criteria($description) {
+        $criteria = [
+            '_mt_evaluation_courage' => '',
+            '_mt_evaluation_innovation' => '',
+            '_mt_evaluation_implementation' => '',
+            '_mt_evaluation_relevance' => '',
+            '_mt_evaluation_visibility' => '',
+            '_mt_evaluation_personality' => ''
+        ];
+        
+        if (empty($description)) {
+            return $criteria;
+        }
+        
+        // Define patterns for each criterion (German text)
+        $patterns = [
+            '_mt_evaluation_courage' => '/Mut\s*&\s*Pioniergeist:\s*(.+?)(?=(?:Innovationsgrad:|Umsetzungskraft|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
+            '_mt_evaluation_innovation' => '/Innovationsgrad:\s*(.+?)(?=(?:Mut\s*&|Umsetzungskraft|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
+            '_mt_evaluation_implementation' => '/Umsetzungskraft\s*&\s*Wirkung:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
+            '_mt_evaluation_relevance' => '/Relevanz\s*für\s*die\s*Mobilitätswende:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Vorbildfunktion|Persönlichkeit|$))/isu',
+            '_mt_evaluation_visibility' => '/Vorbildfunktion\s*&\s*Sichtbarkeit:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Relevanz|Persönlichkeit|$))/isu',
+            '_mt_evaluation_personality' => '/Persönlichkeit\s*&\s*Motivation:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Relevanz|Vorbildfunktion|$))/isu'
+        ];
+        
+        // Extract text for each criterion
+        foreach ($patterns as $field => $pattern) {
+            if (preg_match($pattern, $description, $matches)) {
+                $criteria[$field] = trim($matches[1]);
+                // Clean up the extracted text
+                $criteria[$field] = preg_replace('/\s+/', ' ', $criteria[$field]);
+                $criteria[$field] = trim($criteria[$field], " \t\n\r\0\x0B.,;:");
+            }
+        }
+        
+        return $criteria;
+    }
+    
+    /**
      * Process CSV import with enhanced features
      *
      * @param string $file_path Path to uploaded CSV file
@@ -198,8 +261,8 @@ class MT_Enhanced_Profile_Importer {
             // Map data to fields
             $candidate_data = self::map_row_data($data, $field_map);
             
-            // Skip if no name
-            if (empty($candidate_data['name'])) {
+            // Skip if no name (check for post_title)
+            if (empty($candidate_data['post_title'])) {
                 continue;
             }
             
@@ -313,41 +376,29 @@ class MT_Enhanced_Profile_Importer {
     }
     
     /**
-     * Enhanced CSV header mapping for specific format
+     * Enhanced CSV header mapping using exact field mapping
      *
      * @param array $headers CSV headers
      * @return array Field mapping
      */
     private static function map_csv_headers($headers) {
         $mapping = [];
+        $field_mapping = self::get_field_mapping();
         
-        // Define comprehensive header variations for the specific format:
-        // ID, Name, Organisation, Position, LinkedIn-Link, Webseite, Article about coming of age, Description, Category, Status
-        $field_variations = [
-            'id' => ['id', 'candidate_id', 'nummer'],
-            'name' => ['name', 'candidate name', 'full name', 'display name', 'kandidat', 'name des kandidaten'],
-            'organization' => ['organisation', 'organization', 'company', 'firma', 'unternehmen'],
-            'position' => ['position', 'title', 'job title', 'rolle', 'funktion'],
-            'linkedin' => ['linkedin-link', 'linkedin', 'linkedin url', 'linkedin profile'],
-            'website' => ['webseite', 'website', 'website url', 'web', 'homepage'],
-            'article' => ['article about coming of age', 'article', 'artikel', 'coming of age'],
-            'description' => ['description', 'beschreibung', 'bio', 'biography', 'profil'],
-            'category' => ['category', 'kategorie', 'award category'],
-            'status' => ['status', 'top 50', 'top50', 'finalist', 'shortlist'],
-            'email' => ['email', 'e-mail', 'email address', 'mail'],
-            'nominator' => ['nominator', 'nominiert von', 'nominated by'],
-            'notes' => ['notes', 'erste notizen/nachricht', 'erste notizen', 'nachricht', 'bemerkungen'],
-            'photo' => ['photo', 'foto', 'bild', 'image']
-        
-        // Map headers
+        // Map headers directly to their indices
         foreach ($headers as $index => $header) {
-            $header_lower = strtolower(trim($header));
+            $header_trimmed = trim($header);
             
-            foreach ($field_variations as $field => $variations) {
-                foreach ($variations as $variation) {
-                    if (strpos($header_lower, $variation) !== false || $header_lower === $variation) {
-                        $mapping[$field] = $index;
-                        break 2;
+            // Check for exact match with our field mapping
+            if (isset($field_mapping[$header_trimmed])) {
+                // Store the index for this header
+                $mapping[$header_trimmed] = $index;
+            } else {
+                // Also check lowercase version for flexibility
+                foreach ($field_mapping as $expected_header => $meta_key) {
+                    if (strcasecmp($header_trimmed, $expected_header) === 0) {
+                        $mapping[$expected_header] = $index;
+                        break;
                     }
                 }
             }
@@ -360,51 +411,53 @@ class MT_Enhanced_Profile_Importer {
      * Map row data using field mapping with proper encoding
      *
      * @param array $data Row data
-     * @param array $field_map Field mapping
+     * @param array $header_map Header to index mapping
      * @return array Mapped data
      */
-    private static function map_row_data($data, $field_map) {
+    private static function map_row_data($data, $header_map) {
         $mapped = [];
+        $field_mapping = self::get_field_mapping();
         
-        foreach ($field_map as $field => $index) {
-            if (isset($data[$index])) {
-                // Handle German special characters properly
-                $value = trim($data[$index]);
+        // Process each field from our mapping
+        foreach ($field_mapping as $csv_header => $meta_key) {
+            if (isset($header_map[$csv_header]) && isset($data[$header_map[$csv_header]])) {
+                $value = trim($data[$header_map[$csv_header]]);
                 
                 // Ensure UTF-8 encoding for German characters (ä, ö, ü, ß)
                 if (!mb_check_encoding($value, 'UTF-8')) {
                     $value = mb_convert_encoding($value, 'UTF-8', 'auto');
                 }
                 
-                // Clean specific fields
-                switch ($field) {
-                    case 'linkedin':
-                    case 'website':
-                    case 'article':
+                // Clean specific fields based on meta key
+                switch ($meta_key) {
+                    case '_mt_linkedin_url':
+                    case '_mt_website_url':
+                    case '_mt_article_url':
                         // Validate and clean URLs
                         $value = self::validate_and_clean_url($value);
                         break;
-                    case 'email':
-                        $value = sanitize_email($value);
-                        break;
-                    case 'status':
+                    case '_mt_top_50_status':
                         // Handle Status field for Top 50
                         $value = in_array(strtolower($value), ['ja', 'yes', '1', 'true', 'top 50', 'top50']) ? 'yes' : 'no';
                         break;
-                    case 'category':
+                    case '_mt_category_type':
                         // Map category types
                         $value = self::map_category_type($value);
                         break;
-                    case 'description':
+                    case '_mt_description_full':
                         // Preserve line breaks and German characters in description
                         $value = wp_kses_post($value);
+                        break;
+                    case 'post_title':
+                        // Just sanitize the title
+                        $value = sanitize_text_field($value);
                         break;
                     default:
                         // Preserve German characters while sanitizing
                         $value = sanitize_text_field($value);
                 }
                 
-                $mapped[$field] = $value;
+                $mapped[$meta_key] = $value;
             }
         }
         
@@ -460,14 +513,14 @@ class MT_Enhanced_Profile_Importer {
     /**
      * Validate candidate data without importing
      *
-     * @param array $data Candidate data
+     * @param array $data Candidate data with meta keys
      * @param int $row_number Row number for error reporting
      * @param array $options Import options
      * @return array Result with success status and message
      */
     private static function validate_candidate($data, $row_number, $options) {
-        // Check required fields
-        if (empty($data['name'])) {
+        // Check required fields (post_title is the name)
+        if (empty($data['post_title'])) {
             return [
                 'success' => false,
                 'message' => __('Name is required', 'mobility-trailblazers')
@@ -476,17 +529,27 @@ class MT_Enhanced_Profile_Importer {
         
         // Validate URLs if option is set
         if ($options['validate_urls']) {
-            if (!empty($data['linkedin']) && !filter_var($data['linkedin'], FILTER_VALIDATE_URL)) {
+            // Check LinkedIn URL
+            if (!empty($data['_mt_linkedin_url']) && !filter_var($data['_mt_linkedin_url'], FILTER_VALIDATE_URL)) {
                 return [
                     'success' => false,
                     'message' => __('Invalid LinkedIn URL', 'mobility-trailblazers')
                 ];
             }
             
-            if (!empty($data['website']) && !filter_var($data['website'], FILTER_VALIDATE_URL)) {
+            // Check Website URL
+            if (!empty($data['_mt_website_url']) && !filter_var($data['_mt_website_url'], FILTER_VALIDATE_URL)) {
                 return [
                     'success' => false,
                     'message' => __('Invalid website URL', 'mobility-trailblazers')
+                ];
+            }
+            
+            // Check Article URL
+            if (!empty($data['_mt_article_url']) && !filter_var($data['_mt_article_url'], FILTER_VALIDATE_URL)) {
+                return [
+                    'success' => false,
+                    'message' => __('Invalid article URL', 'mobility-trailblazers')
                 ];
             }
         }
@@ -494,7 +557,7 @@ class MT_Enhanced_Profile_Importer {
         // Check if exists (using WP_Query for better compatibility)
         $existing_query = new \WP_Query([
             'post_type' => 'mt_candidate',
-            'title' => $data['name'],
+            'title' => $data['post_title'],
             'posts_per_page' => 1,
             'post_status' => 'any'
         ]);
@@ -518,22 +581,26 @@ class MT_Enhanced_Profile_Importer {
     /**
      * Import single candidate with enhanced features
      *
-     * @param array $data Candidate data
+     * @param array $data Candidate data with meta keys
      * @param int $row_number Row number for error reporting
      * @param array $options Import options
      * @return array Result with success status and message
      */
     private static function import_candidate($data, $row_number, $options) {
-        // Validate first
-        $validation = self::validate_candidate($data, $row_number, $options);
-        if (!$validation['success']) {
-            return $validation;
+        // Get the name from post_title field
+        $name = isset($data['post_title']) ? $data['post_title'] : '';
+        
+        if (empty($name)) {
+            return [
+                'success' => false,
+                'message' => __('Name is required', 'mobility-trailblazers')
+            ];
         }
         
         // Check if candidate exists (using WP_Query for better compatibility)
         $existing_query = new \WP_Query([
             'post_type' => 'mt_candidate',
-            'title' => $data['name'],
+            'title' => $name,
             'posts_per_page' => 1,
             'post_status' => 'any'
         ]);
@@ -553,20 +620,20 @@ class MT_Enhanced_Profile_Importer {
             $post_id = $existing->ID;
             $action = 'updated';
             
-            // Update post content if provided
-            if (!empty($data['description'])) {
+            // Update post title if changed
+            if ($existing->post_title !== $name) {
                 wp_update_post([
                     'ID' => $post_id,
-                    'post_content' => $data['description']
+                    'post_title' => $name
                 ]);
             }
         } else {
             // Create new candidate
             $post_data = [
-                'post_title' => $data['name'],
+                'post_title' => $name,
                 'post_type' => 'mt_candidate',
                 'post_status' => 'publish',
-                'post_content' => $data['description'] ?? ''
+                'post_content' => '' // We'll store description as meta
             ];
             
             $post_id = wp_insert_post($post_data);
@@ -581,56 +648,29 @@ class MT_Enhanced_Profile_Importer {
             $action = 'created';
         }
         
-        // Update meta fields with correct mapping
-        $meta_fields = [
-            'id' => '_mt_candidate_id',
-            'organization' => '_mt_organization',
-            'position' => '_mt_position',
-            'linkedin' => '_mt_linkedin_url',
-            'website' => '_mt_website_url',
-            'article' => '_mt_article_url',
-            'description' => '_mt_description_full',
-            'category' => '_mt_category_type',
-            'status' => '_mt_top_50_status',
-            'email' => '_mt_email',
-            'nominator' => '_mt_nominator',
-            'notes' => '_mt_notes'
+        // Parse evaluation criteria from description if present
+        $evaluation_criteria = [];
+        if (!empty($data['_mt_description_full'])) {
+            $evaluation_criteria = self::parse_evaluation_criteria($data['_mt_description_full']);
+        }
         
-        foreach ($meta_fields as $field => $meta_key) {
-            if (isset($data[$field]) && (!$options['skip_empty_fields'] || !empty($data[$field]))) {
-                update_post_meta($post_id, $meta_key, $data[$field]);
+        // Update all meta fields directly from the mapped data
+        foreach ($data as $meta_key => $value) {
+            // Skip post_title as it's not a meta field
+            if ($meta_key === 'post_title') {
+                continue;
+            }
+            
+            // Only update if value is not empty or if we're not skipping empty fields
+            if (!$options['skip_empty_fields'] || !empty($value)) {
+                update_post_meta($post_id, $meta_key, $value);
             }
         }
         
-        // Handle category taxonomy
-        if (!empty($data['category'])) {
-            $categories = array_map('trim', explode(',', $data['category']));
-            $term_ids = [];
-            
-            foreach ($categories as $category_name) {
-                $term = term_exists($category_name, 'mt_award_category');
-                if (!$term) {
-                    $term = wp_insert_term($category_name, 'mt_award_category');
-                }
-                if ($term && !is_wp_error($term)) {
-                    $term_ids[] = is_array($term) ? $term['term_id'] : $term;
-                }
-            }
-            
-            if (!empty($term_ids)) {
-                wp_set_post_terms($post_id, $term_ids, 'mt_award_category');
-            }
-        }
-        
-        // Handle photo import if enabled
-        if ($options['import_photos'] && !empty($data['photo'])) {
-            // If photo field contains 'Ja' or 'Yes', look for image file
-            if (in_array(strtolower($data['photo']), ['ja', 'yes'])) {
-                // Try to find and attach photo based on candidate name
-                self::attach_candidate_photo($post_id, $data['name']);
-            } elseif (filter_var($data['photo'], FILTER_VALIDATE_URL)) {
-                // If it's a URL, download and attach
-                self::import_photo_from_url($post_id, $data['photo']);
+        // Save evaluation criteria if parsed
+        foreach ($evaluation_criteria as $criterion_key => $criterion_value) {
+            if (!empty($criterion_value)) {
+                update_post_meta($post_id, $criterion_key, $criterion_value);
             }
         }
         
@@ -639,7 +679,7 @@ class MT_Enhanced_Profile_Importer {
             'action' => $action,
             'message' => sprintf(
                 __('Candidate "%s" %s successfully', 'mobility-trailblazers'),
-                $data['name'],
+                $name,
                 $action
             ),
             'post_id' => $post_id
