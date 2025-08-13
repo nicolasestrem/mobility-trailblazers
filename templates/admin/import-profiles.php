@@ -81,21 +81,69 @@ if (isset($_GET['action']) && $_GET['action'] === 'download_template') {
         wp_die(__('Security check failed.', 'mobility-trailblazers'));
     }
     
-    // Generate template - this functionality needs to be implemented in MT_Import_Handler
-    // For now, redirect to the standard template download
-    wp_redirect(admin_url('admin-post.php?action=mt_download_template&type=candidates'));
-    exit;
-    
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="mobility-trailblazers-import-template.csv"');
-    echo $csv_content;
+    // Generate template - redirect to the standard template download
+    wp_redirect(admin_url('admin-post.php?action=mt_download_template&type=candidates&_wpnonce=' . wp_create_nonce('mt_download_template')));
     exit;
 }
 
 // Get import statistics
-// Note: Statistics functionality needs to be implemented in MT_Import_Handler
+// Note: Full statistics functionality needs to be implemented in MT_Import_Handler
+$candidate_posts = wp_count_posts('mt_candidate');
+$total_candidates = $candidate_posts->publish + $candidate_posts->draft;
+
+// Count candidates with specific attributes
+$with_photos = 0;
+$with_linkedin = 0;
+$with_website = 0;
+$top50 = 0;
+$by_category = [];
+
+// Query candidates for statistics
+$candidates = get_posts([
+    'post_type' => 'mt_candidate',
+    'posts_per_page' => -1,
+    'post_status' => ['publish', 'draft']
+]);
+
+foreach ($candidates as $candidate) {
+    // Check for photo
+    if (has_post_thumbnail($candidate->ID)) {
+        $with_photos++;
+    }
+    
+    // Check for LinkedIn
+    if (get_post_meta($candidate->ID, '_mt_linkedin_url', true)) {
+        $with_linkedin++;
+    }
+    
+    // Check for website
+    if (get_post_meta($candidate->ID, '_mt_website_url', true)) {
+        $with_website++;
+    }
+    
+    // Check for Top 50
+    $status = get_post_meta($candidate->ID, '_mt_top_50_status', true);
+    if ($status === 'yes' || $status === 'Yes' || $status === '1') {
+        $top50++;
+    }
+    
+    // Count by category
+    $category = get_post_meta($candidate->ID, '_mt_category_type', true);
+    if ($category) {
+        if (!isset($by_category[$category])) {
+            $by_category[$category] = 0;
+        }
+        $by_category[$category]++;
+    }
+}
+
 $stats = [
-    'total_candidates' => wp_count_posts('mt_candidate')->publish,
+    'total_candidates' => $total_candidates,
+    'with_photos' => $with_photos,
+    'with_linkedin' => $with_linkedin,
+    'with_website' => $with_website,
+    'top50' => $top50,
+    'by_category' => $by_category,
     'last_import' => get_option('mt_last_import_date', 'N/A'),
     'last_import_count' => get_option('mt_last_import_count', 0)
 ];

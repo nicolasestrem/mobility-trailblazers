@@ -394,7 +394,7 @@ class MT_Import_Handler {
                 
                 // Parse and save evaluation criteria if present
                 if (!empty($mapped_data['description'])) {
-                    $this->parse_evaluation_criteria($post_id, $mapped_data['description']);
+                    $this->save_evaluation_criteria($post_id, $mapped_data['description']);
                 }
                 
             } catch (\Exception $e) {
@@ -579,13 +579,13 @@ class MT_Import_Handler {
     }
     
     /**
-     * Parse evaluation criteria from description
+     * Save evaluation criteria to post meta
      *
      * @param int $post_id Candidate post ID
      * @param string $description Description containing criteria
      * @return void
      */
-    private function parse_evaluation_criteria($post_id, $description) {
+    private function save_evaluation_criteria($post_id, $description) {
         // Parse evaluation criteria from description
         $criteria = self::parse_evaluation_criteria($description);
         
