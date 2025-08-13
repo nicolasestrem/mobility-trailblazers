@@ -237,4 +237,47 @@ For issues or questions:
 
 ---
 
-*Last Updated: Version 2.2.15*
+## Version 2.2.24 Update
+
+### New AJAX Import System
+Version 2.2.24 introduces a comprehensive AJAX-based import system with real-time progress tracking:
+
+#### Features
+- **Progress Modal**: Visual progress bar with percentage completion
+- **Real-time Updates**: Live status messages during import
+- **Error Details**: Row-by-row error reporting
+- **Batch Processing**: Automatic handling of large files
+- **File Validation**: Pre-upload validation for size and type
+
+#### Using the AJAX Import
+1. Navigate to **Mobility Trailblazers → Import/Export**
+2. Click **Import via AJAX** button
+3. Select file and import type
+4. Watch real-time progress
+5. Review detailed results
+
+### Jury Members Import
+New support for importing jury members via CSV:
+
+**Required Headers:**
+```csv
+name,title,organization,email,role
+```
+
+**Features:**
+- Automatic WordPress user creation
+- Role assignment (mt_jury_member)
+- Email validation and duplicate checking
+- Update existing members option
+
+### WP-CLI Support
+Version 2.2.24 adds WP-CLI command support for server-side imports:
+
+```bash
+# Import with WP-CLI
+wp eval "\$handler = new \\MobilityTrailblazers\\Admin\\MT_Import_Handler(); \$result = \$handler->process_csv_import('/path/to/file.csv', 'candidates', false); print_r(\$result);"
+```
+
+---
+
+*Last Updated: Version 2.2.24*

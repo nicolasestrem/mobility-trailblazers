@@ -2,6 +2,62 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.24] - 2025-08-13
+
+### Added
+- **Complete AJAX CSV Import System**: Implemented comprehensive CSV import with real-time progress tracking
+  - Created `MT_CSV_Import_Ajax` class with full security and validation
+  - JavaScript module with progress modal and file validation
+  - CSS for professional import UI with animated progress bars
+  - Support for both standard form submission and AJAX imports
+
+- **Import Handler Class**: Created `MT_Import_Handler` for centralized CSV processing
+  - Handles both jury members and candidates imports
+  - UTF-8 BOM detection and removal for Excel compatibility
+  - Field mapping with support for German headers
+  - Comprehensive error tracking with row-specific details
+
+- **CSV Templates with German Support**: Updated templates with proper formatting
+  - Candidates template with exact headers: ID, Name, Organisation, Position, LinkedIn-Link, Webseite, Article about coming of age, Description, Category, Status
+  - Jury members template with standard fields
+  - UTF-8 BOM included for Excel compatibility
+
+### Enhanced
+- **Import/Export Page**: Complete overhaul of import functionality
+  - Fixed template download links to serve actual CSV files
+  - Added fallback template generation if files not found
+  - Dual import methods: standard form and AJAX with progress
+  - Help text with exact CSV format requirements
+
+- **Script Enqueuing**: Proper JavaScript and CSS loading
+  - CSV import scripts loaded only on import/export page
+  - Localized strings for all UI messages
+  - Progress tracking and error reporting
+
+### Fixed
+- **Template Download Issues**: Resolved file naming mismatches
+  - Fixed jury-members.csv vs jury_members.csv conflicts
+  - Added multiple fallback methods for template serving
+  - Dynamic template generation if files missing
+
+- **Import Errors**: Comprehensive error handling
+  - Better error messages with specific details
+  - Row-by-row error tracking
+  - Support for various CSV encodings
+
+### Technical Details
+- **New Files Created**:
+  - `includes/ajax/class-mt-csv-import-ajax.php` - AJAX handler
+  - `includes/admin/class-mt-import-handler.php` - Import processor
+  - `assets/js/csv-import.js` - JavaScript module
+  - `assets/css/csv-import.css` - Import UI styles
+
+- **Files Modified**:
+  - `includes/core/class-mt-plugin.php` - Added AJAX handler initialization
+  - `includes/admin/class-mt-import-export.php` - Enhanced with new field mappings
+  - `data/templates/candidates.csv` - Updated with correct headers
+  - `data/templates/jury-members.csv` - Standardized format
+
 ## [2.2.23] - 2025-08-13
 
 ### Added

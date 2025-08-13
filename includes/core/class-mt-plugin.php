@@ -130,6 +130,9 @@ class MT_Plugin {
         // Import AJAX (handles candidate CSV imports)
         // The file self-initializes when loaded, creating an instance at the bottom
         require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-import-ajax.php';
+        
+        // CSV Import AJAX (comprehensive CSV import handler)
+        require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-csv-import-ajax.php';
     }
     
     /**
@@ -274,6 +277,54 @@ class MT_Plugin {
             MT_VERSION,
             true
         );
+        
+        // CSV Import script (on import/export page)
+        if (isset($_GET['page']) && $_GET['page'] === 'mt-import-export') {
+            // Enqueue CSV import styles
+            wp_enqueue_style(
+                'mt-csv-import',
+                MT_PLUGIN_URL . 'assets/css/csv-import.css',
+                ['mt-admin'],
+                MT_VERSION
+            );
+            
+            // Enqueue CSV import script
+            wp_enqueue_script(
+                'mt-csv-import',
+                MT_PLUGIN_URL . 'assets/js/csv-import.js',
+                ['jquery'],
+                MT_VERSION,
+                true
+            );
+            
+            // Localize script
+            wp_localize_script('mt-csv-import', 'mt_csv_import', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_ajax_nonce'),
+                'i18n' => [
+                    'importing' => __('Importing Data', 'mobility-trailblazers'),
+                    'please_wait' => __('Please wait while we process your file...', 'mobility-trailblazers'),
+                    'uploading_file' => __('Uploading file...', 'mobility-trailblazers'),
+                    'processing' => __('Processing CSV data...', 'mobility-trailblazers'),
+                    'import_complete' => __('Import completed successfully!', 'mobility-trailblazers'),
+                    'import_failed' => __('Import failed. Please check the error messages.', 'mobility-trailblazers'),
+                    'import_error' => __('An error occurred during import', 'mobility-trailblazers'),
+                    'ajax_import' => __('Import via AJAX', 'mobility-trailblazers'),
+                    'no_file_selected' => __('Please select a CSV file to import.', 'mobility-trailblazers'),
+                    'no_type_selected' => __('Please select an import type.', 'mobility-trailblazers'),
+                    'invalid_file_type' => __('Invalid file type. Please select a CSV file.', 'mobility-trailblazers'),
+                    'file_too_large' => __('File is too large. Maximum size is 10MB.', 'mobility-trailblazers'),
+                    'file_selected' => __('File selected: %s', 'mobility-trailblazers'),
+                    'created' => __('created', 'mobility-trailblazers'),
+                    'updated' => __('updated', 'mobility-trailblazers'),
+                    'skipped' => __('skipped', 'mobility-trailblazers'),
+                    'errors' => __('errors', 'mobility-trailblazers'),
+                    'error_details' => __('Error Details:', 'mobility-trailblazers'),
+                    'candidates_help' => __('<strong>Candidates CSV Format:</strong> ID, Name, Organisation, Position, LinkedIn-Link, Webseite, Article about coming of age, Description, Category, Status', 'mobility-trailblazers'),
+                    'jury_help' => __('<strong>Jury Members CSV Format:</strong> name, title, organization, email, role', 'mobility-trailblazers')
+                ]
+            ]);
+        }
         
         // Candidate import script (only on candidates page)
         $screen = get_current_screen();

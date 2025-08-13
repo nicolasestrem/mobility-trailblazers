@@ -25,6 +25,7 @@
 - **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation (v2.2.15 - German character support, URL validation)
 - **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.15)
 - **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.23)
+- **admin/class-mt-import-handler.php** - Centralized CSV processing for all import types (v2.2.24)
 
 ### AJAX Handlers (v2.2.13 - Standardized error handling)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
@@ -32,6 +33,7 @@
 - **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
 - **ajax/class-mt-import-ajax.php** - CSV import AJAX handler with file validation and security (v2.2.16)
+- **ajax/class-mt-csv-import-ajax.php** - Comprehensive CSV import with progress tracking (v2.2.24)
 
 ### Business Logic Services
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation
@@ -81,6 +83,7 @@
 - **css/admin.css** - Admin interface styling with brand colors
 - **css/frontend.css** - Public-facing interface styles
 - **css/jury-dashboard.css** - Specific styling for jury evaluation interface
+- **css/csv-import.css** - Progress modal and import UI styles (v2.2.24)
 
 ### JavaScript
 - **js/admin.js** - Admin functionality including bulk operations and AJAX
@@ -88,6 +91,7 @@
 - **js/jury-evaluation.js** - Evaluation form validation and submission
 - **js/charts.js** - Data visualization for statistics and progress
 - **js/candidate-import.js** - AJAX-based CSV import with file picker dialog (v2.2.16)
+- **js/csv-import.js** - Complete CSV import module with progress tracking (v2.2.24)
 
 ### Images
 - **images/logo.png** - Platform logo and branding assets
@@ -95,6 +99,13 @@
 
 ### Data Files
 - **sample-candidates.csv** - Example CSV file for candidate import (v2.2.15 - German format)
+
+## 📁 /data/ - Data Templates and Files (v2.2.24)
+
+### CSV Templates
+- **templates/candidates.csv** - Template for candidate imports with German headers
+- **templates/jury-members.csv** - Template for jury member imports
+- **templates/jury_members.csv** - Alternative naming for compatibility
 
 ## 📁 /languages/ - Internationalization
 
@@ -221,5 +232,17 @@ The platform follows a **Repository-Service-Controller** pattern:
 - **Sortable Lists** - All custom columns support sorting
 - **Export Enhancement** - Full UTF-8 support with BOM for Excel
 
+## 📊 Recent Updates (v2.2.24)
+
+### Complete CSV Import System
+- **AJAX Import Handler** - Real-time progress tracking with visual feedback
+- **Import Handler Class** - Centralized CSV processing for all import types
+- **Progress Modal UI** - Professional import interface with animated progress bars
+- **Dual Import Methods** - Standard form and AJAX-based imports
+- **Template System** - CSV templates with UTF-8 BOM for Excel compatibility
+- **Jury Member Import** - Full support for importing jury members with user creation
+- **Error Handling** - Row-by-row error reporting with detailed messages
+- **File Validation** - Pre-upload validation for size, type, and format
+
 ---
-*Last Updated: August 2025 | Version 2.2.16*
+*Last Updated: August 2025 | Version 2.2.24*

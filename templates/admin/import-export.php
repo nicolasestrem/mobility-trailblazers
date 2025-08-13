@@ -13,17 +13,29 @@ if (!defined('ABSPATH')) {
 
 // Get any messages from the URL
 $import_message = '';
+$message_type = 'success';
 if (isset($_GET['message'])) {
     switch ($_GET['message']) {
         case 'import_success':
             $count = isset($_GET['count']) ? intval($_GET['count']) : 0;
             $import_message = sprintf(__('Successfully imported %d records.', 'mobility-trailblazers'), $count);
+            $message_type = 'success';
             break;
         case 'export_started':
             $import_message = __('Export started. Download should begin automatically.', 'mobility-trailblazers');
+            $message_type = 'success';
             break;
         case 'import_error':
-            $import_message = __('Error during import. Please check the file format.', 'mobility-trailblazers');
+            $import_message = __('Error during import. Please check the file format and ensure you have selected a file.', 'mobility-trailblazers');
+            $message_type = 'error';
+            break;
+        case 'no_file':
+            $import_message = __('No file was selected. Please choose a CSV file to import.', 'mobility-trailblazers');
+            $message_type = 'error';
+            break;
+        case 'invalid_type':
+            $import_message = __('Please select an import type (Candidates or Jury Members).', 'mobility-trailblazers');
+            $message_type = 'error';
             break;
     }
 }
@@ -33,7 +45,7 @@ if (isset($_GET['message'])) {
     <h1><?php _e('Import/Export', 'mobility-trailblazers'); ?></h1>
     
     <?php if ($import_message): ?>
-        <div class="notice notice-success is-dismissible">
+        <div class="notice notice-<?php echo $message_type; ?> is-dismissible">
             <p><?php echo esc_html($import_message); ?></p>
         </div>
     <?php endif; ?>
@@ -121,14 +133,32 @@ if (isset($_GET['message'])) {
                 
                 <ul>
                     <li>
-                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_download_template&type=candidates'), 'mt_download_template'); ?>">
+                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_download_template&type=candidates'), 'mt_download_template'); ?>" 
+                           class="button button-secondary">
+                            <span class="dashicons dashicons-download"></span>
                             <?php _e('Candidates Template', 'mobility-trailblazers'); ?>
                         </a>
+                        <?php if (file_exists(MT_PLUGIN_DIR . 'data/templates/candidates.csv')): ?>
+                            <small>
+                                (<a href="<?php echo MT_PLUGIN_URL . 'data/templates/candidates.csv'; ?>" download="candidates-template.csv">
+                                    <?php _e('Direct download', 'mobility-trailblazers'); ?>
+                                </a>)
+                            </small>
+                        <?php endif; ?>
                     </li>
                     <li>
-                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_download_template&type=jury_members'), 'mt_download_template'); ?>">
+                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_download_template&type=jury_members'), 'mt_download_template'); ?>" 
+                           class="button button-secondary">
+                            <span class="dashicons dashicons-download"></span>
                             <?php _e('Jury Members Template', 'mobility-trailblazers'); ?>
                         </a>
+                        <?php if (file_exists(MT_PLUGIN_DIR . 'data/templates/jury_members.csv')): ?>
+                            <small>
+                                (<a href="<?php echo MT_PLUGIN_URL . 'data/templates/jury_members.csv'; ?>" download="jury_members-template.csv">
+                                    <?php _e('Direct download', 'mobility-trailblazers'); ?>
+                                </a>)
+                            </small>
+                        <?php endif; ?>
                     </li>
                 </ul>
             </div>
@@ -160,5 +190,42 @@ if (isset($_GET['message'])) {
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #ddd;
+}
+
+.mt-template-downloads ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
+
+.mt-template-downloads li {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mt-template-downloads .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mt-template-downloads .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.mt-template-downloads small {
+    color: #666;
+}
+
+.mt-template-downloads small a {
+    text-decoration: none;
+}
+
+.mt-template-downloads small a:hover {
+    text-decoration: underline;
 }
 </style>

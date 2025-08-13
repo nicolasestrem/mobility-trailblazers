@@ -53,9 +53,19 @@ class MT_Import_Export {
         
         // Check for file upload
         if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+            $error_message = 'import_error';
+            
+            // Add specific error details for debugging
+            if (isset($_FILES['csv_file']['error'])) {
+                MT_Logger::error('File upload error', [
+                    'error_code' => $_FILES['csv_file']['error'],
+                    'error_constant' => self::get_upload_error_constant($_FILES['csv_file']['error'])
+                ]);
+            }
+            
             wp_redirect(add_query_arg([
                 'page' => 'mt-import-export',
-                'message' => 'import_error'
+                'message' => $error_message
             ], admin_url('admin.php')));
             exit;
         }
@@ -143,6 +153,13 @@ class MT_Import_Export {
      * @return array Import results
      */
     private static function process_csv_import($file_path, $import_type, $update_existing = false) {
+        // Use the new import handler for better processing
+        if (class_exists('\MobilityTrailblazers\Admin\MT_Import_Handler')) {
+            $handler = new \MobilityTrailblazers\Admin\MT_Import_Handler();
+            return $handler->process_csv_import($file_path, $import_type, $update_existing);
+        }
+        
+        // Fallback to existing implementation if handler not available
         $result = [
             'success' => 0,
             'updated' => 0,
@@ -233,10 +250,30 @@ class MT_Import_Export {
      * @return array Import result
      */
     private static function import_candidate($data, $update_existing = false) {
+        // Map the German/specific headers to internal field names
+        $field_mapping = [
+            'ID' => 'id',
+            'Name' => 'name',
+            'Organisation' => 'organisation',
+            'Position' => 'position',
+            'LinkedIn-Link' => 'linkedin',
+            'Webseite' => 'website',
+            'Article about coming of age' => 'article',
+            'Description' => 'description',
+            'Category' => 'category',
+            'Status' => 'status'
+        ];
+        
+        // Remap the data array with standard keys
+        $mapped_data = [];
+        foreach ($field_mapping as $csv_key => $internal_key) {
+            $mapped_data[$internal_key] = isset($data[$csv_key]) ? $data[$csv_key] : '';
+        }
+        
         // Required fields
-        $required_fields = ['name', 'company', 'category'];
+        $required_fields = ['name', 'organisation', 'category'];
         foreach ($required_fields as $field) {
-            if (empty($data[$field])) {
+            if (empty($mapped_data[$field])) {
                 return [
                     'status' => 'error',
                     'error' => sprintf(__('Missing required field: %s', 'mobility-trailblazers'), $field)
@@ -245,30 +282,37 @@ class MT_Import_Export {
         }
         
         // Sanitize data
-        $name = sanitize_text_field($data['name']);
-        $company = sanitize_text_field($data['company']);
-        $category = sanitize_text_field($data['category']);
-        $description = isset($data['description']) ? wp_kses_post($data['description']) : '';
-        $innovation = isset($data['innovation']) ? wp_kses_post($data['innovation']) : '';
-        $website = isset($data['website']) ? esc_url_raw($data['website']) : '';
-        $linkedin = isset($data['linkedin']) ? esc_url_raw($data['linkedin']) : '';
-        $email = isset($data['email']) ? sanitize_email($data['email']) : '';
+        $import_id = isset($mapped_data['id']) ? sanitize_text_field($mapped_data['id']) : '';
+        $name = sanitize_text_field($mapped_data['name']);
+        $organisation = sanitize_text_field($mapped_data['organisation']);
+        $position = sanitize_text_field($mapped_data['position']);
+        $category = sanitize_text_field($mapped_data['category']);
+        $status = sanitize_text_field($mapped_data['status']);
+        $description = wp_kses_post($mapped_data['description']);
+        $website = esc_url_raw($mapped_data['website']);
+        $linkedin = esc_url_raw($mapped_data['linkedin']);
+        $article = esc_url_raw($mapped_data['article']);
         
-        // Check if candidate exists
+        // Check if candidate exists - using import ID or name
+        $meta_query = [];
+        if (!empty($import_id)) {
+            $meta_query[] = [
+                'key' => '_mt_candidate_id',
+                'value' => $import_id,
+                'compare' => '='
+            ];
+        }
+        $meta_query[] = [
+            'key' => '_mt_candidate_name',
+            'value' => $name,
+            'compare' => '='
+        ];
+        
         $existing_query = new \WP_Query([
             'post_type' => 'mt_candidate',
             'meta_query' => [
                 'relation' => 'OR',
-                [
-                    'key' => '_mt_email',
-                    'value' => $email,
-                    'compare' => '='
-                ],
-                [
-                    'key' => '_mt_candidate_name',
-                    'value' => $name,
-                    'compare' => '='
-                ]
+                $meta_query
             ],
             'posts_per_page' => 1
         ]);
@@ -289,10 +333,10 @@ class MT_Import_Export {
         if ($existing_query->have_posts() && $update_existing) {
             $post_data['ID'] = $existing_query->posts[0]->ID;
             $post_id = wp_update_post($post_data);
-            $status = 'updated';
+            $import_status = 'updated';
         } else {
             $post_id = wp_insert_post($post_data);
-            $status = 'created';
+            $import_status = 'created';
         }
         
         if (is_wp_error($post_id)) {
@@ -302,17 +346,29 @@ class MT_Import_Export {
             ];
         }
         
-        // Update meta fields
+        // Update meta fields with new mapping
+        update_post_meta($post_id, '_mt_candidate_id', $import_id);
         update_post_meta($post_id, '_mt_candidate_name', $name);
-        update_post_meta($post_id, '_mt_organization', $company);
+        update_post_meta($post_id, '_mt_organization', $organisation);
+        update_post_meta($post_id, '_mt_position', $position);
         update_post_meta($post_id, '_mt_category_type', $category);
+        update_post_meta($post_id, '_mt_top_50_status', $status);
         update_post_meta($post_id, '_mt_description_full', $description);
-        update_post_meta($post_id, '_mt_innovation', $innovation);
         update_post_meta($post_id, '_mt_website_url', $website);
         update_post_meta($post_id, '_mt_linkedin_url', $linkedin);
-        update_post_meta($post_id, '_mt_email', $email);
+        update_post_meta($post_id, '_mt_article_url', $article);
         
-        return ['status' => $status];
+        // Parse and save evaluation criteria if present in description
+        if (!empty($description) && class_exists('\MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer')) {
+            $criteria = \MobilityTrailblazers\Admin\MT_Enhanced_Profile_Importer::parse_evaluation_criteria($description);
+            foreach ($criteria as $key => $value) {
+                if (!empty($value)) {
+                    update_post_meta($post_id, $key, $value);
+                }
+            }
+        }
+        
+        return ['status' => $import_status];
     }
     
     /**
@@ -640,23 +696,140 @@ class MT_Import_Export {
         
         $type = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
         
+        // Validate type
+        if (!in_array($type, ['candidates', 'jury_members'])) {
+            wp_die(__('Invalid template type', 'mobility-trailblazers'));
+        }
+        
         // Check if template file exists
         $template_file = MT_PLUGIN_DIR . 'data/templates/' . $type . '.csv';
         
+        // Also check for hyphenated version as fallback
         if (!file_exists($template_file)) {
-            wp_die(__('Template file not found', 'mobility-trailblazers'));
+            $alt_file = MT_PLUGIN_DIR . 'data/templates/' . str_replace('_', '-', $type) . '.csv';
+            if (file_exists($alt_file)) {
+                $template_file = $alt_file;
+            } else {
+                // If template doesn't exist, generate it dynamically
+                self::generate_template($type);
+                return;
+            }
+        }
+        
+        // Clean any output buffer
+        while (ob_get_level()) {
+            ob_end_clean();
         }
         
         // Set headers for download
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename=' . $type . '-template.csv');
         header('Content-Length: ' . filesize($template_file));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
         header('Pragma: no-cache');
         header('Expires: 0');
         
         // Output file
         readfile($template_file);
         exit;
+    }
+    
+    /**
+     * Generate template dynamically if file doesn't exist
+     *
+     * @param string $type Template type
+     */
+    private static function generate_template($type) {
+        // Clean any output buffer
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        
+        // Set headers for download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $type . '-template.csv');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Add BOM for Excel UTF-8 compatibility
+        echo "\xEF\xBB\xBF";
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        if ($type === 'candidates') {
+            // Write headers matching the expected format
+            fputcsv($output, [
+                'ID',
+                'Name',
+                'Organisation',
+                'Position',
+                'LinkedIn-Link',
+                'Webseite',
+                'Article about coming of age',
+                'Description',
+                'Category',
+                'Status'
+            ]);
+            
+            // Write sample data
+            fputcsv($output, [
+                '1',
+                'Dr. Anna Schmidt',
+                'GreenMobility GmbH',
+                'CEO & Gründerin',
+                'https://linkedin.com/in/anna-schmidt',
+                'https://greenmobility.example.com',
+                'https://example.com/article-schmidt',
+                'Mut & Pioniergeist: Dr. Schmidt zeigt außergewöhnlichen Mut bei der Entwicklung von Wasserstoff-betriebenen Stadtbussen. Innovationsgrad: Ihre Zero-Emission-Busflotte mit 500km Reichweite setzt neue Maßstäbe.',
+                'Startup',
+                'Top 50: Yes'
+            ]);
+            
+        } elseif ($type === 'jury_members') {
+            // Write headers
+            fputcsv($output, [
+                'name',
+                'title',
+                'organization',
+                'email',
+                'role'
+            ]);
+            
+            // Write sample data
+            fputcsv($output, [
+                'Prof. Dr. Andreas Herrmann',
+                'President',
+                'Institut für Mobilität, University of St. Gallen',
+                'andreas.herrmann@example.com',
+                'jury_member'
+            ]);
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Get upload error constant name for debugging
+     *
+     * @param int $error_code PHP upload error code
+     * @return string Error constant name
+     */
+    private static function get_upload_error_constant($error_code) {
+        $errors = [
+            UPLOAD_ERR_OK => 'UPLOAD_ERR_OK',
+            UPLOAD_ERR_INI_SIZE => 'UPLOAD_ERR_INI_SIZE',
+            UPLOAD_ERR_FORM_SIZE => 'UPLOAD_ERR_FORM_SIZE',
+            UPLOAD_ERR_PARTIAL => 'UPLOAD_ERR_PARTIAL',
+            UPLOAD_ERR_NO_FILE => 'UPLOAD_ERR_NO_FILE',
+            UPLOAD_ERR_NO_TMP_DIR => 'UPLOAD_ERR_NO_TMP_DIR',
+            UPLOAD_ERR_CANT_WRITE => 'UPLOAD_ERR_CANT_WRITE',
+            UPLOAD_ERR_EXTENSION => 'UPLOAD_ERR_EXTENSION',
+        ];
+        
+        return isset($errors[$error_code]) ? $errors[$error_code] : 'UNKNOWN_ERROR';
     }
 }
 

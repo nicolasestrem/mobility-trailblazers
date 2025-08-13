@@ -328,6 +328,190 @@ All operations include:
 
 ### Customization Hooks
 
+## CSV Import System (v2.2.24)
+
+### Architecture Overview
+
+The CSV import system consists of three main components:
+
+1. **MT_Import_Handler** - Core CSV processing engine
+2. **MT_CSV_Import_Ajax** - AJAX handler with security and validation  
+3. **MTCSVImport** - JavaScript module with UI and progress tracking
+
+### Import Handler Class
+
+Located at `includes/admin/class-mt-import-handler.php`
+
+#### Key Methods
+
+```php
+// Main import method
+public function process_csv_import($file, $import_type, $update_existing = false)
+
+// Type-specific processors
+private function import_jury_members($data, $update_existing, &$results)
+private function import_candidates($data, $update_existing, &$results)
+
+// CSV parsing utilities
+private function parse_csv_file($file)
+private function detect_delimiter($sample)
+private function map_headers($headers)
+```
+
+#### Field Mapping
+
+The system supports flexible field mapping for German headers:
+
+```php
+// Candidates field mapping
+$field_mapping = [
+    'ID' => 'id',
+    'Name' => 'name',
+    'Organisation' => 'organisation',
+    'Position' => 'position',
+    'LinkedIn-Link' => 'linkedin',
+    'Webseite' => 'website',
+    'Article about coming of age' => 'article',
+    'Description' => 'description',
+    'Category' => 'category',
+    'Status' => 'status'
+];
+```
+
+### AJAX Handler
+
+Located at `includes/ajax/class-mt-csv-import-ajax.php`
+
+#### Security Features
+
+1. **Nonce Verification**: Uses `mt_ajax_nonce` for CSRF protection
+2. **Capability Checks**: Requires `manage_options` or `edit_posts`
+3. **File Validation**: 
+   - Type checking (CSV, TXT)
+   - Size limits (10MB max)
+   - MIME type validation
+4. **Input Sanitization**: All user inputs sanitized
+
+#### Progress Tracking
+
+Uses WordPress transients for progress updates:
+
+```php
+$progress_key = 'mt_import_progress_' . get_current_user_id();
+set_transient($progress_key, [
+    'status' => 'processing',
+    'message' => __('Processing CSV file...'),
+    'percentage' => 10
+], 300);
+```
+
+### JavaScript Module
+
+Located at `assets/js/csv-import.js`
+
+#### Features
+
+1. **Progress Modal**: Real-time visual feedback
+2. **File Validation**: Client-side pre-validation
+3. **AJAX Upload**: FormData API for file uploads
+4. **Error Display**: Row-specific error reporting
+
+#### Key Methods
+
+```javascript
+MTCSVImport = {
+    init: function() {},
+    handleAjaxImport: function(form) {},
+    startImport: function(formData) {},
+    validateFile: function(e) {},
+    showProgressModal: function() {},
+    updateProgress: function(percentage, message) {}
+}
+```
+
+### Import Process Flow
+
+1. **File Selection**: User selects CSV file
+2. **Client Validation**: JavaScript validates file type/size
+3. **AJAX Upload**: File sent via FormData
+4. **Server Validation**: PHP validates security and file
+5. **CSV Parsing**: BOM detection, delimiter detection
+6. **Data Processing**: Row-by-row import with validation
+7. **Progress Updates**: Real-time progress via transients
+8. **Result Display**: Success/error summary with details
+
+### UTF-8 and BOM Handling
+
+The system automatically handles UTF-8 encoding:
+
+```php
+// BOM detection and removal
+$bom = fread($handle, 3);
+if ($bom !== "\xEF\xBB\xBF") {
+    rewind($handle);
+}
+
+// Header cleaning
+$headers = array_map(function($header) {
+    return trim(str_replace("\xEF\xBB\xBF", '', $header));
+}, $headers);
+```
+
+### Error Handling
+
+Comprehensive error tracking:
+
+```php
+$results = [
+    'success' => 0,
+    'updated' => 0,
+    'skipped' => 0,
+    'errors' => 0,
+    'error_details' => [],
+    'messages' => []
+];
+
+// Row-specific errors
+$results['error_details'][] = [
+    'row' => $row_num,
+    'error' => 'Specific error message'
+];
+```
+
+### Template System
+
+CSV templates located in `data/templates/`:
+
+- `candidates.csv` - German headers with sample data
+- `jury-members.csv` - Standard jury member format
+- Fallback generation if files missing
+
+### Script Enqueuing
+
+Scripts loaded conditionally on import/export page:
+
+```php
+if (isset($_GET['page']) && $_GET['page'] === 'mt-import-export') {
+    wp_enqueue_style('mt-csv-import', ...);
+    wp_enqueue_script('mt-csv-import', ...);
+    wp_localize_script('mt-csv-import', 'mt_csv_import', [...]);
+}
+```
+
+### WP-CLI Integration
+
+Support for command-line imports:
+
+```bash
+wp eval "
+\$handler = new \\MobilityTrailblazers\\Admin\\MT_Import_Handler();
+\$result = \$handler->process_csv_import('/path/to/file.csv', 'candidates', false);
+print_r(\$result);
+"
+```
+
+### Customization Hooks
+
 While the current implementation doesn't include filters, you can extend functionality by:
 1. Subclassing `MT_Assignment_Ajax`
 2. Adding filters in your custom implementation
