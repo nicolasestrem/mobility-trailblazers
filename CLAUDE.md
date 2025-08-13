@@ -6,6 +6,7 @@ This is a WordPress plugin called "Mobility Trailblazers" that helps users track
 
 ## Code Standards
 - Follow WordPress coding standards
+- Follow /doc/developer-guide.md guide
 - Use proper PHP namespacing
 - Follow PSR-4 autoloading standards
 - Use proper WordPress hooks and filters
@@ -15,6 +16,7 @@ This is a WordPress plugin called "Mobility Trailblazers" that helps users track
 
 ## File Structure
 - Main plugin file: `mobility-trailblazers.php`
+- File summary in /doc/general_index.md
 - Classes in `includes/` directory
 - Templates in `templates/` directory
 - Assets in `assets/` directory
