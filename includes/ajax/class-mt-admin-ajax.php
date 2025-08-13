@@ -327,45 +327,72 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             wp_die(__('Permission denied', 'mobility-trailblazers'));
         }
         
-        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
-        $assignments = $assignment_repo->find_all();
+        // Set headers for CSV download
+        $filename = 'assignments-' . date('Y-m-d') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         
-        $csv_data = [];
-        $csv_data[] = [
+        // Add UTF-8 BOM for proper encoding in Excel
+        echo "\xEF\xBB\xBF";
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Write metadata comment
+        fputcsv($output, ['# Mobility Trailblazers v' . MT_VERSION . ' - Export Date: ' . date('Y-m-d H:i:s')]);
+        
+        // Write headers
+        fputcsv($output, [
             'Jury Member',
             'Candidate',
             'Assigned Date',
             'Evaluation Status'
-        ];
+        ]);
         
+        // Stream assignments in chunks to avoid memory issues
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         
-        foreach ($assignments as $assignment) {
-            $jury_member = get_post($assignment->jury_member_id);
-            $candidate = get_post($assignment->candidate_id);
-            
-            // Check evaluation status
-            $evaluations = $evaluation_repo->find_all([
-                'jury_member_id' => $assignment->jury_member_id,
-                'candidate_id' => $assignment->candidate_id,
-                'limit' => 1
+        $offset = 0;
+        $limit = 100; // Process 100 assignments at a time
+        
+        do {
+            $assignments = $assignment_repo->find_all([
+                'limit' => $limit,
+                'offset' => $offset
             ]);
             
-            $status = 'Not Started';
-            if (!empty($evaluations)) {
-                $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+            foreach ($assignments as $assignment) {
+                $jury_member = get_post($assignment->jury_member_id);
+                $candidate = get_post($assignment->candidate_id);
+                
+                // Check evaluation status
+                $evaluations = $evaluation_repo->find_all([
+                    'jury_member_id' => $assignment->jury_member_id,
+                    'candidate_id' => $assignment->candidate_id,
+                    'limit' => 1
+                ]);
+                
+                $status = 'Not Started';
+                if (!empty($evaluations)) {
+                    $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+                }
+                
+                fputcsv($output, [
+                    $jury_member ? $jury_member->post_title : 'Unknown',
+                    $candidate ? $candidate->post_title : 'Unknown',
+                    $assignment->assigned_at,
+                    $status
+                ]);
             }
             
-            $csv_data[] = [
-                $jury_member ? $jury_member->post_title : 'Unknown',
-                $candidate ? $candidate->post_title : 'Unknown',
-                $assignment->assigned_at,
-                $status
-            ];
-        }
+            $offset += $limit;
+        } while (count($assignments) === $limit);
         
-        // Output CSV directly
-        $this->output_csv_download($csv_data, 'assignments-' . date('Y-m-d') . '.csv');
+        fclose($output);
+        exit;
     }
     
     /**

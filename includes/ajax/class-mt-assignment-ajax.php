@@ -43,7 +43,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         // Bulk operations
         add_action('wp_ajax_mt_bulk_remove_assignments', [$this, 'bulk_remove_assignments']);
         add_action('wp_ajax_mt_bulk_reassign_assignments', [$this, 'bulk_reassign_assignments']);
-        add_action('wp_ajax_mt_bulk_export_assignments', [$this, 'bulk_export_assignments']);
+        // Bulk export now handled by MT_Admin_Ajax::export_assignments
         
         // Add test handler
         add_action('wp_ajax_mt_test', [$this, 'test_handler']);

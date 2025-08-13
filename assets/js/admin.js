@@ -490,7 +490,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             form.append($('<input/>', {
                 type: 'hidden',
                 name: 'action',
-                value: 'mt_bulk_export_assignments'
+                value: 'mt_export_assignments'
             }));
             
             form.append($('<input/>', {

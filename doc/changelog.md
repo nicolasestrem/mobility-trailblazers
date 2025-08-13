@@ -2,6 +2,31 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.21] - 2025-08-13
+
+### Fixed
+- **Duplicate AJAX Actions**: Removed duplicate `mt_bulk_export_assignments` handler - now uses centralized Admin AJAX export
+- **Documentation Links**: Fixed broken documentation links in README - all now point to existing files
+- **CSV Export Memory**: Improved CSV export to stream data in chunks (100 records at a time) instead of loading all into memory
+  - Added plugin version and export date to CSV metadata
+  - Prevents memory exhaustion on large datasets
+
+### Added
+- **Assignment Distribution Diagnostic**: Added debug tool in Assignments page showing:
+  - Current distribution per jury member
+  - Average, min, and max assignments
+  - Test distribution algorithm with seed for reproducibility
+  
+### Verified
+- **AJAX Security Pattern**: All bulk operations follow proper nonce → capability → sanitize pattern
+- **Email Reminders**: Confirmed complete removal - no dead UI elements remain
+- **Shortcode Registration**: All shortcodes in README are properly registered
+- **Nonce Consistency**: Standardized on `mt_admin_nonce` for admin, `mt_ajax_nonce` for frontend
+- **Data Retention**: Uninstall properly respects `mt_remove_data_on_uninstall` setting with clear UI warnings
+
+### Changed
+- **Code Organization**: Consolidated export functionality to Admin AJAX handler only
+
 ## [2.2.20] - 2025-08-13
 
 ### Fixed

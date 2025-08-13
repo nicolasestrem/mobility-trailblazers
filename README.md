@@ -1,6 +1,6 @@
 # Mobility Trailblazers - Award Management Platform
 
-**Version:** 2.2.20
+**Version:** 2.2.21
 **Requires:** WordPress 5.8+, PHP 7.4+
 **License:** GPL v2 or later
 **Last Updated:** August 2025
@@ -88,7 +88,7 @@ E:\OneDrive\CoWorkSpace\Tech Stack\
 3. The plugin automatically creates database tables and sets up user roles
 4. Visit **Mobility Trailblazers** → **Diagnostics** to verify installation
 
-*For detailed installation instructions, see [Developer Guide](doc/mt-developer-guide.md)*
+*For detailed installation instructions, see [Developer Guide](doc/developer-guide.md)*
 
 ## 🚀 Quick Start
 
@@ -109,7 +109,7 @@ E:\OneDrive\CoWorkSpace\Tech Stack\
 3. **Evaluate Candidates**: Use inline controls or detailed evaluation forms
 4. **Track Progress**: Monitor completion with visual indicators
 
-*For detailed setup instructions, see [Developer Guide](doc/mt-developer-guide.md)*
+*For detailed setup instructions, see [Developer Guide](doc/developer-guide.md)*
 
 ## 🏗️ Architecture
 
@@ -122,7 +122,7 @@ The plugin follows modern PHP architecture with PSR-4 autoloading, Repository pa
 - **AJAX Handlers**: Real-time features and form processing
 - **Templates**: Admin and frontend interfaces
 
-*For detailed architecture documentation, see [Architecture Guide](doc/mt-architecture-docs.md)*
+*For detailed architecture documentation, see [Architecture Guide](doc/developer-guide.md)*
 
 ## 🛡️ Security
 
@@ -139,7 +139,7 @@ The plugin implements comprehensive security measures including prepared stateme
 - **`[mt_evaluation_stats]`** - Evaluation statistics (admin only)
 - **`[mt_winners_display]`** - Top-scored candidates display
 
-*For detailed shortcode parameters and examples, see [Developer Guide](doc/mt-developer-guide.md)*
+*For detailed shortcode parameters and examples, see [Developer Guide](doc/developer-guide.md)*
 
 ### Hooks & Filters
 
@@ -152,7 +152,7 @@ The plugin provides extensive hooks and filters for customization including `mt_
 - **Jury Member**: View assigned candidates, submit evaluations, save drafts
 - **Administrator**: Full system access including candidate management, assignments, and settings
 
-*For detailed capabilities documentation, see [Developer Guide](doc/mt-developer-guide.md)*
+*For detailed capabilities documentation, see [Developer Guide](doc/developer-guide.md)*
 
 ## 🌐 Internationalization
 
@@ -171,7 +171,7 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 - **Error Logs**: WordPress debug logs for plugin-specific errors
 - **Browser Console**: Monitor for JavaScript and AJAX errors
 
-*For detailed troubleshooting guide, see [Developer Guide](doc/mt-developer-guide.md)*
+*For detailed troubleshooting guide, see [Developer Guide](doc/developer-guide.md)*
 
 ## 📝 Recent Updates
 
@@ -209,21 +209,21 @@ Fully translatable with German (primary) and English support. Text domain: `mobi
 - Focus on jury evaluation system
 - Modern, responsive UI with improved security
 
-*For complete changelog, see [Changelog](doc/mt-changelog-updated.md)*
+*For complete changelog, see [Changelog](doc/changelog.md)*
 
 ## 📚 Documentation
 
 ### Core Documentation
-- **[Developer Guide](doc/mt-developer-guide.md)** - Development, customization, and troubleshooting
-- **[Architecture Documentation](doc/mt-architecture-docs.md)** - Technical architecture and security
-- **[Customization Guide](doc/mt-customization-guide.md)** - Dashboard and interface customization
-- **[Changelog](doc/mt-changelog-updated.md)** - Version history and updates
+- **[Developer Guide](doc/developer-guide.md)** - Development, customization, and troubleshooting
+- **[Architecture Documentation](doc/developer-guide.md)** - Technical architecture and security
+- **[Customization Guide](doc/developer-guide.md)** - Dashboard and interface customization
+- **[Changelog](doc/changelog.md)** - Version history and updates
 
 ### Feature Documentation
-- **[Grid Layout System](doc/5x2-grid-implementation-summary.md)** - Implementation details
-- **[Inline Evaluation System](doc/inline-evaluation-system.md)** - Inline controls and AJAX
-- **[Rankings System](doc/jury-rankings-system.md)** - Rankings display system
-- **[Error Handling](doc/error-handling-system.md)** - Error management and logging
+- **[Grid Layout System](doc/developer-guide.md)** - Implementation details
+- **[Inline Evaluation System](doc/developer-guide.md)** - Inline controls and AJAX
+- **[Rankings System](doc/developer-guide.md)** - Rankings display system
+- **[Error Handling](doc/developer-guide.md)** - Error management and logging
 
 ### Project Documentation
 Located in `../../Documentation/`:
@@ -266,8 +266,8 @@ README.md (Overview & Quick Start)
 5. Include WordPress/PHP versions when reporting issues
 
 ### Development Support
-- **Setup Guide**: See [Developer Guide](doc/mt-developer-guide.md)
-- **Architecture**: See [Architecture Documentation](doc/mt-architecture-docs.md)
+- **Setup Guide**: See [Developer Guide](doc/developer-guide.md)
+- **Architecture**: See [Architecture Documentation](doc/developer-guide.md)
 - **Troubleshooting**: Common issues and solutions in documentation
 
 ## 📄 License
@@ -276,7 +276,7 @@ GPL 2.0 . or later. See the LICENSE file.
 
 ## 🚀 Development Status
 
-**Current Version: 2.2.20** - Production-ready with active development
+**Current Version: 2.2.21** - Production-ready with active development
 
 **Browser Compatibility:** Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 
@@ -284,4 +284,4 @@ GPL 2.0 . or later. See the LICENSE file.
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 2025 | Version 2.2.20*
+*Last updated: August 2025 | Version 2.2.21*
