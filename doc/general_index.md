@@ -58,7 +58,6 @@
 
 ### Admin Templates
 - **admin/dashboard.php** - Main admin dashboard with statistics
-- **admin/candidates.php** - Candidate management interface (v2.2.15 - deprecated, functionality moved to post type)
 - **admin/evaluations.php** - Evaluation review and management
 - **admin/assignments.php** - Jury assignment management page
 - **admin/import-export.php** - Data import/export interface

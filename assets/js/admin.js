@@ -62,7 +62,63 @@ if (typeof mt_admin.i18n === 'undefined') {
     function initConfirmations() { /* ... confirmation logic ... */ }
     function initAjaxForms() { /* ... ajax form logic ... */ }
     function initMediaUpload() { /* ... media upload logic ... */ }
-    window.mtShowNotification = function(message, type) { /* ... notification logic ... */ };
+    
+    /**
+     * Show notification message to user
+     * @param {string} message - The message to display
+     * @param {string} type - Type of notification ('success', 'error', 'warning', 'info')
+     */
+    window.mtShowNotification = function(message, type) {
+        type = type || 'info';
+        
+        // Remove any existing notifications
+        $('.mt-notification').remove();
+        
+        // Map types to WordPress notice classes
+        const typeMap = {
+            'success': 'notice-success',
+            'error': 'notice-error',
+            'warning': 'notice-warning',
+            'info': 'notice-info'
+        };
+        
+        const noticeClass = typeMap[type] || 'notice-info';
+        
+        // Create notification HTML
+        const notificationHtml = `
+            <div class="mt-notification notice ${noticeClass} is-dismissible">
+                <p>${message}</p>
+                <button type="button" class="notice-dismiss">
+                    <span class="screen-reader-text">Dismiss this notice.</span>
+                </button>
+            </div>
+        `;
+        
+        // Add notification after the page title
+        const $target = $('.wrap h1').first();
+        if ($target.length) {
+            $(notificationHtml).insertAfter($target);
+        } else {
+            // Fallback: add to beginning of .wrap
+            $('.wrap').prepend(notificationHtml);
+        }
+        
+        // Auto-dismiss after 5 seconds for success messages
+        if (type === 'success') {
+            setTimeout(function() {
+                $('.mt-notification').fadeOut(400, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        }
+        
+        // Handle dismiss button
+        $('.mt-notification .notice-dismiss').on('click', function() {
+            $(this).closest('.mt-notification').fadeOut(400, function() {
+                $(this).remove();
+            });
+        });
+    };
 
     /**
      * Manager object for the "Assignment Management" page.

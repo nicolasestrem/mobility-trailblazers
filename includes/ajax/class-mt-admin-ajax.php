@@ -26,10 +26,15 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function init() {
-        // Export actions
+        // Export actions - support both AJAX and admin-post.php
         add_action('wp_ajax_mt_export_candidates', [$this, 'export_candidates']);
         add_action('wp_ajax_mt_export_evaluations', [$this, 'export_evaluations']);
         add_action('wp_ajax_mt_export_assignments', [$this, 'export_assignments']);
+        
+        // Admin-post actions for direct download
+        add_action('admin_post_mt_export_candidates', [$this, 'export_candidates_download']);
+        add_action('admin_post_mt_export_evaluations', [$this, 'export_evaluations_download']);
+        add_action('admin_post_mt_export_assignments', [$this, 'export_assignments_download']);
         
         // Import actions
         // Removed - using MT_Import_Ajax::handle_candidate_import instead
@@ -98,6 +103,59 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
     }
     
     /**
+     * Export candidates - Direct download version
+     */
+    public function export_candidates_download() {
+        // Verify nonce
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_candidates')) {
+            wp_die(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_export_data') && !current_user_can('manage_options')) {
+            wp_die(__('Permission denied', 'mobility-trailblazers'));
+        }
+        
+        $candidates = get_posts([
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ]);
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'ID',
+            'Name',
+            'Organization',
+            'Position',
+            'Categories',
+            'Average Score',
+            'Evaluation Count'
+        ];
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        foreach ($candidates as $candidate) {
+            $categories = wp_get_post_terms($candidate->ID, 'mt_award_category', ['fields' => 'names']);
+            $avg_score = $evaluation_repo->get_average_score_for_candidate($candidate->ID);
+            $evaluations = $evaluation_repo->get_by_candidate($candidate->ID);
+            
+            $csv_data[] = [
+                $candidate->ID,
+                $candidate->post_title,
+                get_post_meta($candidate->ID, '_mt_organization', true),
+                get_post_meta($candidate->ID, '_mt_position', true),
+                implode(', ', $categories),
+                $avg_score,
+                count($evaluations)
+            ];
+        }
+        
+        // Output CSV directly
+        $this->output_csv_download($csv_data, 'candidates-' . date('Y-m-d') . '.csv');
+    }
+    
+    /**
      * Export evaluations to CSV
      *
      * @return void
@@ -150,6 +208,61 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
     }
     
     /**
+     * Export evaluations - Direct download version
+     */
+    public function export_evaluations_download() {
+        // Verify nonce
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_evaluations')) {
+            wp_die(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_export_data') && !current_user_can('manage_options')) {
+            wp_die(__('Permission denied', 'mobility-trailblazers'));
+        }
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluations = $evaluation_repo->find_all();
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'ID',
+            'Jury Member',
+            'Candidate',
+            'Courage Score',
+            'Innovation Score',
+            'Implementation Score',
+            'Relevance Score',
+            'Visibility Score',
+            'Total Score',
+            'Status',
+            'Date'
+        ];
+        
+        foreach ($evaluations as $evaluation) {
+            $jury_member = get_post($evaluation->jury_member_id);
+            $candidate = get_post($evaluation->candidate_id);
+            
+            $csv_data[] = [
+                $evaluation->id,
+                $jury_member ? $jury_member->post_title : 'Unknown',
+                $candidate ? $candidate->post_title : 'Unknown',
+                $evaluation->courage_score,
+                $evaluation->innovation_score,
+                $evaluation->implementation_score,
+                $evaluation->relevance_score,
+                $evaluation->visibility_score,
+                $evaluation->total_score,
+                $evaluation->status,
+                $evaluation->created_at
+            ];
+        }
+        
+        // Output CSV directly
+        $this->output_csv_download($csv_data, 'evaluations-' . date('Y-m-d') . '.csv');
+    }
+    
+    /**
      * Export assignments to CSV
      *
      * @return void
@@ -199,6 +312,89 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             'csv' => $this->array_to_csv($csv_data),
             'filename' => 'assignments-' . date('Y-m-d') . '.csv'
         ]);
+    }
+    
+    /**
+     * Export assignments - Direct download version
+     */
+    public function export_assignments_download() {
+        // Verify nonce
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_assignments')) {
+            wp_die(__('Security check failed', 'mobility-trailblazers'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_export_data') && !current_user_can('manage_options')) {
+            wp_die(__('Permission denied', 'mobility-trailblazers'));
+        }
+        
+        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $assignments = $assignment_repo->find_all();
+        
+        $csv_data = [];
+        $csv_data[] = [
+            'Jury Member',
+            'Candidate',
+            'Assigned Date',
+            'Evaluation Status'
+        ];
+        
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        
+        foreach ($assignments as $assignment) {
+            $jury_member = get_post($assignment->jury_member_id);
+            $candidate = get_post($assignment->candidate_id);
+            
+            // Check evaluation status
+            $evaluations = $evaluation_repo->find_all([
+                'jury_member_id' => $assignment->jury_member_id,
+                'candidate_id' => $assignment->candidate_id,
+                'limit' => 1
+            ]);
+            
+            $status = 'Not Started';
+            if (!empty($evaluations)) {
+                $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+            }
+            
+            $csv_data[] = [
+                $jury_member ? $jury_member->post_title : 'Unknown',
+                $candidate ? $candidate->post_title : 'Unknown',
+                $assignment->assigned_at,
+                $status
+            ];
+        }
+        
+        // Output CSV directly
+        $this->output_csv_download($csv_data, 'assignments-' . date('Y-m-d') . '.csv');
+    }
+    
+    /**
+     * Output CSV file for direct download
+     * 
+     * @param array $data CSV data
+     * @param string $filename Filename for download
+     */
+    private function output_csv_download($data, $filename) {
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Add UTF-8 BOM for proper encoding in Excel
+        echo "\xEF\xBB\xBF";
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Output each row
+        foreach ($data as $row) {
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
+        exit;
     }
     
     /**

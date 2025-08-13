@@ -187,6 +187,172 @@ msgid "Apply"
 msgstr "Anwenden"
 
 msgid "Export started. Download will begin shortly."
+msgstr "Export gestartet. Download beginnt in Kürze."
+
+# Settings Page
+msgid "Mobility Trailblazers Settings"
+msgstr "Mobility Trailblazers Einstellungen"
+
+msgid "General Settings"
+msgstr "Allgemeine Einstellungen"
+
+msgid "Email Notifications"
+msgstr "E-Mail-Benachrichtigungen"
+
+msgid "Enable email notifications"
+msgstr "E-Mail-Benachrichtigungen aktivieren"
+
+msgid "Notification Email"
+msgstr "Benachrichtigungs-E-Mail"
+
+msgid "Evaluation Settings"
+msgstr "Bewertungseinstellungen"
+
+msgid "Allow jury members to save drafts"
+msgstr "Jurymitgliedern erlauben, Entwürfe zu speichern"
+
+msgid "Allow jury members to edit submitted evaluations"
+msgstr "Jurymitgliedern erlauben, eingereichte Bewertungen zu bearbeiten"
+
+msgid "Data Management"
+msgstr "Datenverwaltung"
+
+msgid "Database Status"
+msgstr "Datenbankstatus"
+
+msgid "All tables installed"
+msgstr "Alle Tabellen installiert"
+
+msgid "Import/Export"
+msgstr "Import/Export"
+
+msgid "Export Data"
+msgstr "Daten exportieren"
+
+msgid "Import Data"
+msgstr "Daten importieren"
+
+msgid "Export your data as CSV files for backup or analysis."
+msgstr "Exportieren Sie Ihre Daten als CSV-Dateien zur Sicherung oder Analyse."
+
+msgid "Export Candidates"
+msgstr "Kandidaten exportieren"
+
+msgid "Export Evaluations"
+msgstr "Bewertungen exportieren"
+
+msgid "Export Assignments"
+msgstr "Zuweisungen exportieren"
+
+msgid "Import Type"
+msgstr "Importtyp"
+
+msgid "Select type..."
+msgstr "Typ auswählen..."
+
+msgid "Candidates"
+msgstr "Kandidaten"
+
+msgid "Jury Members"
+msgstr "Jurymitglieder"
+
+msgid "CSV File"
+msgstr "CSV-Datei"
+
+msgid "Select a CSV file to import. Maximum size: 10MB."
+msgstr "Wählen Sie eine CSV-Datei zum Importieren. Maximale Größe: 10MB."
+
+msgid "Update existing records"
+msgstr "Vorhandene Datensätze aktualisieren"
+
+msgid "If checked, existing records with matching IDs will be updated."
+msgstr "Wenn aktiviert, werden vorhandene Datensätze mit übereinstimmenden IDs aktualisiert."
+
+msgid "Import Data"
+msgstr "Daten importieren"
+
+msgid "Download Templates"
+msgstr "Vorlagen herunterladen"
+
+msgid "Download these templates to see the required CSV format:"
+msgstr "Laden Sie diese Vorlagen herunter, um das erforderliche CSV-Format zu sehen:"
+
+msgid "Candidates Template"
+msgstr "Kandidaten-Vorlage"
+
+msgid "Jury Members Template"
+msgstr "Jurymitglieder-Vorlage"
+
+# Dashboard Customization
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Recent Activity"
+msgstr "Letzte Aktivitäten"
+
+msgid "Quick Actions"
+msgstr "Schnellaktionen"
+
+msgid "Add New Candidate"
+msgstr "Neuen Kandidaten hinzufügen"
+
+msgid "Add New Jury Member"
+msgstr "Neues Jurymitglied hinzufügen"
+
+msgid "View All Evaluations"
+msgstr "Alle Bewertungen anzeigen"
+
+msgid "Manage Assignments"
+msgstr "Zuweisungen verwalten"
+
+msgid "System Status"
+msgstr "Systemstatus"
+
+msgid "Database Tables"
+msgstr "Datenbanktabellen"
+
+msgid "Active Users"
+msgstr "Aktive Benutzer"
+
+msgid "Pending Tasks"
+msgstr "Ausstehende Aufgaben"
+
+# Assignment Management
+msgid "Assignment Management"
+msgstr "Zuweisungsverwaltung"
+
+msgid "Auto-Assignment"
+msgstr "Automatische Zuweisung"
+
+msgid "Manual Assignment"
+msgstr "Manuelle Zuweisung"
+
+msgid "Assignment Method"
+msgstr "Zuweisungsmethode"
+
+msgid "Random Distribution"
+msgstr "Zufällige Verteilung"
+
+msgid "Sequential"
+msgstr "Sequenziell"
+
+msgid "Balanced"
+msgstr "Ausgeglichen"
+
+msgid "Candidates per Jury Member"
+msgstr "Kandidaten pro Jurymitglied"
+
+msgid "Clear existing assignments"
+msgstr "Vorhandene Zuweisungen löschen"
+
+msgid "Security check failed"
+msgstr "Sicherheitsprüfung fehlgeschlagen"
+
+msgid "Permission denied"
+msgstr "Zugriff verweigert"
 msgstr "Export gestartet. Der Download beginnt in Kürze."
 
 msgid "Are you sure you want to clear ALL assignments? This cannot be undone."

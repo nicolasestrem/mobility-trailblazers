@@ -2,6 +2,40 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.19] - 2025-08-13
+
+### Fixed
+- **"Save as Draft" Feature**: Verified AJAX endpoint registration - feature is working correctly with proper nonce verification
+- **CSV Export Links**: Fixed broken export links in Import/Export admin page
+  - Added direct download handlers via admin-post.php actions
+  - Export handlers now output CSV files directly with proper headers
+  - Added UTF-8 BOM for proper encoding in Excel
+  
+- **Missing JavaScript Function**: Implemented mtShowNotification function in admin.js
+  - Added WordPress-style admin notifications
+  - Auto-dismissal for success messages after 5 seconds
+  - Proper styling matching WordPress admin interface
+
+### Changed
+- **CSV Import Documentation**: Updated to properly document both import methods
+  - Quick AJAX import on All Candidates page
+  - Advanced Import Profiles page with dry run capability
+  - Clear distinction between the two import options
+
+### Removed
+- **Dead Code Cleanup**: Removed deprecated candidates.php template file
+  - File was marked deprecated in v2.2.15
+  - Removed reference from general_index.md documentation
+  - Functionality already moved to post type interface
+
+### Added
+- **German Translations**: Completed missing translations for admin interface
+  - Added Settings page translations
+  - Added Dashboard customization translations
+  - Added Import/Export interface translations
+  - Added Assignment Management translations
+  - Total of 60+ new German translations for DACH region users
+
 ## [2.2.18] - 2025-08-13
 
 ### Fixed

@@ -67,25 +67,46 @@ Top 50 status values are normalized:
 
 ## Import Process
 
-### Step 1: Access Import Interface
-1. Navigate to **WordPress Admin → Mobility Trailblazers → All Candidates**
-2. Click the **Import CSV** button next to "Add New"
+### Option 1: Quick Import (AJAX)
+**Location**: WordPress Admin → Mobility Trailblazers → All Candidates
 
-### Step 2: Configure Import Options
-- **Update existing candidates**: Check to update existing entries (matched by email)
-- **Skip duplicates**: Check to skip entries that already exist
+1. Click the **Import CSV** button next to "Add New"
+2. Select your CSV file
+3. Choose import options:
+   - **Update existing candidates**: Updates existing entries (matched by name)
+   - **Skip duplicates**: Skips entries that already exist
+4. Click "Import" to start the process
+5. Review results in the notification
 
-### Step 3: Upload CSV File
-1. Click "Choose File" and select your CSV
-2. Review the format requirements displayed
-3. Click "Import" to start the process
+### Option 2: Advanced Import with Dry Run
+**Location**: WordPress Admin → Mobility Trailblazers → Import Profiles
 
-### Step 4: Review Results
-After import completion, you'll see:
+This enhanced importer provides:
+- **Dry Run Mode**: Preview what will be imported without making changes
+- **Field Mapping**: Visual confirmation of how CSV columns map to database fields
+- **Validation Report**: See potential issues before importing
+- **Photo Import**: Option to import candidate photos from URLs
+- **URL Validation**: Validates all URLs before import
+- **Skip Empty Fields**: Option to preserve existing data when CSV field is empty
+
+#### Advanced Import Steps:
+1. Navigate to **Import Profiles** page
+2. Upload your CSV file
+3. Configure import options:
+   - **Update existing**: Update existing records
+   - **Skip empty fields**: Don't overwrite with empty values
+   - **Validate URLs**: Check all URLs are valid
+   - **Import photos**: Download and attach photos from URLs
+4. Click **Dry Run** to preview the import
+5. Review the validation report
+6. If satisfied, click **Import** to process the data
+
+### Import Results
+Both importers will show:
 - Number of candidates imported
 - Number of candidates updated
 - Number of entries skipped
-- Any error messages
+- Any validation errors or warnings
 
 ## CSV File Requirements
 
