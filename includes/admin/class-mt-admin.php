@@ -183,15 +183,6 @@ class MT_Admin {
                 [$this, 'render_audit_log_page']
             );
             
-            // Debug: Check Import (temporary)
-            add_submenu_page(
-                'mobility-trailblazers',
-                __('Check Import', 'mobility-trailblazers'),
-                __('Check Import', 'mobility-trailblazers'),
-                'manage_options',
-                'mt-check-import',
-                [$this, 'render_check_import_page']
-            );
         }
     }
     
@@ -511,15 +502,6 @@ class MT_Admin {
                 echo '<div class="notice notice-error"><p>' . esc_html__('Import profiles template not found.', 'mobility-trailblazers') . '</p></div>';
             }
         }
-    }
-    
-    /**
-     * Render check import page (debug)
-     *
-     * @return void
-     */
-    public function render_check_import_page() {
-        include MT_PLUGIN_DIR . 'debug/check-schneidewind-import.php';
     }
     
     /**

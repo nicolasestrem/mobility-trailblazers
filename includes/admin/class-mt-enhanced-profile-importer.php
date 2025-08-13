@@ -60,23 +60,43 @@ class MT_Enhanced_Profile_Importer {
             return $criteria;
         }
         
-        // Define patterns for each criterion (German text)
-        $patterns = [
-            '_mt_evaluation_courage' => '/Mut\s*&\s*Pioniergeist:\s*(.+?)(?=(?:Innovationsgrad:|Umsetzungskraft|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
-            '_mt_evaluation_innovation' => '/Innovationsgrad:\s*(.+?)(?=(?:Mut\s*&|Umsetzungskraft|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
-            '_mt_evaluation_implementation' => '/Umsetzungskraft\s*&\s*Wirkung:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Relevanz|Vorbildfunktion|Persönlichkeit|$))/isu',
-            '_mt_evaluation_relevance' => '/Relevanz\s*für\s*die\s*Mobilitätswende:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Vorbildfunktion|Persönlichkeit|$))/isu',
-            '_mt_evaluation_visibility' => '/Vorbildfunktion\s*&\s*Sichtbarkeit:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Relevanz|Persönlichkeit|$))/isu',
-            '_mt_evaluation_personality' => '/Persönlichkeit\s*&\s*Motivation:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungskraft|Relevanz|Vorbildfunktion|$))/isu'
+        // Use a more robust approach - split by known labels
+        // This regex splits the text by any of the known section headers
+        $split_pattern = '/(Mut\s*&\s*Pioniergeist\s*:|Innovationsgrad\s*:|Umsetzungskraft\s*&\s*Wirkung\s*:|Relevanz\s*für\s*die\s*Mobilitätswende\s*:|Vorbildfunktion\s*&\s*Sichtbarkeit\s*:|Persönlichkeit\s*&\s*Motivation\s*:)/u';
+        
+        $sections = preg_split($split_pattern, $description, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        
+        // Map labels to field names
+        $label_map = [
+            'Mut & Pioniergeist' => '_mt_evaluation_courage',
+            'Innovationsgrad' => '_mt_evaluation_innovation',
+            'Umsetzungskraft & Wirkung' => '_mt_evaluation_implementation',
+            'Relevanz für die Mobilitätswende' => '_mt_evaluation_relevance',
+            'Vorbildfunktion & Sichtbarkeit' => '_mt_evaluation_visibility',
+            'Persönlichkeit & Motivation' => '_mt_evaluation_personality'
         ];
         
-        // Extract text for each criterion
-        foreach ($patterns as $field => $pattern) {
-            if (preg_match($pattern, $description, $matches)) {
-                $criteria[$field] = trim($matches[1]);
-                // Clean up the extracted text
-                $criteria[$field] = preg_replace('/\s+/', ' ', $criteria[$field]);
-                $criteria[$field] = trim($criteria[$field], " \t\n\r\0\x0B.,;:");
+        // Process sections - labels and their content alternate
+        for ($i = 0; $i < count($sections); $i++) {
+            $section = trim($sections[$i]);
+            
+            // Check if this section is a label
+            foreach ($label_map as $label_text => $field_name) {
+                // Check if section contains the label (ignoring colons and extra spaces)
+                $clean_section = preg_replace('/\s+/', ' ', rtrim($section, ':'));
+                $clean_label = preg_replace('/\s+/', ' ', $label_text);
+                
+                if (stripos($clean_section, $clean_label) !== false) {
+                    // The next section should be the content for this label
+                    if (isset($sections[$i + 1])) {
+                        $content = trim($sections[$i + 1]);
+                        // Clean up the content
+                        $content = preg_replace('/\s+/', ' ', $content);
+                        $content = trim($content, " \t\n\r\0\x0B.,;:");
+                        $criteria[$field_name] = $content;
+                    }
+                    break;
+                }
             }
         }
         
@@ -469,7 +489,10 @@ class MT_Enhanced_Profile_Importer {
                         break;
                     case '_mt_top_50_status':
                         // Handle Status field for Top 50
-                        $value = in_array(strtolower($value), ['ja', 'yes', '1', 'true', 'top 50', 'top50']) ? 'yes' : 'no';
+                        // Remove "Top 50:" prefix if present and check the actual value
+                        $clean_value = preg_replace('/^top\s*50\s*:\s*/i', '', $value);
+                        $clean_value = strtolower(trim($clean_value));
+                        $value = in_array($clean_value, ['ja', 'yes', '1', 'true', 'top 50', 'top50']) ? 'yes' : 'no';
                         break;
                     case '_mt_category_type':
                         // Map category types
