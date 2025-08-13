@@ -195,7 +195,7 @@ class MT_Uninstaller {
             $wpdb->prefix . 'mt_evaluations',
             $wpdb->prefix . 'mt_jury_assignments',
             $wpdb->prefix . 'mt_audit_log',
-            $wpdb->prefix . 'mt_error_logs',
+            $wpdb->prefix . 'mt_error_log',
             $wpdb->prefix . 'mt_voting_results'
         ];
         
