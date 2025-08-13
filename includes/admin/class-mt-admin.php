@@ -704,6 +704,39 @@ class MT_Admin {
         if ($hook === 'mobility-trailblazers_page_mt-settings') {
             wp_enqueue_media();
         }
+        
+        // Candidate import script for candidates list page
+        $screen = get_current_screen();
+        if ($screen && $screen->post_type === 'mt_candidate' && $screen->base === 'edit') {
+            wp_enqueue_script(
+                'mt-candidate-import',
+                MT_PLUGIN_URL . 'assets/js/candidate-import.js',
+                ['jquery'],
+                MT_VERSION,
+                true
+            );
+            
+            // Localize script for import functionality
+            wp_localize_script('mt-candidate-import', 'mt_import', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_ajax_nonce'),
+                'i18n' => [
+                    'importing' => __('Importing...', 'mobility-trailblazers'),
+                    'import_complete' => __('Import complete!', 'mobility-trailblazers'),
+                    'import_failed' => __('Import failed!', 'mobility-trailblazers'),
+                    'import_error' => __('An error occurred during import.', 'mobility-trailblazers'),
+                    'invalid_file_type' => __('Please select a CSV file.', 'mobility-trailblazers'),
+                    'file_too_large' => __('File is too large. Maximum size is 10MB.', 'mobility-trailblazers'),
+                    'created' => __('created', 'mobility-trailblazers'),
+                    'updated' => __('updated', 'mobility-trailblazers'),
+                    'skipped' => __('skipped', 'mobility-trailblazers'),
+                    'errors' => __('errors', 'mobility-trailblazers'),
+                    'error_details' => __('Error details:', 'mobility-trailblazers'),
+                    'no_file_selected' => __('No file selected', 'mobility-trailblazers'),
+                    'confirm_import' => __('Are you sure you want to import this CSV file?', 'mobility-trailblazers')
+                ]
+            ]);
+        }
     }
     
     /**
