@@ -2,6 +2,36 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.23] - 2025-08-13
+
+### Added
+- **Comprehensive Import/Export System**: Created `class-mt-import-export.php` for unified CSV import/export
+  - Support for both Jury Members and Candidates import types
+  - Admin post handlers for form-based imports
+  - AJAX handler for async CSV imports with progress feedback
+  - Export functionality for candidates, evaluations, and assignments
+  - Template download system for CSV formats
+  - Proper UTF-8 BOM handling for Excel compatibility
+  
+### Features
+- **Import Types**: Dropdown now properly shows "Jury Members" and "Candidates" options
+- **CSV Parsing**: Uses PHP's native `fgetcsv()` for reliable parsing
+- **Validation**: Required field checking, email validation, URL sanitization
+- **User Creation**: Automatic WordPress user creation for jury members with role assignment
+- **Duplicate Handling**: Option to update existing records or skip duplicates
+- **Error Reporting**: Detailed error messages with row numbers for failed imports
+- **Security**: Full nonce verification, capability checks, and input sanitization
+
+### Changed
+- **Plugin Initialization**: Added `MT_Import_Export::init()` to core plugin class
+- **Template Files**: Created CSV templates in `data/templates/` for jury members and candidates
+
+### Files Modified
+- `includes/admin/class-mt-import-export.php` - New comprehensive import/export handler
+- `includes/core/class-mt-plugin.php` - Added import/export initialization
+- `data/templates/jury-members.csv` - Template with 20 jury members
+- `data/templates/candidates.csv` - Template with sample candidates
+
 ## [2.2.22] - 2025-08-13
 
 ### Fixed

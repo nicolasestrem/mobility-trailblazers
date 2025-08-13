@@ -24,6 +24,7 @@
 - **admin/class-mt-profile-importer.php** - CSV import functionality for candidate profiles
 - **admin/class-mt-enhanced-profile-importer.php** - Advanced profile import with validation (v2.2.15 - German character support, URL validation)
 - **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.15)
+- **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.23)
 
 ### AJAX Handlers (v2.2.13 - Standardized error handling)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
