@@ -130,6 +130,23 @@ class MT_Plugin {
         $admin_ajax = new \MobilityTrailblazers\Ajax\MT_Admin_Ajax();
         $admin_ajax->init();
         
+        // Debug Center AJAX (v2.3.0)
+        if (is_admin() && current_user_can('manage_options')) {
+            // Load utility classes if needed
+            if (!class_exists('\MobilityTrailblazers\Utilities\MT_Database_Health')) {
+                require_once MT_PLUGIN_DIR . 'includes/utilities/class-mt-database-health.php';
+            }
+            if (!class_exists('\MobilityTrailblazers\Utilities\MT_System_Info')) {
+                require_once MT_PLUGIN_DIR . 'includes/utilities/class-mt-system-info.php';
+            }
+            
+            // Initialize Debug AJAX handler
+            if (file_exists(MT_PLUGIN_DIR . 'includes/ajax/class-mt-debug-ajax.php')) {
+                require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-debug-ajax.php';
+                new \MobilityTrailblazers\Ajax\MT_Debug_Ajax();
+            }
+        }
+        
         // Import AJAX (handles candidate CSV imports)
         // The file self-initializes when loaded, creating an instance at the bottom
         require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-import-ajax.php';

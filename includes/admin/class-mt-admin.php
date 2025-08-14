@@ -108,26 +108,27 @@ class MT_Admin {
             [$this, 'render_settings_page']
         );
         
-        // Tools submenu
-        add_submenu_page(
-            'mobility-trailblazers',
-            __('Tools', 'mobility-trailblazers'),
-            __('Tools', 'mobility-trailblazers'),
-            'manage_options',
-            'mt-tools',
-            [$this, 'render_tools_page']
-        );
-        
-        // Diagnostics submenu (for admins and jury admins)
-        if (current_user_can('manage_options') || current_user_can('mt_jury_admin')) {
+        // Developer Tools submenu (replaces Tools and Diagnostics)
+        if (current_user_can('manage_options')) {
             add_submenu_page(
                 'mobility-trailblazers',
-                __('Diagnostics', 'mobility-trailblazers'),
-                __('Diagnostics', 'mobility-trailblazers'),
+                __('Developer Tools', 'mobility-trailblazers'),
+                __('Developer Tools', 'mobility-trailblazers'),
                 'manage_options',
-                'mt-diagnostics',
-                [$this, 'render_diagnostics_page']
+                'mt-debug-center',
+                [$this, 'render_debug_center_page']
             );
+        }
+        
+        // Legacy redirects for backward compatibility
+        if (isset($_GET['page'])) {
+            if ($_GET['page'] === 'mt-tools') {
+                wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=tools'));
+                exit;
+            } elseif ($_GET['page'] === 'mt-diagnostics') {
+                wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
+                exit;
+            }
         }
 
         // Profile Migration and other admin-only menus
@@ -431,26 +432,50 @@ class MT_Admin {
     }
     
     /**
-     * Render tools page
+     * Render Debug Center page
      *
      * @return void
      */
-    public function render_tools_page() {
-        $template_file = MT_PLUGIN_DIR . 'templates/admin/tools.php';
+    public function render_debug_center_page() {
+        // Load required classes
+        if (!class_exists('\MobilityTrailblazers\Admin\MT_Debug_Manager')) {
+            require_once MT_PLUGIN_DIR . 'includes/admin/class-mt-debug-manager.php';
+        }
+        if (!class_exists('\MobilityTrailblazers\Services\MT_Diagnostic_Service')) {
+            require_once MT_PLUGIN_DIR . 'includes/services/class-mt-diagnostic-service.php';
+        }
+        if (!class_exists('\MobilityTrailblazers\Admin\MT_Maintenance_Tools')) {
+            require_once MT_PLUGIN_DIR . 'includes/admin/class-mt-maintenance-tools.php';
+        }
+        
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/debug-center.php';
         if (file_exists($template_file)) {
             include $template_file;
         } else {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Tools template file not found.', 'mobility-trailblazers') . '</p></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('Debug Center template file not found.', 'mobility-trailblazers') . '</p></div>';
         }
     }
     
     /**
-     * Render diagnostics page
+     * Render tools page (deprecated - redirects to Debug Center)
      *
+     * @deprecated 2.3.0 Use render_debug_center_page() instead
+     * @return void
+     */
+    public function render_tools_page() {
+        wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=tools'));
+        exit;
+    }
+    
+    /**
+     * Render diagnostics page (deprecated - redirects to Debug Center)
+     *
+     * @deprecated 2.3.0 Use render_debug_center_page() instead
      * @return void
      */
     public function render_diagnostics_page() {
-        include MT_PLUGIN_DIR . 'templates/admin/diagnostics.php';
+        wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
+        exit;
     }
 
     /**
@@ -672,6 +697,52 @@ class MT_Admin {
             MT_VERSION,
             true
         );
+        
+        // Enqueue Debug Center assets if on Debug Center page
+        if (isset($_GET['page']) && $_GET['page'] === 'mt-debug-center') {
+            wp_enqueue_style(
+                'mt-debug-center',
+                MT_PLUGIN_URL . 'assets/css/debug-center.css',
+                ['mt-admin'],
+                MT_VERSION
+            );
+            
+            wp_enqueue_script(
+                'mt-debug-center',
+                MT_PLUGIN_URL . 'assets/js/debug-center.js',
+                ['jquery', 'mt-admin'],
+                MT_VERSION,
+                true
+            );
+            
+            // Localize script for Debug Center
+            wp_localize_script('mt-debug-center', 'mt_debug', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_debug_nonce'),
+                'i18n' => [
+                    'running' => __('Running...', 'mobility-trailblazers'),
+                    'diagnostic_complete' => __('Diagnostic complete', 'mobility-trailblazers'),
+                    'diagnostic_failed' => __('Diagnostic failed', 'mobility-trailblazers'),
+                    'network_error' => __('Network error occurred', 'mobility-trailblazers'),
+                    'export_complete' => __('Export complete', 'mobility-trailblazers'),
+                    'export_failed' => __('Export failed', 'mobility-trailblazers'),
+                    'script_output' => __('Script Output', 'mobility-trailblazers'),
+                    'script_complete' => __('Script executed', 'mobility-trailblazers'),
+                    'script_failed' => __('Script failed', 'mobility-trailblazers'),
+                    'errors_occurred' => __('Errors occurred', 'mobility-trailblazers'),
+                    'close' => __('Close', 'mobility-trailblazers'),
+                    'confirm_dangerous' => __('This is a dangerous operation. Are you sure?', 'mobility-trailblazers'),
+                    'operation_complete' => __('Operation complete', 'mobility-trailblazers'),
+                    'operation_failed' => __('Operation failed', 'mobility-trailblazers'),
+                    'enter_password' => __('Enter your admin password:', 'mobility-trailblazers'),
+                    'confirm_clear_logs' => __('Are you sure you want to clear the logs?', 'mobility-trailblazers'),
+                    'logs_cleared' => __('Logs cleared', 'mobility-trailblazers'),
+                    'clear_failed' => __('Failed to clear logs', 'mobility-trailblazers'),
+                    'copied' => __('Copied to clipboard', 'mobility-trailblazers'),
+                    'dismiss' => __('Dismiss', 'mobility-trailblazers')
+                ]
+            ]);
+        }
         
         // Localize script for AJAX and internationalization
         wp_localize_script('mt-admin', 'mt_admin', array(
