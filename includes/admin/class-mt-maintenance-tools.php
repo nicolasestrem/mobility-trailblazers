@@ -113,6 +113,18 @@ class MT_Maintenance_Tools {
                         'description' => __('Regenerate cache indexes for faster lookups', 'mobility-trailblazers'),
                         'dangerous' => false,
                         'callback' => [$this, 'regenerate_cache_indexes']
+                    ],
+                    'clear_object_cache' => [
+                        'title' => __('Clear Object Cache', 'mobility-trailblazers'),
+                        'description' => __('Flush WordPress object cache', 'mobility-trailblazers'),
+                        'dangerous' => false,
+                        'callback' => [$this, 'clear_object_cache']
+                    ],
+                    'clear_plugin_cache' => [
+                        'title' => __('Clear Plugin Cache', 'mobility-trailblazers'),
+                        'description' => __('Clear all plugin-specific cached data', 'mobility-trailblazers'),
+                        'dangerous' => false,
+                        'callback' => [$this, 'clear_plugin_cache']
                     ]
                 ]
             ],
@@ -562,6 +574,44 @@ class MT_Maintenance_Tools {
                 'transients_deleted' => $transients_deleted,
                 'object_cache_flushed' => true
             ]
+        ];
+    }
+    
+    /**
+     * Clear object cache
+     *
+     * @param array $params Parameters
+     * @return array Result
+     */
+    private function clear_object_cache($params = []) {
+        wp_cache_flush();
+        
+        return [
+            'success' => true,
+            'message' => __('Object cache cleared successfully', 'mobility-trailblazers')
+        ];
+    }
+    
+    /**
+     * Clear plugin cache
+     *
+     * @param array $params Parameters
+     * @return array Result
+     */
+    private function clear_plugin_cache($params = []) {
+        // Clear plugin-specific transients
+        delete_transient('mt_evaluation_stats');
+        delete_transient('mt_candidate_stats');
+        delete_transient('mt_jury_stats');
+        delete_transient('mt_assignment_stats');
+        
+        // Clear plugin options cache
+        wp_cache_delete('mt_plugin_settings', 'options');
+        wp_cache_delete('mt_cached_data', 'options');
+        
+        return [
+            'success' => true,
+            'message' => __('Plugin cache cleared successfully', 'mobility-trailblazers')
         ];
     }
     

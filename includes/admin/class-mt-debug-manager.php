@@ -364,8 +364,18 @@ class MT_Debug_Manager {
             // Execute script
             $script_result = include $script_path;
             
-            // Get output
-            $result['output'] = ob_get_contents();
+            // Get output (make sure $result is still an array)
+            $output_content = ob_get_contents();
+            if (!is_array($result)) {
+                // Script may have overwritten $result, restore it
+                $result = [
+                    'success' => false,
+                    'message' => '',
+                    'output' => '',
+                    'errors' => []
+                ];
+            }
+            $result['output'] = $output_content;
             
             // Check result
             if ($script_result === false) {
