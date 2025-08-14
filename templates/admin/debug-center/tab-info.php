@@ -88,8 +88,11 @@ $info = $system_info->get_system_info();
                             <div class="mt-extensions-list">
                                 <?php 
                                 $important_extensions = ['mysqli', 'curl', 'json', 'mbstring', 'zip', 'gd', 'xml'];
+                                $php_extensions = isset($info['php']['extensions']) && is_array($info['php']['extensions']) 
+                                    ? $info['php']['extensions'] 
+                                    : [];
                                 foreach ($important_extensions as $ext):
-                                    $loaded = in_array($ext, $info['php']['extensions']);
+                                    $loaded = in_array($ext, $php_extensions);
                                 ?>
                                 <span class="mt-badge mt-badge-<?php echo $loaded ? 'success' : 'error'; ?>">
                                     <?php echo esc_html($ext); ?>

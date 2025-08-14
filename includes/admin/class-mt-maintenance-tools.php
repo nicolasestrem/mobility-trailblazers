@@ -49,7 +49,7 @@ class MT_Maintenance_Tools {
             'database' => [
                 'title' => __('Database Operations', 'mobility-trailblazers'),
                 'operations' => [
-                    'optimize_tables' => [
+                    'optimize_all' => [
                         'title' => __('Optimize Database Tables', 'mobility-trailblazers'),
                         'description' => __('Optimize all plugin database tables for better performance', 'mobility-trailblazers'),
                         'dangerous' => false,
@@ -61,8 +61,8 @@ class MT_Maintenance_Tools {
                         'dangerous' => true,
                         'callback' => [$this, 'repair_tables']
                     ],
-                    'repair_orphaned' => [
-                        'title' => __('Repair Orphaned Data', 'mobility-trailblazers'),
+                    'clean_orphaned' => [
+                        'title' => __('Clean Orphaned Data', 'mobility-trailblazers'),
                         'description' => __('Remove orphaned evaluations and assignments', 'mobility-trailblazers'),
                         'dangerous' => true,
                         'callback' => [$this, 'repair_orphaned_data']
@@ -125,15 +125,15 @@ class MT_Maintenance_Tools {
                         'dangerous' => false,
                         'callback' => [$this, 'export_all_data']
                     ],
-                    'backup_create' => [
+                    'backup_tables' => [
                         'title' => __('Create Backup', 'mobility-trailblazers'),
                         'description' => __('Create a complete backup of all plugin data', 'mobility-trailblazers'),
                         'dangerous' => false,
                         'callback' => [$this, 'create_backup']
                     ],
-                    'backup_restore' => [
-                        'title' => __('Restore Backup', 'mobility-trailblazers'),
-                        'description' => __('Restore data from a previous backup', 'mobility-trailblazers'),
+                    'import_data' => [
+                        'title' => __('Import Data', 'mobility-trailblazers'),
+                        'description' => __('Import data from backup file', 'mobility-trailblazers'),
                         'dangerous' => true,
                         'callback' => [$this, 'restore_backup'],
                         'requires_file' => true

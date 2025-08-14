@@ -67,9 +67,12 @@
          * Initialize tooltips
          */
         initTooltips: function() {
-            $('.mt-tooltip').tooltip({
-                position: { my: 'center bottom-10', at: 'center top' }
-            });
+            // Only initialize if jQuery UI tooltip is available
+            if ($.fn.tooltip) {
+                $('.mt-tooltip').tooltip({
+                    position: { my: 'center bottom-10', at: 'center top' }
+                });
+            }
         },
         
         /**
