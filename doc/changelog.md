@@ -2,19 +2,29 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
-## [2.3.2] - 2025-08-14 - Debug Center Script Output Fix
+## [2.3.2] - 2025-08-14 - Debug Center Complete Fixes
 
 ### Fixed
 - **Debug Script Output Display**: Fixed empty info box issue when executing debug scripts
+  - Fixed AJAX response structure - removed double wrapping of data
   - Changed from escaped HTML in `<pre>` tag to rendered HTML in `<div>` container
   - Added proper CSS styling for script output formatting
   - Script output now properly displays formatted results instead of raw HTML code
+
+- **Maintenance Operations**: Fixed "Operation not found" error
+  - Corrected template structure to access operations at correct path
+  - Fixed cache operations: `$operations['cache']['operations']` instead of `$operations['cache']`
+  - Fixed reset operations: `$operations['reset']['operations']` instead of `$operations['reset']`
 
 ### Enhanced
 - **UI Improvements**: 
   - Added dedicated `.mt-script-output` CSS class with proper styling
   - Improved readability with appropriate typography and spacing
   - Added scrollable container for long output
+  
+- **Code Quality**:
+  - Removed double data wrapping in AJAX responses
+  - Standardized response structure across all Debug Center operations
 
 ## [2.3.1] - 2025-08-14 - Debug Center Bug Fixes and Stability
 

@@ -117,7 +117,8 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             $result = $debug_manager->execute_script($script, $params);
             
             if ($result['success']) {
-                $this->success($result);
+                // Send the result directly, not wrapped
+                wp_send_json_success($result);
             } else {
                 $this->error($result['message'], $result);
             }
@@ -160,7 +161,8 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             $result = $maintenance_tools->execute_operation($category, $operation, $params);
             
             if ($result['success']) {
-                $this->success($result);
+                // Send the result directly, not wrapped
+                wp_send_json_success($result);
             } else {
                 // Check for special requirements
                 if (isset($result['requires_confirmation'])) {

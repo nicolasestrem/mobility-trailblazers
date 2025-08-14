@@ -366,6 +366,7 @@ class MT_Debug_Manager {
             
             // Get output (make sure $result is still an array)
             $output_content = ob_get_contents();
+            
             if (!is_array($result)) {
                 // Script may have overwritten $result, restore it
                 $result = [
@@ -390,6 +391,10 @@ class MT_Debug_Manager {
             }
             
         } catch (\Exception $e) {
+            // Get output before cleaning buffer
+            $output_content = ob_get_contents();
+            $result['output'] = $output_content;
+            
             $result['message'] = sprintf(
                 __('Script execution error: %s', 'mobility-trailblazers'),
                 $e->getMessage()
@@ -401,8 +406,10 @@ class MT_Debug_Manager {
             ];
             
         } finally {
-            // Clean up
-            ob_end_clean();
+            // Clean up - end buffer without discarding content
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
             
             if ($error_handler_set) {
                 restore_error_handler();

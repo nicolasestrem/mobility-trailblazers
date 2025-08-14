@@ -12,10 +12,13 @@ This document provides solutions to common issues encountered with the Debug Cen
 - Script executes but output is not visible
 - Raw HTML code appears instead of formatted output
 
-**Root Cause:**
-The JavaScript was escaping HTML output and displaying it in a `<pre>` tag, which showed raw HTML instead of rendering it.
+**Root Causes:**
+1. The JavaScript was escaping HTML output and displaying it in a `<pre>` tag
+2. AJAX response was double-wrapping data, causing incorrect data access path
 
-**Solution Applied:**
+**Solutions Applied:**
+
+#### JavaScript Fix:
 ```javascript
 // OLD (Incorrect)
 showScriptOutput: function(data) {
@@ -32,9 +35,44 @@ showScriptOutput: function(data) {
 }
 ```
 
+#### AJAX Handler Fix:
+```php
+// OLD (Double-wrapped)
+if ($result['success']) {
+    $this->success($result);  // This wraps $result in another layer
+}
+
+// NEW (Direct)
+if ($result['success']) {
+    wp_send_json_success($result);  // Send directly
+}
+```
+
 **Files Modified:**
 - `assets/js/debug-center.js`: Changed output rendering method
 - `assets/css/debug-center.css`: Added `.mt-script-output` styling
+- `includes/ajax/class-mt-debug-ajax.php`: Fixed response structure
+
+### 2. Operation Not Found Error
+
+**Symptoms:**
+- Clicking maintenance operation buttons triggers "Operation not found" error
+- Cache and Reset operations not working
+
+**Root Cause:**
+Template was accessing operations at wrong path in the data structure.
+
+**Solution Applied:**
+```php
+// OLD (Incorrect path)
+<?php foreach ($operations['cache'] as $op_key => $operation): ?>
+
+// NEW (Correct path)
+<?php foreach ($operations['cache']['operations'] as $op_key => $operation): ?>
+```
+
+**Files Modified:**
+- `templates/admin/debug-center/tab-tools.php`: Fixed operation paths
 
 ## Fixed Issues (v2.3.1)
 
