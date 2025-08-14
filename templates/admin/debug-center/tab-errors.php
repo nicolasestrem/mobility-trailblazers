@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get error monitor instance
-$error_monitor = \MobilityTrailblazers\Admin\MT_Error_Monitor::get_instance();
+$error_monitor = new \MobilityTrailblazers\Admin\MT_Error_Monitor();
 
 // Get error statistics
 $error_stats = $error_monitor->get_error_statistics();

@@ -7,10 +7,32 @@ if (!defined('ABSPATH')) {
 // Get database health utility
 $db_health = new \MobilityTrailblazers\Utilities\MT_Database_Health();
 
-// Get database stats
+// Get database stats with defaults
 $db_stats = $db_health->get_database_stats();
+if (!is_array($db_stats)) {
+    $db_stats = [
+        'total_tables' => 0,
+        'total_rows' => 0,
+        'total_size_formatted' => 'N/A',
+        'plugin_tables' => 0
+    ];
+}
+
 $connection_info = $db_health->get_connection_info();
+if (!is_array($connection_info)) {
+    $connection_info = [
+        'host' => 'Unknown',
+        'database' => 'Unknown',
+        'server_version' => 'Unknown',
+        'charset' => 'Unknown',
+        'collation' => 'Unknown'
+    ];
+}
+
 $all_tables = $db_health->check_all_tables();
+if (!is_array($all_tables)) {
+    $all_tables = [];
+}
 ?>
 
 <div class="mt-debug-database">
@@ -88,49 +110,66 @@ $all_tables = $db_health->check_all_tables();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($all_tables as $table): ?>
-                    <tr>
-                        <td>
-                            <strong><?php echo esc_html($table['name']); ?></strong>
-                            <?php if ($table['is_plugin_table']): ?>
-                            <span class="dashicons dashicons-admin-plugins" title="<?php esc_attr_e('Plugin Table', 'mobility-trailblazers'); ?>"></span>
-                            <?php endif; ?>
-                        </td>
-                        <td><?php echo esc_html($table['engine']); ?></td>
-                        <td><?php echo esc_html(number_format($table['rows'])); ?></td>
-                        <td><?php echo esc_html($table['size_formatted']); ?></td>
-                        <td>
-                            <?php 
-                            $fragmentation = $table['fragmentation'];
-                            $class = $fragmentation > 30 ? 'high' : ($fragmentation > 10 ? 'medium' : 'low');
-                            ?>
-                            <span class="fragmentation-<?php echo esc_attr($class); ?>">
-                                <?php echo esc_html($fragmentation . '%'); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <?php if ($table['status'] === 'healthy'): ?>
-                                <span class="status-healthy">✓ <?php esc_html_e('Healthy', 'mobility-trailblazers'); ?></span>
-                            <?php elseif ($table['status'] === 'needs_optimization'): ?>
-                                <span class="status-warning">⚠ <?php esc_html_e('Needs Optimization', 'mobility-trailblazers'); ?></span>
-                            <?php else: ?>
-                                <span class="status-error">✗ <?php esc_html_e('Issues Detected', 'mobility-trailblazers'); ?></span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <button type="button" 
-                                    class="button button-small mt-optimize-table" 
-                                    data-table="<?php echo esc_attr($table['name']); ?>">
-                                <?php esc_html_e('Optimize', 'mobility-trailblazers'); ?>
-                            </button>
-                            <button type="button" 
-                                    class="button button-small mt-analyze-table" 
-                                    data-table="<?php echo esc_attr($table['name']); ?>">
-                                <?php esc_html_e('Analyze', 'mobility-trailblazers'); ?>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                    <?php if (!empty($all_tables)): ?>
+                        <?php foreach ($all_tables as $table): 
+                            // Ensure table data is properly structured
+                            if (!is_array($table)) continue;
+                            $name = isset($table['name']) ? $table['name'] : '';
+                            $engine = isset($table['engine']) ? $table['engine'] : 'Unknown';
+                            $rows = isset($table['rows']) ? $table['rows'] : 0;
+                            $size_formatted = isset($table['size_formatted']) ? $table['size_formatted'] : 'N/A';
+                            $fragmentation = isset($table['fragmentation']) ? $table['fragmentation'] : 0;
+                            $status = isset($table['status']) ? $table['status'] : 'unknown';
+                            $is_plugin_table = isset($table['is_plugin_table']) ? $table['is_plugin_table'] : false;
+                            
+                            if (empty($name)) continue;
+                        ?>
+                        <tr>
+                            <td>
+                                <strong><?php echo esc_html($name); ?></strong>
+                                <?php if ($is_plugin_table): ?>
+                                <span class="dashicons dashicons-admin-plugins" title="<?php esc_attr_e('Plugin Table', 'mobility-trailblazers'); ?>"></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo esc_html($engine); ?></td>
+                            <td><?php echo esc_html(number_format($rows)); ?></td>
+                            <td><?php echo esc_html($size_formatted); ?></td>
+                            <td>
+                                <?php 
+                                $class = $fragmentation > 30 ? 'high' : ($fragmentation > 10 ? 'medium' : 'low');
+                                ?>
+                                <span class="fragmentation-<?php echo esc_attr($class); ?>">
+                                    <?php echo esc_html($fragmentation . '%'); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php if ($status === 'healthy'): ?>
+                                    <span class="status-healthy">✓ <?php esc_html_e('Healthy', 'mobility-trailblazers'); ?></span>
+                                <?php elseif ($status === 'needs_optimization'): ?>
+                                    <span class="status-warning">⚠ <?php esc_html_e('Needs Optimization', 'mobility-trailblazers'); ?></span>
+                                <?php else: ?>
+                                    <span class="status-error">✗ <?php esc_html_e('Issues Detected', 'mobility-trailblazers'); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <button type="button" 
+                                        class="button button-small mt-optimize-table" 
+                                        data-table="<?php echo esc_attr($name); ?>">
+                                    <?php esc_html_e('Optimize', 'mobility-trailblazers'); ?>
+                                </button>
+                                <button type="button" 
+                                        class="button button-small mt-analyze-table" 
+                                        data-table="<?php echo esc_attr($name); ?>">
+                                    <?php esc_html_e('Analyze', 'mobility-trailblazers'); ?>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7"><?php esc_html_e('No tables found or database connection error.', 'mobility-trailblazers'); ?></td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -186,7 +225,7 @@ $all_tables = $db_health->check_all_tables();
     <!-- Slow Queries -->
     <?php 
     $slow_queries = $db_health->get_slow_queries(10);
-    if (!empty($slow_queries)): 
+    if (!empty($slow_queries) && is_array($slow_queries)): 
     ?>
     <div class="mt-debug-section">
         <h3><?php esc_html_e('Slow Queries', 'mobility-trailblazers'); ?></h3>
@@ -200,15 +239,22 @@ $all_tables = $db_health->check_all_tables();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($slow_queries as $query): ?>
+                    <?php foreach ($slow_queries as $query): 
+                        if (!is_array($query)) continue;
+                        $query_text = isset($query['query']) ? $query['query'] : '';
+                        $time = isset($query['time']) ? $query['time'] : 'N/A';
+                        $rows_examined = isset($query['rows_examined']) ? $query['rows_examined'] : 'N/A';
+                        
+                        if (empty($query_text)) continue;
+                    ?>
                     <tr>
                         <td>
                             <code class="mt-query-preview">
-                                <?php echo esc_html(substr($query['query'], 0, 100) . (strlen($query['query']) > 100 ? '...' : '')); ?>
+                                <?php echo esc_html(substr($query_text, 0, 100) . (strlen($query_text) > 100 ? '...' : '')); ?>
                             </code>
                         </td>
-                        <td><?php echo esc_html($query['time']); ?></td>
-                        <td><?php echo esc_html($query['rows_examined']); ?></td>
+                        <td><?php echo esc_html($time); ?></td>
+                        <td><?php echo esc_html($rows_examined); ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

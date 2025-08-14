@@ -39,7 +39,6 @@
             
             // Debug script operations
             $(document).on('click', '.mt-execute-script', this.executeScript.bind(this));
-            $(document).on('click', '.mt-view-script', this.viewScript.bind(this));
             
             // Maintenance operations
             $(document).on('click', '.mt-run-maintenance', this.runMaintenance.bind(this));

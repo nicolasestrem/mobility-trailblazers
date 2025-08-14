@@ -539,7 +539,7 @@ class MT_Diagnostic_Service {
             $results['error_stats'] = [
                 'total' => $wpdb->get_var("SELECT COUNT(*) FROM $table_name"),
                 'today' => $wpdb->get_var(
-                    "SELECT COUNT(*) FROM $table_name WHERE DATE(timestamp) = CURDATE()"
+                    "SELECT COUNT(*) FROM $table_name WHERE DATE(created_at) = CURDATE()"
                 ),
                 'critical' => $wpdb->get_var(
                     "SELECT COUNT(*) FROM $table_name WHERE level = 'critical'"
