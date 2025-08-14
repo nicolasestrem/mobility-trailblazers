@@ -1,0 +1,220 @@
+{
+    "version": "2.3.0",
+    "updated": "2025-01-14",
+    "categories": {
+        "generators": {
+            "title": "Test Data Generators",
+            "description": "Scripts for generating test data",
+            "directory": "generators",
+            "scripts": {
+                "fake-candidates-generator.php": {
+                    "title": "Generate Fake Candidates",
+                    "description": "Creates test candidate data for development",
+                    "environments": ["development", "staging"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                },
+                "generate-sample-profiles.php": {
+                    "title": "Generate Sample Profiles",
+                    "description": "Creates sample profile data for testing",
+                    "environments": ["development", "staging"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                }
+            }
+        },
+        "migrations": {
+            "title": "Migration Tools",
+            "description": "Database and data migration scripts",
+            "directory": "migrations",
+            "scripts": {
+                "migrate-candidate-profiles.php": {
+                    "title": "Migrate Candidate Profiles",
+                    "description": "Migrates candidate profile data structure",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": true,
+                    "requires_backup": true,
+                    "author": "MT Team",
+                    "version": "2.0.0"
+                },
+                "migrate-jury-posts.php": {
+                    "title": "Migrate Jury Posts",
+                    "description": "Migrates jury member posts to new structure",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": true,
+                    "requires_backup": true,
+                    "author": "MT Team",
+                    "version": "2.0.0"
+                }
+            }
+        },
+        "diagnostics": {
+            "title": "Diagnostic Scripts",
+            "description": "System diagnostic and check scripts",
+            "directory": "diagnostics",
+            "scripts": {
+                "check-jury-status.php": {
+                    "title": "Check Jury Status",
+                    "description": "Verify jury member status and assignments",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                },
+                "test-db-connection.php": {
+                    "title": "Test Database Connection",
+                    "description": "Test database connectivity and table structure",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                },
+                "check-schneidewind-import.php": {
+                    "title": "Check Specific Import",
+                    "description": "Verify specific candidate import status",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                },
+                "performance-test.php": {
+                    "title": "Performance Test",
+                    "description": "Run performance diagnostics and benchmarks",
+                    "environments": ["development", "staging"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                }
+            }
+        },
+        "repairs": {
+            "title": "Repair Utilities",
+            "description": "Scripts for fixing data and structure issues",
+            "directory": "repairs",
+            "scripts": {
+                "fix-database.php": {
+                    "title": "Fix Database Structure",
+                    "description": "Repair database structure and integrity issues",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": true,
+                    "requires_confirmation": true,
+                    "author": "MT Team",
+                    "version": "2.0.0"
+                },
+                "fix-assignments.php": {
+                    "title": "Fix Assignments",
+                    "description": "Repair assignment data inconsistencies",
+                    "environments": ["development", "staging", "production"],
+                    "dangerous": true,
+                    "requires_confirmation": true,
+                    "author": "MT Team",
+                    "version": "2.0.0"
+                }
+            }
+        },
+        "imports": {
+            "title": "Import Utilities",
+            "description": "Data import scripts",
+            "directory": "",
+            "scripts": {
+                "jury-import.php": {
+                    "title": "Jury Member Import",
+                    "description": "Import jury member data from CSV",
+                    "environments": ["development", "staging"],
+                    "dangerous": true,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                },
+                "test-import-handler.php": {
+                    "title": "Test Import Handler",
+                    "description": "Test import functionality and validation",
+                    "environments": ["development"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                }
+            }
+        },
+        "testing": {
+            "title": "Testing Scripts",
+            "description": "Scripts for testing functionality",
+            "directory": "",
+            "scripts": {
+                "test-profile-system.php": {
+                    "title": "Test Profile System",
+                    "description": "Test profile functionality and data integrity",
+                    "environments": ["development", "staging"],
+                    "dangerous": false,
+                    "author": "MT Team",
+                    "version": "1.0.0"
+                }
+            }
+        },
+        "deprecated": {
+            "title": "Deprecated Scripts",
+            "description": "Old scripts kept for reference (DO NOT USE)",
+            "directory": "deprecated",
+            "scripts": {
+                "test-regex-debug.php": {
+                    "title": "[DEPRECATED] Test Regex Debug",
+                    "description": "Old regex patterns - current implementation differs",
+                    "environments": [],
+                    "dangerous": false,
+                    "deprecated": true,
+                    "deprecated_reason": "Superseded by new parsing logic",
+                    "author": "MT Team",
+                    "version": "0.9.0"
+                },
+                "fix-existing-evaluations.php": {
+                    "title": "[DEPRECATED] Fix Existing Evaluations",
+                    "description": "Old evaluation parsing logic",
+                    "environments": [],
+                    "dangerous": true,
+                    "deprecated": true,
+                    "deprecated_reason": "Superseded by new evaluation parser",
+                    "author": "MT Team",
+                    "version": "0.9.0"
+                },
+                "direct-fix-evaluations.php": {
+                    "title": "[DEPRECATED] Direct Fix Evaluations",
+                    "description": "Outdated evaluation fix",
+                    "environments": [],
+                    "dangerous": true,
+                    "deprecated": true,
+                    "deprecated_reason": "No longer compatible with current structure",
+                    "author": "MT Team",
+                    "version": "0.9.0"
+                },
+                "final-fix-evaluations.php": {
+                    "title": "[DEPRECATED] Final Fix Evaluations",
+                    "description": "Outdated evaluation fix",
+                    "environments": [],
+                    "dangerous": true,
+                    "deprecated": true,
+                    "deprecated_reason": "No longer compatible with current structure",
+                    "author": "MT Team",
+                    "version": "0.9.0"
+                },
+                "test-evaluation-parsing.php": {
+                    "title": "[DEPRECATED] Test Evaluation Parsing",
+                    "description": "Old parsing logic test",
+                    "environments": [],
+                    "dangerous": false,
+                    "deprecated": true,
+                    "deprecated_reason": "Uses outdated parsing methods",
+                    "author": "MT Team",
+                    "version": "0.9.0"
+                }
+            }
+        }
+    },
+    "metadata": {
+        "total_scripts": 18,
+        "active_scripts": 13,
+        "deprecated_scripts": 5,
+        "dangerous_scripts": 8,
+        "safe_scripts": 10
+    }
+}

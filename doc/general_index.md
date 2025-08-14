@@ -25,6 +25,9 @@
 - **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.25 - uses MT_Import_Handler)
 - **admin/class-mt-import-handler.php** - Centralized CSV processing with BOM handling and delimiter detection (v2.2.28 - enhanced CSV parsing)
 - **admin/class-mt-error-monitor.php** - Error monitoring and logging system
+- **admin/class-mt-debug-manager.php** - Debug script execution management with environment controls (v2.3.0)
+- **admin/class-mt-maintenance-tools.php** - System maintenance operations and database tools (v2.3.0)
+- **admin/class-mt-coaching.php** - Jury coaching dashboard for evaluation management (v2.2.29)
 
 ### AJAX Handlers (v2.2.28 - Enhanced security and validation)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging, response handling, and file validation (v2.2.28 - added validate_upload())
@@ -36,8 +39,9 @@
 
 ### Business Logic Services
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation
-- **services/class-mt-assignment-service.php** - Assignment creation and management logic
+- **services/class-mt-assignment-service.php** - Assignment creation and management logic (v2.2.29 - added rebalancing)
 - **services/class-mt-import-service.php** - Data import processing and validation
+- **services/class-mt-diagnostic-service.php** - Comprehensive system health monitoring and diagnostics (v2.3.0)
 
 ### Data Access Layer
 - **repositories/class-mt-evaluation-repository.php** - Database operations for evaluations
@@ -64,10 +68,19 @@
 - **admin/assignments.php** - Jury assignment management page
 - **admin/import-export.php** - Data import/export interface
 - **admin/settings.php** - Plugin configuration settings including data management options (v2.2.13)
-- **admin/diagnostics.php** - System health and debugging tools
+- **admin/diagnostics.php** - System health and debugging tools (deprecated - use Debug Center)
+- **admin/tools.php** - Maintenance tools interface (deprecated - use Debug Center)
 - **admin/error-monitor.php** - Error log viewer and monitoring
 - **admin/import-profiles.php** - Profile import wizard interface
 - **admin/audit-log.php** - Security audit log viewer with filtering and pagination
+- **admin/coaching.php** - Jury coaching dashboard for evaluation tracking (v2.2.29)
+- **admin/debug-center.php** - Unified developer tools interface (v2.3.0)
+- **admin/debug-center/tab-diagnostics.php** - System diagnostics tab (v2.3.0)
+- **admin/debug-center/tab-database.php** - Database tools tab (v2.3.0 - pending)
+- **admin/debug-center/tab-scripts.php** - Debug scripts tab (v2.3.0 - pending)
+- **admin/debug-center/tab-errors.php** - Error monitoring tab (v2.3.0 - pending)
+- **admin/debug-center/tab-tools.php** - Maintenance tools tab (v2.3.0 - pending)
+- **admin/debug-center/tab-info.php** - System information tab (v2.3.0 - pending)
 
 ### Frontend Templates
 - **frontend/jury-dashboard.php** - Main jury member evaluation interface
@@ -126,12 +139,42 @@
 - **jury-rankings-system.md** - Rankings calculation and display
 - **error-handling-system.md** - Error management implementation
 
-## 📁 /debug/ - Development Tools
+## 📁 /debug/ - Development Tools (v2.3.0 - Reorganized)
 
-- **generate-sample-profiles.php** - Creates test candidate data
-- **test-profile-system.php** - Profile system testing utilities
-- **migrate-candidate-profiles.php** - Database migration tools
-- **import-profiles.php** - Bulk profile import functionality
+### Script Organization
+- **registry.json** - Script metadata and environment controls (v2.3.0)
+- **README.md** - Debug script usage guidelines and warnings
+
+### Categorized Scripts (v2.3.0)
+- **generators/** - Test data generation scripts
+  - **fake-candidates-generator.php** - Creates test candidate data
+  - **generate-sample-profiles.php** - Sample profile generation
+  
+- **migrations/** - Data migration scripts
+  - **migrate-candidate-profiles.php** - Profile structure migration
+  - **migrate-jury-posts.php** - Jury member post migration
+  
+- **diagnostics/** - System diagnostic scripts
+  - **check-jury-status.php** - Jury status verification
+  - **test-db-connection.php** - Database connectivity testing
+  - **check-schneidewind-import.php** - Specific import verification
+  - **performance-test.php** - Performance benchmarking
+  
+- **repairs/** - Data repair utilities
+  - **fix-database.php** - Database structure repairs
+  - **fix-assignments.php** - Assignment data fixes
+  
+- **deprecated/** - Old scripts for reference only
+  - **test-regex-debug.php** - Outdated regex patterns
+  - **fix-existing-evaluations.php** - Old evaluation fixes
+  - **direct-fix-evaluations.php** - Legacy evaluation repair
+  - **final-fix-evaluations.php** - Legacy evaluation repair
+  - **test-evaluation-parsing.php** - Old parsing logic
+
+### Standalone Scripts
+- **jury-import.php** - Jury member import utility
+- **test-import-handler.php** - Import functionality testing
+- **test-profile-system.php** - Profile system testing
 
 ## 📁 /infrastructure/ - Deployment Configuration
 

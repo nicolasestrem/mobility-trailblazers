@@ -160,6 +160,16 @@ $.ajax({
 
 ### Debugging
 
+#### Debug Center (v2.3.0)
+The plugin now includes a comprehensive Debug Center for development and troubleshooting:
+- Access via **MT Award System → Developer Tools** 
+- Environment-aware (Development/Staging/Production)
+- System diagnostics and health monitoring
+- Debug script execution with audit logging
+- Database maintenance tools
+- See `doc/debug-center-guide.md` for complete documentation
+
+#### Console Logging
 The code includes extensive console logging for debugging:
 - Module initialization confirmations
 - Button detection results
