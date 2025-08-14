@@ -735,6 +735,195 @@ class MT_Import_Export {
     }
     
     /**
+     * Export candidates with streaming for memory optimization
+     *
+     * @param array $args Export arguments
+     * @return void Outputs CSV directly
+     * @since 2.2.28
+     */
+    public static function export_candidates_stream($args = []) {
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="candidates-' . date('Y-m-d-His') . '.csv"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Add BOM for Excel compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Write headers
+        $headers = [
+            'ID',
+            'Name',
+            'Organisation',
+            'Position',
+            'Category',
+            'Status',
+            'LinkedIn',
+            'Website',
+            'Description',
+            'Created Date',
+            'Modified Date'
+        ];
+        fputcsv($output, $headers);
+        
+        // Query in batches to avoid memory issues
+        $offset = 0;
+        $batch_size = 100;
+        
+        while (true) {
+            $candidates = get_posts([
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => $batch_size,
+                'offset' => $offset,
+                'post_status' => 'any',
+                'orderby' => 'ID',
+                'order' => 'ASC'
+            ]);
+            
+            if (empty($candidates)) {
+                break;
+            }
+            
+            foreach ($candidates as $candidate) {
+                $row = [
+                    $candidate->ID,
+                    $candidate->post_title,
+                    get_post_meta($candidate->ID, '_mt_organization', true),
+                    get_post_meta($candidate->ID, '_mt_position', true),
+                    get_post_meta($candidate->ID, '_mt_category_type', true),
+                    $candidate->post_status,
+                    get_post_meta($candidate->ID, '_mt_linkedin_url', true),
+                    get_post_meta($candidate->ID, '_mt_website_url', true),
+                    wp_strip_all_tags($candidate->post_content),
+                    $candidate->post_date,
+                    $candidate->post_modified
+                ];
+                fputcsv($output, $row);
+                
+                // Free memory
+                unset($row);
+            }
+            
+            $offset += $batch_size;
+            
+            // Clear WordPress object cache
+            wp_cache_flush();
+            
+            // Prevent timeout on large exports
+            if (function_exists('set_time_limit')) {
+                set_time_limit(30);
+            }
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Export evaluations with streaming for memory optimization
+     *
+     * @param array $args Export arguments
+     * @return void Outputs CSV directly
+     * @since 2.2.28
+     */
+    public static function export_evaluations_stream($args = []) {
+        global $wpdb;
+        
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="evaluations-' . date('Y-m-d-His') . '.csv"');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Add BOM for Excel compatibility
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        // Write headers
+        $headers = [
+            'Evaluation ID',
+            'Jury Member',
+            'Candidate',
+            'Criterion 1',
+            'Criterion 2',
+            'Criterion 3',
+            'Criterion 4',
+            'Criterion 5',
+            'Total Score',
+            'Comments',
+            'Status',
+            'Created Date'
+        ];
+        fputcsv($output, $headers);
+        
+        // Query in batches using direct SQL for efficiency
+        $table_name = $wpdb->prefix . 'mt_evaluations';
+        $offset = 0;
+        $batch_size = 100;
+        
+        while (true) {
+            $evaluations = $wpdb->get_results($wpdb->prepare(
+                "SELECT e.*, 
+                        u.display_name as jury_name,
+                        p.post_title as candidate_name
+                 FROM {$table_name} e
+                 LEFT JOIN {$wpdb->users} u ON e.jury_member_id = u.ID
+                 LEFT JOIN {$wpdb->posts} p ON e.candidate_id = p.ID
+                 ORDER BY e.id ASC
+                 LIMIT %d OFFSET %d",
+                $batch_size,
+                $offset
+            ));
+            
+            if (empty($evaluations)) {
+                break;
+            }
+            
+            foreach ($evaluations as $eval) {
+                $total_score = $eval->criterion_1 + $eval->criterion_2 + 
+                              $eval->criterion_3 + $eval->criterion_4 + $eval->criterion_5;
+                
+                $row = [
+                    $eval->id,
+                    $eval->jury_name,
+                    $eval->candidate_name,
+                    $eval->criterion_1,
+                    $eval->criterion_2,
+                    $eval->criterion_3,
+                    $eval->criterion_4,
+                    $eval->criterion_5,
+                    $total_score,
+                    $eval->comments,
+                    $eval->status,
+                    $eval->created_at
+                ];
+                fputcsv($output, $row);
+                
+                // Free memory
+                unset($row);
+            }
+            
+            $offset += $batch_size;
+            
+            // Prevent timeout on large exports
+            if (function_exists('set_time_limit')) {
+                set_time_limit(30);
+            }
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
      * Generate template dynamically if file doesn't exist
      *
      * @param string $type Template type

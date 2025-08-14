@@ -307,11 +307,31 @@
                 html: `
                     <div class="mt-modal-content">
                         <h2>${mt_csv_import.i18n.importing}</h2>
-                        <div class="mt-progress-bar">
-                            <div class="mt-progress-bar-fill" style="width: 0%"></div>
+                        <div class="mt-progress-wrapper">
+                            <div class="mt-progress-bar">
+                                <div class="mt-progress-bar-fill" style="width: 0%">
+                                    <span class="mt-progress-percentage">0%</span>
+                                </div>
+                            </div>
+                            <div class="mt-progress-stats">
+                                <span class="mt-progress-current">0</span> / <span class="mt-progress-total">0</span> records
+                            </div>
                         </div>
                         <p class="mt-progress-message">${mt_csv_import.i18n.please_wait}</p>
-                        <div class="mt-progress-details"></div>
+                        <div class="mt-progress-details">
+                            <div class="mt-progress-item mt-progress-success" style="display: none;">
+                                <span class="icon">✓</span> <span class="label">${mt_csv_import.i18n.imported || 'Imported'}:</span> <span class="count">0</span>
+                            </div>
+                            <div class="mt-progress-item mt-progress-updated" style="display: none;">
+                                <span class="icon">↻</span> <span class="label">${mt_csv_import.i18n.updated || 'Updated'}:</span> <span class="count">0</span>
+                            </div>
+                            <div class="mt-progress-item mt-progress-skipped" style="display: none;">
+                                <span class="icon">⊘</span> <span class="label">${mt_csv_import.i18n.skipped || 'Skipped'}:</span> <span class="count">0</span>
+                            </div>
+                            <div class="mt-progress-item mt-progress-errors" style="display: none;">
+                                <span class="icon">✗</span> <span class="label">${mt_csv_import.i18n.errors || 'Errors'}:</span> <span class="count">0</span>
+                            </div>
+                        </div>
                     </div>
                 `
             });
@@ -338,11 +358,38 @@
         /**
          * Update progress
          */
-        updateProgress: function(percentage, message) {
+        updateProgress: function(percentage, message, stats) {
+            // Update progress bar
             $('.mt-progress-bar-fill').css('width', percentage + '%');
+            $('.mt-progress-percentage').text(percentage + '%');
             
+            // Update message
             if (message) {
                 $('.mt-progress-message').text(message);
+            }
+            
+            // Update stats if provided
+            if (stats) {
+                if (stats.total !== undefined) {
+                    $('.mt-progress-total').text(stats.total);
+                }
+                if (stats.current !== undefined) {
+                    $('.mt-progress-current').text(stats.current);
+                }
+                
+                // Update detail counts
+                if (stats.success !== undefined && stats.success > 0) {
+                    $('.mt-progress-success').show().find('.count').text(stats.success);
+                }
+                if (stats.updated !== undefined && stats.updated > 0) {
+                    $('.mt-progress-updated').show().find('.count').text(stats.updated);
+                }
+                if (stats.skipped !== undefined && stats.skipped > 0) {
+                    $('.mt-progress-skipped').show().find('.count').text(stats.skipped);
+                }
+                if (stats.errors !== undefined && stats.errors > 0) {
+                    $('.mt-progress-errors').show().find('.count').text(stats.errors);
+                }
             }
         },
         

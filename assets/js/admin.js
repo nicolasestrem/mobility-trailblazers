@@ -121,6 +121,42 @@ if (typeof mt_admin.i18n === 'undefined') {
     };
 
     /**
+     * Button loading state management
+     * @param {jQuery} $button - Button element
+     * @param {boolean} loading - True to show loading, false to hide
+     * @param {string} originalText - Original button text to restore
+     * @since 2.2.28
+     */
+    window.setButtonLoading = function($button, loading, originalText) {
+        if (loading) {
+            $button.addClass('loading').prop('disabled', true);
+            if (originalText) {
+                $button.data('original-text', originalText);
+            }
+        } else {
+            $button.removeClass('loading').prop('disabled', false);
+            const text = $button.data('original-text');
+            if (text) {
+                $button.text(text);
+            }
+        }
+    };
+    
+    /**
+     * Add loading overlay to element
+     * @param {jQuery} $element - Element to overlay
+     * @param {boolean} show - True to show, false to hide
+     * @since 2.2.28
+     */
+    window.setLoadingOverlay = function($element, show) {
+        if (show) {
+            $element.addClass('mt-loading-overlay active');
+        } else {
+            $element.removeClass('active');
+        }
+    };
+    
+    /**
      * Refresh dashboard widget
      * @param {string} widgetId - The ID of the widget to refresh
      * @param {function} callback - Optional callback after refresh

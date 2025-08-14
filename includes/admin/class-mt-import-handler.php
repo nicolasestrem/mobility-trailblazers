@@ -60,9 +60,10 @@ class MT_Import_Handler {
      * @param string $file Path to CSV file
      * @param string $import_type Type of import (candidates or jury_members)
      * @param bool $update_existing Whether to update existing records
+     * @param int $batch_size Number of records to process per batch
      * @return array Results array with counts and messages
      */
-    public function process_csv_import($file, $import_type, $update_existing = false) {
+    public function process_csv_import($file, $import_type, $update_existing = false, $batch_size = 50) {
         $results = [
             'success' => 0,
             'updated' => 0,
@@ -164,16 +165,21 @@ class MT_Import_Handler {
         
         fclose($handle);
         
-        // Process based on import type
-        if ($import_type === 'jury_members') {
-            $results = $this->import_jury_members($data, $update_existing, $results);
-        } elseif ($import_type === 'candidates') {
-            $results = $this->import_candidates($data, $update_existing, $results);
+        // Process in batches for large datasets
+        if (count($data) > $batch_size) {
+            $results = $this->process_in_batches($data, $import_type, $update_existing, $batch_size, $results);
         } else {
-            $results['messages'][] = sprintf(
-                __('Invalid import type: %s', 'mobility-trailblazers'),
-                $import_type
-            );
+            // Process normally for small datasets
+            if ($import_type === 'jury_members') {
+                $results = $this->import_jury_members($data, $update_existing, $results);
+            } elseif ($import_type === 'candidates') {
+                $results = $this->import_candidates($data, $update_existing, $results);
+            } else {
+                $results['messages'][] = sprintf(
+                    __('Invalid import type: %s', 'mobility-trailblazers'),
+                    $import_type
+                );
+            }
         }
         
         // Log import completion
@@ -187,6 +193,66 @@ class MT_Import_Handler {
                 'errors' => $results['errors']
             ]
         ]);
+        
+        return $results;
+    }
+    
+    /**
+     * Process data in batches for better performance
+     *
+     * @param array $data All data rows
+     * @param string $import_type Type of import
+     * @param bool $update_existing Whether to update existing records
+     * @param int $batch_size Size of each batch
+     * @param array $results Initial results array
+     * @return array Updated results
+     * @since 2.2.28
+     */
+    private function process_in_batches($data, $import_type, $update_existing, $batch_size, $results) {
+        $batches = array_chunk($data, $batch_size);
+        $total_batches = count($batches);
+        $current_batch = 0;
+        
+        // Store progress in transient for AJAX polling
+        $progress_key = 'mt_import_progress_' . get_current_user_id();
+        
+        foreach ($batches as $batch) {
+            $current_batch++;
+            
+            // Update progress
+            $progress = [
+                'current_batch' => $current_batch,
+                'total_batches' => $total_batches,
+                'percentage' => round(($current_batch / $total_batches) * 100),
+                'message' => sprintf(
+                    __('Processing batch %d of %d...', 'mobility-trailblazers'),
+                    $current_batch,
+                    $total_batches
+                )
+            ];
+            set_transient($progress_key, $progress, 300);
+            
+            // Process batch based on type
+            if ($import_type === 'jury_members') {
+                $results = $this->import_jury_members($batch, $update_existing, $results);
+            } elseif ($import_type === 'candidates') {
+                $results = $this->import_candidates($batch, $update_existing, $results);
+            }
+            
+            // Check for timeout or user abort
+            if (connection_aborted()) {
+                $results['messages'][] = __('Import aborted by user', 'mobility-trailblazers');
+                break;
+            }
+            
+            // Prevent PHP timeout on large imports
+            if (function_exists('set_time_limit')) {
+                set_time_limit(30);
+            }
+        }
+        
+        // Clear progress transient
+        delete_transient($progress_key);
         
         return $results;
     }

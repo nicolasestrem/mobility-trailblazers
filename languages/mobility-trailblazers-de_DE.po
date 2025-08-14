@@ -473,3 +473,150 @@ msgstr "Deutsch"
 
 msgid "Deutsch"
 msgstr "Deutsch"
+
+# v2.2.28 - Security and Import Translations
+msgid "Security check failed"
+msgstr "Sicherheitsprüfung fehlgeschlagen"
+
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "Sicherheitsprüfung fehlgeschlagen. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut."
+
+msgid "You do not have permission to perform this action."
+msgstr "Sie haben keine Berechtigung, diese Aktion auszuführen."
+
+msgid "Permission denied"
+msgstr "Zugriff verweigert"
+
+msgid "You must be logged in to test AJAX"
+msgstr "Sie müssen angemeldet sein, um AJAX zu testen"
+
+msgid "You must be an administrator to access debug information"
+msgstr "Sie müssen Administrator sein, um auf Debug-Informationen zuzugreifen"
+
+# File Upload Validation
+msgid "File upload failed. Please try again."
+msgstr "Datei-Upload fehlgeschlagen. Bitte versuchen Sie es erneut."
+
+msgid "File too large. Maximum size is %s."
+msgstr "Datei zu groß. Maximale Größe ist %s."
+
+msgid "Invalid file type. Allowed types: %s"
+msgstr "Ungültiger Dateityp. Erlaubte Typen: %s"
+
+msgid "Invalid file type. Only CSV files are allowed."
+msgstr "Ungültiger Dateityp. Nur CSV-Dateien sind erlaubt."
+
+msgid "File contains prohibited content."
+msgstr "Datei enthält verbotene Inhalte."
+
+# CSV Import
+msgid "File not found or not readable"
+msgstr "Datei nicht gefunden oder nicht lesbar"
+
+msgid "File size exceeds maximum of %s"
+msgstr "Dateigröße überschreitet Maximum von %s"
+
+msgid "Could not open CSV file"
+msgstr "CSV-Datei konnte nicht geöffnet werden"
+
+msgid "CSV file appears to be empty"
+msgstr "CSV-Datei scheint leer zu sein"
+
+msgid "Column count mismatch"
+msgstr "Spaltenanzahl stimmt nicht überein"
+
+msgid "Failed to parse row"
+msgstr "Zeile konnte nicht analysiert werden"
+
+msgid "Invalid import type: %s"
+msgstr "Ungültiger Importtyp: %s"
+
+msgid "Missing required field: %s"
+msgstr "Erforderliches Feld fehlt: %s"
+
+msgid "Invalid email address"
+msgstr "Ungültige E-Mail-Adresse"
+
+msgid "Import aborted by user"
+msgstr "Import vom Benutzer abgebrochen"
+
+msgid "Processing batch %d of %d..."
+msgstr "Verarbeite Stapel %d von %d..."
+
+# Progress Bar
+msgid "Importing"
+msgstr "Importieren"
+
+msgid "import_in_progress"
+msgstr "Import läuft"
+
+msgid "please_wait"
+msgstr "Bitte warten"
+
+msgid "Imported"
+msgstr "Importiert"
+
+msgid "Updated"
+msgstr "Aktualisiert"
+
+msgid "Skipped"
+msgstr "Übersprungen"
+
+msgid "Errors"
+msgstr "Fehler"
+
+msgid "records"
+msgstr "Datensätze"
+
+# Database Integrity
+msgid "Orphaned assignments cleaned"
+msgstr "Verwaiste Zuweisungen bereinigt"
+
+msgid "Database integrity verified"
+msgstr "Datenbankintegrität überprüft"
+
+msgid "Missing data fixed"
+msgstr "Fehlende Daten behoben"
+
+# Widget Refresh
+msgid "Widget updated"
+msgstr "Widget aktualisiert"
+
+msgid "Refresh failed"
+msgstr "Aktualisierung fehlgeschlagen"
+
+# Button States
+msgid "Loading"
+msgstr "Lädt"
+
+msgid "Processing"
+msgstr "Verarbeitung"
+
+msgid "Please wait"
+msgstr "Bitte warten"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Are you sure?"
+msgstr "Sind Sie sicher?"
+
+# Excel Import Notice
+msgid "Excel files (.xlsx) are not supported. Please save your file as CSV format: In Excel, go to File → Save As → Choose \"CSV (Comma delimited)\" as the file type."
+msgstr "Excel-Dateien (.xlsx) werden nicht unterstützt. Bitte speichern Sie Ihre Datei im CSV-Format: Gehen Sie in Excel zu Datei → Speichern unter → Wählen Sie \"CSV (Trennzeichen-getrennt)\" als Dateityp."
+
+# Additional Admin Messages
+msgid "Changes saved successfully"
+msgstr "Änderungen erfolgreich gespeichert"
+
+msgid "Operation completed successfully"
+msgstr "Vorgang erfolgreich abgeschlossen"
+
+msgid "An unexpected error occurred. Please try again."
+msgstr "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+
+msgid "No changes detected"
+msgstr "Keine Änderungen erkannt"
+
+msgid "Settings updated"
+msgstr "Einstellungen aktualisiert"
