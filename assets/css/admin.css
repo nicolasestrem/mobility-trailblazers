@@ -1075,4 +1075,40 @@ input[type="checkbox"]:checked {
     .mt-search-box {
         width: 100%;
     }
+}
+
+/* Widget Loading States */
+.mt-widget-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.mt-widget-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.8);
+    z-index: 1;
+}
+
+.mt-widget-loading::after {
+    content: 'Loading...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    font-weight: bold;
+    color: var(--mt-primary);
+    font-size: 14px;
+    animation: mt-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mt-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 } 

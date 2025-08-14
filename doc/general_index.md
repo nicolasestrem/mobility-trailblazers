@@ -23,15 +23,15 @@
 - **admin/class-mt-admin-notices.php** - System for displaying admin notifications
 - **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.25 - uses MT_Import_Handler)
 - **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.25 - uses MT_Import_Handler)
-- **admin/class-mt-import-handler.php** - Centralized CSV processing for all import types (v2.2.25 - consolidated all import logic)
+- **admin/class-mt-import-handler.php** - Centralized CSV processing with BOM handling and delimiter detection (v2.2.28 - enhanced CSV parsing)
 - **admin/class-mt-error-monitor.php** - Error monitoring and logging system
 
-### AJAX Handlers (v2.2.13 - Standardized error handling)
-- **ajax/class-mt-base-ajax.php** - Base class with centralized error logging and response handling
-- **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with standardized error responses
+### AJAX Handlers (v2.2.28 - Enhanced security and validation)
+- **ajax/class-mt-base-ajax.php** - Base class with centralized error logging, response handling, and file validation (v2.2.28 - added validate_upload())
+- **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with enhanced security checks (v2.2.28 - secured debug endpoints)
 - **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
-- **ajax/class-mt-import-ajax.php** - Quick CSV import handler for candidates page (v2.2.25 - uses MT_Import_Handler)
+- **ajax/class-mt-import-ajax.php** - Quick CSV import handler using enhanced validation (v2.2.28 - uses validate_upload())
 - **ajax/class-mt-csv-import-ajax.php** - Comprehensive CSV import with progress tracking (v2.2.24)
 
 ### Business Logic Services
@@ -41,7 +41,7 @@
 
 ### Data Access Layer
 - **repositories/class-mt-evaluation-repository.php** - Database operations for evaluations
-- **repositories/class-mt-assignment-repository.php** - Database operations for assignments
+- **repositories/class-mt-assignment-repository.php** - Database operations for assignments (v2.2.28 - added integrity methods)
 - **repositories/class-mt-candidate-repository.php** - Candidate data management
 - **repositories/class-mt-audit-log-repository.php** - Audit log data access and filtering
 
@@ -79,14 +79,14 @@
 ## 📁 /assets/ - Static Resources
 
 ### Stylesheets
-- **css/admin.css** - Admin interface styling with brand colors
+- **css/admin.css** - Admin interface with widget loading states (v2.2.28 - added .mt-widget-loading)
 - **css/frontend.css** - Public-facing interface styles
 - **css/jury-dashboard.css** - Specific styling for jury evaluation interface
 - **css/csv-import.css** - Progress modal and import UI styles (v2.2.24)
 
-### JavaScript
-- **js/admin.js** - Admin functionality including bulk operations and AJAX
-- **js/frontend.js** - Public interface interactions and form handling
+### JavaScript (v2.2.28 - Event delegation and widget refresh)
+- **js/admin.js** - Admin functionality with event delegation and widget refresh functions (v2.2.28)
+- **js/frontend.js** - Public interface with mt_ajax fallback initialization (v2.2.28)
 - **js/jury-evaluation.js** - Evaluation form validation and submission
 - **js/charts.js** - Data visualization for statistics and progress
 - **js/candidate-import.js** - AJAX-based CSV import with file picker dialog (v2.2.16)

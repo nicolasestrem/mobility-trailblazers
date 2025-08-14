@@ -21,6 +21,8 @@ The admin JavaScript is organized into modular components that load conditionall
   - `mtUpdateUrlParam()` / `mtGetUrlParam()` - URL parameter management
   - `mtFormatNumber()` - Number formatting for DACH region
   - `mtDebounce()` - Function debouncing utility
+  - `refreshDashboardWidget(widgetId, callback)` - Refresh individual dashboard widget via AJAX (v2.2.28)
+  - `refreshDashboardWidgets(widgetIds)` - Refresh multiple widgets at once (v2.2.28)
 
 #### Assignment Management Module (`MTAssignmentManager`) - COMPLETE
 Loaded only on the Assignment Management page. Provides full assignment management functionality:
@@ -1100,3 +1102,4 @@ All AJAX errors are logged with:
 - Additional context data
 - Timestamp
 - Request parameters (sanitized)
+

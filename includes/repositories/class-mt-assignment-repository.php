@@ -613,4 +613,131 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         
         return (int) $wpdb->get_var($query);
     }
+    
+    /**
+     * Clean up orphaned assignments (where candidate or jury member no longer exists)
+     *
+     * @return array Array with counts of cleaned items
+     * @since 2.2.28
+     */
+    public function cleanup_orphaned_assignments() {
+        global $wpdb;
+        
+        $cleaned = [
+            'orphaned_candidates' => 0,
+            'orphaned_jury_members' => 0,
+            'missing_assigned_by' => 0
+        ];
+        
+        // Remove assignments for non-existent candidates
+        $orphaned_candidates = $wpdb->query("
+            DELETE a FROM {$this->table_name} a
+            LEFT JOIN {$wpdb->posts} p ON a.candidate_id = p.ID
+            WHERE p.ID IS NULL OR p.post_type != 'mt_candidate'
+        ");
+        $cleaned['orphaned_candidates'] = $orphaned_candidates;
+        
+        // Remove assignments for non-existent jury members
+        $orphaned_jury = $wpdb->query("
+            DELETE a FROM {$this->table_name} a
+            LEFT JOIN {$wpdb->users} u ON a.jury_member_id = u.ID
+            WHERE u.ID IS NULL
+        ");
+        $cleaned['orphaned_jury_members'] = $orphaned_jury;
+        
+        // Fix missing assigned_by values (set to admin user)
+        $admin = get_users(['role' => 'administrator', 'number' => 1]);
+        if (!empty($admin)) {
+            $admin_id = $admin[0]->ID;
+            $missing_assigned_by = $wpdb->query($wpdb->prepare("
+                UPDATE {$this->table_name}
+                SET assigned_by = %d
+                WHERE assigned_by IS NULL OR assigned_by = 0
+            ", $admin_id));
+            $cleaned['missing_assigned_by'] = $missing_assigned_by;
+        }
+        
+        // Clear all assignment caches
+        $this->clear_all_caches();
+        
+        // Log cleanup
+        if (array_sum($cleaned) > 0) {
+            MT_Logger::info('Assignment cleanup completed', $cleaned);
+        }
+        
+        return $cleaned;
+    }
+    
+    /**
+     * Verify database integrity for assignments
+     *
+     * @return array Array with integrity check results
+     * @since 2.2.28
+     */
+    public function verify_integrity() {
+        global $wpdb;
+        
+        $issues = [];
+        
+        // Check for orphaned candidates
+        $orphaned_candidates = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$this->table_name} a
+            LEFT JOIN {$wpdb->posts} p ON a.candidate_id = p.ID
+            WHERE p.ID IS NULL OR p.post_type != 'mt_candidate'
+        ");
+        if ($orphaned_candidates > 0) {
+            $issues['orphaned_candidates'] = $orphaned_candidates;
+        }
+        
+        // Check for orphaned jury members
+        $orphaned_jury = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$this->table_name} a
+            LEFT JOIN {$wpdb->users} u ON a.jury_member_id = u.ID
+            WHERE u.ID IS NULL
+        ");
+        if ($orphaned_jury > 0) {
+            $issues['orphaned_jury_members'] = $orphaned_jury;
+        }
+        
+        // Check for missing assigned_by
+        $missing_assigned_by = $wpdb->get_var("
+            SELECT COUNT(*) FROM {$this->table_name}
+            WHERE assigned_by IS NULL OR assigned_by = 0
+        ");
+        if ($missing_assigned_by > 0) {
+            $issues['missing_assigned_by'] = $missing_assigned_by;
+        }
+        
+        // Check for duplicate assignments
+        $duplicates = $wpdb->get_var("
+            SELECT COUNT(*) FROM (
+                SELECT jury_member_id, candidate_id, COUNT(*) as cnt
+                FROM {$this->table_name}
+                GROUP BY jury_member_id, candidate_id
+                HAVING cnt > 1
+            ) as duplicates
+        ");
+        if ($duplicates > 0) {
+            $issues['duplicate_assignments'] = $duplicates;
+        }
+        
+        return $issues;
+    }
+    
+    /**
+     * Clear all assignment caches
+     *
+     * @return void
+     * @since 2.2.28
+     */
+    private function clear_all_caches() {
+        global $wpdb;
+        
+        // Delete all assignment-related transients
+        $wpdb->query("
+            DELETE FROM {$wpdb->options}
+            WHERE option_name LIKE '_transient_mt_jury_assignments_%'
+            OR option_name LIKE '_transient_timeout_mt_jury_assignments_%'
+        ");
+    }
 } 

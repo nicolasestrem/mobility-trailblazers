@@ -2,6 +2,74 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.28] - 2025-08-14
+
+### Fixed
+- **CSV Import BOM Handling**:
+  - Fixed BOM (Byte Order Mark) detection to prevent header misreading
+  - Added automatic delimiter detection (comma, semicolon, tab, pipe)
+  - Enhanced header cleaning to remove BOM, trim whitespace, and normalize spaces
+  - Improved compatibility with Excel-generated CSV files
+
+- **Field Validation & Mapping**:
+  - Made CSV field mapping case-insensitive
+  - Added support for alternate field names (Organisation/Organization, Website/Webseite)
+  - Fixed field validation to handle both uppercase and lowercase field names
+  - Improved robustness when importing from different CSV sources
+
+- **AJAX Security Enhancements**:
+  - Added nonce verification to test_ajax and debug_user endpoints
+  - Added permission checks for debug endpoints (requires manage_options)
+  - Enhanced file upload validation with comprehensive checks
+  - Added malicious content detection for uploaded files
+
+- **JavaScript Improvements**:
+  - Added fallback initialization for mt_ajax object
+  - Added validation for mt_ajax structure
+  - Converted event handlers to use event delegation for dynamic elements
+  - Improved handling of dynamically added DOM elements
+
+- **Database Integrity**:
+  - Added cleanup_orphaned_assignments() method to remove invalid records
+  - Added verify_integrity() method to check for database issues
+  - Ensured assigned_by field is always populated
+  - Added methods to fix missing or invalid data
+
+- **Widget Management**:
+  - Added refreshDashboardWidget() function for AJAX widget updates
+  - Added refreshDashboardWidgets() for batch widget updates
+  - Added loading states and animations for widget refresh
+  - Improved user feedback during data updates
+
+### Added
+- **Base AJAX Class Enhancement**:
+  - Added validate_upload() method for standardized file validation
+  - Supports MIME type checking, file size limits, and content scanning
+  - Prevents PHP and script injection attempts
+  - Centralized validation logic for all upload handlers
+
+- **Database Cleanup Methods**:
+  - cleanup_orphaned_assignments(): Remove assignments for deleted candidates/jury
+  - verify_integrity(): Check for data consistency issues
+  - clear_all_caches(): Clear assignment-related transients
+
+- **CSS Enhancements**:
+  - Added .mt-widget-loading class with visual feedback
+  - Added pulse animation for loading states
+  - Improved visual feedback during AJAX operations
+
+### Security
+- All AJAX handlers now properly extend MT_Base_Ajax
+- Consistent use of verify_nonce() and check_permission() methods
+- Enhanced file upload validation with multiple security layers
+- Added logging for security events and suspicious activities
+
+### Technical Improvements
+- Event delegation improves performance with dynamic content
+- Reduced memory usage through proper event handler management
+- Better error handling and user feedback
+- Improved code organization and reusability
+
 ## [2.2.27] - 2025-08-13
 
 ### Fixed

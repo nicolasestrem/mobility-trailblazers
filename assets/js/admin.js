@@ -113,10 +113,70 @@ if (typeof mt_admin.i18n === 'undefined') {
         }
         
         // Handle dismiss button
-        $('.mt-notification .notice-dismiss').on('click', function() {
+        $(document).on('click', '.mt-notification .notice-dismiss', function() {
             $(this).closest('.mt-notification').fadeOut(400, function() {
                 $(this).remove();
             });
+        });
+    };
+
+    /**
+     * Refresh dashboard widget
+     * @param {string} widgetId - The ID of the widget to refresh
+     * @param {function} callback - Optional callback after refresh
+     * @since 2.2.28
+     */
+    window.refreshDashboardWidget = function(widgetId, callback) {
+        const $widget = $('#' + widgetId);
+        if (!$widget.length) {
+            if (callback) callback(false);
+            return;
+        }
+        
+        // Add loading state
+        $widget.addClass('mt-widget-loading');
+        
+        $.ajax({
+            url: mt_admin.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'mt_refresh_widget',
+                widget: widgetId,
+                nonce: mt_admin.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.html) {
+                    $widget.html(response.data.html);
+                    // Reinitialize any dynamic elements in the widget
+                    if (typeof initTooltips === 'function') {
+                        initTooltips();
+                    }
+                    if (callback) callback(true);
+                } else {
+                    if (callback) callback(false);
+                }
+            },
+            error: function() {
+                if (callback) callback(false);
+            },
+            complete: function() {
+                $widget.removeClass('mt-widget-loading');
+            }
+        });
+    };
+    
+    /**
+     * Refresh multiple widgets
+     * @param {array} widgetIds - Array of widget IDs to refresh
+     * @since 2.2.28
+     */
+    window.refreshDashboardWidgets = function(widgetIds) {
+        if (!Array.isArray(widgetIds)) {
+            widgetIds = [widgetIds];
+        }
+        
+        widgetIds.forEach(function(widgetId) {
+            refreshDashboardWidget(widgetId);
         });
     };
 
@@ -134,31 +194,31 @@ if (typeof mt_admin.i18n === 'undefined') {
         
         bindEvents: function() {
             // Auto-assign button
-            $('#mt-auto-assign-btn').on('click', (e) => {
+            $(document).on('click', '#mt-auto-assign-btn', (e) => {
                 e.preventDefault();
                 this.showAutoAssignModal();
             });
             
             // Manual assignment button
-            $('#mt-manual-assign-btn').on('click', (e) => {
+            $(document).on('click', '#mt-manual-assign-btn', (e) => {
                 e.preventDefault();
                 this.showManualAssignModal();
             });
             
             // Bulk actions button
-            $('#mt-bulk-actions-btn').on('click', (e) => {
+            $(document).on('click', '#mt-bulk-actions-btn', (e) => {
                 e.preventDefault();
                 this.toggleBulkActions();
             });
             
             // Export button
-            $('#mt-export-btn').on('click', (e) => {
+            $(document).on('click', '#mt-export-btn', (e) => {
                 e.preventDefault();
                 this.exportAssignments();
             });
             
             // Clear all button
-            $('#mt-clear-all-btn').on('click', (e) => {
+            $(document).on('click', '#mt-clear-all-btn', (e) => {
                 e.preventDefault();
                 this.clearAllAssignments();
             });
@@ -170,30 +230,30 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
             
             // Modal close buttons
-            $('.mt-modal-close').on('click', (e) => {
+            $(document).on('click', '.mt-modal-close', (e) => {
                 e.preventDefault();
                 $('.mt-modal').fadeOut(300);
             });
             
             // Manual assignment form submission
-            $('#mt-manual-assignment-form').on('submit', (e) => {
+            $(document).on('submit', '#mt-manual-assignment-form', (e) => {
                 e.preventDefault();
                 this.submitManualAssignment();
             });
             
             // Auto-assignment form submission
-            $('#mt-auto-assign-modal form').on('submit', (e) => {
+            $(document).on('submit', '#mt-auto-assign-modal form', (e) => {
                 e.preventDefault();
                 this.submitAutoAssignment();
             });
             
             // Filter handlers
-            $('#mt-filter-jury, #mt-filter-status').on('change', () => {
+            $(document).on('change', '#mt-filter-jury, #mt-filter-status', () => {
                 this.applyFilters();
             });
             
             // Search handler
-            $('#mt-assignment-search').on('keyup', function() {
+            $(document).on('keyup', '#mt-assignment-search', function() {
                 const searchTerm = $(this).val();
                 MTAssignmentManager.filterAssignments(searchTerm);
             });
@@ -201,18 +261,18 @@ if (typeof mt_admin.i18n === 'undefined') {
         
         initBulkActions: function() {
             // Select all checkbox
-            $('#mt-select-all-assignments').on('change', function() {
+            $(document).on('change', '#mt-select-all-assignments', function() {
                 $('.mt-assignment-checkbox').prop('checked', $(this).prop('checked'));
             });
             
             // Apply bulk action button
-            $('#mt-apply-bulk-action').on('click', (e) => {
+            $(document).on('click', '#mt-apply-bulk-action', (e) => {
                 e.preventDefault();
                 this.applyBulkAction();
             });
             
             // Cancel bulk action button
-            $('#mt-cancel-bulk-action').on('click', (e) => {
+            $(document).on('click', '#mt-cancel-bulk-action', (e) => {
                 e.preventDefault();
                 this.toggleBulkActions();
             });
@@ -613,13 +673,13 @@ if (typeof mt_admin.i18n === 'undefined') {
             $('#reassign_jury_member').html(juryOptions);
             
             // Bind close event
-            $('#mt-reassign-modal .mt-modal-close').on('click', (e) => {
+            $(document).on('click', '#mt-reassign-modal .mt-modal-close', (e) => {
                 e.preventDefault();
                 $('#mt-reassign-modal').fadeOut(300);
             });
             
             // Bind form submit
-            $('#mt-reassign-form').on('submit', (e) => {
+            $(document).on('submit', '#mt-reassign-form', (e) => {
                 e.preventDefault();
                 this.submitReassignment();
             });
@@ -698,16 +758,16 @@ if (typeof mt_admin.i18n === 'undefined') {
         },
         bindEvents: function() {
             // Bind all event listeners for the evaluations page.
-            $('.view-details').on('click', (e) => {
+            $(document).on('click', '.view-details', (e) => {
                 const $trigger = $(e.currentTarget);
                 const evaluationId = $trigger.data('evaluation-id');
                 this.viewDetails(evaluationId, $trigger);
             });
 
-            $('#cb-select-all-1, #cb-select-all-2').on('click', this.handleSelectAll);
+            $(document).on('click', '#cb-select-all-1, #cb-select-all-2', this.handleSelectAll);
             $('input[name="evaluation[]"]').on('click', this.handleSingleSelect);
 
-            $('#doaction, #doaction2').on('click', (e) => {
+            $(document).on('click', '#doaction, #doaction2', (e) => {
                 const action = $(e.currentTarget).prev('select').val();
                 this.applyBulkAction(action);
             });

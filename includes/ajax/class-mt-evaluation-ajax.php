@@ -795,6 +795,18 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function test_ajax() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            $this->error(__('You must be logged in to test AJAX', 'mobility-trailblazers'));
+            return;
+        }
+        
         $this->success([
             'message' => 'AJAX is working correctly',
             'timestamp' => current_time('mysql'),
@@ -808,6 +820,18 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * @return void
      */
     public function debug_user() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_ajax_nonce')) {
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check if user has admin capabilities for debugging
+        if (!current_user_can('manage_options')) {
+            $this->error(__('You must be an administrator to access debug information', 'mobility-trailblazers'));
+            return;
+        }
+        
         $current_user_id = get_current_user_id();
         $user = wp_get_current_user();
         

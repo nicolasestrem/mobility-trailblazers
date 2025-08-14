@@ -6,6 +6,32 @@
 (function($) {
     'use strict';
 
+    // Initialize mt_ajax object if not defined
+    if (typeof mt_ajax === 'undefined') {
+        console.warn('MT: mt_ajax object not initialized. Creating fallback.');
+        window.mt_ajax = {
+            ajax_url: '/wp-admin/admin-ajax.php',
+            nonce: '',
+            i18n: {
+                error: 'An error occurred',
+                success: 'Success',
+                loading: 'Loading...',
+                confirm: 'Are you sure?'
+            }
+        };
+    }
+
+    // Validate mt_ajax structure
+    if (!mt_ajax.ajax_url) {
+        mt_ajax.ajax_url = '/wp-admin/admin-ajax.php';
+        console.warn('MT: mt_ajax.ajax_url was missing. Using default.');
+    }
+    
+    if (!mt_ajax.i18n) {
+        mt_ajax.i18n = {};
+        console.warn('MT: mt_ajax.i18n was missing. Using empty object.');
+    }
+
     // Helper function to safely access mt_ajax.i18n values
     // Make it globally accessible for all sections
     window.getI18nText = function(key, defaultValue) {
@@ -821,14 +847,14 @@
         }
         
         // Hover effects for ranking cards
-        $('.mt-ranking-item').on('mouseenter', function() {
+        $(document).on('mouseenter', '.mt-ranking-item', function() {
             $(this).find('.mt-score-ring-progress').css('stroke', '#764ba2');
         }).on('mouseleave', function() {
             $(this).find('.mt-score-ring-progress').css('stroke', '#667eea');
         });
         
         // Click feedback
-        $('.mt-ranking-item').on('click', function() {
+        $(document).on('click', '.mt-ranking-item', function() {
             $(this).css('transform', 'scale(0.98)');
             setTimeout(() => {
                 $(this).css('transform', '');

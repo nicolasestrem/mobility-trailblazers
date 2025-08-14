@@ -259,6 +259,93 @@ abstract class MT_Base_Ajax {
     }
 
     /**
+     * Validate uploaded file
+     *
+     * @param array $file $_FILES array element
+     * @param array $allowed_types Allowed file extensions
+     * @param int $max_size Maximum file size in bytes
+     * @return bool|string True if valid, error message if not
+     * @since 2.2.28
+     */
+    protected function validate_upload($file, $allowed_types = ['csv'], $max_size = null) {
+        // Check if file was uploaded
+        if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+            return __('File upload failed. Please try again.', 'mobility-trailblazers');
+        }
+        
+        // Set default max size (10MB)
+        if ($max_size === null) {
+            $max_size = 10 * MB_IN_BYTES;
+        }
+        
+        // Check file size
+        if ($file['size'] > $max_size) {
+            return sprintf(
+                __('File too large. Maximum size is %s.', 'mobility-trailblazers'),
+                size_format($max_size)
+            );
+        }
+        
+        // Validate file extension
+        $file_info = wp_check_filetype_and_ext($file['tmp_name'], $file['name']);
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        
+        if (!in_array($ext, $allowed_types)) {
+            return sprintf(
+                __('Invalid file type. Allowed types: %s', 'mobility-trailblazers'),
+                implode(', ', $allowed_types)
+            );
+        }
+        
+        // Additional MIME type validation for CSV files
+        if (in_array('csv', $allowed_types)) {
+            $allowed_mimes = [
+                'text/csv',
+                'text/plain',
+                'application/csv',
+                'application/x-csv',
+                'text/x-csv',
+                'text/comma-separated-values',
+                'application/vnd.ms-excel',
+                'application/octet-stream'
+            ];
+            
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            
+            // Allow text files and the specific MIME types
+            if (!in_array($mime_type, $allowed_mimes) && strpos($mime_type, 'text') === false) {
+                MT_Logger::warning('Unexpected MIME type for CSV', [
+                    'mime_type' => $mime_type,
+                    'file_name' => $file['name']
+                ]);
+                // Don't block entirely, but log the warning
+            }
+        }
+        
+        // Check for malicious content patterns
+        $content = file_get_contents($file['tmp_name'], false, null, 0, 1024);
+        if ($content !== false) {
+            // Check for PHP tags
+            if (preg_match('/<\?php|<\?=/i', $content)) {
+                MT_Logger::security_event('Malicious file upload attempt', [
+                    'file_name' => $file['name'],
+                    'user_id' => get_current_user_id()
+                ]);
+                return __('File contains prohibited content.', 'mobility-trailblazers');
+            }
+            
+            // Check for script tags in CSV
+            if (in_array('csv', $allowed_types) && preg_match('/<script|javascript:/i', $content)) {
+                return __('File contains prohibited content.', 'mobility-trailblazers');
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Initialize AJAX handler
      *
      * @return void

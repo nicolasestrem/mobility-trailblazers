@@ -60,73 +60,19 @@ class MT_Import_Ajax extends MT_Base_Ajax {
                 return;
             }
             
-            // Step 3: Validate uploaded file
-            if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-                $error_message = $this->get_upload_error_message();
-                MT_Logger::error('File upload failed', [
-                    'error_code' => $_FILES['csv_file']['error'] ?? 'no_file',
+            // Step 3: Validate uploaded file using enhanced validation
+            $validation = $this->validate_upload($_FILES['csv_file'], ['csv', 'txt'], 10 * MB_IN_BYTES);
+            if ($validation !== true) {
+                MT_Logger::error('File upload validation failed', [
+                    'error' => $validation,
+                    'file_name' => $_FILES['csv_file']['name'] ?? 'unknown',
                     'action' => 'mt_import_candidates'
                 ]);
-                $this->error($error_message);
+                $this->error($validation);
                 return;
             }
             
-            // Step 4: Validate file type
-            $file_info = wp_check_filetype($_FILES['csv_file']['name']);
-            $allowed_types = ['csv', 'txt', 'text'];
-            
-            if (!empty($file_info['ext']) && !in_array(strtolower($file_info['ext']), $allowed_types)) {
-                MT_Logger::warning('Invalid file type for import', [
-                    'file_type' => $file_info['ext'],
-                    'file_name' => $_FILES['csv_file']['name']
-                ]);
-                $this->error(__('Invalid file type. Please upload a CSV file.', 'mobility-trailblazers'));
-                return;
-            }
-            
-            // Step 5: Validate file size (10MB max)
-            $max_size = 10 * MB_IN_BYTES;
-            if ($_FILES['csv_file']['size'] > $max_size) {
-                MT_Logger::warning('File too large for import', [
-                    'file_size' => $_FILES['csv_file']['size'],
-                    'max_size' => $max_size
-                ]);
-                $this->error(sprintf(
-                    __('File is too large. Maximum size is %s.', 'mobility-trailblazers'),
-                    size_format($max_size)
-                ));
-                return;
-            }
-            
-            // Step 6: Additional MIME type validation for security
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime_type = finfo_file($finfo, $_FILES['csv_file']['tmp_name']);
-            finfo_close($finfo);
-            
-            $allowed_mimes = [
-                'text/csv', 
-                'text/plain', 
-                'application/csv', 
-                'application/x-csv',
-                'text/x-csv',
-                'text/comma-separated-values',
-                'application/vnd.ms-excel',
-                'application/octet-stream'
-            ];
-            
-            $is_valid_mime = in_array($mime_type, $allowed_mimes) || 
-                            strpos($mime_type, 'text') !== false || 
-                            strpos($mime_type, 'csv') !== false;
-            
-            if (!$is_valid_mime) {
-                MT_Logger::warning('Suspicious MIME type detected', [
-                    'mime_type' => $mime_type,
-                    'file_name' => $_FILES['csv_file']['name']
-                ]);
-                // Don't block entirely, just log the warning
-            }
-            
-            // Step 7: Prepare import options
+            // Step 4: Prepare import options
             $options = [
                 'update_existing' => $this->get_param('update_existing') === '1',
                 'skip_duplicates' => $this->get_param('skip_duplicates', '1') === '1',

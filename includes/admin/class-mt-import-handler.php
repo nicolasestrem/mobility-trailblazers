@@ -30,10 +30,14 @@ class MT_Import_Handler {
         'ID' => 'import_id',
         'Name' => 'name',
         'Organisation' => 'organisation',
+        'Organization' => 'organisation',  // US spelling variant
         'Position' => 'position',
         'LinkedIn-Link' => 'linkedin',
+        'LinkedIn' => 'linkedin',  // Alternate
         'Webseite' => 'website',
+        'Website' => 'website',  // English variant
         'Article about coming of age' => 'article',
+        'Article' => 'article',  // Shortened
         'Description' => 'description',
         'Category' => 'category',
         'Status' => 'status'
@@ -95,28 +99,38 @@ class MT_Import_Handler {
         // Detect and skip BOM if present
         $bom = fread($handle, 3);
         if ($bom !== "\xEF\xBB\xBF") {
-            // No BOM, rewind to start
+            // No BOM found, rewind to start
             rewind($handle);
         }
+        // If BOM is found, we've already read past it, so don't rewind
+        
+        // Detect delimiter
+        $delimiter = $this->detect_delimiter($file);
         
         // Read headers
-        $headers = fgetcsv($handle, 0, ',');
+        $headers = fgetcsv($handle, 0, $delimiter);
         if (!$headers) {
             fclose($handle);
             $results['messages'][] = __('CSV file appears to be empty', 'mobility-trailblazers');
             return $results;
         }
         
-        // Clean headers (remove any remaining BOM, trim whitespace)
+        // Clean headers (remove any remaining BOM, trim whitespace, normalize)
         $headers = array_map(function($header) {
-            return trim(str_replace("\xEF\xBB\xBF", '', $header));
+            // Remove BOM if present
+            $header = str_replace("\xEF\xBB\xBF", '', $header);
+            // Trim whitespace
+            $header = trim($header);
+            // Normalize multiple spaces to single space
+            $header = preg_replace('/\s+/', ' ', $header);
+            return $header;
         }, $headers);
         
         // Collect all data rows
         $data = [];
         $row_number = 1;
         
-        while (($row = fgetcsv($handle, 0, ',')) !== FALSE) {
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== FALSE) {
             $row_number++;
             
             // Skip empty rows
@@ -426,8 +440,24 @@ class MT_Import_Handler {
         $mapped = [];
         
         foreach ($mapping as $csv_field => $internal_field) {
-            $value = isset($row[$csv_field]) ? $row[$csv_field] : '';
-            $mapped[$internal_field] = trim($value);
+            // Try exact match first
+            if (isset($row[$csv_field])) {
+                $mapped[$internal_field] = trim($row[$csv_field]);
+                continue;
+            }
+            
+            // Try case-insensitive match
+            foreach ($row as $key => $value) {
+                if (strcasecmp($key, $csv_field) === 0) {
+                    $mapped[$internal_field] = trim($value);
+                    break;
+                }
+            }
+            
+            // If still not found, set empty string
+            if (!isset($mapped[$internal_field])) {
+                $mapped[$internal_field] = '';
+            }
         }
         
         return $mapped;
@@ -710,5 +740,44 @@ class MT_Import_Handler {
         }
         
         return $criteria;
+    }
+    
+    /**
+     * Detect CSV delimiter from file
+     *
+     * @param string $file Path to CSV file
+     * @return string Detected delimiter (default: ',')
+     * @since 2.2.28
+     */
+    private function detect_delimiter($file) {
+        $handle = fopen($file, 'r');
+        if (!$handle) {
+            return ',';
+        }
+        
+        // Read first line
+        $first_line = fgets($handle);
+        fclose($handle);
+        
+        if (!$first_line) {
+            return ',';
+        }
+        
+        // Remove BOM if present
+        $first_line = str_replace("\xEF\xBB\xBF", '', $first_line);
+        
+        // Count occurrences of common delimiters
+        $delimiters = [',', ';', "\t", '|'];
+        $counts = [];
+        
+        foreach ($delimiters as $delimiter) {
+            $counts[$delimiter] = substr_count($first_line, $delimiter);
+        }
+        
+        // Return delimiter with highest count
+        arsort($counts);
+        $detected = key($counts);
+        
+        return $counts[$detected] > 0 ? $detected : ',';
     }
 }
