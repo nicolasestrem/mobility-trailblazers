@@ -618,6 +618,55 @@
     font-size: 12px;
 }
 
+.mt-script-output {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+    max-height: 500px;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.mt-script-output h1 {
+    font-size: 1.5em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+}
+
+.mt-script-output h3 {
+    font-size: 1.1em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #23282d;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 5px;
+}
+
+.mt-script-output p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.mt-script-output ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.mt-script-output li {
+    margin: 5px 0;
+}
+
+.mt-script-output code {
+    background: #e8e8e8;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 0.9em;
+}
+
 .mt-modal-content .button {
     margin-top: 15px;
 }

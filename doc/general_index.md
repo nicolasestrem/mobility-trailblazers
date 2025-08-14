@@ -135,13 +135,14 @@
 - **mobility-trailblazers-de_DE.po** - German translations
 - **mobility-trailblazers-de_DE.mo** - Compiled German translations
 
-## 📁 /doc/ - Documentation (v2.3.0 - Added Debug Center guide)
+## 📁 /doc/ - Documentation (v2.3.2 - Added troubleshooting guide)
 
 ### Developer Documentation
 - **developer-guide.md** - Complete development guide with architecture (v2.3.0 - updated with Debug Center)
-- **changelog.md** - Version history and release notes (v2.3.0 - complete implementation details)
-- **general_index.md** - Comprehensive file and component index (v2.3.0 - fully updated)
-- **debug-center-guide.md** - Complete Debug Center documentation and usage guide (v2.3.0 - new)
+- **changelog.md** - Version history and release notes (v2.3.2 - script output fixes)
+- **general_index.md** - Comprehensive file and component index (v2.3.2 - updated)
+- **debug-center-guide.md** - Complete Debug Center documentation and usage guide (v2.3.2 - added known issues)
+- **debug-center-troubleshooting.md** - Troubleshooting guide for Debug Center issues (v2.3.2 - new)
 
 ### Feature Documentation
 - **csv-import-guide.md** - CSV import functionality documentation

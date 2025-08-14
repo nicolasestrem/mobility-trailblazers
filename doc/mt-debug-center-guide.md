@@ -91,6 +91,21 @@ The Debug Center is a comprehensive developer tools interface for the Mobility T
 - WordPress configuration
 - Export capabilities for support
 
+## Known Issues and Solutions (v2.3.2)
+
+### Script Output Display
+**Issue**: Debug scripts showing empty info boxes when executed
+**Solution**: Script output is now rendered as HTML instead of being escaped
+- Output is displayed in a `<div class="mt-script-output">` container
+- HTML formatting is preserved for proper display
+- CSS styling ensures readability
+
+### Common Runtime Errors (Fixed in v2.3.1)
+1. **Missing init() method**: MT_Debug_Ajax now properly implements the abstract method
+2. **Undefined JavaScript methods**: Removed non-existent method bindings
+3. **Array access warnings**: Added defensive checks with isset() and default values
+4. **Database connection failures**: Graceful fallbacks when database is unavailable
+
 ## Security Features
 
 ### Environment Controls

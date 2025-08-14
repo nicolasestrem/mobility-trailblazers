@@ -254,7 +254,7 @@
             const $modal = $('<div class="mt-modal">').html(`
                 <div class="mt-modal-content">
                     <h3>${mt_debug.i18n.script_output || 'Script Output'}</h3>
-                    <pre>${this.escapeHtml(data.output || '')}</pre>
+                    <div class="mt-script-output">${data.output || '<p>No output generated</p>'}</div>
                     ${data.errors && data.errors.length ? 
                         `<div class="notice notice-error">
                             <p>${mt_debug.i18n.errors_occurred || 'Errors occurred'}:</p>

@@ -2,6 +2,20 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.3.2] - 2025-08-14 - Debug Center Script Output Fix
+
+### Fixed
+- **Debug Script Output Display**: Fixed empty info box issue when executing debug scripts
+  - Changed from escaped HTML in `<pre>` tag to rendered HTML in `<div>` container
+  - Added proper CSS styling for script output formatting
+  - Script output now properly displays formatted results instead of raw HTML code
+
+### Enhanced
+- **UI Improvements**: 
+  - Added dedicated `.mt-script-output` CSS class with proper styling
+  - Improved readability with appropriate typography and spacing
+  - Added scrollable container for long output
+
 ## [2.3.1] - 2025-08-14 - Debug Center Bug Fixes and Stability
 
 ### Fixed
