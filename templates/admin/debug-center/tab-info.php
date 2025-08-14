@@ -315,7 +315,10 @@ $info = $system_info->get_system_info();
         <div class="mt-info-table">
             <table class="wp-list-table widefat fixed striped">
                 <tbody>
-                    <?php foreach ($info['constants'] as $constant => $value): ?>
+                    <?php 
+                    $constants = isset($info['constants']) && is_array($info['constants']) ? $info['constants'] : [];
+                    foreach ($constants as $constant => $value): 
+                    ?>
                     <tr>
                         <th><code><?php echo esc_html($constant); ?></code></th>
                         <td>

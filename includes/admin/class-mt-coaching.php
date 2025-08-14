@@ -103,7 +103,7 @@ class MT_Coaching {
                 END) as avg_score,
                 MAX(e.updated_at) as last_activity
             FROM {$wpdb->users} u
-            LEFT JOIN {$wpdb->prefix}mt_assignments a ON u.ID = a.jury_member_id
+            LEFT JOIN {$wpdb->prefix}mt_jury_assignments a ON u.ID = a.jury_member_id
             LEFT JOIN {$wpdb->prefix}mt_evaluations e ON u.ID = e.jury_member_id AND a.candidate_id = e.candidate_id
             WHERE u.ID IN (
                 SELECT user_id FROM {$wpdb->usermeta} 

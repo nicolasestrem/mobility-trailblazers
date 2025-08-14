@@ -484,8 +484,13 @@ class MT_Admin {
      * @return void
      */
     public function render_migrate_profiles_page() {
-        // Include the migration script
-        include MT_PLUGIN_DIR . 'debug/migrate-candidate-profiles.php';
+        // Include the migration template
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/migrate-profiles.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Template not found.', 'mobility-trailblazers') . '</p></div>';
+        }
     }
     
     /**
@@ -504,8 +509,13 @@ class MT_Admin {
      * @return void
      */
     public function render_generate_samples_page() {
-        // Include the sample generator script
-        include MT_PLUGIN_DIR . 'debug/generate-sample-profiles.php';
+        // Include the sample generator template
+        $template_file = MT_PLUGIN_DIR . 'templates/admin/generate-samples.php';
+        if (file_exists($template_file)) {
+            include $template_file;
+        } else {
+            echo '<div class="notice notice-error"><p>' . esc_html__('Template not found.', 'mobility-trailblazers') . '</p></div>';
+        }
     }
     
     /**

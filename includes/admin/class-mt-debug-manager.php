@@ -448,7 +448,7 @@ class MT_Debug_Manager {
         ];
         
         // Log to custom logger
-        MT_Logger::info('Debug script execution: ' . $script_name, $log_data);
+        MT_Logger::info('Debug script execution: ' . $script, $log_data);
         
         // Also save to options for audit trail
         $audit_log = get_option('mt_debug_script_audit', []);
