@@ -72,7 +72,7 @@
             };
 
             // Log to console in debug mode
-            if (window.console && // console.error) {
+            if (window.console && console.error) {
                 // console.error('MT Error:', errorData);
             }
         },
@@ -995,11 +995,11 @@
                     },
                     error: function(xhr, status, error) {
                         // console.error('AJAX Error:', {
-                            status: status,
-                            error: error,
-                            responseText: xhr.responseText,
-                            responseJSON: xhr.responseJSON
-                        });
+                        //     status: status,
+                        //     error: error,
+                        //     responseText: xhr.responseText,
+                        //     responseJSON: xhr.responseJSON
+                        // });
                         
                         // Try to parse error message
                         let errorMessage = 'Network error. Please try again.';
@@ -1246,13 +1246,13 @@
                 error: function(xhr, status, error) {
                     // Log detailed error information
                     // console.error('AJAX Save Error:', {
-                        status: status,
-                        error: error,
-                        responseText: xhr.responseText,
-                        responseJSON: xhr.responseJSON,
-                        readyState: xhr.readyState,
-                        statusText: xhr.statusText
-                    });
+                    //     status: status,
+                    //     error: error,
+                    //     responseText: xhr.responseText,
+                    //     responseJSON: xhr.responseJSON,
+                    //     readyState: xhr.readyState,
+                    //     statusText: xhr.statusText
+                    // });
                     
                     $btn.removeClass('saving').addClass('unsaved').html('<span class="dashicons dashicons-warning"></span> ' + getI18nText('error', 'Error'));
                     $row.removeClass('saving').addClass('unsaved');
