@@ -117,7 +117,7 @@
         "imports": {
             "title": "Import Utilities",
             "description": "Data import scripts",
-            "directory": "",
+            "directory": ".",
             "scripts": {
                 "jury-import.php": {
                     "title": "Jury Member Import",
@@ -140,7 +140,7 @@
         "testing": {
             "title": "Testing Scripts",
             "description": "Scripts for testing functionality",
-            "directory": "",
+            "directory": ".",
             "scripts": {
                 "test-profile-system.php": {
                     "title": "Test Profile System",

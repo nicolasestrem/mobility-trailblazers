@@ -108,6 +108,8 @@ $info = $system_info->get_system_info();
                                     $extensions = isset($info['php']['extensions']) && is_array($info['php']['extensions']) 
                                         ? $info['php']['extensions'] 
                                         : [];
+                                    // Ensure all array elements are strings
+                                    $extensions = array_filter($extensions, 'is_string');
                                     echo esc_html(implode(', ', $extensions)); 
                                 ?></code>
                             </details>
