@@ -671,6 +671,82 @@
     margin-top: 15px;
 }
 
+/* Diagnostic Results */
+.mt-diagnostic-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 4px solid #0073aa;
+    border-radius: 4px;
+}
+
+.mt-diagnostic-section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    font-size: 16px;
+}
+
+.mt-diagnostic-items {
+    display: grid;
+    gap: 10px;
+}
+
+.mt-diagnostic-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #e1e1e1;
+    border-radius: 3px;
+}
+
+.mt-diagnostic-item.mt-diagnostic-success {
+    border-left: 3px solid #46b450;
+}
+
+.mt-diagnostic-item.mt-diagnostic-warning {
+    border-left: 3px solid #ffb900;
+}
+
+.mt-diagnostic-item.mt-diagnostic-error {
+    border-left: 3px solid #dc3232;
+}
+
+.mt-diagnostic-label {
+    font-weight: 600;
+    margin-right: 10px;
+    min-width: 150px;
+}
+
+.mt-diagnostic-value {
+    flex: 1;
+    word-break: break-word;
+}
+
+.mt-diagnostic-item .dashicons {
+    margin-left: auto;
+    font-size: 20px;
+}
+
+.mt-diagnostic-item.mt-diagnostic-success .dashicons {
+    color: #46b450;
+}
+
+.mt-diagnostic-item.mt-diagnostic-warning .dashicons {
+    color: #ffb900;
+}
+
+.mt-diagnostic-item.mt-diagnostic-error .dashicons {
+    color: #dc3232;
+}
+
+.mt-diagnostic-timestamp {
+    margin: 10px 0;
+    font-style: italic;
+    color: #666;
+}
+
 /* Notifications */
 .mt-notification {
     animation: slideDown 0.3s ease;

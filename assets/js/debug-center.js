@@ -113,7 +113,9 @@
         runDiagnostic: function(e) {
             e.preventDefault();
             
-            const $button = $(e.currentTarget).find('button[name="run_diagnostic"]') || $(e.currentTarget);
+            // If triggered from form submit, find the button. Otherwise, use the clicked element
+            const $target = $(e.currentTarget);
+            const $button = $target.is('form') ? $target.find('button[name="run_diagnostic"]') : $target;
             const $form = $button.closest('form');
             const type = $form.find('#diagnostic_type').val() || 'full';
             
@@ -150,17 +152,99 @@
          * Display diagnostic results
          */
         displayDiagnosticResults: function(data) {
-            const $results = $('.diagnostic-results');
+            // Find or create results container
+            let $container = $('.mt-diagnostics-tab .diagnostic-results');
             
-            if (!$results.length) {
-                location.reload(); // Reload to show results from server
-                return;
+            if (!$container.length) {
+                // Create results container if it doesn't exist
+                $container = $('<div class="diagnostic-results mt-debug-section"></div>');
+                $('.mt-diagnostics-tab').append($container);
             }
             
-            // Update results container
-            // This would typically update the DOM with the results
-            // For now, we'll reload the page to show server-rendered results
-            location.reload();
+            // Build results HTML
+            let html = '<h3>' + (mt_debug.i18n.diagnostic_results || 'Diagnostic Results') + '</h3>';
+            html += '<div class="mt-diagnostic-timestamp">Run at: ' + (data.timestamp || new Date().toLocaleString()) + '</div>';
+            
+            if (data.diagnostics) {
+                // Display each diagnostic section
+                for (const [section, results] of Object.entries(data.diagnostics)) {
+                    html += '<div class="mt-diagnostic-section">';
+                    html += '<h4>' + this.formatSectionName(section) + '</h4>';
+                    html += '<div class="mt-diagnostic-items">';
+                    
+                    if (typeof results === 'object' && results !== null) {
+                        for (const [key, value] of Object.entries(results)) {
+                            const status = this.getDiagnosticStatus(key, value);
+                            html += '<div class="mt-diagnostic-item ' + status.class + '">';
+                            html += '<span class="mt-diagnostic-label">' + this.formatLabel(key) + ':</span>';
+                            html += '<span class="mt-diagnostic-value">' + this.formatValue(value) + '</span>';
+                            if (status.icon) {
+                                html += '<span class="dashicons ' + status.icon + '"></span>';
+                            }
+                            html += '</div>';
+                        }
+                    } else {
+                        html += '<div class="mt-diagnostic-item">' + results + '</div>';
+                    }
+                    
+                    html += '</div></div>';
+                }
+            }
+            
+            // Update container
+            $container.html(html);
+            
+            // Scroll to results
+            $('html, body').animate({
+                scrollTop: $container.offset().top - 100
+            }, 500);
+        },
+        
+        /**
+         * Format section name
+         */
+        formatSectionName: function(name) {
+            return name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        },
+        
+        /**
+         * Format label
+         */
+        formatLabel: function(label) {
+            return label.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        },
+        
+        /**
+         * Format value
+         */
+        formatValue: function(value) {
+            if (typeof value === 'boolean') {
+                return value ? '✓ Yes' : '✗ No';
+            }
+            if (typeof value === 'object' && value !== null) {
+                return JSON.stringify(value, null, 2);
+            }
+            return String(value);
+        },
+        
+        /**
+         * Get diagnostic status
+         */
+        getDiagnosticStatus: function(key, value) {
+            // Determine status based on key and value
+            if (key.includes('error') || key.includes('failed')) {
+                return { class: 'mt-diagnostic-error', icon: 'dashicons-warning' };
+            }
+            if (key.includes('warning') || key.includes('deprecated')) {
+                return { class: 'mt-diagnostic-warning', icon: 'dashicons-info' };
+            }
+            if (value === true || key.includes('success') || key.includes('valid')) {
+                return { class: 'mt-diagnostic-success', icon: 'dashicons-yes-alt' };
+            }
+            if (value === false || key.includes('invalid')) {
+                return { class: 'mt-diagnostic-error', icon: 'dashicons-dismiss' };
+            }
+            return { class: '', icon: '' };
         },
         
         /**

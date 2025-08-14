@@ -2,6 +2,21 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.3.3] - 2025-08-14 - Diagnostic System Fix
+
+### Fixed
+- **Run Diagnostic Button**: Fixed non-functional diagnostic execution
+  - Corrected button selector logic in JavaScript for form submission
+  - Implemented dynamic results display instead of page reload
+  - Added comprehensive diagnostic results rendering with status indicators
+
+### Enhanced
+- **Diagnostic Display**:
+  - Added dynamic DOM updating for diagnostic results
+  - Implemented color-coded status indicators (success/warning/error)
+  - Added formatted display for all diagnostic data types
+  - Included timestamp and auto-scroll to results
+
 ## [2.3.2] - 2025-08-14 - Debug Center Complete Fixes
 
 ### Fixed
