@@ -98,7 +98,12 @@ $info = $system_info->get_system_info();
                             </div>
                             <details class="mt-all-extensions">
                                 <summary><?php esc_html_e('Show all extensions', 'mobility-trailblazers'); ?></summary>
-                                <code><?php echo esc_html(implode(', ', $info['php']['extensions'])); ?></code>
+                                <code><?php 
+                                    $extensions = isset($info['php']['extensions']) && is_array($info['php']['extensions']) 
+                                        ? $info['php']['extensions'] 
+                                        : [];
+                                    echo esc_html(implode(', ', $extensions)); 
+                                ?></code>
                             </details>
                         </td>
                     </tr>

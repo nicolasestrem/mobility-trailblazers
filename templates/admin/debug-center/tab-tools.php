@@ -36,8 +36,8 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
                 <div class="mt-tool-icon">
                     <span class="dashicons dashicons-<?php echo esc_attr($operation['icon'] ?? 'admin-tools'); ?>"></span>
                 </div>
-                <h4><?php echo esc_html($operation['title']); ?></h4>
-                <p><?php echo esc_html($operation['description']); ?></p>
+                <h4><?php echo esc_html(isset($operation['title']) ? $operation['title'] : 'Operation'); ?></h4>
+                <p><?php echo esc_html(isset($operation['description']) ? $operation['description'] : ''); ?></p>
                 
                 <?php if (!empty($operation['stats'])): ?>
                 <div class="mt-tool-stats">
@@ -175,8 +175,8 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
                 <div class="mt-tool-icon">
                     <span class="dashicons dashicons-<?php echo esc_attr($operation['icon'] ?? 'warning'); ?>"></span>
                 </div>
-                <h4><?php echo esc_html($operation['title']); ?></h4>
-                <p><?php echo esc_html($operation['description']); ?></p>
+                <h4><?php echo esc_html(isset($operation['title']) ? $operation['title'] : 'Operation'); ?></h4>
+                <p><?php echo esc_html(isset($operation['description']) ? $operation['description'] : ''); ?></p>
                 
                 <?php if ($is_factory_reset): ?>
                 <div class="mt-tool-password">
@@ -194,7 +194,7 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
                         class="button <?php echo $is_factory_reset ? 'button-danger' : 'button-secondary'; ?> mt-run-maintenance"
                         data-category="reset"
                         data-operation="<?php echo esc_attr($op_key); ?>"
-                        data-confirm="<?php echo esc_attr($operation['confirm']); ?>"
+                        data-confirm="<?php echo esc_attr(isset($operation['confirm']) ? $operation['confirm'] : ''); ?>"
                         <?php echo $is_factory_reset ? 'data-requires-password="true"' : ''; ?>
                         <?php echo ($environment === 'production' && !empty($operation['block_production'])) ? 'disabled' : ''; ?>>
                     <?php echo esc_html($operation['button_text'] ?? __('Reset', 'mobility-trailblazers')); ?>

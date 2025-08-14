@@ -244,7 +244,7 @@ class MT_Maintenance_Tools {
                 __('Operation error: %s', 'mobility-trailblazers'),
                 $e->getMessage()
             );
-            MT_Logger::log_error('maintenance_operation_error', $e->getMessage());
+            MT_Logger::error('Maintenance operation error', ['error' => $e->getMessage()]);
         }
         
         return $result;
@@ -845,6 +845,6 @@ class MT_Maintenance_Tools {
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
         ];
         
-        MT_Logger::log('maintenance_operation', wp_json_encode($log_data));
+        MT_Logger::info('Maintenance operation: ' . $category . '/' . $operation, $log_data);
     }
 }

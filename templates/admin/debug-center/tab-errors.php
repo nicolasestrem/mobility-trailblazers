@@ -44,11 +44,11 @@ foreach ($recent_errors as $error) {
                 <div class="mt-stat-label"><?php esc_html_e('Errors Today', 'mobility-trailblazers'); ?></div>
             </div>
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html($error_stats['unique_errors']); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(isset($error_stats['unique_errors']) ? $error_stats['unique_errors'] : 0); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Unique Errors', 'mobility-trailblazers'); ?></div>
             </div>
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html($error_stats['most_common_type']); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(isset($error_stats['most_common_type']) ? $error_stats['most_common_type'] : 'None'); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Most Common Type', 'mobility-trailblazers'); ?></div>
             </div>
         </div>
