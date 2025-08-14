@@ -31,7 +31,15 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
      */
     public function __construct() {
         parent::__construct();
-        
+        $this->init();
+    }
+    
+    /**
+     * Initialize the AJAX handler
+     *
+     * @return void
+     */
+    public function init() {
         // Register AJAX actions
         add_action('wp_ajax_mt_run_diagnostic', [$this, 'run_diagnostic']);
         add_action('wp_ajax_mt_execute_debug_script', [$this, 'execute_debug_script']);
@@ -53,7 +61,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $type = sanitize_text_field($_POST['diagnostic_type'] ?? 'full');
@@ -65,15 +73,15 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             // Cache results for export
             set_transient('mt_last_diagnostic_' . get_current_user_id(), $results, HOUR_IN_SECONDS);
             
-            $this->send_success([
+            $this->success([
                 'diagnostics' => $results,
                 'timestamp' => current_time('mysql'),
                 'type' => $type
             ]);
             
         } catch (\Exception $e) {
-            $this->log_error('Diagnostic failed', $e->getMessage());
-            $this->send_error(sprintf(
+            \MobilityTrailblazers\Core\MT_Logger::error('Diagnostic failed', $e->getMessage());
+            $this->error(sprintf(
                 __('Diagnostic failed: %s', 'mobility-trailblazers'),
                 $e->getMessage()
             ));
@@ -89,38 +97,38 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $script = sanitize_text_field($_POST['script'] ?? '');
         $params = isset($_POST['params']) ? array_map('sanitize_text_field', $_POST['params']) : [];
         
         if (empty($script)) {
-            $this->send_error(__('No script specified', 'mobility-trailblazers'));
+            $this->error(__('No script specified', 'mobility-trailblazers'));
         }
         
         $debug_manager = new MT_Debug_Manager();
         
         // Check if script is allowed
         if (!$debug_manager->is_script_allowed($script)) {
-            $this->send_error(__('Script not allowed in current environment', 'mobility-trailblazers'));
+            $this->error(__('Script not allowed in current environment', 'mobility-trailblazers'));
         }
         
         try {
             $result = $debug_manager->execute_script($script, $params);
             
             if ($result['success']) {
-                $this->send_success($result);
+                $this->success($result);
             } else {
-                $this->send_error($result['message'], $result);
+                $this->error($result['message'], $result);
             }
             
         } catch (\Exception $e) {
-            $this->log_error('Script execution failed', [
+            \MobilityTrailblazers\Core\MT_Logger::error('Script execution failed', [
                 'script' => $script,
                 'error' => $e->getMessage()
             ]);
-            $this->send_error(sprintf(
+            $this->error(sprintf(
                 __('Script execution failed: %s', 'mobility-trailblazers'),
                 $e->getMessage()
             ));
@@ -136,7 +144,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $category = sanitize_text_field($_POST['category'] ?? '');
@@ -144,7 +152,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $params = isset($_POST['params']) ? array_map('sanitize_text_field', $_POST['params']) : [];
         
         if (empty($category) || empty($operation)) {
-            $this->send_error(__('Invalid operation specified', 'mobility-trailblazers'));
+            $this->error(__('Invalid operation specified', 'mobility-trailblazers'));
         }
         
         $maintenance_tools = new MT_Maintenance_Tools();
@@ -153,29 +161,29 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             $result = $maintenance_tools->execute_operation($category, $operation, $params);
             
             if ($result['success']) {
-                $this->send_success($result);
+                $this->success($result);
             } else {
                 // Check for special requirements
                 if (isset($result['requires_confirmation'])) {
-                    $this->send_error($result['message'], [
+                    $this->error($result['message'], [
                         'requires_confirmation' => true
                     ]);
                 } elseif (isset($result['requires_password'])) {
-                    $this->send_error($result['message'], [
+                    $this->error($result['message'], [
                         'requires_password' => true
                     ]);
                 } else {
-                    $this->send_error($result['message']);
+                    $this->error($result['message']);
                 }
             }
             
         } catch (\Exception $e) {
-            $this->log_error('Maintenance operation failed', [
+            \MobilityTrailblazers\Core\MT_Logger::error('Maintenance operation failed', [
                 'category' => $category,
                 'operation' => $operation,
                 'error' => $e->getMessage()
             ]);
-            $this->send_error(sprintf(
+            $this->error(sprintf(
                 __('Operation failed: %s', 'mobility-trailblazers'),
                 $e->getMessage()
             ));
@@ -191,7 +199,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         // Get cached diagnostics or run new
@@ -212,7 +220,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             'diagnostics' => $diagnostics
         ];
         
-        $this->send_success([
+        $this->success([
             'filename' => 'mt-diagnostics-' . date('Y-m-d-His') . '.json',
             'data' => wp_json_encode($export_data, JSON_PRETTY_PRINT),
             'mime_type' => 'application/json'
@@ -228,7 +236,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         global $wpdb;
@@ -237,7 +245,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         
         // Check if table exists
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
-            $this->send_success([
+            $this->success([
                 'total' => 0,
                 'today' => 0,
                 'this_week' => 0,
@@ -268,7 +276,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             )
         ];
         
-        $this->send_success($stats);
+        $this->success($stats);
     }
     
     /**
@@ -280,7 +288,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $type = sanitize_text_field($_POST['log_type'] ?? 'all');
@@ -314,7 +322,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
                 $cleared[] = 'audit_log';
             }
             
-            $this->send_success([
+            $this->success([
                 'cleared' => $cleared,
                 'message' => sprintf(
                     __('Cleared %d log(s)', 'mobility-trailblazers'),
@@ -323,8 +331,8 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             ]);
             
         } catch (\Exception $e) {
-            $this->log_error('Failed to clear logs', $e->getMessage());
-            $this->send_error(__('Failed to clear logs', 'mobility-trailblazers'));
+            \MobilityTrailblazers\Core\MT_Logger::error('Failed to clear logs', $e->getMessage());
+            $this->error(__('Failed to clear logs', 'mobility-trailblazers'));
         }
     }
     
@@ -337,7 +345,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $db_health = new MT_Database_Health();
@@ -350,11 +358,11 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
                 'slow_queries' => $db_health->get_slow_queries(5)
             ];
             
-            $this->send_success($health_data);
+            $this->success($health_data);
             
         } catch (\Exception $e) {
-            $this->log_error('Database health check failed', $e->getMessage());
-            $this->send_error(__('Failed to check database health', 'mobility-trailblazers'));
+            \MobilityTrailblazers\Core\MT_Logger::error('Database health check failed', $e->getMessage());
+            $this->error(__('Failed to check database health', 'mobility-trailblazers'));
         }
     }
     
@@ -367,7 +375,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $system_info = new MT_System_Info();
@@ -378,11 +386,11 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
             // Cache for export
             set_transient('mt_last_sysinfo_' . get_current_user_id(), $info, HOUR_IN_SECONDS);
             
-            $this->send_success($info);
+            $this->success($info);
             
         } catch (\Exception $e) {
-            $this->log_error('System info retrieval failed', $e->getMessage());
-            $this->send_error(__('Failed to get system information', 'mobility-trailblazers'));
+            \MobilityTrailblazers\Core\MT_Logger::error('System info retrieval failed', $e->getMessage());
+            $this->error(__('Failed to get system information', 'mobility-trailblazers'));
         }
     }
     
@@ -395,13 +403,13 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_debug_nonce');
         
         if (!current_user_can('manage_options')) {
-            $this->send_error(__('Insufficient permissions', 'mobility-trailblazers'));
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
         }
         
         $widget_id = sanitize_text_field($_POST['widget_id'] ?? '');
         
         if (empty($widget_id)) {
-            $this->send_error(__('No widget specified', 'mobility-trailblazers'));
+            $this->error(__('No widget specified', 'mobility-trailblazers'));
         }
         
         try {
@@ -446,21 +454,21 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
                     break;
                     
                 default:
-                    $this->send_error(__('Unknown widget', 'mobility-trailblazers'));
+                    $this->error(__('Unknown widget', 'mobility-trailblazers'));
                     return;
             }
             
-            $this->send_success([
+            $this->success([
                 'widget_id' => $widget_id,
                 'html' => $html
             ]);
             
         } catch (\Exception $e) {
-            $this->log_error('Widget refresh failed', [
+            \MobilityTrailblazers\Core\MT_Logger::error('Widget refresh failed', [
                 'widget' => $widget_id,
                 'error' => $e->getMessage()
             ]);
-            $this->send_error(__('Failed to refresh widget', 'mobility-trailblazers'));
+            $this->error(__('Failed to refresh widget', 'mobility-trailblazers'));
         }
     }
 }
