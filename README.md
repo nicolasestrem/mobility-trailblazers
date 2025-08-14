@@ -94,27 +94,14 @@ wp_mt_error_log (centralized error logging)
 
 ## 🔧 Installation
 
-### Docker Deployment (Recommended)
-```bash
-# Clone repository
-git clone https://github.com/nicolasestrem/mobility-trailblazers.git
-cd mobility-trailblazers
-
-# Deploy with Docker
-cd /mnt/dietpi_userdata/docker-files/STAGING/
-docker-compose up -d
-
-# Install plugin
-docker cp ./mobility-trailblazers mobility_wordpress_STAGING:/var/www/html/wp-content/plugins/
-docker exec mobility_wordpress_STAGING chown -R www-data:www-data /var/www/html/wp-content/plugins/mobility-trailblazers
-docker exec mobility_wpcli_STAGING wp plugin activate mobility-trailblazers
-```
-
-### Manual Installation
+### WordPress Installation
 1. Upload plugin to `/wp-content/plugins/mobility-trailblazers/`
 2. Activate through WordPress Admin → Plugins
 3. Run setup wizard at MT Award System → Setup
 4. Configure settings and import initial data
+
+### Docker Deployment
+The plugin is compatible with Docker-based WordPress installations. Ensure proper file permissions and database configuration when deploying in containerized environments.
 
 ## 💼 User Roles & Capabilities
 
@@ -122,7 +109,6 @@ docker exec mobility_wpcli_STAGING wp plugin activate mobility-trailblazers
 - **Administrator**: Full system access, all capabilities
 - **MT Jury Admin**: Assignment management, evaluation oversight
 - **MT Jury Member**: View assignments, submit evaluations
-- **Public Users**: View candidates, participate in voting
 
 ### Key Capabilities
 ```php
