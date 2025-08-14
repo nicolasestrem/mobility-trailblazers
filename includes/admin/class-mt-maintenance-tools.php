@@ -157,7 +157,7 @@ class MT_Maintenance_Tools {
                         'requires_confirmation' => true,
                         'callback' => [$this, 'reset_assignments']
                     ],
-                    'reset_plugin' => [
+                    'factory_reset' => [
                         'title' => __('Factory Reset', 'mobility-trailblazers'),
                         'description' => __('Reset plugin to initial state (deletes ALL data)', 'mobility-trailblazers'),
                         'dangerous' => true,

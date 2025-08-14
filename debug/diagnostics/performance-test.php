@@ -7,7 +7,10 @@
  * @since 2.2.29
  */
 
-require_once('../../../../wp-load.php');
+// Security check
+if (!defined('ABSPATH')) {
+    die('Direct access forbidden.');
+}
 
 if (!current_user_can('manage_options')) {
     wp_die('Access denied');

@@ -88,9 +88,12 @@ $info = $system_info->get_system_info();
                             <div class="mt-extensions-list">
                                 <?php 
                                 $important_extensions = ['mysqli', 'curl', 'json', 'mbstring', 'zip', 'gd', 'xml'];
-                                $php_extensions = isset($info['php']['extensions']) && is_array($info['php']['extensions']) 
-                                    ? $info['php']['extensions'] 
-                                    : [];
+                                $php_extensions = [];
+                                if (isset($info['php']) && is_array($info['php']) && isset($info['php']['extensions'])) {
+                                    if (is_array($info['php']['extensions'])) {
+                                        $php_extensions = $info['php']['extensions'];
+                                    }
+                                }
                                 foreach ($important_extensions as $ext):
                                     $loaded = in_array($ext, $php_extensions);
                                 ?>

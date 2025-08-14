@@ -11,8 +11,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Load WordPress
-require_once('../../../wp-load.php');
+// WordPress is already loaded via AJAX
+// No need to require wp-load.php
 
 // Check if user has admin permissions
 if (!current_user_can('manage_options')) {

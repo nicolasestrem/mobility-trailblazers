@@ -11,8 +11,8 @@ if (!defined('ABSPATH')) {
  * for the Mobility Trailblazers plugin.
  */
 
-// Load WordPress
-require_once('wp-config.php');
+// WordPress is already loaded via AJAX
+// No need to require wp-config.php
 
 // Test database connection
 global $wpdb;

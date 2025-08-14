@@ -15,8 +15,8 @@ if (!defined('ABSPATH')) {
  * - Via command line: php fix-database.php
  */
 
-// Load WordPress
-require_once('../../../wp-load.php');
+// WordPress is already loaded via AJAX
+// No need to require wp-load.php
 
 // Security check
 if (!current_user_can('manage_options')) {
