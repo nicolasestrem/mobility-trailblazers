@@ -30,7 +30,6 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
      * Constructor
      */
     public function __construct() {
-        parent::__construct();
         $this->init();
     }
     
