@@ -19,29 +19,30 @@
 - **class-mt-uninstaller.php** - Handles plugin uninstall with optional data preservation (v2.2.13)
 
 ### Administrative Interface
-- **admin/class-mt-admin.php** - Admin menu setup and page rendering management (v2.2.15 - removed duplicate candidates menu)
+- **admin/class-mt-admin.php** - Admin menu setup and page rendering management (v2.3.0 - added Debug Center integration)
 - **admin/class-mt-admin-notices.php** - System for displaying admin notifications
 - **admin/class-mt-candidate-columns.php** - Custom admin columns and CSV import/export for candidates (v2.2.25 - uses MT_Import_Handler)
 - **admin/class-mt-import-export.php** - Comprehensive import/export handler for candidates and jury members (v2.2.25 - uses MT_Import_Handler)
 - **admin/class-mt-import-handler.php** - Centralized CSV processing with BOM handling and delimiter detection (v2.2.28 - enhanced CSV parsing)
 - **admin/class-mt-error-monitor.php** - Error monitoring and logging system
-- **admin/class-mt-debug-manager.php** - Debug script execution management with environment controls (v2.3.0)
-- **admin/class-mt-maintenance-tools.php** - System maintenance operations and database tools (v2.3.0)
+- **admin/class-mt-debug-manager.php** - Debug script execution management with environment controls (v2.3.0 - complete)
+- **admin/class-mt-maintenance-tools.php** - System maintenance operations and database tools (v2.3.0 - complete)
 - **admin/class-mt-coaching.php** - Jury coaching dashboard for evaluation management (v2.2.29)
 
-### AJAX Handlers (v2.2.28 - Enhanced security and validation)
+### AJAX Handlers (v2.3.0 - Added Debug Center support)
 - **ajax/class-mt-base-ajax.php** - Base class with centralized error logging, response handling, and file validation (v2.2.28 - added validate_upload())
 - **ajax/class-mt-evaluation-ajax.php** - Handles evaluation form submissions with enhanced security checks (v2.2.28 - secured debug endpoints)
 - **ajax/class-mt-assignment-ajax.php** - Manages jury-candidate assignment operations with consistent error handling
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
 - **ajax/class-mt-import-ajax.php** - Quick CSV import handler using enhanced validation (v2.2.28 - uses validate_upload())
 - **ajax/class-mt-csv-import-ajax.php** - Comprehensive CSV import with progress tracking (v2.2.24)
+- **ajax/class-mt-debug-ajax.php** - Debug Center AJAX operations (diagnostics, scripts, maintenance) (v2.3.0)
 
-### Business Logic Services
+### Business Logic Services (v2.3.0 - Added diagnostic service)
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation
 - **services/class-mt-assignment-service.php** - Assignment creation and management logic (v2.2.29 - added rebalancing)
 - **services/class-mt-import-service.php** - Data import processing and validation
-- **services/class-mt-diagnostic-service.php** - Comprehensive system health monitoring and diagnostics (v2.3.0)
+- **services/class-mt-diagnostic-service.php** - Comprehensive system health monitoring and diagnostics (v2.3.0 - complete)
 
 ### Data Access Layer
 - **repositories/class-mt-evaluation-repository.php** - Database operations for evaluations
@@ -53,6 +54,7 @@
 - **core/class-mt-database.php** - Database table creation and management
 - **core/class-mt-database-upgrade.php** - Handles database schema updates
 - **core/class-mt-logger.php** - Error logging and debugging system
+- **core/class-mt-plugin.php** - Main plugin initialization (v2.3.0 - added Debug Center loading)
 - **core/class-mt-post-types.php** - Registers candidate and jury member post types
 - **core/class-mt-taxonomies.php** - Category and tag taxonomy registration
 - **core/class-mt-roles.php** - User role and capability management
@@ -60,27 +62,31 @@
 - **core/class-mt-i18n.php** - Internationalization and translation setup
 - **core/class-mt-audit-logger.php** - Centralized audit logging for security compliance
 
+### Utility Classes (v2.3.0 - New)
+- **utilities/class-mt-database-health.php** - Database health monitoring and analysis
+- **utilities/class-mt-system-info.php** - System information gathering and reporting
+
 ## 📁 /templates/ - Display Templates
 
-### Admin Templates
+### Admin Templates (v2.3.0 - Added Debug Center)
 - **admin/dashboard.php** - Main admin dashboard with statistics
 - **admin/evaluations.php** - Evaluation review and management
 - **admin/assignments.php** - Jury assignment management page
 - **admin/import-export.php** - Data import/export interface
 - **admin/settings.php** - Plugin configuration settings including data management options (v2.2.13)
-- **admin/diagnostics.php** - System health and debugging tools (deprecated - use Debug Center)
-- **admin/tools.php** - Maintenance tools interface (deprecated - use Debug Center)
+- **admin/diagnostics.php** - System health and debugging tools (deprecated v2.3.0 - redirects to Debug Center)
+- **admin/tools.php** - Maintenance tools interface (deprecated v2.3.0 - redirects to Debug Center)
 - **admin/error-monitor.php** - Error log viewer and monitoring
 - **admin/import-profiles.php** - Profile import wizard interface
 - **admin/audit-log.php** - Security audit log viewer with filtering and pagination
 - **admin/coaching.php** - Jury coaching dashboard for evaluation tracking (v2.2.29)
-- **admin/debug-center.php** - Unified developer tools interface (v2.3.0)
-- **admin/debug-center/tab-diagnostics.php** - System diagnostics tab (v2.3.0)
-- **admin/debug-center/tab-database.php** - Database tools tab (v2.3.0 - pending)
-- **admin/debug-center/tab-scripts.php** - Debug scripts tab (v2.3.0 - pending)
-- **admin/debug-center/tab-errors.php** - Error monitoring tab (v2.3.0 - pending)
-- **admin/debug-center/tab-tools.php** - Maintenance tools tab (v2.3.0 - pending)
-- **admin/debug-center/tab-info.php** - System information tab (v2.3.0 - pending)
+- **admin/debug-center.php** - Unified developer tools interface (v2.3.0 - complete)
+- **admin/debug-center/tab-diagnostics.php** - System diagnostics tab with health monitoring (v2.3.0 - complete)
+- **admin/debug-center/tab-database.php** - Database tools and optimization tab (v2.3.0 - complete)
+- **admin/debug-center/tab-scripts.php** - Debug script execution interface (v2.3.0 - complete)
+- **admin/debug-center/tab-errors.php** - Error log monitoring and management (v2.3.0 - complete)
+- **admin/debug-center/tab-tools.php** - Maintenance operations interface (v2.3.0 - complete)
+- **admin/debug-center/tab-info.php** - System information display (v2.3.0 - complete)
 
 ### Frontend Templates
 - **frontend/jury-dashboard.php** - Main jury member evaluation interface
@@ -91,19 +97,21 @@
 
 ## 📁 /assets/ - Static Resources
 
-### Stylesheets
+### Stylesheets (v2.3.0 - Added Debug Center styles)
 - **css/admin.css** - Admin interface with widget loading states (v2.2.28 - added .mt-widget-loading)
 - **css/frontend.css** - Public-facing interface styles
 - **css/jury-dashboard.css** - Specific styling for jury evaluation interface
 - **css/csv-import.css** - Progress modal and import UI styles (v2.2.24)
+- **css/debug-center.css** - Professional Debug Center styling with responsive design (v2.3.0)
 
-### JavaScript (v2.2.28 - Event delegation and widget refresh)
+### JavaScript (v2.3.0 - Added Debug Center)
 - **js/admin.js** - Admin functionality with event delegation and widget refresh functions (v2.2.28)
 - **js/frontend.js** - Public interface with mt_ajax fallback initialization (v2.2.28)
 - **js/jury-evaluation.js** - Evaluation form validation and submission
 - **js/charts.js** - Data visualization for statistics and progress
 - **js/candidate-import.js** - AJAX-based CSV import with file picker dialog (v2.2.16)
 - **js/csv-import.js** - Complete CSV import module with progress tracking (v2.2.24)
+- **js/debug-center.js** - Debug Center interactive functionality with AJAX operations (v2.3.0)
 
 ### Images
 - **images/logo.png** - Platform logo and branding assets
@@ -125,19 +133,19 @@
 - **mobility-trailblazers-de_DE.po** - German translations
 - **mobility-trailblazers-de_DE.mo** - Compiled German translations
 
-## 📁 /doc/ - Documentation
+## 📁 /doc/ - Documentation (v2.3.0 - Added Debug Center guide)
 
 ### Developer Documentation
-- **mt-developer-guide.md** - Complete development guide with architecture
-- **mt-architecture-docs.md** - Technical architecture and security details
-- **mt-customization-guide.md** - UI and dashboard customization instructions
-- **mt-changelog-updated.md** - Version history and release notes
+- **developer-guide.md** - Complete development guide with architecture (v2.3.0 - updated with Debug Center)
+- **changelog.md** - Version history and release notes (v2.3.0 - complete implementation details)
+- **general_index.md** - Comprehensive file and component index (v2.3.0 - fully updated)
+- **debug-center-guide.md** - Complete Debug Center documentation and usage guide (v2.3.0 - new)
 
 ### Feature Documentation
-- **5x2-grid-implementation-summary.md** - Grid layout system documentation
-- **inline-evaluation-system.md** - Inline evaluation controls guide
-- **jury-rankings-system.md** - Rankings calculation and display
-- **error-handling-system.md** - Error management implementation
+- **csv-import-guide.md** - CSV import functionality documentation
+- **ajax-csv-import-guide.md** - AJAX-based CSV import guide
+- **import-consolidation-v2.2.25.md** - Import system consolidation documentation
+- **debug-plan-10min.md** - Debug tools planning document
 
 ## 📁 /debug/ - Development Tools (v2.3.0 - Reorganized)
 
