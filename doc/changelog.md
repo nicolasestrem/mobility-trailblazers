@@ -2,6 +2,44 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.3.1] - 2025-08-14 - Debug Center Bug Fixes and Stability
+
+### Fixed
+- **Runtime Errors Resolution**: Complete fix of all Debug Center runtime errors
+  - Fixed MT_Debug_Ajax missing init() method implementation
+  - Resolved parent::__construct() call on non-existent parent constructor
+  - Fixed JavaScript undefined method bindings (viewScript, confirmOperation, analyzeTable, optimizeTable)
+  - Resolved all PHP array access warnings with defensive programming
+  - Fixed MT_Error_Monitor private method visibility issues
+  - Corrected MT_Logger private method calls to use public API methods
+  - Fixed array to string conversions in tab templates
+
+- **Database Issues**:
+  - Fixed incorrect table name references (wp_mt_assignments → wp_mt_jury_assignments)
+  - Added proper error handling for database connection failures
+  - Improved resilience when database is unavailable
+
+- **Debug Script Execution**:
+  - Removed unnecessary wp-load.php and wp-config.php requires (scripts run in AJAX context)
+  - Fixed undefined variable $script_name in MT_Debug_Manager
+  - Corrected operation key mismatches in MT_Maintenance_Tools
+
+- **Template Improvements**:
+  - Created proper templates for migrate-profiles and generate-samples pages
+  - Added comprehensive array validation throughout all tab templates
+  - Fixed jQuery UI tooltip dependency (made optional)
+
+### Enhanced
+- **Error Handling**: All Debug Center components now handle missing data gracefully
+- **Code Quality**: Applied defensive programming patterns throughout
+- **Compatibility**: Debug Center works even with partial database connectivity
+
+### Technical Details
+- Fixed 15+ distinct runtime errors across multiple components
+- Improved error resilience with proper fallback values
+- Enhanced array validation to prevent type errors
+- Corrected all method visibility issues for proper encapsulation
+
 ## [2.3.0] - 2025-08-14 - Debug Center Complete Implementation
 
 ### Added

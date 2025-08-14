@@ -87,6 +87,8 @@
 - **admin/debug-center/tab-errors.php** - Error log monitoring and management (v2.3.0 - complete)
 - **admin/debug-center/tab-tools.php** - Maintenance operations interface (v2.3.0 - complete)
 - **admin/debug-center/tab-info.php** - System information display (v2.3.0 - complete)
+- **admin/migrate-profiles.php** - Migration tool for candidate profiles (v2.3.1)
+- **admin/generate-samples.php** - Sample data generator for testing (v2.3.1)
 
 ### Frontend Templates
 - **frontend/jury-dashboard.php** - Main jury member evaluation interface

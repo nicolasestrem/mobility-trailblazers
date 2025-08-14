@@ -160,14 +160,36 @@ $.ajax({
 
 ### Debugging
 
-#### Debug Center (v2.3.0)
-The plugin now includes a comprehensive Debug Center for development and troubleshooting:
-- Access via **MT Award System → Developer Tools** 
-- Environment-aware (Development/Staging/Production)
-- System diagnostics and health monitoring
-- Debug script execution with audit logging
-- Database maintenance tools
-- See `doc/debug-center-guide.md` for complete documentation
+#### Debug Center (v2.3.0 - Enhanced v2.3.1)
+The plugin includes a comprehensive Debug Center for development and troubleshooting:
+
+**Access**: MT Award System → Debug Center (formerly Developer Tools)
+
+**Features**:
+- **6 Complete Tabs**: Diagnostics, Database, Scripts, Errors, Tools, Info
+- **Environment-aware** (Development/Staging/Production) with appropriate restrictions
+- **System Diagnostics**: Real-time health monitoring, performance metrics
+- **Database Tools**: Table optimization, fragmentation analysis, slow query detection
+- **Script Execution**: Categorized debug scripts with audit logging and security controls
+- **Error Monitoring**: Comprehensive error tracking with statistics and filtering
+- **Maintenance Tools**: Cache management, data operations, scheduled tasks
+- **System Information**: Complete environment details with export functionality
+
+**Key Classes**:
+- `MT_Debug_Manager` - Script management and execution
+- `MT_Diagnostic_Service` - System health monitoring (Singleton)
+- `MT_Maintenance_Tools` - Maintenance operations
+- `MT_Debug_Ajax` - AJAX handler for all Debug Center operations
+- `MT_Database_Health` - Database monitoring utilities
+- `MT_System_Info` - System information gathering
+
+**Security Features**:
+- Production environment restrictions for dangerous operations
+- Password verification for factory reset
+- Audit logging with IP tracking
+- Nonce verification for all operations
+
+See `doc/mt-debug-center-guide.md` for complete documentation
 
 #### Console Logging
 The code includes extensive console logging for debugging:
