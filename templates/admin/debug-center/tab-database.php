@@ -57,7 +57,7 @@ if (!is_array($all_tables)) {
             </div>
             <div class="mt-info-item">
                 <strong><?php esc_html_e('Version:', 'mobility-trailblazers'); ?></strong>
-                <span><?php echo esc_html($connection_info['server_version']); ?></span>
+                <span><?php echo esc_html(isset($connection_info['server_version']) ? $connection_info['server_version'] : 'Unknown'); ?></span>
             </div>
             <div class="mt-info-item">
                 <strong><?php esc_html_e('Charset:', 'mobility-trailblazers'); ?></strong>
@@ -65,7 +65,7 @@ if (!is_array($all_tables)) {
             </div>
             <div class="mt-info-item">
                 <strong><?php esc_html_e('Collation:', 'mobility-trailblazers'); ?></strong>
-                <span><?php echo esc_html($connection_info['collation']); ?></span>
+                <span><?php echo esc_html(isset($connection_info['collation']) ? $connection_info['collation'] : 'Unknown'); ?></span>
             </div>
         </div>
     </div>
@@ -75,19 +75,19 @@ if (!is_array($all_tables)) {
         <h3><?php esc_html_e('Database Statistics', 'mobility-trailblazers'); ?></h3>
         <div class="mt-stats-grid">
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html($db_stats['total_tables']); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(isset($db_stats['total_tables']) ? $db_stats['total_tables'] : 0); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Total Tables', 'mobility-trailblazers'); ?></div>
             </div>
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html(number_format($db_stats['total_rows'])); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(number_format(isset($db_stats['total_rows']) ? $db_stats['total_rows'] : 0)); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Total Rows', 'mobility-trailblazers'); ?></div>
             </div>
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html($db_stats['total_size_formatted']); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(isset($db_stats['total_size_formatted']) ? $db_stats['total_size_formatted'] : 'N/A'); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Database Size', 'mobility-trailblazers'); ?></div>
             </div>
             <div class="mt-stat-card">
-                <div class="mt-stat-value"><?php echo esc_html($db_stats['plugin_tables']); ?></div>
+                <div class="mt-stat-value"><?php echo esc_html(isset($db_stats['plugin_tables']) ? $db_stats['plugin_tables'] : 0); ?></div>
                 <div class="mt-stat-label"><?php esc_html_e('Plugin Tables', 'mobility-trailblazers'); ?></div>
             </div>
         </div>

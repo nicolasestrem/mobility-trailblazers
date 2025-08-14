@@ -84,7 +84,7 @@ class MT_Error_Monitor {
      *
      * @return array
      */
-    private function get_error_statistics() {
+    public function get_error_statistics() {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'mt_error_log';
@@ -94,8 +94,8 @@ class MT_Error_Monitor {
             return [
                 'total_errors' => 0,
                 'errors_today' => 0,
-                'errors_this_week' => 0,
-                'critical_errors' => 0
+                'unique_errors' => 0,
+                'most_common_type' => 'None'
             ];
         }
         
@@ -330,5 +330,59 @@ class MT_Error_Monitor {
             'critical_errors' => $critical_errors,
             'status' => $status
         ];
+    }
+    
+    /**
+     * Get recent errors
+     *
+     * @param int $limit Number of errors to retrieve
+     * @return array
+     */
+    public function get_recent_errors($limit = 50) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_error_log';
+        
+        // Check if table exists
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
+            return [];
+        }
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table_name ORDER BY created_at DESC LIMIT %d",
+            $limit
+        ), ARRAY_A);
+        
+        return $results ? $results : [];
+    }
+    
+    /**
+     * Get error types
+     *
+     * @return array
+     */
+    public function get_error_types() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mt_error_log';
+        
+        // Check if table exists
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) !== $table_name) {
+            return [];
+        }
+        
+        $results = $wpdb->get_results(
+            "SELECT level as type, COUNT(*) as count FROM $table_name GROUP BY level",
+            OBJECT_K
+        );
+        
+        $types = [];
+        if ($results) {
+            foreach ($results as $type => $data) {
+                $types[$type] = $data->count;
+            }
+        }
+        
+        return $types;
     }
 }

@@ -28,7 +28,10 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
     <div class="mt-debug-section">
         <h3><?php esc_html_e('Cache Management', 'mobility-trailblazers'); ?></h3>
         <div class="mt-tools-grid">
-            <?php foreach ($operations['cache'] as $op_key => $operation): ?>
+            <?php if (isset($operations['cache']) && is_array($operations['cache'])): ?>
+                <?php foreach ($operations['cache'] as $op_key => $operation): 
+                    if (!is_array($operation)) continue;
+                ?>
             <div class="mt-tool-card">
                 <div class="mt-tool-icon">
                     <span class="dashicons dashicons-<?php echo esc_attr($operation['icon'] ?? 'admin-tools'); ?>"></span>
@@ -56,6 +59,7 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
                 </button>
             </div>
             <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -162,9 +166,11 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
             <?php esc_html_e('These operations will permanently delete data. Please ensure you have backups before proceeding.', 'mobility-trailblazers'); ?>
         </div>
         <div class="mt-tools-grid">
-            <?php foreach ($operations['reset'] as $op_key => $operation): 
-                $is_factory_reset = ($op_key === 'factory_reset');
-            ?>
+            <?php if (isset($operations['reset']) && is_array($operations['reset'])): ?>
+                <?php foreach ($operations['reset'] as $op_key => $operation): 
+                    if (!is_array($operation)) continue;
+                    $is_factory_reset = ($op_key === 'factory_reset');
+                ?>
             <div class="mt-tool-card <?php echo $is_factory_reset ? 'mt-tool-danger' : 'mt-tool-warning'; ?>">
                 <div class="mt-tool-icon">
                     <span class="dashicons dashicons-<?php echo esc_attr($operation['icon'] ?? 'warning'); ?>"></span>
@@ -202,6 +208,7 @@ $environment = (new \MobilityTrailblazers\Admin\MT_Debug_Manager())->get_environ
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 

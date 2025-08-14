@@ -146,7 +146,7 @@ $info = $system_info->get_system_info();
                     <tr>
                         <th><?php esc_html_e('Debug Mode', 'mobility-trailblazers'); ?></th>
                         <td>
-                            <?php if ($info['wordpress']['debug']): ?>
+                            <?php if (isset($info['wordpress']['debug']) && $info['wordpress']['debug']): ?>
                             <span class="mt-badge mt-badge-warning"><?php esc_html_e('Enabled', 'mobility-trailblazers'); ?></span>
                             <?php else: ?>
                             <span class="mt-badge mt-badge-success"><?php esc_html_e('Disabled', 'mobility-trailblazers'); ?></span>
@@ -174,7 +174,7 @@ $info = $system_info->get_system_info();
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Server IP', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['server']['ip']); ?></td>
+                        <td><?php echo esc_html(isset($info['server']['ip']) ? $info['server']['ip'] : 'Unknown'); ?></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Server Port', 'mobility-trailblazers'); ?></th>
@@ -207,27 +207,27 @@ $info = $system_info->get_system_info();
                 <tbody>
                     <tr>
                         <th><?php esc_html_e('Database Version', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['database']['version']); ?></td>
+                        <td><?php echo esc_html(isset($info['database']['version']) ? $info['database']['version'] : 'Unknown'); ?></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Database Host', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['database']['host']); ?></td>
+                        <td><?php echo esc_html(isset($info['database']['host']) ? $info['database']['host'] : 'Unknown'); ?></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Database Name', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['database']['name']); ?></td>
+                        <td><?php echo esc_html(isset($info['database']['name']) ? $info['database']['name'] : 'Unknown'); ?></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Table Prefix', 'mobility-trailblazers'); ?></th>
-                        <td><code><?php echo esc_html($info['database']['prefix']); ?></code></td>
+                        <td><code><?php echo esc_html(isset($info['database']['prefix']) ? $info['database']['prefix'] : 'Unknown'); ?></code></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Charset', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['database']['charset']); ?></td>
+                        <td><?php echo esc_html(isset($info['database']['charset']) ? $info['database']['charset'] : 'Unknown'); ?></td>
                     </tr>
                     <tr>
                         <th><?php esc_html_e('Collation', 'mobility-trailblazers'); ?></th>
-                        <td><?php echo esc_html($info['database']['collation']); ?></td>
+                        <td><?php echo esc_html(isset($info['database']['collation']) ? $info['database']['collation'] : 'Unknown'); ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -247,18 +247,26 @@ $info = $system_info->get_system_info();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($info['plugins'] as $plugin): ?>
-                    <tr>
-                        <td>
-                            <strong><?php echo esc_html($plugin['name']); ?></strong>
-                            <?php if ($plugin['network']): ?>
-                            <span class="mt-badge mt-badge-info"><?php esc_html_e('Network', 'mobility-trailblazers'); ?></span>
-                            <?php endif; ?>
-                        </td>
-                        <td><?php echo esc_html($plugin['version']); ?></td>
-                        <td><?php echo esc_html($plugin['author']); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
+                    <?php if (isset($info['plugins']) && is_array($info['plugins'])): ?>
+                        <?php foreach ($info['plugins'] as $plugin): 
+                            if (!is_array($plugin)) continue;
+                            $name = isset($plugin['name']) ? $plugin['name'] : 'Unknown';
+                            $version = isset($plugin['version']) ? $plugin['version'] : 'Unknown';
+                            $author = isset($plugin['author']) ? $plugin['author'] : 'Unknown';
+                            $network = isset($plugin['network']) ? $plugin['network'] : false;
+                        ?>
+                        <tr>
+                            <td>
+                                <strong><?php echo esc_html($name); ?></strong>
+                                <?php if ($network): ?>
+                                <span class="mt-badge mt-badge-info"><?php esc_html_e('Network', 'mobility-trailblazers'); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?php echo esc_html($version); ?></td>
+                            <td><?php echo esc_html($author); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

@@ -42,15 +42,10 @@
             
             // Maintenance operations
             $(document).on('click', '.mt-run-maintenance', this.runMaintenance.bind(this));
-            $(document).on('click', '.mt-confirm-operation', this.confirmOperation.bind(this));
             
             // Error monitoring
             $(document).on('click', '.mt-clear-logs', this.clearLogs.bind(this));
             $(document).on('click', '.mt-refresh-errors', this.refreshErrors.bind(this));
-            
-            // Database operations
-            $(document).on('click', '.mt-analyze-table', this.analyzeTable.bind(this));
-            $(document).on('click', '.mt-optimize-table', this.optimizeTable.bind(this));
             
             // System info
             $(document).on('click', '.mt-copy-sysinfo', this.copySystemInfo.bind(this));
