@@ -2,6 +2,55 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.2.29] - 2025-08-14
+
+### Added
+- **Coaching Dashboard**: Complete jury evaluation management system
+  - New coaching menu under Mobility Trailblazers for administrators
+  - Real-time progress tracking for all jury members
+  - Visual progress bars showing completion rates
+  - Recent activity feed showing latest evaluations
+  - Send reminder emails to jury members with incomplete evaluations
+  - Export coaching reports as CSV with all statistics
+  - Average score tracking per jury member
+  - Last activity tracking to identify inactive jury members
+
+- **Performance Testing Suite**: Comprehensive testing tools for large datasets
+  - Test import performance with configurable record counts
+  - Test export performance and memory usage
+  - Database query performance testing
+  - Memory usage profiling for different operations
+  - Assignment distribution analysis
+  - Index effectiveness testing
+  - Visual test interface at `/debug/performance-test.php`
+
+- **Assignment Validation & Rebalancing**: Advanced assignment management
+  - `validate_assignment_distribution()` method to check distribution quality
+  - `rebalance_assignments()` to automatically redistribute uneven assignments
+  - `get_distribution_statistics()` for detailed distribution analysis
+  - Standard deviation calculation to measure distribution fairness
+  - Quality ratings: Excellent (≤1.5 SD), Good (≤3 SD), Fair (≤5 SD), Poor (>5 SD)
+  - Automatic detection of over/under-assigned jury members
+
+### Enhanced
+- **German Translations**: Complete localization for v2.2.29 features
+  - 80+ new German translations added
+  - Coaching dashboard fully translated
+  - Performance testing interface translated
+  - Assignment validation messages translated
+  - All error messages and notifications localized
+
+- **Template Organization**: Standardized file naming
+  - Template files now consistently use hyphenated names
+  - Improved fallback handling for template loading
+
+### Technical Improvements
+- Coaching statistics use optimized SQL queries with proper JOINs
+- Performance tests include memory profiling and execution time tracking
+- Assignment rebalancing prevents duplicate assignments
+- Audit logging for all coaching and rebalancing actions
+- Proper capability checks for all new features
+
 ## [2.2.28] - 2025-08-14
 
 ### Fixed

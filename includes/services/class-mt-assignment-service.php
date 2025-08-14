@@ -290,6 +290,252 @@ class MT_Assignment_Service implements MT_Service_Interface {
     }
     
     /**
+     * Validate assignment distribution
+     * Checks if assignments are evenly distributed among jury members
+     *
+     * @param string $method Distribution method used
+     * @return bool True if distribution is balanced
+     * @since 2.2.29
+     */
+    public function validate_assignment_distribution($method = 'balanced') {
+        $assignments = $this->repository->find_all();
+        
+        if (empty($assignments)) {
+            return true; // No assignments to validate
+        }
+        
+        // Group by jury member
+        $jury_assignments = [];
+        foreach ($assignments as $assignment) {
+            if (!isset($jury_assignments[$assignment->jury_member_id])) {
+                $jury_assignments[$assignment->jury_member_id] = 0;
+            }
+            $jury_assignments[$assignment->jury_member_id]++;
+        }
+        
+        // Calculate distribution statistics
+        $counts = array_values($jury_assignments);
+        $avg = array_sum($counts) / count($counts);
+        $variance = 0;
+        
+        foreach ($counts as $count) {
+            $variance += pow($count - $avg, 2);
+        }
+        $variance = $variance / count($counts);
+        $std_dev = sqrt($variance);
+        
+        // Log distribution statistics
+        MT_Audit_Logger::log('assignment_distribution_validated', 'assignment', null, [
+            'method' => $method,
+            'average_per_jury' => round($avg, 2),
+            'std_deviation' => round($std_dev, 2),
+            'min_assignments' => min($counts),
+            'max_assignments' => max($counts),
+            'jury_count' => count($jury_assignments),
+            'distribution_quality' => $std_dev <= 1.5 ? 'Excellent' : ($std_dev <= 3 ? 'Good' : 'Poor')
+        ]);
+        
+        // Return true if distribution is balanced (low standard deviation)
+        return $std_dev <= 1.5; // Acceptable variance threshold
+    }
+    
+    /**
+     * Rebalance assignments for more even distribution
+     * Moves assignments from over-assigned to under-assigned jury members
+     *
+     * @return array Result with success status and moved count
+     * @since 2.2.29
+     */
+    public function rebalance_assignments() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'mt_assignments';
+        
+        // Get current distribution
+        $distribution = $wpdb->get_results("
+            SELECT jury_member_id, COUNT(*) as count
+            FROM {$table}
+            GROUP BY jury_member_id
+            ORDER BY count DESC
+        ");
+        
+        if (empty($distribution)) {
+            return [
+                'success' => false,
+                'message' => __('No assignments to balance', 'mobility-trailblazers')
+            ];
+        }
+        
+        // Calculate target distribution
+        $total = array_sum(array_column($distribution, 'count'));
+        $jury_count = count($distribution);
+        $target_per_jury = floor($total / $jury_count);
+        
+        // Identify over-assigned and under-assigned jury members
+        $over_assigned = [];
+        $under_assigned = [];
+        
+        foreach ($distribution as $jury) {
+            $diff = $jury->count - $target_per_jury;
+            if ($diff > 1) {
+                $over_assigned[] = [
+                    'id' => $jury->jury_member_id,
+                    'excess' => $diff
+                ];
+            } elseif ($diff < 0) {
+                $under_assigned[] = [
+                    'id' => $jury->jury_member_id,
+                    'needed' => abs($diff)
+                ];
+            }
+        }
+        
+        // Rebalance by moving assignments
+        $moved = 0;
+        $moves = [];
+        
+        foreach ($over_assigned as &$over) {
+            foreach ($under_assigned as &$under) {
+                if ($under['needed'] <= 0 || $over['excess'] <= 0) {
+                    continue;
+                }
+                
+                // Get assignments that can be moved
+                $moveable = $wpdb->get_results($wpdb->prepare("
+                    SELECT id, candidate_id 
+                    FROM {$table}
+                    WHERE jury_member_id = %d
+                    AND candidate_id NOT IN (
+                        SELECT candidate_id 
+                        FROM {$table} 
+                        WHERE jury_member_id = %d
+                    )
+                    LIMIT %d
+                ", $over['id'], $under['id'], min($over['excess'], $under['needed'])));
+                
+                foreach ($moveable as $assignment) {
+                    // Move assignment
+                    $wpdb->update(
+                        $table,
+                        [
+                            'jury_member_id' => $under['id'],
+                            'updated_at' => current_time('mysql')
+                        ],
+                        ['id' => $assignment->id]
+                    );
+                    
+                    $moves[] = [
+                        'assignment_id' => $assignment->id,
+                        'from_jury' => $over['id'],
+                        'to_jury' => $under['id'],
+                        'candidate_id' => $assignment->candidate_id
+                    ];
+                    
+                    $moved++;
+                    $under['needed']--;
+                    $over['excess']--;
+                    
+                    if ($over['excess'] <= 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Clear caches
+        $this->repository->clear_all_caches();
+        
+        // Log the rebalancing action
+        MT_Audit_Logger::log('assignments_rebalanced', 'assignment', null, [
+            'moved_count' => $moved,
+            'moves' => $moves,
+            'target_per_jury' => $target_per_jury,
+            'jury_count' => $jury_count
+        ]);
+        
+        return [
+            'success' => true,
+            'moved' => $moved,
+            'message' => sprintf(
+                __('%d assignments rebalanced across %d jury members', 'mobility-trailblazers'),
+                $moved,
+                $jury_count
+            ),
+            'details' => [
+                'target_per_jury' => $target_per_jury,
+                'moves' => $moves
+            ]
+        ];
+    }
+    
+    /**
+     * Get distribution statistics
+     * Returns detailed statistics about current assignment distribution
+     *
+     * @return array Distribution statistics
+     * @since 2.2.29
+     */
+    public function get_distribution_statistics() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'mt_assignments';
+        
+        // Get distribution data
+        $distribution = $wpdb->get_results("
+            SELECT 
+                jury_member_id,
+                COUNT(*) as assignment_count,
+                COUNT(DISTINCT candidate_id) as unique_candidates
+            FROM {$table}
+            GROUP BY jury_member_id
+        ");
+        
+        if (empty($distribution)) {
+            return [
+                'total_assignments' => 0,
+                'jury_count' => 0,
+                'average' => 0,
+                'min' => 0,
+                'max' => 0,
+                'std_deviation' => 0,
+                'quality' => 'N/A'
+            ];
+        }
+        
+        // Calculate statistics
+        $counts = array_column($distribution, 'assignment_count');
+        $total = array_sum($counts);
+        $avg = $total / count($counts);
+        
+        // Calculate standard deviation
+        $variance = 0;
+        foreach ($counts as $count) {
+            $variance += pow($count - $avg, 2);
+        }
+        $std_dev = sqrt($variance / count($counts));
+        
+        // Determine quality
+        if ($std_dev <= 1.5) {
+            $quality = 'Excellent';
+        } elseif ($std_dev <= 3) {
+            $quality = 'Good';
+        } elseif ($std_dev <= 5) {
+            $quality = 'Fair';
+        } else {
+            $quality = 'Poor';
+        }
+        
+        return [
+            'total_assignments' => $total,
+            'jury_count' => count($distribution),
+            'average' => round($avg, 2),
+            'min' => min($counts),
+            'max' => max($counts),
+            'std_deviation' => round($std_dev, 2),
+            'quality' => $quality,
+            'distribution' => $distribution
+        ];
+    }
+    
+    /**
      * Distribute candidates randomly
      *
      * @param array $jury_members Array of jury member IDs

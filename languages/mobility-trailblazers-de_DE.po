@@ -620,3 +620,216 @@ msgstr "Keine Änderungen erkannt"
 
 msgid "Settings updated"
 msgstr "Einstellungen aktualisiert"
+
+# v2.2.29 - Coaching Dashboard Translations
+msgid "Coaching Dashboard"
+msgstr "Coaching-Dashboard"
+
+msgid "Coaching"
+msgstr "Coaching"
+
+msgid "Jury Member Progress"
+msgstr "Jurymitglied-Fortschritt"
+
+msgid "Jury Coaching Dashboard"
+msgstr "Jury-Coaching-Dashboard"
+
+msgid "%d pending"
+msgstr "%d ausstehend"
+
+msgid "Today"
+msgstr "Heute"
+
+msgid "Yesterday"
+msgstr "Gestern"
+
+msgid "%d days ago"
+msgstr "vor %d Tagen"
+
+msgid "Never"
+msgstr "Nie"
+
+msgid "Send Reminder"
+msgstr "Erinnerung senden"
+
+msgid "Send Reminders to Incomplete"
+msgstr "Erinnerungen an Unvollständige senden"
+
+msgid "Remind About Drafts"
+msgstr "An Entwürfe erinnern"
+
+msgid "Export Coaching Report"
+msgstr "Coaching-Bericht exportieren"
+
+msgid "Refresh Statistics"
+msgstr "Statistiken aktualisieren"
+
+msgid "Recent Evaluation Activity"
+msgstr "Letzte Bewertungsaktivität"
+
+msgid "Time"
+msgstr "Zeit"
+
+msgid "No recent activity"
+msgstr "Keine aktuellen Aktivitäten"
+
+msgid "Completion Rate"
+msgstr "Abschlussrate"
+
+msgid "Send reminder emails to all jury members with incomplete evaluations?"
+msgstr "Erinnerungs-E-Mails an alle Jurymitglieder mit unvollständigen Bewertungen senden?"
+
+msgid "Sending reminders..."
+msgstr "Sende Erinnerungen..."
+
+msgid "Reminders sent successfully"
+msgstr "Erinnerungen erfolgreich gesendet"
+
+msgid "Report exported successfully"
+msgstr "Bericht erfolgreich exportiert"
+
+msgid "%d reminder emails sent"
+msgstr "%d Erinnerungs-E-Mails gesendet"
+
+msgid "Reminder: Mobility Trailblazers Evaluations Pending"
+msgstr "Erinnerung: Mobility Trailblazers Bewertungen ausstehend"
+
+msgid "Dear %s,\n\nYou have %d pending evaluations for the Mobility Trailblazers Awards.\n\nPlease log in to complete your evaluations: %s\n\nThank you for your participation.\n\nBest regards,\nMobility Trailblazers Team"
+msgstr "Sehr geehrte(r) %s,\n\nSie haben %d ausstehende Bewertungen für die Mobility Trailblazers Awards.\n\nBitte melden Sie sich an, um Ihre Bewertungen abzuschließen: %s\n\nVielen Dank für Ihre Teilnahme.\n\nMit freundlichen Grüßen,\nMobility Trailblazers Team"
+
+msgid "No jury members found"
+msgstr "Keine Jurymitglieder gefunden"
+
+# Performance Testing Translations
+msgid "Performance Testing Suite"
+msgstr "Performance-Testsuite"
+
+msgid "Large Import Test"
+msgstr "Großer Import-Test"
+
+msgid "Large Export Test"
+msgstr "Großer Export-Test"
+
+msgid "Evaluation Query Test"
+msgstr "Bewertungsabfrage-Test"
+
+msgid "Memory Usage Test"
+msgstr "Speichernutzungs-Test"
+
+msgid "Assignment Distribution Test"
+msgstr "Zuweisungsverteilungs-Test"
+
+msgid "Index Performance Test"
+msgstr "Index-Performance-Test"
+
+msgid "Test Large Import (100 records)"
+msgstr "Großen Import testen (100 Datensätze)"
+
+msgid "Test Large Export"
+msgstr "Großen Export testen"
+
+msgid "Test Database Queries"
+msgstr "Datenbankabfragen testen"
+
+msgid "Test Memory Usage"
+msgstr "Speichernutzung testen"
+
+msgid "Test Assignment Distribution"
+msgstr "Zuweisungsverteilung testen"
+
+msgid "Test Index Performance"
+msgstr "Index-Performance testen"
+
+msgid "Run All Tests"
+msgstr "Alle Tests ausführen"
+
+msgid "Test Results:"
+msgstr "Testergebnisse:"
+
+msgid "Tests completed successfully!"
+msgstr "Tests erfolgreich abgeschlossen!"
+
+msgid "Duration:"
+msgstr "Dauer:"
+
+msgid "Memory Used:"
+msgstr "Genutzter Speicher:"
+
+msgid "candidates_processed"
+msgstr "Kandidaten verarbeitet"
+
+msgid "candidates_exported"
+msgstr "Kandidaten exportiert"
+
+msgid "query_time"
+msgstr "Abfragezeit"
+
+msgid "distribution_quality"
+msgstr "Verteilungsqualität"
+
+msgid "Excellent"
+msgstr "Ausgezeichnet"
+
+msgid "Good"
+msgstr "Gut"
+
+msgid "Fair"
+msgstr "Befriedigend"
+
+msgid "Poor"
+msgstr "Schlecht"
+
+# Assignment Validation & Rebalancing Translations
+msgid "No assignments to balance"
+msgstr "Keine Zuweisungen zum Ausgleichen"
+
+msgid "%d assignments rebalanced across %d jury members"
+msgstr "%d Zuweisungen wurden auf %d Jurymitglieder neu verteilt"
+
+msgid "assignment_distribution_validated"
+msgstr "Zuweisungsverteilung validiert"
+
+msgid "assignments_rebalanced"
+msgstr "Zuweisungen neu verteilt"
+
+msgid "average_per_jury"
+msgstr "Durchschnitt pro Jurymitglied"
+
+msgid "standard_deviation"
+msgstr "Standardabweichung"
+
+msgid "min_assignments"
+msgstr "Minimale Zuweisungen"
+
+msgid "max_assignments"
+msgstr "Maximale Zuweisungen"
+
+msgid "jury_count"
+msgstr "Anzahl Jurymitglieder"
+
+msgid "total_assignments"
+msgstr "Gesamtzuweisungen"
+
+msgid "Validate Distribution"
+msgstr "Verteilung validieren"
+
+msgid "Rebalance Assignments"
+msgstr "Zuweisungen neu verteilen"
+
+msgid "Distribution Statistics"
+msgstr "Verteilungsstatistiken"
+
+msgid "Quality:"
+msgstr "Qualität:"
+
+msgid "Average:"
+msgstr "Durchschnitt:"
+
+msgid "Standard Deviation:"
+msgstr "Standardabweichung:"
+
+msgid "Minimum:"
+msgstr "Minimum:"
+
+msgid "Maximum:"
+msgstr "Maximum:"

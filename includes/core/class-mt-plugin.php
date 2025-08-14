@@ -94,6 +94,9 @@ class MT_Plugin {
             if (current_user_can('manage_options')) {
                 $error_monitor = new \MobilityTrailblazers\Admin\MT_Error_Monitor();
                 $error_monitor->init();
+                
+                // Initialize coaching dashboard
+                $coaching = new \MobilityTrailblazers\Admin\MT_Coaching();
             }
         }
         
