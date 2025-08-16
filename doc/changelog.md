@@ -2,6 +2,53 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.4.1] - 2025-08-16 - Jury Grid Display Fix & Interactive Cards
+
+### Fixed
+- **Jury Grid Inconsistent Sizing**: Resolved issue where jury member cards had variable sizes based on content length
+  - Implemented fixed minimum height (320px) for all grid items
+  - Set consistent image container dimensions (150x150px)
+  - Added text truncation for long names and organizations using CSS line-clamp
+  - Proper flexbox layout ensures vertical alignment consistency
+
+- **Missing Click Functionality**: Added interactivity to jury member cards
+  - Wrapped entire card content in anchor tags linking to individual profiles
+  - Cards now navigate to `/candidate/[name]/` URLs
+  - Maintained semantic HTML structure
+
+### Added
+- **Visual Hover Effects**: Enhanced user experience with interactive feedback
+  - Card lift animation with shadow on hover
+  - Image scales to 1.05x on hover
+  - Name color changes to accent color (#C1693C)
+  - "View Profile" button appears on hover with smooth opacity transition
+  - Cursor changes to pointer to indicate clickability
+
+- **Responsive Grid Breakpoints**: Proper mobile and tablet support
+  - 1400px: 5 columns → 4 columns
+  - 1200px: 4 columns → 3 columns
+  - 992px: 3 columns → 2 columns
+  - 768px: 2 columns with reduced card dimensions
+  - 480px: Single column layout
+
+### Enhanced
+- **CSS Architecture**: Comprehensive styling improvements
+  - Added 255 lines of grid standardization CSS
+  - Added 72 lines of clickability and hover effect styles
+  - Used CSS Grid with minmax() for flexible responsive columns
+  - Implemented CSS custom properties for consistent theming
+
+### Files Modified
+- `assets/css/frontend.css` - Added jury grid fixes and clickability styles
+- `templates/frontend/candidates-grid.php` - Added link wrapper and data attributes
+
+### Technical Details
+- Used `object-fit: cover` for consistent image display
+- Implemented `-webkit-line-clamp` for multi-line text truncation
+- Added `flex-shrink: 0` to prevent image distortion
+- Used `!important` flags to override theme conflicts
+- Maintained WordPress coding standards throughout
+
 ## [2.4.0] - 2025-01-16 - Complete Photo Management & Enhanced UI Templates
 
 ### Added

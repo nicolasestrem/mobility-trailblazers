@@ -23,15 +23,16 @@ $show_category = $atts['show_category'] === 'yes';
         $position = get_post_meta(get_the_ID(), '_mt_position', true);
         $categories = wp_get_post_terms(get_the_ID(), 'mt_award_category');
     ?>
-        <div class="mt-candidate-grid-item">
-            <?php if (has_post_thumbnail()) : ?>
-                <div class="mt-candidate-image">
-                    <?php the_post_thumbnail('medium', ['class' => 'mt-candidate-photo']); ?>
-                </div>
-            <?php endif; ?>
-            
-            <div class="mt-candidate-info">
-                <h3><?php the_title(); ?></h3>
+        <div class="mt-candidate-grid-item" data-candidate-id="<?php echo get_the_ID(); ?>">
+            <a href="<?php the_permalink(); ?>" class="mt-candidate-link">
+                <?php if (has_post_thumbnail()) : ?>
+                    <div class="mt-candidate-image">
+                        <?php the_post_thumbnail('medium', ['class' => 'mt-candidate-photo']); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="mt-candidate-info">
+                    <h3><?php the_title(); ?></h3>
                 
                 <?php if ($organization || $position) : ?>
                     <div class="mt-candidate-meta">
@@ -60,7 +61,8 @@ $show_category = $atts['show_category'] === 'yes';
                         <?php the_excerpt(); ?>
                     </div>
                 <?php endif; ?>
-            </div>
+                </div>
+            </a>
         </div>
     <?php endwhile; ?>
 </div> 
