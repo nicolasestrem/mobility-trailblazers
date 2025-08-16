@@ -107,6 +107,9 @@ class MT_Plugin {
         $shortcodes = new MT_Shortcodes();
         $shortcodes->init();
         
+        // Initialize template loader for enhanced candidate profiles
+        MT_Template_Loader::init();
+        
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);

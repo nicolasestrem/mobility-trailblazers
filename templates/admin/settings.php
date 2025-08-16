@@ -64,6 +64,9 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
         update_option('mt_candidate_presentation', $candidate_presentation);
     }
     
+    // Save enhanced template setting
+    update_option('mt_use_enhanced_template', isset($_POST['mt_use_enhanced_template']) ? '1' : '0');
+    
     // Save language settings
     if (isset($_POST['mt_default_language'])) {
         update_option('mt_default_language', sanitize_text_field($_POST['mt_default_language']));
@@ -506,7 +509,45 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
             </tr>
         </table>
         
-
+        <!-- Enhanced Template Settings -->
+        <h2><?php _e('Enhanced Candidate Profile Template', 'mobility-trailblazers'); ?></h2>
+        <p><?php _e('Configure the enhanced candidate profile template with modern UI features.', 'mobility-trailblazers'); ?></p>
+        
+        <table class="form-table">
+            <tr>
+                <th scope="row"><?php _e('Enhanced Template', 'mobility-trailblazers'); ?></th>
+                <td>
+                    <label>
+                        <input type="checkbox" name="mt_use_enhanced_template" value="1"
+                               <?php checked(get_option('mt_use_enhanced_template', '1'), '1'); ?> />
+                        <strong><?php _e('Use Enhanced Candidate Profile Template (v2.4.0)', 'mobility-trailblazers'); ?></strong>
+                    </label>
+                    <p class="description">
+                        <?php _e('Enables the modern candidate profile template with hero sections, criteria cards, and enhanced UI elements.', 'mobility-trailblazers'); ?>
+                    </p>
+                    
+                    <div class="notice notice-info inline" style="margin-top: 15px;">
+                        <p><strong><?php _e('Enhanced Template Features:', 'mobility-trailblazers'); ?></strong></p>
+                        <ul style="list-style-type: disc; margin-left: 20px;">
+                            <li><?php _e('Hero section with gradient background and floating photo frame', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('Structured evaluation criteria cards with custom icons', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('Sidebar with quick facts and navigation', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('Modern responsive design with animations', 'mobility-trailblazers'); ?></li>
+                            <li><?php _e('Enhanced typography and visual hierarchy', 'mobility-trailblazers'); ?></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="notice notice-warning inline" style="margin-top: 10px;">
+                        <p>
+                            <strong><?php _e('Note:', 'mobility-trailblazers'); ?></strong>
+                            <?php _e('To display structured criteria cards, run the criteria parsing tool:', 'mobility-trailblazers'); ?>
+                            <br/>
+                            <code>wp eval-file parse-evaluation-criteria.php</code>
+                        </p>
+                    </div>
+                </td>
+            </tr>
+        </table>
         
         <!-- Display Settings -->
         <h2><?php _e('Display Settings', 'mobility-trailblazers'); ?></h2>
