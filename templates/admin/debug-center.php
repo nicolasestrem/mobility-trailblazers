@@ -163,4 +163,25 @@ $is_production = $debug_manager->is_production();
     padding-top: 20px;
     border-top: 1px solid #ddd;
 }
+
+.button-danger {
+    background: #dc3232 !important;
+    border-color: #ba2020 !important;
+    color: #fff !important;
+    box-shadow: 0 1px 0 #ba2020 !important;
+    text-shadow: 0 -1px 1px #ba2020, 1px 0 1px #ba2020, 0 1px 1px #ba2020, -1px 0 1px #ba2020 !important;
+}
+
+.button-danger:hover,
+.button-danger:focus {
+    background: #ba2020 !important;
+    border-color: #a01515 !important;
+    color: #fff !important;
+}
+
+.button-danger:active {
+    background: #a01515 !important;
+    border-color: #a01515 !important;
+    box-shadow: inset 0 2px 0 #a01515 !important;
+}
 </style>

@@ -80,7 +80,21 @@ Manage database operations:
 - Sync evaluations with assignments
 - Rebuild indexes
 - Run migrations
+- Delete all candidates (v2.3.5)
 ```
+
+**Delete All Candidates (v2.3.5):**
+- Located in Database Operations section
+- Styled as a red danger button to indicate destructive action
+- Requires typing "DELETE" to confirm
+- Deletes all candidates and their associated data:
+  - Candidate posts (mt_candidate post type)
+  - All evaluations for those candidates
+  - All assignments for those candidates
+  - All post meta data
+- Uses database transactions for safe deletion
+- Full rollback on error to maintain data integrity
+- Comprehensive audit logging
 
 ### 3. Debug Scripts Tab
 Execute categorized debug scripts:

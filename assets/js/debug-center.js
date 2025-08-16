@@ -53,6 +53,9 @@
             
             // Widget refresh
             $(document).on('click', '.mt-refresh-widget', this.refreshWidget.bind(this));
+            
+            // Delete all candidates
+            $(document).on('click', '.mt-delete-all-candidates', this.deleteAllCandidates.bind(this));
         },
         
         /**
@@ -630,6 +633,58 @@
                         const filename = 'mt-sysinfo-' + new Date().toISOString().slice(0, 10) + '.json';
                         this.downloadJSON(JSON.stringify(response.data, null, 2), filename);
                     }
+                }
+            });
+        },
+        
+        /**
+         * Delete all candidates
+         */
+        deleteAllCandidates: function(e) {
+            e.preventDefault();
+            
+            const $button = $(e.currentTarget);
+            const confirmMessage = $button.data('confirm');
+            
+            // Show confirmation dialog
+            const confirmation = prompt(confirmMessage || 'Type DELETE to confirm');
+            
+            if (confirmation !== 'DELETE') {
+                this.showNotification(mt_debug.i18n.operation_cancelled || 'Operation cancelled', 'info');
+                return;
+            }
+            
+            $button.prop('disabled', true).addClass('updating-message');
+            const originalText = $button.text();
+            $button.text(mt_debug.i18n.deleting || 'Deleting...');
+            
+            $.ajax({
+                url: this.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mt_delete_all_candidates',
+                    nonce: this.nonce,
+                    confirmation: 'DELETE'
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.showNotification(response.data.message || mt_debug.i18n.candidates_deleted || 'All candidates deleted', 'success');
+                        
+                        // Show details if available
+                        if (response.data.deleted_count !== undefined) {
+                            console.log('Deleted candidates:', response.data.deleted_count);
+                            console.log('Deleted evaluations:', response.data.evaluations_deleted);
+                            console.log('Deleted assignments:', response.data.assignments_deleted);
+                        }
+                    } else {
+                        this.showNotification(response.data || mt_debug.i18n.delete_failed || 'Failed to delete candidates', 'error');
+                    }
+                },
+                error: () => {
+                    this.showNotification(mt_debug.i18n.network_error || 'Network error occurred', 'error');
+                },
+                complete: () => {
+                    $button.prop('disabled', false).removeClass('updating-message').text(originalText);
                 }
             });
         }

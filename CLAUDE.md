@@ -5,6 +5,7 @@ Award platform for "25 Mobility Trailblazers in 25" - DACH region mobility innov
 ## 🚨 CRITICAL PROJECT RULES
 
 **PROJECT LOCATION**: `E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers`
+Use all the MCP servers at your disposition
 
 ### Non-Negotiable Rules
 - **NEVER remove features without asking first**

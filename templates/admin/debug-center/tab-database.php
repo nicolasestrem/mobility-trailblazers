@@ -219,6 +219,15 @@ if (!is_array($all_tables)) {
                     <?php esc_html_e('Clear Transients', 'mobility-trailblazers'); ?>
                 </button>
             </div>
+            
+            <div class="mt-operation-card">
+                <h4><?php esc_html_e('Delete All Candidates', 'mobility-trailblazers'); ?></h4>
+                <p><?php esc_html_e('Remove all candidates and their associated data. This action cannot be undone!', 'mobility-trailblazers'); ?></p>
+                <button type="button" class="button button-danger mt-delete-all-candidates" 
+                        data-confirm="<?php esc_attr_e('WARNING: This will permanently delete ALL candidates and their evaluations. This action cannot be undone! Type DELETE to confirm.', 'mobility-trailblazers'); ?>">
+                    <?php esc_html_e('Delete All Candidates', 'mobility-trailblazers'); ?>
+                </button>
+            </div>
         </div>
     </div>
 

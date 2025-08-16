@@ -36,7 +36,7 @@
 - **ajax/class-mt-admin-ajax.php** - General admin AJAX operations with unified error logging
 - **ajax/class-mt-import-ajax.php** - Quick CSV import handler using enhanced validation (v2.2.28 - uses validate_upload())
 - **ajax/class-mt-csv-import-ajax.php** - Comprehensive CSV import with progress tracking (v2.2.24)
-- **ajax/class-mt-debug-ajax.php** - Debug Center AJAX operations (diagnostics, scripts, maintenance) (v2.3.0)
+- **ajax/class-mt-debug-ajax.php** - Debug Center AJAX operations (diagnostics, scripts, maintenance, delete all candidates) (v2.3.5)
 
 ### Business Logic Services (v2.3.0 - Added diagnostic service)
 - **services/class-mt-evaluation-service.php** - Core evaluation processing and calculation

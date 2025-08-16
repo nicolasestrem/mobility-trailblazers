@@ -49,6 +49,7 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
         add_action('wp_ajax_mt_get_database_health', [$this, 'get_database_health']);
         add_action('wp_ajax_mt_get_system_info', [$this, 'get_system_info']);
         add_action('wp_ajax_mt_refresh_debug_widget', [$this, 'refresh_debug_widget']);
+        add_action('wp_ajax_mt_delete_all_candidates', [$this, 'delete_all_candidates']);
     }
     
     /**
@@ -470,6 +471,111 @@ class MT_Debug_Ajax extends MT_Base_Ajax {
                 'error' => $e->getMessage()
             ]);
             $this->error(__('Failed to refresh widget', 'mobility-trailblazers'));
+        }
+    }
+    
+    /**
+     * Delete all candidates
+     *
+     * @return void
+     */
+    public function delete_all_candidates() {
+        $this->verify_nonce('mt_debug_nonce');
+        
+        if (!current_user_can('manage_options')) {
+            $this->error(__('Insufficient permissions', 'mobility-trailblazers'));
+        }
+        
+        // Extra security: require confirmation
+        $confirmation = sanitize_text_field($_POST['confirmation'] ?? '');
+        if ($confirmation !== 'DELETE') {
+            $this->error(__('Invalid confirmation. Please type DELETE to confirm.', 'mobility-trailblazers'));
+        }
+        
+        global $wpdb;
+        
+        try {
+            // Start transaction
+            $wpdb->query('START TRANSACTION');
+            
+            // Get all candidate IDs
+            $candidate_ids = $wpdb->get_col(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'mt_candidate'"
+            );
+            
+            if (empty($candidate_ids)) {
+                $wpdb->query('COMMIT');
+                $this->success([
+                    'message' => __('No candidates found to delete.', 'mobility-trailblazers'),
+                    'deleted_count' => 0
+                ]);
+                return;
+            }
+            
+            // Delete evaluations
+            $evaluations_deleted = $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM {$wpdb->prefix}mt_evaluations WHERE candidate_id IN (" . 
+                    implode(',', array_fill(0, count($candidate_ids), '%d')) . ")",
+                    ...$candidate_ids
+                )
+            );
+            
+            // Delete assignments
+            $assignments_deleted = $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM {$wpdb->prefix}mt_assignments WHERE candidate_id IN (" . 
+                    implode(',', array_fill(0, count($candidate_ids), '%d')) . ")",
+                    ...$candidate_ids
+                )
+            );
+            
+            // Delete post meta
+            $meta_deleted = $wpdb->query(
+                $wpdb->prepare(
+                    "DELETE FROM {$wpdb->postmeta} WHERE post_id IN (" . 
+                    implode(',', array_fill(0, count($candidate_ids), '%d')) . ")",
+                    ...$candidate_ids
+                )
+            );
+            
+            // Delete the posts themselves
+            $posts_deleted = 0;
+            foreach ($candidate_ids as $candidate_id) {
+                if (wp_delete_post($candidate_id, true)) {
+                    $posts_deleted++;
+                }
+            }
+            
+            // Commit transaction
+            $wpdb->query('COMMIT');
+            
+            // Log the action
+            \MobilityTrailblazers\Core\MT_Logger::info('All candidates deleted', [
+                'user_id' => get_current_user_id(),
+                'candidates_deleted' => $posts_deleted,
+                'evaluations_deleted' => $evaluations_deleted,
+                'assignments_deleted' => $assignments_deleted,
+                'meta_deleted' => $meta_deleted
+            ]);
+            
+            $this->success([
+                'message' => sprintf(
+                    __('Successfully deleted %d candidates with all associated data.', 'mobility-trailblazers'),
+                    $posts_deleted
+                ),
+                'deleted_count' => $posts_deleted,
+                'evaluations_deleted' => $evaluations_deleted,
+                'assignments_deleted' => $assignments_deleted
+            ]);
+            
+        } catch (\Exception $e) {
+            $wpdb->query('ROLLBACK');
+            \MobilityTrailblazers\Core\MT_Logger::error('Failed to delete candidates', $e->getMessage());
+            $this->error(sprintf(
+                __('Failed to delete candidates: %s', 'mobility-trailblazers'),
+                $e->getMessage()
+            ));
         }
     }
 }

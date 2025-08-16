@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to CSV Converter - Mobility Trailblazers</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8e0ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .preview {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .preview h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f0f0ff;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .category-startup { background: #d4edda; color: #155724; }
+        .category-gov { background: #cce5ff; color: #004085; }
+        .category-tech { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Mobility Trailblazers Excel to CSV Converter</h1>
+            <p>Convert your Excel candidate list to the platform-compatible CSV format</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📊</div>
+                <div class="upload-text">Click to upload Excel file or drag & drop</div>
+                <div class="upload-subtext">Supports .xlsx and .xls files</div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+            
+            <div class="preview" id="preview">
+                <h3>📋 Data Preview</h3>
+                
+                <div class="stats" id="stats"></div>
+                
+                <div class="table-container">
+                    <table id="previewTable">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <div class="actions">
+                    <button class="button" id="downloadBtn">💾 Download CSV</button>
+                    <button class="button" id="resetBtn">🔄 Reset</button>
+                </div>
+            </div>
+            
+            <div class="success-message" id="successMessage"></div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        let candidateData = [];
+        let csvContent = '';
+        
+        // Category mappings
+        const categoryMap = {
+            'Governance & Verwaltungen, Politik, öffentliche Unternehmen': 'Gov',
+            'Etablierte Unternehmen': 'Tech',
+            'Start-ups, Scale-ups & Katalysatoren': 'Startup',
+            'Start-ups & Scale-ups': 'Startup'
+        };
+        
+        // Initialize upload area
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+        
+        function handleFile(file) {
+            if (!file) return;
+            
+            hideMessages();
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Get the Kandidaten sheet
+                    const sheet = workbook.Sheets['Kandidaten'] || workbook.Sheets[workbook.SheetNames[0]];
+                    
+                    // Convert to JSON
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    
+                    // Process the data
+                    processExcelData(jsonData);
+                    
+                } catch (error) {
+                    showError('Error reading Excel file: ' + error.message);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function processExcelData(rawData) {
+            candidateData = [];
+            
+            // Find where actual data starts (after headers)
+            let dataStartIndex = -1;
+            for (let i = 0; i < rawData.length; i++) {
+                const row = rawData[i];
+                // Check if this looks like the header row
+                if (Object.values(row).some(val => val === 'ID' || val === 'Name')) {
+                    dataStartIndex = i + 1;
+                    break;
+                }
+            }
+            
+            if (dataStartIndex === -1) {
+                // Try to find data by looking for numeric IDs
+                for (let i = 0; i < rawData.length; i++) {
+                    const firstCol = Object.values(rawData[i])[0];
+                    if (Number.isInteger(firstCol) && firstCol > 0) {
+                        dataStartIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            // Process candidates
+            for (let i = dataStartIndex; i < rawData.length; i++) {
+                const row = rawData[i];
+                const values = Object.values(row);
+                
+                // Skip empty rows
+                if (!values[0] || !values[1]) continue;
+                
+                const candidate = {
+                    'ID': values[0] || '',
+                    'Name': cleanField(values[1] || ''),
+                    'Position': cleanField(values[2] || ''),
+                    'Organisation': cleanField(values[3] || ''),
+                    'LinkedIn-Link': cleanUrl(values[4] || ''),
+                    'Webseite': cleanUrl(values[5] || ''),
+                    'Category': mapCategory(values[6] || ''),
+                    'Nominator': cleanField(values[7] || ''),
+                    'Description': cleanField(values[8] || ''),
+                    'Top 50': mapStatus(values[10] || '')
+                };
+                
+                candidateData.push(candidate);
+            }
+            
+            if (candidateData.length > 0) {
+                generateCSV();
+                displayPreview();
+                showSuccess(`Successfully processed ${candidateData.length} candidates`);
+            } else {
+                showError('No valid candidate data found in the Excel file');
+            }
+        }
+        
+        function cleanField(value) {
+            return String(value).trim();
+        }
+        
+        function cleanUrl(url) {
+            url = String(url).trim();
+            if (!url) return '';
+            
+            if (!url.match(/^https?:\/\//i)) {
+                url = 'https://' + url;
+            }
+            return url;
+        }
+        
+        function mapCategory(category) {
+            category = String(category).trim();
+            return categoryMap[category] || 'Tech';
+        }
+        
+        function mapStatus(status) {
+            status = String(status).toLowerCase().trim();
+            return (status === 'ja' || status === 'yes' || status === '1' || status === 'true') ? 'Ja' : 'Nein';
+        }
+        
+        function generateCSV() {
+            const headers = ['ID', 'Name', 'Organisation', 'Position', 'LinkedIn-Link', 'Webseite', 'Article about coming of age', 'Description', 'Category', 'Status'];
+            const rows = [headers];
+            
+            candidateData.forEach(candidate => {
+                const row = [
+                    candidate['ID'],
+                    escapeCSV(candidate['Name']),
+                    escapeCSV(candidate['Organisation']),
+                    escapeCSV(candidate['Position']),
+                    candidate['LinkedIn-Link'],
+                    candidate['Webseite'],
+                    '', // Article field
+                    escapeCSV(candidate['Description']),
+                    candidate['Category'],
+                    candidate['Status']
+                ];
+                rows.push(row);
+            });
+            
+            csvContent = rows.map(row => row.join(',')).join('\n');
+        }
+        
+        function escapeCSV(field) {
+            if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+                return '"' + field.replace(/"/g, '""') + '"';
+            }
+            return field;
+        }
+        
+        function displayPreview() {
+            // Show stats
+            const stats = document.getElementById('stats');
+            const top50Count = candidateData.filter(c => c['Status'] === 'Ja').length;
+            const categories = [...new Set(candidateData.map(c => c['Category']))];
+            
+            stats.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${candidateData.length}</div>
+                    <div class="stat-label">Total Candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${top50Count}</div>
+                    <div class="stat-label">Top 50</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${categories.length}</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+            `;
+            
+            // Show table preview
+            const table = document.getElementById('previewTable');
+            const thead = table.querySelector('thead');
+            const tbody = table.querySelector('tbody');
+            
+            thead.innerHTML = '<tr><th>ID</th><th>Name</th><th>Organisation</th><th>Category</th><th>Top 50</th></tr>';
+            
+            tbody.innerHTML = candidateData.slice(0, 10).map(c => `
+                <tr>
+                    <td>${c['ID']}</td>
+                    <td>${c['Name']}</td>
+                    <td>${c['Organisation']}</td>
+                    <td><span class="category-badge category-${c['Category'].toLowerCase()}">${c['Category']}</span></td>
+                    <td>${c['Status'] === 'Ja' ? '✅' : '❌'}</td>
+                </tr>
+            `).join('');
+            
+            preview.style.display = 'block';
+        }
+        
+        // Download CSV
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'mobility_trailblazers_candidates.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccess('CSV file downloaded successfully!');
+        });
+        
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            candidateData = [];
+            csvContent = '';
+            fileInput.value = '';
+            preview.style.display = 'none';
+            hideMessages();
+        });
+        
+        function showSuccess(message) {
+            successMessage.textContent = '✅ ' + message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = '❌ ' + message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+        
+        function hideMessages() {
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

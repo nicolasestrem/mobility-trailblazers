@@ -2,6 +2,63 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.3.5] - 2025-08-16 - Delete All Candidates Feature
+
+### Added
+- **Delete All Candidates Button**: Added to Debug Center Database Tools tab
+  - Located in Database Operations section for easy access
+  - Styled as a danger button (red) to indicate destructive action
+  - Requires typing "DELETE" for confirmation to prevent accidental deletion
+  - Uses database transactions for safe, atomic deletion
+
+- **AJAX Handler** (`mt_delete_all_candidates`):
+  - Verifies admin permissions and nonce for security
+  - Double confirmation required (button click + type "DELETE")
+  - Deletes all candidates with associated data (evaluations, assignments, meta)
+  - Full transaction support with rollback on error
+  - Comprehensive logging for audit trail
+
+- **JavaScript Support**:
+  - Interactive confirmation prompt
+  - Progress indication during deletion
+  - Success/error notifications
+  - Console logging of deletion counts
+
+### Security
+- Multiple confirmation layers to prevent accidental data loss
+- Admin-only access restriction
+- Transaction-based deletion ensures data integrity
+
+## [2.3.4] - 2025-08-16 - Excel Import Support
+
+### Added
+- **Excel to CSV Conversion Tools**: Complete solution for importing Excel candidate lists
+  - Browser-based converter (`tools/excel-to-csv-converter.html`) with drag-and-drop interface
+  - PHP script converter (`tools/excel-to-csv-converter.php`) for server-side processing
+  - Visual preview with statistics showing total candidates, Top 50 count, and categories
+  - Real-time conversion with instant CSV download
+
+- **Category Mapping System**: Automatic translation of German categories to platform standards
+  - "Governance & Verwaltungen, Politik, öffentliche Unternehmen" → Gov
+  - "Etablierte Unternehmen" → Tech
+  - "Start-ups, Scale-ups & Katalysatoren" → Startup
+  - "Start-ups & Scale-ups" → Startup
+
+- **Data Processing Features**:
+  - UTF-8 encoding with BOM for Excel compatibility
+  - Automatic URL validation and https:// prefixing
+  - Top 50 status normalization (Ja/Nein)
+  - Support for 51 candidates from Excel sheet "Kandidaten"
+  - Handles special German characters (ä, ö, ü, ß)
+
+### Documentation
+- **Excel Import Guide** (`doc/excel-import-guide.md`): Comprehensive documentation
+  - Expected Excel format and structure
+  - Column mapping specifications
+  - Step-by-step conversion process
+  - Import troubleshooting guide
+  - Sample data structures
+
 ## [2.3.3] - 2025-08-14 - Diagnostic System Fix
 
 ### Fixed
