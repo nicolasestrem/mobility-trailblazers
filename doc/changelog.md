@@ -2,6 +2,76 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.4.0] - 2025-01-16 - Complete Photo Management & Enhanced UI Templates
+
+### Added
+- **Comprehensive Photo Attachment System**
+  - Direct photo attachment script (`direct-photo-attach-complete.php`) with ID-based mapping for all 52 candidates
+  - Enhanced photo matching script (`match-photos-updated.php`) with improved name variation handling
+  - Photo verification tool (`verify-photo-matching.php`) for status reporting and missing photo detection
+  - Support for Günther Schuh special case (ID: 4444)
+
+- **Enhanced Candidates Grid Template** (`candidates-grid-enhanced.php`)
+  - Modern card-based layout with 320px minimum width
+  - Live search functionality with debounce (300ms)
+  - Category filtering with smooth animations
+  - Social media quick links (LinkedIn, Website)
+  - Hover effects with image scaling (1.1x)
+  - No results state with helpful messaging
+  - Responsive breakpoints (768px, 480px)
+
+- **Professional Jury Member Template** (`single-mt_jury.php`)
+  - Circular profile photos (200px) with badge overlay
+  - Real-time evaluation statistics dashboard
+  - Expertise tags display system
+  - Activity metrics (assigned, submitted, drafts, average score)
+  - Gradient hero section with floating pattern animation
+
+- **Interactive JavaScript Features** (`candidate-interactions.js`)
+  - Intersection Observer for lazy loading images
+  - Quick view modal system with AJAX loading
+  - Keyboard navigation support (arrow keys, enter)
+  - Search result highlighting with mark tags
+  - Smooth scroll animations (800ms duration)
+  - Sort functionality by name and date
+  - Staggered card animations on filter
+
+- **Criteria Parsing Tool** (`tools/parse-criteria.php`)
+  - Automated extraction of evaluation criteria into structured fields
+  - Support for multiple text formats and variations
+  - Individual meta fields for each criterion (_mt_criterion_mut, etc.)
+  - Verification mode for quality checking
+  - Batch processing for all candidates
+
+### Enhanced
+- **Candidate Profile Template** (already enhanced in previous version)
+  - Confirmed working with gradient backgrounds
+  - Criteria cards with custom icons and colors
+  - Responsive sidebar layout
+  - Navigation between candidates
+
+### Technical Improvements
+- **Photo Management**
+  - Handles special characters in names (umlauts, hyphens)
+  - Automatic WordPress media library integration
+  - Alt text generation for accessibility
+  - Duplicate prevention checks
+
+- **Performance Optimizations**
+  - Debounced search inputs
+  - Staggered animations to prevent jank
+  - CSS Grid with auto-fill for responsive layouts
+  - Optimized selector queries in JavaScript
+
+### Files Created/Modified
+- `/direct-photo-attach-complete.php` - Complete photo attachment with all candidates
+- `/verify-photo-matching.php` - Photo status verification tool
+- `/match-photos-updated.php` - Enhanced matching logic
+- `/templates/frontend/candidates-grid-enhanced.php` - Modern grid layout
+- `/templates/frontend/single/single-mt_jury.php` - Jury member profile
+- `/assets/js/candidate-interactions.js` - Interactive features
+- `/tools/parse-criteria.php` - Criteria parsing utility
+
 ## [2.3.6] - 2025-01-18 - Candidate Photo Integration & Modern UI Overhaul
 
 ### Added

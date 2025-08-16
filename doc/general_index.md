@@ -9,6 +9,13 @@
 - **.gitmodules** - Git submodule configuration for the plugin repository
 - **CODING_INSTRUCTIONS** - Development standards and workflow guidelines for the project
 
+### Photo Management Scripts (v2.4.0)
+- **match-photos.php** - Original photo matching script with basic name matching
+- **match-photos-updated.php** - Enhanced photo matching with improved name variation handling
+- **direct-photo-attach.php** - Direct ID-based photo attachment for initial candidates
+- **direct-photo-attach-complete.php** - Complete photo attachment for all 52 candidates
+- **verify-photo-matching.php** - Verification tool for photo attachment status
+
 ## 📁 /includes/ - Core PHP Classes
 
 ### Core System Files
@@ -96,6 +103,11 @@
 - **frontend/candidate-profile.php** - Public candidate profile display
 - **frontend/voting-form.php** - Public voting interface
 - **frontend/rankings.php** - Display of current candidate rankings
+- **frontend/candidates-grid.php** - Basic candidates grid display (v2.0.1)
+- **frontend/candidates-grid-enhanced.php** - Modern card-based grid with filtering and search (v2.4.0)
+- **frontend/single/single-mt_candidate.php** - Enhanced candidate profile with hero section and criteria cards (v2.2.0, enhanced v2.4.0)
+- **frontend/single/single-mt_candidate-backup.php** - Original candidate template backup (v2.1.0)
+- **frontend/single/single-mt_jury.php** - Jury member profile with statistics dashboard (v2.4.0)
 
 ## 📁 /assets/ - Static Resources
 
@@ -106,7 +118,7 @@
 - **css/csv-import.css** - Progress modal and import UI styles (v2.2.24)
 - **css/debug-center.css** - Professional Debug Center styling with responsive design (v2.3.0)
 
-### JavaScript (v2.3.0 - Added Debug Center)
+### JavaScript (v2.4.0 - Added interactive features)
 - **js/admin.js** - Admin functionality with event delegation and widget refresh functions (v2.2.28)
 - **js/frontend.js** - Public interface with mt_ajax fallback initialization (v2.2.28)
 - **js/jury-evaluation.js** - Evaluation form validation and submission
@@ -114,6 +126,7 @@
 - **js/candidate-import.js** - AJAX-based CSV import with file picker dialog (v2.2.16)
 - **js/csv-import.js** - Complete CSV import module with progress tracking (v2.2.24)
 - **js/debug-center.js** - Debug Center interactive functionality with AJAX operations (v2.3.0)
+- **js/candidate-interactions.js** - Interactive features for candidate profiles and grids (v2.4.0)
 
 ### Images
 - **images/logo.png** - Platform logo and branding assets
@@ -147,8 +160,13 @@
 ### Feature Documentation
 - **csv-import-guide.md** - CSV import functionality documentation
 - **ajax-csv-import-guide.md** - AJAX-based CSV import guide
+- **photo-integration-guide.md** - Complete photo management and UI enhancement documentation (v2.4.0)
 - **import-consolidation-v2.2.25.md** - Import system consolidation documentation
 - **debug-plan-10min.md** - Debug tools planning document
+
+## 📁 /tools/ - Utility Scripts (v2.4.0)
+
+- **parse-criteria.php** - Parse and structure evaluation criteria into individual meta fields
 
 ## 📁 /debug/ - Development Tools (v2.3.0 - Reorganized)
 
