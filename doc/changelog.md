@@ -2,6 +2,67 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.3.6] - 2025-01-18 - Candidate Photo Integration & Modern UI Overhaul
+
+### Added
+- **Photo Management System**: Complete photo integration solution
+  - Photo matching script (`match-photos.php`) for bulk photo-to-candidate association
+  - Support for 50+ WebP format photos in `/Photos_candidates/webp/`
+  - Automatic WordPress media library upload and featured image assignment
+  - Handles name variations (Dr., Prof., umlauts) in matching algorithm
+
+- **Enhanced Candidate Profile Pages**: Complete visual redesign
+  - Hero section with gradient backgrounds and animated patterns
+  - Floating photo frames with hover effects (280x280px)
+  - Structured evaluation criteria cards with custom icons
+  - Sidebar with quick facts, social links, and jury evaluation CTAs
+  - Responsive two-column layout with mobile optimization
+
+- **Modern Candidates Grid**: Card-based listing interface
+  - Interactive category filtering with JavaScript
+  - Hover animations and scale effects on cards
+  - Social media quick links (LinkedIn, Website)
+  - AJAX-ready "Load More" pagination
+  - Responsive columns (1-4 based on viewport)
+
+- **Jury Member Profile Template**: New dedicated template
+  - Circular profile photo presentation
+  - Biography and expertise sections
+  - Evaluation activity statistics
+  - Professional gradient header design
+
+### Enhanced
+- **Visual Design System**: Comprehensive UI upgrade
+  - Color palette: Primary gradient (#3b82f6 to #1e3a8a)
+  - Modern typography scale (2.5-3rem headings, 1.05rem body)
+  - Consistent border radius (16-20px cards, 8-12px buttons)
+  - Multi-layer shadows for depth perception
+  - GPU-accelerated animations (0.3s ease transitions)
+
+- **Information Architecture**: Improved content organization
+  - Clear section separation with visual headers
+  - Icon-based navigation cues
+  - Progressive disclosure of evaluation criteria
+  - Contextual CTAs based on user role
+
+### Technical
+- **Performance Optimizations**:
+  - WebP format for optimal image compression
+  - Lazy loading preparation in templates
+  - CSS animations using transform/opacity for GPU acceleration
+  - Minimal JavaScript for filtering operations
+
+- **Database Integration**:
+  - Uses existing post meta fields (no schema changes)
+  - Featured image support for all candidate posts
+  - Category taxonomy for filtering
+
+### Documentation
+- Created comprehensive photo integration guide (`doc/candidate-photo-integration.md`)
+- Detailed template enhancement documentation
+- Visual design system specifications
+- Implementation instructions for administrators
+
 ## [2.3.5] - 2025-08-16 - Delete All Candidates Feature
 
 ### Added
