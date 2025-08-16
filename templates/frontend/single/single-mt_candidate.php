@@ -524,7 +524,7 @@ while (have_posts()) : the_post();
                 <?php endif; ?>
                 
                 <?php if (!empty($criteria_sections)) : ?>
-                    <h2 class="mt-section-heading">Bewertungskriterien</h2>
+                    <h2 class="mt-section-heading"><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h2>
                     <div class="mt-criteria-grid">
                         <?php if (isset($criteria_sections['mut'])) : ?>
                             <div class="mt-criterion-card mut">
@@ -578,7 +578,7 @@ while (have_posts()) : the_post();
                     </div>
                 <?php elseif ($eval_criteria) : ?>
                     <div class="mt-overview-section">
-                        <h2 class="mt-section-heading">Bewertungskriterien</h2>
+                        <h2 class="mt-section-heading"><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h2>
                         <div class="mt-section-content">
                             <?php echo wp_kses_post(wpautop($eval_criteria)); ?>
                         </div>
@@ -595,7 +595,7 @@ while (have_posts()) : the_post();
                     <?php if ($prev_post) : ?>
                         <a href="<?php echo get_permalink($prev_post); ?>" class="mt-nav-link prev">
                             <span class="dashicons dashicons-arrow-left-alt2"></span>
-                            Vorheriger Kandidat
+                            <?php _e('Previous Candidate', 'mobility-trailblazers'); ?>
                         </a>
                     <?php else : ?>
                         <span></span>
@@ -603,7 +603,7 @@ while (have_posts()) : the_post();
                     
                     <?php if ($next_post) : ?>
                         <a href="<?php echo get_permalink($next_post); ?>" class="mt-nav-link next">
-                            Nächster Kandidat
+                            <?php _e('Next Candidate', 'mobility-trailblazers'); ?>
                             <span class="dashicons dashicons-arrow-right-alt2"></span>
                         </a>
                     <?php endif; ?>
@@ -613,32 +613,32 @@ while (have_posts()) : the_post();
             <!-- Sidebar -->
             <aside class="mt-sidebar">
                 <div class="mt-sidebar-card">
-                    <h3 class="mt-sidebar-title">Quick Facts</h3>
+                    <h3 class="mt-sidebar-title"><?php _e('Quick Facts', 'mobility-trailblazers'); ?></h3>
                     <ul class="mt-quick-facts">
                         <?php if ($organization) : ?>
-                            <li><strong>Organisation:</strong> <?php echo esc_html($organization); ?></li>
+                            <li><strong><?php _e('Organization:', 'mobility-trailblazers'); ?></strong> <?php echo esc_html($organization); ?></li>
                         <?php endif; ?>
                         <?php if ($position) : ?>
-                            <li><strong>Position:</strong> <?php echo esc_html($position); ?></li>
+                            <li><strong><?php _e('Position:', 'mobility-trailblazers'); ?></strong> <?php echo esc_html($position); ?></li>
                         <?php endif; ?>
                         <?php if (!empty($categories)) : ?>
-                            <li><strong>Kategorie:</strong> <?php echo esc_html($categories[0]->name); ?></li>
+                            <li><strong><?php _e('Category:', 'mobility-trailblazers'); ?></strong> <?php echo esc_html($categories[0]->name); ?></li>
                         <?php endif; ?>
                     </ul>
                 </div>
                 
                 <?php if (current_user_can('mt_submit_evaluations')) : ?>
                     <div class="mt-sidebar-card">
-                        <h3 class="mt-sidebar-title">Jury Aktion</h3>
+                        <h3 class="mt-sidebar-title"><?php _e('Jury Action', 'mobility-trailblazers'); ?></h3>
                         <a href="<?php echo esc_url(add_query_arg('evaluate', $candidate_id, home_url('/jury-dashboard/'))); ?>" 
                            class="mt-cta-button">
-                            Kandidat bewerten
+                            <?php _e('Evaluate Candidate', 'mobility-trailblazers'); ?>
                         </a>
                     </div>
                 <?php endif; ?>
                 
                 <div class="mt-sidebar-card">
-                    <h3 class="mt-sidebar-title">Teilen</h3>
+                    <h3 class="mt-sidebar-title"><?php _e('Share', 'mobility-trailblazers'); ?></h3>
                     <div style="display: flex; gap: 10px;">
                         <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(get_permalink()); ?>&text=<?php echo urlencode($display_name . ' - Mobility Trailblazers'); ?>" 
                            target="_blank" 

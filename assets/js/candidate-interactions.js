@@ -309,7 +309,7 @@
                 }
             },
             error: function() {
-                $modalBody.html('<p>Fehler beim Laden der Kandidateninformationen.</p>');
+                $modalBody.html('<p>' + (mt_ajax.i18n.load_error || 'Error loading candidate information.') + '</p>');
             }
         });
     }

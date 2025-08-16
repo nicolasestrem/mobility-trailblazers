@@ -342,15 +342,15 @@ $all_categories = get_terms([
                     <input type="text" 
                            class="mt-search-input" 
                            id="mt-candidate-search" 
-                           placeholder="Suche nach Name, Organisation oder Position...">
+                           placeholder="<?php esc_attr_e('Search by name, organization or position...', 'mobility-trailblazers'); ?>">
                 </div>
             <?php endif; ?>
             
             <?php if ($enable_filter && !empty($all_categories)) : ?>
                 <div class="mt-filter-buttons">
-                    <span class="mt-filter-label">Filter:</span>
+                    <span class="mt-filter-label"><?php _e('Filter:', 'mobility-trailblazers'); ?></span>
                     <button class="mt-filter-btn active" data-filter="all">
-                        Alle
+                        <?php _e('All', 'mobility-trailblazers'); ?>
                     </button>
                     <?php foreach ($all_categories as $category) : ?>
                         <button class="mt-filter-btn" data-filter="<?php echo esc_attr($category->slug); ?>">
@@ -432,7 +432,7 @@ $all_categories = get_terms([
                                        target="_blank" 
                                        rel="noopener"
                                        onclick="event.stopPropagation();"
-                                       title="LinkedIn">
+                                       title="<?php esc_attr_e('LinkedIn', 'mobility-trailblazers'); ?>">
                                         <span class="dashicons dashicons-linkedin"></span>
                                     </a>
                                 <?php endif; ?>
@@ -441,7 +441,7 @@ $all_categories = get_terms([
                                        target="_blank" 
                                        rel="noopener"
                                        onclick="event.stopPropagation();"
-                                       title="Website">
+                                       title="<?php esc_attr_e('Website', 'mobility-trailblazers'); ?>">
                                         <span class="dashicons dashicons-admin-site"></span>
                                     </a>
                                 <?php endif; ?>
@@ -453,7 +453,7 @@ $all_categories = get_terms([
         <?php else : ?>
             <div class="mt-no-results">
                 <div class="mt-no-results-icon">🔍</div>
-                <div class="mt-no-results-text">Keine Kandidaten gefunden</div>
+                <div class="mt-no-results-text"><?php _e('No candidates found', 'mobility-trailblazers'); ?></div>
                 <div class="mt-no-results-hint">Versuchen Sie, Ihre Filterkriterien anzupassen</div>
             </div>
         <?php endif; ?>

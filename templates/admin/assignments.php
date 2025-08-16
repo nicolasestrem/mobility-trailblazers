@@ -70,14 +70,14 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
 <?php if (defined('WP_DEBUG') && WP_DEBUG) : ?>
 <!-- Debug Section (Development Only) -->
 <div style="background: #f0f0f0; padding: 10px; margin: 20px 0; border: 1px solid #ccc;">
-    <h3>Debug Information</h3>
+    <h3><?php _e('Debug Information', 'mobility-trailblazers'); ?></h3>
     <p>Page: <?php echo esc_html($_GET['page'] ?? 'unknown'); ?></p>
     <p>Current User Can Manage: <?php echo current_user_can('manage_options') ? 'Yes' : 'No'; ?></p>
     <p>AJAX URL: <?php echo esc_url(admin_url('admin-ajax.php')); ?></p>
     <p>Nonce: <?php echo esc_attr(wp_create_nonce('mt_admin_nonce')); ?></p>
     
     <!-- Assignment Distribution Diagnostic -->
-    <h4>Assignment Distribution Analysis</h4>
+    <h4><?php _e('Assignment Distribution Analysis', 'mobility-trailblazers'); ?></h4>
     <?php 
     $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
     $all_assignments = $assignment_repo->find_all(['limit' => 1000]);

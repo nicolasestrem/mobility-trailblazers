@@ -202,6 +202,7 @@ class MT_Plugin {
                 'invalid_candidate' => __('Invalid candidate ID.', 'mobility-trailblazers'),
                 'security_error' => __('Security configuration error. Please refresh the page and try again.', 'mobility-trailblazers'),
                 'loading_evaluation' => __('Loading evaluation form...', 'mobility-trailblazers'),
+                'load_error' => __('Error loading candidate information.', 'mobility-trailblazers'),
                 'request_timeout' => __('Request timed out. Please check your connection and try again.', 'mobility-trailblazers'),
                 'request_cancelled' => __('Request was cancelled.', 'mobility-trailblazers'),
                 'permission_denied' => __('You do not have permission to perform this action.', 'mobility-trailblazers'),

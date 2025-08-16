@@ -113,7 +113,7 @@
             const $button = $(e.currentTarget);
             const juryName = $button.data('jury-name');
             
-            if (!confirm(`Send reminder to ${juryName}?`)) {
+            if (!confirm((mt_coaching.i18n.confirm_single_reminder || 'Send reminder to %s?').replace('%s', juryName))) {
                 return;
             }
             
@@ -131,7 +131,7 @@
                 success: (response) => {
                     if (response.success) {
                         this.showNotice(`Reminder sent to ${juryName}`, 'success');
-                        $button.text('Reminder Sent').prop('disabled', true);
+                        $button.text(mt_coaching.i18n.reminder_sent || 'Reminder Sent').prop('disabled', true);
                     } else {
                         this.showNotice(response.data.message || mt_coaching.i18n.error, 'error');
                     }

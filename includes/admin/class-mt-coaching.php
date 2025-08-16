@@ -64,6 +64,8 @@ class MT_Coaching {
             'nonce' => wp_create_nonce('mt_coaching_nonce'),
             'i18n' => [
                 'confirm_reminder' => __('Send reminder emails to all jury members with incomplete evaluations?', 'mobility-trailblazers'),
+                'confirm_single_reminder' => __('Send reminder to %s?', 'mobility-trailblazers'),
+                'reminder_sent' => __('Reminder Sent', 'mobility-trailblazers'),
                 'sending' => __('Sending reminders...', 'mobility-trailblazers'),
                 'sent' => __('Reminders sent successfully', 'mobility-trailblazers'),
                 'export_success' => __('Report exported successfully', 'mobility-trailblazers'),

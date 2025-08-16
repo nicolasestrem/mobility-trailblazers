@@ -833,3 +833,172 @@ msgstr "Minimum:"
 
 msgid "Maximum:"
 msgstr "Maximum:"
+
+# Frontend Template Translations
+msgid "Search by name, organization or position..."
+msgstr "Suche nach Name, Organisation oder Position..."
+
+msgid "Filter:"
+msgstr "Filter:"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+msgid "Website"
+msgstr "Webseite"
+
+msgid "No candidates found"
+msgstr "Keine Kandidaten gefunden"
+
+msgid "Evaluation Criteria"
+msgstr "Bewertungskriterien"
+
+msgid "Innovation Level"
+msgstr "Innovationsgrad"
+
+msgid "Previous Candidate"
+msgstr "Vorheriger Kandidat"
+
+msgid "Next Candidate"
+msgstr "Nächster Kandidat"
+
+msgid "Quick Facts"
+msgstr "Schnellübersicht"
+
+msgid "Organization:"
+msgstr "Organisation:"
+
+msgid "Position:"
+msgstr "Position:"
+
+msgid "Category:"
+msgstr "Kategorie:"
+
+msgid "Jury Action"
+msgstr "Jury-Aktion"
+
+msgid "Evaluate Candidate"
+msgstr "Kandidat bewerten"
+
+msgid "Share"
+msgstr "Teilen"
+
+msgid "Assigned Candidates"
+msgstr "Zugewiesene Kandidaten"
+
+msgid "Submitted Evaluations"
+msgstr "Eingereichte Bewertungen"
+
+msgid "Drafts"
+msgstr "Entwürfe"
+
+msgid "Average Score"
+msgstr "Durchschnittliche Bewertung"
+
+msgid "About Me"
+msgstr "Über mich"
+
+# Admin Interface Translations
+msgid "Debug Information"
+msgstr "Debug-Informationen"
+
+msgid "Assignment Distribution Analysis"
+msgstr "Zuweisungsverteilungsanalyse"
+
+# JavaScript Translations
+msgid "Error loading candidate information."
+msgstr "Fehler beim Laden der Kandidateninformationen."
+
+msgid "Send reminder to %s?"
+msgstr "Erinnerung an %s senden?"
+
+msgid "Reminder Sent"
+msgstr "Erinnerung gesendet"
+
+# Email Template Translations
+msgid "25 Mobility Trailblazers in 25"
+msgstr "25 Mobility Trailblazers in 25"
+
+msgid "Dear %s,"
+msgstr "Sehr geehrte/r %s,"
+
+msgid "This is a friendly reminder about your pending evaluations for the Mobility Trailblazers awards."
+msgstr "Dies ist eine freundliche Erinnerung an Ihre ausstehenden Bewertungen für die Mobility Trailblazers Awards."
+
+msgid "Status:"
+msgstr "Status:"
+
+msgid "You have %d candidate(s) awaiting your evaluation."
+msgstr "Sie haben %d Kandidat(en), die auf Ihre Bewertung warten."
+
+msgid "Deadline:"
+msgstr "Frist:"
+
+msgid "Your expertise and insights are invaluable in recognizing the innovators shaping the future of mobility in the DACH region."
+msgstr "Ihre Expertise und Einblicke sind unverzichtbar für die Anerkennung der Innovatoren, die die Zukunft der Mobilität in der DACH-Region gestalten."
+
+msgid "Complete Your Evaluations"
+msgstr "Bewertungen abschließen"
+
+msgid "Thank you for your continued dedication to this important initiative."
+msgstr "Vielen Dank für Ihr kontinuierliches Engagement für diese wichtige Initiative."
+
+msgid "Best regards,"
+msgstr "Mit freundlichen Grüßen,"
+
+msgid "The Mobility Trailblazers Team"
+msgstr "Das Mobility Trailblazers Team"
+
+msgid "This is an automated reminder from the Mobility Trailblazers evaluation platform."
+msgstr "Dies ist eine automatische Erinnerung von der Mobility Trailblazers Bewertungsplattform."
+
+msgid "If you have any questions, please contact us at %s"
+msgstr "Bei Fragen kontaktieren Sie uns bitte unter %s"
+
+msgid "New Candidate Assignments"
+msgstr "Neue Kandidatenzuweisungen"
+
+msgid "You have been assigned %d new candidate(s) to evaluate for the Mobility Trailblazers awards."
+msgstr "Ihnen wurden %d neue Kandidat(en) zur Bewertung für die Mobility Trailblazers Awards zugewiesen."
+
+msgid "Your Assigned Candidates:"
+msgstr "Ihre zugewiesenen Kandidaten:"
+
+msgid "Please review each candidate thoroughly and provide your evaluation based on the following criteria:"
+msgstr "Bitte prüfen Sie jeden Kandidaten gründlich und geben Sie Ihre Bewertung basierend auf den folgenden Kriterien ab:"
+
+msgid "Mut & Pioniergeist"
+msgstr "Mut & Pioniergeist"
+
+msgid "Innovationsgrad"
+msgstr "Innovationsgrad"
+
+msgid "Umsetzungskraft & Wirkung"
+msgstr "Umsetzungskraft & Wirkung"
+
+msgid "Relevanz für die Mobilitätswende"
+msgstr "Relevanz für die Mobilitätswende"
+
+msgid "Vorbildfunktion & Sichtbarkeit"
+msgstr "Vorbildfunktion & Sichtbarkeit"
+
+msgid "Start Evaluating"
+msgstr "Bewertung starten"
+
+msgid "Your expertise is crucial in identifying the mobility innovators who are making a real difference."
+msgstr "Ihre Expertise ist entscheidend für die Identifizierung der Mobilitätsinnovatoren, die einen echten Unterschied machen."
+
+msgid "This notification was sent from the Mobility Trailblazers evaluation platform."
+msgstr "Diese Benachrichtigung wurde von der Mobility Trailblazers Bewertungsplattform gesendet."
+
+msgid "[Mobility Trailblazers] Reminder: %d Evaluations Pending"
+msgstr "[Mobility Trailblazers] Erinnerung: %d ausstehende Bewertungen"
+
+msgid "[Mobility Trailblazers] %d New Candidate Assignment(s)"
+msgstr "[Mobility Trailblazers] %d neue Kandidatenzuweisung(en)"
+
+msgid "Failed to send reminder to user ID %d"
+msgstr "Erinnerung an Benutzer-ID %d konnte nicht gesendet werden"

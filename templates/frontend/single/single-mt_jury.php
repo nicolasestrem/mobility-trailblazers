@@ -472,31 +472,31 @@ while (have_posts()) : the_post();
                 <div class="mt-stat-card">
                     <div class="mt-stat-icon">📋</div>
                     <div class="mt-stat-value"><?php echo intval($assigned_count); ?></div>
-                    <div class="mt-stat-label">Zugewiesene Kandidaten</div>
+                    <div class="mt-stat-label"><?php _e('Assigned Candidates', 'mobility-trailblazers'); ?></div>
                 </div>
                 
                 <div class="mt-stat-card">
                     <div class="mt-stat-icon">✅</div>
                     <div class="mt-stat-value"><?php echo intval($stats->submitted_count); ?></div>
-                    <div class="mt-stat-label">Eingereichte Bewertungen</div>
+                    <div class="mt-stat-label"><?php _e('Submitted Evaluations', 'mobility-trailblazers'); ?></div>
                 </div>
                 
                 <div class="mt-stat-card">
                     <div class="mt-stat-icon">📝</div>
                     <div class="mt-stat-value"><?php echo intval($stats->draft_count); ?></div>
-                    <div class="mt-stat-label">Entwürfe</div>
+                    <div class="mt-stat-label"><?php _e('Drafts', 'mobility-trailblazers'); ?></div>
                 </div>
                 
                 <div class="mt-stat-card">
                     <div class="mt-stat-icon">⭐</div>
                     <div class="mt-stat-value"><?php echo $stats->avg_score ? number_format($stats->avg_score, 1) : '—'; ?></div>
-                    <div class="mt-stat-label">Durchschnittliche Bewertung</div>
+                    <div class="mt-stat-label"><?php _e('Average Score', 'mobility-trailblazers'); ?></div>
                 </div>
             </div>
             
             <?php if ($bio) : ?>
                 <div class="mt-jury-bio-section">
-                    <h2 class="mt-section-title">Über mich</h2>
+                    <h2 class="mt-section-title"><?php _e('About Me', 'mobility-trailblazers'); ?></h2>
                     <div class="mt-bio-content">
                         <?php echo wp_kses_post(wpautop($bio)); ?>
                     </div>
