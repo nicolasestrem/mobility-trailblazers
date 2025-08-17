@@ -126,3 +126,4 @@ test-candidates.csv
 *.bat
 .claude.json
 .mcp.json
+.claude-local.json
