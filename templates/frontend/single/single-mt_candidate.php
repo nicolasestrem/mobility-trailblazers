@@ -497,14 +497,14 @@ while (have_posts()) : the_post();
                     
                     <div class="mt-social-links">
                         <?php if ($linkedin) : ?>
-                            <a href="<?php echo esc_url($linkedin); ?>" target="_blank" class="mt-social-link">
+                            <a href="<?php echo esc_url($linkedin); ?>" target="_blank" class="mt-social-link linkedin">
                                 <span class="dashicons dashicons-linkedin"></span>
                                 LinkedIn
                             </a>
                         <?php endif; ?>
                         <?php if ($website) : ?>
-                            <a href="<?php echo esc_url($website); ?>" target="_blank" class="mt-social-link">
-                                <span class="dashicons dashicons-admin-site"></span>
+                            <a href="<?php echo esc_url($website); ?>" target="_blank" class="mt-social-link website">
+                                <span class="dashicons dashicons-admin-site-alt3"></span>
                                 Website
                             </a>
                         <?php endif; ?>
@@ -535,7 +535,7 @@ while (have_posts()) : the_post();
                                 <div class="mt-criterion-icon">🚀</div>
                                 <h3 class="mt-criterion-title">Mut & Pioniergeist</h3>
                                 <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['mut']); ?>
+                                    <?php echo wp_kses_post(wpautop($criteria_sections['mut'])); ?>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -545,7 +545,7 @@ while (have_posts()) : the_post();
                                 <div class="mt-criterion-icon">💡</div>
                                 <h3 class="mt-criterion-title">Innovationsgrad</h3>
                                 <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['innovation']); ?>
+                                    <?php echo wp_kses_post(wpautop($criteria_sections['innovation'])); ?>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -555,7 +555,7 @@ while (have_posts()) : the_post();
                                 <div class="mt-criterion-icon">⚡</div>
                                 <h3 class="mt-criterion-title">Umsetzungskraft & Wirkung</h3>
                                 <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['umsetzung']); ?>
+                                    <?php echo wp_kses_post(wpautop($criteria_sections['umsetzung'])); ?>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -565,7 +565,7 @@ while (have_posts()) : the_post();
                                 <div class="mt-criterion-icon">🌍</div>
                                 <h3 class="mt-criterion-title">Relevanz für die Mobilitätswende</h3>
                                 <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['relevanz']); ?>
+                                    <?php echo wp_kses_post(wpautop($criteria_sections['relevanz'])); ?>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -575,7 +575,7 @@ while (have_posts()) : the_post();
                                 <div class="mt-criterion-icon">⭐</div>
                                 <h3 class="mt-criterion-title">Vorbildfunktion & Sichtbarkeit</h3>
                                 <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['vorbild']); ?>
+                                    <?php echo wp_kses_post(wpautop($criteria_sections['vorbild'])); ?>
                                 </div>
                             </div>
                         <?php endif; ?>

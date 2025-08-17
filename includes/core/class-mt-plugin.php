@@ -164,13 +164,42 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
+        // Ensure dashicons are loaded on frontend
+        wp_enqueue_style('dashicons');
+        
         // Styles
         wp_enqueue_style(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/css/frontend.css',
-            [],
+            ['dashicons'],
             MT_VERSION
         );
+        
+        // Enhanced candidate profile styles
+        wp_enqueue_style(
+            'mt-enhanced-candidate-profile',
+            MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
+        // Candidate profile fixes (v2.4.2)
+        wp_enqueue_style(
+            'mt-candidate-profile-fixes',
+            MT_PLUGIN_URL . 'assets/css/candidate-profile-fixes.css',
+            ['mt-frontend', 'mt-enhanced-candidate-profile'],
+            MT_VERSION
+        );
+        
+        // Jury dashboard styles
+        if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
+            wp_enqueue_style(
+                'mt-jury-dashboard',
+                MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
+                ['mt-frontend'],
+                MT_VERSION
+            );
+        }
         
         // Scripts
         wp_enqueue_script(
