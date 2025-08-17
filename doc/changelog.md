@@ -2,6 +2,41 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.12] - 2025-08-17
+### Fixed
+- **Alignment Issues**: Fixed center alignment problems in candidate cards
+  - Text and elements now properly centered
+  - Improved visual hierarchy and layout consistency
+  
+- **Padding Problems**: Added proper padding to content boxes
+  - Increased padding from 20px to 25-30px for better breathing room
+  - Fixed content being too close to borders
+  - Applied consistent padding across all components
+  
+- **Color Corrections**: Updated to strict brand color palette
+  - Primary: #003C3D (deep teal)
+  - Secondary: #004C5F (deep blue)
+  - Body Text: #302C37 (dark gray)
+  - Accent: #C1693C (kupfer/copper)
+  - Background: #F8F0E3 (cream)
+  - Borders: #A4DCD5 (blue accent)
+
+### Changed
+- **Candidate Links**: Updated link button colors
+  - LinkedIn links use Secondary color (#004C5F)
+  - Website links use Accent color (#C1693C)
+  - Proper hover states with brand colors
+  
+- **Card Backgrounds**: Changed from white to BG Beige (#F8F0E3)
+  - Better consistency with main website
+  - Softer, more inviting appearance
+  
+### Added
+- **New Stylesheet**: Created `mt-brand-fixes.css` for targeted fixes
+  - Comprehensive fixes for alignment, padding, and colors
+  - High specificity overrides for consistency
+  - Responsive adjustments for mobile devices
+
 ## [2.5.11] - 2025-08-17
 ### Added
 - **Brand Alignment Styles**: New `mt-brand-alignment.css` stylesheet to match main website design

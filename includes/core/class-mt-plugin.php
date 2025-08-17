@@ -224,6 +224,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Brand fixes for alignment, padding, and colors (v2.5.12)
+        wp_enqueue_style(
+            'mt-brand-fixes',
+            MT_PLUGIN_URL . 'assets/css/mt-brand-fixes.css',
+            ['mt-brand-alignment'],
+            MT_VERSION
+        );
+        
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
             'mt-design-enhancements',
