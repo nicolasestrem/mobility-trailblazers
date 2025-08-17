@@ -216,6 +216,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Brand alignment styles to match main website (v2.5.11)
+        wp_enqueue_style(
+            'mt-brand-alignment',
+            MT_PLUGIN_URL . 'assets/css/mt-brand-alignment.css',
+            ['mt-variables', 'mt-components', 'mt-frontend', 'mt-jury-dashboard-enhanced'],
+            MT_VERSION
+        );
+        
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
             'mt-design-enhancements',

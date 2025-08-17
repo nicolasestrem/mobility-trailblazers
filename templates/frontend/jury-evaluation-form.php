@@ -183,11 +183,15 @@ $criteria = [
                         <h3 style="color: #212529 !important;"><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
                         <div class="mt-bio-content" style="display: block !important;">
                             <?php 
+                            // Clean and format the biography content
+                            $bio_display = html_entity_decode($bio_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            $bio_display = wp_kses_post($bio_display);
+                            
                             // If content is too long, show excerpt
-                            if (strlen($bio_content) > 500) {
-                                echo '<p style="color: #495057 !important;">' . wp_kses_post(wp_trim_words($bio_content, 80, '...')) . '</p>';
+                            if (strlen($bio_display) > 500) {
+                                echo '<p style="color: #495057 !important;">' . wp_trim_words($bio_display, 80, '...') . '</p>';
                             } else {
-                                echo '<p style="color: #495057 !important;">' . wp_kses_post($bio_content) . '</p>'; 
+                                echo '<p style="color: #495057 !important;">' . $bio_display . '</p>'; 
                             }
                             ?>
                         </div>
@@ -210,8 +214,23 @@ $criteria = [
                     <?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?>
                 </h2>
                 <div class="mt-total-score-display">
-                    <?php _e('Total Score:', 'mobility-trailblazers'); ?>
-                    <span id="mt-total-score">0</span>/10
+                    <?php 
+                    $total = 0;
+                    $count = 0;
+                    if ($evaluation) {
+                        foreach (['courage', 'innovation', 'implementation', 'relevance', 'visibility'] as $criterion) {
+                            $score = $evaluation->{$criterion . '_score'};
+                            if ($score !== null) {
+                                $total += $score;
+                                $count++;
+                            }
+                        }
+                    }
+                    $avg = $count > 0 ? round($total / $count, 1) : 0;
+                    ?>
+                    <?php _e('Average Score:', 'mobility-trailblazers'); ?>
+                    <span id="mt-total-score"><?php echo esc_html($avg); ?></span>/10
+                    <span class="mt-evaluated-count">(<?php echo esc_html($count); ?>/5 <?php _e('criteria evaluated', 'mobility-trailblazers'); ?>)</span>
                 </div>
             </div>
             

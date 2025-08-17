@@ -2,6 +2,32 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.11] - 2025-08-17
+### Added
+- **Brand Alignment Styles**: New `mt-brand-alignment.css` stylesheet to match main website design
+  - Implemented main website color palette (#f8f0e3, #003c3d, #004c5f, #c1693c)
+  - Added Poppins font for headings matching main site typography
+  - Created consistent hover effects and transitions across all components
+
+### Changed
+- **Background Colors**: Updated to soft cream (#F8F0E3) for:
+  - `.mt-jury-dashboard` - Jury dashboard main container
+  - `.mt-candidates-list` - Candidates list container
+  - `.mt-candidate-grid-item` - Individual candidate grid items
+  - `.mt-criteria-stats` - Criteria statistics sections
+  - `.mt-winners-header` - Winners header section
+  
+### Enhanced
+- **Design Consistency**: Aligned plugin visual design with main website
+  - Updated button styles to use terracotta accent color (#c1693c)
+  - Improved card designs with consistent border colors and shadows
+  - Added gradient effects to headers matching main site
+  - Enhanced form inputs with brand-consistent focus states
+  
+### Fixed
+- **Biography Display**: Fixed HTML entity encoding issues in candidate biographies
+- **Score Display**: Updated to show "Average Score" with evaluation count for clarity
+
 ## [2.5.10] - 2025-08-17
 ### Removed
 - **Repository Cleanup**: Removed all stale and unused files from project root
