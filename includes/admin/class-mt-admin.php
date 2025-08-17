@@ -710,12 +710,7 @@ class MT_Admin {
         
         // Enqueue Debug Center assets if on Debug Center page
         if (isset($_GET['page']) && $_GET['page'] === 'mt-debug-center') {
-            wp_enqueue_style(
-                'mt-debug-center',
-                MT_PLUGIN_URL . 'assets/css/debug-center.css',
-                ['mt-admin'],
-                MT_VERSION
-            );
+            // Debug Center styles are now included in admin.css
             
             wp_enqueue_script(
                 'mt-debug-center',

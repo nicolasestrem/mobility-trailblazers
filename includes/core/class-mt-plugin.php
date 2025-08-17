@@ -180,10 +180,34 @@ class MT_Plugin {
             MT_VERSION
         );
         
-        // Main Frontend Styles (includes consolidated grid system)
+        // Main Frontend Styles (core styles only)
         wp_enqueue_style(
             'mt-frontend',
-            MT_PLUGIN_URL . 'assets/css/frontend.css',
+            MT_PLUGIN_URL . 'assets/css/frontend-new.css',
+            ['mt-variables', 'mt-components'],
+            MT_VERSION
+        );
+        
+        // Candidate Grid Module
+        wp_enqueue_style(
+            'mt-candidate-grid',
+            MT_PLUGIN_URL . 'assets/css/mt-candidate-grid.css',
+            ['mt-variables', 'mt-components'],
+            MT_VERSION
+        );
+        
+        // Evaluation Forms Module
+        wp_enqueue_style(
+            'mt-evaluation-forms',
+            MT_PLUGIN_URL . 'assets/css/mt-evaluation-forms.css',
+            ['mt-variables', 'mt-components'],
+            MT_VERSION
+        );
+        
+        // Jury Dashboard Enhanced Module
+        wp_enqueue_style(
+            'mt-jury-dashboard-enhanced',
+            MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-enhanced.css',
             ['mt-variables', 'mt-components'],
             MT_VERSION
         );
@@ -192,7 +216,7 @@ class MT_Plugin {
         wp_enqueue_style(
             'mt-enhanced-candidate-profile',
             MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
-            ['mt-variables', 'mt-components', 'mt-frontend'],
+            ['mt-variables', 'mt-components', 'mt-frontend', 'mt-candidate-grid'],
             MT_VERSION
         );
         
@@ -205,12 +229,12 @@ class MT_Plugin {
             true
         );
         
-        // Jury dashboard styles
+        // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(
                 'mt-jury-dashboard',
                 MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
-                ['mt-frontend'],
+                ['mt-frontend', 'mt-jury-dashboard-enhanced'],
                 MT_VERSION
             );
         }
