@@ -18,25 +18,27 @@
    DASHBOARD HEADER
    ======================================== */
 .mt-dashboard-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
-    color: white;
+    background: #f8f9fa;
+    color: #212529;
     padding: 40px;
     border-radius: 12px;
-    margin: -40px -40px 40px -40px;
+    margin: 0 0 30px 0;
     text-align: center;
+    border: 2px solid #dee2e6;
 }
 
 .mt-dashboard-header h1 {
-    color: white;
-    font-size: 32px;
+    color: #212529;
+    font-size: 36px;
     font-weight: 700;
     margin: 0 0 10px 0;
 }
 
 .mt-dashboard-header p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #6c757d;
     font-size: 18px;
     margin: 0;
+    font-weight: 400;
 }
 
 /* Progress Bar in Header */
@@ -205,22 +207,23 @@
 }
 
 .mt-candidate-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    background: #f8f9fa;
     padding: 20px;
     text-align: center;
-    color: white;
+    color: #212529;
+    border-bottom: 3px solid var(--mt-accent);
 }
 
 .mt-candidate-name {
     font-size: 18px;
-    font-weight: 600;
-    color: white;
+    font-weight: 700;
+    color: #212529;
     margin: 0 0 5px 0;
 }
 
 .mt-candidate-org {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #6c757d;
     margin: 0;
 }
 
@@ -306,24 +309,27 @@
 }
 
 .mt-rankings-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
-    color: white;
+    background: #ffffff;
+    color: #212529;
     padding: 30px;
     border-radius: 12px;
-    margin: -40px -40px 40px -40px;
+    margin: 0 0 30px 0;
     text-align: center;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .mt-rankings-header h2 {
-    color: white;
-    font-size: 28px;
+    color: #212529;
+    font-size: 32px;
     margin: 0 0 10px 0;
     font-weight: 700;
 }
 
 .mt-rankings-subtitle {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 16px;
+    color: #6c757d;
+    font-size: 18px;
+    font-weight: 400;
 }
 
 /* Rankings Grid */

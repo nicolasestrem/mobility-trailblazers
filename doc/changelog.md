@@ -1,3 +1,20 @@
+## [2.5.5] - 2025-08-17
+### UI/UX Improvements - Enhanced Readability
+- **Color Contrast Fixes**: Improved text readability across the entire interface
+  - Table headers: Changed from dark gradient to white background with dark text
+  - Score inputs: Enhanced borders and added proper contrast for different states
+  - Action buttons: Updated to use standard Bootstrap colors for better visibility
+  - Cell borders: Changed to lighter gray for less visual noise
+- **Typography Improvements**: 
+  - Increased font weights for better readability
+  - Updated heading sizes for better hierarchy
+  - Improved color contrast for all text elements
+- **Component Updates**:
+  - Rankings header: Changed from dark gradient to light background
+  - Dashboard header: Updated to use light gray background with dark text
+  - Total score display: Added visual emphasis with border and background
+- **Accessibility**: All text now meets WCAG AA contrast requirements
+
 ## [2.5.4] - 2025-08-17
 ### Production Cleanup & Security Hardening
 - **JavaScript Debug Code Removal**: Removed 13 console.log/warn/error statements across 7 files

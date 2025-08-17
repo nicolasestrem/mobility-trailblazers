@@ -45,7 +45,9 @@
       "Bash(node:*)",
       "mcp__kapture__screenshot",
       "mcp__kapture__click",
-      "mcp__kapture__keypress"
+      "mcp__kapture__keypress",
+      "mcp__kapture__elements",
+      "mcp__kapture__dom"
     ],
     "deny": [],
     "additionalDirectories": [

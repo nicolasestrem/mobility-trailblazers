@@ -153,16 +153,17 @@
 
 /* Candidate Header for numbered cards */
 .mt-candidate-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    background: #f8f9fa;
     padding: 15px;
     text-align: center;
     margin: -20px -20px 15px -20px; /* Negative margin to fill card edges */
+    border-bottom: 3px solid var(--mt-accent);
 }
 
 .mt-candidate-number {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: bold;
-    color: white;
+    color: var(--mt-accent);
     margin: 0;
 }
 
@@ -878,22 +879,23 @@ body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card {
 }
 
 body .mt-jury-dashboard .mt-candidate-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%) !important;
+    background: #f8f9fa !important;
     padding: 15px !important;
     text-align: center !important;
-    color: white !important;
+    color: #212529 !important;
+    border-bottom: 3px solid var(--mt-accent) !important;
 }
 
 body .mt-jury-dashboard .mt-candidate-name {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: white !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #212529 !important;
     margin: 0 0 5px 0 !important;
 }
 
 body .mt-jury-dashboard .mt-candidate-org {
     font-size: 14px !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: #6c757d !important;
     margin: 0 !important;
 }
 
@@ -991,14 +993,15 @@ body .mt-jury-dashboard .mt-rankings-header {
 }
 
 body .mt-jury-dashboard .mt-rankings-header h2 {
-    color: var(--mt-primary) !important;
-    font-size: 24px !important;
+    color: #212529 !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
     margin: 0 0 10px 0 !important;
 }
 
 body .mt-jury-dashboard .mt-rankings-subtitle {
-    color: var(--mt-body-text) !important;
-    font-size: 14px !important;
+    color: #495057 !important;
+    font-size: 16px !important;
     margin: 0 !important;
 }
 
@@ -2455,12 +2458,13 @@ body .mt-submission-guidelines li {
 
 /* --- Jury Rankings Table Modern Styles --- */
 .mt-evaluation-table-wrap {
-    background: var(--mt-bg-base);
+    background: #ffffff;
     border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
     padding: 0 0 24px 0;
     overflow-x: auto;
     margin-bottom: 30px;
+    border: 1px solid #dee2e6;
 }
 .mt-evaluation-table {
     width: 100%;
@@ -2468,20 +2472,20 @@ body .mt-submission-guidelines li {
     border-spacing: 0;
     min-width: 900px;
     font-size: 15px;
-    background: var(--mt-bg-base);
+    background: #ffffff;
     border-radius: 14px;
     overflow: hidden;
 }
 .mt-evaluation-table thead th {
-    background: linear-gradient(135deg, var(--mt-primary), var(--mt-secondary));
-    color: var(--mt-bg-base);
+    background: var(--mt-bg-base);
+    color: var(--mt-primary);
     font-weight: 700;
     padding: 14px 10px;
     text-align: center;
     position: sticky;
     top: 0;
     z-index: 2;
-    border-bottom: 2px solid var(--mt-blue-accent);
+    border-bottom: 3px solid var(--mt-accent);
     font-size: 16px;
     letter-spacing: 0.5px;
     cursor: help;
@@ -2490,15 +2494,15 @@ body .mt-submission-guidelines li {
     transition: background 0.2s;
 }
 .mt-evaluation-table tbody tr:nth-child(even) {
-    background: var(--mt-bg-beige);
+    background: rgba(245, 230, 211, 0.3);
 }
 .mt-evaluation-table tbody tr:hover {
-    background: rgba(164, 220, 213, 0.2);
+    background: rgba(164, 220, 213, 0.15);
 }
 .mt-evaluation-table td, .mt-evaluation-table th {
-    padding: 10px 8px;
-    border-right: 1px solid var(--mt-blue-accent);
-    border-bottom: 1px solid var(--mt-blue-accent);
+    padding: 12px 10px;
+    border-right: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
     text-align: center;
     vertical-align: middle;
 }
@@ -2562,42 +2566,50 @@ body .mt-submission-guidelines li {
 .mt-eval-candidate .mt-candidate-name {
     font-weight: 700;
     font-size: 16px;
-    color: var(--mt-primary);
+    color: #212529;
     display: block;
     margin-bottom: 2px;
 }
 .mt-eval-candidate .mt-candidate-meta {
     font-size: 13px;
-    color: var(--mt-secondary);
+    color: #495057;
     margin-top: 2px;
 }
 /* Score input color coding */
 .mt-eval-score-input {
     width: 50px;
     text-align: center;
-    border: 1px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-secondary);
     border-radius: 4px;
     padding: 4px;
     font-size: 14px;
+    font-weight: 600;
     color: var(--mt-primary);
+    background: var(--mt-bg-base);
 }
 .mt-eval-score-input.score-high {
-    background-color: rgba(164, 220, 213, 0.2);
-    border-color: var(--mt-blue-accent);
-    color: var(--mt-primary);
+    background-color: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+    color: #1e7e34;
+    font-weight: 700;
 }
 .mt-eval-score-input.score-low {
-    background-color: rgba(184, 111, 82, 0.1);
-    border-color: var(--mt-kupfer-soft);
-    color: var(--mt-kupfer-bold);
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+    color: #bd2130;
+    font-weight: 700;
 }
 .mt-eval-total-score {
     text-align: center;
 }
 .mt-eval-total-value {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
-    color: var(--mt-primary);
+    color: #212529;
+    background: rgba(255, 193, 7, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 2px solid #ffc107;
 }
 /* Action buttons */
 .mt-btn-save-eval,
@@ -2615,30 +2627,39 @@ body .mt-submission-guidelines li {
     margin: 0 2px;
 }
 .mt-btn-save-eval {
-    background: var(--mt-accent);
+    background: #28a745;
     color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .mt-btn-save-eval:hover {
-    background: var(--mt-kupfer-bold);
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 .mt-btn-save-eval.unsaved {
-    background: var(--mt-kupfer-soft);
+    background: #ffc107;
+    color: #212529;
 }
 .mt-btn-save-eval.saving {
     opacity: 0.7;
     cursor: not-allowed;
 }
 .mt-btn-save-eval.saved {
-    background: var(--mt-blue-accent);
-    color: var(--mt-primary);
+    background: #17a2b8;
+    color: white;
 }
 .mt-btn-full-evaluation {
-    background: var(--mt-secondary);
+    background: #007bff;
     color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .mt-btn-full-evaluation:hover {
-    background: var(--mt-primary);
+    background: #0056b3;
     color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 /* Loading spinner */
 .mt-eval-spinner {
@@ -3219,4 +3240,28 @@ body.page .mt-candidates-grid {
 /* Ensure the item is positioned relative for the pseudo-element */
 .mt-candidate-grid-item {
     position: relative !important;
+}
+}
+
+/* Fix for numbered candidate cards with dark backgrounds - Added 2025-08-17 */
+.elementor-widget-container [style*='background: linear-gradient'],
+.elementor-widget-container [style*='background-color: #003C3D'],
+.elementor-widget-container [style*='background-color: #004C5F'],
+div[style*='background: linear-gradient'] {
+    background: #f8f9fa \!important;
+    border: 2px solid #dee2e6 \!important;
+}
+
+.elementor-widget-container [style*='color: white'] h1,
+.elementor-widget-container [style*='color: white'] h2,
+.elementor-widget-container [style*='color: white'] h3,
+.elementor-widget-container [style*='color: white'] h4,
+.elementor-widget-container [style*='color: white'] strong,
+div[style*='color: white'] {
+    color: #212529 \!important;
+}
+
+.elementor-widget-container [style*='color: white'] p,
+.elementor-widget-container [style*='color: white'] span {
+    color: #495057 \!important;
 }
