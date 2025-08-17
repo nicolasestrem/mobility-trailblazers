@@ -86,10 +86,17 @@ class MT_Template_Loader {
             return;
         }
         
-        // Enhanced styles are now included in the modular frontend.css structure
+        // Enqueue enhanced styles
+        wp_enqueue_style(
+            'mt-enhanced-candidate-profile',
+            MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
         // Add custom CSS for criterion colors and animations
         $custom_css = self::generate_custom_css();
-        wp_add_inline_style('mt-frontend', $custom_css);
+        wp_add_inline_style('mt-enhanced-candidate-profile', $custom_css);
     }
     
     /**

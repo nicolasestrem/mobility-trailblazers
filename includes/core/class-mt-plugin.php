@@ -180,43 +180,11 @@ class MT_Plugin {
             MT_VERSION
         );
         
-        // Candidate Grid System (loaded third)
-        wp_enqueue_style(
-            'mt-candidate-grid',
-            MT_PLUGIN_URL . 'assets/css/mt-candidate-grid.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Evaluation Forms (loaded fourth)
-        wp_enqueue_style(
-            'mt-evaluation-forms',
-            MT_PLUGIN_URL . 'assets/css/mt-evaluation-forms.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Enhanced Jury Dashboard (loaded fifth)
-        wp_enqueue_style(
-            'mt-jury-dashboard-enhanced',
-            MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-enhanced.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Utilities and Responsive (loaded last)
-        wp_enqueue_style(
-            'mt-utilities-responsive',
-            MT_PLUGIN_URL . 'assets/css/mt-utilities-responsive.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Main Frontend Styles (global overrides and fallbacks)
+        // Main Frontend Styles (now streamlined with @import statements)
         wp_enqueue_style(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/css/frontend.css',
-            ['mt-variables', 'mt-components', 'mt-candidate-grid', 'mt-evaluation-forms', 'mt-jury-dashboard-enhanced', 'mt-utilities-responsive'],
+            ['mt-variables', 'mt-components'],
             MT_VERSION
         );
         
