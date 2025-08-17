@@ -122,3 +122,5 @@ test-candidates.csv
 test-candidates.csv
 
 /.devcontainer/
+*.ps1
+*.bat
