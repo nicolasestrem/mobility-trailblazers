@@ -57,7 +57,7 @@ class MT_Shortcodes {
                    '</div>';
         }
         
-        // Enqueue dashboard scripts and styles
+        // Enqueue dashboard scripts and styles (now uses streamlined frontend.css with @import)
         wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);

@@ -692,7 +692,7 @@ class MT_Admin {
             return;
         }
         
-        // Enqueue admin CSS and JS
+        // Enqueue admin CSS and JS (now imports shared variables and components)
         wp_enqueue_style(
             'mt-admin',
             MT_PLUGIN_URL . 'assets/css/admin.css',
