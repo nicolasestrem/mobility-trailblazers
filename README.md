@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.2.28  
+**Version:** 2.5.3  
 **Author:** Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  

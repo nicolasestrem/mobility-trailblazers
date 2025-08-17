@@ -11,12 +11,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get stats from parent context
-$jury_stats = $stats['jury_stats'] ?? [];
-$total_assigned = $stats['total_assigned'] ?? 0;
-$total_completed = $stats['total_completed'] ?? 0;
-$total_drafts = $stats['total_drafts'] ?? 0;
-$completion_rate = $stats['completion_rate'] ?? 0;
+// Get coaching data from parent context
+$jury_stats = $coaching_data['jury_stats'] ?? [];
+$total_assigned = $coaching_data['total_assigned'] ?? 0;
+$total_completed = $coaching_data['total_completed'] ?? 0;
+$total_drafts = $coaching_data['total_drafts'] ?? 0;
+$completion_rate = $coaching_data['completion_rate'] ?? 0;
 ?>
 
 <div class="wrap">

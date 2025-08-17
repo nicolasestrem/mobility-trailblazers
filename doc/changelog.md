@@ -1,3 +1,97 @@
+<<<<<<< HEAD
+## [2.5.3] - 2025-08-17
+### Critical Security Fixes
+- **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
+- **XSS Prevention**: Added wp_kses_post() sanitization to Debug Center script output
+- **AJAX Standardization**: Unified response format across all Debug Center handlers
+- **Version Sync**: Updated all version references to 2.5.3 (was inconsistent 2.2.28-2.4.4)
+
+### Security Improvements
+- Verified all Debug Center handlers have proper nonce and capability checks
+- Confirmed registry path resolution uses absolute paths only
+- Added comprehensive security audit documentation
+
+### Documentation
+- Created critical-security-fixes-2025-08-17.md with detailed fix information
+- Updated README and plugin header with correct version
+
+## [2.5.2] - 2025-08-17
+### Bug Fixes
+- **Fatal Error Prevention**: Added null checks in `MT_Evaluation_Ajax::get_evaluation_details()` to prevent crashes when posts are deleted
+- **Nonce Standardization**: Fixed inconsistent nonce names in export download functions (now using `mt_admin_nonce`)
+- **Proper Script Termination**: Changed `exit` to `wp_die()` after `wp_safe_redirect()` in language switcher
+- **Improved Variable Naming**: Renamed `$stats` to `$coaching_data` in MT_Coaching class for clarity
+- **Code Cleanup**: Removed test_handler placeholder from MT_Assignment_Ajax
+
+### Documentation
+- Created comprehensive bug fixes documentation in `doc/bug-fixes-2025-08-17.md`
+- Identified pending improvements for future iterations (namespace consistency, action hooks)
+
+## [2.5.1] - 2025-08-17
+### Critical Fixes
+- **Hero Section Height Issue**: Fixed excessive hero section taking up entire viewport
+  - Reduced padding from 80px/60px to 50px/40px in single candidate template
+  - Added max-height constraint of 400px to prevent excessive expansion
+  - Updated CSS in both `candidate-profile-fixes.css` and inline styles
+- **Evaluation Criteria Text Formatting**: Fixed bunched text without proper line breaks
+  - Changed white-space from normal to pre-line to preserve line breaks
+  - Added overflow-wrap for better word breaking
+  - Added specific BR element handling for proper line spacing
+- **Top Ranked Candidates Color Contrast**: Fixed unreadable text on rank badges
+  - Gold rank (#FFD700) now uses dark text (#1f2937) for better contrast
+  - Silver and bronze ranks maintain white text with proper shadows
+  - Added text-shadow and font-weight improvements for visibility
+- **Candidate Grid View Layout**: Fixed broken grid layout issues
+  - Implemented proper CSS Grid with auto-fill and minmax(280px, 1fr)
+  - Fixed card heights and image object-fit for consistent display
+  - Added responsive breakpoints for mobile devices
+  - Enhanced hover effects and card shadows
+- **Biography/Web Fields**: Verified fields are already present in evaluation form
+  - Confirmed biography and social links display correctly in jury-evaluation-form.php
+  - No changes needed as functionality already exists
+
+### Changed
+- **CSS Structure Improvements**: Optimized styles for better maintainability
+  - Hero pattern now properly constrained within max-height
+  - Enhanced responsive design for mobile viewports
+  - Better organization of fixes across CSS files
+
+## [2.5.0] - 2025-08-17
+### Added
+- **Comprehensive Design Improvements**: Implemented major design overhaul for better user experience
+  - Created `design-improvements-2025.css` with enhanced visual hierarchy and modern styling
+  - Added `design-enhancements.js` for interactive animations and smooth scrolling
+  - Implemented progress indicators for evaluation forms
+  - Added auto-save indicators and ripple effects for better feedback
+  - Enhanced accessibility with keyboard navigation and screen reader support
+
+### Fixed
+- **Excessive Top Spacing**: Significantly reduced padding on candidate profile pages
+  - Hero section padding reduced from 40px to 30px top
+  - Photo frames reduced to 220px for better proportions
+  - Content section pulled up with negative margin for tighter layout
+  - Added specific WordPress admin bar compensation
+- **Evaluation Criteria Text Formatting**: Fixed text display issues
+  - Changed white-space from pre-wrap to normal for better text flow
+  - Increased line-height to 1.8 for improved readability
+  - Added proper paragraph spacing (1rem bottom margin)
+  - Ensured word-break for long text strings
+- **Duplicate Biography Sections**: Removed duplicate content display
+  - Consolidated two biography sections into one in jury evaluation form
+  - Now uses biography meta field with fallback to post content
+  - Cleaner presentation with single biography section
+- **Social Media Icons**: Replaced broken dashicons with inline SVG icons
+  - LinkedIn icon now displays correctly with proper SVG path
+  - Website icon uses globe SVG for better visual clarity
+  - Icons properly sized at 20x20px with currentColor fill
+  - Added hover effects and proper alignment
+
+### Changed
+- **Plugin Core Updates**: Modified asset enqueuing in `class-mt-plugin.php`
+  - Added design-improvements-2025.css to stylesheet queue
+  - Added design-enhancements.js with jQuery dependency
+  - Proper dependency chain for CSS load order
+
 ## [2.4.5] - 2025-08-17
 ### Documentation
 - **Complete Candidate Page Design Fixes Documentation**: Created comprehensive documentation for all layout improvements
@@ -8,6 +102,8 @@
   - Complete testing results and browser compatibility information
   - New file: `doc/candidate-page-design-layout-fixes-complete.md`
 
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 ## [2.4.4] - 2025-08-17
 ### Fixed
 - **Candidate Profile Display Issues**: Fixed critical field mapping issues that prevented candidate data from displaying

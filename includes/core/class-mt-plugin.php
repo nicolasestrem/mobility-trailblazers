@@ -164,14 +164,11 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
-        // Ensure dashicons are loaded on frontend
-        wp_enqueue_style('dashicons');
-        
         // Styles
         wp_enqueue_style(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/css/frontend.css',
-            ['dashicons'],
+            [],
             MT_VERSION
         );
         
@@ -189,6 +186,31 @@ class MT_Plugin {
             MT_PLUGIN_URL . 'assets/css/candidate-profile-fixes.css',
             ['mt-frontend', 'mt-enhanced-candidate-profile'],
             MT_VERSION
+        );
+        
+        // Design improvements 2025 (v1.0.0)
+        wp_enqueue_style(
+            'mt-design-improvements',
+            MT_PLUGIN_URL . 'assets/css/design-improvements-2025.css',
+            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes'],
+            '1.0.0'
+        );
+        
+        // Critical fixes for v2.5.0 issues (2025-08-17)
+        wp_enqueue_style(
+            'mt-critical-fixes',
+            MT_PLUGIN_URL . 'assets/css/critical-fixes-2025.css',
+            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes', 'mt-design-improvements'],
+            MT_VERSION . '.1'
+        );
+        
+        // Design enhancements JavaScript (v1.0.0)
+        wp_enqueue_script(
+            'mt-design-enhancements',
+            MT_PLUGIN_URL . 'assets/js/design-enhancements.js',
+            ['jquery'],
+            '1.0.0',
+            true
         );
         
         // Jury dashboard styles

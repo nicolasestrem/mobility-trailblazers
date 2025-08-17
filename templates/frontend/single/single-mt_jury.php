@@ -19,12 +19,12 @@ while (have_posts()) : the_post();
     $user = get_user_by('id', $user_id);
     
     // Get jury member meta data
-    $organization = get_post_meta($jury_id, '_mt_organization', true);
-    $position = get_post_meta($jury_id, '_mt_position', true);
-    $bio = get_post_meta($jury_id, '_mt_bio', true);
-    $expertise = get_post_meta($jury_id, '_mt_expertise', true);
-    $linkedin = get_post_meta($jury_id, '_mt_linkedin', true);
-    $website = get_post_meta($jury_id, '_mt_website', true);
+    $organization = get_post_meta($jury_id, '_mt_organization', true) ?: '';
+    $position = get_post_meta($jury_id, '_mt_position', true) ?: '';
+    $bio = get_post_meta($jury_id, '_mt_bio', true) ?: '';
+    $expertise = get_post_meta($jury_id, '_mt_expertise', true) ?: '';
+    $linkedin = get_post_meta($jury_id, '_mt_linkedin', true) ?: '';
+    $website = get_post_meta($jury_id, '_mt_website', true) ?: '';
     $display_name = get_post_meta($jury_id, '_mt_display_name', true) ?: get_the_title();
     
     // Get evaluation statistics

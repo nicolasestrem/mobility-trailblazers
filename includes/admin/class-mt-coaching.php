@@ -79,7 +79,7 @@ class MT_Coaching {
      */
     public function render_coaching_page() {
         // Get coaching statistics
-        $stats = $this->get_coaching_statistics();
+        $coaching_data = $this->get_coaching_statistics();
         
         include MT_PLUGIN_DIR . 'templates/admin/coaching.php';
     }
@@ -154,10 +154,10 @@ class MT_Coaching {
         $type = sanitize_text_field($_POST['type'] ?? 'incomplete');
         
         // Get jury members needing reminders
-        $stats = $this->get_coaching_statistics();
+        $coaching_data = $this->get_coaching_statistics();
         $sent_count = 0;
         
-        foreach ($stats['jury_stats'] as $jury) {
+        foreach ($coaching_data['jury_stats'] as $jury) {
             // Skip if completed all assignments
             if ($jury->assigned <= $jury->completed && $type === 'incomplete') {
                 continue;
@@ -206,7 +206,7 @@ class MT_Coaching {
             wp_die(__('Permission denied', 'mobility-trailblazers'));
         }
         
-        $stats = $this->get_coaching_statistics();
+        $coaching_data = $this->get_coaching_statistics();
         
         // Set headers for CSV download
         $filename = 'coaching-report-' . date('Y-m-d-His') . '.csv';
@@ -234,7 +234,7 @@ class MT_Coaching {
         ]);
         
         // Write data
-        foreach ($stats['jury_stats'] as $jury) {
+        foreach ($coaching_data['jury_stats'] as $jury) {
             $progress = $jury->assigned > 0 ? round(($jury->completed / $jury->assigned) * 100, 1) : 0;
             $pending = $jury->assigned - $jury->completed;
             
