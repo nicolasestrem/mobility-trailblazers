@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## [2.5.3] - 2025-08-17
 ### Critical Security Fixes
 - **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
@@ -104,6 +105,8 @@
   - Complete testing results and browser compatibility information
   - New file: `doc/candidate-page-design-layout-fixes-complete.md`
 
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 =======
 >>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 =======
