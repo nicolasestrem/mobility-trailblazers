@@ -125,3 +125,4 @@ test-candidates.csv
 *.ps1
 *.bat
 .claude.json
+.mcp.json
