@@ -1,3 +1,19 @@
+## [2.5.3] - 2025-08-17
+### Critical Security Fixes
+- **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
+- **XSS Prevention**: Added wp_kses_post() sanitization to Debug Center script output
+- **AJAX Standardization**: Unified response format across all Debug Center handlers
+- **Version Sync**: Updated all version references to 2.5.3 (was inconsistent 2.2.28-2.4.4)
+
+### Security Improvements
+- Verified all Debug Center handlers have proper nonce and capability checks
+- Confirmed registry path resolution uses absolute paths only
+- Added comprehensive security audit documentation
+
+### Documentation
+- Created critical-security-fixes-2025-08-17.md with detailed fix information
+- Updated README and plugin header with correct version
+
 ## [2.5.2] - 2025-08-17
 ### Bug Fixes
 - **Fatal Error Prevention**: Added null checks in `MT_Evaluation_Ajax::get_evaluation_details()` to prevent crashes when posts are deleted

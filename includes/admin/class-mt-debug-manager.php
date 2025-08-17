@@ -376,7 +376,8 @@ class MT_Debug_Manager {
                     'errors' => []
                 ];
             }
-            $result['output'] = $output_content;
+            // Sanitize HTML output to prevent XSS
+            $result['output'] = wp_kses_post($output_content);
             
             // Check result
             if ($script_result === false) {
@@ -393,7 +394,8 @@ class MT_Debug_Manager {
         } catch (\Exception $e) {
             // Get output before cleaning buffer
             $output_content = ob_get_contents();
-            $result['output'] = $output_content;
+            // Sanitize HTML output to prevent XSS
+            $result['output'] = wp_kses_post($output_content);
             
             $result['message'] = sprintf(
                 __('Script execution error: %s', 'mobility-trailblazers'),
