@@ -356,9 +356,15 @@ function testAjax() {
     </table>
 </div>
 
-<!-- Auto-Assignment Modal -->
-<div id="mt-auto-assign-modal" class="mt-modal" style="display: none;">
+<?php 
+// Include the new modal implementation
+include __DIR__ . '/assignments-modals.php';
+?>
+
+<!-- Auto-Assignment Modal (OLD - HIDDEN) -->
+<div id="mt-auto-assign-modal" class="mt-modal" style="display: none !important;">
     <div class="mt-modal-content">
+        <button type="button" class="mt-modal-close">&times;</button>
         <h2><?php _e('Auto-Assignment Configuration', 'mobility-trailblazers'); ?></h2>
         <form method="post" action="">
             <?php wp_nonce_field('mt_assignments'); ?>
@@ -399,8 +405,9 @@ function testAjax() {
 </div>
 
 <!-- Manual Assignment Modal -->
-<div id="mt-manual-assign-modal" class="mt-modal" style="display: none;">
+<div id="mt-manual-assign-modal" class="mt-modal">
     <div class="mt-modal-content">
+        <button type="button" class="mt-modal-close">&times;</button>
         <h2><?php _e('Manual Assignment', 'mobility-trailblazers'); ?></h2>
         <form id="mt-manual-assignment-form">
             <div class="mt-form-group">
@@ -435,28 +442,198 @@ function testAjax() {
     </div>
 </div>
 
+<?php
+// Enqueue the dedicated assignments script
+wp_enqueue_script(
+    'mt-assignments',
+    MT_PLUGIN_URL . 'assets/js/mt-assignments.js',
+    ['jquery'],
+    MT_VERSION,
+    true
+);
+
+// Enqueue modal debug script - load it last to override everything
+wp_enqueue_script(
+    'mt-modal-debug',
+    MT_PLUGIN_URL . 'assets/js/mt-modal-debug.js',
+    ['jquery'],
+    MT_VERSION . '.2',
+    true
+);
+
+// Enqueue modal fix CSS
+wp_enqueue_style(
+    'mt-modal-fix',
+    MT_PLUGIN_URL . 'assets/css/mt-modal-fix.css',
+    [],
+    MT_VERSION
+);
+?>
+
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    console.log('Inline script running...');
+    console.log('MT Assignments: Inline fallback script loaded');
     
-    // Direct event binding as fallback
-    $(document).on('click', '#mt-auto-assign-btn', function(e) {
-        e.preventDefault();
-        console.log('Fallback handler: Auto-assign clicked');
-        $('#mt-auto-assign-modal').show();
-    });
-    
-    $(document).on('click', '.mt-modal-close', function(e) {
-        e.preventDefault();
-        console.log('Fallback handler: Close modal clicked');
-        $('.mt-modal').hide();
-    });
-    
-    // Test if mt_admin exists
+    // Check if main admin.js loaded correctly
     if (typeof mt_admin !== 'undefined') {
-        console.log('mt_admin is available:', mt_admin);
+        console.log('MT Assignments: mt_admin object available');
     } else {
-        console.error('mt_admin is NOT available!');
+        console.error('MT Assignments: mt_admin object NOT available - creating fallback');
+        // Create fallback mt_admin object
+        window.mt_admin = {
+            ajax_url: ajaxurl || '<?php echo admin_url('admin-ajax.php'); ?>',
+            nonce: '<?php echo wp_create_nonce('mt_admin_nonce'); ?>',
+            i18n: {
+                processing: 'Processing...',
+                error_occurred: 'An error occurred. Please try again.',
+                assignments_created: 'Assignments created successfully.'
+            }
+        };
+    }
+    
+    // Force modal to show with aggressive inline styles
+    function forceShowModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.cssText = 'display: flex !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; background-color: rgba(0, 0, 0, 0.6) !important; z-index: 999999 !important; align-items: center !important; justify-content: center !important;';
+            
+            var content = modal.querySelector('.mt-modal-content');
+            if (content) {
+                content.style.cssText = 'position: relative !important; background: #ffffff !important; padding: 30px !important; max-width: 600px !important; width: 90% !important; max-height: 90vh !important; overflow-y: auto !important; border-radius: 8px !important; box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important; z-index: 1000000 !important; margin: auto !important;';
+            }
+        }
+    }
+    
+    function hideModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // Check if MTAssignmentManager initialized
+    if (typeof MTAssignmentManager === 'undefined') {
+        console.log('MT Assignments: MTAssignmentManager not found, using fallback handlers');
+        
+        // Fallback handlers for modal functionality
+        $('#mt-auto-assign-btn').on('click', function(e) {
+            e.preventDefault();
+            console.log('MT Assignments: Opening auto-assign modal');
+            forceShowModal('mt-auto-assign-modal');
+        });
+        
+        $('#mt-manual-assign-btn').on('click', function(e) {
+            e.preventDefault();
+            console.log('MT Assignments: Opening manual assign modal');
+            forceShowModal('mt-manual-assign-modal');
+        });
+        
+        $('.mt-modal-close').on('click', function(e) {
+            e.preventDefault();
+            console.log('MT Assignments: Closing modal');
+            var modalId = $(this).closest('.mt-modal').attr('id');
+            hideModal(modalId);
+        });
+        
+        // Click outside modal to close
+        $('.mt-modal').on('click', function(e) {
+            if ($(e.target).hasClass('mt-modal')) {
+                hideModal(this.id);
+            }
+        });
+        
+        // Handle auto-assign form submission
+        $('#mt-auto-assign-modal form').on('submit', function(e) {
+            e.preventDefault();
+            console.log('MT Assignments: Submitting auto-assignment');
+            
+            var $form = $(this);
+            var $submitBtn = $form.find('button[type="submit"]');
+            var originalText = $submitBtn.text();
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_auto_assign',
+                    nonce: mt_admin.nonce,
+                    method: $('#assignment_method').val(),
+                    candidates_per_jury: $('#candidates_per_jury').val(),
+                    clear_existing: $('#clear_existing').is(':checked') ? 'true' : 'false'
+                },
+                beforeSend: function() {
+                    $submitBtn.prop('disabled', true).text('Processing...');
+                },
+                success: function(response) {
+                    console.log('MT Assignments: Auto-assign response', response);
+                    if (response.success) {
+                        alert(response.data.message || 'Auto-assignment completed successfully!');
+                        location.reload();
+                    } else {
+                        alert(response.data || 'An error occurred');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('MT Assignments: Auto-assign error', error);
+                    alert('Error: ' + error);
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+        
+        // Handle manual assignment form submission
+        $('#mt-manual-assignment-form').on('submit', function(e) {
+            e.preventDefault();
+            console.log('MT Assignments: Submitting manual assignment');
+            
+            var $form = $(this);
+            var $submitBtn = $form.find('button[type="submit"]');
+            var originalText = $submitBtn.text();
+            
+            var candidateIds = [];
+            $('input[name="candidate_ids[]"]:checked').each(function() {
+                candidateIds.push($(this).val());
+            });
+            
+            if (!$('#manual_jury_member').val() || candidateIds.length === 0) {
+                alert('Please select a jury member and at least one candidate.');
+                return;
+            }
+            
+            $.ajax({
+                url: mt_admin.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'mt_manual_assign',
+                    nonce: mt_admin.nonce,
+                    jury_member_id: $('#manual_jury_member').val(),
+                    candidate_ids: candidateIds
+                },
+                beforeSend: function() {
+                    $submitBtn.prop('disabled', true).text('Processing...');
+                },
+                success: function(response) {
+                    console.log('MT Assignments: Manual assign response', response);
+                    if (response.success) {
+                        alert(response.data.message || 'Assignments created successfully!');
+                        location.reload();
+                    } else {
+                        alert(response.data || 'An error occurred');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('MT Assignments: Manual assign error', error);
+                    alert('Error: ' + error);
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+    } else {
+        console.log('MT Assignments: MTAssignmentManager found and should be initialized');
     }
 });
 </script>

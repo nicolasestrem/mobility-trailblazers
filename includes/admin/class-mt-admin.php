@@ -687,8 +687,16 @@ class MT_Admin {
         // Check if we're on the candidates list page specifically
         $is_candidates_page = ($screen && $screen->post_type === 'mt_candidate' && $screen->base === 'edit');
         
-        // Only on our plugin pages or candidates page
-        if (!$is_candidates_page && strpos($hook, 'mobility-trailblazers') === false && strpos($hook, 'mt-') === false) {
+        // Check if we're on any mobility trailblazers admin page
+        $is_mt_admin_page = (
+            $is_candidates_page ||
+            strpos($hook, 'mobility-trailblazers') !== false ||
+            strpos($hook, 'mt-') !== false ||
+            (isset($_GET['page']) && strpos($_GET['page'], 'mt-') === 0)
+        );
+        
+        // Only on our plugin pages
+        if (!$is_mt_admin_page) {
             return;
         }
         
@@ -749,11 +757,13 @@ class MT_Admin {
             ]);
         }
         
-        // Localize script for AJAX and internationalization
+        // Always localize script for AJAX and internationalization on our pages
         wp_localize_script('mt-admin', 'mt_admin', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_admin_nonce'),
             'admin_url' => admin_url(),
+            'plugin_url' => MT_PLUGIN_URL,
+            'current_page' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '',
             'i18n' => array(
                 'confirm_remove_assignment' => __('Are you sure you want to remove this assignment?', 'mobility-trailblazers'),
                 'assignment_removed' => __('Assignment removed successfully.', 'mobility-trailblazers'),

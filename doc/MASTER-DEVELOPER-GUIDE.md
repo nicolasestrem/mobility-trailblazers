@@ -97,7 +97,10 @@ MTAssignmentManager = {
         // Entry point, sets up all event handlers
     },
     
-    // Modal Management
+    // Modal Management (Updated v2.5.7)
+    // NOTE: Due to WordPress admin CSS conflicts, modals now use
+    // unique class names (mt-new-modal-*) and simple class toggle
+    // mechanism. See templates/admin/assignments-modals.php
     showAutoAssignModal: function() {},
     showManualAssignModal: function() {},
     

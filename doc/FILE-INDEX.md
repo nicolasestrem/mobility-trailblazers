@@ -100,6 +100,11 @@ Utility classes:
 ## Templates (/templates/)
 
 ### /templates/admin/
+Administrative templates:
+- **assignments.php** - Assignment management interface (Updated 2.5.7)
+- **assignments-modals.php** - New modal implementation for assignments (Added 2.5.7)
+
+### /templates/admin/
 Admin interface templates:
 - **dashboard.php** - Main dashboard
 - **dashboard-widget.php** - Dashboard widget
@@ -153,6 +158,7 @@ Stylesheets:
 - **enhanced-candidate-profile.css** - Enhanced candidate profile styling
 - **candidate-profile-fixes.css** - Layout and spacing fixes (v2.4.2)
 - **design-improvements-2025.css** - Comprehensive UI/UX improvements (v2.5.0)
+- **mt-modal-fix.css** - Modal positioning and visibility fixes (v2.5.7)
 
 ### /assets/js/
 JavaScript files:
@@ -165,6 +171,9 @@ JavaScript files:
 - **debug-center.js** - Debug Center UI
 - **candidate-interactions.js** - Interactive features
 - **design-enhancements.js** - Animations and interactive enhancements (v2.5.0)
+- **mt-assignments.js** - Enhanced assignment modal handling (v2.5.7)
+- **mt-modal-force.js** - Force modal visibility script (v2.5.7)
+- **mt-modal-debug.js** - Modal debugging utilities (v2.5.7)
 
 ### /assets/images/
 Image files:

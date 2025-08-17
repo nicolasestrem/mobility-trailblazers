@@ -1,3 +1,23 @@
+## [2.5.7] - 2025-08-17
+### Fixed Assignment Modal Visibility Issues
+- **Problem**: Auto-assign and manual assignment modals were not visible to users despite being in DOM
+- **Root Cause**: Conflicts with WordPress admin styles and JavaScript execution order
+- **Solution**: Created new modal implementation with unique class names and simplified JavaScript
+- **Files Created**:
+  - `templates/admin/assignments-modals.php`: New modal implementation with clean HTML/CSS/JS
+  - `assets/js/mt-modal-force.js`: Force modal visibility script (attempted fix)
+  - `assets/js/mt-modal-debug.js`: Debug script for modal troubleshooting
+- **Files Modified**:
+  - `templates/admin/assignments.php`: Included new modal implementation
+  - `assets/css/mt-modal-fix.css`: Added aggressive CSS overrides with transform positioning
+  - `assets/js/mt-assignments.js`: Enhanced modal handling with multiple fallbacks
+- **Technical Details**:
+  - Used unique CSS classes (`mt-new-modal-overlay`, `mt-new-modal-container`) to avoid conflicts
+  - Implemented vanilla JavaScript event handlers alongside jQuery for reliability
+  - Applied inline styles with !important flags to override conflicting styles
+  - Moved modals to body element to escape container positioning contexts
+- **Result**: Both auto-assignment and manual assignment modals now display correctly and are fully functional
+
 ## [2.5.6] - 2025-08-17
 ### Evaluation Page UI Improvements
 - **Biography Display**: Fixed biography display on evaluation page
