@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## [2.5.3] - 2025-08-17
 ### Critical Security Fixes
 - **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
@@ -60,6 +61,8 @@
   - Enhanced responsive design for mobile viewports
   - Better organization of fixes across CSS files
 
+=======
+>>>>>>> parent of 18e9855 (Fix v2.5.0 breaking issues - Hero height, text formatting, colors, grid)
 ## [2.5.0] - 2025-08-17
 ### Added
 - **Comprehensive Design Improvements**: Implemented major design overhaul for better user experience

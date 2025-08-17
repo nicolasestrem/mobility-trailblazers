@@ -59,10 +59,9 @@ while (have_posts()) : the_post();
 
 .mt-hero-section {
     position: relative;
-    padding: 50px 0 40px; /* Reduced from 80px 0 60px */
+    padding: 80px 0 60px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow: hidden;
-    max-height: 400px; /* Add maximum height constraint */
 }
 
 .mt-hero-section.category-tech {
