@@ -180,11 +180,19 @@ class MT_Plugin {
             MT_VERSION
         );
         
-        // Main Frontend Styles (now streamlined with @import statements)
+        // Main Frontend Styles (includes consolidated grid system)
         wp_enqueue_style(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/css/frontend.css',
             ['mt-variables', 'mt-components'],
+            MT_VERSION
+        );
+        
+        // Enhanced candidate profile styles (includes all fixes)
+        wp_enqueue_style(
+            'mt-enhanced-candidate-profile',
+            MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
+            ['mt-variables', 'mt-components', 'mt-frontend'],
             MT_VERSION
         );
         
@@ -196,6 +204,16 @@ class MT_Plugin {
             '1.0.0',
             true
         );
+        
+        // Jury dashboard styles
+        if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
+            wp_enqueue_style(
+                'mt-jury-dashboard',
+                MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
+                ['mt-frontend'],
+                MT_VERSION
+            );
+        }
         
         // Scripts
         wp_enqueue_script(

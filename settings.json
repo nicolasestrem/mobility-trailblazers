@@ -1,0 +1,6 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "powershell.exe -ExecutionPolicy Bypass -Command \"$input = [Console]::In.ReadToEnd(); try { $json = $input | ConvertFrom-Json; $modelName = $json.model.display_name; $currentDir = $json.workspace.current_dir; } catch { $modelName = 'Claude'; $currentDir = (Get-Location).Path; } $time = Get-Date -Format 'HH:mm:ss'; $user = $env:USERNAME; $computer = $env:COMPUTERNAME; $dirName = Split-Path -Leaf $currentDir; Write-Host \\\"$user@$computer [$time] $dirName | $modelName\\\"\""
+  }
+}
