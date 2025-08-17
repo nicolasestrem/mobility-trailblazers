@@ -1,5 +1,5 @@
-# Mobility Trailblazers - Complete Import/Export Guide
-*Last Updated: August 16, 2025 | Version 2.4.1*
+# Mobility Trailblazers - Import/Export & Localization Guide
+*Last Updated: August 17, 2025 | Version 2.5.8*
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
@@ -10,9 +10,10 @@
 6. [Field Mapping & Validation](#field-mapping--validation)
 7. [German Text Parsing](#german-text-parsing)
 8. [Export Functionality](#export-functionality)
-9. [System Architecture](#system-architecture)
-10. [Troubleshooting](#troubleshooting)
-11. [Developer Reference](#developer-reference)
+9. [German Localization](#german-localization)
+10. [System Architecture](#system-architecture)
+11. [Troubleshooting](#troubleshooting)
+12. [Developer Reference](#developer-reference)
 
 ---
 
@@ -609,6 +610,50 @@ Available exports:
 - **Evaluations** - Jury evaluations with scores
 - **Assignments** - Jury-candidate mappings
 - **Audit Log** - Security audit trail
+
+---
+
+## German Localization
+
+### Overview
+The plugin includes complete German localization (1000+ strings) for the DACH region market.
+
+### Language Files
+```
+/languages/
+├── mobility-trailblazers-de_DE.po    # Translation source
+└── mobility-trailblazers-de_DE.mo    # Compiled translation
+```
+
+### Activation
+1. **Install German Language Pack:**
+```bash
+wp language core install de_DE --activate
+```
+
+2. **Set Site Language:**
+```bash
+wp option update WPLANG de_DE
+```
+
+3. **Clear Cache:**
+```bash
+wp cache flush
+```
+
+### Language Detection Priority
+1. URL parameter (`?mt_lang=de_DE`)
+2. User meta preference
+3. Browser cookie
+4. Site language setting
+5. Default to German
+
+### Translation Coverage
+- ✅ All evaluation criteria and scoring
+- ✅ Jury dashboard and assignments
+- ✅ Admin interface and settings
+- ✅ Email templates and notifications
+- ✅ Error messages and confirmations
 
 ---
 
