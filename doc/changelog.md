@@ -2,6 +2,28 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.14] - 2025-01-20
+### Fixed
+- **Candidate Card Backgrounds**: Applied consistent cream background (#F8F0E3) with blue accent borders
+  - Fixed missing background colors on candidate link cards
+  - Added hover effects with white background and copper borders
+  - Improved text color hierarchy for better readability
+  
+- **Jury Dashboard Title**: Enhanced header presentation with professional styling
+  - Implemented gradient background (deep teal to blue)
+  - Added Poppins font for improved typography
+  - Created visual depth with pattern overlay and shadows
+  - Styled progress bar with copper accent gradient
+
+- **Evaluation Button**: Removed inappropriate evaluation button from candidate pages
+  - Button was showing for all jury members regardless of assignment
+  - Evaluations now properly restricted to jury dashboard
+
+### Enhanced
+- **Brand Consistency**: Maintained color palette across all UI elements
+- **Visual Hierarchy**: Improved distinction between different content areas
+- **User Experience**: Smoother transitions and clearer interactive states
+
 ## [2.5.13] - 2025-01-20
 ### Security
 - **Debug Center Audit**: Complete security overhaul of admin debug interface
