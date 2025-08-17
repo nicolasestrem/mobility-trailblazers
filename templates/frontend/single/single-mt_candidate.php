@@ -15,19 +15,19 @@ get_header();
 
 while (have_posts()) : the_post();
     $candidate_id = get_the_ID();
-    $organization = get_post_meta($candidate_id, '_mt_organization', true);
-    $position = get_post_meta($candidate_id, '_mt_position', true);
+    $organization = get_post_meta($candidate_id, '_mt_organization', true) ?: '';
+    $position = get_post_meta($candidate_id, '_mt_position', true) ?: '';
     $display_name = get_post_meta($candidate_id, '_mt_candidate_name', true) ?: get_the_title();
-    $overview = get_post_meta($candidate_id, '_mt_description_full', true);
-    $linkedin = get_post_meta($candidate_id, '_mt_linkedin_url', true);
-    $website = get_post_meta($candidate_id, '_mt_website_url', true);
+    $overview = get_post_meta($candidate_id, '_mt_description_full', true) ?: '';
+    $linkedin = get_post_meta($candidate_id, '_mt_linkedin_url', true) ?: '';
+    $website = get_post_meta($candidate_id, '_mt_website_url', true) ?: '';
     
     // Get individual evaluation criteria
-    $eval_courage = get_post_meta($candidate_id, '_mt_evaluation_courage', true);
-    $eval_innovation = get_post_meta($candidate_id, '_mt_evaluation_innovation', true);
-    $eval_implementation = get_post_meta($candidate_id, '_mt_evaluation_implementation', true);
-    $eval_relevance = get_post_meta($candidate_id, '_mt_evaluation_relevance', true);
-    $eval_visibility = get_post_meta($candidate_id, '_mt_evaluation_visibility', true);
+    $eval_courage = get_post_meta($candidate_id, '_mt_evaluation_courage', true) ?: '';
+    $eval_innovation = get_post_meta($candidate_id, '_mt_evaluation_innovation', true) ?: '';
+    $eval_implementation = get_post_meta($candidate_id, '_mt_evaluation_implementation', true) ?: '';
+    $eval_relevance = get_post_meta($candidate_id, '_mt_evaluation_relevance', true) ?: '';
+    $eval_visibility = get_post_meta($candidate_id, '_mt_evaluation_visibility', true) ?: '';
     $categories = wp_get_post_terms($candidate_id, 'mt_award_category');
     $category_slug = !empty($categories) ? $categories[0]->slug : 'default';
     

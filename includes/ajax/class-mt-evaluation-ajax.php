@@ -308,10 +308,10 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get candidate meta
-        $organization = get_post_meta($candidate_id, '_mt_organization', true);
-        $position = get_post_meta($candidate_id, '_mt_position', true);
-        $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true);
-        $website = get_post_meta($candidate_id, '_mt_website', true);
+        $organization = get_post_meta($candidate_id, '_mt_organization', true) ?: '';
+        $position = get_post_meta($candidate_id, '_mt_position', true) ?: '';
+        $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true) ?: '';
+        $website = get_post_meta($candidate_id, '_mt_website', true) ?: '';
         
         // Get categories
         $categories = wp_get_post_terms($candidate_id, 'mt_award_category', [

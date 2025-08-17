@@ -19,11 +19,11 @@ if (!$candidate) {
 }
 
 // Get candidate meta
-$organization = get_post_meta($candidate->ID, '_mt_organization', true);
-$position = get_post_meta($candidate->ID, '_mt_position', true);
-$biography = get_post_meta($candidate->ID, '_mt_description_full', true);
-$linkedin_url = get_post_meta($candidate->ID, '_mt_linkedin_url', true);
-$website_url = get_post_meta($candidate->ID, '_mt_website_url', true);
+$organization = get_post_meta($candidate->ID, '_mt_organization', true) ?: '';
+$position = get_post_meta($candidate->ID, '_mt_position', true) ?: '';
+$biography = get_post_meta($candidate->ID, '_mt_description_full', true) ?: '';
+$linkedin_url = get_post_meta($candidate->ID, '_mt_linkedin_url', true) ?: '';
+$website_url = get_post_meta($candidate->ID, '_mt_website_url', true) ?: '';
 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
 $photo_id = get_post_thumbnail_id($candidate->ID);
 
@@ -205,7 +205,8 @@ $criteria = [
             
             <div class="mt-criteria-grid">
                 <?php foreach ($criteria as $key => $criterion) : 
-                    $score_value = $evaluation ? $evaluation->{$key . '_score'} : 5;
+                    $score_value = ($evaluation && isset($evaluation->{$key . '_score'})) ? $evaluation->{$key . '_score'} : 5;
+                    $score_value = $score_value ?? 5; // Ensure it's never null
                 ?>
                     <div class="mt-criterion-card" data-criterion="<?php echo esc_attr($key); ?>">
                         <div class="mt-criterion-header" style="border-left-color: <?php echo esc_attr($criterion['color']); ?>">
