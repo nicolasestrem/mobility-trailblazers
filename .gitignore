@@ -1,0 +1,126 @@
+# Mobility Trailblazers Platform .gitignore
+# ==========================================
+
+# WordPress Core
+/wordpress/
+/wp-admin/
+/wp-includes/
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/backup-db/
+/wp-content/cache/
+/wp-content/backups/
+l
+# Configuration Fies
+/config/.env
+/config/.env.*
+!config/.env.example
+wp-config.php
+wp-config-local.php
+*.sql
+*.sql.gz
+
+# Development Dependencies
+/wordpress-plugin/mobility-trailblazers/vendor/
+/wordpress-plugin/mobility-trailblazers/node_modules/
+/development/build/vendor/
+/development/build/node_modules/
+
+# Build Artifacts
+/wordpress-plugin/releases/*.zip
+!/wordpress-plugin/releases/latest/.gitkeep
+*.min.js
+*.min.css
+*.map
+
+# Security Reports (sensitive data)
+/development/security/reports/*.json
+/development/security/reports/*.txt
+/development/security/reports/*.html
+!/development/security/reports/.gitkeep
+
+# Debug and Log Files
+*.log
+error_log
+/development/debug/*.log
+/development/debug/output/
+debug.log
+/logs/
+
+# Archive (large files)
+/archive/**/*.zip
+/archive/**/*.tar.gz
+/archive/**/*.sql
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+*.tmproj
+*.tmproject
+tmtags
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.sass-cache/
+
+# Backup Files
+*.bak
+*.backup
+*_backup
+*.old
+*_old
+
+# Docker
+/infrastructure/docker/mysql/data/
+/infrastructure/docker/wordpress/uploads/
+*.env.local
+
+# Komodo
+/infrastructure/komodo/*.env
+/infrastructure/komodo/secrets/
+
+# Documentation Working Files
+/documentation/**/*.docx
+/documentation/**/*.pptx
+!/documentation/business/meeting-minutes/*.docx
+*.~lock.*
+
+# Testing
+/development/testing/coverage/
+/development/testing/results/
+.phpunit.result.cache
+
+# Keep these directories with .gitkeep
+!/wordpress-plugin/releases/.gitkeep
+!/development/security/reports/.gitkeep
+!/documentation/business/meeting-minutes/.gitkeep
+!/assets/branding/logos/.gitkeepplugin/mobility-trailblazers/
+
+# Claude AI context files
+.claude/
+
+/Photos_candidates/
+test-candidates.csv
+test-candidates.csv
+
+/.devcontainer/
+*.ps1
+*.bat

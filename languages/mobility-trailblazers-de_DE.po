@@ -1,0 +1,1004 @@
+# German translations for Mobility Trailblazers plugin
+# Copyright (C) 2025 Mobility Trailblazers
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Mobility Trailblazers 2.1.0\n"
+"Report-Msgid-Bugs-To: https://mobilitytrailblazers.com\n"
+"POT-Creation-Date: 2025-07-17 12:00+0000\n"
+"PO-Revision-Date: 2025-07-17 12:00+0000\n"
+"Last-Translator: Mobility Trailblazers Team\n"
+"Language-Team: German <de@mobilitytrailblazers.com>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0\n"
+
+# General
+msgid "Loading..."
+msgstr "Wird geladen..."
+
+msgid "An error occurred. Please try again."
+msgstr "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+
+msgid "Success!"
+msgstr "Erfolg!"
+
+msgid "Saving..."
+msgstr "Wird gespeichert..."
+
+msgid "Saved!"
+msgstr "Gespeichert!"
+
+msgid "Are you sure you want to delete this?"
+msgstr "Sind Sie sicher, dass Sie dies löschen möchten?"
+
+msgid "Submit"
+msgstr "Absenden"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Processing..."
+msgstr "Wird verarbeitet..."
+
+# Evaluation System
+msgid "Evaluation submitted successfully!"
+msgstr "Bewertung erfolgreich eingereicht!"
+
+msgid "Draft saved successfully!"
+msgstr "Entwurf erfolgreich gespeichert!"
+
+msgid "Please rate all criteria before submitting."
+msgstr "Bitte bewerten Sie alle Kriterien vor dem Absenden."
+
+msgid "Evaluate Candidate"
+msgstr "Kandidat bewerten"
+
+msgid "Evaluation Criteria"
+msgstr "Bewertungskriterien"
+
+msgid "Additional Comments"
+msgstr "Zusätzliche Kommentare"
+
+msgid "Share your thoughts about this candidate's contributions to mobility innovation..."
+msgstr "Teilen Sie Ihre Gedanken zu den Beiträgen dieses Kandidaten zur Mobilitätsinnovation..."
+
+msgid "Save as Draft"
+msgstr "Als Entwurf speichern"
+
+msgid "Submit Evaluation"
+msgstr "Bewertung einreichen"
+
+msgid "Evaluation Guidelines"
+msgstr "Bewertungsrichtlinien"
+
+msgid "Score each criterion from 0 (lowest) to 10 (highest) based on your assessment"
+msgstr "Bewerten Sie jedes Kriterium von 0 (niedrigste) bis 10 (höchste) basierend auf Ihrer Einschätzung"
+
+msgid "Consider the candidate's overall impact on mobility transformation"
+msgstr "Berücksichtigen Sie die Gesamtwirkung des Kandidaten auf die Mobilitätstransformation"
+
+msgid "You can save your evaluation as a draft and return later to complete it"
+msgstr "Sie können Ihre Bewertung als Entwurf speichern und später fortsetzen"
+
+msgid "Once submitted, you can still edit your evaluation if needed"
+msgstr "Nach dem Einreichen können Sie Ihre Bewertung bei Bedarf noch bearbeiten"
+
+msgid "Total Score:"
+msgstr "Gesamtpunktzahl:"
+
+msgid "characters"
+msgstr "Zeichen"
+
+# Jury Dashboard
+msgid "Welcome to Jury Dashboard"
+msgstr "Willkommen im Jury-Dashboard"
+
+msgid "Review and evaluate your assigned candidates for the Mobility Trailblazers Awards"
+msgstr "Überprüfen und bewerten Sie Ihre zugewiesenen Kandidaten für die Mobility Trailblazers Awards"
+
+msgid "Back to Dashboard"
+msgstr "Zurück zum Dashboard"
+
+msgid "Total Assigned"
+msgstr "Gesamt zugewiesen"
+
+msgid "Completed"
+msgstr "Abgeschlossen"
+
+msgid "In Draft"
+msgstr "Im Entwurf"
+
+msgid "Pending"
+msgstr "Ausstehend"
+
+msgid "Not Started"
+msgstr "Nicht begonnen"
+
+msgid "Draft Saved"
+msgstr "Entwurf gespeichert"
+
+msgid "View/Edit Evaluation"
+msgstr "Bewertung ansehen/bearbeiten"
+
+msgid "Continue Evaluation"
+msgstr "Bewertung fortsetzen"
+
+msgid "Start Evaluation"
+msgstr "Bewertung starten"
+
+msgid "No candidates have been assigned to you yet."
+msgstr "Ihnen wurden noch keine Kandidaten zugewiesen."
+
+msgid "All Statuses"
+msgstr "Alle Status"
+
+msgid "Evaluation Submitted"
+msgstr "Bewertung eingereicht"
+
+# Candidate Information
+msgid "Innovation Summary"
+msgstr "Innovationszusammenfassung"
+
+msgid "Biography"
+msgstr "Biografie"
+
+msgid "Search candidates..."
+msgstr "Kandidaten suchen..."
+
+msgid "No results found."
+msgstr "Keine Ergebnisse gefunden."
+
+msgid "Invalid candidate ID."
+msgstr "Ungültige Kandidaten-ID."
+
+msgid "Candidate not found."
+msgstr "Kandidat nicht gefunden."
+
+# Admin Interface
+msgid "Settings saved successfully!"
+msgstr "Einstellungen erfolgreich gespeichert!"
+
+msgid "Assignments created successfully."
+msgstr "Zuweisungen erfolgreich erstellt."
+
+msgid "Assign Selected"
+msgstr "Ausgewählte zuweisen"
+
+msgid "Run Auto-Assignment"
+msgstr "Automatische Zuweisung ausführen"
+
+msgid "Please select a bulk action"
+msgstr "Bitte wählen Sie eine Massenaktion"
+
+msgid "Please select at least one assignment"
+msgstr "Bitte wählen Sie mindestens eine Zuweisung aus"
+
+msgid "Please select a jury member"
+msgstr "Bitte wählen Sie ein Jurymitglied aus"
+
+msgid "Apply"
+msgstr "Anwenden"
+
+msgid "Export started. Download will begin shortly."
+msgstr "Export gestartet. Download beginnt in Kürze."
+
+# Settings Page
+msgid "Mobility Trailblazers Settings"
+msgstr "Mobility Trailblazers Einstellungen"
+
+msgid "General Settings"
+msgstr "Allgemeine Einstellungen"
+
+msgid "Email Notifications"
+msgstr "E-Mail-Benachrichtigungen"
+
+msgid "Enable email notifications"
+msgstr "E-Mail-Benachrichtigungen aktivieren"
+
+msgid "Notification Email"
+msgstr "Benachrichtigungs-E-Mail"
+
+msgid "Evaluation Settings"
+msgstr "Bewertungseinstellungen"
+
+msgid "Allow jury members to save drafts"
+msgstr "Jurymitgliedern erlauben, Entwürfe zu speichern"
+
+msgid "Allow jury members to edit submitted evaluations"
+msgstr "Jurymitgliedern erlauben, eingereichte Bewertungen zu bearbeiten"
+
+msgid "Data Management"
+msgstr "Datenverwaltung"
+
+msgid "Database Status"
+msgstr "Datenbankstatus"
+
+msgid "All tables installed"
+msgstr "Alle Tabellen installiert"
+
+msgid "Import/Export"
+msgstr "Import/Export"
+
+msgid "Export Data"
+msgstr "Daten exportieren"
+
+msgid "Import Data"
+msgstr "Daten importieren"
+
+msgid "Export your data as CSV files for backup or analysis."
+msgstr "Exportieren Sie Ihre Daten als CSV-Dateien zur Sicherung oder Analyse."
+
+msgid "Export Candidates"
+msgstr "Kandidaten exportieren"
+
+msgid "Export Evaluations"
+msgstr "Bewertungen exportieren"
+
+msgid "Export Assignments"
+msgstr "Zuweisungen exportieren"
+
+msgid "Import Type"
+msgstr "Importtyp"
+
+msgid "Select type..."
+msgstr "Typ auswählen..."
+
+msgid "Candidates"
+msgstr "Kandidaten"
+
+msgid "Jury Members"
+msgstr "Jurymitglieder"
+
+msgid "CSV File"
+msgstr "CSV-Datei"
+
+msgid "Select a CSV file to import. Maximum size: 10MB."
+msgstr "Wählen Sie eine CSV-Datei zum Importieren. Maximale Größe: 10MB."
+
+msgid "Update existing records"
+msgstr "Vorhandene Datensätze aktualisieren"
+
+msgid "If checked, existing records with matching IDs will be updated."
+msgstr "Wenn aktiviert, werden vorhandene Datensätze mit übereinstimmenden IDs aktualisiert."
+
+msgid "Import Data"
+msgstr "Daten importieren"
+
+msgid "Download Templates"
+msgstr "Vorlagen herunterladen"
+
+msgid "Download these templates to see the required CSV format:"
+msgstr "Laden Sie diese Vorlagen herunter, um das erforderliche CSV-Format zu sehen:"
+
+msgid "Candidates Template"
+msgstr "Kandidaten-Vorlage"
+
+msgid "Jury Members Template"
+msgstr "Jurymitglieder-Vorlage"
+
+# Dashboard Customization
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Recent Activity"
+msgstr "Letzte Aktivitäten"
+
+msgid "Quick Actions"
+msgstr "Schnellaktionen"
+
+msgid "Add New Candidate"
+msgstr "Neuen Kandidaten hinzufügen"
+
+msgid "Add New Jury Member"
+msgstr "Neues Jurymitglied hinzufügen"
+
+msgid "View All Evaluations"
+msgstr "Alle Bewertungen anzeigen"
+
+msgid "Manage Assignments"
+msgstr "Zuweisungen verwalten"
+
+msgid "System Status"
+msgstr "Systemstatus"
+
+msgid "Database Tables"
+msgstr "Datenbanktabellen"
+
+msgid "Active Users"
+msgstr "Aktive Benutzer"
+
+msgid "Pending Tasks"
+msgstr "Ausstehende Aufgaben"
+
+# Assignment Management
+msgid "Assignment Management"
+msgstr "Zuweisungsverwaltung"
+
+msgid "Auto-Assignment"
+msgstr "Automatische Zuweisung"
+
+msgid "Manual Assignment"
+msgstr "Manuelle Zuweisung"
+
+msgid "Assignment Method"
+msgstr "Zuweisungsmethode"
+
+msgid "Random Distribution"
+msgstr "Zufällige Verteilung"
+
+msgid "Sequential"
+msgstr "Sequenziell"
+
+msgid "Balanced"
+msgstr "Ausgeglichen"
+
+msgid "Candidates per Jury Member"
+msgstr "Kandidaten pro Jurymitglied"
+
+msgid "Clear existing assignments"
+msgstr "Vorhandene Zuweisungen löschen"
+
+msgid "Security check failed"
+msgstr "Sicherheitsprüfung fehlgeschlagen"
+
+msgid "Permission denied"
+msgstr "Zugriff verweigert"
+msgstr "Export gestartet. Der Download beginnt in Kürze."
+
+msgid "Are you sure you want to clear ALL assignments? This cannot be undone."
+msgstr "Sind Sie sicher, dass Sie ALLE Zuweisungen löschen möchten? Dies kann nicht rückgängig gemacht werden."
+
+msgid "This will remove ALL jury assignments. Are you absolutely sure?"
+msgstr "Dies wird ALLE Jury-Zuweisungen entfernen. Sind Sie absolut sicher?"
+
+msgid "Clearing..."
+msgstr "Wird gelöscht..."
+
+msgid "Clear All"
+msgstr "Alle löschen"
+
+msgid "All assignments have been cleared."
+msgstr "Alle Zuweisungen wurden gelöscht."
+
+# Errors
+msgid "Security configuration error. Please refresh the page and try again."
+msgstr "Sicherheitskonfigurationsfehler. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut."
+
+msgid "Request timed out. Please check your connection and try again."
+msgstr "Anfrage-Zeitüberschreitung. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+
+msgid "Request was cancelled."
+msgstr "Anfrage wurde abgebrochen."
+
+msgid "You do not have permission to perform this action."
+msgstr "Sie haben keine Berechtigung, diese Aktion auszuführen."
+
+msgid "The requested resource was not found."
+msgstr "Die angeforderte Ressource wurde nicht gefunden."
+
+msgid "Server error. Please try again later."
+msgstr "Serverfehler. Bitte versuchen Sie es später erneut."
+
+msgid "Network error. Please try again."
+msgstr "Netzwerkfehler. Bitte versuchen Sie es erneut."
+
+msgid "Please ensure all scores are between 0 and 10."
+msgstr "Bitte stellen Sie sicher, dass alle Bewertungen zwischen 0 und 10 liegen."
+
+msgid "You are not assigned to evaluate this candidate."
+msgstr "Sie sind nicht zur Bewertung dieses Kandidaten zugewiesen."
+
+msgid "Error saving evaluation"
+msgstr "Fehler beim Speichern der Bewertung"
+
+# Language Settings
+msgid "Mobility Trailblazers Language Settings"
+msgstr "Mobility Trailblazers Spracheinstellungen"
+
+msgid "Preferred Language"
+msgstr "Bevorzugte Sprache"
+
+msgid "Select your preferred language for the Mobility Trailblazers platform."
+msgstr "Wählen Sie Ihre bevorzugte Sprache für die Mobility Trailblazers-Plattform."
+
+msgid "Language Settings"
+msgstr "Spracheinstellungen"
+
+msgid "Default Language"
+msgstr "Standardsprache"
+
+msgid "Select the default language for the platform."
+msgstr "Wählen Sie die Standardsprache für die Plattform."
+
+msgid "Enable Language Switcher"
+msgstr "Sprachumschalter aktivieren"
+
+msgid "Show language switcher in the frontend."
+msgstr "Sprachumschalter im Frontend anzeigen."
+
+msgid "Auto-detect Language"
+msgstr "Sprache automatisch erkennen"
+
+msgid "Automatically detect user language based on browser settings."
+msgstr "Benutzersprache automatisch basierend auf Browsereinstellungen erkennen."
+
+msgid "Invalid language selection."
+msgstr "Ungültige Sprachauswahl."
+
+msgid "Language updated successfully."
+msgstr "Sprache erfolgreich aktualisiert."
+
+# Validation and Status Messages
+msgid "Please provide any additional insights or observations about this candidate (optional)."
+msgstr "Bitte geben Sie zusätzliche Einblicke oder Beobachtungen zu diesem Kandidaten an (optional)."
+
+msgid "Submitting..."
+msgstr "Wird eingereicht..."
+
+msgid "This evaluation has been submitted. You can still edit and resubmit."
+msgstr "Diese Bewertung wurde eingereicht. Sie können sie immer noch bearbeiten und erneut einreichen."
+
+msgid "Loading evaluation form..."
+msgstr "Bewertungsformular wird geladen..."
+
+msgid "Draft"
+msgstr "Entwurf"
+
+msgid "You must be logged in as a jury member to access this dashboard."
+msgstr "Sie müssen als Jurymitglied angemeldet sein, um auf dieses Dashboard zugreifen zu können."
+
+# Admin Messages
+msgid "Are you sure you want to change the default language? This will affect all users who haven't set a preference."
+msgstr "Sind Sie sicher, dass Sie die Standardsprache ändern möchten? Dies wirkt sich auf alle Benutzer aus, die keine Präferenz festgelegt haben."
+
+msgid "Language preference updated successfully."
+msgstr "Sprachpräferenz erfolgreich aktualisiert."
+
+# Additional UI Elements
+msgid "English"
+msgstr "Englisch"
+
+msgid "German"
+msgstr "Deutsch"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+# v2.2.28 - Security and Import Translations
+msgid "Security check failed"
+msgstr "Sicherheitsprüfung fehlgeschlagen"
+
+msgid "Security check failed. Please refresh the page and try again."
+msgstr "Sicherheitsprüfung fehlgeschlagen. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut."
+
+msgid "You do not have permission to perform this action."
+msgstr "Sie haben keine Berechtigung, diese Aktion auszuführen."
+
+msgid "Permission denied"
+msgstr "Zugriff verweigert"
+
+msgid "You must be logged in to test AJAX"
+msgstr "Sie müssen angemeldet sein, um AJAX zu testen"
+
+msgid "You must be an administrator to access debug information"
+msgstr "Sie müssen Administrator sein, um auf Debug-Informationen zuzugreifen"
+
+# File Upload Validation
+msgid "File upload failed. Please try again."
+msgstr "Datei-Upload fehlgeschlagen. Bitte versuchen Sie es erneut."
+
+msgid "File too large. Maximum size is %s."
+msgstr "Datei zu groß. Maximale Größe ist %s."
+
+msgid "Invalid file type. Allowed types: %s"
+msgstr "Ungültiger Dateityp. Erlaubte Typen: %s"
+
+msgid "Invalid file type. Only CSV files are allowed."
+msgstr "Ungültiger Dateityp. Nur CSV-Dateien sind erlaubt."
+
+msgid "File contains prohibited content."
+msgstr "Datei enthält verbotene Inhalte."
+
+# CSV Import
+msgid "File not found or not readable"
+msgstr "Datei nicht gefunden oder nicht lesbar"
+
+msgid "File size exceeds maximum of %s"
+msgstr "Dateigröße überschreitet Maximum von %s"
+
+msgid "Could not open CSV file"
+msgstr "CSV-Datei konnte nicht geöffnet werden"
+
+msgid "CSV file appears to be empty"
+msgstr "CSV-Datei scheint leer zu sein"
+
+msgid "Column count mismatch"
+msgstr "Spaltenanzahl stimmt nicht überein"
+
+msgid "Failed to parse row"
+msgstr "Zeile konnte nicht analysiert werden"
+
+msgid "Invalid import type: %s"
+msgstr "Ungültiger Importtyp: %s"
+
+msgid "Missing required field: %s"
+msgstr "Erforderliches Feld fehlt: %s"
+
+msgid "Invalid email address"
+msgstr "Ungültige E-Mail-Adresse"
+
+msgid "Import aborted by user"
+msgstr "Import vom Benutzer abgebrochen"
+
+msgid "Processing batch %d of %d..."
+msgstr "Verarbeite Stapel %d von %d..."
+
+# Progress Bar
+msgid "Importing"
+msgstr "Importieren"
+
+msgid "import_in_progress"
+msgstr "Import läuft"
+
+msgid "please_wait"
+msgstr "Bitte warten"
+
+msgid "Imported"
+msgstr "Importiert"
+
+msgid "Updated"
+msgstr "Aktualisiert"
+
+msgid "Skipped"
+msgstr "Übersprungen"
+
+msgid "Errors"
+msgstr "Fehler"
+
+msgid "records"
+msgstr "Datensätze"
+
+# Database Integrity
+msgid "Orphaned assignments cleaned"
+msgstr "Verwaiste Zuweisungen bereinigt"
+
+msgid "Database integrity verified"
+msgstr "Datenbankintegrität überprüft"
+
+msgid "Missing data fixed"
+msgstr "Fehlende Daten behoben"
+
+# Widget Refresh
+msgid "Widget updated"
+msgstr "Widget aktualisiert"
+
+msgid "Refresh failed"
+msgstr "Aktualisierung fehlgeschlagen"
+
+# Button States
+msgid "Loading"
+msgstr "Lädt"
+
+msgid "Processing"
+msgstr "Verarbeitung"
+
+msgid "Please wait"
+msgstr "Bitte warten"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Are you sure?"
+msgstr "Sind Sie sicher?"
+
+# Excel Import Notice
+msgid "Excel files (.xlsx) are not supported. Please save your file as CSV format: In Excel, go to File → Save As → Choose \"CSV (Comma delimited)\" as the file type."
+msgstr "Excel-Dateien (.xlsx) werden nicht unterstützt. Bitte speichern Sie Ihre Datei im CSV-Format: Gehen Sie in Excel zu Datei → Speichern unter → Wählen Sie \"CSV (Trennzeichen-getrennt)\" als Dateityp."
+
+# Additional Admin Messages
+msgid "Changes saved successfully"
+msgstr "Änderungen erfolgreich gespeichert"
+
+msgid "Operation completed successfully"
+msgstr "Vorgang erfolgreich abgeschlossen"
+
+msgid "An unexpected error occurred. Please try again."
+msgstr "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+
+msgid "No changes detected"
+msgstr "Keine Änderungen erkannt"
+
+msgid "Settings updated"
+msgstr "Einstellungen aktualisiert"
+
+# v2.2.29 - Coaching Dashboard Translations
+msgid "Coaching Dashboard"
+msgstr "Coaching-Dashboard"
+
+msgid "Coaching"
+msgstr "Coaching"
+
+msgid "Jury Member Progress"
+msgstr "Jurymitglied-Fortschritt"
+
+msgid "Jury Coaching Dashboard"
+msgstr "Jury-Coaching-Dashboard"
+
+msgid "%d pending"
+msgstr "%d ausstehend"
+
+msgid "Today"
+msgstr "Heute"
+
+msgid "Yesterday"
+msgstr "Gestern"
+
+msgid "%d days ago"
+msgstr "vor %d Tagen"
+
+msgid "Never"
+msgstr "Nie"
+
+msgid "Send Reminder"
+msgstr "Erinnerung senden"
+
+msgid "Send Reminders to Incomplete"
+msgstr "Erinnerungen an Unvollständige senden"
+
+msgid "Remind About Drafts"
+msgstr "An Entwürfe erinnern"
+
+msgid "Export Coaching Report"
+msgstr "Coaching-Bericht exportieren"
+
+msgid "Refresh Statistics"
+msgstr "Statistiken aktualisieren"
+
+msgid "Recent Evaluation Activity"
+msgstr "Letzte Bewertungsaktivität"
+
+msgid "Time"
+msgstr "Zeit"
+
+msgid "No recent activity"
+msgstr "Keine aktuellen Aktivitäten"
+
+msgid "Completion Rate"
+msgstr "Abschlussrate"
+
+msgid "Send reminder emails to all jury members with incomplete evaluations?"
+msgstr "Erinnerungs-E-Mails an alle Jurymitglieder mit unvollständigen Bewertungen senden?"
+
+msgid "Sending reminders..."
+msgstr "Sende Erinnerungen..."
+
+msgid "Reminders sent successfully"
+msgstr "Erinnerungen erfolgreich gesendet"
+
+msgid "Report exported successfully"
+msgstr "Bericht erfolgreich exportiert"
+
+msgid "%d reminder emails sent"
+msgstr "%d Erinnerungs-E-Mails gesendet"
+
+msgid "Reminder: Mobility Trailblazers Evaluations Pending"
+msgstr "Erinnerung: Mobility Trailblazers Bewertungen ausstehend"
+
+msgid "Dear %s,\n\nYou have %d pending evaluations for the Mobility Trailblazers Awards.\n\nPlease log in to complete your evaluations: %s\n\nThank you for your participation.\n\nBest regards,\nMobility Trailblazers Team"
+msgstr "Sehr geehrte(r) %s,\n\nSie haben %d ausstehende Bewertungen für die Mobility Trailblazers Awards.\n\nBitte melden Sie sich an, um Ihre Bewertungen abzuschließen: %s\n\nVielen Dank für Ihre Teilnahme.\n\nMit freundlichen Grüßen,\nMobility Trailblazers Team"
+
+msgid "No jury members found"
+msgstr "Keine Jurymitglieder gefunden"
+
+# Performance Testing Translations
+msgid "Performance Testing Suite"
+msgstr "Performance-Testsuite"
+
+msgid "Large Import Test"
+msgstr "Großer Import-Test"
+
+msgid "Large Export Test"
+msgstr "Großer Export-Test"
+
+msgid "Evaluation Query Test"
+msgstr "Bewertungsabfrage-Test"
+
+msgid "Memory Usage Test"
+msgstr "Speichernutzungs-Test"
+
+msgid "Assignment Distribution Test"
+msgstr "Zuweisungsverteilungs-Test"
+
+msgid "Index Performance Test"
+msgstr "Index-Performance-Test"
+
+msgid "Test Large Import (100 records)"
+msgstr "Großen Import testen (100 Datensätze)"
+
+msgid "Test Large Export"
+msgstr "Großen Export testen"
+
+msgid "Test Database Queries"
+msgstr "Datenbankabfragen testen"
+
+msgid "Test Memory Usage"
+msgstr "Speichernutzung testen"
+
+msgid "Test Assignment Distribution"
+msgstr "Zuweisungsverteilung testen"
+
+msgid "Test Index Performance"
+msgstr "Index-Performance testen"
+
+msgid "Run All Tests"
+msgstr "Alle Tests ausführen"
+
+msgid "Test Results:"
+msgstr "Testergebnisse:"
+
+msgid "Tests completed successfully!"
+msgstr "Tests erfolgreich abgeschlossen!"
+
+msgid "Duration:"
+msgstr "Dauer:"
+
+msgid "Memory Used:"
+msgstr "Genutzter Speicher:"
+
+msgid "candidates_processed"
+msgstr "Kandidaten verarbeitet"
+
+msgid "candidates_exported"
+msgstr "Kandidaten exportiert"
+
+msgid "query_time"
+msgstr "Abfragezeit"
+
+msgid "distribution_quality"
+msgstr "Verteilungsqualität"
+
+msgid "Excellent"
+msgstr "Ausgezeichnet"
+
+msgid "Good"
+msgstr "Gut"
+
+msgid "Fair"
+msgstr "Befriedigend"
+
+msgid "Poor"
+msgstr "Schlecht"
+
+# Assignment Validation & Rebalancing Translations
+msgid "No assignments to balance"
+msgstr "Keine Zuweisungen zum Ausgleichen"
+
+msgid "%d assignments rebalanced across %d jury members"
+msgstr "%d Zuweisungen wurden auf %d Jurymitglieder neu verteilt"
+
+msgid "assignment_distribution_validated"
+msgstr "Zuweisungsverteilung validiert"
+
+msgid "assignments_rebalanced"
+msgstr "Zuweisungen neu verteilt"
+
+msgid "average_per_jury"
+msgstr "Durchschnitt pro Jurymitglied"
+
+msgid "standard_deviation"
+msgstr "Standardabweichung"
+
+msgid "min_assignments"
+msgstr "Minimale Zuweisungen"
+
+msgid "max_assignments"
+msgstr "Maximale Zuweisungen"
+
+msgid "jury_count"
+msgstr "Anzahl Jurymitglieder"
+
+msgid "total_assignments"
+msgstr "Gesamtzuweisungen"
+
+msgid "Validate Distribution"
+msgstr "Verteilung validieren"
+
+msgid "Rebalance Assignments"
+msgstr "Zuweisungen neu verteilen"
+
+msgid "Distribution Statistics"
+msgstr "Verteilungsstatistiken"
+
+msgid "Quality:"
+msgstr "Qualität:"
+
+msgid "Average:"
+msgstr "Durchschnitt:"
+
+msgid "Standard Deviation:"
+msgstr "Standardabweichung:"
+
+msgid "Minimum:"
+msgstr "Minimum:"
+
+msgid "Maximum:"
+msgstr "Maximum:"
+
+# Frontend Template Translations
+msgid "Search by name, organization or position..."
+msgstr "Suche nach Name, Organisation oder Position..."
+
+msgid "Filter:"
+msgstr "Filter:"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+msgid "Website"
+msgstr "Webseite"
+
+msgid "No candidates found"
+msgstr "Keine Kandidaten gefunden"
+
+msgid "Evaluation Criteria"
+msgstr "Bewertungskriterien"
+
+msgid "Innovation Level"
+msgstr "Innovationsgrad"
+
+msgid "Previous Candidate"
+msgstr "Vorheriger Kandidat"
+
+msgid "Next Candidate"
+msgstr "Nächster Kandidat"
+
+msgid "Quick Facts"
+msgstr "Schnellübersicht"
+
+msgid "Organization:"
+msgstr "Organisation:"
+
+msgid "Position:"
+msgstr "Position:"
+
+msgid "Category:"
+msgstr "Kategorie:"
+
+msgid "Jury Action"
+msgstr "Jury-Aktion"
+
+msgid "Evaluate Candidate"
+msgstr "Kandidat bewerten"
+
+msgid "Share"
+msgstr "Teilen"
+
+msgid "Assigned Candidates"
+msgstr "Zugewiesene Kandidaten"
+
+msgid "Submitted Evaluations"
+msgstr "Eingereichte Bewertungen"
+
+msgid "Drafts"
+msgstr "Entwürfe"
+
+msgid "Average Score"
+msgstr "Durchschnittliche Bewertung"
+
+msgid "About Me"
+msgstr "Über mich"
+
+# Admin Interface Translations
+msgid "Debug Information"
+msgstr "Debug-Informationen"
+
+msgid "Assignment Distribution Analysis"
+msgstr "Zuweisungsverteilungsanalyse"
+
+# JavaScript Translations
+msgid "Error loading candidate information."
+msgstr "Fehler beim Laden der Kandidateninformationen."
+
+msgid "Send reminder to %s?"
+msgstr "Erinnerung an %s senden?"
+
+msgid "Reminder Sent"
+msgstr "Erinnerung gesendet"
+
+# Email Template Translations
+msgid "25 Mobility Trailblazers in 25"
+msgstr "25 Mobility Trailblazers in 25"
+
+msgid "Dear %s,"
+msgstr "Sehr geehrte/r %s,"
+
+msgid "This is a friendly reminder about your pending evaluations for the Mobility Trailblazers awards."
+msgstr "Dies ist eine freundliche Erinnerung an Ihre ausstehenden Bewertungen für die Mobility Trailblazers Awards."
+
+msgid "Status:"
+msgstr "Status:"
+
+msgid "You have %d candidate(s) awaiting your evaluation."
+msgstr "Sie haben %d Kandidat(en), die auf Ihre Bewertung warten."
+
+msgid "Deadline:"
+msgstr "Frist:"
+
+msgid "Your expertise and insights are invaluable in recognizing the innovators shaping the future of mobility in the DACH region."
+msgstr "Ihre Expertise und Einblicke sind unverzichtbar für die Anerkennung der Innovatoren, die die Zukunft der Mobilität in der DACH-Region gestalten."
+
+msgid "Complete Your Evaluations"
+msgstr "Bewertungen abschließen"
+
+msgid "Thank you for your continued dedication to this important initiative."
+msgstr "Vielen Dank für Ihr kontinuierliches Engagement für diese wichtige Initiative."
+
+msgid "Best regards,"
+msgstr "Mit freundlichen Grüßen,"
+
+msgid "The Mobility Trailblazers Team"
+msgstr "Das Mobility Trailblazers Team"
+
+msgid "This is an automated reminder from the Mobility Trailblazers evaluation platform."
+msgstr "Dies ist eine automatische Erinnerung von der Mobility Trailblazers Bewertungsplattform."
+
+msgid "If you have any questions, please contact us at %s"
+msgstr "Bei Fragen kontaktieren Sie uns bitte unter %s"
+
+msgid "New Candidate Assignments"
+msgstr "Neue Kandidatenzuweisungen"
+
+msgid "You have been assigned %d new candidate(s) to evaluate for the Mobility Trailblazers awards."
+msgstr "Ihnen wurden %d neue Kandidat(en) zur Bewertung für die Mobility Trailblazers Awards zugewiesen."
+
+msgid "Your Assigned Candidates:"
+msgstr "Ihre zugewiesenen Kandidaten:"
+
+msgid "Please review each candidate thoroughly and provide your evaluation based on the following criteria:"
+msgstr "Bitte prüfen Sie jeden Kandidaten gründlich und geben Sie Ihre Bewertung basierend auf den folgenden Kriterien ab:"
+
+msgid "Mut & Pioniergeist"
+msgstr "Mut & Pioniergeist"
+
+msgid "Innovationsgrad"
+msgstr "Innovationsgrad"
+
+msgid "Umsetzungskraft & Wirkung"
+msgstr "Umsetzungskraft & Wirkung"
+
+msgid "Relevanz für die Mobilitätswende"
+msgstr "Relevanz für die Mobilitätswende"
+
+msgid "Vorbildfunktion & Sichtbarkeit"
+msgstr "Vorbildfunktion & Sichtbarkeit"
+
+msgid "Start Evaluating"
+msgstr "Bewertung starten"
+
+msgid "Your expertise is crucial in identifying the mobility innovators who are making a real difference."
+msgstr "Ihre Expertise ist entscheidend für die Identifizierung der Mobilitätsinnovatoren, die einen echten Unterschied machen."
+
+msgid "This notification was sent from the Mobility Trailblazers evaluation platform."
+msgstr "Diese Benachrichtigung wurde von der Mobility Trailblazers Bewertungsplattform gesendet."
+
+msgid "[Mobility Trailblazers] Reminder: %d Evaluations Pending"
+msgstr "[Mobility Trailblazers] Erinnerung: %d ausstehende Bewertungen"
+
+msgid "[Mobility Trailblazers] %d New Candidate Assignment(s)"
+msgstr "[Mobility Trailblazers] %d neue Kandidatenzuweisung(en)"
+
+msgid "Failed to send reminder to user ID %d"
+msgstr "Erinnerung an Benutzer-ID %d konnte nicht gesendet werden"

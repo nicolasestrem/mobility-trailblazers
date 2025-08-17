@@ -1,0 +1,3 @@
+[submodule "plugin/mobility-trailblazers"]
+	path = plugin/mobility-trailblazers
+	url = https://github.com/nicolasestrem/mobility-trailblazers.git
