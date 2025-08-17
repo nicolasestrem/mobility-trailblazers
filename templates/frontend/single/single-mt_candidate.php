@@ -17,32 +17,36 @@ while (have_posts()) : the_post();
     $candidate_id = get_the_ID();
     $organization = get_post_meta($candidate_id, '_mt_organization', true);
     $position = get_post_meta($candidate_id, '_mt_position', true);
-    $display_name = get_post_meta($candidate_id, '_mt_display_name', true) ?: get_the_title();
-    $overview = get_post_meta($candidate_id, '_mt_overview', true);
-    $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
-    $personality = get_post_meta($candidate_id, '_mt_personality_motivation', true);
-    $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true);
-    $website = get_post_meta($candidate_id, '_mt_website', true);
+    $display_name = get_post_meta($candidate_id, '_mt_candidate_name', true) ?: get_the_title();
+    $overview = get_post_meta($candidate_id, '_mt_description_full', true);
+    $linkedin = get_post_meta($candidate_id, '_mt_linkedin_url', true);
+    $website = get_post_meta($candidate_id, '_mt_website_url', true);
+    
+    // Get individual evaluation criteria
+    $eval_courage = get_post_meta($candidate_id, '_mt_evaluation_courage', true);
+    $eval_innovation = get_post_meta($candidate_id, '_mt_evaluation_innovation', true);
+    $eval_implementation = get_post_meta($candidate_id, '_mt_evaluation_implementation', true);
+    $eval_relevance = get_post_meta($candidate_id, '_mt_evaluation_relevance', true);
+    $eval_visibility = get_post_meta($candidate_id, '_mt_evaluation_visibility', true);
     $categories = wp_get_post_terms($candidate_id, 'mt_award_category');
     $category_slug = !empty($categories) ? $categories[0]->slug : 'default';
     
-    // Parse evaluation criteria into sections
+    // Build criteria sections from individual fields
     $criteria_sections = [];
-    if ($eval_criteria) {
-        // Split by common patterns
-        $patterns = [
-            'mut' => '/Mut & Pioniergeist:(.+?)(?=Innovationsgrad:|Umsetzungskraft:|Relevanz|Vorbildfunktion:|$)/si',
-            'innovation' => '/Innovationsgrad:(.+?)(?=Mut & Pioniergeist:|Umsetzungskraft:|Relevanz|Vorbildfunktion:|$)/si',
-            'umsetzung' => '/Umsetzungskraft & Wirkung:(.+?)(?=Mut & Pioniergeist:|Innovationsgrad:|Relevanz|Vorbildfunktion:|$)/si',
-            'relevanz' => '/Relevanz für die Mobilitätswende:(.+?)(?=Mut & Pioniergeist:|Innovationsgrad:|Umsetzungskraft:|Vorbildfunktion:|$)/si',
-            'vorbild' => '/Vorbildfunktion & Sichtbarkeit:(.+?)(?=Mut & Pioniergeist:|Innovationsgrad:|Umsetzungskraft:|Relevanz|$)/si'
-        ];
-        
-        foreach ($patterns as $key => $pattern) {
-            if (preg_match($pattern, $eval_criteria, $matches)) {
-                $criteria_sections[$key] = trim($matches[1]);
-            }
-        }
+    if ($eval_courage) {
+        $criteria_sections['mut'] = $eval_courage;
+    }
+    if ($eval_innovation) {
+        $criteria_sections['innovation'] = $eval_innovation;
+    }
+    if ($eval_implementation) {
+        $criteria_sections['umsetzung'] = $eval_implementation;
+    }
+    if ($eval_relevance) {
+        $criteria_sections['relevanz'] = $eval_relevance;
+    }
+    if ($eval_visibility) {
+        $criteria_sections['vorbild'] = $eval_visibility;
     }
 ?>
 
@@ -576,13 +580,6 @@ while (have_posts()) : the_post();
                             </div>
                         <?php endif; ?>
                     </div>
-                <?php elseif ($eval_criteria) : ?>
-                    <div class="mt-overview-section">
-                        <h2 class="mt-section-heading"><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h2>
-                        <div class="mt-section-content">
-                            <?php echo wp_kses_post(wpautop($eval_criteria)); ?>
-                        </div>
-                    </div>
                 <?php endif; ?>
                 
                 <!-- Navigation -->
@@ -627,7 +624,19 @@ while (have_posts()) : the_post();
                     </ul>
                 </div>
                 
-                <?php if (current_user_can('mt_submit_evaluations')) : ?>
+                <?php 
+                // Check if current user is a jury member assigned to this candidate
+                if (current_user_can('mt_submit_evaluations')) : 
+                    global $wpdb;
+                    $user_id = get_current_user_id();
+                    $is_assigned = $wpdb->get_var($wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$wpdb->prefix}mt_jury_assignments 
+                        WHERE jury_member_id = %d AND candidate_id = %d",
+                        $user_id, $candidate_id
+                    ));
+                    
+                    if ($is_assigned) :
+                ?>
                     <div class="mt-sidebar-card">
                         <h3 class="mt-sidebar-title"><?php _e('Jury Action', 'mobility-trailblazers'); ?></h3>
                         <a href="<?php echo esc_url(add_query_arg('evaluate', $candidate_id, home_url('/jury-dashboard/'))); ?>" 
@@ -635,7 +644,10 @@ while (have_posts()) : the_post();
                             <?php _e('Evaluate Candidate', 'mobility-trailblazers'); ?>
                         </a>
                     </div>
-                <?php endif; ?>
+                <?php 
+                    endif;
+                endif; 
+                ?>
                 
                 <div class="mt-sidebar-card">
                     <h3 class="mt-sidebar-title"><?php _e('Share', 'mobility-trailblazers'); ?></h3>

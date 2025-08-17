@@ -21,7 +21,9 @@ if (!$candidate) {
 // Get candidate meta
 $organization = get_post_meta($candidate->ID, '_mt_organization', true);
 $position = get_post_meta($candidate->ID, '_mt_position', true);
-$innovation_summary = get_post_meta($candidate->ID, '_mt_innovation_summary', true);
+$biography = get_post_meta($candidate->ID, '_mt_description_full', true);
+$linkedin_url = get_post_meta($candidate->ID, '_mt_linkedin_url', true);
+$website_url = get_post_meta($candidate->ID, '_mt_website_url', true);
 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
 $photo_id = get_post_thumbnail_id($candidate->ID);
 
@@ -152,10 +154,29 @@ $criteria = [
                     <?php endif; ?>
                 </div>
                 
-                <?php if ($presentation_settings['show_innovation_summary'] && $innovation_summary) : ?>
-                    <div class="mt-innovation-summary">
-                        <h3><?php _e('Innovation Summary', 'mobility-trailblazers'); ?></h3>
-                        <p><?php echo esc_html($innovation_summary); ?></p>
+                <?php if ($linkedin_url || $website_url) : ?>
+                    <div class="mt-candidate-links">
+                        <?php if ($linkedin_url) : ?>
+                            <a href="<?php echo esc_url($linkedin_url); ?>" target="_blank" class="mt-link-button">
+                                <span class="dashicons dashicons-linkedin"></span>
+                                LinkedIn Profile
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($website_url) : ?>
+                            <a href="<?php echo esc_url($website_url); ?>" target="_blank" class="mt-link-button">
+                                <span class="dashicons dashicons-admin-site"></span>
+                                Website
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($biography) : ?>
+                    <div class="mt-candidate-biography">
+                        <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
+                        <div class="mt-bio-content">
+                            <?php echo wp_kses_post(wpautop($biography)); ?>
+                        </div>
                     </div>
                 <?php endif; ?>
                 

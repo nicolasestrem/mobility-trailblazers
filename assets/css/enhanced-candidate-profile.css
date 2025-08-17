@@ -1,4 +1,4 @@
-/* Enhanced Candidate Profile Styles v2.4.0 */
+/* Enhanced Candidate Profile Styles v2.4.1 */
 
 /* Hero Section */
 .mt-enhanced-candidate-profile {
@@ -803,4 +803,83 @@
         box-shadow: none !important;
         border: 2px solid #ddd !important;
     }
+}
+
+/* Biography section styling - Added v2.4.1 */
+.mt-candidate-biography {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.mt-candidate-biography h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.mt-bio-content {
+    line-height: 1.6;
+    color: #555;
+}
+
+.mt-bio-content p {
+    margin-bottom: 1em;
+}
+
+.mt-bio-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Social links styling - Added v2.4.1 */
+.mt-candidate-links {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mt-link-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background: #0073aa;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s, transform 0.2s;
+    font-size: 14px;
+}
+
+.mt-link-button:hover {
+    background: #005a87;
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.mt-link-button .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+}
+
+/* Ensure links work well in evaluation form */
+.mt-evaluation-page .mt-candidate-links {
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mt-evaluation-page .mt-candidate-biography {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 25px;
+    margin: 20px 0;
 }

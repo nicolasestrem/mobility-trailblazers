@@ -1,3 +1,34 @@
+## [2.4.4] - 2025-08-17
+### Fixed
+- **Candidate Profile Display Issues**: Fixed critical field mapping issues that prevented candidate data from displaying
+  - Updated `single-mt_candidate.php` template to use correct database field names
+  - Fixed biography display (now reads from `_mt_description_full`)
+  - Fixed LinkedIn and website links (now reads from `_mt_linkedin_url` and `_mt_website_url`)
+  - Individual evaluation criteria now properly displayed from separate fields
+- **Jury Evaluation Form**: Updated field mappings to display candidate information correctly
+  - Added biography section with proper field mapping
+  - Added social links (LinkedIn, Website) display
+  - Removed non-existent innovation summary field
+- **Access Control**: Fixed "Evaluate Candidate" button to only show for assigned jury members
+  - Added database check for jury assignments
+  - Button now only appears when user is assigned to evaluate that specific candidate
+- **Styling Enhancements**: Added CSS for biography and social links sections
+  - New styles for `.mt-candidate-biography` and `.mt-bio-content`
+  - Added `.mt-candidate-links` and `.mt-link-button` styles
+  - Ensured consistent styling across single candidate and evaluation pages
+
+### Added
+- **Data Migration Script**: Created `debug/migrations/fix-candidate-field-mapping.php`
+  - Ensures backward compatibility by creating duplicate fields with both naming conventions
+  - Maps old field names to new field names automatically
+  - Combines individual evaluation criteria into single field for compatibility
+  - Successfully migrated all 50 candidates in the database
+
+### Technical Details
+- Templates now handle both old and new field naming conventions
+- Migration script can be run via WP-CLI or admin interface
+- All changes maintain backward compatibility
+
 ## [2.4.3] - 2025-08-16
 ### Enhanced
 - **Complete Translation System Implementation**: Added comprehensive i18n support for all user-facing strings
