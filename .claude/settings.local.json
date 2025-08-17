@@ -39,7 +39,13 @@
       "mcp__kapture__list_tabs",
       "mcp__kapture__reload",
       "mcp__kapture__navigate",
-      "mcp__kapture__console_logs"
+      "mcp__kapture__console_logs",
+      "Bash(npx postcss:*)",
+      "mcp__kapture__new_tab",
+      "Bash(node:*)",
+      "mcp__kapture__screenshot",
+      "mcp__kapture__click",
+      "mcp__kapture__keypress"
     ],
     "deny": [],
     "additionalDirectories": [
