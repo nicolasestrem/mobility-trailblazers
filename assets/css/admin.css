@@ -1,36 +1,8 @@
 /* Mobility Trailblazers Admin Styles */
 
-/* Mobility Trailblazers Official Brand Colors */
-:root {
-    /* System Colors (Primary Palette) */
-    --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
-    --mt-secondary: #004C5F;         /* Dark Indigo - Links, Secondary Elements */
-    --mt-body-text: #302C37;         /* Dark Gray - Body Text */
-    --mt-accent: #C1693C;            /* Copper - CTAs, Highlights */
-    
-    /* Custom Colors (Extended Palette) */
-    --mt-kupfer-soft: #B86F52;       /* Soft Copper - Hover States */
-    --mt-kupfer-bold: #C1693C;       /* Bold Copper - Active States */
-    --mt-blue-accent: #A4DCD5;       /* Light Turquoise - Info, Borders */
-    --mt-bg-beige: #F5E6D3;          /* Soft Beige - Background Sections */
-    --mt-bg-base: #FFFFFF;           /* White - Base Background */
-    --mt-overlay-bg: #004C5FCC;      /* Indigo Overlay with Transparency */
-    --mt-deep-blue: #004C5F;         /* Deep Blue (same as secondary) */
-    
-    /* Additional Utility Colors */
-    --mt-success: #28a745;           /* Success Green */
-    --mt-warning: #ffc107;           /* Warning Yellow */
-    --mt-error: #dc3545;             /* Error Red */
-    --mt-info: #17a2b8;              /* Info Blue */
-    
-    /* Shadows and Effects */
-    --mt-shadow-sm: 0 2px 4px rgba(48, 44, 55, 0.1);
-    --mt-shadow-md: 0 4px 12px rgba(48, 44, 55, 0.15);
-    --mt-shadow-lg: 0 8px 24px rgba(0, 60, 61, 0.2);
-    
-    /* Transitions */
-    --mt-transition: all 0.3s ease;
-}
+/* Import shared variables and components */
+@import url('mt-variables.css');
+@import url('mt-components.css');
 
 /* Reset box-sizing for MT elements to prevent layout issues */
 .mt-admin-dashboard *,
