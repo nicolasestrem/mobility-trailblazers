@@ -172,19 +172,22 @@ $criteria = [
                 <?php endif; ?>
                 
                 <?php 
-                // Always show biography if available
-                if ($biography || $candidate->post_content) : ?>
-                    <div class="mt-candidate-bio">
-                        <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
-                        <div class="mt-bio-content">
+                // Always show biography if available - check both sources
+                $bio_content = !empty($biography) ? $biography : '';
+                if (empty($bio_content) && !empty($candidate->post_content)) {
+                    $bio_content = $candidate->post_content;
+                }
+                
+                if (!empty(trim($bio_content))) : ?>
+                    <div class="mt-candidate-bio" style="display: block !important;">
+                        <h3 style="color: #212529 !important;"><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
+                        <div class="mt-bio-content" style="display: block !important;">
                             <?php 
-                            // Use biography meta if available, otherwise use post content
-                            $bio_content = $biography ?: $candidate->post_content;
                             // If content is too long, show excerpt
                             if (strlen($bio_content) > 500) {
-                                echo wp_kses_post(wpautop(wp_trim_words($bio_content, 80, '...')));
+                                echo '<p style="color: #495057 !important;">' . wp_kses_post(wp_trim_words($bio_content, 80, '...')) . '</p>';
                             } else {
-                                echo wp_kses_post(wpautop($bio_content)); 
+                                echo '<p style="color: #495057 !important;">' . wp_kses_post($bio_content) . '</p>'; 
                             }
                             ?>
                         </div>
@@ -202,13 +205,15 @@ $criteria = [
         
         <!-- Scoring Section -->
         <div class="mt-scoring-section">
-            <h2 class="mt-section-title">
-                <?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?>
-                <span class="mt-total-score-display">
+            <div class="mt-evaluation-header">
+                <h2 class="mt-section-title">
+                    <?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?>
+                </h2>
+                <div class="mt-total-score-display">
                     <?php _e('Total Score:', 'mobility-trailblazers'); ?>
                     <span id="mt-total-score">0</span>/10
-                </span>
-            </h2>
+                </div>
+            </div>
             
             <div class="mt-criteria-grid">
                 <?php foreach ($criteria as $key => $criterion) : 

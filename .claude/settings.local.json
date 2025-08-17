@@ -47,7 +47,8 @@
       "mcp__kapture__click",
       "mcp__kapture__keypress",
       "mcp__kapture__elements",
-      "mcp__kapture__dom"
+      "mcp__kapture__dom",
+      "mcp__wordpress__wp_post_meta"
     ],
     "deny": [],
     "additionalDirectories": [

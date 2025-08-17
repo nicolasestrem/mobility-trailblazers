@@ -1631,31 +1631,94 @@ body .mt-candidate-showcase .mt-innovation-summary p {
 }
 
 /* Biography Section */
+.mt-candidate-bio,
 body .mt-candidate-showcase .mt-candidate-bio {
     margin-top: 30px !important;
+    display: block !important;
+    background: #f8f9fa !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e9ecef !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: auto !important;
 }
 
+.mt-candidate-bio h3,
 body .mt-candidate-showcase .mt-candidate-bio h3 {
     font-size: 20px !important;
     font-weight: 600 !important;
-    color: var(--mt-primary) !important;
+    color: #212529 !important;
     margin: 0 0 15px 0 !important;
     padding-bottom: 10px !important;
     border-bottom: 2px solid var(--mt-blue-accent) !important;
 }
 
+.mt-bio-content,
 body .mt-candidate-showcase .mt-bio-content {
     font-size: 16px !important;
     line-height: 1.8 !important;
-    color: var(--mt-body-text) !important;
+    color: #495057 !important;
+    display: block !important;
 }
 
-body .mt-candidate-showcase .mt-bio-content p {
+body .mt-candidate-showcase .mt-bio-content p,
+.mt-candidate-bio .mt-bio-content p {
     margin: 0 0 15px 0 !important;
+    color: #495057 !important;
 }
 
-body .mt-candidate-showcase .mt-bio-content p:last-child {
+body .mt-candidate-showcase .mt-bio-content p:last-child,
+.mt-candidate-bio .mt-bio-content p:last-child {
     margin-bottom: 0 !important;
+}
+
+/* Social Links Styling */
+.mt-candidate-links {
+    display: flex !important;
+    gap: 15px !important;
+    margin-top: 20px !important;
+}
+
+.mt-link-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 20px !important;
+    background: #0077b5 !important;
+    color: white !important;
+    text-decoration: none !important;
+    border-radius: 25px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+.mt-link-button:hover {
+    background: #005885 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3) !important;
+}
+
+.mt-link-button .dashicons {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+}
+
+.mt-link-button .dashicons-linkedin {
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>') no-repeat center !important;
+    background-size: 18px 18px !important;
+    text-indent: -9999px !important;
+}
+
+.mt-link-button:nth-child(2) {
+    background: #26a69a !important;
+}
+
+.mt-link-button:nth-child(2):hover {
+    background: #1e8278 !important;
 }
 
 /* Animation Effects */
@@ -1993,15 +2056,15 @@ body .mt-scoring-section {
 
 body .mt-section-title {
     display: flex !important;
-    justify-content: center !important;
+    justify-content: space-between !important;
     align-items: center !important;
-    font-size: 24px !important;
+    font-size: 28px !important;
     font-weight: 700 !important;
-    text-align: center !important;
-    color: var(--mt-primary) !important;
+    gap: 30px !important;
+    color: #212529 !important;
     margin: 0 0 30px 0 !important;
     padding-bottom: 15px !important;
-    border-bottom: 2px solid var(--mt-blue-accent) !important;
+    border-bottom: 2px solid #dee2e6 !important;
 }
 
 body .mt-total-score-display {
@@ -3091,18 +3154,7 @@ body .mt-submission-guidelines li {
 }
 
 /* Bio Text - Truncated */
-.mt-candidate-bio {
-    margin-top: 10px !important;
-    font-size: 12px !important;
-    color: #666 !important;
-    line-height: 1.4 !important;
-    max-height: 50px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical !important;
-}
+/* Removed conflicting biography styles that were limiting height */
 
 /* Responsive Design - Maintain aspect ratio */
 @media (max-width: 1400px) {
@@ -3289,6 +3341,93 @@ div[style*='color: white'] {
 }
 
 
+/* Evaluation Header Layout */
+.mt-scoring-section .mt-evaluation-header {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin-bottom: 30px !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid #dee2e6 !important;
+    position: relative !important;
+    gap: 40px !important;
+}
+
+.mt-scoring-section .mt-evaluation-header h2.mt-section-title {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    text-align: center !important;
+    color: #212529 !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Fix Total Score positioning */
+.mt-total-score-display {
+    background: #e8f4f8 !important;
+    padding: 10px 24px !important;
+    border-radius: 25px !important;
+    border: 2px solid #17a2b8 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    white-space: nowrap !important;
+}
+
+#mt-total-score {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #dc3545 !important;
+    margin: 0 3px !important;
+}
+
+/* Force biography content to be visible */
+.mt-candidate-bio {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 50px !important;
+}
+
+.mt-bio-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.mt-bio-content p {
+    display: block !important;
+    margin: 0 0 15px 0 !important;
+    color: #495057 !important;
+}
+
+/* Center just the title text */
+.mt-scoring-section h2.mt-section-title {
+    width: 100% !important;
+    position: relative !important;
+}
+
+.mt-scoring-section h2.mt-section-title::before {
+    content: '';
+    flex: 1;
+}
+
+/* Force Evaluation Criteria title to be visible - Priority fix */
+.mt-scoring-section .mt-evaluation-header h2,
+.mt-scoring-section .mt-evaluation-header h2.mt-section-title,
+.mt-scoring-section h2.mt-section-title,
+h2.mt-section-title {
+    color: #212529 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 /* Center Evaluation Criteria - Added 2025-08-17 */
 .mt-criteria-grid {
     display: grid !important;
@@ -3329,4 +3468,24 @@ div[style*='color: white'] {
     text-align: center !important;
     margin: 0 auto !important;
     display: block !important;
+}
+
+/* Force biography content to be visible */
+.mt-candidate-bio {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 50px !important;
+}
+
+.mt-bio-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.mt-bio-content p {
+    display: block !important;
+    margin: 0 0 15px 0 !important;
+    color: #495057 !important;
 }
