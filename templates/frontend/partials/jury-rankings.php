@@ -104,6 +104,14 @@ if (!empty($jury_members)) {
                                 <?php if ($organization) echo esc_html($organization); ?>
                             </div>
                         <?php endif; ?>
+                        <?php 
+                        // Add biography/excerpt
+                        $excerpt = get_the_excerpt($candidate->ID);
+                        if ($excerpt) : ?>
+                            <div class="mt-candidate-bio">
+                                <?php echo esc_html(wp_trim_words($excerpt, 15, '...')); ?>
+                            </div>
+                        <?php endif; ?>
                     </td>
                     <?php 
                     $row_total = 0;
