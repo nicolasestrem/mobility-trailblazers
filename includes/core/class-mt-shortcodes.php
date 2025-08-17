@@ -98,14 +98,55 @@ class MT_Shortcodes {
      * @return string
      */
     public function render_candidates_grid($atts) {
-        return '<div class="mt-candidates-grid">
-            <h3>Candidates Grid</h3>
-            <p>This is a test display of the candidates grid shortcode.</p>
-            <div class="mt-grid-item">
-                <h4>Test Candidate</h4>
-                <p>This is a test candidate entry.</p>
-            </div>
-        </div>';
+        $atts = shortcode_atts([
+            'category' => '',
+            'columns' => 3,
+            'limit' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'show_bio' => 'yes',
+            'show_category' => 'yes'
+        ], $atts, 'mt_candidates_grid');
+        
+        // Query candidates
+        $args = [
+            'post_type' => 'mt_candidate',
+            'posts_per_page' => intval($atts['limit']),
+            'orderby' => $atts['orderby'],
+            'order' => $atts['order'],
+            'post_status' => 'publish'
+        ];
+        
+        // Filter by category if specified
+        if (!empty($atts['category'])) {
+            $args['tax_query'] = [
+                [
+                    'taxonomy' => 'mt_award_category',
+                    'field' => 'slug',
+                    'terms' => $atts['category']
+                ]
+            ];
+        }
+        
+        $candidates = new \WP_Query($args);
+        
+        if (!$candidates->have_posts()) {
+            return '<div class="mt-notice">' . esc_html__('No candidates found.', 'mobility-trailblazers') . '</div>';
+        }
+        
+        // Start output buffering
+        ob_start();
+        
+        // Output custom CSS
+        echo '<style type="text/css">' . $this->generate_candidates_grid_css() . '</style>';
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'templates/frontend/candidates-grid.php';
+        
+        // Reset post data
+        wp_reset_postdata();
+        
+        return ob_get_clean();
     }
     
     /**
@@ -115,14 +156,30 @@ class MT_Shortcodes {
      * @return string
      */
     public function render_evaluation_stats($atts) {
-        return '<div class="mt-evaluation-stats">
-            <h3>Evaluation Statistics</h3>
-            <p>This is a test display of the evaluation statistics shortcode.</p>
-            <div class="mt-stats-item">
-                <h4>Test Statistic</h4>
-                <p>This is a test statistic entry.</p>
-            </div>
-        </div>';
+        // Check permissions
+        if (!current_user_can('mt_view_all_evaluations')) {
+            return '';
+        }
+        
+        $atts = shortcode_atts([
+            'type' => 'summary', // summary, by-category, by-jury
+            'show_chart' => 'yes'
+        ], $atts, 'mt_evaluation_stats');
+        
+        // Get statistics
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $stats = $evaluation_repo->get_statistics();
+        
+        // Start output buffering
+        ob_start();
+        
+        // Output custom CSS for stats
+        echo '<style type="text/css">' . $this->generate_stats_custom_css() . '</style>';
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'templates/frontend/evaluation-stats.php';
+        
+        return ob_get_clean();
     }
     
     /**
@@ -132,14 +189,28 @@ class MT_Shortcodes {
      * @return string
      */
     public function render_winners_display($atts) {
-        return '<div class="mt-winners-display">
-            <h3>Winners Display</h3>
-            <p>This is a test display of the winners display shortcode.</p>
-            <div class="mt-winner-item">
-                <h4>Test Winner</h4>
-                <p>This is a test winner entry.</p>
-            </div>
-        </div>';
+        $atts = shortcode_atts([
+            'category' => '',
+            'year' => date('Y'),
+            'limit' => 3,
+            'show_scores' => 'no'
+        ], $atts, 'mt_winners_display');
+        
+        // Get winners (top scored candidates)
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $winners = $evaluation_repo->get_top_candidates($atts['limit'], $atts['category']);
+        
+        if (empty($winners)) {
+            return '<div class="mt-notice">' . esc_html__('Winners have not been announced yet.', 'mobility-trailblazers') . '</div>';
+        }
+        
+        // Start output buffering
+        ob_start();
+        
+        // Include template
+        include MT_PLUGIN_DIR . 'templates/frontend/winners-display.php';
+        
+        return ob_get_clean();
     }
     
     /**
