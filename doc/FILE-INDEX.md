@@ -1,5 +1,5 @@
 # Mobility Trailblazers - Complete File Index
-*Last Updated: August 17, 2025 | Version 2.5.0*
+*Last Updated: August 17, 2025 | Version 2.5.8*
 
 ## Table of Contents
 1. [Root Directory](#root-directory)
@@ -387,6 +387,47 @@ mobility-trailblazers/
 - `*.md` - Documentation
 - `.git*` - Git files
 - Tests and development artifacts
+
+---
+
+## Testing Infrastructure (/tests/)
+
+### Test Configuration
+- **phpunit.xml** - PHPUnit configuration with test suites
+- **tests/bootstrap.php** - WordPress test environment setup
+
+### Test Helpers (/tests/helpers/)
+- **class-mt-test-case.php** - Base test case with WordPress utilities
+- **class-mt-test-factory.php** - Test data factory for mock generation
+- **trait-mt-test-helpers.php** - Custom assertions and utilities
+
+### Unit Tests (/tests/unit/)
+- **Core/PluginTest.php** - Core plugin functionality tests
+- **Services/EvaluationServiceTest.php** - Evaluation service tests
+
+### Integration Tests (/tests/integration/)
+- **EvaluationWorkflowTest.php** - Complete workflow testing
+
+---
+
+## Localization (/languages/)
+
+### German Translation
+- **mobility-trailblazers-de_DE.po** - German translation source file (1000+ strings)
+- **mobility-trailblazers-de_DE.mo** - Compiled German translation
+
+---
+
+## Updated File Statistics
+
+### Total Files by Type
+- **PHP Classes**: 80+ files (including test files)
+- **Templates**: 35+ files
+- **JavaScript**: 9 files
+- **CSS**: 5 files
+- **Documentation**: 10+ files
+- **Test Files**: 8 files
+- **Translation Files**: 2 files (German)
 
 ---
 

@@ -1,3 +1,35 @@
+## [2.5.8] - 2025-08-17
+### Testing Infrastructure & German Localization
+- **Testing Framework Implementation**:
+  - Created comprehensive PHPUnit testing infrastructure
+  - Added `phpunit.xml` configuration for test suites
+  - Created `tests/` directory structure with unit, integration, and e2e subdirectories
+  - Implemented base test case class (`MT_Test_Case`) with WordPress-specific utilities
+  - Added test factory (`MT_Test_Factory`) for generating mock data
+  - Created test helpers trait (`MT_Test_Helpers`) with 20+ custom assertions
+- **Unit Tests Created**:
+  - `tests/unit/Core/PluginTest.php`: Core plugin functionality tests
+  - `tests/unit/Services/EvaluationServiceTest.php`: Evaluation service tests
+- **Integration Tests Created**:
+  - `tests/integration/EvaluationWorkflowTest.php`: Complete workflow testing
+- **German Localization Completed**:
+  - Fixed duplicate entries and syntax errors in `languages/mobility-trailblazers-de_DE.po`
+  - Successfully compiled German .mo file
+  - Installed German language pack for WordPress core
+  - Set WordPress language to German (de_DE)
+  - Over 1000 strings translated covering all plugin features
+- **Bug Fixes**:
+  - Fixed jQuery UI tooltip error in `assets/js/design-enhancements.js`
+  - Added conditional check for tooltip function availability
+  - Implemented fallback to native browser tooltips
+- **Documentation**:
+  - Created `doc/testing-debugging-report-2025-08-17.md` with comprehensive testing report
+  - Documented all testing infrastructure and findings
+  - Added test execution commands and protocols
+- **Database Issues Identified**:
+  - Assignment table schema mismatch (uses `is_active` instead of `status` column)
+  - Recommended migration script for schema standardization
+
 ## [2.5.7] - 2025-08-17
 ### Removed Error Monitor Feature
 - **Removed Components**:

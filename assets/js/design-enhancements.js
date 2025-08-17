@@ -188,15 +188,25 @@ jQuery(document).ready(function($) {
     // ========================================
     // Tooltip enhancement for icons
     // ========================================
-    $('.mt-criterion-icon').each(function() {
-        var $this = $(this);
-        var title = $this.siblings('.mt-criterion-title').text();
-        
-        $this.attr('title', title).tooltip({
-            position: { my: 'center bottom-10', at: 'center top' },
-            classes: { 'ui-tooltip': 'mt-tooltip' }
+    // Check if tooltip function exists before using it
+    if ($.fn.tooltip) {
+        $('.mt-criterion-icon').each(function() {
+            var $this = $(this);
+            var title = $this.siblings('.mt-criterion-title').text();
+            
+            $this.attr('title', title).tooltip({
+                position: { my: 'center bottom-10', at: 'center top' },
+                classes: { 'ui-tooltip': 'mt-tooltip' }
+            });
         });
-    });
+    } else {
+        // Fallback: just set title attribute for native browser tooltips
+        $('.mt-criterion-icon').each(function() {
+            var $this = $(this);
+            var title = $this.siblings('.mt-criterion-title').text();
+            $this.attr('title', title);
+        });
+    }
     
     // ========================================
     // Auto-save indicator for evaluation form
