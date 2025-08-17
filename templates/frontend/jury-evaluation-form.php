@@ -171,14 +171,21 @@ $criteria = [
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($presentation_settings['show_full_bio'] && ($biography || $candidate->post_content)) : ?>
+                <?php 
+                // Always show biography if available
+                if ($biography || $candidate->post_content) : ?>
                     <div class="mt-candidate-bio">
                         <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
                         <div class="mt-bio-content">
                             <?php 
                             // Use biography meta if available, otherwise use post content
                             $bio_content = $biography ?: $candidate->post_content;
-                            echo wp_kses_post(wpautop($bio_content)); 
+                            // If content is too long, show excerpt
+                            if (strlen($bio_content) > 500) {
+                                echo wp_kses_post(wpautop(wp_trim_words($bio_content, 80, '...')));
+                            } else {
+                                echo wp_kses_post(wpautop($bio_content)); 
+                            }
                             ?>
                         </div>
                     </div>

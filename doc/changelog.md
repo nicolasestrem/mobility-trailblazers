@@ -1,3 +1,15 @@
+## [2.5.6] - 2025-08-17
+### Evaluation Page UI Improvements
+- **Biography Display**: Fixed biography display on evaluation page
+  - Removed conditional check that was preventing display
+  - Added word limit (80 words) for long biographies
+  - Biography now shows from either meta field or post content
+- **Centered Evaluation Criteria**: Improved layout alignment
+  - Centered "Evaluation Criteria" title
+  - Added center alignment for criteria cards
+  - Improved visual hierarchy with centered content
+- **Note**: `/candidates/` URL requires a page with `[mt_candidates_grid]` shortcode
+
 ## [2.5.5] - 2025-08-17
 ### UI/UX Improvements - Enhanced Readability
 - **Color Contrast Fixes**: Improved text readability across the entire interface

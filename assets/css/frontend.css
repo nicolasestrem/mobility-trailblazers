@@ -1993,10 +1993,11 @@ body .mt-scoring-section {
 
 body .mt-section-title {
     display: flex !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
     align-items: center !important;
     font-size: 24px !important;
     font-weight: 700 !important;
+    text-align: center !important;
     color: var(--mt-primary) !important;
     margin: 0 0 30px 0 !important;
     padding-bottom: 15px !important;
@@ -3285,4 +3286,47 @@ div[style*='color: white'] {
 .elementor-widget-container [style*='color: white'] p,
 .elementor-widget-container [style*='color: white'] span {
     color: #495057 \!important;
+}
+
+
+/* Center Evaluation Criteria - Added 2025-08-17 */
+.mt-criteria-grid {
+    display: grid !important;
+    gap: 25px !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+}
+
+.mt-criterion-card {
+    text-align: center !important;
+}
+
+.mt-criterion-header {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.mt-criterion-header .dashicons {
+    margin: 0 auto 10px auto !important;
+    display: block !important;
+}
+
+.mt-criterion-description {
+    text-align: center !important;
+}
+
+.mt-scoring-scale {
+    justify-content: center !important;
+}
+
+.mt-score-display {
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+/* Total Score Box Centering */
+.mt-total-score-box {
+    text-align: center !important;
+    margin: 0 auto !important;
+    display: block !important;
 }
