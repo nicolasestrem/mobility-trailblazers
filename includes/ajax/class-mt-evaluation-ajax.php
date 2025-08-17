@@ -66,11 +66,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Debug: Log user capabilities
-        $current_user_id = get_current_user_id();
-        $user = wp_get_current_user();
-        error_log('MT AJAX - User ID: ' . $current_user_id);
-        error_log('MT AJAX - User roles: ' . implode(', ', $user->roles));
-        error_log('MT AJAX - Can submit evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'true' : 'false'));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $current_user_id = get_current_user_id();
+            $user = wp_get_current_user();
+            error_log('MT AJAX - User ID: ' . $current_user_id);
+            error_log('MT AJAX - User roles: ' . implode(', ', $user->roles));
+            error_log('MT AJAX - Can submit evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'true' : 'false'));
+        }
         
         // Check permissions
         if (!$this->check_permission('mt_submit_evaluations')) {
@@ -78,21 +80,29 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Debug: Log raw POST data
-        error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
+        }
         
         // Get current user as jury member
         $current_user_id = get_current_user_id();
-        error_log('MT AJAX - Current user ID: ' . $current_user_id);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT AJAX - Current user ID: ' . $current_user_id);
+        }
         
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
+            }
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
             return;
         }
         
-        error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
+        }
         
         // Get status (draft or completed)
         $status = $this->get_param('status', 'completed');

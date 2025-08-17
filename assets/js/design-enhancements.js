@@ -279,7 +279,7 @@ jQuery(document).ready(function($) {
             var loadTime = timing.loadEventEnd - timing.navigationStart;
             
             if (loadTime > 3000) {
-                console.warn('Page load time:', loadTime + 'ms - Consider optimizing assets');
+                // Page load time exceeds 3 seconds - optimization may be needed
             }
         });
     }

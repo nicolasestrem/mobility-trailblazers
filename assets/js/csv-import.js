@@ -219,7 +219,7 @@
          * Handle import error
          */
         handleImportError: function(xhr, status, error) {
-            console.error('Import error:', error);
+            // Import error occurred
             
             let errorMessage = mt_csv_import.i18n.import_error;
             

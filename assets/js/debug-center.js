@@ -395,7 +395,7 @@
                         
                         // Show details if available
                         if (response.data.data) {
-                            console.log('Operation details:', response.data.data);
+                            // Debug logging removed for production
                         }
                     } else {
                         if (response.data && response.data.requires_password) {
@@ -672,9 +672,8 @@
                         
                         // Show details if available
                         if (response.data.deleted_count !== undefined) {
-                            console.log('Deleted candidates:', response.data.deleted_count);
-                            console.log('Deleted evaluations:', response.data.evaluations_deleted);
-                            console.log('Deleted assignments:', response.data.assignments_deleted);
+                            // Debug logging removed for production
+                            // Deleted counts available in response.data
                         }
                     } else {
                         this.showNotification(response.data || mt_debug.i18n.delete_failed || 'Failed to delete candidates', 'error');

@@ -413,7 +413,7 @@
                 }
             });
 
-            console.log('MT Table Rankings Enhancements loaded successfully');
+            // MT Table Rankings Enhancements loaded
         }
 
         // Initialize

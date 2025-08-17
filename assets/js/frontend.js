@@ -8,7 +8,7 @@
 
     // Initialize mt_ajax object if not defined
     if (typeof mt_ajax === 'undefined') {
-        console.warn('MT: mt_ajax object not initialized. Creating fallback.');
+        // Fallback initialization for missing mt_ajax object
         window.mt_ajax = {
             ajax_url: '/wp-admin/admin-ajax.php',
             nonce: '',
@@ -24,12 +24,12 @@
     // Validate mt_ajax structure
     if (!mt_ajax.ajax_url) {
         mt_ajax.ajax_url = '/wp-admin/admin-ajax.php';
-        console.warn('MT: mt_ajax.ajax_url was missing. Using default.');
+        // Using default AJAX URL
     }
     
     if (!mt_ajax.i18n) {
         mt_ajax.i18n = {};
-        console.warn('MT: mt_ajax.i18n was missing. Using empty object.');
+        // Using empty i18n object
     }
 
     // Helper function to safely access mt_ajax.i18n values

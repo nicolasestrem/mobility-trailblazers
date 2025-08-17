@@ -372,7 +372,7 @@
      */
     function loadMoreCandidates(page, perPage) {
         // This would typically be an AJAX call
-        console.log('Loading page ' + page + ' with ' + perPage + ' items');
+        // Pagination parameters: page and perPage
     }
 
     /**

@@ -124,10 +124,10 @@ class MT_Admin {
         if (isset($_GET['page'])) {
             if ($_GET['page'] === 'mt-tools') {
                 wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=tools'));
-                exit;
+                wp_die();
             } elseif ($_GET['page'] === 'mt-diagnostics') {
                 wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
-                exit;
+                wp_die();
             }
         }
 
@@ -410,7 +410,7 @@ class MT_Admin {
         
         // Redirect to prevent resubmission
         wp_redirect(add_query_arg('settings-updated', 'true', wp_get_referer()));
-        exit;
+        wp_die();
     }
     
     /**
@@ -464,7 +464,7 @@ class MT_Admin {
      */
     public function render_tools_page() {
         wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=tools'));
-        exit;
+        wp_die();
     }
     
     /**
@@ -475,7 +475,7 @@ class MT_Admin {
      */
     public function render_diagnostics_page() {
         wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
-        exit;
+        wp_die();
     }
 
     /**
@@ -634,7 +634,7 @@ class MT_Admin {
             
             if (!isset($_GET['activate-multi'])) {
                 wp_redirect(admin_url('admin.php?page=mobility-trailblazers'));
-                exit;
+                wp_die();
             }
         }
     }

@@ -329,7 +329,7 @@ class MT_Candidate_Columns {
         }
         
         wp_redirect($redirect_url);
-        exit;
+        wp_die();
     }
     
     /**

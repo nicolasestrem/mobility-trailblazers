@@ -436,7 +436,7 @@ jQuery(document).ready(function($) {
     // INITIALIZE ALL FIXES
     // ========================================
     function initializeFixes() {
-        console.log('Initializing evaluation form fixes...');
+        // Initializing evaluation form fixes
         
         // Add missing styles first
         addMissingStyles();
@@ -448,7 +448,7 @@ jQuery(document).ready(function($) {
         fixFormSubmission();
         initCharacterCount();
         
-        console.log('Evaluation form fixes applied successfully');
+        // Evaluation form fixes applied
     }
     
     // Run fixes when page is ready
