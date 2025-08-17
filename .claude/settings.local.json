@@ -55,7 +55,16 @@
       "mcp__gemini-cli__ask-gemini",
       "mcp__gemini-cli__brainstorm",
       "mcp__memory__open_nodes",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__read_multiple_files",
+      "mcp__filesystem__read_file",
+      "mcp__filesystem__edit_file",
+      "mcp__filesystem__write_file",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__move_file",
+      "Bash(do [ -f \"$file\" ])",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "additionalDirectories": [

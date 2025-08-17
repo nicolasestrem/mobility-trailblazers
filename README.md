@@ -182,9 +182,12 @@ npm run build
 ## 📚 Documentation
 
 ### Core Documentation
-- **[Developer Guide](doc/developer-guide.md)** - Architecture and development practices
-- **[Changelog](doc/changelog.md)** - Complete version history
-- **[General Index](doc/general_index.md)** - File and structure overview
+- **[Developer Guide](doc/developer-guide.md)** - Complete technical reference, architecture, testing, and troubleshooting
+- **[Import/Export Guide](doc/import-export-guide.md)** - CSV/Excel handling and German localization
+- **[Changelog](doc/changelog.md)** - Complete version history (v2.5.8 to v2.2.0)
+
+### Archived Documentation
+- **[Archived](doc/archived/)** - Historical documentation and dated fix reports
 
 ### Project Documentation
 Located in `../../Documentation/`:
@@ -214,24 +217,24 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Status**: Platform Development Complete ✅
+**Current Version**: 2.5.8 (August 17, 2025)  
+**Status**: Production Ready ✅
 
-### Completed Features
-- ✅ Technical Infrastructure (Docker, Database, Security)
-- ✅ Core Plugin Development (v2.2.28)
-- ✅ Jury Evaluation System
-- ✅ CSV Import/Export with BOM handling
-- ✅ Assignment Management with drag-and-drop
-- ✅ Multi-language support (German/English)
+### Recent Updates
+- ✅ Testing infrastructure with PHPUnit and live diagnostics
+- ✅ German localization (1000+ strings translated)
+- ✅ Security hardening and production cleanup
+- ✅ CSS architecture consolidation
+- ✅ UI/UX improvements and photo management system
 
 ### Upcoming Milestones
-- **August 2025**: Candidate profiles and photography
+- **August 18, 2025**: Critical platform launch deadline
 - **September 2025**: Jury pre-selection workflow
-- **October 2025**: Live event integration
+- **October 30, 2025**: Final award ceremony
 - **November 2025**: Post-award archive system
 
 ---
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 2025 | Version 2.2.28*
+*Last updated: August 17, 2025 | Version 2.5.8*
