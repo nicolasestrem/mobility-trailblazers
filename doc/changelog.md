@@ -2,6 +2,33 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.13] - 2025-01-20
+### Security
+- **Debug Center Audit**: Complete security overhaul of admin debug interface
+  - Enhanced nonce verification on all AJAX endpoints
+  - Added capability checks for all operations
+  - Proper input sanitization and output escaping
+  - SQL injection prevention with prepared statements
+
+### Removed
+- **Delete All Candidates**: Permanently removed dangerous bulk delete operation
+  - Removed AJAX handler method
+  - Removed JavaScript function  
+  - Removed UI button from database tab
+  - Too risky even with confirmations
+
+### Fixed
+- **Debug Script Execution**: Now requires MT_DEV_TOOLS constant in production
+- **Log Clearing**: Restricted to non-destructive operations only
+- **System Info**: Removed sensitive data from responses
+- **Database Queries**: All queries now use prepared statements
+
+### Improved
+- **Security**: All AJAX handlers properly verify nonces and capabilities
+- **Internationalization**: All strings use proper text domain
+- **Error Handling**: Consistent error messages and logging
+- **Code Quality**: Removed deprecated and unsafe code patterns
+
 ## [2.5.12] - 2025-08-17
 ### Fixed
 - **Alignment Issues**: Fixed center alignment problems in candidate cards
