@@ -54,7 +54,8 @@
       "mcp__kapture__select",
       "mcp__gemini-cli__ask-gemini",
       "mcp__gemini-cli__brainstorm",
-      "mcp__memory__open_nodes"
+      "mcp__memory__open_nodes",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "additionalDirectories": [
