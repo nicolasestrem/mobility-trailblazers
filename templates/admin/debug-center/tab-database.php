@@ -220,14 +220,19 @@ if (!is_array($all_tables)) {
                 </button>
             </div>
             
-            <div class="mt-operation-card">
-                <h4><?php esc_html_e('Delete All Candidates', 'mobility-trailblazers'); ?></h4>
-                <p><?php esc_html_e('Remove all candidates and their associated data. This action cannot be undone!', 'mobility-trailblazers'); ?></p>
-                <button type="button" class="button button-danger mt-delete-all-candidates" 
-                        data-confirm="<?php esc_attr_e('WARNING: This will permanently delete ALL candidates and their evaluations. This action cannot be undone! Type DELETE to confirm.', 'mobility-trailblazers'); ?>">
-                    <?php esc_html_e('Delete All Candidates', 'mobility-trailblazers'); ?>
+            <?php 
+            // REMOVED: Delete All Candidates button - dangerous operation removed 2025-01-20
+            // This feature was permanently disabled for security reasons
+            if (defined('MT_DEV_TOOLS') && MT_DEV_TOOLS && defined('WP_DEBUG') && WP_DEBUG) : ?>
+            <!-- Delete All Candidates - Only visible in development with MT_DEV_TOOLS enabled -->
+            <div class="mt-operation-card" style="opacity: 0.5; pointer-events: none;">
+                <h4><?php esc_html_e('Delete All Candidates (Disabled)', 'mobility-trailblazers'); ?></h4>
+                <p><?php esc_html_e('This dangerous operation has been permanently disabled for security reasons.', 'mobility-trailblazers'); ?></p>
+                <button type="button" class="button button-danger" disabled>
+                    <?php esc_html_e('Function Removed', 'mobility-trailblazers'); ?>
                 </button>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
