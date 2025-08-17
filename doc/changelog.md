@@ -1,3 +1,15 @@
+## [2.5.2] - 2025-08-17
+### Bug Fixes
+- **Fatal Error Prevention**: Added null checks in `MT_Evaluation_Ajax::get_evaluation_details()` to prevent crashes when posts are deleted
+- **Nonce Standardization**: Fixed inconsistent nonce names in export download functions (now using `mt_admin_nonce`)
+- **Proper Script Termination**: Changed `exit` to `wp_die()` after `wp_safe_redirect()` in language switcher
+- **Improved Variable Naming**: Renamed `$stats` to `$coaching_data` in MT_Coaching class for clarity
+- **Code Cleanup**: Removed test_handler placeholder from MT_Assignment_Ajax
+
+### Documentation
+- Created comprehensive bug fixes documentation in `doc/bug-fixes-2025-08-17.md`
+- Identified pending improvements for future iterations (namespace consistency, action hooks)
+
 ## [2.5.1] - 2025-08-17
 ### Critical Fixes
 - **Hero Section Height Issue**: Fixed excessive hero section taking up entire viewport

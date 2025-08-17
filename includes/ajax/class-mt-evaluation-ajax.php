@@ -888,14 +888,25 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = get_post($evaluation->jury_member_id);
         $candidate = get_post($evaluation->candidate_id);
         
-        // Get categories
-        $categories = wp_get_post_terms($evaluation->candidate_id, 'mt_category', ['fields' => 'names']);
+        // Check if posts exist to avoid fatal errors
+        $jury_member_title = ($jury_member && is_object($jury_member) && isset($jury_member->post_title)) 
+            ? $jury_member->post_title 
+            : __('Unknown (Deleted)', 'mobility-trailblazers');
+            
+        $candidate_title = ($candidate && is_object($candidate) && isset($candidate->post_title)) 
+            ? $candidate->post_title 
+            : __('Unknown (Deleted)', 'mobility-trailblazers');
+        
+        // Get categories - only if candidate exists
+        $categories = ($candidate && is_object($candidate)) 
+            ? wp_get_post_terms($evaluation->candidate_id, 'mt_category', ['fields' => 'names'])
+            : [];
         
         // Prepare response data
         $data = [
             'id' => $evaluation->id,
-            'jury_member' => $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
-            'candidate' => $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
+            'jury_member' => $jury_member_title,
+            'candidate' => $candidate_title,
             'organization' => get_post_meta($evaluation->candidate_id, '_mt_organization', true),
             'categories' => implode(', ', $categories),
             'scores' => [

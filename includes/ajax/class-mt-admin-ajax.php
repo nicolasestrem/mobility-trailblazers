@@ -106,7 +106,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      */
     public function export_candidates_download() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_candidates')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_admin_nonce')) {
             wp_die(__('Security check failed', 'mobility-trailblazers'));
         }
         
@@ -211,7 +211,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      */
     public function export_evaluations_download() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_evaluations')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_admin_nonce')) {
             wp_die(__('Security check failed', 'mobility-trailblazers'));
         }
         
@@ -318,7 +318,7 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
      */
     public function export_assignments_download() {
         // Verify nonce
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_export_assignments')) {
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'mt_admin_nonce')) {
             wp_die(__('Security check failed', 'mobility-trailblazers'));
         }
         
