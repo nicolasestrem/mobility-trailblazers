@@ -185,7 +185,7 @@ class MT_I18n {
         // Redirect to remove the query parameter
         $redirect_url = remove_query_arg('mt_lang');
         wp_safe_redirect($redirect_url);
-        wp_die();
+        exit;
     }
     
     /**

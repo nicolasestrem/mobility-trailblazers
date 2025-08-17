@@ -2,6 +2,21 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.10] - 2025-08-17
+### Removed
+- **Repository Cleanup**: Removed all stale and unused files from project root
+  - Deleted 9 one-time PHP migration/utility scripts (create-jury-member-posts.php, direct-photo-attach.php, etc.)
+  - Removed 6 duplicate "Copy" files 
+  - Deleted 9 unused PowerShell/batch scripts and configuration files
+  - Total: 24 files removed from root directory
+  
+### Improved
+- **Repository Structure**: Clean, professional root directory
+  - Only essential plugin files retained (main plugin, uninstall.php)
+  - Kept core project files (.gitignore, LICENSE, README.md, etc.)
+  - No broken includes or requires - all removed files were verified as unreferenced
+  - Plugin remains fully functional after cleanup
+
 ## [2.5.9] - 2025-08-17
 ### Changed
 - **Documentation Consolidation**: Reduced from 23 to 5 core files
