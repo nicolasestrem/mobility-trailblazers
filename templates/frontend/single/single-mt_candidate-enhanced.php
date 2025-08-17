@@ -265,23 +265,9 @@ while (have_posts()) : the_post();
                     </div>
                 </div>
 
-                <!-- Evaluation CTA -->
-                <?php if (current_user_can('mt_submit_evaluations')) : ?>
-                    <div class="mt-sidebar-widget mt-evaluation-cta">
-                        <h3 class="mt-widget-title">
-                            <i class="dashicons dashicons-clipboard"></i>
-                            <?php _e('Jury Evaluation', 'mobility-trailblazers'); ?>
-                        </h3>
-                        <p class="mt-cta-description">
-                            <?php _e('Evaluate this candidate based on the five criteria for the Mobility Trailblazers Award.', 'mobility-trailblazers'); ?>
-                        </p>
-                        <a href="<?php echo esc_url(add_query_arg('evaluate', $candidate_id, home_url('/jury-dashboard/'))); ?>" 
-                           class="mt-cta-button">
-                            <i class="dashicons dashicons-edit"></i>
-                            <span><?php _e('Start Evaluation', 'mobility-trailblazers'); ?></span>
-                        </a>
-                    </div>
-                <?php endif; ?>
+                <!-- Evaluation CTA removed 2025-01-20 -->
+                <!-- Button was showing for all jury members regardless of assignment status -->
+                <!-- Evaluations should only be started from the jury dashboard where assignments are properly checked -->
 
                 <!-- Navigation Widget -->
                 <div class="mt-sidebar-widget mt-navigation">
