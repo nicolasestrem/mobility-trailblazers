@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(composer security-scan:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(sed:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(for:*)",
+      "Bash(do mv \"$file\" deprecated/)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(do mv \"$file\" generators/)",
+      "Bash(do mv \"$file\" migrations/)",
+      "Bash(do mv \"$file\" diagnostics/)",
+      "Bash(do mv \"$file\" repairs/)",
+      "Bash(git commit:*)",
+      "mcp__docker__docker_ps",
+      "mcp__docker__mobility_status",
+      "WebFetch(domain:github.com)",
+      "mcp__wordpress__wp_plugin_list",
+      "mcp__mysql__mysql_tables",
+      "mcp__docker__wp_cli",
+      "mcp__docker__wp_logs",
+      "mcp__wordpress__wp_debug_log",
+      "mcp__mysql__mt_debug_check",
+      "mcp__mysql__mysql_query",
+      "mcp__wordpress__wp_rest_api",
+      "mcp__docker__docker_exec",
+      "mcp__mysql__mysql_describe",
+      "Bash(curl:*)",
+      "mcp__wordpress__wp_cli",
+      "Bash(php -l:*)"
+    ],
+    "deny": [],
+    "additionalDirectories": [
+      "E:\\OneDrive\\CoWorkSpace"
+    ]
+  }
+}
