@@ -1,10 +1,10 @@
 # Mobility Trailblazers Documentation
 
-*Last Updated: August 17, 2025 | Version 2.5.0*
+*Last Updated: August 16, 2025 | Version 2.4.1*
 
 ## Documentation Structure
 
-This documentation has been consolidated for better organization and maintainability. All documentation is now organized into 9 main files:
+This documentation has been consolidated for better organization and maintainability. All documentation is now organized into 7 main files:
 
 ### Core Documentation Files
 
@@ -50,17 +50,6 @@ This documentation has been consolidated for better organization and maintainabi
    - Complete version history
    - Feature additions and bug fixes
    - Breaking changes and migrations
-
-8. **[DESIGN-IMPROVEMENTS-2025.md](./DESIGN-IMPROVEMENTS-2025.md)**
-   - UI/UX improvements documentation
-   - CSS architecture and load order
-   - JavaScript enhancements
-   - Accessibility features
-
-9. **[candidate-profile-fixes-2025-01-16.md](./candidate-profile-fixes-2025-01-16.md)**
-   - Initial candidate profile fixes
-   - Layout and spacing improvements
-   - Icon fixes documentation
 
 ## Quick Navigation
 

@@ -192,6 +192,7 @@ class MT_Plugin {
             MT_VERSION
         );
         
+<<<<<<< HEAD
         // Design improvements 2025 (v1.0.0)
         wp_enqueue_style(
             'mt-design-improvements',
@@ -217,6 +218,8 @@ class MT_Plugin {
             true
         );
         
+=======
+>>>>>>> parent of 6d6222d (Add comprehensive design improvements for 2025)
         // Jury dashboard styles
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(
