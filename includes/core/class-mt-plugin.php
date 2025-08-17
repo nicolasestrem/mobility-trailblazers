@@ -199,6 +199,14 @@ class MT_Plugin {
             '1.0.0'
         );
         
+        // Critical fixes for v2.5.0 issues (2025-08-17)
+        wp_enqueue_style(
+            'mt-critical-fixes',
+            MT_PLUGIN_URL . 'assets/css/critical-fixes-2025.css',
+            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes', 'mt-design-improvements'],
+            MT_VERSION . '.1'
+        );
+        
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
             'mt-design-enhancements',
