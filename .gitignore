@@ -127,3 +127,5 @@ test-candidates.csv
 .claude.json
 .mcp.json
 .claude-local.json
+/mcp-tools
+package.json
