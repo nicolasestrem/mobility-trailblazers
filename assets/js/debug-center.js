@@ -43,9 +43,7 @@
             // Maintenance operations
             $(document).on('click', '.mt-run-maintenance', this.runMaintenance.bind(this));
             
-            // Error monitoring
-            $(document).on('click', '.mt-clear-logs', this.clearLogs.bind(this));
-            $(document).on('click', '.mt-refresh-errors', this.refreshErrors.bind(this));
+            // Error monitoring removed - no longer needed
             
             // System info
             $(document).on('click', '.mt-copy-sysinfo', this.copySystemInfo.bind(this));
@@ -445,73 +443,9 @@
             }
         },
         
-        /**
-         * Clear logs
-         */
-        clearLogs: function(e) {
-            e.preventDefault();
-            
-            const $button = $(e.currentTarget);
-            const logType = $button.data('log-type') || 'all';
-            
-            if (!confirm(mt_debug.i18n.confirm_clear_logs || 'Are you sure you want to clear the logs?')) {
-                return;
-            }
-            
-            $button.prop('disabled', true);
-            
-            $.ajax({
-                url: this.ajaxUrl,
-                type: 'POST',
-                data: {
-                    action: 'mt_clear_debug_logs',
-                    nonce: this.nonce,
-                    log_type: logType
-                },
-                success: (response) => {
-                    if (response.success) {
-                        this.showNotification(response.data.message || mt_debug.i18n.logs_cleared || 'Logs cleared', 'success');
-                        this.refreshErrors();
-                    } else {
-                        this.showNotification(response.data || mt_debug.i18n.clear_failed || 'Failed to clear logs', 'error');
-                    }
-                },
-                complete: () => {
-                    $button.prop('disabled', false);
-                }
-            });
-        },
+        // clearLogs method removed - error monitoring no longer supported
         
-        /**
-         * Refresh error display
-         */
-        refreshErrors: function(e) {
-            if (e) e.preventDefault();
-            
-            const $container = $('.error-stats-container');
-            if (!$container.length) return;
-            
-            $container.addClass('updating');
-            
-            $.ajax({
-                url: this.ajaxUrl,
-                type: 'POST',
-                data: {
-                    action: 'mt_get_error_stats',
-                    nonce: this.nonce
-                },
-                success: (response) => {
-                    if (response.success) {
-                        // Update error stats display
-                        // This would typically update the DOM
-                        location.reload();
-                    }
-                },
-                complete: () => {
-                    $container.removeClass('updating');
-                }
-            });
-        },
+        // refreshErrors method removed - error monitoring no longer supported
         
         /**
          * Refresh widget

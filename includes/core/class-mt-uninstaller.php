@@ -196,7 +196,7 @@ class MT_Uninstaller {
             $wpdb->prefix . 'mt_evaluations',
             $wpdb->prefix . 'mt_jury_assignments',
             $wpdb->prefix . 'mt_audit_log',
-            $wpdb->prefix . 'mt_error_log',
+            // $wpdb->prefix . 'mt_error_log', // Removed in v2.5.7
             $wpdb->prefix . 'mt_voting_results'
         ];
         
@@ -269,7 +269,7 @@ class MT_Uninstaller {
      */
     private static function clear_scheduled_events() {
         // Clear any scheduled cron events
-        wp_clear_scheduled_hook('mt_cleanup_error_logs');
+        // wp_clear_scheduled_hook('mt_cleanup_error_logs'); // Removed in v2.5.7
         wp_clear_scheduled_hook('mt_daily_evaluation_reminder');
         wp_clear_scheduled_hook('mt_cleanup_audit_logs');
     }

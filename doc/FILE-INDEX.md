@@ -61,7 +61,7 @@ Administrative interface:
 - **class-mt-candidate-columns.php** - Custom columns and import
 - **class-mt-import-export.php** - Import/export handler
 - **class-mt-import-handler.php** - Centralized CSV processing
-- **class-mt-error-monitor.php** - Error monitoring system
+- ~~**class-mt-error-monitor.php**~~ - Error monitoring system (Removed in v2.5.7)
 - **class-mt-debug-manager.php** - Debug script management
 - **class-mt-maintenance-tools.php** - System maintenance
 - **class-mt-coaching.php** - Jury coaching dashboard

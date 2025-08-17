@@ -663,8 +663,8 @@ class MT_Admin {
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         $stats = $evaluation_repo->get_statistics();
 
-        // Get error summary
-        $error_summary = \MobilityTrailblazers\Admin\MT_Error_Monitor::get_dashboard_summary();
+        // Error monitor removed - no longer needed
+        $error_summary = [];
 
         $template_file = MT_PLUGIN_DIR . 'templates/admin/dashboard-widget.php';
         if (file_exists($template_file)) {

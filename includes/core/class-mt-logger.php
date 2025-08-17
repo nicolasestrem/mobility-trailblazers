@@ -111,10 +111,7 @@ class MT_Logger {
         // Write to WordPress error log
         error_log($formatted_message);
         
-        // Store in plugin-specific log if critical
-        if ($level === self::LEVEL_CRITICAL) {
-            self::store_critical_error($message, $context);
-        }
+        // Error monitoring removed - no longer storing in database
     }
     
     /**
@@ -148,118 +145,26 @@ class MT_Logger {
         return $formatted;
     }
     
-    /**
-     * Store critical errors in database for admin review
-     *
-     * @param string $message Error message
-     * @param array $context Error context
-     * @return void
-     */
-    private static function store_critical_error($message, $context = []) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_error_log';
-        
-        // Create table if it doesn't exist
-        self::maybe_create_error_table();
-        
-        $wpdb->insert(
-            $table_name,
-            [
-                'level' => self::LEVEL_CRITICAL,
-                'message' => $message,
-                'context' => wp_json_encode($context),
-                'user_id' => get_current_user_id(),
-                'request_uri' => $_SERVER['REQUEST_URI'] ?? '',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-                'created_at' => current_time('mysql')
-            ],
-            ['%s', '%s', '%s', '%d', '%s', '%s', '%s']
-        );
-    }
+    // Error monitoring removed - store_critical_error method no longer needed
     
-    /**
-     * Create error log table if it doesn't exist
-     *
-     * @return void
-     */
-    private static function maybe_create_error_table() {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_error_log';
-        
-        $charset_collate = $wpdb->get_charset_collate();
-        
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
-            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-            level varchar(20) NOT NULL,
-            message text NOT NULL,
-            context longtext,
-            user_id bigint(20) unsigned DEFAULT 0,
-            request_uri varchar(500) DEFAULT '',
-            user_agent varchar(500) DEFAULT '',
-            created_at datetime NOT NULL,
-            PRIMARY KEY (id),
-            KEY level (level),
-            KEY created_at (created_at),
-            KEY user_id (user_id)
-        ) $charset_collate;";
-        
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
+    // Error monitoring removed - maybe_create_error_table method no longer needed
     
     /**
      * Get recent error logs for admin display
-     *
-     * @param int $limit Number of errors to retrieve
-     * @param string $level Filter by log level
-     * @return array Error logs
+     * @deprecated Error monitoring removed in v2.5.7
+     * @return array Empty array
      */
     public static function get_recent_errors($limit = 50, $level = null) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_error_log';
-        
-        // Check if table exists
-        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") !== $table_name) {
-            return [];
-        }
-        
-        $where_clause = '';
-        $params = [];
-        
-        if ($level) {
-            $where_clause = 'WHERE level = %s';
-            $params[] = $level;
-        }
-        
-        $params[] = $limit;
-        
-        $sql = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC LIMIT %d";
-        
-        return $wpdb->get_results($wpdb->prepare($sql, $params));
+        return [];
     }
     
     /**
      * Clear old error logs
-     *
-     * @param int $days_to_keep Number of days to keep logs
-     * @return int Number of deleted records
+     * @deprecated Error monitoring removed in v2.5.7
+     * @return int Always returns 0
      */
     public static function cleanup_old_logs($days_to_keep = 30) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'mt_error_log';
-        
-        $cutoff_date = date('Y-m-d H:i:s', strtotime("-$days_to_keep days"));
-        
-        return $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM $table_name WHERE created_at < %s",
-                $cutoff_date
-            )
-        );
+        return 0;
     }
     
     /**

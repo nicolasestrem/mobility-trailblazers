@@ -1,4 +1,24 @@
 ## [2.5.7] - 2025-08-17
+### Removed Error Monitor Feature
+- **Removed Components**:
+  - `includes/admin/class-mt-error-monitor.php` - Error monitor class
+  - `templates/admin/error-monitor.php` - Error monitor template
+  - Error monitoring UI from Debug Center
+  - Error log database table (`mt_error_log`)
+  - Error monitoring CSS styles from admin.css
+  - JavaScript error monitoring methods from debug-center.js
+- **Modified Files**:
+  - `includes/core/class-mt-plugin.php` - Removed error monitor initialization
+  - `includes/admin/class-mt-admin.php` - Removed error monitor dashboard references
+  - `includes/core/class-mt-logger.php` - Disabled database error logging (kept file logging)
+  - `includes/core/class-mt-uninstaller.php` - Removed error log table cleanup
+  - `templates/admin/debug-center/tab-errors.php` - Replaced with deprecation notice
+  - `assets/js/debug-center.js` - Removed clearLogs and refreshErrors methods
+  - `assets/css/admin.css` - Removed error monitor styles
+- **Reason**: Simplified error handling to use standard WordPress debug logging instead of custom database solution
+- **Alternative**: Use WordPress debug logging with WP_DEBUG, WP_DEBUG_LOG constants
+
+## [2.5.7] - 2025-08-17
 ### Fixed Assignment Modal Visibility Issues
 - **Problem**: Auto-assign and manual assignment modals were not visible to users despite being in DOM
 - **Root Cause**: Conflicts with WordPress admin styles and JavaScript execution order
