@@ -124,3 +124,4 @@ test-candidates.csv
 /.devcontainer/
 *.ps1
 *.bat
+.claude.json
