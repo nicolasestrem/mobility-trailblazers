@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## [2.5.3] - 2025-08-17
 ### Critical Security Fixes
 - **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
@@ -101,6 +102,8 @@
   - Complete testing results and browser compatibility information
   - New file: `doc/candidate-page-design-layout-fixes-complete.md`
 
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 ## [2.4.4] - 2025-08-17
 ### Fixed
 - **Candidate Profile Display Issues**: Fixed critical field mapping issues that prevented candidate data from displaying
