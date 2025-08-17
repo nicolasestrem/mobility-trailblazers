@@ -33,7 +33,13 @@
       "mcp__mysql__mysql_describe",
       "Bash(curl:*)",
       "mcp__wordpress__wp_cli",
-      "Bash(php -l:*)"
+      "Bash(php -l:*)",
+      "Bash(ls:*)",
+      "Bash(head:*)",
+      "mcp__kapture__list_tabs",
+      "mcp__kapture__reload",
+      "mcp__kapture__navigate",
+      "mcp__kapture__console_logs"
     ],
     "deny": [],
     "additionalDirectories": [

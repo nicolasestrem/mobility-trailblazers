@@ -164,44 +164,36 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
-        // Styles
+        // Core CSS Variables (loaded first)
         wp_enqueue_style(
-            'mt-frontend',
-            MT_PLUGIN_URL . 'assets/css/frontend.css',
+            'mt-variables',
+            MT_PLUGIN_URL . 'assets/css/mt-variables.css',
             [],
             MT_VERSION
         );
         
-        // Enhanced candidate profile styles
+        // Component Library (loaded second)
+        wp_enqueue_style(
+            'mt-components',
+            MT_PLUGIN_URL . 'assets/css/mt-components.css',
+            ['mt-variables'],
+            MT_VERSION
+        );
+        
+        // Main Frontend Styles (includes consolidated grid system)
+        wp_enqueue_style(
+            'mt-frontend',
+            MT_PLUGIN_URL . 'assets/css/frontend.css',
+            ['mt-variables', 'mt-components'],
+            MT_VERSION
+        );
+        
+        // Enhanced candidate profile styles (includes all fixes)
         wp_enqueue_style(
             'mt-enhanced-candidate-profile',
             MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
-            ['mt-frontend'],
+            ['mt-variables', 'mt-components', 'mt-frontend'],
             MT_VERSION
-        );
-        
-        // Candidate profile fixes (v2.4.2)
-        wp_enqueue_style(
-            'mt-candidate-profile-fixes',
-            MT_PLUGIN_URL . 'assets/css/candidate-profile-fixes.css',
-            ['mt-frontend', 'mt-enhanced-candidate-profile'],
-            MT_VERSION
-        );
-        
-        // Design improvements 2025 (v1.0.0)
-        wp_enqueue_style(
-            'mt-design-improvements',
-            MT_PLUGIN_URL . 'assets/css/design-improvements-2025.css',
-            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes'],
-            '1.0.0'
-        );
-        
-        // Critical fixes for v2.5.0 issues (2025-08-17)
-        wp_enqueue_style(
-            'mt-critical-fixes',
-            MT_PLUGIN_URL . 'assets/css/critical-fixes-2025.css',
-            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes', 'mt-design-improvements'],
-            MT_VERSION . '.1'
         );
         
         // Design enhancements JavaScript (v1.0.0)
@@ -327,11 +319,27 @@ class MT_Plugin {
             return;
         }
         
-        // Styles
+        // Core CSS Variables (loaded first)
+        wp_enqueue_style(
+            'mt-variables',
+            MT_PLUGIN_URL . 'assets/css/mt-variables.css',
+            [],
+            MT_VERSION
+        );
+        
+        // Component Library (loaded second)
+        wp_enqueue_style(
+            'mt-components',
+            MT_PLUGIN_URL . 'assets/css/mt-components.css',
+            ['mt-variables'],
+            MT_VERSION
+        );
+        
+        // Admin Styles (includes debug center)
         wp_enqueue_style(
             'mt-admin',
             MT_PLUGIN_URL . 'assets/css/admin.css',
-            [],
+            ['mt-variables', 'mt-components'],
             MT_VERSION
         );
         

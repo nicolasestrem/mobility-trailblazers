@@ -1,20 +1,57 @@
-/* Enhanced Candidate Profile Styles v2.4.1 */
+/**
+ * Enhanced Candidate Profile Styles
+ * Version: 2.5.0
+ * Updated: 2025-08-17
+ * 
+ * Dependencies: mt-variables.css, mt-components.css
+ * 
+ * This file consolidates all candidate profile styles including:
+ * - Hero sections
+ * - Photo frames
+ * - Social links
+ * - Evaluation criteria
+ * - Biography sections
+ * - All fixes from candidate-profile-fixes.css and critical-fixes-2025.css
+ */
 
-/* Hero Section */
+/* ===================================
+   HERO SECTION
+   =================================== */
+
 .mt-enhanced-candidate-profile {
     margin: 0;
     padding: 0;
     background: var(--mt-bg-base);
 }
 
-.mt-candidate-hero {
+/* Remove excessive top spacing */
+.mt-candidate-enhanced {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.mt-candidate-hero,
+.mt-hero-section {
     position: relative;
     background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 50%, var(--mt-accent) 100%);
-    padding: 80px 0;
+    padding: 40px 0 30px; /* Optimized padding from fixes */
     overflow: hidden;
-    min-height: 60vh;
+    min-height: auto;
+    max-height: 400px; /* Prevent excessive height */
     display: flex;
     align-items: center;
+}
+
+/* Adjust for WordPress admin bar */
+body.admin-bar .mt-candidate-hero,
+body.admin-bar .mt-hero-section {
+    margin-top: -32px;
+    padding-top: 62px; /* 30px + 32px admin bar */
+}
+
+/* Single candidate template specific */
+body.single-mt_candidate .mt-hero-section {
+    padding-top: 40px;
 }
 
 .mt-hero-pattern {
@@ -28,6 +65,10 @@
         radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
     animation: patternFloat 20s ease-in-out infinite;
+    opacity: 0.05; /* Reduce pattern visibility from critical fixes */
+    height: 100%;
+    max-height: 400px;
+    overflow: hidden;
 }
 
 @keyframes patternFloat {
@@ -43,25 +84,32 @@
     z-index: 2;
 }
 
-.mt-hero-content {
+.mt-hero-content,
+.mt-profile-header-enhanced {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 60px;
+    grid-template-columns: 280px 1fr; /* Adjusted for smaller photo frame */
+    gap: 30px; /* Reduced gap from fixes */
     align-items: center;
+    padding: 15px 0;
 }
 
-/* Photo Frame with Floating Effect */
+/* ===================================
+   PHOTO FRAME
+   =================================== */
+
 .mt-photo-frame {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 220px; /* Reduced size from fixes */
+    height: 220px;
 }
 
 .mt-photo-border {
     position: relative;
-    width: 280px;
-    height: 280px;
+    width: 220px; /* Reduced size from fixes */
+    height: 220px;
     border-radius: 20px;
     padding: 8px;
     background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
@@ -69,7 +117,7 @@
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.4s ease;
+    transition: var(--mt-transition);
 }
 
 .mt-photo-border:hover {
@@ -116,15 +164,19 @@
     opacity: 1;
 }
 
-/* Hero Information */
+/* ===================================
+   HERO INFORMATION
+   =================================== */
+
 .mt-hero-info {
     color: white;
 }
 
-.mt-hero-name {
-    font-size: 3.5rem;
+.mt-hero-name,
+.mt-profile-name-enhanced {
+    font-size: 2.8rem; /* Reduced size from fixes */
     font-weight: 700;
-    margin: 0 0 20px 0;
+    margin: 0 0 10px 0;
     line-height: 1.1;
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
@@ -882,4 +934,189 @@
     border: 1px solid #e5e7eb;
     padding: 25px;
     margin: 20px 0;
+}
+
+/* ===================================
+   CONSOLIDATED FIXES FROM candidate-profile-fixes.css
+   =================================== */
+
+/* Fix LinkedIn and website icons */
+.mt-social-link .dashicons-linkedin::before,
+.mt-link-button .dashicons-linkedin::before {
+    content: "in" !important;
+    font-family: Arial, sans-serif !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+}
+
+.mt-social-link .dashicons-admin-site::before {
+    content: "\f319" !important;
+}
+
+/* Ensure dashicons are properly loaded */
+.mt-social-link .dashicons,
+.mt-candidate-links .dashicons {
+    font-family: dashicons !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-transform: none !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 20px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+/* Unicode fallbacks for missing icons */
+.mt-social-link.linkedin .dashicons:empty::before {
+    content: "🔗" !important;
+    font-family: inherit !important;
+}
+
+.mt-social-link.website .dashicons:empty::before {
+    content: "🌐" !important;
+    font-family: inherit !important;
+}
+
+/* Pull content section up with rounded corners */
+.mt-content-section {
+    margin-top: -30px !important;
+    border-radius: 30px 30px 0 0 !important;
+    position: relative !important;
+    z-index: 2 !important;
+    background: #f8f9fa !important;
+    padding-top: 35px !important;
+}
+
+/* Fix text formatting in evaluation criteria */
+.mt-criterion-content {
+    white-space: pre-line !important;
+    word-wrap: break-word !important;
+    line-height: 1.8 !important;
+    color: #4b5563 !important;
+    font-size: 0.95rem !important;
+    overflow-wrap: break-word !important;
+}
+
+.mt-criterion-content p {
+    margin: 0 0 1rem !important;
+    line-height: 1.8 !important;
+}
+
+.mt-criterion-content p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* ===================================
+   CONSOLIDATED FIXES FROM critical-fixes-2025.css
+   =================================== */
+
+/* Restore evaluation form sliders */
+.mt-criterion-evaluation .mt-score-buttons {
+    display: none !important;
+}
+
+.mt-criterion-evaluation .mt-score-slider-container {
+    display: block !important;
+    margin: 15px 0 !important;
+}
+
+.mt-criterion-evaluation input[type="range"],
+.mt-score-slider {
+    display: block !important;
+    width: 100% !important;
+    margin: 10px 0 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    height: 8px !important;
+    border-radius: 5px !important;
+    background: #ddd !important;
+    outline: none !important;
+    opacity: 1 !important;
+    transition: opacity 0.2s !important;
+}
+
+.mt-score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 50% !important;
+    background: var(--mt-success) !important;
+    cursor: pointer !important;
+}
+
+.mt-score-slider::-moz-range-thumb {
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 50% !important;
+    background: var(--mt-success) !important;
+    cursor: pointer !important;
+}
+
+.mt-score-display {
+    display: inline-block !important;
+    margin-left: 10px !important;
+    font-weight: bold !important;
+    font-size: 1.1em !important;
+    color: #333 !important;
+}
+
+/* Fix empty biography sections */
+.mt-bio-content:empty::before {
+    content: "No biography available for this candidate." !important;
+    color: #999 !important;
+    font-style: italic !important;
+}
+
+/* Optimize spacing */
+.mt-overview-section {
+    padding: 30px !important;
+}
+
+.mt-section-heading {
+    font-size: 1.6rem !important;
+    margin-bottom: 15px !important;
+}
+
+.mt-criteria-grid {
+    gap: 20px !important;
+}
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+
+@media print {
+    .mt-candidate-hero,
+    .mt-hero-section {
+        padding: 10px 0 !important;
+        min-height: auto !important;
+    }
+    
+    .mt-hero-pattern {
+        display: none;
+    }
+    
+    .mt-photo-frame,
+    .mt-photo-border {
+        width: 150px !important;
+        height: 150px !important;
+        box-shadow: none;
+    }
+    
+    .mt-content-section {
+        box-shadow: none;
+        margin-top: 0;
+    }
+    
+    .mt-sidebar {
+        display: none;
+    }
 }

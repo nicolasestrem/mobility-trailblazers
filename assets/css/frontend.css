@@ -1,6 +1,17 @@
-/* Mobility Trailblazers Frontend Styles */
+/**
+ * Mobility Trailblazers Frontend Styles
+ * Version: 2.5.0
+ * Updated: 2025-08-17
+ * 
+ * Dependencies: mt-variables.css, mt-components.css
+ * 
+ * This file now includes consolidated grid systems from:
+ * - jury-grid-fix.css
+ * - design-improvements-2025.css
+ * - critical-fixes-2025.css (grid sections)
+ */
 
-/* Mobility Trailblazers Official Brand Colors */
+/* Note: CSS variables moved to mt-variables.css - remove duplicates */
 :root {
     /* System Colors (Primary Palette) */
     --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
@@ -60,33 +71,92 @@
     text-decoration: underline;
 }
 
-/* Candidates Grid */
+/* ===================================
+   CONSOLIDATED CANDIDATES GRID SYSTEM
+   Merged from: jury-grid-fix.css, design-improvements-2025.css
+   =================================== */
+
+/* Main Grid Container */
 .mt-candidates-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 20px;
+    display: grid !important;
+    gap: 20px !important;
+    padding: 20px 0 !important;
+    width: 100% !important;
     margin: 30px 0;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.mt-candidate-card {
-    background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
-    border-radius: 12px;
+/* Grid Column Layouts - Dynamic Options */
+.mt-candidates-grid.columns-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.mt-candidates-grid.columns-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.mt-candidates-grid.columns-5 {
+    grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* Default auto-fill layout */
+.mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+/* Individual Grid Items - Enhanced Card Styles */
+.mt-candidate-card,
+.mt-candidate-grid-item {
+    background: var(--mt-bg-base) !important;
+    border: 2px solid var(--mt-blue-accent) !important;
+    border-radius: 12px !important;
     overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: var(--mt-transition) !important;
+    box-shadow: var(--mt-shadow-sm) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    min-height: 280px !important;
+    height: 100% !important;
+    padding: 20px !important;
 }
 
-.mt-candidate-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 60, 61, 0.15);
-    border-color: var(--mt-secondary);
+.mt-candidate-card:hover,
+.mt-candidate-grid-item:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: var(--mt-shadow-lg) !important;
+    border-color: var(--mt-secondary) !important;
 }
 
+/* Candidate Image Container - Fixed Size */
+.mt-candidate-image {
+    width: 150px !important;
+    height: 150px !important;
+    margin: 0 auto 15px !important;
+    overflow: hidden !important;
+    border-radius: 8px !important;
+    background: #F5F5F5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mt-candidate-photo {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+/* Candidate Header for numbered cards */
 .mt-candidate-header {
     background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
     padding: 15px;
     text-align: center;
+    margin: -20px -20px 15px -20px; /* Negative margin to fill card edges */
 }
 
 .mt-candidate-number {
@@ -96,8 +166,15 @@
     margin: 0;
 }
 
-.mt-candidate-body {
-    padding: 20px;
+/* Candidate Info Section */
+.mt-candidate-body,
+.mt-candidate-info {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 0 10px !important;
     text-align: center;
 }
 
@@ -518,16 +595,33 @@
     }
 }
 
-/* Responsive Design */
+/* ===================================
+   CONSOLIDATED RESPONSIVE GRID DESIGN
+   =================================== */
+
 @media (max-width: 1200px) {
-    .mt-candidates-grid {
-        grid-template-columns: repeat(4, 1fr);
+    .mt-candidates-grid.columns-5 {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .mt-candidates-grid.columns-4 {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
     }
 }
 
 @media (max-width: 992px) {
-    .mt-candidates-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .mt-candidates-grid.columns-3,
+    .mt-candidates-grid.columns-4,
+    .mt-candidates-grid.columns-5 {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    
+    .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
     }
     
     .mt-jury-stats {
@@ -536,9 +630,33 @@
 }
 
 @media (max-width: 768px) {
+    .mt-candidates-grid.columns-3,
+    .mt-candidates-grid.columns-4,
+    .mt-candidates-grid.columns-5 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
     .mt-candidates-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        gap: 15px !important;
+    }
+    
+    .mt-candidate-grid-item,
+    .mt-candidate-card {
+        min-height: 250px !important;
+    }
+    
+    .mt-candidate-image {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    
+    .mt-candidate-info h3 {
+        font-size: 16px !important;
+        min-height: 40px !important;
     }
     
     .mt-container {
@@ -560,8 +678,17 @@
 }
 
 @media (max-width: 480px) {
+    .mt-candidates-grid.columns-3,
+    .mt-candidates-grid.columns-4,
+    .mt-candidates-grid.columns-5,
     .mt-candidates-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+    }
+    
+    .mt-candidate-grid-item,
+    .mt-candidate-card {
+        min-height: auto !important;
+        padding: 15px !important;
     }
     
     .mt-jury-stats {
