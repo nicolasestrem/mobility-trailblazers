@@ -524,7 +524,10 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         // Optionally delete all evaluations first
         if ($cascade_evaluations) {
             $evaluation_repo = new MT_Evaluation_Repository();
+            // Truncate evaluations table
             $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}mt_evaluations");
+            // Clear all evaluation caches
+            $evaluation_repo->clear_all_evaluation_caches();
         }
         
         // Use TRUNCATE for better performance and to reset auto-increment
@@ -537,6 +540,18 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         if ($result !== false) {
             // Clear all related caches
             $this->clear_all_assignment_caches();
+            
+            // Clear ALL transients that might contain assignment/evaluation data
+            $wpdb->query("DELETE FROM {$wpdb->options} 
+                         WHERE option_name LIKE '_transient_mt_%' 
+                         OR option_name LIKE '_transient_timeout_mt_%'");
+            
+            // Log the action
+            MT_Logger::info('Cleared all assignments', [
+                'cascade_evaluations' => $cascade_evaluations,
+                'user_id' => get_current_user_id()
+            ]);
+            
             return true;
         }
         

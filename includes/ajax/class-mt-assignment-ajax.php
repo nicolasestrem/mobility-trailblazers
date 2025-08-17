@@ -10,6 +10,7 @@ namespace MobilityTrailblazers\Ajax;
 
 use MobilityTrailblazers\Services\MT_Assignment_Service;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
+use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -364,13 +365,28 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $this->check_permission('mt_manage_settings');
         
         $assignment_repo = new MT_Assignment_Repository();
+        $evaluation_repo = new MT_Evaluation_Repository();
         
-        // Use repository method to clear all assignments
-        // This properly handles cache clearing and any future hooks
-        $result = $assignment_repo->clear_all();
+        // Clear all assignments AND evaluations
+        // This ensures all related data is removed
+        $result = $assignment_repo->clear_all(true); // true = cascade delete evaluations
         
         if ($result) {
-            $this->success(null, __('All assignments have been cleared.', 'mobility-trailblazers'));
+            // Also clear all evaluation caches explicitly
+            $evaluation_repo->clear_all_evaluation_caches();
+            
+            // Clear any WordPress transients that might cache stats
+            global $wpdb;
+            $wpdb->query("DELETE FROM {$wpdb->options} 
+                         WHERE option_name LIKE '_transient_mt_%' 
+                         OR option_name LIKE '_transient_timeout_mt_%'");
+            
+            // Clear object cache if available
+            if (function_exists('wp_cache_flush')) {
+                wp_cache_flush();
+            }
+            
+            $this->success(null, __('All assignments and evaluation data have been cleared.', 'mobility-trailblazers'));
         } else {
             $this->error(__('Failed to clear assignments.', 'mobility-trailblazers'));
         }
@@ -434,9 +450,20 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         
         // Clear existing assignments if requested
         if (isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true') {
-            $clear_result = $assignment_repo->clear_all();
+            // Clear assignments and evaluations with proper cache clearing
+            $clear_result = $assignment_repo->clear_all(true); // true = cascade delete evaluations
             if ($clear_result) {
-                error_log('MT Auto Assign: Cleared all existing assignments');
+                // Clear evaluation caches too
+                $evaluation_repo = new MT_Evaluation_Repository();
+                $evaluation_repo->clear_all_evaluation_caches();
+                
+                // Clear all transients
+                global $wpdb;
+                $wpdb->query("DELETE FROM {$wpdb->options} 
+                             WHERE option_name LIKE '_transient_mt_%' 
+                             OR option_name LIKE '_transient_timeout_mt_%'");
+                
+                error_log('MT Auto Assign: Cleared all existing assignments and evaluations');
             } else {
                 error_log('MT Auto Assign: Failed to clear existing assignments');
             }

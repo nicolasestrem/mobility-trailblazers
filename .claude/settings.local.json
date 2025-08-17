@@ -53,7 +53,8 @@
       "mcp__kapture__fill",
       "mcp__kapture__select",
       "mcp__gemini-cli__ask-gemini",
-      "mcp__gemini-cli__brainstorm"
+      "mcp__gemini-cli__brainstorm",
+      "mcp__memory__open_nodes"
     ],
     "deny": [],
     "additionalDirectories": [
