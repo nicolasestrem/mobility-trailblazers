@@ -1,0 +1,479 @@
+/**
+ * Design Improvements 2025
+ * Version: 1.0.0
+ * Purpose: Comprehensive design improvements across the platform
+ */
+
+/* ========================================
+   GLOBAL IMPROVEMENTS
+   ======================================== */
+.mt-candidate-enhanced {
+    background: #f8f9fa;
+}
+
+/* ========================================
+   HERO SECTION OPTIMIZATION
+   ======================================== */
+.mt-hero-section {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* ========================================
+   CONTENT CARDS ENHANCEMENT
+   ======================================== */
+.mt-overview-section,
+.mt-criterion-card,
+.mt-sidebar-card {
+    background: white;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.mt-overview-section:hover,
+.mt-criterion-card:hover,
+.mt-sidebar-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   IMPROVED GRID SPACING
+   ======================================== */
+.mt-criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px !important;
+    margin: 30px 0;
+}
+
+/* ========================================
+   SECTION HEADINGS
+   ======================================== */
+.mt-section-heading {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #e5e7eb !important;
+}
+
+/* ========================================
+   CONTENT PADDING OPTIMIZATION
+   ======================================== */
+.mt-content-section {
+    padding: 40px 0 !important;
+}
+
+.mt-content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================
+   SIDEBAR IMPROVEMENTS
+   ======================================== */
+.mt-sidebar {
+    position: sticky;
+    top: 100px; /* Account for header */
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.mt-sidebar-card {
+    margin-bottom: 15px !important;
+    padding: 20px !important;
+}
+
+/* ========================================
+   SOCIAL LINK ICONS WITH SVG
+   ======================================== */
+.mt-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mt-social-link:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.mt-social-link svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* LinkedIn specific styling */
+.mt-social-link.linkedin {
+    background: rgba(0, 119, 181, 0.2);
+}
+
+.mt-social-link.linkedin:hover {
+    background: rgba(0, 119, 181, 0.3);
+}
+
+/* Website link specific styling */
+.mt-social-link.website {
+    background: rgba(38, 166, 154, 0.2);
+}
+
+.mt-social-link.website:hover {
+    background: rgba(38, 166, 154, 0.3);
+}
+
+/* ========================================
+   PHOTO FRAME ENHANCEMENTS
+   ======================================== */
+.mt-photo-frame {
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.mt-photo-frame.hover-effect {
+    transform: scale(1.05);
+}
+
+.mt-photo-frame img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+}
+
+/* ========================================
+   ANIMATION CLASSES
+   ======================================== */
+.animate-in {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   ENHANCED BUTTONS
+   ======================================== */
+.mt-button,
+.mt-link-button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-button:before,
+.mt-link-button:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.mt-button:hover:before,
+.mt-link-button:hover:before {
+    width: 300px;
+    height: 300px;
+}
+
+/* ========================================
+   IMPROVED TYPOGRAPHY
+   ======================================== */
+body.single-mt_candidate {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.mt-candidate-enhanced h1,
+.mt-candidate-enhanced h2,
+.mt-candidate-enhanced h3,
+.mt-candidate-enhanced h4 {
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.mt-candidate-enhanced p {
+    line-height: 1.8;
+    color: #4b5563;
+}
+
+/* ========================================
+   EVALUATION FORM IMPROVEMENTS
+   ======================================== */
+.mt-evaluation-form {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+
+.mt-evaluation-criteria {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 30px;
+    padding-top: 30px;
+}
+
+.mt-criterion-evaluation {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.mt-criterion-evaluation:hover {
+    background: #f3f4f6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ========================================
+   MOBILE RESPONSIVENESS
+   ======================================== */
+@media (max-width: 768px) {
+    .mt-criteria-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-content-container {
+        padding: 0 15px;
+    }
+    
+    .mt-hero-section {
+        padding: 20px 0 15px !important;
+    }
+    
+    .mt-social-links {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .mt-social-link {
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+    
+    .mt-sidebar {
+        position: static;
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mt-section-heading {
+        font-size: 1.3rem !important;
+    }
+    
+    .mt-profile-name-enhanced {
+        font-size: 2rem !important;
+    }
+    
+    .mt-photo-frame {
+        width: 180px !important;
+        height: 180px !important;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ======================================== */
+.mt-social-link:focus,
+.mt-button:focus,
+.mt-link-button:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mt-criterion-card,
+    .mt-sidebar-card,
+    .mt-overview-section {
+        border: 2px solid #1f2937;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+    .mt-hero-section {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .mt-social-links,
+    .mt-sidebar,
+    .mt-navigation {
+        display: none !important;
+    }
+    
+    .mt-content-container {
+        max-width: 100%;
+    }
+    
+    .mt-criterion-card {
+        page-break-inside: avoid;
+    }
+}
+
+/* ========================================
+   FIX: TOP RANKED CANDIDATES COLOR CONTRAST
+   ======================================== */
+.mt-top-ranked .mt-rank-1,
+.mt-top-ranked .mt-rank-badge.rank-1 {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+    color: #1f2937 !important; /* Dark text for contrast */
+}
+
+.mt-top-ranked .mt-rank-2,
+.mt-top-ranked .mt-rank-badge.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%) !important;
+    color: #ffffff !important;
+}
+
+.mt-top-ranked .mt-rank-3,
+.mt-top-ranked .mt-rank-badge.rank-3 {
+    background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Ensure text contrast in top ranked section */
+.mt-top-ranked .mt-candidate-name,
+.mt-top-ranked .mt-score,
+.mt-top-ranked .mt-candidate-card h3,
+.mt-top-ranked .mt-candidate-card .mt-score-display {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    font-weight: 600 !important;
+}
+
+/* Fix text visibility on rank badges */
+.mt-rank-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+}
+
+/* ========================================
+   FIX: CANDIDATE GRID VIEW LAYOUT
+   ======================================== */
+.mt-candidates-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+    padding: 20px !important;
+}
+
+.mt-candidate-card {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 320px !important;
+    background: white !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+}
+
+.mt-candidate-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+}
+
+.mt-candidate-card img,
+.mt-candidate-card .mt-candidate-image {
+    width: 100% !important;
+    height: 200px !important;
+    object-fit: cover !important;
+    background: #f3f4f6 !important;
+}
+
+.mt-candidate-card .mt-candidate-info {
+    padding: 20px !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mt-candidate-card .mt-candidate-name {
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    color: #1f2937 !important;
+}
+
+.mt-candidate-card .mt-candidate-organization {
+    color: #6b7280 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 12px !important;
+}
+
+.mt-candidate-card .mt-candidate-category {
+    display: inline-block !important;
+    padding: 4px 12px !important;
+    background: #e5e7eb !important;
+    color: #4b5563 !important;
+    border-radius: 6px !important;
+    font-size: 0.85rem !important;
+    margin-top: auto !important;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1024px) {
+    .mt-candidates-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .mt-candidates-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+        gap: 15px !important;
+        padding: 15px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .mt-candidates-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
