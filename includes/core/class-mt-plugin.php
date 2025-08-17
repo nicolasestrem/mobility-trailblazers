@@ -173,6 +173,7 @@ class MT_Plugin {
         );
         
 <<<<<<< HEAD
+<<<<<<< HEAD
         // Enhanced candidate profile styles
         wp_enqueue_style(
             'mt-enhanced-candidate-profile',
@@ -224,6 +225,8 @@ class MT_Plugin {
             );
         }
         
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 =======
 >>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
         // Scripts
