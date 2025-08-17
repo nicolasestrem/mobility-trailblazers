@@ -1,3 +1,32 @@
+## [2.5.1] - 2025-08-17
+### Critical Fixes
+- **Hero Section Height Issue**: Fixed excessive hero section taking up entire viewport
+  - Reduced padding from 80px/60px to 50px/40px in single candidate template
+  - Added max-height constraint of 400px to prevent excessive expansion
+  - Updated CSS in both `candidate-profile-fixes.css` and inline styles
+- **Evaluation Criteria Text Formatting**: Fixed bunched text without proper line breaks
+  - Changed white-space from normal to pre-line to preserve line breaks
+  - Added overflow-wrap for better word breaking
+  - Added specific BR element handling for proper line spacing
+- **Top Ranked Candidates Color Contrast**: Fixed unreadable text on rank badges
+  - Gold rank (#FFD700) now uses dark text (#1f2937) for better contrast
+  - Silver and bronze ranks maintain white text with proper shadows
+  - Added text-shadow and font-weight improvements for visibility
+- **Candidate Grid View Layout**: Fixed broken grid layout issues
+  - Implemented proper CSS Grid with auto-fill and minmax(280px, 1fr)
+  - Fixed card heights and image object-fit for consistent display
+  - Added responsive breakpoints for mobile devices
+  - Enhanced hover effects and card shadows
+- **Biography/Web Fields**: Verified fields are already present in evaluation form
+  - Confirmed biography and social links display correctly in jury-evaluation-form.php
+  - No changes needed as functionality already exists
+
+### Changed
+- **CSS Structure Improvements**: Optimized styles for better maintainability
+  - Hero pattern now properly constrained within max-height
+  - Enhanced responsive design for mobile viewports
+  - Better organization of fixes across CSS files
+
 ## [2.5.0] - 2025-08-17
 ### Added
 - **Comprehensive Design Improvements**: Implemented major design overhaul for better user experience
