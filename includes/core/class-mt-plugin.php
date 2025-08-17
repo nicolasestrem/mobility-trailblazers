@@ -164,17 +164,15 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
-        // Ensure dashicons are loaded on frontend
-        wp_enqueue_style('dashicons');
-        
         // Styles
         wp_enqueue_style(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/css/frontend.css',
-            ['dashicons'],
+            [],
             MT_VERSION
         );
         
+<<<<<<< HEAD
         // Enhanced candidate profile styles
         wp_enqueue_style(
             'mt-enhanced-candidate-profile',
@@ -226,6 +224,8 @@ class MT_Plugin {
             );
         }
         
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
         // Scripts
         wp_enqueue_script(
             'mt-frontend',

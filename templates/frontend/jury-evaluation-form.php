@@ -157,14 +157,14 @@ $criteria = [
                 <?php if ($linkedin_url || $website_url) : ?>
                     <div class="mt-candidate-links">
                         <?php if ($linkedin_url) : ?>
-                            <a href="<?php echo esc_url($linkedin_url); ?>" target="_blank" class="mt-link-button linkedin">
+                            <a href="<?php echo esc_url($linkedin_url); ?>" target="_blank" class="mt-link-button">
                                 <span class="dashicons dashicons-linkedin"></span>
                                 LinkedIn Profile
                             </a>
                         <?php endif; ?>
                         <?php if ($website_url) : ?>
-                            <a href="<?php echo esc_url($website_url); ?>" target="_blank" class="mt-link-button website">
-                                <span class="dashicons dashicons-admin-site-alt3"></span>
+                            <a href="<?php echo esc_url($website_url); ?>" target="_blank" class="mt-link-button">
+                                <span class="dashicons dashicons-admin-site"></span>
                                 Website
                             </a>
                         <?php endif; ?>
