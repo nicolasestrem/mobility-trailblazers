@@ -1,3 +1,39 @@
+## [2.5.0] - 2025-08-17
+### Added
+- **Comprehensive Design Improvements**: Implemented major design overhaul for better user experience
+  - Created `design-improvements-2025.css` with enhanced visual hierarchy and modern styling
+  - Added `design-enhancements.js` for interactive animations and smooth scrolling
+  - Implemented progress indicators for evaluation forms
+  - Added auto-save indicators and ripple effects for better feedback
+  - Enhanced accessibility with keyboard navigation and screen reader support
+
+### Fixed
+- **Excessive Top Spacing**: Significantly reduced padding on candidate profile pages
+  - Hero section padding reduced from 40px to 30px top
+  - Photo frames reduced to 220px for better proportions
+  - Content section pulled up with negative margin for tighter layout
+  - Added specific WordPress admin bar compensation
+- **Evaluation Criteria Text Formatting**: Fixed text display issues
+  - Changed white-space from pre-wrap to normal for better text flow
+  - Increased line-height to 1.8 for improved readability
+  - Added proper paragraph spacing (1rem bottom margin)
+  - Ensured word-break for long text strings
+- **Duplicate Biography Sections**: Removed duplicate content display
+  - Consolidated two biography sections into one in jury evaluation form
+  - Now uses biography meta field with fallback to post content
+  - Cleaner presentation with single biography section
+- **Social Media Icons**: Replaced broken dashicons with inline SVG icons
+  - LinkedIn icon now displays correctly with proper SVG path
+  - Website icon uses globe SVG for better visual clarity
+  - Icons properly sized at 20x20px with currentColor fill
+  - Added hover effects and proper alignment
+
+### Changed
+- **Plugin Core Updates**: Modified asset enqueuing in `class-mt-plugin.php`
+  - Added design-improvements-2025.css to stylesheet queue
+  - Added design-enhancements.js with jQuery dependency
+  - Proper dependency chain for CSS load order
+
 ## [2.4.5] - 2025-08-17
 ### Documentation
 - **Complete Candidate Page Design Fixes Documentation**: Created comprehensive documentation for all layout improvements

@@ -191,6 +191,23 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Design improvements 2025 (v1.0.0)
+        wp_enqueue_style(
+            'mt-design-improvements',
+            MT_PLUGIN_URL . 'assets/css/design-improvements-2025.css',
+            ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes'],
+            '1.0.0'
+        );
+        
+        // Design enhancements JavaScript (v1.0.0)
+        wp_enqueue_script(
+            'mt-design-enhancements',
+            MT_PLUGIN_URL . 'assets/js/design-enhancements.js',
+            ['jquery'],
+            '1.0.0',
+            true
+        );
+        
         // Jury dashboard styles
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(

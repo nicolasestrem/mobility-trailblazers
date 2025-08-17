@@ -1,5 +1,5 @@
 # Mobility Trailblazers - Complete File Index
-*Last Updated: August 16, 2025 | Version 2.4.1*
+*Last Updated: August 17, 2025 | Version 2.5.0*
 
 ## Table of Contents
 1. [Root Directory](#root-directory)
@@ -150,6 +150,9 @@ Stylesheets:
 - **jury-dashboard.css** - Jury interface styles
 - **csv-import.css** - Import UI styles
 - **debug-center.css** - Debug Center styles
+- **enhanced-candidate-profile.css** - Enhanced candidate profile styling
+- **candidate-profile-fixes.css** - Layout and spacing fixes (v2.4.2)
+- **design-improvements-2025.css** - Comprehensive UI/UX improvements (v2.5.0)
 
 ### /assets/js/
 JavaScript files:
@@ -161,6 +164,7 @@ JavaScript files:
 - **csv-import.js** - Progress import
 - **debug-center.js** - Debug Center UI
 - **candidate-interactions.js** - Interactive features
+- **design-enhancements.js** - Animations and interactive enhancements (v2.5.0)
 
 ### /assets/images/
 Image files:

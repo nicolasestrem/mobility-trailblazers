@@ -171,20 +171,15 @@ $criteria = [
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($biography) : ?>
-                    <div class="mt-candidate-biography">
-                        <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
-                        <div class="mt-bio-content">
-                            <?php echo wp_kses_post(wpautop($biography)); ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($presentation_settings['show_full_bio'] && $candidate->post_content) : ?>
+                <?php if ($presentation_settings['show_full_bio'] && ($biography || $candidate->post_content)) : ?>
                     <div class="mt-candidate-bio">
                         <h3><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
                         <div class="mt-bio-content">
-                            <?php echo wp_kses_post(wpautop($candidate->post_content)); ?>
+                            <?php 
+                            // Use biography meta if available, otherwise use post content
+                            $bio_content = $biography ?: $candidate->post_content;
+                            echo wp_kses_post(wpautop($bio_content)); 
+                            ?>
                         </div>
                     </div>
                 <?php endif; ?>

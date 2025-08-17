@@ -1,5 +1,5 @@
 # Mobility Trailblazers - Master Developer Guide
-*Last Updated: August 16, 2025 | Version 2.4.1*
+*Last Updated: August 17, 2025 | Version 2.5.0*
 
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -9,14 +9,15 @@
 5. [Database Schema](#database-schema)
 6. [Security Implementation](#security-implementation)
 7. [Auto-Assignment System](#auto-assignment-system)
-8. [Dashboard System](#dashboard-system)
-9. [Audit Logging](#audit-logging)
-10. [User Roles & Capabilities](#user-roles--capabilities)
-11. [Plugin Settings](#plugin-settings)
-12. [Testing & Debugging](#testing--debugging)
-13. [Code Examples](#code-examples)
-14. [Best Practices](#best-practices)
-15. [Version History](#version-history)
+8. [Frontend Assets Management](#frontend-assets-management)
+9. [Dashboard System](#dashboard-system)
+10. [Audit Logging](#audit-logging)
+11. [User Roles & Capabilities](#user-roles--capabilities)
+12. [Plugin Settings](#plugin-settings)
+13. [Testing & Debugging](#testing--debugging)
+14. [Code Examples](#code-examples)
+15. [Best Practices](#best-practices)
+16. [Version History](#version-history)
 
 ---
 
@@ -670,6 +671,81 @@ $result = $service->auto_assign('balanced', 5, true);
 - Existing assignments
 - No candidates/jury members
 - Database constraints
+
+---
+
+## Frontend Assets Management
+
+### CSS Architecture (v2.5.0)
+
+The frontend uses a layered CSS architecture with specific load order:
+
+#### Base Stylesheets
+```css
+1. frontend.css          - Core frontend styles
+2. enhanced-candidate-profile.css - Enhanced profile features
+3. candidate-profile-fixes.css    - Layout fixes (v2.4.2)
+4. design-improvements-2025.css   - UI/UX improvements (v2.5.0)
+```
+
+#### CSS Load Order
+```php
+// In class-mt-plugin.php
+wp_enqueue_style('mt-frontend', ...);
+wp_enqueue_style('mt-enhanced-candidate-profile', ['mt-frontend'], ...);
+wp_enqueue_style('mt-candidate-profile-fixes', ['mt-frontend', 'mt-enhanced-candidate-profile'], ...);
+wp_enqueue_style('mt-design-improvements', ['mt-frontend', 'mt-enhanced-candidate-profile', 'mt-candidate-profile-fixes'], ...);
+```
+
+### JavaScript Enhancements (v2.5.0)
+
+#### design-enhancements.js Features
+```javascript
+// Smooth scrolling
+$('a[href^="#"]').on('click', smoothScroll);
+
+// Scroll animations
+animateOnScroll();  // Fade-in animations for cards
+
+// Progress indicators
+MTEvaluationProgress.init();  // Visual progress tracking
+
+// Auto-save feedback
+MTSaveIndicator.show();  // Visual save confirmation
+
+// Accessibility enhancements
+initKeyboardNavigation();
+initSkipToContent();
+initFocusManagement();
+```
+
+### Responsive Breakpoints
+```css
+@media (max-width: 968px)  /* Tablet landscape */
+@media (max-width: 768px)  /* Tablet portrait */
+@media (max-width: 640px)  /* Mobile */
+```
+
+### SVG Icon Implementation (v2.5.0)
+Social media icons now use inline SVGs instead of dashicons:
+
+```php
+// LinkedIn SVG
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 0h-14c-2.761..."/>
+</svg>
+
+// Website/Globe SVG
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0c-6.627..."/>
+</svg>
+```
+
+### Performance Optimizations
+- GPU-accelerated CSS animations
+- IntersectionObserver for lazy loading
+- Debounced scroll events
+- Critical CSS inlining ready
 
 ---
 
