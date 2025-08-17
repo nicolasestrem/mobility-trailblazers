@@ -11,9 +11,8 @@
 
 /* Reduce hero section padding significantly */
 .mt-hero-section {
-    padding: 40px 0 30px !important; /* Optimal padding */
+    padding: 30px 0 20px !important; /* Further reduced */
     min-height: auto !important;
-    max-height: 400px !important; /* Add maximum height constraint */
 }
 
 /* Remove any top margin/padding from the main container */
@@ -71,12 +70,11 @@ body.admin-bar .mt-hero-section {
 
 /* Fix text formatting in evaluation criteria */
 .mt-criterion-content {
-    white-space: pre-line !important; /* Changed to preserve line breaks */
+    white-space: normal !important; /* Changed from pre-wrap for better formatting */
     word-wrap: break-word !important;
     line-height: 1.8 !important;
     color: #4b5563 !important;
     font-size: 0.95rem !important;
-    overflow-wrap: break-word !important; /* Add for better word breaking */
 }
 
 /* Add proper paragraph spacing */
@@ -87,13 +85,6 @@ body.admin-bar .mt-hero-section {
 
 .mt-criterion-content p:last-child {
     margin-bottom: 0 !important;
-}
-
-/* Add proper line break handling */
-.mt-criterion-content br {
-    display: block !important;
-    margin: 0.5em 0 !important;
-    content: "" !important;
 }
 
 /* Ensure proper text display in cards */
@@ -232,8 +223,6 @@ body.admin-bar .mt-hero-section {
 /* Fix any overflow issues */
 .mt-hero-pattern {
     overflow: hidden !important;
-    height: 100% !important;
-    max-height: 400px !important;
 }
 
 /* Improve content readability */

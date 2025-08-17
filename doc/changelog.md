@@ -1,4 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 ## [2.5.3] - 2025-08-17
 ### Critical Security Fixes
 - **CSS Syntax Errors**: Fixed invalid CSS with spaces between values and units (40 px → 40px)
@@ -56,6 +61,8 @@
   - Enhanced responsive design for mobile viewports
   - Better organization of fixes across CSS files
 
+=======
+>>>>>>> parent of 18e9855 (Fix v2.5.0 breaking issues - Hero height, text formatting, colors, grid)
 ## [2.5.0] - 2025-08-17
 ### Added
 - **Comprehensive Design Improvements**: Implemented major design overhaul for better user experience
@@ -92,6 +99,8 @@
   - Added design-enhancements.js with jQuery dependency
   - Proper dependency chain for CSS load order
 
+=======
+>>>>>>> parent of 6d6222d (Add comprehensive design improvements for 2025)
 ## [2.4.5] - 2025-08-17
 ### Documentation
 - **Complete Candidate Page Design Fixes Documentation**: Created comprehensive documentation for all layout improvements
@@ -102,6 +111,12 @@
   - Complete testing results and browser compatibility information
   - New file: `doc/candidate-page-design-layout-fixes-complete.md`
 
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
+=======
+>>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 =======
 >>>>>>> parent of 7d8d650 (Fix candidate profile layout and icon issues)
 ## [2.4.4] - 2025-08-17
