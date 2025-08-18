@@ -3,6 +3,24 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.31] - 2025-08-18
+### Fixed
+- **Candidate Image Cropping Issue**: Fixed Friedrich Dräxlmaier's profile image where face was not visible
+  - Added new CSS file `candidate-image-adjustments.css` for specific image positioning
+  - Implemented `object-position: center 25%` to adjust image focus point
+  - Applied fix to hero images, profile photos, and grid view cards
+  - Added responsive adjustments for mobile views
+  - New file: `assets/css/candidate-image-adjustments.css`
+  - Modified: `includes/core/class-mt-plugin.php` (added stylesheet enqueue)
+  - Can be used as template for fixing other candidates with similar issues
+
+### Technical Details
+- Default `object-position` changed from `center center` to `center 30%` for better face visibility
+- Specific adjustment for Friedrich Dräxlmaier using post ID 4627 selectors
+- Supports multiple selector patterns: body class, data attributes, and href matching
+- Mobile-responsive with adjusted positioning for smaller screens
+
+
 ## [2.5.30] - 2025-08-18
 ### Added
 - **Custom Scroll-to-Top Solution**: Complete replacement for broken Happy Addons button

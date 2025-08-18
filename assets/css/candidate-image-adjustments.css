@@ -1,0 +1,102 @@
+/**
+ * Candidate Image Adjustments
+ * Version: 1.0.0
+ * Created: 2025-08-18
+ * 
+ * Description: Specific image positioning adjustments for candidates
+ * where faces are not properly visible with default cropping
+ */
+
+/* ===================================
+   GENERAL IMAGE POSITIONING FIX
+   =================================== */
+
+/* Default object-position adjustment for better face visibility */
+.mt-candidate-hero-photo,
+.mt-candidate-photo,
+.mt-candidate-image img {
+    object-position: center 30% !important; /* Move focus point up to show faces better */
+}
+
+/* ===================================
+   SPECIFIC CANDIDATE ADJUSTMENTS
+   =================================== */
+
+/* Friedrich Dräxlmaier - Face visible in upper portion */
+body.postid-4627 .mt-candidate-hero-photo,
+body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
+.candidate-friedrich-draexlmaier .mt-candidate-hero-photo {
+    object-position: center 25% !important; /* Adjust to show face properly */
+}
+
+/* Alternative selector for candidate grid */
+[data-candidate-id="4627"] .mt-candidate-photo,
+[data-candidate-id="4627"] .mt-candidate-image img {
+    object-position: center 25% !important;
+}
+
+/* Candidate cards on grid view */
+.mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-photo,
+.mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-image img {
+    object-position: center 25% !important;
+}
+
+/* ===================================
+   RESPONSIVE ADJUSTMENTS
+   =================================== */
+
+@media (max-width: 768px) {
+    /* Adjust for mobile where images are smaller */
+    .mt-candidate-hero-photo,
+    .mt-candidate-photo,
+    .mt-candidate-image img {
+        object-position: center 35% !important;
+    }
+    
+    body.postid-4627 .mt-candidate-hero-photo,
+    body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
+    .candidate-friedrich-draexlmaier .mt-candidate-hero-photo {
+        object-position: center 30% !important;
+    }
+}
+
+/* ===================================
+   FALLBACK FOR MISSING FACES
+   =================================== */
+
+/* If you need to add more candidates with similar issues, follow this pattern:
+
+body.postid-XXXX .mt-candidate-hero-photo,
+body[class*="candidate-slug"] .mt-candidate-hero-photo {
+    object-position: center YY% !important;
+}
+
+Where:
+- XXXX is the post ID
+- candidate-slug is the URL slug
+- YY% is the vertical position (lower percentage = higher in image)
+*/
+
+/* ===================================
+   ENHANCED GRID VIEW FIX
+   =================================== */
+
+/* Better default for all candidate grid images */
+.mt-candidates-grid .mt-candidate-photo,
+.mt-candidates-grid .mt-candidate-image img,
+.mt-candidate-card .mt-candidate-photo,
+.mt-candidate-card .mt-candidate-image img {
+    object-position: center 30% !important; /* Better default for face visibility */
+}
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+
+@media print {
+    .mt-candidate-hero-photo,
+    .mt-candidate-photo,
+    .mt-candidate-image img {
+        object-position: center center !important; /* Reset for print */
+    }
+}

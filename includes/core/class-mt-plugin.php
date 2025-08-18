@@ -240,6 +240,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Candidate image positioning adjustments (v1.0.0)
+        wp_enqueue_style(
+            'mt-candidate-image-adjustments',
+            MT_PLUGIN_URL . 'assets/css/candidate-image-adjustments.css',
+            ['mt-enhanced-candidate-profile'],
+            '1.0.0'
+        );
+        
         // Brand alignment styles to match main website (v2.5.11)
         wp_enqueue_style(
             'mt-brand-alignment',
