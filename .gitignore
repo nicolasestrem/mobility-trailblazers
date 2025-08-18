@@ -1,122 +1,107 @@
-# Mobility Trailblazers Platform .gitignore
-# ==========================================
+# Production .gitignore for Mobility Trailblazers
+# =================================================
 
-# WordPress Core
-/wordpress/
-/wp-admin/
-/wp-includes/
-/wp-content/uploads/
-/wp-content/upgrade/
-/wp-content/backup-db/
-/wp-content/cache/
-/wp-content/backups/
-l
-# Configuration Fies
-/config/.env
-/config/.env.*
-!config/.env.example
+# WordPress Core (should not be in plugin repo)
 wp-config.php
-wp-config-local.php
-*.sql
-*.sql.gz
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
 
-# Development Dependencies
-/wordpress-plugin/mobility-trailblazers/vendor/
-/wordpress-plugin/mobility-trailblazers/node_modules/
-/development/build/vendor/
-/development/build/node_modules/
-
-# Build Artifacts
-/wordpress-plugin/releases/*.zip
-!/wordpress-plugin/releases/latest/.gitkeep
-*.min.js
-*.min.css
-*.map
-
-# Security Reports (sensitive data)
-/development/security/reports/*.json
-/development/security/reports/*.txt
-/development/security/reports/*.html
-!/development/security/reports/.gitkeep
-
-# Debug and Log Files
+# Temporary & Log Files
+*.tmp
+*.temp
+*.cache
 *.log
 error_log
-/development/debug/*.log
-/development/debug/output/
 debug.log
-/logs/
 
-# Archive (large files)
-/archive/**/*.zip
-/archive/**/*.tar.gz
-/archive/**/*.sql
-
-# IDE and Editor Files
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-.project
-.settings/
-*.tmproj
-*.tmproject
-tmtags
-
-# Operating System Files
+# OS Files
 .DS_Store
 .DS_Store?
 ._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 desktop.ini
+.Trashes
 
-# Temporary Files
-*.tmp
-*.temp
+# Editor Files
 *.swp
 *.swo
 *~
-.sass-cache/
+.idea/
+.vscode/
+*.sublime-*
+*.code-workspace
 
 # Backup Files
 *.bak
 *.backup
-*_backup
+*.orig
 *.old
-*_old
 
-# Docker
-/infrastructure/docker/mysql/data/
-/infrastructure/docker/wordpress/uploads/
-*.env.local
+# Local Configuration
+*.local.php
+*.local.json
+.env
+.env.*
+!.env.example
 
-# Komodo
-/infrastructure/komodo/*.env
-/infrastructure/komodo/secrets/
-
-# Documentation Working Files
-/documentation/**/*.docx
-/documentation/**/*.pptx
-!/documentation/business/meeting-minutes/*.docx
-*.~lock.*
-
-# Testing
-/development/testing/coverage/
-/development/testing/results/
+# Development Files (removed from production)
+/debug/
+/tests/
+/tools/
+/node_modules/
+/vendor/
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpunit.xml
 .phpunit.result.cache
+.phpcs.xml
+.eslintrc*
+.prettierrc*
+webpack.config.js
 
-# Keep these directories with .gitkeep
-!/wordpress-plugin/releases/.gitkeep
-!/development/security/reports/.gitkeep
-!/documentation/business/meeting-minutes/.gitkeep
-!/assets/branding/logos/.gitkeepplugin/mobility-trailblazers/
+# Build Files
+/dist/
+/build/
+*.map
+*.min.js.map
+*.min.css.map
 
-# Claude AI context files
+# Documentation Archives
+/doc/archived/
+/doc/test-*
+
+# Data Files
+/data/*.local.csv
+/data/test-*
+
+# Session Files
+SESSION_*.md
+
+# Development Scripts
+test-*.php
+create-*.php
+fix-*.php
+migrate-*.php
+import-*.php
+cleanup-*.php
+*.ps1
+*.bat
+
+# Git Development
+.gitattributes
+.github/
+
+# Docker & DevContainers
+.devcontainer/
+docker-compose.override.yml
+
+# MCP & Claude Files
 .claude/
 .cursor/
+
 CLAUDE.md
 .claude.json
 .claude-local.json
@@ -151,3 +136,20 @@ deprecated/
 *.ps1
 *.bat
 cleanup-*.sh
+=======
+.claude.json
+.claude-local.json
+.mcp.json
+/mcp-tools/
+
+# Photos (keep in repo but ignore changes)
+/Photos_candidates/
+
+# Keep Essential Directories
+!assets/
+!includes/
+!languages/
+!templates/
+!doc/
+/.claude
+
