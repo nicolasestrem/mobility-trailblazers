@@ -834,6 +834,34 @@ FROM wp_mt_evaluations
 WHERE status = 'submitted';
 ```
 
+## Code Cleanup History
+
+### August 18, 2025 - Scroll-to-Top Removal
+
+**Version**: 2.5.31
+**Reason**: Feature was causing conflicts and not properly integrated
+
+**Files Removed**:
+- `assets/css/mt-scroll-to-top.css` - Ultra-aggressive CSS with excessive specificity
+- `assets/js/mt-scroll-to-top.js` - JavaScript implementation
+- `includes/integrations/elementor/widgets/class-mt-widget-scroll-to-top.php` - Elementor widget
+- `doc/scroll-to-top-implementation.md` - Documentation
+
+**Files Modified**:
+- `includes/integrations/elementor/class-mt-elementor-loader.php` - Removed widget registration
+- `doc/CHANGELOG.md` - Updated to reflect removal
+
+**Key Notes**:
+- The scroll-to-top feature was never properly enqueued in `class-mt-plugin.php`
+- CSS used excessive `!important` declarations that could conflict with themes
+- Multiple redundant implementations existed
+- Decision made to completely remove rather than fix due to unnecessary complexity
+
+**Preserved Working Features**:
+- Animation system (v2.5.29) remains intact and functional
+- Spacing fixes that resolved white bar issues were preserved
+- All other Elementor widgets continue to function
+
 ## Troubleshooting
 
 ### Common Issues

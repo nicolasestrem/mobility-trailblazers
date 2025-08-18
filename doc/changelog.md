@@ -21,42 +21,26 @@
 - Mobile-responsive with adjusted positioning for smaller screens
 
 
-## [2.5.30] - 2025-08-18
-### Added
-- **Custom Scroll-to-Top Solution**: Complete replacement for broken Happy Addons button
-  - JavaScript class `MTScrollToTop` with comprehensive functionality
-  - CSS file `mt-scroll-to-top.css` with ultra-aggressive overrides
-  - Fixed positioning system that bypasses all theme conflicts
-  - Smooth scroll animation with fallback for older browsers
-  - Accessibility support with ARIA labels and keyboard navigation
-  - Proper focus management after scroll completion
-  - Performance optimized with debounced scroll events
-  - New files:
-    - `assets/css/mt-scroll-to-top.css`
-    - `assets/js/mt-scroll-to-top.js`
-  - Modified: `includes/core/class-mt-plugin.php` (enqueue_frontend_assets)
-
-- **Elementor Scroll-to-Top Widget**: Professional widget for cross-site reusability
-  - Complete Elementor widget class `MT_Widget_Scroll_To_Top`
-  - Comprehensive controls interface with position, styling, and animation options
-  - Four position options: bottom-right, bottom-left, top-right, top-left
-  - Customizable offset controls for precise positioning
-  - Adjustable scroll threshold (when button appears)
-  - Full styling controls: size, background gradients, colors, borders, shadows
-  - Icon size controls and three hover animation options (lift, scale, rotate)
-  - Animation duration settings and speed controls
-  - Per-widget instance styling with inline CSS generation
-  - Editor preview functionality for live design
-  - New file: `includes/integrations/elementor/widgets/class-mt-widget-scroll-to-top.php`
+## [2.5.31] - 2025-08-18
+### Removed
+- **Scroll-to-Top Implementation**: Complete removal of all scroll-to-top functionality
+  - Deleted custom implementation that was causing conflicts and never properly integrated
+  - Removed Elementor widget integration from loader
+  - Cleaned up CSS and JavaScript files (3 files deleted)
   - Modified: `includes/integrations/elementor/class-mt-elementor-loader.php`
+  - Documented cleanup in developer guide for future reference
 
 ### Fixed
-- **Happy Addons Compatibility**: Resolved scroll-to-top button not sticking on production
-  - Button had 0 dimensions and wasn't visible on frontend
-  - CSS positioning conflicts with theme containers and transforms
-  - Fixed by implementing custom solution that bypasses all theme interference
-  - Button now attaches to `document.documentElement` for guaranteed positioning
-  - Ultra-specific CSS selectors override all possible conflicts
+- **Code Cleanup**: Removed redundant and non-functional code
+  - Eliminated ultra-aggressive CSS with excessive !important declarations
+  - Removed unused JavaScript classes and implementations
+  - Cleaned up widget registrations
+
+### Preserved
+- **Working Features**: Maintained all functional components
+  - Animation system v2.5.29 remains intact
+  - Spacing fixes that resolved white bar issues preserved
+  - All other Elementor widgets continue functioning
 
 ### Technical Details
 - Maximum z-index (2147483647) ensures button appears above all content
