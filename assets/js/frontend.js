@@ -502,6 +502,10 @@
                 // Try numeric inputs
                 $sliders = $('input[type="number"][name*="_score"]');
             }
+            if ($sliders.length === 0) {
+                // Try hidden inputs (used with button-style scoring)
+                $sliders = $('input[type="hidden"][name*="_score"]');
+            }
             
             $sliders.each(function() {
                 var value = parseFloat($(this).val());
@@ -565,10 +569,15 @@
             
             // Validate form selection
             
-            // Validate scores
+            // Validate scores (check all types of score inputs)
             var isValid = true;
-            $('.mt-score-slider').each(function() {
-                var value = parseInt($(this).val());
+            var $scoreInputs = $('.mt-score-slider');
+            if ($scoreInputs.length === 0) {
+                $scoreInputs = $('input[name*="_score"]'); // This will match hidden, range, number inputs
+            }
+            
+            $scoreInputs.each(function() {
+                var value = parseFloat($(this).val());
                 if (isNaN(value) || value < 0 || value > 10) {
                     isValid = false;
                     return false;
@@ -811,6 +820,9 @@
         
         $group.find('input[type="hidden"]').val(value);
         updateScoreDisplay($button.closest('.mt-criterion-card'), value);
+        
+        // Update total score when button is clicked
+        MTJuryDashboard.updateTotalScore();
     });
 
     // Numeric input functionality

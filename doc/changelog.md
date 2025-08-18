@@ -2,6 +2,30 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.20.2] - 2025-08-18
+### Fixed
+- **Button-Style Score Calculation**: Fixed total score not updating with button-style scoring
+  - Added support for hidden input fields used with score buttons
+  - Updated `updateTotalScore()` to check for hidden inputs when sliders not found
+  - Fixed validation to work with all input types (hidden, range, number)
+  - Modified: `assets/js/frontend.js` (lines 505-508, 572-585)
+
+- **Submit Button Color**: Fixed evaluation submit button showing orange instead of #004C5F
+  - Added more specific CSS selectors to override theme styles
+  - Used `!important` declarations to ensure correct color application
+  - Modified: `assets/css/mt-evaluation-fixes.css` (lines 122-154)
+
+### Improved
+- **Admin Testing Support**: Added admin bypass for assignment checks during testing
+  - Allows admin users to test evaluation forms without jury assignments
+  - Modified: `templates/frontend/jury-dashboard.php` (lines 34-37)
+
+### Cleaned
+- **Production Deployment**: Removed development files from production
+  - Deleted `/debug` directory and all development/testing files
+  - Removed backup files and directories from `/assets/css`
+  - Production now contains only necessary runtime files
+
 ## [2.5.20] - 2025-08-18
 ### Fixed
 - **Total Score Calculation**: Fixed score always showing 0 on evaluation pages

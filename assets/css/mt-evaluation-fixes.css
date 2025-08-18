@@ -119,11 +119,12 @@
     margin-left: 10px;
 }
 
-/* Save buttons */
-.mt-save-draft,
-.mt-submit-evaluation {
-    background: #004C5F;
-    color: white;
+/* Save buttons - More specific selectors to override theme styles */
+button.mt-save-draft,
+button.mt-submit-evaluation,
+.mt-btn.mt-submit-evaluation {
+    background: #004C5F !important;
+    color: white !important;
     border: none;
     padding: 12px 30px;
     border-radius: 5px;
@@ -134,19 +135,22 @@
     margin: 10px;
 }
 
-.mt-save-draft:hover,
-.mt-submit-evaluation:hover {
-    background: #003C3D;
+button.mt-save-draft:hover,
+button.mt-submit-evaluation:hover,
+.mt-btn.mt-submit-evaluation:hover {
+    background: #003C3D !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.mt-save-draft {
-    background: #666;
+button.mt-save-draft,
+.mt-btn.mt-save-draft {
+    background: #666 !important;
 }
 
-.mt-save-draft:hover {
-    background: #555;
+button.mt-save-draft:hover,
+.mt-btn.mt-save-draft:hover {
+    background: #555 !important;
 }
 
 /* Fix spacing and alignment */
