@@ -245,6 +245,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Evaluation form fixes (v2.5.20.1)
+        wp_enqueue_style(
+            'mt-evaluation-fixes',
+            MT_PLUGIN_URL . 'assets/css/mt-evaluation-fixes.css',
+            ['mt-frontend', 'mt-evaluation-forms'],
+            MT_VERSION
+        );
+        
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
             'mt-design-enhancements',
@@ -341,7 +349,13 @@ class MT_Plugin {
                 'save' => __('Save', 'mobility-trailblazers'),
                 'error_saving_evaluation' => __('Error saving evaluation', 'mobility-trailblazers'),
                 'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
-                'invalid_scores' => __('Please ensure all scores are between 0 and 10.', 'mobility-trailblazers')
+                'invalid_scores' => __('Please ensure all scores are between 0 and 10.', 'mobility-trailblazers'),
+                'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
+                'courage_description' => __('Demonstrates bold vision and willingness to take risks in advancing mobility transformation', 'mobility-trailblazers'),
+                'innovation_description' => __('Shows creative problem-solving and introduces novel approaches to mobility challenges', 'mobility-trailblazers'),
+                'implementation_description' => __('Successfully executes ideas with measurable impact on sustainable mobility', 'mobility-trailblazers'),
+                'relevance_description' => __('Addresses critical aspects of transportation transformation and future mobility needs', 'mobility-trailblazers'),
+                'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
     }

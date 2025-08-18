@@ -380,32 +380,37 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             'courage' => [
                 'key' => 'courage_score',
                 'label' => __('Mut & Pioniergeist', 'mobility-trailblazers'),
-                'description' => __('Courage & Pioneer Spirit', 'mobility-trailblazers'),
-                'icon' => 'dashicons-superhero'
+                'description' => __('Demonstrates bold vision and willingness to take risks in advancing mobility transformation', 'mobility-trailblazers'),
+                'icon' => 'dashicons-superhero',
+                'color' => '#FF6B6B'
             ],
             'innovation' => [
                 'key' => 'innovation_score',
                 'label' => __('Innovationsgrad', 'mobility-trailblazers'),
-                'description' => __('Innovation Degree', 'mobility-trailblazers'),
-                'icon' => 'dashicons-lightbulb'
+                'description' => __('Shows creative problem-solving and introduces novel approaches to mobility challenges', 'mobility-trailblazers'),
+                'icon' => 'dashicons-lightbulb',
+                'color' => '#4ECDC4'
             ],
             'implementation' => [
                 'key' => 'implementation_score',
                 'label' => __('Umsetzungskraft & Wirkung', 'mobility-trailblazers'),
-                'description' => __('Implementation & Impact', 'mobility-trailblazers'),
-                'icon' => 'dashicons-hammer'
+                'description' => __('Successfully executes ideas with measurable impact on sustainable mobility', 'mobility-trailblazers'),
+                'icon' => 'dashicons-hammer',
+                'color' => '#45B7D1'
             ],
             'relevance' => [
                 'key' => 'relevance_score',
                 'label' => __('Relevanz für Mobilitätswende', 'mobility-trailblazers'),
-                'description' => __('Mobility Transformation Relevance', 'mobility-trailblazers'),
-                'icon' => 'dashicons-location-alt'
+                'description' => __('Addresses critical aspects of transportation transformation and future mobility needs', 'mobility-trailblazers'),
+                'icon' => 'dashicons-location-alt',
+                'color' => '#96CEB4'
             ],
             'visibility' => [
                 'key' => 'visibility_score',
                 'label' => __('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'),
-                'description' => __('Role Model & Visibility', 'mobility-trailblazers'),
-                'icon' => 'dashicons-visibility'
+                'description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers'),
+                'icon' => 'dashicons-visibility',
+                'color' => '#FFEAA7'
             ]
         ];
         

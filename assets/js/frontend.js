@@ -490,14 +490,45 @@
         updateTotalScore: function() {
             var total = 0;
             var count = 0;
+            var nonZeroCount = 0;
             
-            $('.mt-score-slider').each(function() {
-                total += parseInt($(this).val()) || 0;
-                count++;
+            // Try multiple selectors to find score inputs
+            var $sliders = $('.mt-score-slider');
+            if ($sliders.length === 0) {
+                // Try alternate selectors
+                $sliders = $('input[type="range"][name*="_score"]');
+            }
+            if ($sliders.length === 0) {
+                // Try numeric inputs
+                $sliders = $('input[type="number"][name*="_score"]');
+            }
+            
+            $sliders.each(function() {
+                var value = parseFloat($(this).val());
+                if (!isNaN(value)) {
+                    total += value;
+                    count++;
+                    if (value > 0) {
+                        nonZeroCount++;
+                    }
+                }
             });
             
-            var average = count > 0 ? (total / count).toFixed(1) : 0;
-            $('#mt-total-score').text(average);
+            // Calculate average
+            var average = count > 0 ? (total / count).toFixed(1) : '0.0';
+            
+            // Update the display
+            var $totalScore = $('#mt-total-score');
+            if ($totalScore.length) {
+                $totalScore.text(average);
+            }
+            
+            // Also update the evaluated count
+            var $evaluatedCount = $('.mt-evaluated-count');
+            if ($evaluatedCount.length) {
+                var evaluatedText = '(' + nonZeroCount + '/5 ' + getI18nText('criteria_evaluated', 'criteria evaluated') + ')';
+                $evaluatedCount.text(evaluatedText);
+            }
         },
         
         updateCharCount: function() {
@@ -708,6 +739,16 @@
     // Initialize on document ready
     $(document).ready(function() {
         MTJuryDashboard.init();
+        
+        // Fallback initialization after a short delay
+        setTimeout(function() {
+            MTJuryDashboard.updateTotalScore();
+        }, 500);
+        
+        // Also try on window load
+        $(window).on('load', function() {
+            MTJuryDashboard.updateTotalScore();
+        });
     });
     
     // Star rating functionality

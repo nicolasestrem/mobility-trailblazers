@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Score Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Simple Score Test - No WordPress</h1>
+    <h2>Average Score: <span id="mt-total-score">0.0</span>/10</h2>
+    
+    <div>
+        <label>Courage: <input type="range" class="mt-score-slider" min="0" max="10" step="0.5" value="5"></label><br>
+        <label>Innovation: <input type="range" class="mt-score-slider" min="0" max="10" step="0.5" value="6"></label><br>
+        <label>Implementation: <input type="range" class="mt-score-slider" min="0" max="10" step="0.5" value="7"></label><br>
+        <label>Relevance: <input type="range" class="mt-score-slider" min="0" max="10" step="0.5" value="8"></label><br>
+        <label>Visibility: <input type="range" class="mt-score-slider" min="0" max="10" step="0.5" value="9"></label><br>
+    </div>
+    
+    <script>
+    function updateTotalScore() {
+        var total = 0;
+        var count = 0;
+        
+        $('.mt-score-slider').each(function() {
+            var value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                total += value;
+                count++;
+            }
+        });
+        
+        var average = count > 0 ? (total / count).toFixed(1) : '0.0';
+        $('#mt-total-score').text(average);
+        console.log('Updated score to: ' + average);
+    }
+    
+    $(document).ready(function() {
+        $('.mt-score-slider').on('input', updateTotalScore);
+        updateTotalScore();
+    });
+    </script>
+</body>
+</html>

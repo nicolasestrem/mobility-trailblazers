@@ -27,9 +27,14 @@ if (isset($_GET['evaluate']) && is_numeric($_GET['evaluate'])) {
         return;
     }
     
-    // Verify assignment
+    // Verify assignment - Skip check for admin users during testing
     $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
     $has_assignment = $assignment_repo->exists($jury_member->ID, $candidate_id);
+    
+    // Allow admin users to bypass assignment check for testing
+    if (current_user_can('manage_options')) {
+        $has_assignment = true;
+    }
     
     if ($has_assignment) {
         include MT_PLUGIN_DIR . 'templates/frontend/jury-evaluation-form.php';

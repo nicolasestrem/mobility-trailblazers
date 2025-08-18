@@ -632,20 +632,22 @@ body.single-mt_candidate .mt-hero-section {
 }
 
 .mt-nav-all {
-    background: var(--mt-accent);
+    background: #004C5F;
     color: white;
     justify-content: center;
     font-weight: 600;
+    border: 2px solid #004C5F;
 }
 
 .mt-nav-all:hover {
-    background: var(--mt-kupfer-bold);
+    background: #003C3D;
     color: white;
     transform: translateY(-2px);
+    border-color: #003C3D;
 }
 
 .mt-nav-all i {
-    color: white;
+    color: white !important;
 }
 
 /* Responsive Design */

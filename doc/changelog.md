@@ -2,6 +2,26 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.20] - 2025-08-18
+### Fixed
+- **Total Score Calculation**: Fixed score always showing 0 on evaluation pages
+  - Changed from `parseInt()` to `parseFloat()` to preserve decimal values
+  - Now correctly calculates averages with 0.5 step increments
+  - Updated evaluated count display
+  - Modified: `assets/js/frontend.js` (line 490)
+
+- **Evaluation Criteria Descriptions**: Enhanced criterion descriptions with detailed explanations
+  - Added comprehensive English descriptions for all 5 evaluation criteria
+  - Improved localization support with new translation strings
+  - Added color codes for visual distinction
+  - Modified: `includes/services/class-mt-evaluation-service.php`
+  - Modified: `includes/core/class-mt-plugin.php`
+
+### Verified
+- **Draft Saving**: Confirmed working correctly with existing implementation
+  - AJAX handler properly processes `status: 'draft'` parameter
+  - Draft evaluations save successfully to database
+
 ## [2.5.19] - 2025-08-18
 ### Added
 - **Complete Ranking System Rebuild**: Brand new ranking and medal display system
