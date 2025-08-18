@@ -2,6 +2,15 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.28] - 2025-01-20
+### Fixed
+- **Database Schema Migration Complete**: Finished migration from generic column names to descriptive ones
+  - All PHP files now use new schema: courage_score, innovation_score, implementation_score, relevance_score, visibility_score
+  - Updated 9 remaining files that still used old criterion_1-5 naming
+  - Files updated: single-mt_jury.php, coaching.php, class-mt-import-export.php, all test files, performance-test.php
+  - Resolves PR #9 conflict by completing the schema migration across entire codebase
+  - Database and codebase now fully aligned with descriptive column names
+
 ## [2.5.27] - 2025-01-18
 ### Fixed
 - **Mobile Content Cutoff**: Fixed candidate card content being cut off on mobile devices
