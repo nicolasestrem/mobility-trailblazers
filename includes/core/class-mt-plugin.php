@@ -419,6 +419,22 @@ class MT_Plugin {
                 'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
+        
+        // Custom Scroll to Top Button (v2.5.30)
+        wp_enqueue_style(
+            'mt-scroll-to-top',
+            MT_PLUGIN_URL . 'assets/css/mt-scroll-to-top.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
+        wp_enqueue_script(
+            'mt-scroll-to-top',
+            MT_PLUGIN_URL . 'assets/js/mt-scroll-to-top.js',
+            ['jquery'],
+            MT_VERSION,
+            true
+        );
     }
     
     /**

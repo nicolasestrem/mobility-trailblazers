@@ -3,6 +3,56 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.30] - 2025-08-18
+### Added
+- **Custom Scroll-to-Top Solution**: Complete replacement for broken Happy Addons button
+  - JavaScript class `MTScrollToTop` with comprehensive functionality
+  - CSS file `mt-scroll-to-top.css` with ultra-aggressive overrides
+  - Fixed positioning system that bypasses all theme conflicts
+  - Smooth scroll animation with fallback for older browsers
+  - Accessibility support with ARIA labels and keyboard navigation
+  - Proper focus management after scroll completion
+  - Performance optimized with debounced scroll events
+  - New files:
+    - `assets/css/mt-scroll-to-top.css`
+    - `assets/js/mt-scroll-to-top.js`
+  - Modified: `includes/core/class-mt-plugin.php` (enqueue_frontend_assets)
+
+- **Elementor Scroll-to-Top Widget**: Professional widget for cross-site reusability
+  - Complete Elementor widget class `MT_Widget_Scroll_To_Top`
+  - Comprehensive controls interface with position, styling, and animation options
+  - Four position options: bottom-right, bottom-left, top-right, top-left
+  - Customizable offset controls for precise positioning
+  - Adjustable scroll threshold (when button appears)
+  - Full styling controls: size, background gradients, colors, borders, shadows
+  - Icon size controls and three hover animation options (lift, scale, rotate)
+  - Animation duration settings and speed controls
+  - Per-widget instance styling with inline CSS generation
+  - Editor preview functionality for live design
+  - New file: `includes/integrations/elementor/widgets/class-mt-widget-scroll-to-top.php`
+  - Modified: `includes/integrations/elementor/class-mt-elementor-loader.php`
+
+### Fixed
+- **Happy Addons Compatibility**: Resolved scroll-to-top button not sticking on production
+  - Button had 0 dimensions and wasn't visible on frontend
+  - CSS positioning conflicts with theme containers and transforms
+  - Fixed by implementing custom solution that bypasses all theme interference
+  - Button now attaches to `document.documentElement` for guaranteed positioning
+  - Ultra-specific CSS selectors override all possible conflicts
+
+### Technical Details
+- Maximum z-index (2147483647) ensures button appears above all content
+- Inline styles in JavaScript bypass CSS cascade conflicts
+- GPU acceleration with `transform3d` for smooth animations
+- Reduced motion support for accessibility compliance
+- Cross-browser compatible with IE11+ support
+- Widget registration in Elementor under "Mobility Trailblazers" category
+
+### Production Deployment
+- All files uploaded to production FTP server
+- Plugin version incremented to 2.5.30
+- Ready for immediate use across multiple sites via Elementor widget
+
 ## [2.5.29] - 2025-08-18
 ### Added
 - **Enhanced Animation System**: Comprehensive animation library with 50+ effects
