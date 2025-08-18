@@ -70,7 +70,13 @@
       "mcp__mobility-ftp__ftp_upload_directory",
       "Bash(git restore:*)",
       "mcp__kapture__show",
-      "mcp__memory__create_entities"
+      "mcp__memory__create_entities",
+      "Bash(cp:*)",
+      "Bash(docker cp:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(grep:*)",
+      "mcp__filesystem__list_allowed_directories",
+      "mcp__kapture__elementsFromPoint"
     ],
     "deny": [],
     "additionalDirectories": [

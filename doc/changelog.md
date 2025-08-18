@@ -2,41 +2,38 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
-## [2.5.22] - 2025-01-18
-### Added
-- **Native Elementor Widget Integration**: Complete Elementor integration with native widgets
-  - Created shared renderer class (`MT_Shortcode_Renderer`) used by both shortcodes and widgets
-  - Four native Elementor widgets matching all MT shortcodes:
-    - MT Jury Dashboard widget
-    - MT Candidates Grid widget with full controls
-    - MT Evaluation Statistics widget
-    - MT Winners Display widget
-  - Elementor Bootstrap loader for automatic widget registration
-  - Admin tool "MT Elementor Export" for generating importable templates
-  - Templates automatically detect container vs section mode
-  - New files:
-    - `includes/public/renderers/class-mt-shortcode-renderer.php`
-    - `includes/elementor/class-mt-elementor-bootstrap.php`
-    - `includes/elementor/widgets/` (4 widget classes)
-    - `includes/admin/tools/class-mt-elementor-export.php`
-
-### Changed
-- **Shortcode Architecture**: Refactored to use shared renderer
-  - All shortcodes now delegate rendering to `MT_Shortcode_Renderer`
-  - Ensures identical output between shortcodes and Elementor widgets
-  - Maintains backward compatibility for all existing shortcodes
-
+## [2.5.24] - 2025-01-18
 ### Fixed
-- **Elementor Template Issue**: Fixed templates showing raw shortcodes
-  - Templates now use native Elementor widgets instead of shortcode widget
-  - Proper widget registration in Elementor's widget manager
-  - Correct JSON structure for both container and section modes
-
+- **Elementor Integration Rebuilt**: Complete redesign of Elementor widget integration
+  - Moved to `includes/integrations/elementor/` directory for better organization
+  - Created singleton loader pattern to prevent multiple instantiations
+  - Implemented proper base widget class with error handling
+  - Fixed widget registration to prevent constructor errors
+  - Added file existence checks before requiring files
+  - Widgets now properly delegate to existing shortcodes
+  
+### Added
+- **Four Native Elementor Widgets**: 
+  - MT Jury Dashboard - displays jury member dashboard
+  - MT Candidates Grid - shows candidates with filtering options
+  - MT Evaluation Statistics - displays evaluation stats (admin only)
+  - MT Winners Display - shows top-ranked candidates
+  
 ### Technical Details
-- Widgets register under "Mobility Trailblazers" category in Elementor
-- All widgets include proper controls matching shortcode attributes
-- Style controls allow customization without affecting functionality
-- Assets (CSS/JS) are properly enqueued for both shortcodes and widgets
+- All widgets use shortcode delegation pattern for consistency
+- Proper namespace structure: `MobilityTrailblazers\Integrations\Elementor`
+- Widgets only load when Elementor is active
+- Category "Mobility Trailblazers" added to Elementor panel
+
+## [2.5.23] - 2025-01-18 [REVERTED]
+### Note
+- Attempted fix for widget loading issues but still had critical errors
+
+## [2.5.22] - 2025-01-18 [REVERTED]
+### Note
+- **Version reverted to 2.5.21 due to critical errors in Elementor integration**
+- Native Elementor widget integration causing fatal errors in production
+- Initial implementation had constructor and dependency issues
 
 ## [2.5.21] - 2025-01-18
 ### Added
