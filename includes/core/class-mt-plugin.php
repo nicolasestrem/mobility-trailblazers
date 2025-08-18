@@ -124,15 +124,9 @@ class MT_Plugin {
         // Initialize template loader for enhanced candidate profiles
         MT_Template_Loader::init();
         
-        // Initialize archive handler for grid layout
-        MT_Archive_Handler::init();
-        
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
-        
-        // Add body classes for animations
-        add_filter('body_class', [$this, 'add_animation_body_classes']);
     }
     
     /**
@@ -240,14 +234,6 @@ class MT_Plugin {
             MT_VERSION
         );
         
-        // Candidate image positioning adjustments (v1.0.0)
-        wp_enqueue_style(
-            'mt-candidate-image-adjustments',
-            MT_PLUGIN_URL . 'assets/css/candidate-image-adjustments.css',
-            ['mt-enhanced-candidate-profile'],
-            '1.0.0'
-        );
-        
         // Brand alignment styles to match main website (v2.5.11)
         wp_enqueue_style(
             'mt-brand-alignment',
@@ -288,35 +274,6 @@ class MT_Plugin {
             '1.0.0',
             true
         );
-        
-        // Animation styles (conditional based on settings)
-        $presentation_settings = get_option('mt_candidate_presentation', []);
-        if (!empty($presentation_settings['enable_animations']) || !empty($presentation_settings['enable_hover_effects'])) {
-            // Original animations (v2.5.28)
-            wp_enqueue_style(
-                'mt-animations',
-                MT_PLUGIN_URL . 'assets/css/mt-animations.css',
-                ['mt-frontend'],
-                MT_VERSION
-            );
-            
-            // Enhanced animations (v2.5.29)
-            wp_enqueue_style(
-                'mt-animations-enhanced',
-                MT_PLUGIN_URL . 'assets/css/mt-animations-enhanced.css',
-                ['mt-animations'],
-                MT_VERSION
-            );
-            
-            // Animation controller JavaScript
-            wp_enqueue_script(
-                'mt-animations',
-                MT_PLUGIN_URL . 'assets/js/mt-animations.js',
-                ['jquery'],
-                MT_VERSION,
-                true
-            );
-        }
         
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
@@ -414,42 +371,6 @@ class MT_Plugin {
                 'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
-        
-        // Custom Scroll to Top Button (v2.5.30)
-        wp_enqueue_style(
-            'mt-scroll-to-top',
-            MT_PLUGIN_URL . 'assets/css/mt-scroll-to-top.css',
-            ['mt-frontend'],
-            MT_VERSION
-        );
-        
-        wp_enqueue_script(
-            'mt-scroll-to-top',
-            MT_PLUGIN_URL . 'assets/js/mt-scroll-to-top.js',
-            ['jquery'],
-            MT_VERSION,
-            true
-        );
-    }
-    
-    /**
-     * Add body classes for animations based on settings
-     *
-     * @param array $classes Existing body classes
-     * @return array Modified body classes
-     */
-    public function add_animation_body_classes($classes) {
-        $presentation_settings = get_option('mt_candidate_presentation', []);
-        
-        if (!empty($presentation_settings['enable_animations'])) {
-            $classes[] = 'mt-animations-enabled';
-        }
-        
-        if (!empty($presentation_settings['enable_hover_effects'])) {
-            $classes[] = 'mt-hover-effects';
-        }
-        
-        return $classes;
     }
     
     /**

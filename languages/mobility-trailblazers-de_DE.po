@@ -161,9 +161,6 @@ msgstr "Ungültige Kandidaten-ID."
 msgid "Candidate not found."
 msgstr "Kandidat nicht gefunden."
 
-msgid "Invalid candidate."
-msgstr "Ungültiger Kandidat."
-
 # Admin Interface
 msgid "Settings saved successfully!"
 msgstr "Einstellungen erfolgreich gespeichert!"
