@@ -2,6 +2,153 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.16] - 2025-01-20
+### Removed
+- **Email Functionality**: Completely removed all email features from the plugin
+  - Deleted MT_Email_Service class and email service infrastructure
+  - Removed all email templates from templates/emails/ directory
+  - Removed "Send Reminder" buttons from coaching dashboard
+  - Removed email-related JavaScript functions from coaching.js
+  - Cleaned up AJAX handlers for email sending
+  - Plugin will no longer send any email notifications or reminders
+  - As requested, the plugin now operates without any email features
+
+### Changed  
+- **Coaching Dashboard**: Simplified interface without email actions
+  - Removed individual "Send Reminder" buttons from jury member rows
+  - Removed bulk email action buttons ("Send Reminders to Incomplete", "Remind About Drafts")
+  - Kept only "Export Coaching Report" and "Refresh Statistics" functionality
+  - Cleaner, more focused dashboard for tracking progress
+
+## [2.5.15] - 2025-01-20
+### Fixed
+- **View Details Button**: Fixed non-working View Details button in evaluations admin page
+  - Changed MTEvaluationManager from const to window object for proper scope
+  - Fixed initialization to ensure event handlers are properly bound
+  
+- **Debug Center Scripts**: Fixed JavaScript initialization for debug script buttons
+  - Buttons now properly execute debug scripts when clicked
+  - Event handlers correctly bound to mt-execute-script class
+
+### Removed
+- **Error Monitor Tab**: Removed deprecated Error Monitor tab from Debug Center
+  - Tab was no longer functional and has been replaced by standard WordPress debug logging
+  - Cleaner interface with only relevant debug tools
+
+### Improved
+- **JavaScript Initialization**: Better module initialization for admin pages
+- **Code Quality**: Removed unnecessary complexity in favor of simpler solutions
+
+## [2.5.14] - 2025-01-20
+### Fixed
+- **Candidate Card Backgrounds**: Applied consistent cream background (#F8F0E3) with blue accent borders
+  - Fixed missing background colors on candidate link cards
+  - Added hover effects with white background and copper borders
+  - Improved text color hierarchy for better readability
+  
+- **Jury Dashboard Title**: Enhanced header presentation with professional styling
+  - Implemented gradient background (deep teal to blue)
+  - Added Poppins font for improved typography
+  - Created visual depth with pattern overlay and shadows
+  - Styled progress bar with copper accent gradient
+
+- **Evaluation Button**: Removed inappropriate evaluation button from candidate pages
+  - Button was showing for all jury members regardless of assignment
+  - Evaluations now properly restricted to jury dashboard
+
+### Enhanced
+- **Brand Consistency**: Maintained color palette across all UI elements
+- **Visual Hierarchy**: Improved distinction between different content areas
+- **User Experience**: Smoother transitions and clearer interactive states
+
+## [2.5.13] - 2025-01-20
+### Security
+- **Debug Center Audit**: Complete security overhaul of admin debug interface
+  - Enhanced nonce verification on all AJAX endpoints
+  - Added capability checks for all operations
+  - Proper input sanitization and output escaping
+  - SQL injection prevention with prepared statements
+
+### Removed
+- **Delete All Candidates**: Permanently removed dangerous bulk delete operation
+  - Removed AJAX handler method
+  - Removed JavaScript function  
+  - Removed UI button from database tab
+  - Too risky even with confirmations
+
+### Fixed
+- **Debug Script Execution**: Now requires MT_DEV_TOOLS constant in production
+- **Log Clearing**: Restricted to non-destructive operations only
+- **System Info**: Removed sensitive data from responses
+- **Database Queries**: All queries now use prepared statements
+
+### Improved
+- **Security**: All AJAX handlers properly verify nonces and capabilities
+- **Internationalization**: All strings use proper text domain
+- **Error Handling**: Consistent error messages and logging
+- **Code Quality**: Removed deprecated and unsafe code patterns
+
+## [2.5.12] - 2025-08-17
+### Fixed
+- **Alignment Issues**: Fixed center alignment problems in candidate cards
+  - Text and elements now properly centered
+  - Improved visual hierarchy and layout consistency
+  
+- **Padding Problems**: Added proper padding to content boxes
+  - Increased padding from 20px to 25-30px for better breathing room
+  - Fixed content being too close to borders
+  - Applied consistent padding across all components
+  
+- **Color Corrections**: Updated to strict brand color palette
+  - Primary: #003C3D (deep teal)
+  - Secondary: #004C5F (deep blue)
+  - Body Text: #302C37 (dark gray)
+  - Accent: #C1693C (kupfer/copper)
+  - Background: #F8F0E3 (cream)
+  - Borders: #A4DCD5 (blue accent)
+
+### Changed
+- **Candidate Links**: Updated link button colors
+  - LinkedIn links use Secondary color (#004C5F)
+  - Website links use Accent color (#C1693C)
+  - Proper hover states with brand colors
+  
+- **Card Backgrounds**: Changed from white to BG Beige (#F8F0E3)
+  - Better consistency with main website
+  - Softer, more inviting appearance
+  
+### Added
+- **New Stylesheet**: Created `mt-brand-fixes.css` for targeted fixes
+  - Comprehensive fixes for alignment, padding, and colors
+  - High specificity overrides for consistency
+  - Responsive adjustments for mobile devices
+
+## [2.5.11] - 2025-08-17
+### Added
+- **Brand Alignment Styles**: New `mt-brand-alignment.css` stylesheet to match main website design
+  - Implemented main website color palette (#f8f0e3, #003c3d, #004c5f, #c1693c)
+  - Added Poppins font for headings matching main site typography
+  - Created consistent hover effects and transitions across all components
+
+### Changed
+- **Background Colors**: Updated to soft cream (#F8F0E3) for:
+  - `.mt-jury-dashboard` - Jury dashboard main container
+  - `.mt-candidates-list` - Candidates list container
+  - `.mt-candidate-grid-item` - Individual candidate grid items
+  - `.mt-criteria-stats` - Criteria statistics sections
+  - `.mt-winners-header` - Winners header section
+  
+### Enhanced
+- **Design Consistency**: Aligned plugin visual design with main website
+  - Updated button styles to use terracotta accent color (#c1693c)
+  - Improved card designs with consistent border colors and shadows
+  - Added gradient effects to headers matching main site
+  - Enhanced form inputs with brand-consistent focus states
+  
+### Fixed
+- **Biography Display**: Fixed HTML entity encoding issues in candidate biographies
+- **Score Display**: Updated to show "Average Score" with evaluation count for clarity
+
 ## [2.5.10] - 2025-08-17
 ### Removed
 - **Repository Cleanup**: Removed all stale and unused files from project root

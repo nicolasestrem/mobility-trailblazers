@@ -30,7 +30,6 @@ class MT_Coaching {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_coaching_scripts']);
         
         // AJAX handlers
-        add_action('wp_ajax_mt_send_coaching_reminder', [$this, 'send_coaching_reminder']);
         add_action('wp_ajax_mt_export_coaching_report', [$this, 'export_coaching_report']);
     }
     
@@ -136,63 +135,6 @@ class MT_Coaching {
     }
     
     /**
-     * AJAX handler for sending coaching reminders
-     */
-    public function send_coaching_reminder() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'mt_coaching_nonce')) {
-            wp_send_json_error(['message' => __('Security check failed', 'mobility-trailblazers')]);
-            return;
-        }
-        
-        // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => __('Permission denied', 'mobility-trailblazers')]);
-            return;
-        }
-        
-        $type = sanitize_text_field($_POST['type'] ?? 'incomplete');
-        
-        // Get jury members needing reminders
-        $coaching_data = $this->get_coaching_statistics();
-        $sent_count = 0;
-        
-        foreach ($coaching_data['jury_stats'] as $jury) {
-            // Skip if completed all assignments
-            if ($jury->assigned <= $jury->completed && $type === 'incomplete') {
-                continue;
-            }
-            
-            // Send reminder email
-            $subject = __('Reminder: Mobility Trailblazers Evaluations Pending', 'mobility-trailblazers');
-            $pending = $jury->assigned - $jury->completed;
-            
-            $message = sprintf(
-                __('Dear %s,\n\nYou have %d pending evaluations for the Mobility Trailblazers Awards.\n\nPlease log in to complete your evaluations: %s\n\nThank you for your participation.\n\nBest regards,\nMobility Trailblazers Team', 'mobility-trailblazers'),
-                $jury->display_name,
-                $pending,
-                home_url('/jury-dashboard/')
-            );
-            
-            if (wp_mail($jury->user_email, $subject, $message)) {
-                $sent_count++;
-            }
-        }
-        
-        // Log the action
-        MT_Logger::info('Coaching reminders sent', [
-            'type' => $type,
-            'sent_count' => $sent_count,
-            'user_id' => get_current_user_id()
-        ]);
-        
-        wp_send_json_success([
-            'message' => sprintf(__('%d reminder emails sent', 'mobility-trailblazers'), $sent_count),
-            'sent_count' => $sent_count
-        ]);
-    }
-    
-    /**
      * AJAX handler for exporting coaching report
      */
     public function export_coaching_report() {
@@ -256,11 +198,11 @@ class MT_Coaching {
         fputcsv($output, [
             'TOTAL',
             '',
-            $stats['total_assigned'],
-            $stats['total_completed'],
-            $stats['total_drafts'],
-            $stats['total_assigned'] - $stats['total_completed'],
-            $stats['completion_rate'] . '%',
+            $coaching_data['total_assigned'],
+            $coaching_data['total_completed'],
+            $coaching_data['total_drafts'],
+            $coaching_data['total_assigned'] - $coaching_data['total_completed'],
+            $coaching_data['completion_rate'] . '%',
             '',
             ''
         ]);

@@ -1,0 +1,467 @@
+/**
+ * Mobility Trailblazers Brand Alignment Styles
+ * Aligns the plugin design with the main website at mobilitytrailblazers.de
+ * 
+ * Main Website Color Palette:
+ * - Primary: #003c3d (deep teal)
+ * - Secondary: #004c5f (dark blue-green)  
+ * - Accent: #c1693c (warm terracotta)
+ * - Background: #f8f0e3 (soft cream)
+ * 
+ * @since 2.5.11
+ */
+
+/* ========================================
+   Global Brand Alignment
+   ======================================== */
+
+/* Apply brand colors to body and main containers */
+body.mt-plugin-page,
+.mt-plugin-wrapper {
+    background-color: #f8f0e3 !important;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Headings - Use Poppins like main site */
+.mt-jury-dashboard h1,
+.mt-jury-dashboard h2,
+.mt-evaluation-page h1,
+.mt-evaluation-page h2,
+.mt-candidate-name {
+    font-family: 'Poppins', sans-serif !important;
+    color: #003c3d !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   Jury Dashboard Styling
+   ======================================== */
+
+/* Main dashboard background */
+.mt-jury-dashboard,
+body .mt-jury-dashboard {
+    background-color: #f8f0e3 !important;
+    color: #003c3d;
+    padding: 30px;
+}
+
+/* Dashboard header */
+.mt-jury-dashboard .mt-dashboard-header {
+    background: linear-gradient(135deg, #f8f0e3 0%, #fff 100%);
+    border-bottom: 3px solid #c1693c;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+}
+
+/* Stats cards */
+.mt-jury-dashboard .mt-stat-card {
+    background: #fff !important;
+    border: 1px solid #c1693c;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.mt-jury-dashboard .mt-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(193, 105, 60, 0.2);
+    border-color: #003c3d;
+}
+
+.mt-jury-dashboard .mt-stat-number {
+    color: #c1693c !important;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.mt-jury-dashboard .mt-stat-label {
+    color: #003c3d !important;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 1px;
+}
+
+/* ========================================
+   Candidates List Styling
+   ======================================== */
+
+/* Candidates list container */
+.mt-candidates-list,
+body .mt-jury-dashboard .mt-candidates-list {
+    background-color: #f8f0e3 !important;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Individual candidate cards */
+.mt-candidate-card,
+.mt-candidate-item {
+    background: #fff !important;
+    border: 2px solid #e5d9c8;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.mt-candidate-card:hover,
+.mt-candidate-item:hover {
+    border-color: #c1693c;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 60, 61, 0.1);
+}
+
+/* Candidate names */
+.mt-candidate-card h3,
+.mt-candidate-item h3 {
+    color: #003c3d !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* Candidate meta info */
+.mt-candidate-meta {
+    color: #004c5f;
+    font-size: 0.9em;
+}
+
+/* ========================================
+   Candidate Grid Item Styling
+   ======================================== */
+
+.mt-candidate-grid-item {
+    background-color: #f8f0e3 !important;
+    border: 2px solid #e5d9c8;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.mt-candidate-grid-item:hover {
+    background-color: #fff !important;
+    border-color: #c1693c;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(193, 105, 60, 0.15);
+}
+
+.mt-candidate-grid-item .mt-candidate-image {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.mt-candidate-grid-item h3 {
+    color: #003c3d !important;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2em;
+    margin-bottom: 8px;
+}
+
+.mt-candidate-grid-item .mt-candidate-org {
+    color: #004c5f;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+/* ========================================
+   Criteria Stats Styling
+   ======================================== */
+
+.mt-criteria-stats {
+    background-color: #f8f0e3 !important;
+    border: 2px solid #c1693c;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+}
+
+.mt-criteria-stats h3 {
+    color: #003c3d !important;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    font-size: 1.3em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #c1693c;
+    padding-bottom: 10px;
+}
+
+.mt-criterion-stat {
+    background: #fff;
+    border-left: 4px solid #c1693c;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.mt-criterion-stat:hover {
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(0, 60, 61, 0.1);
+}
+
+/* ========================================
+   Winners Header Styling
+   ======================================== */
+
+.mt-winners-header {
+    background-color: #f8f0e3 !important;
+    background: linear-gradient(135deg, #f8f0e3 0%, #fff 50%, #f8f0e3 100%);
+    border-bottom: 4px solid #c1693c;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.mt-winners-header h2 {
+    color: #003c3d !important;
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.mt-winners-header h2::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 4px;
+    background: #c1693c;
+    margin: 20px auto 0;
+    border-radius: 2px;
+}
+
+.mt-winners-header p {
+    color: #004c5f;
+    font-size: 1.1em;
+    margin-top: 15px;
+}
+
+/* ========================================
+   Buttons and CTAs
+   ======================================== */
+
+.mt-btn,
+.mt-evaluate-btn,
+.mt-submit-btn {
+    background-color: #c1693c !important;
+    color: #fff !important;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.mt-btn:hover,
+.mt-evaluate-btn:hover,
+.mt-submit-btn:hover {
+    background-color: #003c3d !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 60, 61, 0.2);
+}
+
+/* Secondary buttons */
+.mt-btn-secondary {
+    background-color: #004c5f !important;
+}
+
+.mt-btn-secondary:hover {
+    background-color: #003c3d !important;
+}
+
+/* ========================================
+   Forms and Inputs
+   ======================================== */
+
+.mt-search-input,
+.mt-filter-select,
+input[type="text"],
+input[type="email"],
+select {
+    background-color: #fff !important;
+    border: 2px solid #e5d9c8;
+    border-radius: 6px;
+    padding: 10px 15px;
+    color: #003c3d;
+    transition: all 0.3s ease;
+}
+
+.mt-search-input:focus,
+.mt-filter-select:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+    border-color: #c1693c;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+}
+
+/* ========================================
+   Progress Bars
+   ======================================== */
+
+.mt-progress-bar {
+    background-color: #e5d9c8 !important;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 25px;
+}
+
+.mt-progress-fill {
+    background: linear-gradient(90deg, #c1693c 0%, #003c3d 100%) !important;
+    height: 100%;
+    transition: width 0.5s ease;
+}
+
+.mt-progress-text {
+    color: #003c3d !important;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* ========================================
+   Evaluation Forms
+   ======================================== */
+
+.mt-evaluation-page {
+    background-color: #f8f0e3 !important;
+    padding: 30px;
+}
+
+.mt-criterion-card {
+    background: #fff !important;
+    border: 2px solid #e5d9c8;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.mt-criterion-card:hover {
+    border-color: #c1693c;
+    box-shadow: 0 5px 20px rgba(0, 60, 61, 0.1);
+}
+
+/* Score sliders */
+.mt-score-slider {
+    accent-color: #c1693c;
+}
+
+.mt-score-display {
+    background-color: #c1693c !important;
+    color: #fff !important;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* ========================================
+   Tables
+   ======================================== */
+
+.mt-rankings-table {
+    background: #fff;
+    border: 2px solid #e5d9c8;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.mt-rankings-table th {
+    background: linear-gradient(135deg, #003c3d 0%, #004c5f 100%) !important;
+    color: #fff !important;
+    padding: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.mt-rankings-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e5d9c8;
+    color: #003c3d;
+}
+
+.mt-rankings-table tr:hover {
+    background-color: #f8f0e3 !important;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 768px) {
+    .mt-jury-dashboard {
+        padding: 15px;
+    }
+    
+    .mt-winners-header h2 {
+        font-size: 1.8em;
+    }
+    
+    .mt-candidates-list {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .mt-candidate-grid-item {
+        margin-bottom: 15px;
+    }
+}
+
+/* ========================================
+   Animation Classes
+   ======================================== */
+
+.mt-fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   Override Specificity Issues
+   ======================================== */
+
+body .mt-jury-dashboard,
+body.mt-jury-dashboard,
+#main .mt-jury-dashboard {
+    background-color: #f8f0e3 !important;
+}
+
+body .mt-candidates-list,
+#main .mt-candidates-list {
+    background-color: #f8f0e3 !important;
+}
+
+body .mt-candidate-grid-item,
+#main .mt-candidate-grid-item {
+    background-color: #f8f0e3 !important;
+}
+
+body .mt-criteria-stats,
+#main .mt-criteria-stats {
+    background-color: #f8f0e3 !important;
+}
+
+body .mt-winners-header,
+#main .mt-winners-header {
+    background-color: #f8f0e3 !important;
+}

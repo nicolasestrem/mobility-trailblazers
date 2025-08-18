@@ -124,3 +124,8 @@ test-candidates.csv
 /.devcontainer/
 *.ps1
 *.bat
+.claude.json
+.mcp.json
+.claude-local.json
+/mcp-tools
+package.json

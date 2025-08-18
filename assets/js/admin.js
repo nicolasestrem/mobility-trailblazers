@@ -769,7 +769,7 @@ if (typeof mt_admin.i18n === 'undefined') {
      * Manager object for the "Evaluations" admin page.
      * Contains all logic specific to this page.
      */
-    const MTEvaluationManager = {
+    window.MTEvaluationManager = {
         init: function() {
             // Entry point for all evaluation page functionality.
             // MTEvaluationManager initialized
@@ -1090,7 +1090,7 @@ if (typeof mt_admin.i18n === 'undefined') {
 
         // Check for the Evaluations page using body class (more reliable than checking page title)
         if ($('body').hasClass('mobility-trailblazers_page_mt-evaluations')) {
-             MTEvaluationManager.init();
+             window.MTEvaluationManager.init();
         }
     });
 

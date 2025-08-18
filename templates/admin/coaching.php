@@ -54,7 +54,6 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
                 <thead>
                     <tr>
                         <th><?php _e('Jury Member', 'mobility-trailblazers'); ?></th>
-                        <th><?php _e('Email', 'mobility-trailblazers'); ?></th>
                         <th class="text-center"><?php _e('Assigned', 'mobility-trailblazers'); ?></th>
                         <th class="text-center"><?php _e('Completed', 'mobility-trailblazers'); ?></th>
                         <th class="text-center"><?php _e('Drafts', 'mobility-trailblazers'); ?></th>
@@ -84,11 +83,6 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
                                 <?php if ($pending > 0): ?>
                                 <span class="pending-badge"><?php echo sprintf(__('%d pending', 'mobility-trailblazers'), $pending); ?></span>
                                 <?php endif; ?>
-                            </td>
-                            <td>
-                                <a href="mailto:<?php echo esc_attr($jury->user_email); ?>">
-                                    <?php echo esc_html($jury->user_email); ?>
-                                </a>
                             </td>
                             <td class="text-center"><?php echo intval($jury->assigned); ?></td>
                             <td class="text-center">
@@ -133,13 +127,7 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
                                 ?>
                             </td>
                             <td>
-                                <?php if ($pending > 0): ?>
-                                <button class="button button-small send-reminder-single" 
-                                        data-jury-id="<?php echo $jury->ID; ?>"
-                                        data-jury-name="<?php echo esc_attr($jury->display_name); ?>">
-                                    <?php _e('Send Reminder', 'mobility-trailblazers'); ?>
-                                </button>
-                                <?php endif; ?>
+                                <!-- Email functionality removed -->
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -153,16 +141,6 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
             <h2><?php _e('Coaching Actions', 'mobility-trailblazers'); ?></h2>
             
             <div class="mt-button-group">
-                <button class="mt-button" id="send-reminder-incomplete">
-                    <span class="dashicons dashicons-email"></span>
-                    <?php _e('Send Reminders to Incomplete', 'mobility-trailblazers'); ?>
-                </button>
-                
-                <button class="mt-button-secondary" id="send-reminder-drafts">
-                    <span class="dashicons dashicons-edit"></span>
-                    <?php _e('Remind About Drafts', 'mobility-trailblazers'); ?>
-                </button>
-                
                 <a href="<?php echo wp_nonce_url(admin_url('admin-ajax.php?action=mt_export_coaching_report'), 'mt_coaching_nonce', 'nonce'); ?>" 
                    class="mt-button-secondary" id="export-coaching-report">
                     <span class="dashicons dashicons-download"></span>
