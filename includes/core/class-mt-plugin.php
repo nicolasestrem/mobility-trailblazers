@@ -297,11 +297,29 @@ class MT_Plugin {
         // Animation styles (conditional based on settings)
         $presentation_settings = get_option('mt_candidate_presentation', []);
         if (!empty($presentation_settings['enable_animations']) || !empty($presentation_settings['enable_hover_effects'])) {
+            // Original animations (v2.5.28)
             wp_enqueue_style(
                 'mt-animations',
                 MT_PLUGIN_URL . 'assets/css/mt-animations.css',
                 ['mt-frontend'],
                 MT_VERSION
+            );
+            
+            // Enhanced animations (v2.5.29)
+            wp_enqueue_style(
+                'mt-animations-enhanced',
+                MT_PLUGIN_URL . 'assets/css/mt-animations-enhanced.css',
+                ['mt-animations'],
+                MT_VERSION
+            );
+            
+            // Animation controller JavaScript
+            wp_enqueue_script(
+                'mt-animations',
+                MT_PLUGIN_URL . 'assets/js/mt-animations.js',
+                ['jquery'],
+                MT_VERSION,
+                true
             );
         }
         

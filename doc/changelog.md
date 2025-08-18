@@ -3,6 +3,54 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.29] - 2025-08-18
+### Added
+- **Enhanced Animation System**: Comprehensive animation library with 50+ effects
+  - Entrance animations: Fade, Slide, Zoom, Rotate, Flip variations
+  - Attention seekers: Pulse, Shake, Wobble, Bounce, RubberBand, Heartbeat
+  - Micro-interactions: Button press, ripple effects, hover states
+  - Scroll-triggered reveals with Intersection Observer
+  - Parallax scrolling effects
+  - Loading states and progress indicators
+  - Stagger animations for lists and grids
+- **Animation Controller**: JavaScript API for dynamic animations
+  - Public methods: animate(), stopAnimation(), isAnimating(), replay()
+  - jQuery plugin integration
+  - Performance monitoring
+  - AJAX content support
+- **Advanced Animation Settings**
+  - Animation speed control (instant to slower)
+  - Default animation style selection
+  - Scroll reveal toggle
+  - Parallax effects toggle
+  - Live preview in settings
+- **New CSS Files**
+  - `mt-animations-enhanced.css`: Complete animation library
+  - CSS variables for customization
+  - GPU acceleration optimization
+  - Reduced motion support
+- **New JavaScript Files**
+  - `mt-animations.js`: Animation controller and utilities
+  - Dynamic animation assignment
+  - Performance monitoring
+
+### Enhanced
+- **Settings Page**: Added animation preview buttons
+  - Live speed preview
+  - Live style preview
+  - Visual feedback for settings
+- **Performance**: Optimized animations
+  - GPU acceleration with transform3d
+  - Will-change property management
+  - Automatic cleanup after animations
+  - Layout containment for better performance
+
+### Technical
+- Over 20 animation types available
+- 5 speed presets (0.1s to 0.8s)
+- Responsive to user preferences (prefers-reduced-motion)
+- Backwards compatible with v2.5.28 animations
+
 ## [2.5.28] - 2025-08-18
 ### Added
 - **Archive Grid Handler**: New class `MT_Archive_Handler` to properly display candidates in grid layout
