@@ -1092,6 +1092,58 @@ body.single-mt_candidate .mt-hero-section {
 }
 
 /* ===================================
+   MOBILE FIXES FOR CONTENT CUTOFF - v2.5.27
+   =================================== */
+
+/* Fix for mobile candidate cards content being cut off */
+@media (max-width: 768px) {
+    /* Ensure sidebar widgets and quick facts sections auto-expand */
+    .mt-sidebar-widget.mt-quick-facts,
+    .mt-quick-overview,
+    .mt-sidebar-card,
+    .mt-sidebar-widget {
+        min-height: auto !important;
+        height: auto !important;
+        padding-bottom: 30px !important;
+        overflow: visible !important;
+    }
+    
+    /* Extra padding for last item to prevent cutoff */
+    .mt-quick-facts li:last-child,
+    .mt-fact-item:last-child {
+        padding-bottom: 20px !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Ensure containers allow content to expand */
+    .mt-content-sidebar,
+    .mt-sidebar {
+        overflow: visible !important;
+        height: auto !important;
+    }
+    
+    /* Fix for any fixed height containers on mobile */
+    [class*="mt-candidate"] {
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+}
+
+/* Additional fixes for very small screens */
+@media (max-width: 480px) {
+    .mt-sidebar-widget,
+    .mt-sidebar-card {
+        padding: 20px 20px 35px 20px !important;
+    }
+    
+    /* Ensure award year and all fields are visible */
+    .mt-quick-facts,
+    .mt-fact-list {
+        padding-bottom: 15px !important;
+    }
+}
+
+/* ===================================
    PRINT STYLES
    =================================== */
 

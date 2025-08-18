@@ -2,6 +2,16 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.27] - 2025-01-18
+### Fixed
+- **Mobile Content Cutoff**: Fixed candidate card content being cut off on mobile devices
+  - Removed fixed height constraints on mobile viewports
+  - Added proper bottom padding to ensure all content is visible
+  - Fixed overflow properties to allow content to expand naturally
+  - Specifically addressed "Schnellübersicht" section where AWARD YEAR field was hidden
+  - Applied responsive fixes for screens below 768px and 480px
+  - Ensured all quick facts and candidate information display completely
+
 ## [2.5.26] - 2025-01-18
 ### Fixed
 - **Evaluation Title Readability**: Changed "Kandidat bewerten" / "Evaluate Candidate" title color to copper (#C1693C) for better visibility
