@@ -203,8 +203,8 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
                         </td>
                         <td>
                             <?php 
-                            $total = $activity->criterion_1 + $activity->criterion_2 + 
-                                    $activity->criterion_3 + $activity->criterion_4 + $activity->criterion_5;
+                            $total = $activity->courage_score + $activity->innovation_score + 
+                                    $activity->implementation_score + $activity->relevance_score + $activity->visibility_score;
                             echo $total;
                             ?>
                         </td>

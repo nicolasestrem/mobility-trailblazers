@@ -57,11 +57,11 @@ class EvaluationServiceTest extends MT_Test_Case {
         $data = [
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $this->candidate_id,
-            'criterion_1' => 80,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 80,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'comments' => 'Test evaluation',
             'status' => 'draft'
         ];
@@ -81,11 +81,11 @@ class EvaluationServiceTest extends MT_Test_Case {
         $data = [
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $this->candidate_id,
-            'criterion_1' => 80,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 80,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'comments' => 'Test evaluation',
             'status' => 'draft'
         ];
@@ -121,11 +121,11 @@ class EvaluationServiceTest extends MT_Test_Case {
         $data = [
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $this->candidate_id,
-            'criterion_1' => 150, // Invalid
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 150, // Invalid
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'status' => 'draft'
         ];
         
@@ -145,11 +145,11 @@ class EvaluationServiceTest extends MT_Test_Case {
         $data = [
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $unassigned_candidate,
-            'criterion_1' => 80,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 80,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'status' => 'draft'
         ];
         
@@ -211,29 +211,29 @@ class EvaluationServiceTest extends MT_Test_Case {
         $this->create_test_assignment($jury3, $this->candidate_id);
         
         $this->create_test_evaluation($this->jury_id, $this->candidate_id, [
-            'criterion_1' => 80,
-            'criterion_2' => 80,
-            'criterion_3' => 80,
-            'criterion_4' => 80,
-            'criterion_5' => 80,
+            'courage_score' => 80,
+            'innovation_score' => 80,
+            'implementation_score' => 80,
+            'relevance_score' => 80,
+            'visibility_score' => 80,
             'status' => 'submitted'
         ]);
         
         $this->create_test_evaluation($jury2, $this->candidate_id, [
-            'criterion_1' => 90,
-            'criterion_2' => 90,
-            'criterion_3' => 90,
-            'criterion_4' => 90,
-            'criterion_5' => 90,
+            'courage_score' => 90,
+            'innovation_score' => 90,
+            'implementation_score' => 90,
+            'relevance_score' => 90,
+            'visibility_score' => 90,
             'status' => 'submitted'
         ]);
         
         $this->create_test_evaluation($jury3, $this->candidate_id, [
-            'criterion_1' => 70,
-            'criterion_2' => 70,
-            'criterion_3' => 70,
-            'criterion_4' => 70,
-            'criterion_5' => 70,
+            'courage_score' => 70,
+            'innovation_score' => 70,
+            'implementation_score' => 70,
+            'relevance_score' => 70,
+            'visibility_score' => 70,
             'status' => 'submitted'
         ]);
         
@@ -276,7 +276,7 @@ class EvaluationServiceTest extends MT_Test_Case {
     public function test_update_evaluation() {
         // Create evaluation
         $evaluation_id = $this->create_test_evaluation($this->jury_id, $this->candidate_id, [
-            'criterion_1' => 70,
+            'courage_score' => 70,
             'status' => 'draft'
         ]);
         
@@ -285,11 +285,11 @@ class EvaluationServiceTest extends MT_Test_Case {
             'evaluation_id' => $evaluation_id,
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $this->candidate_id,
-            'criterion_1' => 85,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 85,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'status' => 'submitted'
         ];
         
@@ -299,7 +299,7 @@ class EvaluationServiceTest extends MT_Test_Case {
         
         // Verify update
         $evaluation = $this->service->get_evaluation($evaluation_id);
-        $this->assertEquals(85, $evaluation->criterion_1, 'Score should be updated');
+        $this->assertEquals(85, $evaluation->courage_score, 'Score should be updated');
         $this->assertEquals('submitted', $evaluation->status, 'Status should be updated');
     }
 
@@ -320,7 +320,7 @@ class EvaluationServiceTest extends MT_Test_Case {
             'evaluation_id' => $evaluation_id,
             'jury_member_id' => $this->jury_id,
             'candidate_id' => $this->candidate_id,
-            'criterion_1' => 95,
+            'courage_score' => 95,
             'status' => 'submitted'
         ];
         

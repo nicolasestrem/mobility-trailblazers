@@ -69,11 +69,11 @@ class MT_Test_Factory {
      */
     public static function evaluation($overrides = []) {
         $defaults = [
-            'criterion_1' => wp_rand(60, 100),
-            'criterion_2' => wp_rand(60, 100),
-            'criterion_3' => wp_rand(60, 100),
-            'criterion_4' => wp_rand(60, 100),
-            'criterion_5' => wp_rand(60, 100),
+            'courage_score' => wp_rand(60, 100),
+            'innovation_score' => wp_rand(60, 100),
+            'implementation_score' => wp_rand(60, 100),
+            'relevance_score' => wp_rand(60, 100),
+            'visibility_score' => wp_rand(60, 100),
             'comments' => self::lorem_ipsum(1),
             'status' => self::random_from(['draft', 'submitted']),
             'created_at' => current_time('mysql'),

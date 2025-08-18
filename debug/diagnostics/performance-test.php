@@ -116,8 +116,8 @@ class MT_Performance_Tester {
         $results = $wpdb->get_results("
             SELECT 
                 candidate_id,
-                AVG(criterion_1 + criterion_2 + criterion_3 + 
-                    criterion_4 + criterion_5) as avg_score,
+                AVG(courage_score + innovation_score + implementation_score + 
+                    relevance_score + visibility_score) as avg_score,
                 COUNT(DISTINCT jury_member_id) as evaluator_count
             FROM {$table}
             WHERE status = 'submitted'
