@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Mobility Trailblazers - Nicolas Estrem
+# Copyright (C) 2025 Nicolas Estrem
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
@@ -34,7 +34,7 @@ msgstr ""
 
 #. Author of the plugin
 #: mobility-trailblazers.php
-msgid "Mobility Trailblazers - Nicolas Estrem"
+msgid "Nicolas Estrem"
 msgstr ""
 
 #: debug/diagnostics/check-schneidewind-import.php:15

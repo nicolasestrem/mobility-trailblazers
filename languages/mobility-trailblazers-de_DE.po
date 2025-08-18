@@ -161,6 +161,9 @@ msgstr "Ungültige Kandidaten-ID."
 msgid "Candidate not found."
 msgstr "Kandidat nicht gefunden."
 
+msgid "Invalid candidate."
+msgstr "Ungültiger Kandidat."
+
 # Admin Interface
 msgid "Settings saved successfully!"
 msgstr "Einstellungen erfolgreich gespeichert!"
@@ -213,9 +216,6 @@ msgstr "Jurymitgliedern erlauben, Entwürfe zu speichern"
 
 msgid "Allow jury members to edit submitted evaluations"
 msgstr "Jurymitgliedern erlauben, eingereichte Bewertungen zu bearbeiten"
-
-msgid "Sie sind kein Jurymitglied."
-msgstr "Sie sind kein Jurymitglied."
 
 msgid "Data Management"
 msgstr "Datenverwaltung"

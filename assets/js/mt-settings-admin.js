@@ -2,7 +2,7 @@
  * Mobility Trailblazers Settings Admin JavaScript
  * 
  * @package MobilityTrailblazers
- * @since 2.5.27
+ * @since 2.5.29
  */
 
 jQuery(document).ready(function($) {
@@ -154,4 +154,100 @@ jQuery(document).ready(function($) {
             ' <button type="button" class="button mt-clear-image">Clear Image</button>'
         );
     }
+    
+    // Animation Speed Preview
+    $(document).on('click', '.mt-preview-animation-speed', function(e) {
+        e.preventDefault();
+        const speed = $('#animation_speed').val();
+        const $preview = $('<div class="mt-animation-preview-box">Animation Preview</div>');
+        
+        // Remove any existing preview
+        $('.mt-animation-preview-box').remove();
+        
+        // Add preview box
+        $(this).after($preview);
+        
+        // Apply animation with selected speed
+        $preview.addClass('mt-anim-' + speed + ' mtFadeInUp');
+        
+        // Remove after animation
+        setTimeout(function() {
+            $preview.fadeOut(function() {
+                $(this).remove();
+            });
+        }, 2000);
+    });
+    
+    // Animation Style Preview
+    $(document).on('click', '.mt-preview-animation-style', function(e) {
+        e.preventDefault();
+        const style = $('#animation_style').val();
+        const $preview = $('<div class="mt-animation-preview-box">Animation Preview</div>');
+        
+        // Remove any existing preview
+        $('.mt-animation-preview-box').remove();
+        
+        // Add preview box
+        $(this).after($preview);
+        
+        // Map style to animation class
+        const animationMap = {
+            'fade': 'mtFadeIn',
+            'slide': 'mtSlideInLeft',
+            'zoom': 'mtZoomIn',
+            'rotate': 'mtRotateIn',
+            'flip': 'mtFlipInY',
+            'bounce': 'mtZoomInBounce'
+        };
+        
+        // Apply animation
+        $preview.addClass(animationMap[style] || 'mtFadeIn');
+        
+        // Remove after animation
+        setTimeout(function() {
+            $preview.fadeOut(function() {
+                $(this).remove();
+            });
+        }, 2000);
+    });
+    
+    // Add enhanced animation preview styles
+    const enhancedStyles = '<style>' +
+        '.mt-animation-preview-box {' +
+        '    display: inline-block;' +
+        '    margin-left: 10px;' +
+        '    padding: 10px 20px;' +
+        '    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' +
+        '    color: white;' +
+        '    border-radius: 5px;' +
+        '    font-weight: bold;' +
+        '    box-shadow: 0 4px 6px rgba(0,0,0,0.1);' +
+        '}' +
+        '@keyframes mtFadeIn { from { opacity: 0; } to { opacity: 1; } }' +
+        '@keyframes mtFadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }' +
+        '@keyframes mtSlideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }' +
+        '@keyframes mtZoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }' +
+        '@keyframes mtRotateIn { from { opacity: 0; transform: rotate(-180deg) scale(0.8); } to { opacity: 1; transform: rotate(0) scale(1); } }' +
+        '@keyframes mtFlipInY { from { opacity: 0; transform: perspective(600px) rotateY(90deg); } to { opacity: 1; transform: perspective(600px) rotateY(0); } }' +
+        '@keyframes mtZoomInBounce {' +
+        '    0% { opacity: 0; transform: scale(0.3); }' +
+        '    50% { transform: scale(1.05); }' +
+        '    70% { transform: scale(0.95); }' +
+        '    100% { opacity: 1; transform: scale(1); }' +
+        '}' +
+        '.mtFadeIn { animation: mtFadeIn 0.5s ease forwards; }' +
+        '.mtFadeInUp { animation: mtFadeInUp 0.5s ease forwards; }' +
+        '.mtSlideInLeft { animation: mtSlideInLeft 0.5s ease forwards; }' +
+        '.mtZoomIn { animation: mtZoomIn 0.5s ease forwards; }' +
+        '.mtRotateIn { animation: mtRotateIn 0.5s ease forwards; }' +
+        '.mtFlipInY { animation: mtFlipInY 0.5s ease forwards; }' +
+        '.mtZoomInBounce { animation: mtZoomInBounce 0.8s ease forwards; }' +
+        '.mt-anim-instant { animation-duration: 0.1s !important; }' +
+        '.mt-anim-fast { animation-duration: 0.2s !important; }' +
+        '.mt-anim-normal { animation-duration: 0.3s !important; }' +
+        '.mt-anim-slow { animation-duration: 0.5s !important; }' +
+        '.mt-anim-slower { animation-duration: 0.8s !important; }' +
+        '</style>';
+    
+    $('head').append(enhancedStyles);
 });

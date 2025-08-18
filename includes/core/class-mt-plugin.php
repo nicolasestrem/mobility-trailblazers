@@ -108,9 +108,18 @@ class MT_Plugin {
         $shortcodes = new MT_Shortcodes();
         $shortcodes->init();
         
-        // Initialize Elementor integration if Elementor is active
-        $this->init_elementor_integration();
-        
+        // Initialize Elementor integration
+        if (did_action('elementor/loaded')) {
+            require_once MT_PLUGIN_DIR . 'includes/elementor/class-mt-elementor-bootstrap.php';
+            \MobilityTrailblazers\Elementor\MT_Elementor_Bootstrap::init();
+            
+            // Initialize Elementor Export tool for admins
+            if (is_admin() && current_user_can('manage_options')) {
+                require_once MT_PLUGIN_DIR . 'includes/admin/tools/class-mt-elementor-export.php';
+                $elementor_export = new \MobilityTrailblazers\Admin\Tools\MT_Elementor_Export();
+                $elementor_export->init();
+            }
+        }
         
         // Initialize template loader for enhanced candidate profiles
         MT_Template_Loader::init();
@@ -167,28 +176,6 @@ class MT_Plugin {
         
         // CSV Import AJAX (comprehensive CSV import handler)
         require_once MT_PLUGIN_DIR . 'includes/ajax/class-mt-csv-import-ajax.php';
-    }
-    
-    /**
-     * Initialize Elementor integration
-     *
-     * @return void
-     */
-    private function init_elementor_integration() {
-        // Only initialize if Elementor is active
-        if (!did_action('elementor/loaded')) {
-            return;
-        }
-        
-        // Check if integration loader exists
-        $loader_file = MT_PLUGIN_DIR . 'includes/integrations/elementor/class-mt-elementor-loader.php';
-        if (!file_exists($loader_file)) {
-            return;
-        }
-        
-        // Load and initialize the integration
-        require_once $loader_file;
-        \MobilityTrailblazers\Integrations\Elementor\MT_Elementor_Loader::init();
     }
     
     /**
@@ -297,11 +284,29 @@ class MT_Plugin {
         // Animation styles (conditional based on settings)
         $presentation_settings = get_option('mt_candidate_presentation', []);
         if (!empty($presentation_settings['enable_animations']) || !empty($presentation_settings['enable_hover_effects'])) {
+            // Original animations (v2.5.28)
             wp_enqueue_style(
                 'mt-animations',
                 MT_PLUGIN_URL . 'assets/css/mt-animations.css',
                 ['mt-frontend'],
                 MT_VERSION
+            );
+            
+            // Enhanced animations (v2.5.29)
+            wp_enqueue_style(
+                'mt-animations-enhanced',
+                MT_PLUGIN_URL . 'assets/css/mt-animations-enhanced.css',
+                ['mt-animations'],
+                MT_VERSION
+            );
+            
+            // Animation controller JavaScript
+            wp_enqueue_script(
+                'mt-animations',
+                MT_PLUGIN_URL . 'assets/js/mt-animations.js',
+                ['jquery'],
+                MT_VERSION,
+                true
             );
         }
         
@@ -401,6 +406,22 @@ class MT_Plugin {
                 'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
+        
+        // Custom Scroll to Top Button (v2.5.30)
+        wp_enqueue_style(
+            'mt-scroll-to-top',
+            MT_PLUGIN_URL . 'assets/css/mt-scroll-to-top.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
+        wp_enqueue_script(
+            'mt-scroll-to-top',
+            MT_PLUGIN_URL . 'assets/js/mt-scroll-to-top.js',
+            ['jquery'],
+            MT_VERSION,
+            true
+        );
     }
     
     /**
