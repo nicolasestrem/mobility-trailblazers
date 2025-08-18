@@ -85,14 +85,11 @@ if (!empty($jury_members)) {
                 <tr class="mt-eval-row <?php echo esc_attr($position_class . ' ' . $rank_class); ?>" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
                     <td class="mt-eval-rank">
                         <span class="mt-position-badge <?php echo esc_attr($position_class); ?>">
-                            <?php if ($position === 1): ?>
-                                <svg class="mt-medal-icon mt-medal-gold" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/></svg>
-                            <?php elseif ($position === 2): ?>
-                                <svg class="mt-medal-icon mt-medal-silver" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/></svg>
-                            <?php elseif ($position === 3): ?>
-                                <svg class="mt-medal-icon mt-medal-bronze" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/></svg>
+                            <?php if ($position <= 3): ?>
+                                <span class="position-number"><?php echo $position; ?></span>
+                            <?php else: ?>
+                                <span class="position-number"><?php echo $position; ?></span>
                             <?php endif; ?>
-                            <span class="position-number"><?php echo $position; ?></span>
                         </span>
                     </td>
                     <td class="mt-eval-candidate">

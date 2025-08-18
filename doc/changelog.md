@@ -2,6 +2,17 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.18] - 2025-08-18
+### Fixed
+- **Medal Icons and Position Numbers**: Fixed display issues with ranking badges
+  - Removed non-functional SVG medal icons
+  - Simplified position badges to show numbers only
+  - Enhanced medal styling with proper gradients for gold, silver, and bronze positions
+  - Added proper CSS for position badge visibility
+  - Fixed badge sizing and alignment in tables
+  - New file: `assets/css/mt-medal-fix.css`
+  - Modified: `templates/frontend/partials/jury-rankings.php`
+
 ## [2.5.17] - 2025-08-18
 ### Added
 - **Elementor Template Integration**: New tool for creating Elementor templates from MT shortcodes

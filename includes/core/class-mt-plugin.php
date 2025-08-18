@@ -232,6 +232,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Medal and position number display fixes (v2.5.18)
+        wp_enqueue_style(
+            'mt-medal-fix',
+            MT_PLUGIN_URL . 'assets/css/mt-medal-fix.css',
+            ['mt-frontend', 'mt-jury-dashboard-enhanced'],
+            MT_VERSION
+        );
+        
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
             'mt-design-enhancements',
