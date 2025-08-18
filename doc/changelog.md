@@ -2,6 +2,36 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.25] - 2025-01-18
+### Fixed
+- **Version Consistency**: Synchronized version numbers across all files (plugin header, README, changelog)
+- **CSS Validation**: Verified no invalid CSS units with spaces before 'px'
+- **Button-Style Scoring**: Confirmed proper total score calculation with button inputs
+  
+### Security
+- **AJAX Handler Audit**: Comprehensive security review of all AJAX endpoints
+  - Verified nonce verification in all handlers
+  - Confirmed capability checks for administrative actions
+  - Validated input sanitization and output escaping
+  
+### Improved
+- **Code Quality**: Removed development artifacts and session files
+  - Deleted SESSION_ARTIFACT_2025-01-18.md from repository
+  - Updated .distignore to exclude session artifacts
+  
+### Verified
+- **Elementor Integration**: Confirmed all 4 widgets working correctly
+  - MT Jury Dashboard widget functional
+  - MT Candidates Grid widget operational
+  - MT Evaluation Statistics widget (admin only) verified
+  - MT Winners Display widget tested
+  
+### Technical
+- **Build Process**: Prepared clean production build
+  - Excluded debug directory from production
+  - Verified all development files removed
+  - Confirmed proper enqueue of CSS files
+  
 ## [2.5.24] - 2025-01-18
 ### Fixed
 - **Elementor Integration Rebuilt**: Complete redesign of Elementor widget integration

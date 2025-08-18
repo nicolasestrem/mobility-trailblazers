@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.5.4  
+**Version:** 2.5.25  
 **Author:** Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  
@@ -217,7 +217,7 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Version**: 2.5.8 (August 17, 2025)  
+**Current Version**: 2.5.25 (January 18, 2025)  
 **Status**: Production Ready ✅
 
 ### Recent Updates
@@ -237,4 +237,4 @@ Located in `../../Documentation/`:
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 17, 2025 | Version 2.5.8*
+*Last updated: January 18, 2025 | Version 2.5.25*

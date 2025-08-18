@@ -55,6 +55,10 @@ CODE_OF_CONDUCT.md
 /tmp/
 /temp/
 
+# Session artifacts
+SESSION_ARTIFACT*.md
+*.claude
+
 # Node modules (if any)
 /node_modules/
 
