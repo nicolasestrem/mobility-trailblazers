@@ -165,6 +165,12 @@ button.mt-save-draft:hover,
 .mt-evaluation-title {
     font-size: 28px;
     margin: 0 0 10px 0;
+    color: #C1693C !important; /* Copper color for better readability */
+}
+
+/* Ensure the h1 inside also gets the copper color */
+.mt-evaluation-title h1 {
+    color: #C1693C !important;
 }
 
 .mt-evaluation-meta {
@@ -194,5 +200,6 @@ button.mt-save-draft:hover,
     
     .mt-evaluation-title {
         font-size: 22px;
+        color: #C1693C !important; /* Maintain copper color on mobile */
     }
 }
