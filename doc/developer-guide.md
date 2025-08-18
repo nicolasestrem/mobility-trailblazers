@@ -1,6 +1,6 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.5.8 | Last Updated: August 17, 2025*
+*Version 2.5.31 | Last Updated: August 18, 2025*
 
 ## Table of Contents
 
@@ -15,10 +15,11 @@
 9. [UI Templates & Components](#ui-templates--components)
 10. [Photo Management System](#photo-management-system)
 11. [Auto-Assignment System](#auto-assignment-system)
-12. [Testing Infrastructure](#testing-infrastructure)
-13. [Debug Center](#debug-center)
-14. [Troubleshooting](#troubleshooting)
-15. [Best Practices](#best-practices)
+12. [Rich Text Editor](#rich-text-editor)
+13. [Testing Infrastructure](#testing-infrastructure)
+14. [Debug Center](#debug-center)
+15. [Troubleshooting](#troubleshooting)
+16. [Best Practices](#best-practices)
 
 ## Architecture Overview
 
@@ -599,6 +600,86 @@ echo sprintf(
     $result['jury_count']
 );
 ```
+
+## Rich Text Editor
+
+### Overview
+
+The Rich Text Editor provides a lightweight, bulletproof content editing solution for candidate content management. It features a comprehensive formatting toolbar and graceful fallback for older browsers.
+
+### Architecture
+
+```php
+// Backend Handler
+class MT_Candidate_Editor {
+    // Registers AJAX handlers for content management
+    public function __construct() {
+        add_action('wp_ajax_mt_update_candidate_content', [$this, 'ajax_update_content']);
+        add_action('wp_ajax_mt_get_candidate_content', [$this, 'ajax_get_content']);
+    }
+}
+```
+
+```javascript
+// Frontend Implementation
+var MTCandidateEditor = {
+    editorSupported: true,     // ContentEditable support detection
+    historyStack: {},          // Undo/redo history per tab
+    historyIndex: {},          // Current position in history
+    
+    executeCommand: function(command) {
+        // Handles all formatting commands
+        // Falls back to markdown syntax for unsupported browsers
+    }
+}
+```
+
+### Features
+
+- **Rich Text Formatting**: Bold, italic, headings, lists, links
+- **Keyboard Shortcuts**: Ctrl+B, Ctrl+I, Ctrl+K, Ctrl+Z, Ctrl+Y
+- **History Management**: Up to 50 undo/redo states per editor
+- **HTML Sanitization**: Client and server-side security
+- **Graceful Fallback**: Textarea with markdown support for older browsers
+
+### Security Implementation
+
+```javascript
+// Client-side HTML sanitization
+cleanHTML: function(html) {
+    var temp = document.createElement('div');
+    temp.innerHTML = html;
+    
+    // Remove dangerous elements and attributes
+    var scripts = temp.getElementsByTagName('script');
+    var styles = temp.getElementsByTagName('style');
+    // ... removal logic
+    
+    return temp.innerHTML;
+}
+```
+
+```php
+// Server-side sanitization
+$content = wp_kses_post($_POST['content']);
+update_post_meta($post_id, $field_map[$field], $content);
+```
+
+### Usage
+
+```javascript
+// Initialize editor on candidate admin page
+if (typeof mtCandidateEditor !== 'undefined' && 
+    $('body').hasClass('post-type-mt_candidate')) {
+    MTCandidateEditor.init();
+}
+```
+
+### Files
+
+- `includes/admin/class-mt-candidate-editor.php` - Backend handler
+- `assets/js/candidate-editor.js` - Frontend implementation
+- Modal HTML embedded in admin footer for performance
 
 ## Testing Infrastructure
 
