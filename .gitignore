@@ -116,16 +116,38 @@ desktop.ini
 
 # Claude AI context files
 .claude/
+.cursor/
+CLAUDE.md
+.claude.json
+.claude-local.json
+.mcp.json
 
-/Photos_candidates/
-test-candidates.csv
-test-candidates.csv
-
+# Development files (keep out of main branch)
+/debug/
+/tests/
+/tools/
+/qa_i18n/
+/reports/
+/mcp-tools/
 /.devcontainer/
+phpunit.xml
+package.json
+package-lock.json
+
+# Sample and test data
+sample-*.csv
+test-*.csv
+/data/templates/
+
+# Backup and deprecated files
+*.backup
+*.bak
+backup-*/
+archived/
+deprecated/
+*-deprecated.*
+
+# Scripts
 *.ps1
 *.bat
-.claude.json
-.mcp.json
-.claude-local.json
-/mcp-tools
-package.json
+cleanup-*.sh
