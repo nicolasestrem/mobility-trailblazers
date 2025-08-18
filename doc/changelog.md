@@ -2,6 +2,24 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.16] - 2025-01-20
+### Removed
+- **Email Functionality**: Completely removed all email features from the plugin
+  - Deleted MT_Email_Service class and email service infrastructure
+  - Removed all email templates from templates/emails/ directory
+  - Removed "Send Reminder" buttons from coaching dashboard
+  - Removed email-related JavaScript functions from coaching.js
+  - Cleaned up AJAX handlers for email sending
+  - Plugin will no longer send any email notifications or reminders
+  - As requested, the plugin now operates without any email features
+
+### Changed  
+- **Coaching Dashboard**: Simplified interface without email actions
+  - Removed individual "Send Reminder" buttons from jury member rows
+  - Removed bulk email action buttons ("Send Reminders to Incomplete", "Remind About Drafts")
+  - Kept only "Export Coaching Report" and "Refresh Statistics" functionality
+  - Cleaner, more focused dashboard for tracking progress
+
 ## [2.5.15] - 2025-01-20
 ### Fixed
 - **View Details Button**: Fixed non-working View Details button in evaluations admin page

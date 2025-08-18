@@ -21,128 +21,8 @@
          * Bind event handlers
          */
         bindEvents: function() {
-            // Send reminder to incomplete
-            $('#send-reminder-incomplete').on('click', this.sendReminderIncomplete.bind(this));
-            
-            // Send reminder about drafts
-            $('#send-reminder-drafts').on('click', this.sendReminderDrafts.bind(this));
-            
-            // Send individual reminder
-            $(document).on('click', '.send-reminder-single', this.sendReminderSingle.bind(this));
-            
             // Refresh statistics
             $('#refresh-stats').on('click', this.refreshStats.bind(this));
-        },
-        
-        /**
-         * Send reminders to jury members with incomplete evaluations
-         */
-        sendReminderIncomplete: function(e) {
-            e.preventDefault();
-            
-            if (!confirm(mt_coaching.i18n.confirm_reminder)) {
-                return;
-            }
-            
-            const $button = $(e.currentTarget);
-            this.setButtonLoading($button, true);
-            
-            $.ajax({
-                url: mt_coaching.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'mt_send_coaching_reminder',
-                    nonce: mt_coaching.nonce,
-                    type: 'incomplete'
-                },
-                success: (response) => {
-                    if (response.success) {
-                        this.showNotice(response.data.message, 'success');
-                    } else {
-                        this.showNotice(response.data.message || mt_coaching.i18n.error, 'error');
-                    }
-                },
-                error: () => {
-                    this.showNotice(mt_coaching.i18n.error, 'error');
-                },
-                complete: () => {
-                    this.setButtonLoading($button, false);
-                }
-            });
-        },
-        
-        /**
-         * Send reminders about draft evaluations
-         */
-        sendReminderDrafts: function(e) {
-            e.preventDefault();
-            
-            const $button = $(e.currentTarget);
-            this.setButtonLoading($button, true);
-            
-            $.ajax({
-                url: mt_coaching.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'mt_send_coaching_reminder',
-                    nonce: mt_coaching.nonce,
-                    type: 'drafts'
-                },
-                success: (response) => {
-                    if (response.success) {
-                        this.showNotice(response.data.message, 'success');
-                    } else {
-                        this.showNotice(response.data.message || mt_coaching.i18n.error, 'error');
-                    }
-                },
-                error: () => {
-                    this.showNotice(mt_coaching.i18n.error, 'error');
-                },
-                complete: () => {
-                    this.setButtonLoading($button, false);
-                }
-            });
-        },
-        
-        /**
-         * Send reminder to individual jury member
-         */
-        sendReminderSingle: function(e) {
-            e.preventDefault();
-            
-            const $button = $(e.currentTarget);
-            const juryName = $button.data('jury-name');
-            
-            if (!confirm((mt_coaching.i18n.confirm_single_reminder || 'Send reminder to %s?').replace('%s', juryName))) {
-                return;
-            }
-            
-            this.setButtonLoading($button, true);
-            
-            $.ajax({
-                url: mt_coaching.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'mt_send_coaching_reminder',
-                    nonce: mt_coaching.nonce,
-                    type: 'single',
-                    jury_id: $button.data('jury-id')
-                },
-                success: (response) => {
-                    if (response.success) {
-                        this.showNotice(`Reminder sent to ${juryName}`, 'success');
-                        $button.text(mt_coaching.i18n.reminder_sent || 'Reminder Sent').prop('disabled', true);
-                    } else {
-                        this.showNotice(response.data.message || mt_coaching.i18n.error, 'error');
-                    }
-                },
-                error: () => {
-                    this.showNotice(mt_coaching.i18n.error, 'error');
-                },
-                complete: () => {
-                    this.setButtonLoading($button, false);
-                }
-            });
         },
         
         /**
@@ -165,7 +45,7 @@
             if (loading) {
                 $button.addClass('loading').prop('disabled', true);
                 $button.data('original-text', $button.html());
-                $button.html('<span class="spinner is-active"></span> ' + mt_coaching.i18n.sending);
+                $button.html('<span class="spinner is-active"></span> Loading...');
             } else {
                 $button.removeClass('loading').prop('disabled', false);
                 if ($button.data('original-text')) {
