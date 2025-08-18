@@ -25,7 +25,7 @@
     padding: 20px 0 !important;
     width: 100% !important;
     max-width: 1400px !important;
-    margin: 0 auto 30px !important; /* Removed top margin */
+    margin: 30px auto !important;
 }
 
 /* Grid Column Layouts - Dynamic Options */
@@ -407,7 +407,7 @@ body .mt-candidates-grid img {
 /* Ensure proper spacing for the specific voting page */
 body.page .mt-candidates-grid {
     max-width: 1400px !important;
-    margin: 0 auto 30px !important; /* Removed top margin */
+    margin: 30px auto !important;
 }
 
 /* Fix any potential flexbox issues */

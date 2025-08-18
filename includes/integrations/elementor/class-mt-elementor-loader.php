@@ -104,8 +104,8 @@ class MT_Elementor_Loader {
             'jury-dashboard',
             'candidates-grid',
             'evaluation-stats',
-            'winners-display'
-            // 'scroll-to-top' // Disabled - causing white space issues
+            'winners-display',
+            'scroll-to-top'
         ];
         
         foreach ($widget_files as $widget) {
