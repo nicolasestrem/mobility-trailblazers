@@ -2,6 +2,42 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.22] - 2025-01-18
+### Added
+- **Native Elementor Widget Integration**: Complete Elementor integration with native widgets
+  - Created shared renderer class (`MT_Shortcode_Renderer`) used by both shortcodes and widgets
+  - Four native Elementor widgets matching all MT shortcodes:
+    - MT Jury Dashboard widget
+    - MT Candidates Grid widget with full controls
+    - MT Evaluation Statistics widget
+    - MT Winners Display widget
+  - Elementor Bootstrap loader for automatic widget registration
+  - Admin tool "MT Elementor Export" for generating importable templates
+  - Templates automatically detect container vs section mode
+  - New files:
+    - `includes/public/renderers/class-mt-shortcode-renderer.php`
+    - `includes/elementor/class-mt-elementor-bootstrap.php`
+    - `includes/elementor/widgets/` (4 widget classes)
+    - `includes/admin/tools/class-mt-elementor-export.php`
+
+### Changed
+- **Shortcode Architecture**: Refactored to use shared renderer
+  - All shortcodes now delegate rendering to `MT_Shortcode_Renderer`
+  - Ensures identical output between shortcodes and Elementor widgets
+  - Maintains backward compatibility for all existing shortcodes
+
+### Fixed
+- **Elementor Template Issue**: Fixed templates showing raw shortcodes
+  - Templates now use native Elementor widgets instead of shortcode widget
+  - Proper widget registration in Elementor's widget manager
+  - Correct JSON structure for both container and section modes
+
+### Technical Details
+- Widgets register under "Mobility Trailblazers" category in Elementor
+- All widgets include proper controls matching shortcode attributes
+- Style controls allow customization without affecting functionality
+- Assets (CSS/JS) are properly enqueued for both shortcodes and widgets
+
 ## [2.5.21] - 2025-01-18
 ### Added
 - **Candidate Content Editor**: Comprehensive editing interface for candidate profile sections

@@ -108,6 +108,19 @@ class MT_Plugin {
         $shortcodes = new MT_Shortcodes();
         $shortcodes->init();
         
+        // Initialize Elementor integration
+        if (did_action('elementor/loaded')) {
+            require_once MT_PLUGIN_DIR . 'includes/elementor/class-mt-elementor-bootstrap.php';
+            \MobilityTrailblazers\Elementor\MT_Elementor_Bootstrap::init();
+            
+            // Initialize Elementor Export tool for admins
+            if (is_admin() && current_user_can('manage_options')) {
+                require_once MT_PLUGIN_DIR . 'includes/admin/tools/class-mt-elementor-export.php';
+                $elementor_export = new \MobilityTrailblazers\Admin\Tools\MT_Elementor_Export();
+                $elementor_export->init();
+            }
+        }
+        
         // Initialize template loader for enhanced candidate profiles
         MT_Template_Loader::init();
         
