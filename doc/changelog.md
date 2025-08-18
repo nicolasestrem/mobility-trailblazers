@@ -2,6 +2,25 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.15] - 2025-01-20
+### Fixed
+- **View Details Button**: Fixed non-working View Details button in evaluations admin page
+  - Changed MTEvaluationManager from const to window object for proper scope
+  - Fixed initialization to ensure event handlers are properly bound
+  
+- **Debug Center Scripts**: Fixed JavaScript initialization for debug script buttons
+  - Buttons now properly execute debug scripts when clicked
+  - Event handlers correctly bound to mt-execute-script class
+
+### Removed
+- **Error Monitor Tab**: Removed deprecated Error Monitor tab from Debug Center
+  - Tab was no longer functional and has been replaced by standard WordPress debug logging
+  - Cleaner interface with only relevant debug tools
+
+### Improved
+- **JavaScript Initialization**: Better module initialization for admin pages
+- **Code Quality**: Removed unnecessary complexity in favor of simpler solutions
+
 ## [2.5.14] - 2025-01-20
 ### Fixed
 - **Candidate Card Backgrounds**: Applied consistent cream background (#F8F0E3) with blue accent borders

@@ -65,12 +65,6 @@ $is_production = $debug_manager->is_production();
             <?php _e('Debug Scripts', 'mobility-trailblazers'); ?>
         </a>
         
-        <a href="?page=mt-debug-center&tab=errors" 
-           class="nav-tab <?php echo $active_tab === 'errors' ? 'nav-tab-active' : ''; ?>">
-            <span class="dashicons dashicons-warning"></span>
-            <?php _e('Error Monitor', 'mobility-trailblazers'); ?>
-        </a>
-        
         <a href="?page=mt-debug-center&tab=tools" 
            class="nav-tab <?php echo $active_tab === 'tools' ? 'nav-tab-active' : ''; ?>">
             <span class="dashicons dashicons-admin-tools"></span>
