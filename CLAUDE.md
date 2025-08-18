@@ -55,9 +55,10 @@ Primary: #26a69a | Success: #4caf50 | Warning: #ff9800 | Error: #f44336
 ## 💡 WORKFLOW
 1. Check existing code
 2. Follow Repository-Service-Controller pattern
-3. Test with WP_DEBUG & different MCP servers
-4. Update production with FTP MCP
-5. Update docs
-6. Commit and PR
+3. Test with WP_DEBUG & different MCP servers on staging
+4. Never update production if there are bugs or errors on staging
+5. Update production with FTP MCP
+6. Update docs
+7. Commit and PR
 
 **Key Commands**: `wp transient delete --all` | `wp db check` | `tail -f wp-content/debug.log`
