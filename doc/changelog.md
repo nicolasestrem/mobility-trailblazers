@@ -2,7 +2,7 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
-## [2.5.21] - 2025-08-18
+## [2.5.21] - 2025-01-18
 ### Added
 - **Candidate Content Editor**: Comprehensive editing interface for candidate profile sections
   - Added meta boxes for Innovation Summary, Evaluation Criteria, and Biography
@@ -15,13 +15,19 @@
     - `assets/js/candidate-editor.js`
   - Modified: `includes/admin/class-mt-admin.php`
 
+### Fixed
+- **Biography Display**: Fixed biography not showing on candidate profiles
+  - Template was looking for `_mt_personality_motivation` while editor saves to `_mt_personality`
+  - Updated `templates/frontend/single/single-mt_candidate-enhanced.php` to check both fields
+  - Added fallback support for backward compatibility
+
 ### Technical Details
 - Content stored in post meta fields: `_mt_overview`, `_mt_evaluation_criteria`, `_mt_personality`
 - Proper nonce verification and capability checks for security
 - Responsive modal interface with tabbed navigation
 - Support for rich text editing with TinyMCE
 
-## [2.5.20.2] - 2025-08-18
+## [2.5.20.2] - 2025-01-18
 ### Fixed
 - **Button-Style Score Calculation**: Fixed total score not updating with button-style scoring
   - Added support for hidden input fields used with score buttons
@@ -45,7 +51,7 @@
   - Removed backup files and directories from `/assets/css`
   - Production now contains only necessary runtime files
 
-## [2.5.20] - 2025-08-18
+## [2.5.20] - 2025-01-18
 ### Fixed
 - **Total Score Calculation**: Fixed score always showing 0 on evaluation pages
   - Changed from `parseInt()` to `parseFloat()` to preserve decimal values
@@ -65,7 +71,7 @@
   - AJAX handler properly processes `status: 'draft'` parameter
   - Draft evaluations save successfully to database
 
-## [2.5.19] - 2025-08-18
+## [2.5.19] - 2025-01-18
 ### Added
 - **Complete Ranking System Rebuild**: Brand new ranking and medal display system
   - Created `MT_Ranking_Display` utility class for consistent ranking displays
@@ -81,7 +87,7 @@
     - `debug/test-ranking-display.php`
   - Modified: `templates/frontend/partials/jury-rankings.php`
 
-## [2.5.18] - 2025-08-18
+## [2.5.18] - 2025-01-18
 ### Fixed
 - **Medal Icons and Position Numbers**: Fixed display issues with ranking badges
   - Removed non-functional SVG medal icons
@@ -92,7 +98,7 @@
   - New file: `assets/css/mt-medal-fix.css`
   - Modified: `templates/frontend/partials/jury-rankings.php`
 
-## [2.5.17] - 2025-08-18
+## [2.5.17] - 2025-01-18
 ### Added
 - **Elementor Template Integration**: New tool for creating Elementor templates from MT shortcodes
   - Added MT Elementor Templates tool under Tools menu

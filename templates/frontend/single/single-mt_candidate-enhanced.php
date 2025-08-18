@@ -22,7 +22,7 @@ while (have_posts()) : the_post();
     $display_name = get_post_meta($candidate_id, '_mt_display_name', true) ?: get_the_title();
     $overview = get_post_meta($candidate_id, '_mt_overview', true);
     $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
-    $personality = get_post_meta($candidate_id, '_mt_personality_motivation', true);
+    $personality = get_post_meta($candidate_id, '_mt_personality', true) ?: get_post_meta($candidate_id, '_mt_personality_motivation', true);
     $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true);
     $website = get_post_meta($candidate_id, '_mt_website', true);
     $categories = wp_get_post_terms($candidate_id, 'mt_award_category');
