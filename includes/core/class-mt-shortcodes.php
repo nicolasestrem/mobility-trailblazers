@@ -53,7 +53,7 @@ class MT_Shortcodes {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         if (!$jury_member) {
             return '<div class="mt-notice mt-notice-error">' . 
-                   __('Your jury member profile could not be found.', 'mobility-trailblazers') . 
+                   __('Sie sind kein Jurymitglied.', 'mobility-trailblazers') . 
                    '</div>';
         }
         
