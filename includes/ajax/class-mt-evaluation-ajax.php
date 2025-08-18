@@ -96,7 +96,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
             }
-            $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            $this->error(__('Sie sind kein Jurymitglied.', 'mobility-trailblazers'));
             return;
         }
         
@@ -194,7 +194,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            $this->error(__('Sie sind kein Jurymitglied.', 'mobility-trailblazers'));
         }
         
         // Prepare evaluation data
@@ -270,7 +270,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            $this->error(__('Sie sind kein Jurymitglied.', 'mobility-trailblazers'));
         }
         
         // Get evaluation
@@ -367,7 +367,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
-            $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            $this->error(__('Sie sind kein Jurymitglied.', 'mobility-trailblazers'));
         }
         
         // Get progress

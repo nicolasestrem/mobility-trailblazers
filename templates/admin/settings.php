@@ -67,13 +67,6 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
     // Save enhanced template setting
     update_option('mt_use_enhanced_template', isset($_POST['mt_use_enhanced_template']) ? '1' : '0');
     
-    // Save language settings
-    if (isset($_POST['mt_default_language'])) {
-        update_option('mt_default_language', sanitize_text_field($_POST['mt_default_language']));
-    }
-    update_option('mt_enable_language_switcher', isset($_POST['mt_enable_language_switcher']) ? '1' : '0');
-    update_option('mt_auto_detect_language', isset($_POST['mt_auto_detect_language']) ? '1' : '0');
-    
     // Save other settings
     update_option('mt_evaluations_per_page', intval($_POST['evaluations_per_page']));
     
@@ -337,46 +330,6 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                         echo esc_textarea(isset($dashboard_settings['intro_text']) ? $dashboard_settings['intro_text'] : ''); 
                     ?></textarea>
                     <p class="description"><?php _e('Custom message displayed at the top of the jury dashboard.', 'mobility-trailblazers'); ?></p>
-                </td>
-            </tr>
-        </table>
-        
-        <!-- Language Settings -->
-        <h2><?php _e('Language Settings', 'mobility-trailblazers'); ?></h2>
-        <p><?php _e('Configure multilingual settings for the platform.', 'mobility-trailblazers'); ?></p>
-        
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="mt_default_language"><?php _e('Default Language', 'mobility-trailblazers'); ?></label>
-                </th>
-                <td>
-                    <select id="mt_default_language" name="mt_default_language">
-                        <option value="de_DE" <?php selected(get_option('mt_default_language', 'de_DE'), 'de_DE'); ?>>🇩🇪 Deutsch</option>
-                        <option value="en_US" <?php selected(get_option('mt_default_language', 'de_DE'), 'en_US'); ?>>🇬🇧 English</option>
-                    </select>
-                    <p class="description"><?php _e('Select the default language for the platform.', 'mobility-trailblazers'); ?></p>
-                </td>
-            </tr>
-            
-            <tr>
-                <th scope="row"><?php _e('Language Options', 'mobility-trailblazers'); ?></th>
-                <td>
-                    <label>
-                        <input type="checkbox" name="mt_enable_language_switcher" value="1"
-                               <?php checked(get_option('mt_enable_language_switcher', '1'), '1'); ?> />
-                        <?php _e('Enable Language Switcher', 'mobility-trailblazers'); ?>
-                    </label>
-                    <p class="description"><?php _e('Show language switcher in the frontend.', 'mobility-trailblazers'); ?></p>
-                    
-                    <br/>
-                    
-                    <label>
-                        <input type="checkbox" name="mt_auto_detect_language" value="1"
-                               <?php checked(get_option('mt_auto_detect_language', '1'), '1'); ?> />
-                        <?php _e('Auto-detect Language', 'mobility-trailblazers'); ?>
-                    </label>
-                    <p class="description"><?php _e('Automatically detect user language based on browser settings.', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
         </table>

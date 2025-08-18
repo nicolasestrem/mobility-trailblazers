@@ -101,6 +101,42 @@ docker-compose.override.yml
 # MCP & Claude Files
 .claude/
 .cursor/
+
+CLAUDE.md
+.claude.json
+.claude-local.json
+.mcp.json
+
+# Development files (keep out of main branch)
+/debug/
+/tests/
+/tools/
+/qa_i18n/
+/reports/
+/mcp-tools/
+/.devcontainer/
+phpunit.xml
+package.json
+package-lock.json
+
+# Sample and test data
+sample-*.csv
+test-*.csv
+/data/templates/
+
+# Backup and deprecated files
+*.backup
+*.bak
+backup-*/
+archived/
+deprecated/
+*-deprecated.*
+
+# Scripts
+*.ps1
+*.bat
+cleanup-*.sh
+=======
 .claude.json
 .claude-local.json
 .mcp.json
@@ -116,3 +152,4 @@ docker-compose.override.yml
 !templates/
 !doc/
 /.claude
+
