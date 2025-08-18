@@ -10,6 +10,8 @@
     
     var MTCandidateEditor = {
         currentPostId: null,
+        tempContent: {},
+        richEditorsInitialized: false,
         
         init: function() {
             this.addEditButtons();
@@ -107,26 +109,122 @@
         },
         
         populateModal: function(data) {
-            // Restore modal body HTML
-            var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
-                              '<textarea id="mt-edit-overview" rows="10"></textarea>' +
-                              '</div>' +
-                              '<div class="mt-tab-content" data-content="criteria">' +
-                              '<textarea id="mt-edit-criteria" rows="15"></textarea>' +
-                              '</div>' +
-                              '<div class="mt-tab-content" data-content="biography">' +
-                              '<textarea id="mt-edit-biography" rows="10"></textarea>' +
-                              '</div>';
+            var self = this;
             
-            $('.mt-modal-body').html(modalBodyHTML);
+            // Check if rich editor is available
+            var useRichEditor = typeof MTRichEditor !== 'undefined' && MTRichEditor.isSupported();
             
-            // Populate textareas
-            $('#mt-edit-overview').val(data.overview || '');
-            $('#mt-edit-criteria').val(data.criteria || '');
-            $('#mt-edit-biography').val(data.biography || '');
+            if (useRichEditor) {
+                // Create containers for rich editors
+                var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
+                                  '<div id="mt-edit-overview"></div>' +
+                                  '</div>' +
+                                  '<div class="mt-tab-content" data-content="criteria">' +
+                                  '<div class="mt-template-buttons">' +
+                                  '<button type="button" class="mt-template-button" data-template="criteria-headers">Insert Standard Criteria Headers</button>' +
+                                  '</div>' +
+                                  '<div id="mt-edit-criteria"></div>' +
+                                  '</div>' +
+                                  '<div class="mt-tab-content" data-content="biography">' +
+                                  '<div id="mt-edit-biography"></div>' +
+                                  '</div>';
+                
+                $('.mt-modal-body').html(modalBodyHTML);
+                
+                // Destroy any existing editors
+                if (self.richEditorsInitialized) {
+                    MTRichEditor.destroy('mt-edit-overview');
+                    MTRichEditor.destroy('mt-edit-criteria');
+                    MTRichEditor.destroy('mt-edit-biography');
+                }
+                
+                // Initialize rich editors with content
+                MTRichEditor.init('mt-edit-overview', {
+                    content: data.overview || '',
+                    minHeight: 200,
+                    maxHeight: 400,
+                    label: 'Innovation Summary',
+                    autosave: true,
+                    onAutosave: function(content) {
+                        self.tempSave('overview', content);
+                    }
+                });
+                
+                MTRichEditor.init('mt-edit-criteria', {
+                    content: data.criteria || '',
+                    minHeight: 300,
+                    maxHeight: 500,
+                    label: 'Evaluation Criteria',
+                    autosave: true,
+                    onAutosave: function(content) {
+                        self.tempSave('criteria', content);
+                    }
+                });
+                
+                MTRichEditor.init('mt-edit-biography', {
+                    content: data.biography || '',
+                    minHeight: 200,
+                    maxHeight: 400,
+                    label: 'Biography',
+                    autosave: true,
+                    onAutosave: function(content) {
+                        self.tempSave('biography', content);
+                    }
+                });
+                
+                self.richEditorsInitialized = true;
+                
+                // Add class to wrapper for criteria-specific styling
+                $('#mt-edit-criteria').parent().addClass('mt-evaluation-criteria-editor');
+                
+                // Bind template button
+                $('.mt-template-button').off('click').on('click', function() {
+                    var template = $(this).data('template');
+                    if (template === 'criteria-headers') {
+                        self.insertCriteriaTemplate();
+                    }
+                });
+                
+            } else {
+                // Fallback to textareas
+                var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
+                                  '<textarea id="mt-edit-overview" rows="10"></textarea>' +
+                                  '</div>' +
+                                  '<div class="mt-tab-content" data-content="criteria">' +
+                                  '<textarea id="mt-edit-criteria" rows="15"></textarea>' +
+                                  '</div>' +
+                                  '<div class="mt-tab-content" data-content="biography">' +
+                                  '<textarea id="mt-edit-biography" rows="10"></textarea>' +
+                                  '</div>';
+                
+                $('.mt-modal-body').html(modalBodyHTML);
+                
+                // Populate textareas
+                $('#mt-edit-overview').val(data.overview || '');
+                $('#mt-edit-criteria').val(data.criteria || '');
+                $('#mt-edit-biography').val(data.biography || '');
+            }
             
             // Reset to first tab
             this.switchTab('overview');
+        },
+        
+        insertCriteriaTemplate: function() {
+            var template = '<strong>Mut & Pioniergeist:</strong><br><br>' +
+                          '<strong>Innovationsgrad:</strong><br><br>' +
+                          '<strong>Umsetzungskraft & Wirkung:</strong><br><br>' +
+                          '<strong>Relevanz für die Mobilitätswende:</strong><br><br>' +
+                          '<strong>Vorbildfunktion & Sichtbarkeit:</strong><br><br>';
+            
+            if (typeof MTRichEditor !== 'undefined') {
+                var currentContent = MTRichEditor.getContent('mt-edit-criteria');
+                MTRichEditor.setContent('mt-edit-criteria', currentContent + template);
+            }
+        },
+        
+        tempSave: function(field, content) {
+            // Store auto-saved content temporarily
+            this.tempContent[field] = content;
         },
         
         switchTab: function(tab) {
@@ -150,16 +248,35 @@
             var activeTab = $('.mt-tab-btn.active').data('tab');
             var content = '';
             
-            switch(activeTab) {
-                case 'overview':
-                    content = $('#mt-edit-overview').val();
-                    break;
-                case 'criteria':
-                    content = $('#mt-edit-criteria').val();
-                    break;
-                case 'biography':
-                    content = $('#mt-edit-biography').val();
-                    break;
+            // Check if using rich editor
+            var useRichEditor = typeof MTRichEditor !== 'undefined' && self.richEditorsInitialized;
+            
+            if (useRichEditor) {
+                // Get content from rich editor
+                switch(activeTab) {
+                    case 'overview':
+                        content = MTRichEditor.getContent('mt-edit-overview');
+                        break;
+                    case 'criteria':
+                        content = MTRichEditor.getContent('mt-edit-criteria');
+                        break;
+                    case 'biography':
+                        content = MTRichEditor.getContent('mt-edit-biography');
+                        break;
+                }
+            } else {
+                // Get content from textarea
+                switch(activeTab) {
+                    case 'overview':
+                        content = $('#mt-edit-overview').val();
+                        break;
+                    case 'criteria':
+                        content = $('#mt-edit-criteria').val();
+                        break;
+                    case 'biography':
+                        content = $('#mt-edit-biography').val();
+                        break;
+                }
             }
             
             // Save via AJAX
@@ -192,8 +309,24 @@
         },
         
         closeModal: function() {
+            // Check for unsaved changes
+            if (this.richEditorsInitialized && Object.keys(this.tempContent).length > 0) {
+                if (!confirm('You have unsaved changes. Are you sure you want to close?')) {
+                    return;
+                }
+            }
+            
+            // Destroy editors if initialized
+            if (this.richEditorsInitialized) {
+                MTRichEditor.destroy('mt-edit-overview');
+                MTRichEditor.destroy('mt-edit-criteria');
+                MTRichEditor.destroy('mt-edit-biography');
+                this.richEditorsInitialized = false;
+            }
+            
             $('#mt-inline-edit-modal').hide();
             this.currentPostId = null;
+            this.tempContent = {};
         }
     };
     

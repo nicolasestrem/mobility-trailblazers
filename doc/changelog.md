@@ -3,42 +3,77 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
-## [2.5.30] - 2025-08-18
+## [2.5.32] - 2025-01-18
 ### Added
-- **Custom Scroll-to-Top Solution**: Complete replacement for broken Happy Addons button
-  - JavaScript class `MTScrollToTop` with comprehensive functionality
-  - CSS file `mt-scroll-to-top.css` with ultra-aggressive overrides
-  - Fixed positioning system that bypasses all theme conflicts
-  - Smooth scroll animation with fallback for older browsers
-  - Accessibility support with ARIA labels and keyboard navigation
-  - Proper focus management after scroll completion
-  - Performance optimized with debounced scroll events
-  - New files:
-    - `assets/css/mt-scroll-to-top.css`
-    - `assets/js/mt-scroll-to-top.js`
-  - Modified: `includes/core/class-mt-plugin.php` (enqueue_frontend_assets)
+- **Rich Text Editor for Candidate Content**: Implemented comprehensive WYSIWYG editor for Edit Content modal
+  - New lightweight, dependency-free rich text editor module
+  - Full formatting toolbar with bold, italic, underline, headings, lists, and links
+  - Keyboard shortcuts support (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K, Ctrl+Z, Ctrl+Y)
+  - Undo/redo functionality with 50-state history management
+  - Auto-save feature every 30 seconds
+  - Template insertion for standard evaluation criteria
+  - Character count display
+  - HTML sanitization for security (client and server-side)
+  - Graceful fallback to textarea for unsupported browsers
+  - Files added: `assets/js/mt-rich-editor.js`, `assets/css/mt-rich-editor.css`
+  - Files modified: `assets/js/candidate-editor.js`, `includes/admin/class-mt-candidate-editor.php`
+  - Documentation: `doc/rich-text-editor.md`
 
-- **Elementor Scroll-to-Top Widget**: Professional widget for cross-site reusability
-  - Complete Elementor widget class `MT_Widget_Scroll_To_Top`
-  - Comprehensive controls interface with position, styling, and animation options
-  - Four position options: bottom-right, bottom-left, top-right, top-left
-  - Customizable offset controls for precise positioning
-  - Adjustable scroll threshold (when button appears)
-  - Full styling controls: size, background gradients, colors, borders, shadows
-  - Icon size controls and three hover animation options (lift, scale, rotate)
-  - Animation duration settings and speed controls
-  - Per-widget instance styling with inline CSS generation
-  - Editor preview functionality for live design
-  - New file: `includes/integrations/elementor/widgets/class-mt-widget-scroll-to-top.php`
+### Enhanced
+- **Content Editing Experience**: Significant improvement to admin content management
+  - ContentEditable areas replace plain textareas
+  - Visual feedback for active formatting states
+  - Unsaved changes warning on modal close
+  - Responsive design for mobile/tablet editing
+  - Dark mode support following WordPress admin theme
+  - Improved modal UI with professional styling
+
+### Technical Details
+- Pure JavaScript implementation (no external libraries)
+- Browser compatibility: Chrome 60+, Firefox 55+, Safari 11+, Edge 79+
+- Performance optimized with lazy loading and proper memory management
+- Full WordPress integration with nonce verification and capability checks
+- Accessible with ARIA labels and keyboard navigation
+
+
+## [2.5.31] - 2025-08-18
+### Fixed
+- **Candidate Image Cropping Issue**: Fixed Friedrich Dräxlmaier's profile image where face was not visible
+  - Added new CSS file `candidate-image-adjustments.css` for specific image positioning
+  - Implemented `object-position: center 25%` to adjust image focus point
+  - Applied fix to hero images, profile photos, and grid view cards
+  - Added responsive adjustments for mobile views
+  - New file: `assets/css/candidate-image-adjustments.css`
+  - Modified: `includes/core/class-mt-plugin.php` (added stylesheet enqueue)
+  - Can be used as template for fixing other candidates with similar issues
+
+### Technical Details
+- Default `object-position` changed from `center center` to `center 30%` for better face visibility
+- Specific adjustment for Friedrich Dräxlmaier using post ID 4627 selectors
+- Supports multiple selector patterns: body class, data attributes, and href matching
+- Mobile-responsive with adjusted positioning for smaller screens
+
+
+## [2.5.31] - 2025-08-18
+### Removed
+- **Scroll-to-Top Implementation**: Complete removal of all scroll-to-top functionality
+  - Deleted custom implementation that was causing conflicts and never properly integrated
+  - Removed Elementor widget integration from loader
+  - Cleaned up CSS and JavaScript files (3 files deleted)
   - Modified: `includes/integrations/elementor/class-mt-elementor-loader.php`
+  - Documented cleanup in developer guide for future reference
 
 ### Fixed
-- **Happy Addons Compatibility**: Resolved scroll-to-top button not sticking on production
-  - Button had 0 dimensions and wasn't visible on frontend
-  - CSS positioning conflicts with theme containers and transforms
-  - Fixed by implementing custom solution that bypasses all theme interference
-  - Button now attaches to `document.documentElement` for guaranteed positioning
-  - Ultra-specific CSS selectors override all possible conflicts
+- **Code Cleanup**: Removed redundant and non-functional code
+  - Eliminated ultra-aggressive CSS with excessive !important declarations
+  - Removed unused JavaScript classes and implementations
+  - Cleaned up widget registrations
+
+### Preserved
+- **Working Features**: Maintained all functional components
+  - Animation system v2.5.29 remains intact
+  - Spacing fixes that resolved white bar issues preserved
+  - All other Elementor widgets continue functioning
 
 ### Technical Details
 - Maximum z-index (2147483647) ensures button appears above all content

@@ -132,7 +132,7 @@ class MT_Admin {
             if ($_GET['page'] === 'mt-tools') {
                 wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=tools'));
                 wp_die();
-            } elseif ($_GET['page'] === 'mt-diagnostics' || $_GET['page'] === 'mobility-trailblazers-diagnostics') {
+            } elseif ($_GET['page'] === 'mt-diagnostics') {
                 wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
                 wp_die();
             }
@@ -815,18 +815,9 @@ class MT_Admin {
             );
         }
         
-        // WordPress media scripts and custom JS for settings page
+        // WordPress media scripts for settings page
         if ($hook === 'mobility-trailblazers_page_mt-settings') {
             wp_enqueue_media();
-            
-            // Enqueue our settings admin script
-            wp_enqueue_script(
-                'mt-settings-admin',
-                MT_PLUGIN_URL . 'assets/js/mt-settings-admin.js',
-                ['jquery', 'media-upload'],
-                MT_VERSION,
-                true
-            );
         }
         
         // Candidate import script for candidates list page
