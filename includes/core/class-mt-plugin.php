@@ -115,9 +115,15 @@ class MT_Plugin {
         // Initialize template loader for enhanced candidate profiles
         MT_Template_Loader::init();
         
+        // Initialize archive handler for grid layout
+        MT_Archive_Handler::init();
+        
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        
+        // Add body classes for animations
+        add_filter('body_class', [$this, 'add_animation_body_classes']);
     }
     
     /**
@@ -288,6 +294,17 @@ class MT_Plugin {
             true
         );
         
+        // Animation styles (conditional based on settings)
+        $presentation_settings = get_option('mt_candidate_presentation', []);
+        if (!empty($presentation_settings['enable_animations']) || !empty($presentation_settings['enable_hover_effects'])) {
+            wp_enqueue_style(
+                'mt-animations',
+                MT_PLUGIN_URL . 'assets/css/mt-animations.css',
+                ['mt-frontend'],
+                MT_VERSION
+            );
+        }
+        
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(
@@ -384,6 +401,26 @@ class MT_Plugin {
                 'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
+    }
+    
+    /**
+     * Add body classes for animations based on settings
+     *
+     * @param array $classes Existing body classes
+     * @return array Modified body classes
+     */
+    public function add_animation_body_classes($classes) {
+        $presentation_settings = get_option('mt_candidate_presentation', []);
+        
+        if (!empty($presentation_settings['enable_animations'])) {
+            $classes[] = 'mt-animations-enabled';
+        }
+        
+        if (!empty($presentation_settings['enable_hover_effects'])) {
+            $classes[] = 'mt-hover-effects';
+        }
+        
+        return $classes;
     }
     
     /**

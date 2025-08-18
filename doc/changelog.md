@@ -2,6 +2,43 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.28] - 2025-08-18
+### Added
+- **Archive Grid Handler**: New class `MT_Archive_Handler` to properly display candidates in grid layout
+- **Animation System**: Comprehensive CSS animations based on settings
+  - Fade-in, scale, slide, and pulse animations
+  - Hover effects for cards, buttons, and links
+  - Respects user's reduced motion preferences
+- **Media Library Integration**: Dashboard header image upload with WordPress media library
+- **Settings JavaScript**: New admin script for enhanced settings functionality
+
+### Fixed
+- **Candidate Grid Layout**: Fixed archive page displaying as list instead of grid
+  - Added proper grid CSS application via body classes
+  - Responsive breakpoints for tablet and mobile
+  - Proper card styling with shadows and hover effects
+- **Dashboard Header Image**: Implemented missing media upload functionality
+  - Added JavaScript media library integration
+  - Image preview and clear functionality
+  - Proper saving and retrieval of image URLs
+
+### Removed
+- **Non-Functional Language Settings**: Removed language settings that had no implementation
+  - Removed default language dropdown
+  - Removed language switcher checkbox  
+  - Removed auto-detect language option
+  - Cleaned up associated save logic
+
+### Improved
+- **Settings Page Organization**: Streamlined settings interface
+  - Only functional settings displayed
+  - Better grouping of related options
+  - Added validation for form submission
+- **Animation Performance**: Optimized animation CSS
+  - Uses GPU acceleration where appropriate
+  - Implements will-change for smooth animations
+  - Cleans up after animations complete
+
 ## [2.5.27] - 2025-01-18
 ### Fixed
 - **Mobile Content Cutoff**: Fixed candidate card content being cut off on mobile devices
