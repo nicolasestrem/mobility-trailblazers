@@ -30,6 +30,13 @@ class MT_Language_Switcher {
     private $i18n;
     
     /**
+     * Track if language switcher has been rendered
+     *
+     * @var bool
+     */
+    private static $switcher_rendered = false;
+    
+    /**
      * Constructor
      */
     public function __construct() {
@@ -51,6 +58,11 @@ class MT_Language_Switcher {
         
         // Add styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        
+        // Reset the rendered flag at the beginning of each request
+        add_action('init', function() {
+            self::$switcher_rendered = false;
+        }, 1);
     }
     
     /**
@@ -207,12 +219,21 @@ class MT_Language_Switcher {
             'type' => 'dropdown', // dropdown or inline
             'show_flags' => 'yes',
             'show_names' => 'yes',
-            'class' => ''
+            'class' => '',
+            'force_display' => 'no' // Allow forcing display even if already rendered
         ], $atts);
         
         if (!get_option('mt_enable_language_switcher', '1')) {
             return '';
         }
+        
+        // Check if switcher has already been rendered (unless forced)
+        if (self::$switcher_rendered && $atts['force_display'] !== 'yes') {
+            return '';
+        }
+        
+        // Mark as rendered
+        self::$switcher_rendered = true;
         
         $current_lang = $this->i18n->get_current_language();
         $languages = $this->i18n->get_supported_languages();
@@ -316,6 +337,15 @@ class MT_Language_Switcher {
             <?php endforeach; ?>
         </div>
         <?php
+    }
+    
+    /**
+     * Reset the rendered flag (useful for AJAX requests)
+     *
+     * @return void
+     */
+    public static function reset_rendered_flag() {
+        self::$switcher_rendered = false;
     }
     
     /**
