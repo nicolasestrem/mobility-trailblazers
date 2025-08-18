@@ -2,6 +2,20 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.17] - 2025-08-18
+### Added
+- **Elementor Template Integration**: New tool for creating Elementor templates from MT shortcodes
+  - Added MT Elementor Templates tool under Tools menu
+  - Creates importable Elementor templates for all 4 MT shortcodes
+  - Supports both container and section modes based on Elementor settings
+  - Templates wrap shortcodes to maintain full functionality
+  - Added CSS wrapper classes for customizable template styling
+  - New files:
+    - `includes/admin/tools/class-mt-elementor-templates.php`
+    - `assets/css/mt-elementor-templates.css`
+    - `debug/create-elementor-templates.php`
+  - Modified `includes/admin/class-mt-admin.php` to load the tool
+
 ## [2.5.16] - 2025-01-20
 ### Removed
 - **Email Functionality**: Completely removed all email features from the plugin

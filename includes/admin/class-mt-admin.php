@@ -38,7 +38,11 @@ class MT_Admin {
         
         // Add dashboard widgets
         add_action('wp_dashboard_setup', [$this, 'add_dashboard_widgets']);
-
+        
+        // Initialize Elementor Templates tool
+        if (is_admin()) {
+            $this->init_elementor_templates();
+        }
     }
     
     /**
@@ -600,6 +604,19 @@ class MT_Admin {
         }
     }
     
+    
+    /**
+     * Initialize Elementor Templates tool
+     *
+     * @return void
+     */
+    private function init_elementor_templates() {
+        if (!file_exists(MT_PLUGIN_DIR . 'includes/admin/tools/class-mt-elementor-templates.php')) {
+            return;
+        }
+        
+        require_once MT_PLUGIN_DIR . 'includes/admin/tools/class-mt-elementor-templates.php';
+    }
     
     /**
      * Display admin notices
