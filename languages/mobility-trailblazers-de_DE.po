@@ -214,9 +214,6 @@ msgstr "Jurymitgliedern erlauben, Entwürfe zu speichern"
 msgid "Allow jury members to edit submitted evaluations"
 msgstr "Jurymitgliedern erlauben, eingereichte Bewertungen zu bearbeiten"
 
-msgid "Sie sind kein Jurymitglied."
-msgstr "Sie sind kein Jurymitglied."
-
 msgid "Data Management"
 msgstr "Datenverwaltung"
 

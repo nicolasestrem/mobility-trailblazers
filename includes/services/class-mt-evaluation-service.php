@@ -1,5 +1,5 @@
 <?php
-// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Mobility Trailblazers - Nicolas Estrem
+// GPL 2.0 or later. See LICENSE. Copyright (c) 2025 Nicolas Estrem
 
 /**
  * Evaluation Service

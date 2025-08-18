@@ -6,7 +6,7 @@
  * Version: 2.5.26
  * Requires at least: 5.8
  * Requires PHP: 7.4
- * Author: Mobility Trailblazers - Nicolas Estrem
+ * Author: Nicolas Estrem
  * Author URI: https://mobility-trailblazers.com
  * Text Domain: mobility-trailblazers
  * Domain Path: /languages
@@ -15,7 +15,7 @@
  */
 
 /**
- * Copyright (c) 2025 Mobility Trailblazers - Nicolas Estrem
+ * Copyright (c) 2025 Nicolas Estrem
  *
  * This program is free software. You can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
