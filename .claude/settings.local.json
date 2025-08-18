@@ -64,7 +64,8 @@
       "mcp__filesystem__create_directory",
       "mcp__filesystem__move_file",
       "Bash(do [ -f \"$file\" ])",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "mcp__mobility-ftp__ftp_upload_file"
     ],
     "deny": [],
     "additionalDirectories": [

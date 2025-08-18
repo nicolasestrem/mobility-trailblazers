@@ -98,8 +98,8 @@ class MT_Coaching {
                 COUNT(DISTINCT e.candidate_id) as completed,
                 COUNT(DISTINCT CASE WHEN e.status = 'draft' THEN e.candidate_id END) as drafts,
                 AVG(CASE 
-                    WHEN e.criterion_1 IS NOT NULL 
-                    THEN e.criterion_1 + e.criterion_2 + e.criterion_3 + e.criterion_4 + e.criterion_5 
+                    WHEN e.courage_score IS NOT NULL 
+                    THEN e.courage_score + e.innovation_score + e.implementation_score + e.relevance_score + e.visibility_score 
                     ELSE NULL 
                 END) as avg_score,
                 MAX(e.updated_at) as last_activity
