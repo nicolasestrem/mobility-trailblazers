@@ -52,11 +52,11 @@ class EvaluationWorkflowTest extends MT_Test_Case {
                 'action' => 'mt_save_evaluation',
                 'nonce' => wp_create_nonce('mt_ajax_nonce'),
                 'candidate_id' => $candidate_id,
-                'criterion_1' => 80 + $index,
-                'criterion_2' => 75 + $index,
-                'criterion_3' => 85 + $index,
-                'criterion_4' => 90 + $index,
-                'criterion_5' => 70 + $index,
+                'courage_score' => 80 + $index,
+                'innovation_score' => 75 + $index,
+                'implementation_score' => 85 + $index,
+                'relevance_score' => 90 + $index,
+                'visibility_score' => 70 + $index,
                 'comments' => 'Test evaluation ' . $index,
                 'status' => 'submitted'
             ];
@@ -101,7 +101,7 @@ class EvaluationWorkflowTest extends MT_Test_Case {
             'action' => 'mt_save_evaluation',
             'nonce' => wp_create_nonce('mt_ajax_nonce'),
             'candidate_id' => $candidate_id,
-            'criterion_1' => 80,
+            'courage_score' => 80,
             // Missing other criteria
             'status' => 'submitted'
         ];
@@ -117,11 +117,11 @@ class EvaluationWorkflowTest extends MT_Test_Case {
             'action' => 'mt_save_evaluation',
             'nonce' => wp_create_nonce('mt_ajax_nonce'),
             'candidate_id' => $candidate_id,
-            'criterion_1' => 150, // Invalid
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 150, // Invalid
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'status' => 'submitted'
         ];
         
@@ -136,11 +136,11 @@ class EvaluationWorkflowTest extends MT_Test_Case {
             'action' => 'mt_save_evaluation',
             'nonce' => wp_create_nonce('mt_ajax_nonce'),
             'candidate_id' => $candidate_id,
-            'criterion_1' => 80,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 80,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'comments' => 'Valid evaluation',
             'status' => 'submitted'
         ];
@@ -242,11 +242,11 @@ class EvaluationWorkflowTest extends MT_Test_Case {
         $evaluation_service->save_evaluation([
             'jury_member_id' => $jury_id,
             'candidate_id' => $candidate_id,
-            'criterion_1' => 80,
-            'criterion_2' => 75,
-            'criterion_3' => 85,
-            'criterion_4' => 90,
-            'criterion_5' => 70,
+            'courage_score' => 80,
+            'innovation_score' => 75,
+            'implementation_score' => 85,
+            'relevance_score' => 90,
+            'visibility_score' => 70,
             'status' => 'submitted'
         ]);
         
@@ -300,11 +300,11 @@ class EvaluationWorkflowTest extends MT_Test_Case {
             $result = $evaluation_service->save_evaluation([
                 'jury_member_id' => $jury_id,
                 'candidate_id' => $candidate_id,
-                'criterion_1' => 70 + ($index * 10),
-                'criterion_2' => 75 + ($index * 10),
-                'criterion_3' => 80 + ($index * 10),
-                'criterion_4' => 85 + ($index * 10),
-                'criterion_5' => 90 + ($index * 10),
+                'courage_score' => 70 + ($index * 10),
+                'innovation_score' => 75 + ($index * 10),
+                'implementation_score' => 80 + ($index * 10),
+                'relevance_score' => 85 + ($index * 10),
+                'visibility_score' => 90 + ($index * 10),
                 'status' => 'submitted'
             ]);
             

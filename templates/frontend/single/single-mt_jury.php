@@ -35,7 +35,7 @@ while (have_posts()) : the_post();
             COUNT(DISTINCT candidate_id) as evaluated_count,
             COUNT(CASE WHEN status = 'submitted' THEN 1 END) as submitted_count,
             COUNT(CASE WHEN status = 'draft' THEN 1 END) as draft_count,
-            AVG((criterion_1 + criterion_2 + criterion_3 + criterion_4 + criterion_5) / 5) as avg_score
+            AVG((courage_score + innovation_score + implementation_score + relevance_score + visibility_score) / 5) as avg_score
         FROM $table_evaluations 
         WHERE jury_member_id = %d
     ", $jury_id));

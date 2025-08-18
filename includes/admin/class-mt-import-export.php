@@ -610,11 +610,11 @@ class MT_Import_Export {
             fputcsv($output, [
                 $evaluation->candidate_name,
                 $evaluation->jury_member,
-                $evaluation->criterion_1,
-                $evaluation->criterion_2,
-                $evaluation->criterion_3,
-                $evaluation->criterion_4,
-                $evaluation->criterion_5,
+                $evaluation->courage_score,
+                $evaluation->innovation_score,
+                $evaluation->implementation_score,
+                $evaluation->relevance_score,
+                $evaluation->visibility_score,
                 $evaluation->comments,
                 $evaluation->status,
                 $evaluation->created_at
@@ -888,18 +888,18 @@ class MT_Import_Export {
             }
             
             foreach ($evaluations as $eval) {
-                $total_score = $eval->criterion_1 + $eval->criterion_2 + 
-                              $eval->criterion_3 + $eval->criterion_4 + $eval->criterion_5;
+                $total_score = $eval->courage_score + $eval->innovation_score + 
+                              $eval->implementation_score + $eval->relevance_score + $eval->visibility_score;
                 
                 $row = [
                     $eval->id,
                     $eval->jury_name,
                     $eval->candidate_name,
-                    $eval->criterion_1,
-                    $eval->criterion_2,
-                    $eval->criterion_3,
-                    $eval->criterion_4,
-                    $eval->criterion_5,
+                    $eval->courage_score,
+                    $eval->innovation_score,
+                    $eval->implementation_score,
+                    $eval->relevance_score,
+                    $eval->visibility_score,
                     $total_score,
                     $eval->comments,
                     $eval->status,
