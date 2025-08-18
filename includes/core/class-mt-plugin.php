@@ -248,6 +248,26 @@ class MT_Plugin {
             '1.0.0'
         );
         
+        // Elementor spacing adjustments (v1.0.0)
+        if (defined('ELEMENTOR_VERSION')) {
+            wp_enqueue_style(
+                'mt-elementor-spacing',
+                MT_PLUGIN_URL . 'assets/css/mt-elementor-spacing.css',
+                ['mt-frontend'],
+                '1.0.0'
+            );
+        }
+        
+        // Page spacing fix for voting dashboard (v1.0.0)
+        if (is_page(1056) || has_shortcode(get_post_field('post_content', get_the_ID()), 'mt_jury_dashboard')) {
+            wp_enqueue_style(
+                'mt-page-spacing-fix',
+                MT_PLUGIN_URL . 'assets/css/mt-page-spacing-fix.css',
+                ['mt-frontend'],
+                '1.0.0'
+            );
+        }
+        
         // Brand alignment styles to match main website (v2.5.11)
         wp_enqueue_style(
             'mt-brand-alignment',
@@ -415,7 +435,9 @@ class MT_Plugin {
             ]
         ]);
         
-        // Custom Scroll to Top Button (v2.5.30)
+        // Custom Scroll to Top Button - DISABLED (causing white space issues)
+        // Disabled on 2025-01-18 - was causing excessive white space at top of pages
+        /*
         wp_enqueue_style(
             'mt-scroll-to-top',
             MT_PLUGIN_URL . 'assets/css/mt-scroll-to-top.css',
@@ -430,6 +452,7 @@ class MT_Plugin {
             MT_VERSION,
             true
         );
+        */
     }
     
     /**

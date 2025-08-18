@@ -1,0 +1,107 @@
+/**
+ * Mobility Trailblazers - Page Spacing Fix
+ * 
+ * @package MobilityTrailblazers
+ * @since   1.0.0
+ * 
+ * Fixes excessive white space on pages using MT shortcodes
+ * Compatible with various themes and page builders
+ */
+
+/* ========================================
+   Target the voting dashboard page specifically
+   ======================================== */
+
+/* Page 1056 - Main voting dashboard */
+.page-id-1056 .entry-content,
+.page-id-1056 #content,
+.page-id-1056 .site-main,
+.page-id-1056 #primary {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Remove top margin from the candidates grid */
+.page-id-1056 .mt-candidates-grid {
+    margin-top: 20px !important; /* Reduced from 30px */
+}
+
+/* ========================================
+   General fixes for all MT shortcode pages
+   ======================================== */
+
+/* When MT shortcodes are present, reduce page padding */
+.has-mt-shortcode .entry-content,
+body:has(.mt-candidates-grid) .entry-content,
+body:has(.mt-jury-dashboard) .entry-content {
+    padding-top: 20px !important;
+}
+
+/* Fix for themes that add large padding to article elements */
+article:has(.mt-candidates-grid),
+article:has(.mt-jury-dashboard) {
+    padding-top: 0 !important;
+}
+
+/* ========================================
+   Theme-specific fixes
+   ======================================== */
+
+/* Hello Elementor theme */
+.hello-elementor .page-id-1056 .site-main {
+    padding-top: 0 !important;
+}
+
+/* Astra theme */
+.ast-separate-container .page-id-1056 .ast-container {
+    padding-top: 20px !important;
+}
+
+/* Twenty Twenty-One/Two/Three themes */
+.page-id-1056 .entry-header {
+    margin-bottom: 20px !important;
+}
+
+/* ========================================
+   Language switcher spacing
+   ======================================== */
+
+.mt-language-switcher {
+    margin-bottom: 20px !important;
+    margin-top: 0 !important;
+}
+
+/* ========================================
+   Error message spacing
+   ======================================== */
+
+.mt-notice {
+    margin: 10px 0 !important;
+}
+
+.mt-notice:first-child {
+    margin-top: 0 !important;
+}
+
+/* ========================================
+   WordPress admin bar compatibility
+   ======================================== */
+
+.admin-bar .page-id-1056 .site-main {
+    /* Admin bar is 32px, no additional spacing needed */
+    margin-top: 0 !important;
+}
+
+/* ========================================
+   Mobile responsive
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+    .page-id-1056 .mt-candidates-grid {
+        margin-top: 15px !important;
+    }
+    
+    .mt-language-switcher {
+        margin-bottom: 15px !important;
+    }
+}
