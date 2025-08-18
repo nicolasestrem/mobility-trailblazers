@@ -69,7 +69,8 @@
       "mcp__mobility-ftp__ftp_list_directory",
       "mcp__mobility-ftp__ftp_upload_directory",
       "Bash(git restore:*)",
-      "mcp__kapture__show"
+      "mcp__kapture__show",
+      "mcp__memory__create_entities"
     ],
     "deny": [],
     "additionalDirectories": [

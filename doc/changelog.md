@@ -2,6 +2,25 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.21] - 2025-08-18
+### Added
+- **Candidate Content Editor**: Comprehensive editing interface for candidate profile sections
+  - Added meta boxes for Innovation Summary, Evaluation Criteria, and Biography
+  - Inline editing modal for quick updates from candidate list page
+  - AJAX-powered content updates without page reload
+  - Helper text for standard evaluation criteria headers
+  - Visual editor with formatting tools
+  - New files:
+    - `includes/admin/class-mt-candidate-editor.php`
+    - `assets/js/candidate-editor.js`
+  - Modified: `includes/admin/class-mt-admin.php`
+
+### Technical Details
+- Content stored in post meta fields: `_mt_overview`, `_mt_evaluation_criteria`, `_mt_personality`
+- Proper nonce verification and capability checks for security
+- Responsive modal interface with tabbed navigation
+- Support for rich text editing with TinyMCE
+
 ## [2.5.20.2] - 2025-08-18
 ### Fixed
 - **Button-Style Score Calculation**: Fixed total score not updating with button-style scoring

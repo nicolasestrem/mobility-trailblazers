@@ -43,6 +43,9 @@ class MT_Admin {
         if (is_admin()) {
             $this->init_elementor_templates();
         }
+        
+        // Initialize Candidate Editor
+        require_once MT_PLUGIN_DIR . 'includes/admin/class-mt-candidate-editor.php';
     }
     
     /**
