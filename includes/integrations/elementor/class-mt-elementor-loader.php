@@ -104,7 +104,8 @@ class MT_Elementor_Loader {
             'jury-dashboard',
             'candidates-grid',
             'evaluation-stats',
-            'winners-display'
+            'winners-display',
+            'scroll-to-top'
         ];
         
         foreach ($widget_files as $widget) {

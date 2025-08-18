@@ -67,13 +67,6 @@ if (isset($_POST['submit']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_settings'
     // Save enhanced template setting
     update_option('mt_use_enhanced_template', isset($_POST['mt_use_enhanced_template']) ? '1' : '0');
     
-    // Save language settings
-    if (isset($_POST['mt_default_language'])) {
-        update_option('mt_default_language', sanitize_text_field($_POST['mt_default_language']));
-    }
-    update_option('mt_enable_language_switcher', isset($_POST['mt_enable_language_switcher']) ? '1' : '0');
-    update_option('mt_auto_detect_language', isset($_POST['mt_auto_detect_language']) ? '1' : '0');
-    
     // Save other settings
     update_option('mt_evaluations_per_page', intval($_POST['evaluations_per_page']));
     
@@ -341,46 +334,6 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
             </tr>
         </table>
         
-        <!-- Language Settings -->
-        <h2><?php _e('Language Settings', 'mobility-trailblazers'); ?></h2>
-        <p><?php _e('Configure multilingual settings for the platform.', 'mobility-trailblazers'); ?></p>
-        
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="mt_default_language"><?php _e('Default Language', 'mobility-trailblazers'); ?></label>
-                </th>
-                <td>
-                    <select id="mt_default_language" name="mt_default_language">
-                        <option value="de_DE" <?php selected(get_option('mt_default_language', 'de_DE'), 'de_DE'); ?>>🇩🇪 Deutsch</option>
-                        <option value="en_US" <?php selected(get_option('mt_default_language', 'de_DE'), 'en_US'); ?>>🇬🇧 English</option>
-                    </select>
-                    <p class="description"><?php _e('Select the default language for the platform.', 'mobility-trailblazers'); ?></p>
-                </td>
-            </tr>
-            
-            <tr>
-                <th scope="row"><?php _e('Language Options', 'mobility-trailblazers'); ?></th>
-                <td>
-                    <label>
-                        <input type="checkbox" name="mt_enable_language_switcher" value="1"
-                               <?php checked(get_option('mt_enable_language_switcher', '1'), '1'); ?> />
-                        <?php _e('Enable Language Switcher', 'mobility-trailblazers'); ?>
-                    </label>
-                    <p class="description"><?php _e('Show language switcher in the frontend.', 'mobility-trailblazers'); ?></p>
-                    
-                    <br/>
-                    
-                    <label>
-                        <input type="checkbox" name="mt_auto_detect_language" value="1"
-                               <?php checked(get_option('mt_auto_detect_language', '1'), '1'); ?> />
-                        <?php _e('Auto-detect Language', 'mobility-trailblazers'); ?>
-                    </label>
-                    <p class="description"><?php _e('Automatically detect user language based on browser settings.', 'mobility-trailblazers'); ?></p>
-                </td>
-            </tr>
-        </table>
-        
         <!-- Candidate Presentation Customization -->
         <h2><?php _e('Candidate Presentation Settings', 'mobility-trailblazers'); ?></h2>
         <p><?php _e('Customize how candidates are displayed to jury members during evaluation.', 'mobility-trailblazers'); ?></p>
@@ -504,7 +457,54 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                         <input type="checkbox" name="mt_candidate_presentation[enable_hover_effects]" value="1" 
                                <?php checked(isset($candidate_presentation['enable_hover_effects']) ? $candidate_presentation['enable_hover_effects'] : 1, 1); ?> />
                         <?php _e('Enable hover effects on interactive elements', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[enable_scroll_reveal]" value="1" 
+                               <?php checked(isset($candidate_presentation['enable_scroll_reveal']) ? $candidate_presentation['enable_scroll_reveal'] : 0, 1); ?> />
+                        <?php _e('Enable scroll-triggered reveal animations', 'mobility-trailblazers'); ?>
+                    </label><br />
+                    
+                    <label>
+                        <input type="checkbox" name="mt_candidate_presentation[enable_parallax]" value="1" 
+                               <?php checked(isset($candidate_presentation['enable_parallax']) ? $candidate_presentation['enable_parallax'] : 0, 1); ?> />
+                        <?php _e('Enable parallax scrolling effects', 'mobility-trailblazers'); ?>
                     </label>
+                </td>
+            </tr>
+            
+            <!-- Animation Speed -->
+            <tr>
+                <th scope="row">
+                    <label for="animation_speed"><?php _e('Animation Speed', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="animation_speed" name="mt_candidate_presentation[animation_speed]">
+                        <option value="instant" <?php selected(isset($candidate_presentation['animation_speed']) ? $candidate_presentation['animation_speed'] : 'normal', 'instant'); ?>><?php _e('Instant (0.1s)', 'mobility-trailblazers'); ?></option>
+                        <option value="fast" <?php selected(isset($candidate_presentation['animation_speed']) ? $candidate_presentation['animation_speed'] : 'normal', 'fast'); ?>><?php _e('Fast (0.2s)', 'mobility-trailblazers'); ?></option>
+                        <option value="normal" <?php selected(isset($candidate_presentation['animation_speed']) ? $candidate_presentation['animation_speed'] : 'normal', 'normal'); ?>><?php _e('Normal (0.3s)', 'mobility-trailblazers'); ?></option>
+                        <option value="slow" <?php selected(isset($candidate_presentation['animation_speed']) ? $candidate_presentation['animation_speed'] : 'normal', 'slow'); ?>><?php _e('Slow (0.5s)', 'mobility-trailblazers'); ?></option>
+                        <option value="slower" <?php selected(isset($candidate_presentation['animation_speed']) ? $candidate_presentation['animation_speed'] : 'normal', 'slower'); ?>><?php _e('Slower (0.8s)', 'mobility-trailblazers'); ?></option>
+                    </select>
+                    <button type="button" class="button button-small mt-preview-animation-speed"><?php _e('Preview', 'mobility-trailblazers'); ?></button>
+                </td>
+            </tr>
+            
+            <!-- Animation Style -->
+            <tr>
+                <th scope="row">
+                    <label for="animation_style"><?php _e('Default Animation Style', 'mobility-trailblazers'); ?></label>
+                </th>
+                <td>
+                    <select id="animation_style" name="mt_candidate_presentation[animation_style]">
+                        <option value="fade" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'fade'); ?>><?php _e('Fade In', 'mobility-trailblazers'); ?></option>
+                        <option value="slide" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'slide'); ?>><?php _e('Slide In', 'mobility-trailblazers'); ?></option>
+                        <option value="zoom" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'zoom'); ?>><?php _e('Zoom In', 'mobility-trailblazers'); ?></option>
+                        <option value="rotate" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'rotate'); ?>><?php _e('Rotate In', 'mobility-trailblazers'); ?></option>
+                        <option value="flip" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'flip'); ?>><?php _e('Flip In', 'mobility-trailblazers'); ?></option>
+                        <option value="bounce" <?php selected(isset($candidate_presentation['animation_style']) ? $candidate_presentation['animation_style'] : 'fade', 'bounce'); ?>><?php _e('Bounce In', 'mobility-trailblazers'); ?></option>
+                    </select>
+                    <button type="button" class="button button-small mt-preview-animation-style"><?php _e('Preview', 'mobility-trailblazers'); ?></button>
                 </td>
             </tr>
         </table>
