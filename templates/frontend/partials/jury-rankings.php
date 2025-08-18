@@ -84,13 +84,24 @@ if (!empty($jury_members)) {
             ?>
                 <tr class="mt-eval-row <?php echo esc_attr($position_class . ' ' . $rank_class); ?>" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
                     <td class="mt-eval-rank">
-                        <span class="mt-position-badge <?php echo esc_attr($position_class); ?>">
-                            <?php if ($position <= 3): ?>
+                        <?php 
+                        // Use the new ranking display utility
+                        if (class_exists('\MobilityTrailblazers\Utilities\MT_Ranking_Display')) {
+                            echo \MobilityTrailblazers\Utilities\MT_Ranking_Display::get_position_badge($position, [
+                                'show_medal' => ($position <= 3),
+                                'show_number' => true,
+                                'size' => 'small',
+                                'context' => 'table'
+                            ]);
+                        } else {
+                            // Fallback to simple display
+                            ?>
+                            <span class="mt-position-badge <?php echo esc_attr($position_class); ?>">
                                 <span class="position-number"><?php echo $position; ?></span>
-                            <?php else: ?>
-                                <span class="position-number"><?php echo $position; ?></span>
-                            <?php endif; ?>
-                        </span>
+                            </span>
+                            <?php
+                        }
+                        ?>
                     </td>
                     <td class="mt-eval-candidate">
                         <span class="mt-candidate-name"><?php echo esc_html($candidate_name); ?></span>

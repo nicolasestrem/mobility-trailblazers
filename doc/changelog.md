@@ -2,6 +2,22 @@
 
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
+## [2.5.19] - 2025-08-18
+### Added
+- **Complete Ranking System Rebuild**: Brand new ranking and medal display system
+  - Created `MT_Ranking_Display` utility class for consistent ranking displays
+  - Proper SVG medal icons with ribbon design for top 3 positions
+  - Multiple display contexts: tables, cards, hero sections
+  - Three size options: small, medium, large
+  - Comprehensive CSS with gradients, shadows, and animations
+  - Responsive design for mobile devices
+  - Accessibility improvements with ARIA labels
+  - New files:
+    - `includes/utilities/class-mt-ranking-display.php`
+    - `assets/css/mt-rankings-v2.css`
+    - `debug/test-ranking-display.php`
+  - Modified: `templates/frontend/partials/jury-rankings.php`
+
 ## [2.5.18] - 2025-08-18
 ### Fixed
 - **Medal Icons and Position Numbers**: Fixed display issues with ranking badges

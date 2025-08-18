@@ -55,6 +55,11 @@ class MT_Plugin {
      * @return void
      */
     public function init() {
+        // Load utility classes
+        if (file_exists(MT_PLUGIN_DIR . 'includes/utilities/class-mt-ranking-display.php')) {
+            require_once MT_PLUGIN_DIR . 'includes/utilities/class-mt-ranking-display.php';
+        }
+        
         // Initialize i18n first
         $i18n = new MT_I18n();
         $i18n->init();
@@ -232,10 +237,10 @@ class MT_Plugin {
             MT_VERSION
         );
         
-        // Medal and position number display fixes (v2.5.18)
+        // New Ranking System v2 (v2.5.19)
         wp_enqueue_style(
-            'mt-medal-fix',
-            MT_PLUGIN_URL . 'assets/css/mt-medal-fix.css',
+            'mt-rankings-v2',
+            MT_PLUGIN_URL . 'assets/css/mt-rankings-v2.css',
             ['mt-frontend', 'mt-jury-dashboard-enhanced'],
             MT_VERSION
         );
