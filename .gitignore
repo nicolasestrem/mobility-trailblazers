@@ -115,3 +115,4 @@ docker-compose.override.yml
 !languages/
 !templates/
 !doc/
+/.claude
