@@ -3,6 +3,39 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.32] - 2025-01-18
+### Added
+- **Rich Text Editor for Candidate Content**: Implemented comprehensive WYSIWYG editor for Edit Content modal
+  - New lightweight, dependency-free rich text editor module
+  - Full formatting toolbar with bold, italic, underline, headings, lists, and links
+  - Keyboard shortcuts support (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+K, Ctrl+Z, Ctrl+Y)
+  - Undo/redo functionality with 50-state history management
+  - Auto-save feature every 30 seconds
+  - Template insertion for standard evaluation criteria
+  - Character count display
+  - HTML sanitization for security (client and server-side)
+  - Graceful fallback to textarea for unsupported browsers
+  - Files added: `assets/js/mt-rich-editor.js`, `assets/css/mt-rich-editor.css`
+  - Files modified: `assets/js/candidate-editor.js`, `includes/admin/class-mt-candidate-editor.php`
+  - Documentation: `doc/rich-text-editor.md`
+
+### Enhanced
+- **Content Editing Experience**: Significant improvement to admin content management
+  - ContentEditable areas replace plain textareas
+  - Visual feedback for active formatting states
+  - Unsaved changes warning on modal close
+  - Responsive design for mobile/tablet editing
+  - Dark mode support following WordPress admin theme
+  - Improved modal UI with professional styling
+
+### Technical Details
+- Pure JavaScript implementation (no external libraries)
+- Browser compatibility: Chrome 60+, Firefox 55+, Safari 11+, Edge 79+
+- Performance optimized with lazy loading and proper memory management
+- Full WordPress integration with nonce verification and capability checks
+- Accessible with ARIA labels and keyboard navigation
+
+
 ## [2.5.31] - 2025-08-18
 ### Fixed
 - **Candidate Image Cropping Issue**: Fixed Friedrich Dräxlmaier's profile image where face was not visible

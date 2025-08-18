@@ -259,10 +259,26 @@ class MT_Candidate_Editor {
         
         // Add JavaScript for inline editing
         if ($hook === 'edit.php') {
+            // Enqueue rich text editor assets
+            wp_enqueue_script(
+                'mt-rich-editor',
+                MT_PLUGIN_URL . 'assets/js/mt-rich-editor.js',
+                [],
+                MT_VERSION,
+                true
+            );
+            
+            wp_enqueue_style(
+                'mt-rich-editor',
+                MT_PLUGIN_URL . 'assets/css/mt-rich-editor.css',
+                ['dashicons'],
+                MT_VERSION
+            );
+            
             wp_enqueue_script(
                 'mt-candidate-editor',
                 MT_PLUGIN_URL . 'assets/js/candidate-editor.js',
-                ['jquery'],
+                ['jquery', 'mt-rich-editor'],
                 MT_VERSION,
                 true
             );
@@ -272,7 +288,7 @@ class MT_Candidate_Editor {
                 'nonce' => wp_create_nonce('mt_candidate_editor'),
                 'i18n' => [
                     'edit' => __('Edit Content', 'mobility-trailblazers'),
-                    'save' => __('Save', 'mobility-trailblazers'),
+                    'save' => __('Save Changes', 'mobility-trailblazers'),
                     'cancel' => __('Cancel', 'mobility-trailblazers'),
                     'saving' => __('Saving...', 'mobility-trailblazers'),
                     'saved' => __('Saved!', 'mobility-trailblazers'),

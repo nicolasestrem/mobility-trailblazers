@@ -678,8 +678,14 @@ if (typeof mtCandidateEditor !== 'undefined' &&
 ### Files
 
 - `includes/admin/class-mt-candidate-editor.php` - Backend handler
-- `assets/js/candidate-editor.js` - Frontend implementation
+- `assets/js/candidate-editor.js` - Frontend implementation and modal integration
+- `assets/js/mt-rich-editor.js` - Rich text editor core module (v2.5.32)
+- `assets/css/mt-rich-editor.css` - Editor styling (v2.5.32)
 - Modal HTML embedded in admin footer for performance
+
+### Documentation
+
+For detailed information about the Rich Text Editor implementation, features, and API, see [Rich Text Editor Documentation](rich-text-editor.md)
 
 ## Testing Infrastructure
 
