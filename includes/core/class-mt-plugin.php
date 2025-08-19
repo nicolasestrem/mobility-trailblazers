@@ -197,13 +197,6 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
-        // Check if we're using Elementor widgets that have v3 CSS
-        $is_elementor_widget_page = $this->is_using_elementor_widgets();
-        
-        // If we're on a page with v3-enabled Elementor widgets, skip legacy CSS
-        if ($is_elementor_widget_page) {
-            return; // v3 CSS is loaded by the widget renderer
-        }
         // Core CSS Variables (loaded first)
         wp_enqueue_style(
             'mt-variables',
@@ -359,6 +352,14 @@ class MT_Plugin {
                 ['mt-frontend', 'mt-jury-dashboard-enhanced'],
                 MT_VERSION
             );
+            
+            // Fix for evaluation card content cutoff
+            wp_enqueue_style(
+                'mt-jury-dashboard-fix',
+                MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-fix.css',
+                ['mt-jury-dashboard'],
+                MT_VERSION
+            );
         }
         
         // Scripts
@@ -447,42 +448,6 @@ class MT_Plugin {
                 'visibility_description' => __('Serves as an inspiring example and actively promotes sustainable mobility solutions', 'mobility-trailblazers')
             ]
         ]);
-    }
-    
-    /**
-     * Check if the current page is using Elementor widgets with v3 CSS
-     * 
-     * @since 2.5.34
-     * @return bool True if using v3-enabled Elementor widgets
-     */
-    private function is_using_elementor_widgets() {
-        // Check if Elementor is active
-        if (!did_action('elementor/loaded')) {
-            return false;
-        }
-        
-        // Check if we're in the Elementor editor
-        if (isset($_GET['elementor-preview']) || 
-            (function_exists('\Elementor\Plugin::$instance') && 
-             \Elementor\Plugin::$instance->preview && 
-             \Elementor\Plugin::$instance->preview->is_preview_mode())) {
-            return true;
-        }
-        
-        // Check post content for our widget shortcodes
-        global $post;
-        if ($post && is_singular()) {
-            $content = $post->post_content;
-            // Check for our specific widget names in Elementor data
-            if (strpos($content, '"widgetType":"mt_candidates_grid"') !== false ||
-                strpos($content, '"widgetType":"mt_jury_dashboard"') !== false ||
-                strpos($content, '"widgetType":"mt_evaluation_stats"') !== false ||
-                strpos($content, '"widgetType":"mt_winners_display"') !== false) {
-                return true;
-            }
-        }
-        
-        return false;
     }
     
     /**
