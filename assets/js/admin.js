@@ -2,6 +2,26 @@
  * Mobility Trailblazers Admin JavaScript
  */
 
+// Mobile touch support for evaluation sliders
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    jQuery(document).ready(function($) {
+        // Add touch support for evaluation sliders
+        $(document).on('touchstart', '.mt-evaluation-slider, .mt-score-slider, .ui-slider-handle', function(e) {
+            var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+            $(this).trigger('mousedown', touch);
+        });
+        
+        // Improve touch targets for mobile
+        $('.mt-evaluation-slider, .mt-score-slider').css({
+            'min-height': '44px',
+            'touch-action': 'pan-y'
+        });
+        
+        // Add mobile-friendly class to body for CSS targeting
+        $('body').addClass('mt-touch-enabled');
+    });
+}
+
 // Ensure mt_admin object exists with fallback values
 if (typeof mt_admin === 'undefined') {
     // mt_admin object not found, creating fallback

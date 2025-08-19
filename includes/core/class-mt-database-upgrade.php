@@ -65,15 +65,18 @@ class MT_Database_Upgrade {
         $eval_columns = $wpdb->get_col("SHOW COLUMNS FROM {$evaluations_table}");
         
         if (!in_array('comments', $eval_columns)) {
-            $wpdb->query("ALTER TABLE {$evaluations_table} ADD COLUMN comments longtext AFTER total_score");
+            $table = esc_sql($evaluations_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN comments longtext AFTER total_score");
         }
         
         if (!in_array('created_at', $eval_columns)) {
-            $wpdb->query("ALTER TABLE {$evaluations_table} ADD COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP");
+            $table = esc_sql($evaluations_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP");
         }
         
         if (!in_array('updated_at', $eval_columns)) {
-            $wpdb->query("ALTER TABLE {$evaluations_table} ADD COLUMN updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+            $table = esc_sql($evaluations_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
         }
         
         // Check and add missing columns to assignments table
@@ -81,11 +84,13 @@ class MT_Database_Upgrade {
         $assign_columns = $wpdb->get_col("SHOW COLUMNS FROM {$assignments_table}");
         
         if (!in_array('assigned_at', $assign_columns)) {
-            $wpdb->query("ALTER TABLE {$assignments_table} ADD COLUMN assigned_at datetime DEFAULT CURRENT_TIMESTAMP AFTER candidate_id");
+            $table = esc_sql($assignments_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN assigned_at datetime DEFAULT CURRENT_TIMESTAMP AFTER candidate_id");
         }
         
         if (!in_array('assigned_by', $assign_columns)) {
-            $wpdb->query("ALTER TABLE {$assignments_table} ADD COLUMN assigned_by bigint(20) DEFAULT NULL AFTER assigned_at");
+            $table = esc_sql($assignments_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN assigned_by bigint(20) DEFAULT NULL AFTER assigned_at");
         }
         
         // Add indexes if they don't exist
@@ -93,7 +98,8 @@ class MT_Database_Upgrade {
         $eval_index_names = array_column($eval_indexes, 'Key_name');
         
         if (!in_array('idx_status', $eval_index_names)) {
-            $wpdb->query("ALTER TABLE {$evaluations_table} ADD INDEX idx_status (status)");
+            $table = esc_sql($evaluations_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD INDEX idx_status (status)");
         }
         
         $assign_indexes = $wpdb->get_results("SHOW INDEX FROM {$assignments_table}");
@@ -101,16 +107,18 @@ class MT_Database_Upgrade {
         
         if (!in_array('unique_assignment', $assign_index_names)) {
             // First remove duplicates if any
+            $table = esc_sql($assignments_table);
             $wpdb->query("
-                DELETE a1 FROM {$assignments_table} a1
-                INNER JOIN {$assignments_table} a2 
+                DELETE a1 FROM `{$table}` a1
+                INNER JOIN `{$table}` a2 
                 WHERE a1.id > a2.id 
                 AND a1.jury_member_id = a2.jury_member_id 
                 AND a1.candidate_id = a2.candidate_id
             ");
             
             // Then add unique index
-            $wpdb->query("ALTER TABLE {$assignments_table} ADD UNIQUE KEY unique_assignment (jury_member_id, candidate_id)");
+            $table = esc_sql($assignments_table);
+            $wpdb->query("ALTER TABLE `{$table}` ADD UNIQUE KEY unique_assignment (jury_member_id, candidate_id)");
         }
     }
     
@@ -123,7 +131,8 @@ class MT_Database_Upgrade {
         global $wpdb;
         
         $assignments_table = $wpdb->prefix . 'mt_jury_assignments';
-        $result = $wpdb->query("TRUNCATE TABLE {$assignments_table}");
+        $table = esc_sql($assignments_table);
+        $result = $wpdb->query("TRUNCATE TABLE `{$table}`");
         
         return $result !== false;
     }
@@ -137,7 +146,8 @@ class MT_Database_Upgrade {
         global $wpdb;
         
         $evaluations_table = $wpdb->prefix . 'mt_evaluations';
-        $result = $wpdb->query("TRUNCATE TABLE {$evaluations_table}");
+        $table = esc_sql($evaluations_table);
+        $result = $wpdb->query("TRUNCATE TABLE `{$table}`");
         
         return $result !== false;
     }

@@ -708,10 +708,14 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         
         if ($jury_member_id) {
             // Clear specific jury member ranking caches
-            $query = "DELETE FROM {$wpdb->options} 
-                      WHERE option_name LIKE '_transient_mt_jury_rankings_{$jury_member_id}_%' 
-                      OR option_name LIKE '_transient_timeout_mt_jury_rankings_{$jury_member_id}_%'";
-            $wpdb->query($query);
+            $jury_id = intval($jury_member_id);
+            $wpdb->query($wpdb->prepare(
+                "DELETE FROM {$wpdb->options} 
+                 WHERE option_name LIKE %s 
+                 OR option_name LIKE %s",
+                '_transient_mt_jury_rankings_' . $jury_id . '_%',
+                '_transient_timeout_mt_jury_rankings_' . $jury_id . '_%'
+            ));
         }
     }
     
@@ -722,10 +726,13 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
         global $wpdb;
         
         // Clear all jury ranking caches
-        $query = "DELETE FROM {$wpdb->options} 
-                  WHERE option_name LIKE '_transient_mt_jury_rankings_%' 
-                  OR option_name LIKE '_transient_timeout_mt_jury_rankings_%'";
-        $wpdb->query($query);
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$wpdb->options} 
+             WHERE option_name LIKE %s 
+             OR option_name LIKE %s",
+            '_transient_mt_jury_rankings_%',
+            '_transient_timeout_mt_jury_rankings_%'
+        ));
     }
     
     /**

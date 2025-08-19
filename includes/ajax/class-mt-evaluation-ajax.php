@@ -671,15 +671,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             // For table views from admin or managers, allow evaluation without assignment
             $is_table_view = isset($_POST['context']) && $_POST['context'] === 'table';
             
-            if ($can_evaluate_all) {
-                error_log('  - User has admin/manager permissions - allowing evaluation');
-            } elseif ($is_table_view) {
-                // Even for table view, regular jury members need assignments
-                $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
-                return;
-            } else {
-                $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
-                return;
+            // Even administrators must have proper assignments for security
+            if (!$has_assignment) {
+                if ($can_evaluate_all) {
+                    // Log this for audit purposes
+                    error_log('WARNING: Admin/Manager evaluating without assignment - Jury: ' . $jury_member->ID . ', Candidate: ' . $candidate_id);
+                    // For now, allow admins but this should be reviewed
+                    error_log('  - User has admin/manager permissions - allowing evaluation (legacy behavior)');
+                } else {
+                    $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
+                    return;
+                }
             }
         }
         

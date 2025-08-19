@@ -535,18 +535,39 @@ class MT_Import_Export {
             'email'
         ]);
         
-        // Write data
-        foreach ($candidates as $candidate) {
-            fputcsv($output, [
-                get_post_meta($candidate->ID, '_mt_candidate_name', true) ?: $candidate->post_title,
-                get_post_meta($candidate->ID, '_mt_organization', true),
-                get_post_meta($candidate->ID, '_mt_category_type', true),
-                get_post_meta($candidate->ID, '_mt_description_full', true),
-                get_post_meta($candidate->ID, '_mt_innovation', true),
-                get_post_meta($candidate->ID, '_mt_website_url', true),
-                get_post_meta($candidate->ID, '_mt_linkedin_url', true),
-                get_post_meta($candidate->ID, '_mt_email', true)
-            ]);
+        // Optimize meta data fetching - get all meta at once
+        $candidate_ids = wp_list_pluck($candidates, 'ID');
+        if (!empty($candidate_ids)) {
+            $meta_query = "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} 
+                           WHERE post_id IN (" . implode(',', array_map('intval', $candidate_ids)) . ") 
+                           AND meta_key IN ('_mt_candidate_name', '_mt_organization', '_mt_category_type', 
+                                            '_mt_description_full', '_mt_innovation', '_mt_website_url', 
+                                            '_mt_linkedin_url', '_mt_email')";
+            $all_meta = $wpdb->get_results($meta_query);
+            
+            // Organize meta by post ID
+            $meta_by_post = [];
+            foreach ($all_meta as $meta) {
+                if (!isset($meta_by_post[$meta->post_id])) {
+                    $meta_by_post[$meta->post_id] = [];
+                }
+                $meta_by_post[$meta->post_id][$meta->meta_key] = $meta->meta_value;
+            }
+            
+            // Write data using cached meta
+            foreach ($candidates as $candidate) {
+                $meta = isset($meta_by_post[$candidate->ID]) ? $meta_by_post[$candidate->ID] : [];
+                fputcsv($output, [
+                    isset($meta['_mt_candidate_name']) ? $meta['_mt_candidate_name'] : $candidate->post_title,
+                    isset($meta['_mt_organization']) ? $meta['_mt_organization'] : '',
+                    isset($meta['_mt_category_type']) ? $meta['_mt_category_type'] : '',
+                    isset($meta['_mt_description_full']) ? $meta['_mt_description_full'] : '',
+                    isset($meta['_mt_innovation']) ? $meta['_mt_innovation'] : '',
+                    isset($meta['_mt_website_url']) ? $meta['_mt_website_url'] : '',
+                    isset($meta['_mt_linkedin_url']) ? $meta['_mt_linkedin_url'] : '',
+                    isset($meta['_mt_email']) ? $meta['_mt_email'] : ''
+                ]);
+            }
         }
         
         fclose($output);
