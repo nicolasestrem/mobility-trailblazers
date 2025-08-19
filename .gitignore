@@ -136,11 +136,6 @@ deprecated/
 *.ps1
 *.bat
 cleanup-*.sh
-=======
-.claude.json
-.claude-local.json
-.mcp.json
-/mcp-tools/
 
 # Photos (keep in repo but ignore changes)
 /Photos_candidates/

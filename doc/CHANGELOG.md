@@ -229,7 +229,7 @@
   - Uses GPU acceleration where appropriate
   - Implements will-change for smooth animations
   - Cleans up after animations complete
-=======
+
 ## [2.5.27b] - 2025-08-18
 ### Fixed
 - **Database Schema Migration Complete**: Finished migration from generic column names to descriptive ones
