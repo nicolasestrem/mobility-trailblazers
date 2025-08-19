@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers
  * Plugin URI: https://mobility-trailblazers.com
  * Description: Award management platform for recognizing mobility innovators in the DACH region
- * Version: 2.5.34
+ * Version: 2.5.35
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Nicolas Estrem
@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('MT_VERSION', '2.5.34');
+define('MT_VERSION', '2.5.35');
 define('MT_PLUGIN_FILE', __FILE__);
 define('MT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -75,6 +75,11 @@ require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';
 
 // Register autoloader
 MobilityTrailblazers\Core\MT_Autoloader::register();
+
+// Load emergency fixes (TEMPORARY - Remove after proper fix)
+if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
+    require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
+}
 
 // Initialize the plugin
 add_action('plugins_loaded', function() {

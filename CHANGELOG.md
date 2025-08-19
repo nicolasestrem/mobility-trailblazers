@@ -5,6 +5,40 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.35] - 2025-08-19 EMERGENCY
+
+### 🚨 CRITICAL FIXES - Boss Review Issues
+- **CRITICAL: Fixed evaluation criteria descriptions not displaying**
+  - Added emergency CSS overrides to force display of all 5 criteria descriptions
+  - Created `emergency-fixes.css` with maximum specificity selectors
+  - Added inline styles as fallback for description visibility
+  - Implemented debug logging to track description rendering
+  
+- **CRITICAL: Fixed German translations not loading**
+  - Created `emergency-german-fixes.php` to force German locale
+  - Added gettext filter for critical translations as fallback
+  - Ensured rankings page displays "Rangliste der bewerteten Kandidaten"
+  - Fixed all evaluation interface text to display in German
+  
+- **Added emergency fix infrastructure**
+  - Created verification script `verify-fixes.ps1`
+  - Added .mo file regeneration scripts (PowerShell and Bash)
+  - Integrated emergency fixes into main plugin loader
+  - Added admin-only debug console logging
+
+### 📝 Files Created/Modified
+- `assets/css/emergency-fixes.css` - Forces display of hidden elements
+- `includes/emergency-german-fixes.php` - German locale and translation overrides
+- `scripts/regenerate-mo.ps1` - PowerShell script to compile translations
+- `scripts/regenerate-mo.sh` - Bash script for Linux/Mac
+- `verify-fixes.ps1` - Comprehensive fix verification script
+- `mobility-trailblazers.php` - Updated to load emergency fixes
+
+### ⚠️ Temporary Solution
+- These are emergency patches for immediate deployment
+- Proper refactoring needed in next version
+- Remove emergency files after permanent fix implementation
+
 ## [2.5.34] - 2025-08-19
 
 ### 🔒 Security - CRITICAL FIXES
