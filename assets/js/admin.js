@@ -5,11 +5,19 @@
 // Mobile touch support for evaluation sliders
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     jQuery(document).ready(function($) {
-        // Add touch support for evaluation sliders
-        $(document).on('touchstart', '.mt-evaluation-slider, .mt-score-slider, .ui-slider-handle', function(e) {
-            var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-            $(this).trigger('mousedown', touch);
-        });
+        // Use event manager for proper cleanup
+        if (window.MTEventManager) {
+            MTEventManager.on('touchstart', '.mt-evaluation-slider, .mt-score-slider, .ui-slider-handle', function(e) {
+                var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                $(this).trigger('mousedown', touch);
+            }, 'admin_touch');
+        } else {
+            // Fallback with namespaced events
+            $(document).on('touchstart.mt_admin', '.mt-evaluation-slider, .mt-score-slider, .ui-slider-handle', function(e) {
+                var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                $(this).trigger('mousedown', touch);
+            });
+        }
         
         // Improve touch targets for mobile
         $('.mt-evaluation-slider, .mt-score-slider').css({
@@ -132,8 +140,8 @@ if (typeof mt_admin.i18n === 'undefined') {
             }, 5000);
         }
         
-        // Handle dismiss button
-        $(document).on('click', '.mt-notification .notice-dismiss', function() {
+        // Handle dismiss button with namespaced event
+        $(document).on('click.mt_admin', '.mt-notification .notice-dismiss', function() {
             $(this).closest('.mt-notification').fadeOut(400, function() {
                 $(this).remove();
             });

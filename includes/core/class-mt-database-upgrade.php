@@ -38,6 +38,11 @@ class MT_Database_Upgrade {
             self::upgrade_to_2_5_26();
         }
         
+        // Add performance optimizations for version 2.5.34
+        if (version_compare($current_version, '2.5.34', '<')) {
+            self::upgrade_to_2_5_34();
+        }
+        
         // Update database version
         update_option('mt_db_version', MT_VERSION);
     }
@@ -202,6 +207,28 @@ class MT_Database_Upgrade {
         } else {
             error_log('Failed to create candidates table: ' . $candidates_table . ' - Error: ' . $wpdb->last_error);
         }
+    }
+    
+    /**
+     * Upgrade to version 2.5.34 - Add performance indexes
+     *
+     * @return void
+     * @since 2.5.34
+     */
+    private static function upgrade_to_2_5_34() {
+        // Load optimizer class if not already loaded
+        if (!class_exists('\MobilityTrailblazers\Core\MT_Database_Optimizer')) {
+            require_once MT_PLUGIN_DIR . 'includes/core/class-mt-database-optimizer.php';
+        }
+        
+        // Run optimization
+        $results = \MobilityTrailblazers\Core\MT_Database_Optimizer::optimize();
+        
+        // Log results
+        error_log('MT Database Optimization Results: ' . print_r($results, true));
+        
+        // Store optimization results for admin notice
+        set_transient('mt_db_optimization_results', $results, HOUR_IN_SECONDS);
     }
     
     /**

@@ -391,9 +391,21 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             // Clear any WordPress transients that might cache stats
             global $wpdb;
-            $wpdb->query("DELETE FROM {$wpdb->options} 
-                         WHERE option_name LIKE '_transient_mt_%' 
-                         OR option_name LIKE '_transient_timeout_mt_%'");
+            try {
+                $result = $wpdb->query($wpdb->prepare(
+                    "DELETE FROM {$wpdb->options} 
+                     WHERE option_name LIKE %s 
+                     OR option_name LIKE %s",
+                    '_transient_mt_%',
+                    '_transient_timeout_mt_%'
+                ));
+                
+                if ($result === false) {
+                    error_log('MT Assignment: Failed to clear transients - ' . $wpdb->last_error);
+                }
+            } catch (\Exception $e) {
+                error_log('MT Assignment: Exception clearing transients - ' . $e->getMessage());
+            }
             
             // Clear object cache if available
             if (function_exists('wp_cache_flush')) {
