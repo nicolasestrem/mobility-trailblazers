@@ -141,15 +141,6 @@ class MT_Admin {
         // Profile Migration and other admin-only menus
         if (current_user_can('manage_options')) {
             
-            // Import Profiles
-            add_submenu_page(
-                'mobility-trailblazers',
-                __('Import Profiles', 'mobility-trailblazers'),
-                __('Import Profiles', 'mobility-trailblazers'),
-                'manage_options',
-                'mt-import-profiles',
-                [$this, 'render_import_profiles_page']
-            );
             
             // Audit Log
             add_submenu_page(
@@ -451,30 +442,6 @@ class MT_Admin {
      * @return void
      */
     public function render_diagnostics_page() {
-        wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
-        wp_die();
-    }
-    
-    /**
-     * Render import profiles page
-     *
-     * @return void
-     */
-    public function render_import_profiles_page() {
-        // Include the import template
-        $template_file = MT_PLUGIN_DIR . 'templates/admin/import-profiles.php';
-        if (file_exists($template_file)) {
-            include $template_file;
-        } else {
-            // Fallback to debug script if template doesn't exist
-            $debug_file = MT_PLUGIN_DIR . 'debug/import-profiles.php';
-            if (file_exists($debug_file)) {
-                include $debug_file;
-            } else {
-                echo '<div class="notice notice-error"><p>' . esc_html__('Import profiles template not found.', 'mobility-trailblazers') . '</p></div>';
-            }
-        }
-    }
     
     /**
      * Render audit log page
