@@ -5,6 +5,37 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.33] - 2025-08-19
+
+### 🔒 Security Fixes
+- **Critical: Fixed insufficient nonce verification** - Added proper execution termination after failed nonce checks
+- **Input validation for evaluation scores** - Enforced 0-10 range validation for all evaluation criteria
+- **Assignment validation** - Added validation for jury member and candidate IDs to prevent invalid assignments
+- **Improved error handling** - Implemented centralized error handler with context logging
+
+### ⚡ Performance Improvements
+- **Database query optimization** - Implemented pagination to prevent memory exhaustion with large datasets
+  - Admin export operations now fetch candidates in batches of 50
+  - Assignment service processes data with pagination
+  - Prevents timeout and memory issues with 200+ candidates
+- **Optimized query performance** - Reduced memory footprint for bulk operations
+
+### 🐛 Bug Fixes
+- **Critical: Version mismatch resolved** - Fixed mismatch between plugin header (2.5.33) and constant (was 2.5.26)
+- **Cross-environment compatibility** - Replaced hardcoded Docker paths with WordPress functions
+- **CSS loading conflicts** - Resolved stylesheet conflicts and loading order issues
+
+### 🔧 Development & Maintenance
+- **Repository cleanup** - Added debug scripts to .gitignore and removed from tracking
+- **Error handling system** - Created MT_Error_Handler class for centralized error management
+- **Improved debugging** - Enhanced error logging with context and backtrace information
+- **Code quality** - Standardized error responses across all AJAX handlers
+
+### 📝 Documentation
+- Updated changelog with comprehensive fix details
+- Added security audit recommendations
+- Documented critical paths for October 2025 launch
+
 ## [2.5.27] - 2025-08-19
 
 ### Fixed
