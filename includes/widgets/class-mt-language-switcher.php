@@ -531,3 +531,4 @@ class MT_Language_Switcher {
         ]);
     }
 }
+

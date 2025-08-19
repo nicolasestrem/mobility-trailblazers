@@ -4,28 +4,23 @@
  * @package MobilityTrailblazers
  * @since 2.5.21
  */
-
 (function($) {
     'use strict';
-    
     var MTCandidateEditor = {
         currentPostId: null,
         tempContent: {},
         richEditorsInitialized: false,
         hasUnsavedChanges: false,
         originalContent: {},
-        
         init: function() {
             this.addEditButtons();
             this.bindEvents();
         },
-        
         addEditButtons: function() {
             // Add edit button to each candidate row
             $('#the-list tr').each(function() {
                 var $row = $(this);
                 var postId = $row.find('input[name="post[]"]').val();
-                
                 if (postId) {
                     var $titleCol = $row.find('.column-title strong');
                     var editBtn = '<a class="mt-inline-edit-btn" data-post-id="' + postId + '" href="#">' +
@@ -36,40 +31,33 @@
                 }
             });
         },
-        
         bindEvents: function() {
             var self = this;
-            
             // Edit button click
             $(document).on('click', '.mt-inline-edit-btn', function(e) {
                 e.preventDefault();
                 var postId = $(this).data('post-id');
                 self.openEditModal(postId);
             });
-            
             // Tab switching
             $('.mt-tab-btn').on('click', function() {
                 var tab = $(this).data('tab');
                 self.switchTab(tab);
             });
-            
             // Save button
             $('.mt-save-content').on('click', function() {
                 self.saveContent();
             });
-            
             // Cancel button
             $('.mt-cancel-edit').on('click', function() {
                 self.closeModal();
             });
-            
             // Close modal on background click
             $('#mt-inline-edit-modal').on('click', function(e) {
                 if (e.target === this) {
                     self.closeModal();
                 }
             });
-            
             // ESC key to close
             $(document).on('keydown', function(e) {
                 if (e.key === 'Escape' && $('#mt-inline-edit-modal').is(':visible')) {
@@ -77,15 +65,12 @@
                 }
             });
         },
-        
         openEditModal: function(postId) {
             var self = this;
             this.currentPostId = postId;
-            
             // Show loading state
             $('#mt-inline-edit-modal').show();
             $('.mt-modal-body').html('<div class="spinner is-active" style="float:none;margin:50px auto;"></div>');
-            
             // Load content via AJAX
             $.ajax({
                 url: ajaxurl,
@@ -109,24 +94,19 @@
                 }
             });
         },
-        
         populateModal: function(data) {
             var self = this;
-            
             // Store original content
             self.originalContent = {
                 overview: data.overview || '',
                 criteria: data.criteria || '',
                 biography: data.biography || ''
             };
-            
             // Reset unsaved changes flag
             self.hasUnsavedChanges = false;
             self.tempContent = {};
-            
             // Check if rich editor is available
             var useRichEditor = typeof MTRichEditor !== 'undefined' && MTRichEditor.isSupported();
-            
             if (useRichEditor) {
                 // Create containers for rich editors
                 var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
@@ -141,16 +121,13 @@
                                   '<div class="mt-tab-content" data-content="biography">' +
                                   '<div id="mt-edit-biography"></div>' +
                                   '</div>';
-                
                 $('.mt-modal-body').html(modalBodyHTML);
-                
                 // Destroy any existing editors
                 if (self.richEditorsInitialized) {
                     MTRichEditor.destroy('mt-edit-overview');
                     MTRichEditor.destroy('mt-edit-criteria');
                     MTRichEditor.destroy('mt-edit-biography');
                 }
-                
                 // Initialize rich editors with content
                 MTRichEditor.init('mt-edit-overview', {
                     content: data.overview || '',
@@ -165,7 +142,6 @@
                         self.checkForChanges('overview', content);
                     }
                 });
-                
                 MTRichEditor.init('mt-edit-criteria', {
                     content: data.criteria || '',
                     minHeight: 300,
@@ -179,7 +155,6 @@
                         self.checkForChanges('criteria', content);
                     }
                 });
-                
                 MTRichEditor.init('mt-edit-biography', {
                     content: data.biography || '',
                     minHeight: 200,
@@ -193,12 +168,9 @@
                         self.checkForChanges('biography', content);
                     }
                 });
-                
                 self.richEditorsInitialized = true;
-                
                 // Add class to wrapper for criteria-specific styling
                 $('#mt-edit-criteria').parent().addClass('mt-evaluation-criteria-editor');
-                
                 // Bind template button
                 $('.mt-template-button').off('click').on('click', function() {
                     var template = $(this).data('template');
@@ -206,7 +178,6 @@
                         self.insertCriteriaTemplate();
                     }
                 });
-                
             } else {
                 // Fallback to textareas
                 var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
@@ -218,9 +189,7 @@
                                   '<div class="mt-tab-content" data-content="biography">' +
                                   '<textarea id="mt-edit-biography" rows="10"></textarea>' +
                                   '</div>';
-                
                 $('.mt-modal-body').html(modalBodyHTML);
-                
                 // Populate textareas
                 $('#mt-edit-overview').val(data.overview || '').on('input', function() {
                     self.checkForChanges('overview', $(this).val());
@@ -232,29 +201,24 @@
                     self.checkForChanges('biography', $(this).val());
                 });
             }
-            
             // Reset to first tab
             this.switchTab('overview');
         },
-        
         insertCriteriaTemplate: function() {
             var template = '<strong>Mut & Pioniergeist:</strong><br><br>' +
                           '<strong>Innovationsgrad:</strong><br><br>' +
                           '<strong>Umsetzungskraft & Wirkung:</strong><br><br>' +
                           '<strong>Relevanz für die Mobilitätswende:</strong><br><br>' +
                           '<strong>Vorbildfunktion & Sichtbarkeit:</strong><br><br>';
-            
             if (typeof MTRichEditor !== 'undefined') {
                 var currentContent = MTRichEditor.getContent('mt-edit-criteria');
                 MTRichEditor.setContent('mt-edit-criteria', currentContent + template);
             }
         },
-        
         tempSave: function(field, content) {
             // Store auto-saved content temporarily
             this.tempContent[field] = content;
         },
-        
         checkForChanges: function(field, content) {
             // Check if content has changed from original
             if (content !== this.originalContent[field]) {
@@ -275,31 +239,24 @@
                 this.hasUnsavedChanges = !allMatch;
             }
         },
-        
         switchTab: function(tab) {
             // Update tab buttons
             $('.mt-tab-btn').removeClass('active');
             $('.mt-tab-btn[data-tab="' + tab + '"]').addClass('active');
-            
             // Update content
             $('.mt-tab-content').removeClass('active');
             $('.mt-tab-content[data-content="' + tab + '"]').addClass('active');
         },
-        
         saveContent: function() {
             var self = this;
             var $saveBtn = $('.mt-save-content');
-            
             // Show saving state
             $saveBtn.prop('disabled', true).text(mtCandidateEditor.i18n.saving);
-            
             // Get active tab
             var activeTab = $('.mt-tab-btn.active').data('tab');
             var content = '';
-            
             // Check if using rich editor
             var useRichEditor = typeof MTRichEditor !== 'undefined' && self.richEditorsInitialized;
-            
             if (useRichEditor) {
                 // Get content from rich editor
                 switch(activeTab) {
@@ -327,7 +284,6 @@
                         break;
                 }
             }
-            
             // Save via AJAX
             $.ajax({
                 url: ajaxurl,
@@ -344,7 +300,6 @@
                         // Update original content with saved value
                         self.originalContent[activeTab] = content;
                         self.hasUnsavedChanges = false;
-                        
                         $saveBtn.text(mtCandidateEditor.i18n.saved);
                         setTimeout(function() {
                             $saveBtn.prop('disabled', false).text(mtCandidateEditor.i18n.save);
@@ -360,7 +315,6 @@
                 }
             });
         },
-        
         closeModal: function() {
             // Check for unsaved changes
             if (this.hasUnsavedChanges) {
@@ -368,7 +322,6 @@
                     return;
                 }
             }
-            
             // Destroy editors if initialized
             if (this.richEditorsInitialized) {
                 MTRichEditor.destroy('mt-edit-overview');
@@ -376,13 +329,11 @@
                 MTRichEditor.destroy('mt-edit-biography');
                 this.richEditorsInitialized = false;
             }
-            
             $('#mt-inline-edit-modal').hide();
             this.currentPostId = null;
             this.tempContent = {};
         }
     };
-    
     // Add AJAX handler for getting content
     $(document).ready(function() {
         // Add the get content handler
@@ -391,8 +342,6 @@
                 action: 'mt_register_get_content_handler'
             });
         }
-        
         MTCandidateEditor.init();
     });
-    
 })(jQuery);

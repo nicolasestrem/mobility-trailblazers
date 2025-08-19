@@ -260,3 +260,4 @@ class MT_Template_Loader {
         return $results;
     }
 }
+

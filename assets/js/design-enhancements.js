@@ -3,10 +3,8 @@
  * Version: 1.0.0
  * Purpose: Add interactive animations and enhancements to the platform
  */
-
 jQuery(document).ready(function($) {
     'use strict';
-    
     // ========================================
     // Smooth scroll for internal links
     // ========================================
@@ -19,7 +17,6 @@ jQuery(document).ready(function($) {
             }, 500, 'swing');
         }
     });
-    
     // ========================================
     // Add animation to cards on scroll
     // ========================================
@@ -29,17 +26,14 @@ jQuery(document).ready(function($) {
             var elementBottom = elementTop + $(this).outerHeight();
             var viewportTop = $(window).scrollTop();
             var viewportBottom = viewportTop + $(window).height();
-            
             if (elementBottom > viewportTop && elementTop < viewportBottom - 100) {
                 $(this).addClass('animate-in');
             }
         });
     }
-    
     // Trigger animation on scroll and initial load
     $(window).on('scroll', animateOnScroll);
     animateOnScroll(); // Initial check
-    
     // ========================================
     // Enhance photo frames with hover effect
     // ========================================
@@ -48,7 +42,6 @@ jQuery(document).ready(function($) {
     }).on('mouseleave', function() {
         $(this).removeClass('hover-effect');
     });
-    
     // ========================================
     // Parallax effect for hero section
     // ========================================
@@ -56,20 +49,17 @@ jQuery(document).ready(function($) {
         $(window).on('scroll', function() {
             var scrollTop = $(window).scrollTop();
             var parallaxSpeed = 0.5;
-            
             $('.mt-hero-pattern').css({
                 'transform': 'translateY(' + (scrollTop * parallaxSpeed) + 'px)'
             });
         });
     }
-    
     // ========================================
     // Progress indicator for evaluation form
     // ========================================
     if ($('.mt-evaluation-form').length) {
         var totalCriteria = $('.mt-criterion-evaluation').length;
         var completedCriteria = 0;
-        
         // Check for completed evaluations
         function updateProgress() {
             completedCriteria = 0;
@@ -79,11 +69,9 @@ jQuery(document).ready(function($) {
                     completedCriteria++;
                 }
             });
-            
             var progressPercent = (completedCriteria / totalCriteria) * 100;
             updateProgressBar(progressPercent);
         }
-        
         // Create progress bar if it doesn't exist
         if (!$('.mt-evaluation-progress').length) {
             var progressHTML = '<div class="mt-evaluation-progress">' +
@@ -94,39 +82,31 @@ jQuery(document).ready(function($) {
                 '</div>';
             $('.mt-evaluation-form').prepend(progressHTML);
         }
-        
         function updateProgressBar(percent) {
             $('.mt-progress-fill').css('width', percent + '%');
             $('.mt-progress-text').text(completedCriteria + ' / ' + totalCriteria + ' criteria evaluated');
         }
-        
         // Update progress on slider change
         $('.mt-score-slider').on('change input', updateProgress);
         updateProgress(); // Initial check
     }
-    
     // ========================================
     // Enhance social links with ripple effect
     // ========================================
     $('.mt-social-link').on('click', function(e) {
         var $this = $(this);
         var ripple = $('<span class="ripple"></span>');
-        
         $this.append(ripple);
-        
         var x = e.pageX - $this.offset().left;
         var y = e.pageY - $this.offset().top;
-        
         ripple.css({
             left: x + 'px',
             top: y + 'px'
         });
-        
         setTimeout(function() {
             ripple.remove();
         }, 600);
     });
-    
     // ========================================
     // Sticky sidebar enhancement
     // ========================================
@@ -134,12 +114,10 @@ jQuery(document).ready(function($) {
         var sidebar = $('.mt-sidebar');
         var sidebarTop = sidebar.offset().top;
         var footerTop = $('footer').length ? $('footer').offset().top : $(document).height();
-        
         $(window).on('scroll', function() {
             var scrollTop = $(window).scrollTop();
             var sidebarHeight = sidebar.outerHeight();
             var windowHeight = $(window).height();
-            
             if (scrollTop > sidebarTop - 100) {
                 if (scrollTop + sidebarHeight + 100 < footerTop) {
                     sidebar.css({
@@ -162,7 +140,6 @@ jQuery(document).ready(function($) {
             }
         });
     }
-    
     // ========================================
     // Image lazy loading enhancement
     // ========================================
@@ -179,12 +156,10 @@ jQuery(document).ready(function($) {
                 }
             });
         });
-        
         $('img[data-src]').each(function() {
             imageObserver.observe(this);
         });
     }
-    
     // ========================================
     // Tooltip enhancement for icons
     // ========================================
@@ -193,7 +168,6 @@ jQuery(document).ready(function($) {
         $('.mt-criterion-icon').each(function() {
             var $this = $(this);
             var title = $this.siblings('.mt-criterion-title').text();
-            
             $this.attr('title', title).tooltip({
                 position: { my: 'center bottom-10', at: 'center top' },
                 classes: { 'ui-tooltip': 'mt-tooltip' }
@@ -207,14 +181,12 @@ jQuery(document).ready(function($) {
             $this.attr('title', title);
         });
     }
-    
     // ========================================
     // Auto-save indicator for evaluation form
     // ========================================
     if ($('.mt-evaluation-form').length) {
         var saveIndicator = $('<div class="mt-save-indicator"><span class="dashicons dashicons-yes"></span> Saved</div>');
         $('body').append(saveIndicator);
-        
         // Show save indicator when AJAX save completes
         $(document).ajaxComplete(function(event, xhr, settings) {
             if (settings.url && settings.url.includes('mt_save_evaluation')) {
@@ -225,7 +197,6 @@ jQuery(document).ready(function($) {
             }
         });
     }
-    
     // ========================================
     // Responsive table enhancement
     // ========================================
@@ -235,7 +206,6 @@ jQuery(document).ready(function($) {
             $table.wrap('<div class="mt-table-wrapper"></div>');
         }
     });
-    
     // ========================================
     // Print optimization
     // ========================================
@@ -246,26 +216,21 @@ jQuery(document).ready(function($) {
         $('*').css('animation', 'none');
         $('*').css('transition', 'none');
     });
-    
     window.addEventListener('afterprint', function() {
         // Restore collapsed state
         $('.mt-collapsible[data-was-collapsed]').addClass('collapsed');
     });
-    
     // ========================================
     // Accessibility enhancements
     // ========================================
-    
     // Skip to content link
     if (!$('#skip-to-content').length) {
         $('body').prepend('<a href="#main-content" id="skip-to-content" class="sr-only">Skip to content</a>');
     }
-    
     // Keyboard navigation for sliders
     $('.mt-score-slider').on('keydown', function(e) {
         var $this = $(this);
         var value = parseFloat($this.val());
-        
         if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
             e.preventDefault();
             $this.val(Math.min(10, value + 0.5)).trigger('change');
@@ -274,12 +239,10 @@ jQuery(document).ready(function($) {
             $this.val(Math.max(0, value - 0.5)).trigger('change');
         }
     });
-    
     // Focus management for modals
     $('.mt-modal').on('shown', function() {
         $(this).find(':focusable:first').focus();
     });
-    
     // ========================================
     // Performance monitoring
     // ========================================
@@ -287,14 +250,12 @@ jQuery(document).ready(function($) {
         window.addEventListener('load', function() {
             var timing = window.performance.timing;
             var loadTime = timing.loadEventEnd - timing.navigationStart;
-            
             if (loadTime > 3000) {
                 // Page load time exceeds 3 seconds - optimization may be needed
             }
         });
     }
 });
-
 // ========================================
 // Add CSS for new elements
 // ========================================
@@ -308,7 +269,6 @@ jQuery(document).ready(function($) {
             background: #f8f9fa;
             border-radius: 8px;
         }
-        
         .mt-progress-bar {
             height: 8px;
             background: #e5e7eb;
@@ -316,18 +276,15 @@ jQuery(document).ready(function($) {
             overflow: hidden;
             margin-bottom: 10px;
         }
-        
         .mt-progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             transition: width 0.3s ease;
         }
-        
         .mt-progress-text {
             font-size: 0.9rem;
             color: #6b7280;
         }
-        
         /* Save Indicator */
         .mt-save-indicator {
             position: fixed;
@@ -343,11 +300,9 @@ jQuery(document).ready(function($) {
             transition: right 0.3s ease;
             z-index: 9999;
         }
-        
         .mt-save-indicator.show {
             right: 20px;
         }
-        
         /* Ripple Effect */
         .ripple {
             position: absolute;
@@ -357,21 +312,18 @@ jQuery(document).ready(function($) {
             animation: ripple-animation 0.6s ease-out;
             pointer-events: none;
         }
-        
         @keyframes ripple-animation {
             to {
                 transform: scale(4);
                 opacity: 0;
             }
         }
-        
         /* Skip to Content */
         #skip-to-content {
             position: absolute;
             left: -9999px;
             z-index: 999;
         }
-        
         #skip-to-content:focus {
             position: fixed;
             top: 0;
@@ -382,13 +334,11 @@ jQuery(document).ready(function($) {
             text-decoration: none;
             z-index: 10000;
         }
-        
         /* Table Wrapper */
         .mt-table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-        
         /* Tooltip Styles */
         .mt-tooltip {
             background: #1f2937;

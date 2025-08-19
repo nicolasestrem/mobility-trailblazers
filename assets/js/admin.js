@@ -1,7 +1,6 @@
 /**
  * Mobility Trailblazers Admin JavaScript
  */
-
 // Mobile touch support for evaluation sliders
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     jQuery(document).ready(function($) {
@@ -18,18 +17,15 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 $(this).trigger('mousedown', touch);
             });
         }
-        
         // Improve touch targets for mobile
         $('.mt-evaluation-slider, .mt-score-slider').css({
             'min-height': '44px',
             'touch-action': 'pan-y'
         });
-        
         // Add mobile-friendly class to body for CSS targeting
         $('body').addClass('mt-touch-enabled');
     });
 }
-
 // Ensure mt_admin object exists with fallback values
 if (typeof mt_admin === 'undefined') {
     // mt_admin object not found, creating fallback
@@ -55,7 +51,6 @@ if (typeof mt_admin === 'undefined') {
         }
     };
 }
-
 // Ensure i18n object exists
 if (typeof mt_admin.i18n === 'undefined') {
     mt_admin.i18n = {
@@ -75,10 +70,8 @@ if (typeof mt_admin.i18n === 'undefined') {
         export_started: 'Export started. Download will begin shortly.'
     };
 }
-
 (function($) {
     'use strict';
-
     // General utility functions that can run on any admin page
     function initTooltips() {
         if (typeof $.fn.tooltip === 'function') {
@@ -90,7 +83,6 @@ if (typeof mt_admin.i18n === 'undefined') {
     function initConfirmations() { /* ... confirmation logic ... */ }
     function initAjaxForms() { /* ... ajax form logic ... */ }
     function initMediaUpload() { /* ... media upload logic ... */ }
-    
     /**
      * Show notification message to user
      * @param {string} message - The message to display
@@ -98,10 +90,8 @@ if (typeof mt_admin.i18n === 'undefined') {
      */
     window.mtShowNotification = function(message, type) {
         type = type || 'info';
-        
         // Remove any existing notifications
         $('.mt-notification').remove();
-        
         // Map types to WordPress notice classes
         const typeMap = {
             'success': 'notice-success',
@@ -109,9 +99,7 @@ if (typeof mt_admin.i18n === 'undefined') {
             'warning': 'notice-warning',
             'info': 'notice-info'
         };
-        
         const noticeClass = typeMap[type] || 'notice-info';
-        
         // Create notification HTML
         const notificationHtml = `
             <div class="mt-notification notice ${noticeClass} is-dismissible">
@@ -121,7 +109,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                 </button>
             </div>
         `;
-        
         // Add notification after the page title
         const $target = $('.wrap h1').first();
         if ($target.length) {
@@ -130,7 +117,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             // Fallback: add to beginning of .wrap
             $('.wrap').prepend(notificationHtml);
         }
-        
         // Auto-dismiss after 5 seconds for success messages
         if (type === 'success') {
             setTimeout(function() {
@@ -139,7 +125,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                 });
             }, 5000);
         }
-        
         // Handle dismiss button with namespaced event
         $(document).on('click.mt_admin', '.mt-notification .notice-dismiss', function() {
             $(this).closest('.mt-notification').fadeOut(400, function() {
@@ -147,7 +132,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
         });
     };
-
     /**
      * Button loading state management
      * @param {jQuery} $button - Button element
@@ -169,7 +153,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             }
         }
     };
-    
     /**
      * Add loading overlay to element
      * @param {jQuery} $element - Element to overlay
@@ -183,7 +166,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             $element.removeClass('active');
         }
     };
-    
     /**
      * Refresh dashboard widget
      * @param {string} widgetId - The ID of the widget to refresh
@@ -196,10 +178,8 @@ if (typeof mt_admin.i18n === 'undefined') {
             if (callback) callback(false);
             return;
         }
-        
         // Add loading state
         $widget.addClass('mt-widget-loading');
-        
         $.ajax({
             url: mt_admin.ajax_url,
             type: 'POST',
@@ -228,7 +208,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             }
         });
     };
-    
     /**
      * Refresh multiple widgets
      * @param {array} widgetIds - Array of widget IDs to refresh
@@ -238,12 +217,10 @@ if (typeof mt_admin.i18n === 'undefined') {
         if (!Array.isArray(widgetIds)) {
             widgetIds = [widgetIds];
         }
-        
         widgetIds.forEach(function(widgetId) {
             refreshDashboardWidget(widgetId);
         });
     };
-
     /**
      * Manager object for the "Assignment Management" page.
      * Contains all logic specific to this page.
@@ -255,106 +232,88 @@ if (typeof mt_admin.i18n === 'undefined') {
             this.bindEvents();
             this.initBulkActions();
         },
-        
         bindEvents: function() {
             // Auto-assign button
             $(document).on('click', '#mt-auto-assign-btn', (e) => {
                 e.preventDefault();
                 this.showAutoAssignModal();
             });
-            
             // Manual assignment button
             $(document).on('click', '#mt-manual-assign-btn', (e) => {
                 e.preventDefault();
                 this.showManualAssignModal();
             });
-            
             // Bulk actions button
             $(document).on('click', '#mt-bulk-actions-btn', (e) => {
                 e.preventDefault();
                 this.toggleBulkActions();
             });
-            
             // Export button
             $(document).on('click', '#mt-export-btn', (e) => {
                 e.preventDefault();
                 this.exportAssignments();
             });
-            
             // Clear all button
             $(document).on('click', '#mt-clear-all-btn', (e) => {
                 e.preventDefault();
                 this.clearAllAssignments();
             });
-            
             // Remove individual assignment
             $(document).on('click', '.mt-remove-assignment', (e) => {
                 e.preventDefault();
                 this.removeAssignment($(e.currentTarget));
             });
-            
             // Modal close buttons
             $(document).on('click', '.mt-modal-close', (e) => {
                 e.preventDefault();
                 $('.mt-modal').fadeOut(300);
             });
-            
             // Manual assignment form submission
             $(document).on('submit', '#mt-manual-assignment-form', (e) => {
                 e.preventDefault();
                 this.submitManualAssignment();
             });
-            
             // Auto-assignment form submission
             $(document).on('submit', '#mt-auto-assign-modal form', (e) => {
                 e.preventDefault();
                 this.submitAutoAssignment();
             });
-            
             // Filter handlers
             $(document).on('change', '#mt-filter-jury, #mt-filter-status', () => {
                 this.applyFilters();
             });
-            
             // Search handler
             $(document).on('keyup', '#mt-assignment-search', function() {
                 const searchTerm = $(this).val();
                 MTAssignmentManager.filterAssignments(searchTerm);
             });
         },
-        
         initBulkActions: function() {
             // Select all checkbox
             $(document).on('change', '#mt-select-all-assignments', function() {
                 $('.mt-assignment-checkbox').prop('checked', $(this).prop('checked'));
             });
-            
             // Apply bulk action button
             $(document).on('click', '#mt-apply-bulk-action', (e) => {
                 e.preventDefault();
                 this.applyBulkAction();
             });
-            
             // Cancel bulk action button
             $(document).on('click', '#mt-cancel-bulk-action', (e) => {
                 e.preventDefault();
                 this.toggleBulkActions();
             });
         },
-        
         showAutoAssignModal: function() {
             $('#mt-auto-assign-modal').fadeIn(300);
         },
-        
         showManualAssignModal: function() {
             $('#mt-manual-assign-modal').fadeIn(300);
         },
-        
         submitAutoAssignment: function() {
             const method = $('#assignment_method').val();
             const candidatesPerJury = $('#candidates_per_jury').val();
             const clearExisting = $('#clear_existing').is(':checked') ? 'true' : 'false';
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -388,20 +347,16 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         submitManualAssignment: function() {
             const juryMemberId = $('#manual_jury_member').val();
             const candidateIds = [];
-            
             $('input[name="candidate_ids[]"]:checked').each(function() {
                 candidateIds.push($(this).val());
             });
-            
             if (!juryMemberId || candidateIds.length === 0) {
                 mtShowNotification(mt_admin.i18n.select_jury_and_candidates, 'warning');
                 return;
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -433,16 +388,13 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         removeAssignment: function($button) {
             const assignmentId = $button.data('assignment-id');
             const juryName = $button.data('jury');
             const candidateName = $button.data('candidate');
-            
             if (!confirm(mt_admin.i18n.confirm_remove_assignment)) {
                 return;
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -476,16 +428,13 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         clearAllAssignments: function() {
             if (!confirm(mt_admin.i18n.confirm_clear_all)) {
                 return;
             }
-            
             if (!confirm(mt_admin.i18n.confirm_clear_all_second)) {
                 return;
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -512,35 +461,28 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         exportAssignments: function() {
             // Create a form to trigger download
             const form = $('<form/>', {
                 action: mt_admin.ajax_url,
                 method: 'POST'
             });
-            
             form.append($('<input/>', {
                 type: 'hidden',
                 name: 'action',
                 value: 'mt_export_assignments'
             }));
-            
             form.append($('<input/>', {
                 type: 'hidden',
                 name: 'nonce',
                 value: mt_admin.nonce
             }));
-            
             form.appendTo('body').submit().remove();
-            
             mtShowNotification(mt_admin.i18n.export_started, 'info');
         },
-        
         toggleBulkActions: function() {
             const $container = $('#mt-bulk-actions-container');
             const $checkboxColumn = $('.check-column');
-            
             if ($container.is(':visible')) {
                 $container.slideUp();
                 $checkboxColumn.hide();
@@ -551,25 +493,20 @@ if (typeof mt_admin.i18n === 'undefined') {
                 $checkboxColumn.show();
             }
         },
-        
         applyBulkAction: function() {
             const action = $('#mt-bulk-action-select').val();
             const selectedIds = [];
-            
             $('.mt-assignment-checkbox:checked').each(function() {
                 selectedIds.push($(this).val());
             });
-            
             if (!action) {
                 mtShowNotification(mt_admin.i18n.select_bulk_action || 'Please select a bulk action', 'warning');
                 return;
             }
-            
             if (selectedIds.length === 0) {
                 mtShowNotification(mt_admin.i18n.select_assignments || 'Please select at least one assignment', 'warning');
                 return;
             }
-            
             if (action === 'remove') {
                 this.bulkRemoveAssignments(selectedIds);
             } else if (action === 'export') {
@@ -578,12 +515,10 @@ if (typeof mt_admin.i18n === 'undefined') {
                 this.showReassignModal(selectedIds);
             }
         },
-        
         bulkRemoveAssignments: function(assignmentIds) {
             if (!confirm('Are you sure you want to remove the selected assignments?')) {
                 return;
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -611,25 +546,21 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         bulkExportAssignments: function(assignmentIds) {
             const form = $('<form/>', {
                 action: mt_admin.ajax_url,
                 method: 'POST'
             });
-            
             form.append($('<input/>', {
                 type: 'hidden',
                 name: 'action',
                 value: 'mt_export_assignments'
             }));
-            
             form.append($('<input/>', {
                 type: 'hidden',
                 name: 'nonce',
                 value: mt_admin.nonce
             }));
-            
             assignmentIds.forEach(id => {
                 form.append($('<input/>', {
                     type: 'hidden',
@@ -637,20 +568,15 @@ if (typeof mt_admin.i18n === 'undefined') {
                     value: id
                 }));
             });
-            
             form.appendTo('body').submit().remove();
         },
-        
         filterAssignments: function(searchTerm) {
             const rows = $('.mt-assignments-table tbody tr');
-            
             if (!searchTerm) {
                 rows.show();
                 return;
             }
-            
             const term = searchTerm.toLowerCase();
-            
             rows.each(function() {
                 const text = $(this).text().toLowerCase();
                 if (text.includes(term)) {
@@ -660,30 +586,25 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         applyFilters: function() {
             const juryFilter = $('#mt-filter-jury').val();
             const statusFilter = $('#mt-filter-status').val();
             const rows = $('.mt-assignments-table tbody tr');
-            
             rows.each(function() {
                 let show = true;
                 const $row = $(this);
-                
                 if (juryFilter) {
                     const juryId = $row.find('.mt-assignment-checkbox').data('jury-id');
                     if (juryId != juryFilter) {
                         show = false;
                     }
                 }
-                
                 if (statusFilter && show) {
                     const status = $row.find('.mt-status').text().toLowerCase();
                     if (status !== statusFilter) {
                         show = false;
                     }
                 }
-                
                 if (show) {
                     $row.show();
                 } else {
@@ -691,24 +612,19 @@ if (typeof mt_admin.i18n === 'undefined') {
                 }
             });
         },
-        
         showReassignModal: function(assignmentIds) {
             // Store the assignment IDs for later use
             this.pendingReassignments = assignmentIds;
-            
             // Check if modal exists, if not create it
             if ($('#mt-reassign-modal').length === 0) {
                 this.createReassignModal();
             }
-            
             // Show the modal
             $('#mt-reassign-modal').fadeIn(300);
         },
-        
         createReassignModal: function() {
             // Get jury members from the filter dropdown as a quick solution
             const juryOptions = $('#mt-filter-jury option').clone();
-            
             const modalHtml = `
                 <div id="mt-reassign-modal" class="mt-modal" style="display: none;">
                     <div class="mt-modal-content">
@@ -729,39 +645,31 @@ if (typeof mt_admin.i18n === 'undefined') {
                     </div>
                 </div>
             `;
-            
             // Append modal to body
             $('body').append(modalHtml);
-            
             // Populate jury options
             $('#reassign_jury_member').html(juryOptions);
-            
             // Bind close event
             $(document).on('click', '#mt-reassign-modal .mt-modal-close', (e) => {
                 e.preventDefault();
                 $('#mt-reassign-modal').fadeOut(300);
             });
-            
             // Bind form submit
             $(document).on('submit', '#mt-reassign-form', (e) => {
                 e.preventDefault();
                 this.submitReassignment();
             });
         },
-        
         submitReassignment: function() {
             const newJuryMemberId = $('#reassign_jury_member').val();
-            
             if (!newJuryMemberId) {
                 mtShowNotification(mt_admin.i18n.select_jury_member || 'Please select a jury member', 'warning');
                 return;
             }
-            
             if (!this.pendingReassignments || this.pendingReassignments.length === 0) {
                 mtShowNotification(mt_admin.i18n.no_assignments_selected || 'No assignments selected', 'warning');
                 return;
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -792,7 +700,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
         }
     };
-
     /**
      * Manager object for the "Evaluations" admin page.
      * Contains all logic specific to this page.
@@ -803,7 +710,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             // MTEvaluationManager initialized
             this.bindEvents();
         },
-        
         /**
          * Get confirmation message based on the action type
          * Provides more specific and helpful messages for different actions
@@ -816,7 +722,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                 'reset': mt_admin.i18n.confirm_reset_evaluations || 'Are you sure you want to reset the selected evaluations to draft status?',
                 'export': mt_admin.i18n.confirm_export_evaluations || 'Are you sure you want to export the selected evaluations?'
             };
-            
             // Return specific message or default
             return messages[action] || 'Are you sure you want to ' + action + ' the selected evaluations?';
         },
@@ -827,10 +732,8 @@ if (typeof mt_admin.i18n === 'undefined') {
                 const evaluationId = $trigger.data('evaluation-id');
                 this.viewDetails(evaluationId, $trigger);
             });
-
             $(document).on('click', '#cb-select-all-1, #cb-select-all-2', this.handleSelectAll);
             $('input[name="evaluation[]"]').on('click', this.handleSingleSelect);
-
             $(document).on('click', '#doaction, #doaction2', (e) => {
                 const action = $(e.currentTarget).prev('select').val();
                 this.applyBulkAction(action);
@@ -845,7 +748,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                 // Focus on modal body for screen readers
                 $modal.find('.mt-modal-body').focus();
             });
-            
             // Fetch evaluation details via AJAX
             $.ajax({
                 url: mt_admin.ajax_url,
@@ -893,12 +795,10 @@ if (typeof mt_admin.i18n === 'undefined') {
                 `;
                 $('body').append(modalHtml);
                 $modal = $('#mt-evaluation-modal');
-                
                 // Bind close events
                 $modal.find('.mt-modal-close, .mt-modal-overlay').on('click', () => {
                     this.closeModal($modal);
                 });
-                
                 // Close on ESC key
                 $(document).on('keydown', (e) => {
                     if (e.key === 'Escape' && $modal.is(':visible')) {
@@ -908,7 +808,6 @@ if (typeof mt_admin.i18n === 'undefined') {
             }
             return $modal;
         },
-        
         closeModal: function($modal) {
             $modal.fadeOut(300, function() {
                 // Return focus to triggering element if stored
@@ -930,7 +829,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                     </div>
                 `;
             }
-            
             return `
                 <div class="mt-evaluation-details">
                     <div class="mt-detail-section">
@@ -958,7 +856,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                             </tr>
                         </table>
                     </div>
-                    
                     <div class="mt-detail-section">
                         <h3>Scores</h3>
                         ${scoresHtml}
@@ -968,14 +865,12 @@ if (typeof mt_admin.i18n === 'undefined') {
                             <strong>Average Score:</strong> ${data.average_score.toFixed(1)}/10
                         </div>
                     </div>
-                    
                     ${data.comments ? `
                         <div class="mt-detail-section">
                             <h3>Comments</h3>
                             <div class="mt-comments">${data.comments}</div>
                         </div>
                     ` : ''}
-                    
                     <div class="mt-detail-section mt-timestamps">
                         <small>
                             Created: ${data.created_at}<br>
@@ -999,27 +894,22 @@ if (typeof mt_admin.i18n === 'undefined') {
                 mtShowNotification(mt_admin.i18n.select_bulk_action || 'Please select a bulk action', 'warning');
                 return;
             }
-
             const selected = [];
             $('input[name="evaluation[]"]:checked').each(function() {
                 selected.push($(this).val());
             });
-
             if (selected.length === 0) {
                 mtShowNotification(mt_admin.i18n.select_assignments || 'Please select at least one evaluation', 'warning');
                 return;
             }
-            
             // Use the improved confirmation message function
             const confirmMessage = this.getConfirmMessage(action);
             if (!confirm(confirmMessage)) {
                 return;
             }
-
             // Perform bulk action via AJAX with improved loading indicators
             this.performBulkAction(action, selected);
         },
-        
         /**
          * Perform the bulk action with proper loading indicators and error handling
          */
@@ -1027,13 +917,11 @@ if (typeof mt_admin.i18n === 'undefined') {
             // Store original button text
             const $buttons = $('#doaction, #doaction2');
             const originalText = $buttons.first().val();
-            
             // Show loading spinner if available
             const $spinner = $('.spinner');
             if ($spinner.length) {
                 $spinner.addClass('is-active');
             }
-            
             $.ajax({
                 url: mt_admin.ajax_url,
                 type: 'POST',
@@ -1046,7 +934,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                 beforeSend: function() {
                     // Disable buttons and show processing text
                     $buttons.prop('disabled', true).val(mt_admin.i18n.processing || 'Processing...');
-                    
                     // Add visual feedback to selected rows
                     $('input[name="evaluation[]"]:checked').closest('tr').addClass('processing').css('opacity', '0.6');
                 },
@@ -1054,7 +941,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                     if (response.success) {
                         // Show success message
                         mtShowNotification(response.data.message || 'Bulk action completed successfully', 'success');
-                        
                         // Reload page after a short delay to show the message
                         setTimeout(function() {
                             location.reload();
@@ -1062,7 +948,6 @@ if (typeof mt_admin.i18n === 'undefined') {
                     } else {
                         // Show error message
                         mtShowNotification(response.data || 'An error occurred', 'error');
-                        
                         // Remove processing state from rows
                         $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');
                     }
@@ -1071,14 +956,12 @@ if (typeof mt_admin.i18n === 'undefined') {
                     // Show detailed error message
                     const errorMsg = mt_admin.i18n.error_occurred || 'An error occurred. Please try again.';
                     mtShowNotification(errorMsg + ' (' + error + ')', 'error');
-                    
                     // Remove processing state from rows
                     $('input[name="evaluation[]"]:checked').closest('tr').removeClass('processing').css('opacity', '1');
                 },
                 complete: function() {
                     // Re-enable buttons and restore original text
                     $buttons.prop('disabled', false).val(originalText || 'Apply');
-                    
                     // Hide loading spinner
                     if ($spinner.length) {
                         $spinner.removeClass('is-active');
@@ -1087,14 +970,12 @@ if (typeof mt_admin.i18n === 'undefined') {
             });
         }
     };
-
     /**
      * Main Initialization Logic
      * This runs on every admin page load.
      */
     $(document).ready(function() {
         // Mobility Trailblazers Admin JS Loaded
-
         // Initialize general scripts that run on all pages
         initTooltips();
         initTabs();
@@ -1108,18 +989,14 @@ if (typeof mt_admin.i18n === 'undefined') {
         if ($.fn.datepicker) {
             $('.mt-datepicker').datepicker({ dateFormat: 'yy-mm-dd' });
         }
-
         // --- Conditional Initialization for Page-Specific Managers ---
-
         // Check for the Assignment Management page
         if ($('#mt-auto-assign-btn').length > 0 || $('.mt-assignments-table').length > 0) {
             MTAssignmentManager.init();
         }
-
         // Check for the Evaluations page using body class (more reliable than checking page title)
         if ($('body').hasClass('mobility-trailblazers_page_mt-evaluations')) {
              window.MTEvaluationManager.init();
         }
     });
-
 })(jQuery);
