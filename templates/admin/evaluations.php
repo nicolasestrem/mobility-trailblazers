@@ -62,7 +62,6 @@ $candidates = get_posts([
             <div class="alignleft actions">
                 <select name="status" id="filter-status">
                     <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
-                    <option value="draft" <?php selected($filter_status, 'draft'); ?>><?php _e('Draft', 'mobility-trailblazers'); ?></option>
                     <option value="completed" <?php selected($filter_status, 'completed'); ?>><?php _e('Completed', 'mobility-trailblazers'); ?></option>
                 </select>
                 
