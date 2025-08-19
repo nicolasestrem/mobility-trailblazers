@@ -74,7 +74,7 @@
    ======================================== */
 .mt-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
     gap: 25px;
     margin: 40px 0;
 }
@@ -187,7 +187,7 @@
    ======================================== */
 .mt-candidates-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
     gap: 25px;
     margin: 40px 0;
 }
@@ -568,7 +568,7 @@
     }
     
     .mt-criteria-grid-inline {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(80px,1fr));
     }
 }
 
@@ -592,7 +592,7 @@
     }
     
     .mt-candidates-list {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
         gap: 20px;
     }
     

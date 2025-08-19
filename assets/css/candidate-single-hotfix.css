@@ -1,0 +1,12 @@
+/* MT candidate hotfix 2025 08 19 */
+body.single-mt_candidate .mt-hero-section{padding:50px 0 40px !important;max-height:400px !important}
+body.single-mt_candidate .mt-candidate-enhanced{padding-top:0 !important;margin-top:0 !important}
+body.single-mt_candidate .mt-profile-header-enhanced{gap:30px !important}
+body.single-mt_candidate .mt-photo-frame,
+body.single-mt_candidate .mt-photo-border{width:220px !important;height:220px !important}
+body.single-mt_candidate .mt-profile-name-enhanced{font-size:2.8rem !important;margin:0 0 10px !important}
+body.single-mt_candidate .mt-content-section{margin-top:-30px !important;border-radius:30px 30px 0 0 !important;position:relative !important;z-index:2 !important;background:#f8f9fa !important;padding-top:35px !important}
+body.single-mt_candidate .mt-criterion-content{white-space:pre-line !important;line-height:1.8 !important;word-wrap:break-word !important;overflow-wrap:break-word !important;color:#4b5563 !important;font-size:0.95rem !important}
+body.single-mt_candidate .mt-criterion-content p{margin:0 0 1rem !important;line-height:1.8 !important}
+body.single-mt_candidate .mt-criterion-card{overflow:hidden !important;word-break:break-word !important}
+body.single-mt_candidate .mt-hero-pattern{overflow:hidden !important;height:100% !important;max-height:400px !important}

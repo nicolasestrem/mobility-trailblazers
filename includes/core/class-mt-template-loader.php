@@ -100,6 +100,16 @@ class MT_Template_Loader {
             MT_VERSION
         );
         
+        // Enqueue hotfix for single candidate pages
+        if (is_singular('mt_candidate')) {
+            wp_enqueue_style(
+                'mt-candidate-single-hotfix',
+                MT_PLUGIN_URL . 'assets/css/candidate-single-hotfix.css',
+                [],
+                '2025-08-19'
+            );
+        }
+        
         // Add custom CSS for criterion colors and animations
         $custom_css = self::generate_custom_css();
         wp_add_inline_style('mt-enhanced-candidate-profile', $custom_css);

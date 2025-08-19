@@ -43,7 +43,7 @@
 
 /* Default auto-fill layout */
 .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px,1fr)) !important;
 }
 
 /* ===================================
@@ -317,7 +317,7 @@
     }
     
     .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+        grid-template-columns: repeat(auto-fill, minmax(250px,1fr)) !important;
     }
 }
 
@@ -329,7 +329,7 @@
     }
     
     .mt-candidates-grid:not(.columns-3):not(.columns-4):not(.columns-5) {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+        grid-template-columns: repeat(auto-fill, minmax(200px,1fr)) !important;
     }
     
     .mt-candidate-grid-item,
@@ -418,7 +418,7 @@ body.page .mt-candidates-grid {
 /* Fixes for Elementor/Theme CSS Conflicts on Jury Dashboard */
 body .mt-jury-dashboard .mt-candidates-list {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px,1fr)) !important;
     gap: 20px !important;
 }
 

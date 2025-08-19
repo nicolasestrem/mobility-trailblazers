@@ -56,7 +56,7 @@
 
 .mt-stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -426,7 +426,7 @@
 /* Assignment Management Specific */
 .mt-assignment-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px,1fr));
     gap: 20px;
     margin-top: 30px;
 }
@@ -671,7 +671,7 @@
 /* Assignment Management Page Specific Styles */
 .mt-stats-dashboard {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -1302,8 +1302,7 @@ input[type="checkbox"]:checked {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        45deg,
+    background: linear-gradient(45deg,
         transparent 25%,
         rgba(255,255,255,0.2) 25%,
         rgba(255,255,255,0.2) 50%,
@@ -1646,7 +1645,7 @@ input[type="checkbox"]:checked {
 /* Script Grid */
 .script-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -1746,7 +1745,7 @@ input[type="checkbox"]:checked {
 
 .maintenance-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
     gap: 15px;
     padding: 15px;
 }
@@ -1797,7 +1796,7 @@ input[type="checkbox"]:checked {
 /* System Info */
 .system-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px,1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -1883,7 +1882,7 @@ input[type="checkbox"]:checked {
 
 .table-health-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
     gap: 10px;
 }
 
