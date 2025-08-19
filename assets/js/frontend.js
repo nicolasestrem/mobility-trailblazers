@@ -167,11 +167,6 @@
                 self.submitEvaluation.call(self, e);
             });
             
-            // Save draft
-            $(document).on('click', '.mt-save-draft', function(e) {
-                self.saveDraft.call(self, e);
-            });
-            
             // Score slider updates
             $(document).on('input', '.mt-score-slider', function() {
                 self.updateScoreDisplay.call(this);
@@ -416,7 +411,6 @@
                         </div>
                         
                         <div class="mt-form-actions">
-                            <button type="button" class="mt-btn mt-btn-secondary mt-save-draft">${getI18nText('save_as_draft', 'Save as Draft')}</button>
                             <button type="submit" class="mt-btn mt-btn-primary">${getI18nText('submit_evaluation', 'Submit Evaluation')}</button>
                             <a href="${window.location.pathname}" class="mt-btn mt-btn-secondary">${getI18nText('back_to_dashboard', 'Back to Dashboard')}</a>
                         </div>
@@ -660,81 +654,6 @@
                 .fail(function() {
                     MTJuryDashboard.showError(getI18nText('error', 'An error occurred. Please try again.'));
                     $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
-                });
-        },
-        
-        saveDraft: function(e) {
-            e.preventDefault();
-            
-            // Check if mt_ajax is available
-            if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
-                MTJuryDashboard.showError(getI18nText('security_error', 'Security configuration error. Please refresh the page and try again.'));
-                return;
-            }
-            
-            var $btn = $(this);
-            var $form = $('#mt-evaluation-form');
-            
-            // Try multiple selectors to find the form
-            if ($form.length === 0) {
-                $form = $('.mt-evaluation-form');
-            }
-            
-
-            
-            // Disable button and show loading
-            $btn.prop('disabled', true).html('<span class="dashicons dashicons-update mt-spin"></span> ' + getI18nText('saving', 'Saving...'));
-            
-            // Get form data including all fields
-            var formData = {};
-            
-            // Add all form fields
-            $form.find('input, textarea, select').each(function() {
-                var $field = $(this);
-                var name = $field.attr('name');
-                var value = $field.val();
-                
-                if (name && value !== undefined) {
-                    formData[name] = value;
-                }
-            });
-            
-            // Add required AJAX fields
-            formData.action = 'mt_submit_evaluation';
-            formData.nonce = mt_ajax.nonce;
-            formData.status = 'draft';
-            
-            // Saving draft with data
-            
-            $.post(mt_ajax.ajax_url, formData)
-                .done(function(response) {
-                    // Draft Save Response received
-                    
-                    if (response.success) {
-                        // Show success message temporarily
-                        $btn.html('<span class="dashicons dashicons-saved"></span> ' + getI18nText('draft_saved', 'Draft Saved!'));
-                        
-                        // Update or add status badge
-                        var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
-                        if ($statusBadge.length) {
-                            $statusBadge.removeClass('mt-status-completed').addClass('mt-status-draft').text(getI18nText('draft_saved_status', 'Draft Saved'));
-                        } else {
-                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-draft">' + getI18nText('draft_saved_status', 'Draft Saved') + '</span>');
-                        }
-                        
-                        setTimeout(function() {
-                            $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + getI18nText('save_as_draft', 'Save as Draft'));
-                        }, 2000);
-                    } else {
-                        // Error message is in response.data.message
-                        var errorMessage = response.data && response.data.message ? response.data.message : getI18nText('error', 'Failed to save draft.');
-                        MTJuryDashboard.showError(errorMessage);
-                        $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + getI18nText('save_as_draft', 'Save as Draft'));
-                    }
-                })
-                .fail(function() {
-                    MTJuryDashboard.showError(getI18nText('error', 'Failed to save draft.'));
-                    $btn.prop('disabled', false).html('<span class="dashicons dashicons-edit"></span> ' + getI18nText('save_as_draft', 'Save as Draft'));
                 });
         },
         

@@ -170,42 +170,6 @@ jQuery(document).ready(function($) {
                 }
             });
         });
-        
-        // Save draft functionality
-        $('.mt-save-draft').on('click', function() {
-            var $btn = $(this);
-            var originalText = $btn.html();
-            
-            // Prepare form data
-            var formData = new FormData($('#mt-evaluation-form')[0]);
-            formData.append('action', 'mt_save_draft');
-            formData.append('status', 'draft');
-            
-            // Show loading state
-            $btn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Saving...');
-            
-            // Submit via AJAX
-            $.ajax({
-                url: mt_ajax.ajax_url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        showNotification('success', 'Draft saved successfully!');
-                        updateStatusBadge('draft');
-                    } else {
-                        showNotification('error', 'Failed to save draft. Please try again.');
-                    }
-                    $btn.prop('disabled', false).html(originalText);
-                },
-                error: function() {
-                    showNotification('error', 'Network error. Please try again.');
-                    $btn.prop('disabled', false).html(originalText);
-                }
-            });
-        });
     }
     
     // ========================================

@@ -111,10 +111,6 @@ $criteria = [
                 <span class="mt-status-badge mt-status-completed">
                     <?php _e('Evaluation Submitted', 'mobility-trailblazers'); ?>
                 </span>
-            <?php elseif ($evaluation && $evaluation->status === 'draft') : ?>
-                <span class="mt-status-badge mt-status-draft">
-                    <?php _e('Draft Saved', 'mobility-trailblazers'); ?>
-                </span>
             <?php endif; ?>
         </div>
     </div>
@@ -330,11 +326,6 @@ $criteria = [
         
         <!-- Form Actions -->
         <div class="mt-form-actions">
-            <button type="button" class="mt-btn mt-btn-secondary mt-save-draft">
-                <span class="dashicons dashicons-edit"></span>
-                <?php _e('Save as Draft', 'mobility-trailblazers'); ?>
-            </button>
-            
             <button type="submit" class="mt-btn mt-btn-primary">
                 <span class="dashicons dashicons-yes-alt"></span>
                 <?php _e('Submit Evaluation', 'mobility-trailblazers'); ?>
@@ -347,7 +338,6 @@ $criteria = [
             <ul>
                 <li><?php _e('Score each criterion from 0 (lowest) to 10 (highest) based on your assessment', 'mobility-trailblazers'); ?></li>
                 <li><?php _e('Consider the candidate\'s overall impact on mobility transformation', 'mobility-trailblazers'); ?></li>
-                <li><?php _e('You can save your evaluation as a draft and return later to complete it', 'mobility-trailblazers'); ?></li>
                 <li><?php _e('Once submitted, you can still edit your evaluation if needed', 'mobility-trailblazers'); ?></li>
             </ul>
         </div>

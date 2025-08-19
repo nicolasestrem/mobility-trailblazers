@@ -222,6 +222,7 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
         wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
         
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
@@ -244,6 +245,7 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
         wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
     }
     
     /**
@@ -257,6 +259,7 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
         wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
     }
     
     /**
@@ -270,6 +273,7 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
         wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
     }
     
     /**

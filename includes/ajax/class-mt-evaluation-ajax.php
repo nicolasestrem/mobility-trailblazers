@@ -33,7 +33,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function init() {
         // Logged in users
         add_action('wp_ajax_mt_submit_evaluation', [$this, 'submit_evaluation']);
-        add_action('wp_ajax_mt_save_draft', [$this, 'save_draft']);
         add_action('wp_ajax_mt_get_evaluation', [$this, 'get_evaluation']);
         add_action('wp_ajax_mt_get_candidate_details', [$this, 'get_candidate_details']);
         add_action('wp_ajax_mt_get_jury_progress', [$this, 'get_jury_progress']);
@@ -191,77 +190,6 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $errors = $service->get_errors();
             $error_message = !empty($errors) ? implode(', ', $errors) : __('Failed to save evaluation.', 'mobility-trailblazers');
             $this->error($error_message);
-        }
-    }
-    
-    /**
-     * Save draft evaluation
-     *
-     * @return void
-     */
-    public function save_draft() {
-        // Verify nonce with proper error handling
-        if (!$this->verify_nonce()) {
-            $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
-            return;
-        }
-        
-        // Check permissions
-        if (!$this->check_permission('mt_submit_evaluations')) {
-            return;
-        }
-        
-        // Get current user as jury member
-        $current_user_id = get_current_user_id();
-        $jury_member = $this->get_jury_member_by_user_id($current_user_id);
-        
-        if (!$jury_member) {
-            $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
-        }
-        
-        // Prepare evaluation data
-        $data = [
-            'jury_member_id' => $jury_member->ID,
-            'candidate_id' => $this->get_int_param('candidate_id'),
-            'status' => 'draft'
-        ];
-        
-        // Add scores if provided
-        $score_fields = [
-            'courage_score',
-            'innovation_score',
-            'implementation_score',
-            'relevance_score',
-            'visibility_score'
-        ];
-        
-        foreach ($score_fields as $field) {
-            $value = $this->get_param($field);
-            if ($value !== null && $value !== '') {
-                $data[$field] = floatval($value);
-            }
-        }
-        
-        // Add comments if provided
-        $comments = $this->get_textarea_param('comments');
-        if (!empty($comments)) {
-            $data['comments'] = $comments;
-        }
-        
-        // Process evaluation
-        $service = new MT_Evaluation_Service();
-        $result = $service->save_draft($data);
-        
-        if ($result) {
-            $this->success(
-                ['evaluation_id' => $result],
-                __('Draft saved successfully!', 'mobility-trailblazers')
-            );
-        } else {
-            $this->error(
-                __('Failed to save draft.', 'mobility-trailblazers'),
-                ['errors' => $service->get_errors()]
-            );
         }
     }
     
