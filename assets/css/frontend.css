@@ -3288,9 +3288,8 @@ body.page .mt-candidates-grid {
     cursor: pointer !important;
 }
 
-/* Optional: Add a "View Profile" button on hover */
-.mt-candidate-grid-item::after {
-    content: "View Profile" !important;
+/* View Profile overlay button */
+.mt-view-profile-overlay {
     position: absolute !important;
     bottom: 20px !important;
     left: 50% !important;
@@ -3307,7 +3306,7 @@ body.page .mt-candidates-grid {
     z-index: 10 !important;
 }
 
-.mt-candidate-grid-item:hover::after {
+.mt-candidate-grid-item:hover .mt-view-profile-overlay {
     opacity: 1 !important;
 }
 

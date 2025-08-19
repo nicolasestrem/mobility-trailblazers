@@ -45,6 +45,7 @@ $show_category = $atts['show_category'] === 'yes';
                             the_post_thumbnail('medium', ['class' => 'mt-candidate-photo']);
                         }
                         ?>
+                        <span class="mt-view-profile-overlay"><?php _e('View Profile', 'mobility-trailblazers'); ?></span>
                     </div>
                 <?php endif; ?>
                 
