@@ -3,6 +3,44 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.34] - 2025-01-19
+### Added
+- **CSS v3 Design System**: Complete redesign with clean, modern styling
+  - New token-based CSS architecture in `assets/css/v3/`
+  - Beige canvas design (#F8F0E3) with white cards
+  - Scoped styles for Elementor widgets only
+  - Design tokens for colors, spacing, and effects
+  - Responsive grid system (1 column mobile, 3 columns desktop)
+  - Files added: `assets/css/v3/mt-tokens.css`, `mt-reset.css`, `mt-widget-candidates-grid.css`, `mt-widget-jury-dashboard.css`, `mt-compat.css`
+  - Documentation: `doc/css-v3-implementation.md`
+
+### Enhanced
+- **Elementor Widget Controls**: Added advanced styling options
+  - Card gap control (responsive slider 8-48px)
+  - Image fit options (cover/contain/fill)
+  - Image position control for fine-tuning
+  - Files modified: `includes/elementor/widgets/class-mt-elementor-candidates-grid.php`, `class-mt-elementor-jury-dashboard.php`
+
+### Changed
+- **CSS Loading Strategy**: Replaced legacy CSS with v3 system
+  - Updated enqueue logic to load only v3 CSS files
+  - Removed dependency on `frontend.css`
+  - File modified: `includes/public/renderers/class-mt-shortcode-renderer.php`
+
+### Added
+- **Code Quality**: Stylelint configuration for CSS linting
+  - File added: `.stylelintrc.json`
+  - Enforces CSS variable usage for colors
+  - Prevents `!important` declarations
+  - Standard CSS formatting rules
+
+### Technical Details
+- All styles properly scoped to widget wrappers (`.elementor-widget-mt_candidates_grid`, `.elementor-widget-mt_jury_dashboard`)
+- Total CSS size: ~3KB minified
+- No breaking changes to admin or non-widget areas
+- Browser support: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+
+
 ## [2.5.33] - 2025-08-19
 ### Removed
 - **Development/Test Admin Pages**: Removed test and development features from production build

@@ -147,6 +147,55 @@ class MT_Elementor_Jury_Dashboard extends Widget_Base {
             ]
         );
         
+        $this->add_responsive_control(
+            'card_gap',
+            [
+                'label' => __('Card Gap', 'mobility-trailblazers'),
+                'type' => Controls_Manager::SLIDER,
+                'range' => [
+                    'px' => [
+                        'min' => 8,
+                        'max' => 48,
+                    ],
+                ],
+                'default' => [
+                    'size' => 32,
+                ],
+                'selectors' => [
+                    '{{WRAPPER}}' => '--mt-card-gap: {{SIZE}}{{UNIT}};',
+                ],
+            ]
+        );
+        
+        $this->add_control(
+            'image_fit',
+            [
+                'label' => __('Image Fit', 'mobility-trailblazers'),
+                'type' => Controls_Manager::SELECT,
+                'options' => [
+                    'cover' => 'Cover',
+                    'contain' => 'Contain',
+                    'fill' => 'Fill',
+                ],
+                'default' => 'cover',
+                'selectors' => [
+                    '{{WRAPPER}} .mt-card__image' => 'object-fit: {{VALUE}};',
+                ],
+            ]
+        );
+        
+        $this->add_control(
+            'image_position',
+            [
+                'label' => __('Image Position', 'mobility-trailblazers'),
+                'type' => Controls_Manager::TEXT,
+                'default' => '30% 50%',
+                'selectors' => [
+                    '{{WRAPPER}} .mt-card__image' => 'object-position: {{VALUE}};',
+                ],
+            ]
+        );
+        
         $this->end_controls_section();
     }
     

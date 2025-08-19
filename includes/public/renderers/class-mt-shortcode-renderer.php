@@ -215,7 +215,14 @@ class MT_Shortcode_Renderer {
      * Enqueue dashboard assets
      */
     private function enqueue_dashboard_assets() {
-        wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
+        // Enqueue v3 CSS files
+        $base = MT_PLUGIN_URL . 'assets/css/v3/';
+        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
+        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
+        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
+        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
+        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+        
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
         
@@ -230,21 +237,39 @@ class MT_Shortcode_Renderer {
      * Enqueue grid assets
      */
     private function enqueue_grid_assets() {
-        wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
+        // Enqueue v3 CSS files
+        $base = MT_PLUGIN_URL . 'assets/css/v3/';
+        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
+        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
+        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
+        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
+        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
     }
     
     /**
      * Enqueue stats assets
      */
     private function enqueue_stats_assets() {
-        wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
+        // Enqueue v3 CSS files
+        $base = MT_PLUGIN_URL . 'assets/css/v3/';
+        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
+        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
+        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
+        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
+        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
     }
     
     /**
      * Enqueue winners assets
      */
     private function enqueue_winners_assets() {
-        wp_enqueue_style('mt-frontend', MT_PLUGIN_URL . 'assets/css/frontend.css', [], MT_VERSION);
+        // Enqueue v3 CSS files
+        $base = MT_PLUGIN_URL . 'assets/css/v3/';
+        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
+        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
+        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
+        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
+        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
     }
     
     /**

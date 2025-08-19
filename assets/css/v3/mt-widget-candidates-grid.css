@@ -1,0 +1,69 @@
+/**
+ * Mobility Trailblazers v3 - Candidates Grid Widget
+ * Scoped to .elementor-widget-mt_candidates_grid
+ */
+
+.elementor-widget-mt_candidates_grid {
+  --mt-card-gap: var(--mt-space-8);
+}
+
+.elementor-widget-mt_candidates_grid .mt-candidates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--mt-card-gap);
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .elementor-widget-mt_candidates_grid .mt-candidates-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.elementor-widget-mt_candidates_grid .mt-candidate-card {
+  background: var(--mt-card-bg);
+  border: 1px solid var(--mt-border-soft);
+  border-radius: var(--mt-radius);
+  box-shadow: var(--mt-shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+}
+
+.elementor-widget-mt_candidates_grid .mt-candidate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+}
+
+.elementor-widget-mt_candidates_grid .mt-card__image {
+  width: 104px;
+  height: 104px;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: 30% 50%;
+  margin: 16px auto 12px;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--mt-border-soft);
+}
+
+.elementor-widget-mt_candidates_grid .mt-card__title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin: 8px 0 2px;
+  color: var(--mt-text);
+}
+
+.elementor-widget-mt_candidates_grid .mt-card__role,
+.elementor-widget-mt_candidates_grid .mt-card__org {
+  opacity: .78;
+  text-align: center;
+}
+
+/* Hide pills or progress inside public cards */
+.elementor-widget-mt_candidates_grid .mt-progress,
+.elementor-widget-mt_candidates_grid .score,
+.elementor-widget-mt_candidates_grid hr {
+  display: none;
+}
