@@ -73,7 +73,7 @@ msgid "Save as Draft"
 msgstr "Als Entwurf speichern"
 
 msgid "Submit Evaluation"
-msgstr "Bewertung einreichen"
+msgstr "Bewertung abschließen"
 
 msgid "Evaluation Guidelines"
 msgstr "Bewertungsrichtlinien"
