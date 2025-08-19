@@ -116,26 +116,6 @@
     opacity: 0.9;
 }
 
-/* Category Badges */
-.mt-hero-categories {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.mt-category-badge {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--mt-white);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
 /* Social Links */
 .mt-hero-social {
     display: flex;

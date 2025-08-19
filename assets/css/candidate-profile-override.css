@@ -148,31 +148,6 @@ body.single-mt_candidate .mt-hero-title .mt-separator {
     opacity: 0.5 !important;
 }
 
-/* Categories - minimal */
-body.single-mt_candidate .mt-hero-categories {
-    display: inline-flex !important;
-    gap: 6px !important;
-    margin: 0 0 10px 0 !important;
-    padding: 0 !important;
-}
-
-body.single-mt_candidate .mt-category-badge {
-    display: inline-block !important;
-    padding: 3px 10px !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-    border-radius: 12px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    color: #fff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    line-height: 1.2 !important;
-}
-
-body.single-mt_candidate .mt-category-badge:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-    transform: none !important;
-}
-
 /* Social links - minimal */
 body.single-mt_candidate .mt-hero-social {
     display: inline-flex !important;
@@ -466,7 +441,6 @@ body.single-mt_candidate .mt-fact-value {
         font-size: 28px !important;
     }
     
-    body.single-mt_candidate .mt-hero-categories,
     body.single-mt_candidate .mt-hero-social {
         justify-content: center !important;
     }

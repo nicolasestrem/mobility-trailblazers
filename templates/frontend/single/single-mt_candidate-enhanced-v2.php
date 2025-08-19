@@ -167,16 +167,7 @@ if (have_posts()) :
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Categories -->
-                    <?php if (!empty($categories)) : ?>
-                        <div class="mt-hero-categories">
-                            <?php foreach ($categories as $category) : ?>
-                                <span class="mt-category-badge">
-                                    <?php echo esc_html($category->name); ?>
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+
                     
                     <!-- Social Links -->
                     <?php if ($linkedin || $website) : ?>

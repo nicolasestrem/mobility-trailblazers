@@ -172,29 +172,7 @@ while (have_posts()) : the_post();
     font-weight: 300;
 }
 
-.mt-category-badges {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-}
 
-.mt-category-badge-enhanced {
-    display: inline-block;
-    padding: 8px 20px;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.mt-category-badge-enhanced:hover {
-    background: rgba(255,255,255,0.3);
-    transform: translateY(-2px);
-}
 
 .mt-social-links {
     display: flex;
@@ -504,15 +482,7 @@ while (have_posts()) : the_post();
                         </div>
                     <?php endif; ?>
                     
-                    <?php if (!empty($categories)) : ?>
-                        <div class="mt-category-badges">
-                            <?php foreach ($categories as $category) : ?>
-                                <span class="mt-category-badge-enhanced">
-                                    <?php echo esc_html($category->name); ?>
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+
                     
                     <div class="mt-social-links">
                         <?php if ($linkedin) : ?>
