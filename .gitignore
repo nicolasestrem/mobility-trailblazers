@@ -87,6 +87,7 @@ fix-*.php
 migrate-*.php
 import-*.php
 cleanup-*.php
+debug-*.php
 *.ps1
 *.bat
 
