@@ -64,6 +64,10 @@ class MT_Plugin {
         $i18n = new MT_I18n();
         $i18n->init();
         
+        // Initialize photo fix for Issue #13
+        require_once MT_PLUGIN_DIR . 'includes/fixes/class-mt-photo-fix.php';
+        \MobilityTrailblazers\Fixes\MT_Photo_Fix::init();
+        
         // Initialize language switcher widget
         $language_switcher = new \MobilityTrailblazers\Widgets\MT_Language_Switcher();
         $language_switcher->init();
@@ -280,6 +284,15 @@ class MT_Plugin {
             'mt-evaluation-rating-fix',
             MT_PLUGIN_URL . 'assets/js/evaluation-rating-fix.js',
             ['jquery', 'mt-frontend'],
+            MT_VERSION,
+            true
+        );
+        
+        // Photo adjustment fix JavaScript (Issue #13 fix)
+        wp_enqueue_script(
+            'mt-photo-adjustment-fix',
+            MT_PLUGIN_URL . 'assets/js/photo-adjustment-fix.js',
+            ['jquery'],
             MT_VERSION,
             true
         );
