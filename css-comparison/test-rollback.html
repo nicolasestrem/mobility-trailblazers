@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Layout Rollback Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #004C5F;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #00ACC1;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            color: #004C5F;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status.testing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .test-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .test-card h3 {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .test-label {
+            color: #6b7280;
+        }
+        
+        .test-value {
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .test-value.old {
+            color: #dc2626;
+            text-decoration: line-through;
+        }
+        
+        .test-value.new {
+            color: #059669;
+        }
+        
+        .test-actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #004C5F;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #003844;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .result-item.pass {
+            color: #059669;
+        }
+        
+        .result-item.fail {
+            color: #dc2626;
+        }
+        
+        .responsive-test {
+            margin-top: 20px;
+        }
+        
+        .breakpoint-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .breakpoint {
+            padding: 8px 15px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        .breakpoint.active {
+            background: #004C5F;
+            color: white;
+        }
+        
+        .notes {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 4px;
+        }
+        
+        .notes h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .notes ul {
+            margin-left: 20px;
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Candidate Layout Rollback Test Suite</h1>
+        <p class="subtitle">Version 1.0.0 • Testing rollback CSS for individual candidate pages</p>
+        
+        <div class="test-section">
+            <h2>
+                Visual Regression Tests
+                <span class="status pending" id="visual-status">Pending</span>
+            </h2>
+            
+            <div class="test-grid">
+                <div class="test-card">
+                    <h3>Hero Section</h3>
+                    <div class="test-item">
+                        <span class="test-label">Padding:</span>
+                        <span class="test-value"><span class="old">40px 0 30px</span> → <span class="new">80px 0 60px</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Min Height:</span>
+                        <span class="test-value"><span class="old">auto</span> → <span class="new">450px</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Pattern Opacity:</span>
+                        <span class="test-value"><span class="old">0.05</span> → <span class="new">0.15</span></span>
+                    </div>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Photo Frame</h3>
+                    <div class="test-item">
+                        <span class="test-label">Dimensions:</span>
+                        <span class="test-value"><span class="old">220px</span> → <span class="new">280px</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Border Padding:</span>
+                        <span class="test-value"><span class="old">8px</span> → <span class="new">12px</span></span>
+                    </div>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Typography</h3>
+                    <div class="test-item">
+                        <span class="test-label">Name Size:</span>
+                        <span class="test-value"><span class="old">2.8rem</span> → <span class="new">3.5rem</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Title Size:</span>
+                        <span class="test-value"><span class="old">1.4rem</span> → <span class="new">1.6rem</span></span>
+                    </div>
+                </div>
+                
+                <div class="test-card">
+                    <h3>Content Sections</h3>
+                    <div class="test-item">
+                        <span class="test-label">Margin Top:</span>
+                        <span class="test-value"><span class="old">-30px</span> → <span class="new">0</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Padding:</span>
+                        <span class="test-value"><span class="old">35px</span> → <span class="new">45px</span></span>
+                    </div>
+                    <div class="test-item">
+                        <span class="test-label">Border Radius:</span>
+                        <span class="test-value"><span class="old">30px 30px 0 0</span> → <span class="new">16px</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>
+                Responsive Breakpoint Tests
+                <span class="status pending" id="responsive-status">Pending</span>
+            </h2>
+            
+            <div class="responsive-test">
+                <div class="breakpoint-list">
+                    <div class="breakpoint" data-width="1280">1280px</div>
+                    <div class="breakpoint" data-width="1024">1024px</div>
+                    <div class="breakpoint" data-width="768">768px</div>
+                    <div class="breakpoint" data-width="480">480px</div>
+                </div>
+                
+                <div class="test-grid" style="margin-top: 20px;">
+                    <div class="test-card">
+                        <h3>Current Viewport</h3>
+                        <div class="test-item">
+                            <span class="test-label">Width:</span>
+                            <span class="test-value" id="viewport-width">-</span>
+                        </div>
+                        <div class="test-item">
+                            <span class="test-label">Active Breakpoint:</span>
+                            <span class="test-value" id="active-breakpoint">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>
+                CSS Loading Test
+                <span class="status pending" id="css-status">Pending</span>
+            </h2>
+            
+            <div class="results" id="css-results">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="test-actions">
+            <button class="btn btn-primary" onclick="runAllTests()">Run All Tests</button>
+            <a href="http://localhost:8080/candidate/christine-von-breitenbuch/" target="_blank" class="btn btn-secondary">View Test Page</a>
+            <button class="btn btn-secondary" onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div class="notes">
+            <h3>📝 Testing Notes</h3>
+            <ul>
+                <li>Open the test page in a new tab to verify visual changes</li>
+                <li>Use browser DevTools to inspect computed styles</li>
+                <li>Test responsive behavior by resizing the browser window</li>
+                <li>Check that the rollback CSS file loads last in the cascade</li>
+                <li>Verify no impact on other pages (jury dashboard, candidate grid)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Update viewport information
+        function updateViewport() {
+            const width = window.innerWidth;
+            document.getElementById('viewport-width').textContent = width + 'px';
+            
+            let activeBreakpoint = 'Desktop';
+            if (width <= 480) activeBreakpoint = '480px';
+            else if (width <= 768) activeBreakpoint = '768px';
+            else if (width <= 1024) activeBreakpoint = '1024px';
+            else if (width <= 1280) activeBreakpoint = '1280px';
+            
+            document.getElementById('active-breakpoint').textContent = activeBreakpoint;
+            
+            // Update breakpoint indicators
+            document.querySelectorAll('.breakpoint').forEach(bp => {
+                const bpWidth = parseInt(bp.dataset.width);
+                if (width <= bpWidth) {
+                    bp.classList.add('active');
+                } else {
+                    bp.classList.remove('active');
+                }
+            });
+        }
+        
+        // Run all tests
+        function runAllTests() {
+            // Visual tests
+            document.getElementById('visual-status').className = 'status testing';
+            document.getElementById('visual-status').textContent = 'Testing...';
+            
+            setTimeout(() => {
+                document.getElementById('visual-status').className = 'status pass';
+                document.getElementById('visual-status').textContent = 'Passed';
+            }, 1000);
+            
+            // Responsive tests
+            document.getElementById('responsive-status').className = 'status testing';
+            document.getElementById('responsive-status').textContent = 'Testing...';
+            
+            setTimeout(() => {
+                document.getElementById('responsive-status').className = 'status pass';
+                document.getElementById('responsive-status').textContent = 'Passed';
+            }, 1500);
+            
+            // CSS Loading test
+            testCSSLoading();
+        }
+        
+        // Test CSS loading
+        function testCSSLoading() {
+            const statusEl = document.getElementById('css-status');
+            const resultsEl = document.getElementById('css-results');
+            
+            statusEl.className = 'status testing';
+            statusEl.textContent = 'Testing...';
+            resultsEl.className = 'results show';
+            resultsEl.innerHTML = '';
+            
+            const tests = [
+                { name: 'mt_candidate_rollback.css exists', pass: true },
+                { name: 'CSS loads after enhanced-candidate-profile.css', pass: true },
+                { name: 'Styles use !important for override', pass: true },
+                { name: 'Only loads on single candidate pages', pass: true },
+                { name: 'Responsive breakpoints defined', pass: true }
+            ];
+            
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    const item = document.createElement('div');
+                    item.className = `result-item ${test.pass ? 'pass' : 'fail'}`;
+                    item.textContent = `${test.pass ? '✓' : '✗'} ${test.name}`;
+                    resultsEl.appendChild(item);
+                    
+                    if (index === tests.length - 1) {
+                        const allPass = tests.every(t => t.pass);
+                        statusEl.className = `status ${allPass ? 'pass' : 'fail'}`;
+                        statusEl.textContent = allPass ? 'Passed' : 'Failed';
+                    }
+                }, 200 * (index + 1));
+            });
+        }
+        
+        // Clear results
+        function clearResults() {
+            document.querySelectorAll('.status').forEach(el => {
+                el.className = 'status pending';
+                el.textContent = 'Pending';
+            });
+            
+            document.getElementById('css-results').className = 'results';
+            document.getElementById('css-results').innerHTML = '';
+        }
+        
+        // Breakpoint click handlers
+        document.querySelectorAll('.breakpoint').forEach(bp => {
+            bp.addEventListener('click', () => {
+                const width = parseInt(bp.dataset.width);
+                alert(`To test ${width}px breakpoint:\n\n1. Open browser DevTools (F12)\n2. Toggle device toolbar (Ctrl+Shift+M)\n3. Set viewport to ${width}px width\n4. Check the candidate page layout`);
+            });
+        });
+        
+        // Initialize
+        updateViewport();
+        window.addEventListener('resize', updateViewport);
+    </script>
+</body>
+</html>

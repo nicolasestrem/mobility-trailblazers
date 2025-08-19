@@ -156,3 +156,4 @@ cleanup-*.sh
 /Photos of all candidates
 
 /.internal/
+/doc/report
