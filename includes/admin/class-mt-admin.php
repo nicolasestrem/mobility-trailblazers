@@ -116,7 +116,7 @@ class MT_Admin {
         );
         
         // Developer Tools submenu - Only in development/staging environments
-        if (current_user_can('manage_options') && !MT_Config::is_production()) {
+        if (current_user_can('manage_options') && (defined('WP_DEBUG') && WP_DEBUG)) {
             add_submenu_page(
                 'mobility-trailblazers',
                 __('Developer Tools', 'mobility-trailblazers'),
@@ -667,7 +667,7 @@ class MT_Admin {
         );
         
         // Enqueue Debug Center assets if on Debug Center page and not in production
-        if (isset($_GET['page']) && $_GET['page'] === 'mt-debug-center' && !MT_Config::is_production()) {
+        if (isset($_GET['page']) && $_GET['page'] === 'mt-debug-center' && (defined('WP_DEBUG') && WP_DEBUG)) {
             // Debug Center styles are now included in admin.css
             
             wp_enqueue_script(

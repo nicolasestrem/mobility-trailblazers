@@ -114,7 +114,7 @@ if (!empty($jury_members)) {
                         <?php endif; ?>
                         <?php 
                         // Add biography/excerpt
-                        $excerpt = get_the_excerpt($candidate->ID);
+                        $excerpt = get_the_excerpt($candidate_id);
                         if ($excerpt) : ?>
                             <div class="mt-candidate-bio">
                                 <?php echo esc_html(wp_trim_words($excerpt, 15, '...')); ?>
