@@ -745,9 +745,18 @@ class MT_Admin {
             );
         }
         
-        // WordPress media scripts for settings page
+        // WordPress media scripts and settings admin JS for settings page
         if ($hook === 'mobility-trailblazers_page_mt-settings') {
             wp_enqueue_media();
+            
+            // Enqueue settings admin script
+            wp_enqueue_script(
+                'mt-settings-admin',
+                MT_PLUGIN_URL . 'assets/js/mt-settings-admin.js',
+                ['jquery', 'wp-media-utils'],
+                MT_VERSION,
+                true
+            );
         }
         
         // Candidate import script for candidates list page

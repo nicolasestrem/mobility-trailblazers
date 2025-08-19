@@ -101,7 +101,8 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
     'show_rankings' => 1,
     'rankings_limit' => 10,
     'card_layout' => 'grid',
-    'intro_text' => __('Welcome to the Mobility Trailblazers Jury Dashboard. Here you can evaluate candidates and track your progress.', 'mobility-trailblazers')
+    'intro_text' => __('Welcome to the Mobility Trailblazers Jury Dashboard. Here you can evaluate candidates and track your progress.', 'mobility-trailblazers'),
+    'header_image_url' => ''
 ]);
 
 // Get candidate presentation settings
@@ -235,15 +236,17 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                     <button type="button" id="upload_header_image" class="button button-secondary">
                         <?php _e('Choose Image', 'mobility-trailblazers'); ?>
                     </button>
-                    <?php if (!empty(isset($dashboard_settings['header_image_url']) ? $dashboard_settings['header_image_url'] : '')) : ?>
+                    <?php if (!empty($dashboard_settings['header_image_url'])) : ?>
                     <div class="mt-image-preview">
                         <img id="header_image_preview" src="<?php echo esc_url($dashboard_settings['header_image_url']); ?>"
                              alt="Header preview" style="max-width: 200px; margin-top: 10px;" />
+                        <button type="button" class="button mt-clear-image" style="margin-top: 10px;"><?php _e('Remove Image', 'mobility-trailblazers'); ?></button>
                     </div>
                     <?php else : ?>
                         <div class="mt-image-preview" style="display: none;">
                             <img id="header_image_preview" src="" alt="<?php _e('Header background preview', 'mobility-trailblazers'); ?>" 
                                  style="max-width: 200px; height: auto; margin-top: 10px;" />
+                            <button type="button" class="button mt-clear-image" style="margin-top: 10px; display: none;"><?php _e('Remove Image', 'mobility-trailblazers'); ?></button>
                         </div>
                     <?php endif; ?>
                     <p class="description"><?php _e('URL for header background image (optional)', 'mobility-trailblazers'); ?></p>

@@ -41,8 +41,18 @@ jQuery(document).ready(function($) {
             
             // Update the preview
             var preview = $('#header_image_preview');
+            var previewContainer = $('.mt-image-preview');
+            
             preview.attr('src', attachment.url);
-            preview.parent('.mt-image-preview').show();
+            previewContainer.show();
+            
+            // Show clear button if not already visible
+            var clearBtn = previewContainer.find('.mt-clear-image');
+            if (clearBtn.length === 0) {
+                previewContainer.append(' <button type="button" class="button mt-clear-image" style="margin-top: 10px;">Remove Image</button>');
+            } else {
+                clearBtn.show();
+            }
             
             // Mark form as changed
             $('input[name="submit"]').prop('disabled', false);
@@ -58,6 +68,10 @@ jQuery(document).ready(function($) {
         $('#header_image_url').val('');
         $('#header_image_preview').attr('src', '');
         $('.mt-image-preview').hide();
+        $(this).hide();
+        
+        // Mark form as changed
+        $('input[name="submit"]').prop('disabled', false);
     });
     
     // Animation Effects Preview
@@ -147,13 +161,6 @@ jQuery(document).ready(function($) {
         '</style>';
     
     $('head').append(animationStyles);
-    
-    // Add clear button next to header image input if image exists
-    if ($('#header_image_url').val()) {
-        $('#upload_header_image').after(
-            ' <button type="button" class="button mt-clear-image">Clear Image</button>'
-        );
-    }
     
     // Animation Speed Preview
     $(document).on('click', '.mt-preview-animation-speed', function(e) {
