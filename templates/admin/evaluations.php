@@ -93,7 +93,6 @@ $candidates = get_posts([
                 <option value="-1"><?php _e('Bulk Actions', 'mobility-trailblazers'); ?></option>
                 <option value="approve"><?php _e('Approve', 'mobility-trailblazers'); ?></option>
                 <option value="reject"><?php _e('Reject', 'mobility-trailblazers'); ?></option>
-                <option value="reset-to-draft"><?php _e('Reset to Draft', 'mobility-trailblazers'); ?></option>
                 <option value="delete"><?php _e('Delete', 'mobility-trailblazers'); ?></option>
             </select>
             <input type="button" id="doaction" class="button action" value="<?php esc_attr_e('Apply', 'mobility-trailblazers'); ?>">
@@ -194,7 +193,6 @@ $candidates = get_posts([
                 <option value="-1"><?php _e('Bulk Actions', 'mobility-trailblazers'); ?></option>
                 <option value="approve"><?php _e('Approve', 'mobility-trailblazers'); ?></option>
                 <option value="reject"><?php _e('Reject', 'mobility-trailblazers'); ?></option>
-                <option value="reset-to-draft"><?php _e('Reset to Draft', 'mobility-trailblazers'); ?></option>
                 <option value="delete"><?php _e('Delete', 'mobility-trailblazers'); ?></option>
             </select>
             <input type="button" id="doaction2" class="button action" value="<?php esc_attr_e('Apply', 'mobility-trailblazers'); ?>">
