@@ -4,9 +4,21 @@
 /* map legacy card selectors to the new look */
 .candidate-card, .mt-candidate-card{ background:var(--mt-card-bg); border:1px solid var(--mt-border-soft); border-radius:var(--mt-radius); box-shadow:var(--mt-shadow); }
 
-/* ensure full width on archive */
-.post-type-archive-mt_candidate #primary,
-.post-type-archive-mt_candidate .content-area { width:100% !important; max-width:100% !important; }
-.post-type-archive-mt_candidate #secondary,
-.post-type-archive-mt_candidate .widget-area,
-.post-type-archive-mt_candidate .sidebar { display:none !important; }
+/* ensure full width on archive - override all theme restrictions */
+body.post-type-archive-mt_candidate .site-inner,
+body.post-type-archive-mt_candidate .wrap,
+body.post-type-archive-mt_candidate .site-content,
+body.post-type-archive-mt_candidate #content,
+body.post-type-archive-mt_candidate #primary,
+body.post-type-archive-mt_candidate .content-area,
+body.post-type-archive-mt_candidate main { 
+    width:100% !important; 
+    max-width:100% !important; 
+    float:none !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
+}
+body.post-type-archive-mt_candidate #secondary,
+body.post-type-archive-mt_candidate .widget-area,
+body.post-type-archive-mt_candidate .sidebar,
+body.post-type-archive-mt_candidate aside { display:none !important; }

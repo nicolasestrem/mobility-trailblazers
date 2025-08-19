@@ -1,9 +1,20 @@
 /* beige everywhere */
 html, body { background:var(--mt-bg-beige); color:var(--mt-text); }
 
-/* kill theme sidebar layout on archive */
-.mt-no-sidebar .site-content .content-area{ width:100% !important; float:none !important; }
-.mt-no-sidebar .site-content .widget-area{ display:none !important; }
+/* kill theme sidebar layout on archive - stronger selectors */
+.mt-no-sidebar .site-content .content-area,
+.mt-no-sidebar #primary,
+.mt-no-sidebar .content-area,
+.mt-no-sidebar main { width:100% !important; max-width:100% !important; float:none !important; }
+.mt-no-sidebar .site-content .widget-area,
+.mt-no-sidebar #secondary,
+.mt-no-sidebar .sidebar,
+.mt-no-sidebar aside { display:none !important; }
+
+/* kill theme container restrictions on archive */
+.post-type-archive-mt_candidate .site-content,
+.post-type-archive-mt_candidate .content-area,
+.post-type-archive-mt_candidate #primary { max-width:100% !important; width:100% !important; }
 
 /* container and grid */
 .mt-container{ max-width:1200px; margin:0 auto; padding:0 var(--mt-space-4); }
