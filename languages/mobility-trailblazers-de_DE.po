@@ -907,6 +907,25 @@ msgstr "Debug-Informationen"
 msgid "Assignment Distribution Analysis"
 msgstr "Zuweisungsverteilungsanalyse"
 
+# Rankings Translations  
+msgid "Top Ranked Candidates"
+msgstr "Rangliste der bewerteten Kandidaten"
+
+msgid "Real-time ranking based on evaluation scores"
+msgstr "Echtzeit-Ranking basierend auf Bewertungsergebnissen"
+
+msgid "Rank"
+msgstr "Rang"
+
+msgid "Candidate"
+msgstr "Kandidat/in"
+
+msgid "Actions"
+msgstr "Aktionen"
+
+msgid "Full View"
+msgstr "Details anzeigen"
+
 # JavaScript Translations
 msgid "Error loading candidate information."
 msgstr "Fehler beim Laden der Kandidateninformationen."
