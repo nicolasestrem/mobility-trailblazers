@@ -455,8 +455,14 @@ class MT_Candidate_Import_Service {
         
         // Write headers
         $headers = [
-            'ID', 'Name', 'Organization', 'Position', 'Country',
-            'LinkedIn', 'Website', 'Article',
+            __('ID', 'mobility-trailblazers'), 
+            __('Name', 'mobility-trailblazers'), 
+            __('Organization', 'mobility-trailblazers'), 
+            __('Position', 'mobility-trailblazers'), 
+            __('Country', 'mobility-trailblazers'),
+            'LinkedIn', 
+            __('Website', 'mobility-trailblazers'), 
+            __('Article', 'mobility-trailblazers'),
             'Überblick', 'Mut & Pioniergeist', 'Innovationsgrad',
             'Umsetzungskraft & Wirkung', 'Relevanz für die Mobilitätswende',
             'Vorbildfunktion & Sichtbarkeit'
