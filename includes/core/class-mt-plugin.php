@@ -55,6 +55,11 @@ class MT_Plugin {
      * @return void
      */
     public function init() {
+        // Load Composer autoload for PhpSpreadsheet
+        if (file_exists(MT_PLUGIN_DIR . 'vendor/autoload.php')) {
+            require_once MT_PLUGIN_DIR . 'vendor/autoload.php';
+        }
+        
         // Load utility classes
         if (file_exists(MT_PLUGIN_DIR . 'includes/utilities/class-mt-ranking-display.php')) {
             require_once MT_PLUGIN_DIR . 'includes/utilities/class-mt-ranking-display.php';
@@ -98,6 +103,9 @@ class MT_Plugin {
             
             // Initialize import/export handler
             \MobilityTrailblazers\Admin\MT_Import_Export::init();
+            
+            // Initialize candidate importer
+            new \MobilityTrailblazers\Admin\MT_Candidate_Importer();
             
             // Initialize coaching dashboard for admin users
             if (current_user_can('manage_options')) {

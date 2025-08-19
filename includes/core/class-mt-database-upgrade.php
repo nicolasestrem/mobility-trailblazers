@@ -33,6 +33,11 @@ class MT_Database_Upgrade {
             self::upgrade_to_2_0_1();
         }
         
+        // Add candidates table for version 2.5.26
+        if (version_compare($current_version, '2.5.26', '<')) {
+            self::upgrade_to_2_5_26();
+        }
+        
         // Update database version
         update_option('mt_db_version', MT_VERSION);
     }
@@ -135,6 +140,58 @@ class MT_Database_Upgrade {
         $result = $wpdb->query("TRUNCATE TABLE {$evaluations_table}");
         
         return $result !== false;
+    }
+    
+    /**
+     * Upgrade to version 2.5.26 - Add candidates table
+     *
+     * @return void
+     * @since 2.5.26
+     */
+    private static function upgrade_to_2_5_26() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        if (strpos($charset_collate, 'utf8mb4') === false) {
+            $charset_collate = 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+        }
+        
+        // Create candidates table with LONGTEXT for German sections
+        $candidates_table = $wpdb->prefix . 'mt_candidates';
+        $candidates_sql = "CREATE TABLE IF NOT EXISTS {$candidates_table} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            post_id bigint(20) DEFAULT NULL,
+            slug varchar(255) NOT NULL,
+            name varchar(255) NOT NULL,
+            organization varchar(255) DEFAULT NULL,
+            position varchar(255) DEFAULT NULL,
+            country varchar(100) DEFAULT NULL,
+            linkedin_url text DEFAULT NULL,
+            website_url text DEFAULT NULL,
+            article_url text DEFAULT NULL,
+            description_sections longtext DEFAULT NULL COMMENT 'JSON with 6 German sections',
+            photo_attachment_id bigint(20) DEFAULT NULL,
+            import_id varchar(100) DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY unique_slug (slug),
+            UNIQUE KEY unique_post_id (post_id),
+            KEY idx_name (name),
+            KEY idx_organization (organization),
+            KEY idx_import_id (import_id)
+        ) {$charset_collate};";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($candidates_sql);
+        
+        // Check if table was created successfully
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$candidates_table}'");
+        if ($table_exists) {
+            error_log('Candidates table created successfully: ' . $candidates_table);
+        } else {
+            error_log('Failed to create candidates table: ' . $candidates_table . ' - Error: ' . $wpdb->last_error);
+        }
     }
     
     /**

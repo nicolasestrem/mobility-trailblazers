@@ -50,7 +50,13 @@ class MT_Template_Loader {
         }
         
         // Path to enhanced template
-        $enhanced_template = MT_PLUGIN_DIR . 'templates/frontend/single/single-mt_candidate-enhanced.php';
+        // Use v2 template with automatic German section formatting
+        $enhanced_template = MT_PLUGIN_DIR . 'templates/frontend/single/single-mt_candidate-enhanced-v2.php';
+        
+        // Fallback to original enhanced template if v2 doesn't exist
+        if (!file_exists($enhanced_template)) {
+            $enhanced_template = MT_PLUGIN_DIR . 'templates/frontend/single/single-mt_candidate-enhanced.php';
+        }
         
         // Check if enhanced template exists
         if (file_exists($enhanced_template)) {

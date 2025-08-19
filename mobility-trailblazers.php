@@ -78,4 +78,15 @@ register_deactivation_hook(__FILE__, function() {
 });
 
 // Uninstall hook
-register_uninstall_hook(__FILE__, ['MobilityTrailblazers\Core\MT_Uninstaller', 'uninstall']); 
+register_uninstall_hook(__FILE__, ['MobilityTrailblazers\Core\MT_Uninstaller', 'uninstall']);
+
+// Register WP-CLI commands
+if (defined('WP_CLI') && WP_CLI) {
+    require_once MT_PLUGIN_DIR . 'vendor/autoload.php';
+    require_once MT_PLUGIN_DIR . 'includes/cli/class-mt-cli-commands.php';
+    
+    $cli_commands = new MobilityTrailblazers\CLI\MT_CLI_Commands();
+    WP_CLI::add_command('mt import-candidates', [$cli_commands, 'import_candidates']);
+    WP_CLI::add_command('mt db-upgrade', [$cli_commands, 'db_upgrade']);
+    WP_CLI::add_command('mt list-candidates', [$cli_commands, 'list_candidates']);
+} 
