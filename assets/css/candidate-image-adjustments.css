@@ -29,15 +29,20 @@ body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
     object-position: center 25% !important; /* Adjust to show face properly */
 }
 
-/* Alternative selector for candidate grid */
+/* Alternative selector for candidate grid - targeting the img directly */
 [data-candidate-id="4627"] .mt-candidate-photo,
-[data-candidate-id="4627"] .mt-candidate-image img {
+[data-candidate-id="4627"] .mt-candidate-image img,
+[data-candidate-id="4627"] img.mt-candidate-photo {
     object-position: center 25% !important;
 }
 
-/* Candidate cards on grid view */
+/* Candidate cards on grid view - all possible selectors */
+.mt-candidate-grid-item[data-candidate-id="4627"] .mt-candidate-photo,
+.mt-candidate-grid-item[data-candidate-id="4627"] .mt-candidate-image img,
+.mt-candidate-grid-item[data-candidate-id="4627"] img.mt-candidate-photo,
 .mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-photo,
-.mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-image img {
+.mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-image img,
+.mt-candidate-grid-item a[href*="friedrich-draexlmaier"] img.mt-candidate-photo {
     object-position: center 25% !important;
 }
 
@@ -87,6 +92,17 @@ Where:
 .mt-candidate-card .mt-candidate-photo,
 .mt-candidate-card .mt-candidate-image img {
     object-position: center 30% !important; /* Better default for face visibility */
+}
+
+/* Specific fix for Friedrich Dräxlmaier on candidate grid - more specific selectors */
+.mt-candidates-grid .mt-candidate-grid-item[data-candidate-id="4627"] img,
+.mt-candidates-grid [data-candidate-id="4627"] img,
+.mt-candidate-grid-item[data-candidate-id="4627"] img,
+article.post-4627 .mt-candidate-image img,
+article.post-4627 img.mt-candidate-photo,
+.type-mt_candidate.post-4627 img {
+    object-position: center 20% !important; /* Show face properly */
+    object-fit: cover !important;
 }
 
 /* ===================================

@@ -172,6 +172,26 @@ $criteria = [
                 <?php endif; ?>
                 
                 <?php 
+                // Show Innovation Summary / Description
+                $overview = get_post_meta($candidate->ID, '_mt_overview', true);
+                $full_description = !empty($candidate->post_content) ? $candidate->post_content : $overview;
+                
+                if (!empty($full_description)) : ?>
+                    <div class="mt-candidate-description" style="margin-top: 20px;">
+                        <h3 style="color: #212529 !important;"><?php _e('Description', 'mobility-trailblazers'); ?></h3>
+                        <div class="mt-description-content" style="color: #495057 !important;">
+                            <?php 
+                            if (!empty($candidate->post_content)) {
+                                echo apply_filters('the_content', $candidate->post_content);
+                            } else {
+                                echo wp_kses_post($overview);
+                            }
+                            ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <?php 
                 // Always show biography if available - check both sources
                 $bio_content = !empty($biography) ? $biography : '';
                 if (empty($bio_content) && !empty($candidate->post_content)) {
@@ -307,12 +327,12 @@ $criteria = [
         
         <!-- Comments Section -->
         <div class="mt-comments-section">
-            <h2 class="mt-section-title"><?php _e('Zusätzliche Kommentare', 'mobility-trailblazers'); ?></h2>
+            <h2 class="mt-section-title"><?php _e('Additional Comments', 'mobility-trailblazers'); ?></h2>
             <p class="mt-section-description">
-                <strong><?php _e('Wer kann diese Kommentare sehen?', 'mobility-trailblazers'); ?></strong><br>
-                <?php _e('Ihre Kommentare sind vertraulich und werden nur von den Organisatoren des Mobility Trailblazers Awards eingesehen, um die finale Entscheidung zu unterstützen.', 'mobility-trailblazers'); ?><br><br>
-                <strong><?php _e('Warum sollten Sie Kommentare hinterlassen?', 'mobility-trailblazers'); ?></strong><br>
-                <?php _e('Ihre qualitativen Einblicke helfen uns, über die numerischen Bewertungen hinaus ein vollständigeres Bild des Kandidaten zu erhalten. Bitte teilen Sie besondere Stärken, innovative Ansätze oder andere relevante Beobachtungen mit (optional).', 'mobility-trailblazers'); ?>
+                <strong><?php _e('Who can see these comments?', 'mobility-trailblazers'); ?></strong><br>
+                <?php _e('Your comments are confidential and will only be viewed by the Mobility Trailblazers Award organizers to support the final decision.', 'mobility-trailblazers'); ?><br><br>
+                <strong><?php _e('Why should you leave comments?', 'mobility-trailblazers'); ?></strong><br>
+                <?php _e('Your qualitative insights help us get a more complete picture of the candidate beyond the numerical ratings. Please share special strengths, innovative approaches, or other relevant observations (optional).', 'mobility-trailblazers'); ?>
             </p>
             <textarea name="comments" 
                       id="mt-comments" 

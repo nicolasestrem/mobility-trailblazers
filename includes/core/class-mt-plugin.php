@@ -292,6 +292,14 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Candidate image adjustments CSS (Issue #13 fix for grid view)
+        wp_enqueue_style(
+            'mt-candidate-image-adjustments',
+            MT_PLUGIN_URL . 'assets/css/candidate-image-adjustments.css',
+            ['mt-frontend', 'mt-candidate-grid'],
+            MT_VERSION
+        );
+        
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(

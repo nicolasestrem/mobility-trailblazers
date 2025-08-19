@@ -13,9 +13,10 @@
         
         // Fix 1: Ensure each slider operates independently
         function initializeIndependentSliders() {
-            // Remove any global event handlers that might interfere
-            $('.mt-score-slider').off('change.global');
-            $('.mt-score-slider').off('input.global');
+            // Remove ALL existing event handlers to prevent conflicts
+            $('.mt-score-slider').off();
+            $(document).off('input', '.mt-score-slider');
+            $(document).off('change', '.mt-score-slider');
             
             // Initialize each slider independently
             $('.mt-score-slider').each(function() {
@@ -175,6 +176,13 @@
             
             // Wait a moment for any other scripts to load
             setTimeout(function() {
+                // Remove all conflicting handlers first
+                $('.mt-score-slider').off();
+                $(document).off('input', '.mt-score-slider');
+                $(document).off('change', '.mt-score-slider');
+                $('.mt-score-mark').off();
+                
+                // Then initialize our fixed handlers
                 initializeIndependentSliders();
                 fixScoreMarks();
                 updateOverallScore();
@@ -183,10 +191,10 @@
                 addDebugInfo();
                 
                 console.log('Evaluation rating fixes applied successfully');
-            }, 500);
+            }, 750); // Increased delay to ensure other scripts have loaded
         }
         
-        // Run initialization
+        // Run initialization with higher priority
         initializeAllFixes();
         
         // Also run on window load as fallback

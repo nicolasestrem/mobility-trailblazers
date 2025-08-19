@@ -84,22 +84,46 @@ class MT_Language_Switcher {
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                padding: 12px 20px;
-                background: var(--mt-bg-light, #ffffff);
-                border: 2px solid var(--mt-border, #004C5F);
-                border-radius: 8px;
+                padding: 14px 24px;
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                border: 2px solid #004C5F;
+                border-radius: 10px;
                 cursor: pointer;
-                font-size: 16px;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                font-size: 17px;
+                font-weight: 600;
+                color: #004C5F;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 3px 6px rgba(0, 76, 95, 0.15);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .mt-language-switcher-toggle::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(0, 76, 95, 0.1), transparent);
+                transition: left 0.5s ease;
             }
             
             .mt-language-switcher-toggle:hover {
-                background: var(--mt-bg-hover, #f0f8ff);
-                border-color: var(--mt-primary, #003845);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                background: linear-gradient(135deg, #f0f8ff 0%, #e1f5ff 100%);
+                border-color: #003845;
+                transform: translateY(-3px) scale(1.02);
+                box-shadow: 0 6px 12px rgba(0, 76, 95, 0.25);
+                color: #003845;
+            }
+            
+            .mt-language-switcher-toggle:hover::before {
+                left: 100%;
+            }
+            
+            .mt-language-switcher-toggle:active {
+                transform: translateY(-1px) scale(1.01);
+                box-shadow: 0 3px 6px rgba(0, 76, 95, 0.2);
             }
             
             .mt-language-switcher-flag {
@@ -181,31 +205,79 @@ class MT_Language_Switcher {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 18px;
-                background: var(--mt-bg-light, #ffffff);
-                border: 2px solid var(--mt-border, #e0e0e0);
-                border-radius: 8px;
+                padding: 12px 20px;
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                border: 2px solid #004C5F;
+                border-radius: 10px;
                 text-decoration: none;
-                color: var(--mt-text, #333);
-                font-size: 15px;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                color: #004C5F;
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 2px 6px rgba(0, 76, 95, 0.12);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .mt-language-switcher-inline .mt-language-option::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(0, 76, 95, 0.1);
+                transform: translate(-50%, -50%);
+                transition: width 0.4s ease, height 0.4s ease;
             }
             
             .mt-language-switcher-inline .mt-language-option:hover {
-                background: var(--mt-bg-hover, #f0f8ff);
-                border-color: var(--mt-primary, #004C5F);
-                transform: translateY(-2px);
+                background: linear-gradient(135deg, #f0f8ff 0%, #e1f5ff 100%);
+                border-color: #003845;
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 5px 12px rgba(0, 76, 95, 0.2);
+                color: #003845;
+            }
+            
+            .mt-language-switcher-inline .mt-language-option:hover::before {
+                width: 200%;
+                height: 200%;
+            }
+            
+            .mt-language-switcher-inline .mt-language-option:active {
+                transform: translateY(-1px) scale(1.02);
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
             
             .mt-language-switcher-inline .mt-language-option.active {
-                background: var(--mt-primary, #004C5F);
+                background: linear-gradient(135deg, #004C5F 0%, #003845 100%);
                 color: white;
-                border-color: var(--mt-primary, #004C5F);
-                box-shadow: 0 4px 12px rgba(0, 76, 95, 0.3);
-                font-weight: 600;
+                border-color: #003845;
+                box-shadow: 0 4px 12px rgba(0, 76, 95, 0.35);
+                font-weight: 700;
+                transform: scale(1.05);
+            }
+            
+            .mt-language-switcher-inline .mt-language-option.active::after {
+                content: "✓";
+                margin-left: 8px;
+                font-size: 18px;
+                animation: checkmark 0.3s ease;
+            }
+            
+            @keyframes checkmark {
+                0% {
+                    transform: scale(0) rotate(-45deg);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.2) rotate(10deg);
+                }
+                100% {
+                    transform: scale(1) rotate(0deg);
+                    opacity: 1;
+                }
             }
             
             @media (max-width: 768px) {

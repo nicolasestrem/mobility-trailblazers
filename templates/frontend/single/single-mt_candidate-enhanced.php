@@ -129,15 +129,28 @@ while (have_posts()) : the_post();
     <section class="mt-candidate-content">
         <div class="mt-content-container">
             <div class="mt-content-main">
-                <!-- Innovation Summary -->
-                <?php if ($overview) : ?>
+                <!-- Innovation Summary / Description -->
+                <?php 
+                // First try to get the full content from post_content
+                $full_description = get_the_content();
+                // Fall back to overview if post_content is empty
+                $description_content = !empty($full_description) ? $full_description : $overview;
+                
+                if ($description_content) : ?>
                     <section class="mt-content-section mt-innovation-summary">
                         <div class="mt-section-header">
                             <i class="dashicons dashicons-lightbulb"></i>
                             <h2><?php _e('Innovation Summary', 'mobility-trailblazers'); ?></h2>
                         </div>
                         <div class="mt-section-content">
-                            <?php echo wp_kses_post($overview); ?>
+                            <?php 
+                            // Apply content filters if using post_content
+                            if (!empty($full_description)) {
+                                echo apply_filters('the_content', $full_description);
+                            } else {
+                                echo wp_kses_post($overview);
+                            }
+                            ?>
                         </div>
                     </section>
                 <?php endif; ?>

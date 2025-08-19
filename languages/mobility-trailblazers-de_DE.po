@@ -144,7 +144,10 @@ msgstr "Bewertung eingereicht"
 
 # Candidate Information
 msgid "Innovation Summary"
-msgstr "Innovationszusammenfassung"
+msgstr "Beschreibung"
+
+msgid "Description"
+msgstr "Beschreibung"
 
 msgid "Biography"
 msgstr "Biografie"
@@ -437,6 +440,18 @@ msgstr "Sprache erfolgreich aktualisiert."
 # Validation and Status Messages
 msgid "Please provide any additional insights or observations about this candidate (optional)."
 msgstr "Bitte geben Sie zusätzliche Einblicke oder Beobachtungen zu diesem Kandidaten an (optional)."
+
+msgid "Who can see these comments?"
+msgstr "Wer kann diese Kommentare sehen?"
+
+msgid "Your comments are confidential and will only be viewed by the Mobility Trailblazers Award organizers to support the final decision."
+msgstr "Ihre Kommentare sind vertraulich und werden nur von den Organisatoren des Mobility Trailblazers Awards eingesehen, um die finale Entscheidung zu unterstützen."
+
+msgid "Why should you leave comments?"
+msgstr "Warum sollten Sie Kommentare hinterlassen?"
+
+msgid "Your qualitative insights help us get a more complete picture of the candidate beyond the numerical ratings. Please share special strengths, innovative approaches, or other relevant observations (optional)."
+msgstr "Ihre qualitativen Einblicke helfen uns, über die numerischen Bewertungen hinaus ein vollständigeres Bild des Kandidaten zu erhalten. Bitte teilen Sie besondere Stärken, innovative Ansätze oder andere relevante Beobachtungen mit (optional)."
 
 msgid "Submitting..."
 msgstr "Wird eingereicht..."
@@ -954,17 +969,32 @@ msgstr "Bitte prüfen Sie jeden Kandidaten gründlich und geben Sie Ihre Bewertu
 msgid "Mut & Pioniergeist"
 msgstr "Mut & Pioniergeist"
 
+msgid "Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten"
+msgstr "Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten"
+
 msgid "Innovationsgrad"
 msgstr "Innovationsgrad"
+
+msgid "Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen"
+msgstr "Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen"
 
 msgid "Umsetzungskraft & Wirkung"
 msgstr "Umsetzungskraft & Wirkung"
 
+msgid "Fähigkeit zur Umsetzung und realer Einfluss der Initiativen"
+msgstr "Fähigkeit zur Umsetzung und realer Einfluss der Initiativen"
+
 msgid "Relevanz für die Mobilitätswende"
 msgstr "Relevanz für die Mobilitätswende"
 
+msgid "Bedeutung und Beitrag zur Transformation der Mobilität"
+msgstr "Bedeutung und Beitrag zur Transformation der Mobilität"
+
 msgid "Vorbildfunktion & Sichtbarkeit"
 msgstr "Vorbildfunktion & Sichtbarkeit"
+
+msgid "Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor"
+msgstr "Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor"
 
 msgid "Start Evaluating"
 msgstr "Bewertung starten"
