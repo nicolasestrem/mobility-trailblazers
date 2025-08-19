@@ -141,36 +141,6 @@ class MT_Admin {
         // Profile Migration and other admin-only menus
         if (current_user_can('manage_options')) {
             
-            // Profile Migration submenu
-            add_submenu_page(
-                'mobility-trailblazers',
-                __('Migrate Profiles', 'mobility-trailblazers'),
-                __('Migrate Profiles', 'mobility-trailblazers'),
-                'manage_options',
-                'mt-migrate-profiles',
-                [$this, 'render_migrate_profiles_page']
-            );
-            
-            // Test Profile System (temporary)
-            add_submenu_page(
-                'mobility-trailblazers',
-                __('Test Profile System', 'mobility-trailblazers'),
-                __('Test Profile System', 'mobility-trailblazers'),
-                'manage_options',
-                'mt-test-profiles',
-                [$this, 'render_test_profiles_page']
-            );
-            
-            // Generate Sample Profiles
-            add_submenu_page(
-                'mobility-trailblazers',
-                __('Generate Samples', 'mobility-trailblazers'),
-                __('Generate Samples', 'mobility-trailblazers'),
-                'manage_options',
-                'mt-generate-samples',
-                [$this, 'render_generate_samples_page']
-            );
-            
             // Import Profiles
             add_submenu_page(
                 'mobility-trailblazers',
@@ -483,46 +453,6 @@ class MT_Admin {
     public function render_diagnostics_page() {
         wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
         wp_die();
-    }
-
-    /**
-     * Render migrate profiles page
-     *
-     * @return void
-     */
-    public function render_migrate_profiles_page() {
-        // Include the migration template
-        $template_file = MT_PLUGIN_DIR . 'templates/admin/migrate-profiles.php';
-        if (file_exists($template_file)) {
-            include $template_file;
-        } else {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Template not found.', 'mobility-trailblazers') . '</p></div>';
-        }
-    }
-    
-    /**
-     * Render test profiles page
-     *
-     * @return void
-     */
-    public function render_test_profiles_page() {
-        // Include the test script
-        include MT_PLUGIN_DIR . 'debug/test-profile-system.php';
-    }
-    
-    /**
-     * Render generate samples page
-     *
-     * @return void
-     */
-    public function render_generate_samples_page() {
-        // Include the sample generator template
-        $template_file = MT_PLUGIN_DIR . 'templates/admin/generate-samples.php';
-        if (file_exists($template_file)) {
-            include $template_file;
-        } else {
-            echo '<div class="notice notice-error"><p>' . esc_html__('Template not found.', 'mobility-trailblazers') . '</p></div>';
-        }
     }
     
     /**

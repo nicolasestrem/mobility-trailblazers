@@ -3,6 +3,25 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.33] - 2025-08-19
+### Removed
+- **Development/Test Admin Pages**: Removed test and development features from production build
+  - Removed "Generate Samples" admin page and functionality
+  - Removed "Test Profile System" admin page and functionality  
+  - Removed "Migrate Profiles" admin page and functionality
+  - Cleaned up admin menu to show only production-ready features
+  - Modified: `includes/admin/class-mt-admin.php` (removed menu registrations and render methods)
+  - Deleted: `templates/admin/generate-samples.php`
+  - Note: `templates/admin/migrate-profiles.php` was already missing from repository
+
+### Preserved
+- **Production Features**: All legitimate production features remain intact
+  - Import Profiles functionality (production data import)
+  - Audit Log functionality
+  - All core admin pages continue working normally
+  - Developer Tools remain available for production debugging
+
+
 ## [2.5.32] - 2025-01-18
 ### Added
 - **Rich Text Editor for Candidate Content**: Implemented comprehensive WYSIWYG editor for Edit Content modal
