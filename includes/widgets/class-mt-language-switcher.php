@@ -77,34 +77,42 @@ class MT_Language_Switcher {
                 position: relative;
                 display: inline-block;
                 margin: 10px 0;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             }
             
             .mt-language-switcher-toggle {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 8px 16px;
-                background: var(--mt-bg-light, #f5f5f5);
-                border: 1px solid var(--mt-border, #ddd);
-                border-radius: 4px;
+                gap: 12px;
+                padding: 12px 20px;
+                background: var(--mt-bg-light, #ffffff);
+                border: 2px solid var(--mt-border, #004C5F);
+                border-radius: 8px;
                 cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s ease;
+                font-size: 16px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             
             .mt-language-switcher-toggle:hover {
-                background: var(--mt-bg-hover, #e9e9e9);
-                border-color: var(--mt-primary, #004C5F);
+                background: var(--mt-bg-hover, #f0f8ff);
+                border-color: var(--mt-primary, #003845);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
             
             .mt-language-switcher-flag {
-                font-size: 20px;
+                font-size: 24px;
                 line-height: 1;
+                filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
             }
             
             .mt-language-switcher-arrow {
-                margin-left: 8px;
-                transition: transform 0.2s ease;
+                margin-left: auto;
+                transition: transform 0.3s ease;
+                font-size: 12px;
+                color: var(--mt-primary, #004C5F);
             }
             
             .mt-language-switcher.active .mt-language-switcher-arrow {
@@ -116,16 +124,17 @@ class MT_Language_Switcher {
                 top: 100%;
                 left: 0;
                 right: 0;
-                margin-top: 4px;
+                margin-top: 8px;
                 background: white;
-                border: 1px solid var(--mt-border, #ddd);
-                border-radius: 4px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border: 2px solid var(--mt-border, #004C5F);
+                border-radius: 8px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
                 opacity: 0;
                 visibility: hidden;
                 transform: translateY(-10px);
-                transition: all 0.2s ease;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 z-index: 1000;
+                min-width: 200px;
             }
             
             .mt-language-switcher.active .mt-language-switcher-dropdown {
@@ -137,16 +146,20 @@ class MT_Language_Switcher {
             .mt-language-switcher-option {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 10px 16px;
+                gap: 12px;
+                padding: 14px 20px;
                 cursor: pointer;
-                transition: background 0.2s ease;
+                transition: all 0.2s ease;
                 color: var(--mt-text, #333);
                 text-decoration: none;
+                font-size: 15px;
+                font-weight: 500;
             }
             
             .mt-language-switcher-option:hover {
-                background: var(--mt-bg-hover, #f0f0f0);
+                background: var(--mt-bg-hover, #f0f8ff);
+                padding-left: 24px;
+                color: var(--mt-primary, #004C5F);
             }
             
             .mt-language-switcher-option:first-child {
@@ -159,32 +172,40 @@ class MT_Language_Switcher {
             
             .mt-language-switcher-inline {
                 display: flex;
-                gap: 12px;
+                gap: 16px;
                 flex-wrap: wrap;
+                align-items: center;
             }
             
             .mt-language-switcher-inline .mt-language-option {
                 display: flex;
                 align-items: center;
-                gap: 6px;
-                padding: 6px 12px;
-                background: var(--mt-bg-light, #f5f5f5);
-                border: 1px solid var(--mt-border, #ddd);
-                border-radius: 4px;
+                gap: 10px;
+                padding: 10px 18px;
+                background: var(--mt-bg-light, #ffffff);
+                border: 2px solid var(--mt-border, #e0e0e0);
+                border-radius: 8px;
                 text-decoration: none;
                 color: var(--mt-text, #333);
-                transition: all 0.2s ease;
+                font-size: 15px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             }
             
             .mt-language-switcher-inline .mt-language-option:hover {
-                background: var(--mt-bg-hover, #e9e9e9);
+                background: var(--mt-bg-hover, #f0f8ff);
                 border-color: var(--mt-primary, #004C5F);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
             
             .mt-language-switcher-inline .mt-language-option.active {
                 background: var(--mt-primary, #004C5F);
                 color: white;
                 border-color: var(--mt-primary, #004C5F);
+                box-shadow: 0 4px 12px rgba(0, 76, 95, 0.3);
+                font-weight: 600;
             }
             
             @media (max-width: 768px) {
@@ -252,15 +273,76 @@ class MT_Language_Switcher {
             <script>
             (function($) {
                 $(document).ready(function() {
+                    // Toggle dropdown with animation
                     $('.mt-language-switcher-toggle').on('click', function(e) {
                         e.preventDefault();
-                        $(this).parent().toggleClass('active');
+                        e.stopPropagation();
+                        var $switcher = $(this).parent();
+                        var isActive = $switcher.hasClass('active');
+                        
+                        // Close all other dropdowns
+                        $('.mt-language-switcher').not($switcher).removeClass('active');
+                        
+                        // Toggle current dropdown
+                        $switcher.toggleClass('active');
+                        
+                        // Animate arrow rotation
+                        var $arrow = $(this).find('.mt-language-switcher-arrow');
+                        if (!isActive) {
+                            $arrow.css('transform', 'rotate(180deg)');
+                        } else {
+                            $arrow.css('transform', 'rotate(0deg)');
+                        }
+                    });
+                    
+                    // Language selection via AJAX
+                    $('.mt-language-switcher-option, .mt-language-option').on('click', function(e) {
+                        e.preventDefault();
+                        var $this = $(this);
+                        var lang = $this.data('lang');
+                        
+                        // Show loading state
+                        $this.css('opacity', '0.5').append('<span class="mt-loading-spinner" style="margin-left: 10px;">⏳</span>');
+                        
+                        // Make AJAX request
+                        $.post(mt_ajax.ajax_url, {
+                            action: 'mt_switch_language',
+                            language: lang,
+                            nonce: mt_ajax.nonce || ''
+                        })
+                        .done(function(response) {
+                            if (response.success) {
+                                // Show success feedback
+                                $this.find('.mt-loading-spinner').html('✓');
+                                
+                                // Reload page after short delay
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 300);
+                            } else {
+                                // On error, just navigate normally
+                                window.location.href = $this.attr('href');
+                            }
+                        })
+                        .fail(function() {
+                            // On fail, navigate normally
+                            window.location.href = $this.attr('href');
+                        });
                     });
                     
                     // Close dropdown when clicking outside
                     $(document).on('click', function(e) {
                         if (!$(e.target).closest('.mt-language-switcher').length) {
                             $('.mt-language-switcher').removeClass('active');
+                            $('.mt-language-switcher-arrow').css('transform', 'rotate(0deg)');
+                        }
+                    });
+                    
+                    // Keyboard navigation
+                    $('.mt-language-switcher').on('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            $(this).removeClass('active');
+                            $(this).find('.mt-language-switcher-arrow').css('transform', 'rotate(0deg)');
                         }
                     });
                 });

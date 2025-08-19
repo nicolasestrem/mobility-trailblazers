@@ -12,6 +12,8 @@
         currentPostId: null,
         tempContent: {},
         richEditorsInitialized: false,
+        hasUnsavedChanges: false,
+        originalContent: {},
         
         init: function() {
             this.addEditButtons();
@@ -111,6 +113,17 @@
         populateModal: function(data) {
             var self = this;
             
+            // Store original content
+            self.originalContent = {
+                overview: data.overview || '',
+                criteria: data.criteria || '',
+                biography: data.biography || ''
+            };
+            
+            // Reset unsaved changes flag
+            self.hasUnsavedChanges = false;
+            self.tempContent = {};
+            
             // Check if rich editor is available
             var useRichEditor = typeof MTRichEditor !== 'undefined' && MTRichEditor.isSupported();
             
@@ -143,10 +156,13 @@
                     content: data.overview || '',
                     minHeight: 200,
                     maxHeight: 400,
-                    label: 'Innovation Summary',
+                    label: 'Beschreibung',
                     autosave: true,
                     onAutosave: function(content) {
                         self.tempSave('overview', content);
+                    },
+                    onChange: function(content) {
+                        self.checkForChanges('overview', content);
                     }
                 });
                 
@@ -158,6 +174,9 @@
                     autosave: true,
                     onAutosave: function(content) {
                         self.tempSave('criteria', content);
+                    },
+                    onChange: function(content) {
+                        self.checkForChanges('criteria', content);
                     }
                 });
                 
@@ -169,6 +188,9 @@
                     autosave: true,
                     onAutosave: function(content) {
                         self.tempSave('biography', content);
+                    },
+                    onChange: function(content) {
+                        self.checkForChanges('biography', content);
                     }
                 });
                 
@@ -200,9 +222,15 @@
                 $('.mt-modal-body').html(modalBodyHTML);
                 
                 // Populate textareas
-                $('#mt-edit-overview').val(data.overview || '');
-                $('#mt-edit-criteria').val(data.criteria || '');
-                $('#mt-edit-biography').val(data.biography || '');
+                $('#mt-edit-overview').val(data.overview || '').on('input', function() {
+                    self.checkForChanges('overview', $(this).val());
+                });
+                $('#mt-edit-criteria').val(data.criteria || '').on('input', function() {
+                    self.checkForChanges('criteria', $(this).val());
+                });
+                $('#mt-edit-biography').val(data.biography || '').on('input', function() {
+                    self.checkForChanges('biography', $(this).val());
+                });
             }
             
             // Reset to first tab
@@ -225,6 +253,27 @@
         tempSave: function(field, content) {
             // Store auto-saved content temporarily
             this.tempContent[field] = content;
+        },
+        
+        checkForChanges: function(field, content) {
+            // Check if content has changed from original
+            if (content !== this.originalContent[field]) {
+                this.hasUnsavedChanges = true;
+            } else {
+                // Check if all fields match original
+                var allMatch = true;
+                for (var key in this.originalContent) {
+                    var currentValue = this.tempContent[key] || this.originalContent[key];
+                    if (key === field) {
+                        currentValue = content;
+                    }
+                    if (currentValue !== this.originalContent[key]) {
+                        allMatch = false;
+                        break;
+                    }
+                }
+                this.hasUnsavedChanges = !allMatch;
+            }
         },
         
         switchTab: function(tab) {
@@ -292,6 +341,10 @@
                 },
                 success: function(response) {
                     if (response.success) {
+                        // Update original content with saved value
+                        self.originalContent[activeTab] = content;
+                        self.hasUnsavedChanges = false;
+                        
                         $saveBtn.text(mtCandidateEditor.i18n.saved);
                         setTimeout(function() {
                             $saveBtn.prop('disabled', false).text(mtCandidateEditor.i18n.save);
@@ -310,7 +363,7 @@
         
         closeModal: function() {
             // Check for unsaved changes
-            if (this.richEditorsInitialized && Object.keys(this.tempContent).length > 0) {
+            if (this.hasUnsavedChanges) {
                 if (!confirm('You have unsaved changes. Are you sure you want to close?')) {
                     return;
                 }

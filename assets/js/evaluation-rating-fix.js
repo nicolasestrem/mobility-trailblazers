@@ -1,0 +1,210 @@
+/**
+ * Evaluation Rating Fix
+ * Purpose: Fix the issue where only one rating can be selected across all categories
+ * Issue #21: Evaluation page does not allow more than one rating across all categories
+ * Created: 2025-08-18
+ */
+
+(function($) {
+    'use strict';
+    
+    // Wait for DOM to be fully loaded
+    $(document).ready(function() {
+        
+        // Fix 1: Ensure each slider operates independently
+        function initializeIndependentSliders() {
+            // Remove any global event handlers that might interfere
+            $('.mt-score-slider').off('change.global');
+            $('.mt-score-slider').off('input.global');
+            
+            // Initialize each slider independently
+            $('.mt-score-slider').each(function() {
+                var $slider = $(this);
+                var sliderName = $slider.attr('name');
+                
+                // Ensure unique name attribute
+                if (!sliderName) {
+                    console.error('Slider missing name attribute');
+                    return;
+                }
+                
+                // Remove any conflicting event handlers
+                $slider.off('change input');
+                
+                // Add independent event handler
+                $slider.on('input change', function(e) {
+                    e.stopPropagation(); // Prevent event bubbling
+                    
+                    var value = $(this).val();
+                    var $card = $(this).closest('.mt-criterion-card');
+                    
+                    // Update only this slider's display
+                    $card.find('.mt-score-value').text(value);
+                    
+                    // Update visual feedback for this slider only
+                    var percentage = (value / 10) * 100;
+                    $(this).css('background', 'linear-gradient(to right, #667eea 0%, #667eea ' + percentage + '%, #e5e7eb ' + percentage + '%, #e5e7eb 100%)');
+                    
+                    // Log for debugging
+                    console.log('Updated ' + sliderName + ' to value: ' + value);
+                    
+                    // Update total score
+                    updateOverallScore();
+                });
+                
+                // Initialize visual state
+                var initialValue = $slider.val();
+                var percentage = (initialValue / 10) * 100;
+                $slider.css('background', 'linear-gradient(to right, #667eea 0%, #667eea ' + percentage + '%, #e5e7eb ' + percentage + '%, #e5e7eb 100%)');
+            });
+        }
+        
+        // Fix 2: Ensure score marks work independently
+        function fixScoreMarks() {
+            $('.mt-score-mark').off('click.global');
+            
+            $('.mt-score-mark').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var value = $(this).data('value');
+                var $card = $(this).closest('.mt-criterion-card');
+                var $slider = $card.find('.mt-score-slider');
+                
+                // Set only this slider's value
+                $slider.val(value).trigger('input');
+                
+                // Visual feedback
+                $(this).addClass('selected').siblings().removeClass('selected');
+            });
+        }
+        
+        // Fix 3: Update total score calculation
+        function updateOverallScore() {
+            var total = 0;
+            var count = 0;
+            
+            $('.mt-score-slider').each(function() {
+                var value = parseFloat($(this).val());
+                if (!isNaN(value)) {
+                    total += value;
+                    count++;
+                }
+            });
+            
+            if (count > 0) {
+                var average = (total / count).toFixed(1);
+                
+                // Update all possible total score displays
+                $('#mt-total-score').text(average);
+                $('.mt-total-score-value').text(average);
+                $('.mt-average-score').text(average + '/10');
+                
+                // Update evaluation status
+                $('.mt-evaluated-count').text('(' + count + '/5 criteria evaluated)');
+                
+                console.log('Total score updated: ' + average + ' (from ' + count + ' criteria)');
+            }
+        }
+        
+        // Fix 4: Prevent form submission if ratings are missing
+        function validateEvaluation() {
+            $('#mt-evaluation-form').on('submit', function(e) {
+                var allRated = true;
+                var unratedCriteria = [];
+                
+                $('.mt-score-slider').each(function() {
+                    var value = parseFloat($(this).val());
+                    var name = $(this).attr('name');
+                    
+                    if (isNaN(value) || value === 0) {
+                        allRated = false;
+                        unratedCriteria.push(name.replace('_score', ''));
+                    }
+                });
+                
+                if (!allRated && unratedCriteria.length === 5) {
+                    e.preventDefault();
+                    alert('Please rate at least one criterion before submitting.');
+                    return false;
+                }
+                
+                // Log submission data for debugging
+                console.log('Submitting evaluation with ratings:');
+                $('.mt-score-slider').each(function() {
+                    console.log($(this).attr('name') + ': ' + $(this).val());
+                });
+            });
+        }
+        
+        // Fix 5: Ensure sliders work after AJAX loads
+        function reinitializeAfterAjax() {
+            $(document).ajaxComplete(function(event, xhr, settings) {
+                if (settings.url && (settings.url.includes('evaluate') || settings.url.includes('mt_get_candidate'))) {
+                    setTimeout(function() {
+                        initializeIndependentSliders();
+                        fixScoreMarks();
+                        updateOverallScore();
+                    }, 100);
+                }
+            });
+        }
+        
+        // Fix 6: Add visual debugging
+        function addDebugInfo() {
+            if (window.location.search.includes('debug=1')) {
+                var debugHtml = '<div id="evaluation-debug" style="position:fixed;bottom:10px;right:10px;background:#fff;border:2px solid #000;padding:10px;z-index:9999;">';
+                debugHtml += '<h4>Evaluation Debug</h4>';
+                debugHtml += '<div id="debug-values"></div>';
+                debugHtml += '</div>';
+                $('body').append(debugHtml);
+                
+                setInterval(function() {
+                    var debugInfo = '';
+                    $('.mt-score-slider').each(function() {
+                        debugInfo += $(this).attr('name') + ': ' + $(this).val() + '<br>';
+                    });
+                    $('#debug-values').html(debugInfo);
+                }, 1000);
+            }
+        }
+        
+        // Initialize all fixes
+        function initializeAllFixes() {
+            console.log('Initializing evaluation rating fixes...');
+            
+            // Wait a moment for any other scripts to load
+            setTimeout(function() {
+                initializeIndependentSliders();
+                fixScoreMarks();
+                updateOverallScore();
+                validateEvaluation();
+                reinitializeAfterAjax();
+                addDebugInfo();
+                
+                console.log('Evaluation rating fixes applied successfully');
+            }, 500);
+        }
+        
+        // Run initialization
+        initializeAllFixes();
+        
+        // Also run on window load as fallback
+        $(window).on('load', function() {
+            if ($('.mt-score-slider').length > 0) {
+                initializeAllFixes();
+            }
+        });
+        
+        // Expose functions globally for debugging
+        window.MTEvaluationFix = {
+            reinitialize: initializeAllFixes,
+            checkValues: function() {
+                $('.mt-score-slider').each(function() {
+                    console.log($(this).attr('name') + ': ' + $(this).val());
+                });
+            }
+        };
+    });
+    
+})(jQuery);

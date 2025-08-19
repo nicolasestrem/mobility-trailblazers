@@ -43,10 +43,10 @@ class MT_Candidate_Editor {
      * Add meta boxes
      */
     public function add_meta_boxes() {
-        // Innovation Summary meta box
+        // Description meta box
         add_meta_box(
             'mt_innovation_summary',
-            __('Innovation Summary', 'mobility-trailblazers'),
+            __('Beschreibung', 'mobility-trailblazers'),
             [$this, 'render_innovation_summary_box'],
             'mt_candidate',
             'normal',
@@ -75,7 +75,7 @@ class MT_Candidate_Editor {
     }
     
     /**
-     * Render Innovation Summary meta box
+     * Render Description meta box
      */
     public function render_innovation_summary_box($post) {
         wp_nonce_field('mt_candidate_editor', 'mt_candidate_editor_nonce');
@@ -84,7 +84,7 @@ class MT_Candidate_Editor {
         ?>
         <div class="mt-editor-wrapper">
             <p class="description">
-                <?php _e('This content appears in the Innovation Summary section on the candidate profile page.', 'mobility-trailblazers'); ?>
+                <?php _e('This content appears in the Description section on the candidate profile page.', 'mobility-trailblazers'); ?>
             </p>
             <?php
             wp_editor($overview, 'mt_overview', [
@@ -184,7 +184,7 @@ class MT_Candidate_Editor {
             return;
         }
         
-        // Save Innovation Summary
+        // Save Description
         if (isset($_POST['mt_overview'])) {
             update_post_meta($post_id, '_mt_overview', wp_kses_post($_POST['mt_overview']));
         }
@@ -312,7 +312,7 @@ class MT_Candidate_Editor {
                 <h2><?php _e('Edit Candidate Content', 'mobility-trailblazers'); ?></h2>
                 <div class="mt-modal-tabs">
                     <button class="mt-tab-btn active" data-tab="overview">
-                        <?php _e('Innovation Summary', 'mobility-trailblazers'); ?>
+                        <?php _e('Beschreibung', 'mobility-trailblazers'); ?>
                     </button>
                     <button class="mt-tab-btn" data-tab="criteria">
                         <?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?>

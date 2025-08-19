@@ -1,0 +1,50 @@
+/**
+ * Photo Adjustments for Specific Candidates
+ * Purpose: Fix photo positioning for candidates where face is not properly visible
+ * Created: 2025-08-18
+ */
+
+/* Friedrich Dräxlmaier - Adjust photo to show face */
+.postid-4627 .mt-photo-frame img,
+.candidate-4627 .mt-photo-frame img,
+.mt-candidate-photo-4627 {
+    object-position: center 20%; /* Adjust vertical position to show face */
+    object-fit: cover;
+}
+
+/* Generic class for photo adjustments */
+.mt-photo-adjust-top .mt-photo-frame img {
+    object-position: center 20%;
+}
+
+.mt-photo-adjust-center .mt-photo-frame img {
+    object-position: center center;
+}
+
+.mt-photo-adjust-bottom .mt-photo-frame img {
+    object-position: center 80%;
+}
+
+/* Candidate grid photo adjustments */
+.mt-candidate-card[data-candidate-id="4627"] .mt-candidate-image img {
+    object-position: center 20%;
+}
+
+/* Archive page photo adjustments */
+.type-mt_candidate.post-4627 .mt-candidate-photo {
+    object-position: center 20%;
+}
+
+/* Evaluation page photo adjustments */
+.mt-candidate-photo-eval[data-candidate="4627"] {
+    object-position: center 20%;
+}
+
+/* Add hover effect to indicate interactive photo */
+.mt-photo-frame img {
+    transition: object-position 0.3s ease;
+}
+
+.mt-photo-frame:hover img {
+    transform: scale(1.05);
+}

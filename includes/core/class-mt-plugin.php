@@ -275,6 +275,23 @@ class MT_Plugin {
             true
         );
         
+        // Evaluation rating fix JavaScript (Issue #21 fix)
+        wp_enqueue_script(
+            'mt-evaluation-rating-fix',
+            MT_PLUGIN_URL . 'assets/js/evaluation-rating-fix.js',
+            ['jquery', 'mt-frontend'],
+            MT_VERSION,
+            true
+        );
+        
+        // Photo adjustments CSS (Issue #13 fix)
+        wp_enqueue_style(
+            'mt-photo-adjustments',
+            MT_PLUGIN_URL . 'assets/css/photo-adjustments.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(

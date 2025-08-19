@@ -18,7 +18,11 @@ while (have_posts()) : the_post();
     $organization = get_post_meta($candidate_id, '_mt_organization', true) ?: '';
     $position = get_post_meta($candidate_id, '_mt_position', true) ?: '';
     $display_name = get_post_meta($candidate_id, '_mt_candidate_name', true) ?: get_the_title();
-    $overview = get_post_meta($candidate_id, '_mt_description_full', true) ?: '';
+    // Get the full description from post_content which contains all sections
+    $full_description = get_the_content();
+    
+    // Also get the overview meta field as fallback
+    $overview_meta = get_post_meta($candidate_id, '_mt_description_full', true) ?: '';
     $linkedin = get_post_meta($candidate_id, '_mt_linkedin_url', true) ?: '';
     $website = get_post_meta($candidate_id, '_mt_website_url', true) ?: '';
     
@@ -386,6 +390,20 @@ while (have_posts()) : the_post();
     font-size: 1.05rem;
 }
 
+.mt-content-subheading {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.mt-content-subheading:first-child {
+    margin-top: 0;
+}
+
 /* Navigation */
 .mt-profile-navigation {
     display: flex;
@@ -523,13 +541,40 @@ while (have_posts()) : the_post();
     <div class="mt-content-section">
         <div class="mt-content-container">
             <div class="mt-main-content">
-                <?php if ($overview) : ?>
-                    <div class="mt-overview-section">
-                        <h2 class="mt-section-heading">Überblick</h2>
-                        <div class="mt-section-content">
-                            <?php echo wp_kses_post(wpautop($overview)); ?>
+                <?php 
+                // Display the full content if available, otherwise fall back to overview meta
+                $content_to_display = !empty($full_description) ? $full_description : $overview_meta;
+                
+                if ($content_to_display) : 
+                    // Check if content has sections (contains headers like "Mut & Pioniergeist")
+                    if (strpos($content_to_display, 'Mut &') !== false || 
+                        strpos($content_to_display, 'Innovation') !== false ||
+                        strpos($content_to_display, 'Umsetzung') !== false) :
+                        // Content has multiple sections, display as formatted content
+                        ?>
+                        <div class="mt-overview-section">
+                            <h2 class="mt-section-heading">Beschreibung</h2>
+                            <div class="mt-section-content">
+                                <?php 
+                                // Parse and format the content with proper sections
+                                $formatted_content = $content_to_display;
+                                
+                                // Convert section headers to proper HTML headers
+                                $formatted_content = preg_replace('/^(Überblick|Mut & Pioniergeist|Innovationsgrad|Umsetzungskraft & Wirkung|Relevanz für die Mobilitätswende|Vorbildfunktion & Sichtbarkeit)$/m', '<h3 class="mt-content-subheading">$1</h3>', $formatted_content);
+                                
+                                echo wp_kses_post(wpautop($formatted_content)); 
+                                ?>
+                            </div>
                         </div>
-                    </div>
+                    <?php else : ?>
+                        <!-- Simple content without sections -->
+                        <div class="mt-overview-section">
+                            <h2 class="mt-section-heading">Überblick</h2>
+                            <div class="mt-section-content">
+                                <?php echo wp_kses_post(wpautop($content_to_display)); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
                 
                 <?php if (!empty($criteria_sections)) : ?>

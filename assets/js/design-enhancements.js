@@ -264,14 +264,14 @@ jQuery(document).ready(function($) {
     // Keyboard navigation for sliders
     $('.mt-score-slider').on('keydown', function(e) {
         var $this = $(this);
-        var value = parseInt($this.val());
+        var value = parseFloat($this.val());
         
         if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
             e.preventDefault();
-            $this.val(Math.min(100, value + 5)).trigger('change');
+            $this.val(Math.min(10, value + 0.5)).trigger('change');
         } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
             e.preventDefault();
-            $this.val(Math.max(0, value - 5)).trigger('change');
+            $this.val(Math.max(0, value - 0.5)).trigger('change');
         }
     });
     

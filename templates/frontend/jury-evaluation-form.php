@@ -66,31 +66,31 @@ if (!empty($presentation_settings['enable_animations'])) {
 $criteria = [
     'courage' => [
         'label' => __('Mut & Pioniergeist', 'mobility-trailblazers'),
-        'description' => __('Courage to challenge conventions and pioneer new paths in mobility', 'mobility-trailblazers'),
+        'description' => __('Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten', 'mobility-trailblazers'),
         'icon' => 'dashicons-superhero',
         'color' => '#e74c3c'
     ],
     'innovation' => [
         'label' => __('Innovationsgrad', 'mobility-trailblazers'),
-        'description' => __('Level of innovation and creative solutions for mobility challenges', 'mobility-trailblazers'),
+        'description' => __('Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen', 'mobility-trailblazers'),
         'icon' => 'dashicons-lightbulb',
         'color' => '#f39c12'
     ],
     'implementation' => [
         'label' => __('Umsetzungskraft & Wirkung', 'mobility-trailblazers'),
-        'description' => __('Implementation strength and real-world impact of initiatives', 'mobility-trailblazers'),
+        'description' => __('Fähigkeit zur Umsetzung und realer Einfluss der Initiativen', 'mobility-trailblazers'),
         'icon' => 'dashicons-hammer',
         'color' => '#27ae60'
     ],
     'relevance' => [
-        'label' => __('Relevanz für Mobilitätswende', 'mobility-trailblazers'),
-        'description' => __('Relevance and contribution to sustainable mobility transformation', 'mobility-trailblazers'),
+        'label' => __('Relevanz für die Mobilitätswende', 'mobility-trailblazers'),
+        'description' => __('Bedeutung und Beitrag zur Transformation der Mobilität', 'mobility-trailblazers'),
         'icon' => 'dashicons-location-alt',
         'color' => '#3498db'
     ],
     'visibility' => [
         'label' => __('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'),
-        'description' => __('Role model function and visibility in the mobility sector', 'mobility-trailblazers'),
+        'description' => __('Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor', 'mobility-trailblazers'),
         'icon' => 'dashicons-visibility',
         'color' => '#9b59b6'
     ]
@@ -307,9 +307,12 @@ $criteria = [
         
         <!-- Comments Section -->
         <div class="mt-comments-section">
-            <h2 class="mt-section-title"><?php _e('Additional Comments', 'mobility-trailblazers'); ?></h2>
+            <h2 class="mt-section-title"><?php _e('Zusätzliche Kommentare', 'mobility-trailblazers'); ?></h2>
             <p class="mt-section-description">
-                <?php _e('Please provide any additional insights or observations about this candidate (optional).', 'mobility-trailblazers'); ?>
+                <strong><?php _e('Wer kann diese Kommentare sehen?', 'mobility-trailblazers'); ?></strong><br>
+                <?php _e('Ihre Kommentare sind vertraulich und werden nur von den Organisatoren des Mobility Trailblazers Awards eingesehen, um die finale Entscheidung zu unterstützen.', 'mobility-trailblazers'); ?><br><br>
+                <strong><?php _e('Warum sollten Sie Kommentare hinterlassen?', 'mobility-trailblazers'); ?></strong><br>
+                <?php _e('Ihre qualitativen Einblicke helfen uns, über die numerischen Bewertungen hinaus ein vollständigeres Bild des Kandidaten zu erhalten. Bitte teilen Sie besondere Stärken, innovative Ansätze oder andere relevante Beobachtungen mit (optional).', 'mobility-trailblazers'); ?>
             </p>
             <textarea name="comments" 
                       id="mt-comments" 
