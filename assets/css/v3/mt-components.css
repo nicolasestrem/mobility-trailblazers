@@ -1,0 +1,39 @@
+/* clean white card, no mint border */
+.mt-candidate-card{
+  background:var(--mt-card-bg);
+  border:1px solid var(--mt-border-soft) !important;
+  border-radius:var(--mt-radius);
+  box-shadow:var(--mt-shadow);
+  padding:20px;
+  display:flex; flex-direction:column;
+  transition:transform .15s ease-out, box-shadow .15s ease-out;
+  text-align:center;
+}
+.mt-candidate-card:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08); }
+
+/* link wrapper */
+.mt-card__link{ text-decoration:none; color:inherit; display:flex; flex-direction:column; align-items:center; }
+
+/* avatar */
+.mt-card__image{
+  width:104px; height:104px; border-radius:999px;
+  object-fit:cover; object-position:30% 50%;
+  margin:16px auto 12px;
+  box-shadow:0 0 0 4px #fff, 0 0 0 6px var(--mt-border-soft);
+}
+
+/* text */
+.mt-card__title{ font-size:1.125rem; font-weight:600; text-align:center; margin:8px 0 2px; color:var(--mt-text); }
+.mt-card__role, .mt-card__org{ text-align:center; opacity:.78; margin:4px 0; }
+
+/* hide junk elements inside cards on archive */
+.post-type-archive-mt_candidate .mt-candidate-card .mt-progress,
+.post-type-archive-mt_candidate .mt-candidate-card .score,
+.post-type-archive-mt_candidate .mt-candidate-card .mt-category-tag,
+.post-type-archive-mt_candidate .mt-candidate-card .mt-badge,
+.post-type-archive-mt_candidate .mt-candidate-card hr{ display:none !important; }
+
+/* buttons */
+.mt-card__footer{ margin-top:auto; display:flex; gap:12px; justify-content:center; padding-top:16px; }
+.mt-button{ background:var(--mt-primary); color:#fff; border-radius:10px; padding:10px 14px; text-decoration:none; transition:all .15s ease-out; }
+.mt-button:hover{ background:var(--mt-secondary); transform:translateY(-1px); }

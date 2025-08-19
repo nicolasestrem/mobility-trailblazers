@@ -141,6 +141,25 @@ class MT_Plugin {
         // Initialize template loader for enhanced candidate profiles
         MT_Template_Loader::init();
         
+        // Bootstrap archive helper
+        add_action('init', function () {
+            if (class_exists('\MobilityTrailblazers\Core\MT_Archive_Handler')) {
+                if (method_exists('\MobilityTrailblazers\Core\MT_Archive_Handler', 'init')) {
+                    \MobilityTrailblazers\Core\MT_Archive_Handler::init();
+                } else {
+                    new \MobilityTrailblazers\Core\MT_Archive_Handler();
+                }
+            }
+        }, 5);
+        
+        // Force no sidebar layout on the candidate archive
+        add_filter('body_class', function($classes){
+            if (is_post_type_archive('mt_candidate')) {
+                $classes[] = 'mt-no-sidebar';
+            }
+            return $classes;
+        });
+        
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
@@ -195,6 +214,16 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
+        // V3 CSS Architecture with calm editorial design
+        $base = MT_PLUGIN_URL . 'assets/css/v3/';
+        wp_enqueue_style('mt-v3-tokens', $base.'mt-tokens.css', [], MT_VERSION);
+        wp_enqueue_style('mt-v3-layout', $base.'mt-layout.css', ['mt-v3-tokens'], MT_VERSION);
+        wp_enqueue_style('mt-v3-components', $base.'mt-components.css', ['mt-v3-layout'], MT_VERSION);
+        if (is_singular('mt_candidate') || is_post_type_archive('mt_candidate')){
+            wp_enqueue_style('mt-v3-pages-candidate', $base.'mt-pages-candidate.css', ['mt-v3-components'], MT_VERSION);
+        }
+        wp_enqueue_style('mt-v3-compat', $base.'mt-compat.css', ['mt-v3-components'], MT_VERSION);
+        
         // Core CSS Variables (loaded first)
         wp_enqueue_style(
             'mt-variables',

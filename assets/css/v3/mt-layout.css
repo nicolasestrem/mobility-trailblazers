@@ -1,0 +1,18 @@
+/* beige everywhere */
+html, body { background:var(--mt-bg-beige); color:var(--mt-text); }
+
+/* kill theme sidebar layout on archive */
+.mt-no-sidebar .site-content .content-area{ width:100% !important; float:none !important; }
+.mt-no-sidebar .site-content .widget-area{ display:none !important; }
+
+/* container and grid */
+.mt-container{ max-width:1200px; margin:0 auto; padding:0 var(--mt-space-4); }
+.mt-archive__title{ margin:var(--mt-space-6) 0; font-size:40px; font-weight:600; color:var(--mt-primary); }
+
+.mt-candidates-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  gap:var(--mt-space-8);
+  align-items:stretch;
+}
+@media (min-width:1024px){ .mt-candidates-grid{ grid-template-columns:repeat(3,1fr); } }

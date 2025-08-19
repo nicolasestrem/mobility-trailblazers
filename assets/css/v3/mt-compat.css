@@ -1,0 +1,12 @@
+/* extra beige lock for common wrappers */
+.site, .mt-wrapper, .elementor-location-archive, .elementor-location-single { background:var(--mt-bg-beige); }
+
+/* map legacy card selectors to the new look */
+.candidate-card, .mt-candidate-card{ background:var(--mt-card-bg); border:1px solid var(--mt-border-soft); border-radius:var(--mt-radius); box-shadow:var(--mt-shadow); }
+
+/* ensure full width on archive */
+.post-type-archive-mt_candidate #primary,
+.post-type-archive-mt_candidate .content-area { width:100% !important; max-width:100% !important; }
+.post-type-archive-mt_candidate #secondary,
+.post-type-archive-mt_candidate .widget-area,
+.post-type-archive-mt_candidate .sidebar { display:none !important; }
