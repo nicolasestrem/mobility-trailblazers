@@ -103,7 +103,6 @@ docker-compose.override.yml
 .claude/
 .cursor/
 
-CLAUDE.md
 .claude.json
 .claude-local.json
 .mcp.json
