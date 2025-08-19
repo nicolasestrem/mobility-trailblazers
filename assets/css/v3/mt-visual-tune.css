@@ -1,6 +1,15 @@
-/* v3 visual tune for Elementor widgets */
+/**
+ * Mobility Trailblazers v3 Visual Tuning Layer
+ * Editorial refinements for calm, magazine-like appearance
+ * 
+ * @since 2.5.34
+ * @package MobilityTrailblazers
+ */
 
-/* small type scale helpers */
+/* ==========================================================================
+   Typography Scale
+   Responsive font sizing with fluid typography
+   ========================================================================== */
 :root{
   --mt-font-xxl: clamp(26px, 3.5vw, 36px);
   --mt-font-xl: clamp(20px, 2.4vw, 24px);
@@ -27,16 +36,25 @@
   box-shadow: 0 10px 32px rgba(0,0,0,.08);
 }
 
-/* big image on top, not a tiny avatar */
+/* ==========================================================================
+   Card Image Styling
+   Full-width hero images for editorial impact
+   ========================================================================== */
+:root {
+  --mt-card-image-height: 220px;
+  --mt-image-focus-x: 30%; /* Horizontal focal point for faces */
+  --mt-image-focus-y: 50%; /* Vertical focal point */
+}
+
 .elementor-widget-mt_candidates_grid .mt-card__image{
   width: 100%;
-  height: 220px;
+  height: var(--mt-card-image-height);
   display: block;
   margin: 0;
   border-radius: 0;
   box-shadow: none;
   object-fit: cover;
-  object-position: 30% 50%;
+  object-position: var(--mt-image-focus-x) var(--mt-image-focus-y);
 }
 
 /* text left aligned for a more editorial feel */
