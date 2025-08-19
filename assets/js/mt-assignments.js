@@ -146,7 +146,7 @@
             },
             error: function(xhr, status, error) {
                 console.error('MT Assignments: Auto-assign error', error);
-                showNotification('Error: ' + error, 'error');
+                showNotification((mt_admin && mt_admin.i18n && mt_admin.i18n.error ? mt_admin.i18n.error : 'Fehler') + ': ' + error, 'error');
             },
             complete: function() {
                 $('#mt-auto-assign-modal button[type="submit"]')
@@ -165,7 +165,7 @@
         });
         
         if (!juryMemberId || candidateIds.length === 0) {
-            showNotification('Please select a jury member and at least one candidate.', 'warning');
+            showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.select_jury_candidates ? mt_admin.i18n.select_jury_candidates : 'Bitte wählen Sie ein Jurymitglied und mindestens einen Kandidaten aus.', 'warning');
             return;
         }
         
@@ -210,7 +210,7 @@
             },
             error: function(xhr, status, error) {
                 console.error('MT Assignments: Manual assign error', error);
-                showNotification('Error: ' + error, 'error');
+                showNotification((mt_admin && mt_admin.i18n && mt_admin.i18n.error ? mt_admin.i18n.error : 'Fehler') + ': ' + error, 'error');
             },
             complete: function() {
                 $('#mt-manual-assignment-form button[type="submit"]')
@@ -259,16 +259,16 @@
                             );
                         }
                     });
-                    showNotification('Assignment removed successfully.', 'success');
+                    showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.assignment_removed ? mt_admin.i18n.assignment_removed : 'Zuweisung erfolgreich entfernt.', 'success');
                 } else {
                     showNotification(response.data || 'An error occurred', 'error');
                 }
             },
             error: function() {
-                showNotification('An error occurred', 'error');
+                showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.error_occurred ? mt_admin.i18n.error_occurred : 'Ein Fehler ist aufgetreten', 'error');
             },
             complete: function() {
-                $button.prop('disabled', false).text('Remove');
+                $button.prop('disabled', false).text(mt_admin && mt_admin.i18n && mt_admin.i18n.remove ? mt_admin.i18n.remove : 'Entfernen');
             }
         });
     }
@@ -302,7 +302,7 @@
             },
             success: function(response) {
                 if (response.success) {
-                    showNotification('All assignments have been cleared.', 'success');
+                    showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.assignments_cleared ? mt_admin.i18n.assignments_cleared : 'Alle Zuweisungen wurden gelöscht.', 'success');
                     setTimeout(function() {
                         location.reload();
                     }, 1500);
@@ -311,7 +311,7 @@
                 }
             },
             error: function() {
-                showNotification('An error occurred', 'error');
+                showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.error_occurred ? mt_admin.i18n.error_occurred : 'Ein Fehler ist aufgetreten', 'error');
             },
             complete: function() {
                 $('#mt-clear-all-btn')
@@ -350,7 +350,7 @@
         
         form.appendTo('body').submit().remove();
         
-        showNotification('Export started. Download will begin shortly.', 'info');
+        showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.export_started ? mt_admin.i18n.export_started : 'Export gestartet. Der Download beginnt in Kürze.', 'info');
     }
     
     function toggleBulkActions() {

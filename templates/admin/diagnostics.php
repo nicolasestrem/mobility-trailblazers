@@ -38,7 +38,7 @@ $diagnostics['system'] = [
     'wordpress_version' => get_bloginfo('version'),
     'site_url' => get_site_url(),
     'home_url' => get_home_url(),
-    'multisite' => is_multisite() ? 'Yes' : 'No',
+    'multisite' => is_multisite() ? __('Yes', 'mobility-trailblazers') : __('No', 'mobility-trailblazers'),
     'memory_limit' => ini_get('memory_limit'),
     'max_execution_time' => ini_get('max_execution_time'),
     'upload_max_filesize' => ini_get('upload_max_filesize'),
@@ -213,8 +213,8 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
                 $test_result = sprintf(
                     __('Database test successful! Created evaluation ID: %d, Retrieved: %s, Deleted: %s', 'mobility-trailblazers'),
                     $eval_id,
-                    $retrieved ? 'Yes' : 'No',
-                    $deleted ? 'Yes' : 'No'
+                    $retrieved ? __('Yes', 'mobility-trailblazers') : __('No', 'mobility-trailblazers'),
+                    $deleted ? __('Yes', 'mobility-trailblazers') : __('No', 'mobility-trailblazers')
                 );
             } else {
                 $test_result = __('Database test failed! Could not create test evaluation.', 'mobility-trailblazers');
@@ -244,7 +244,7 @@ if (isset($_POST['test_action']) && wp_verify_nonce($_POST['_wpnonce'], 'mt_diag
             $test_user = wp_get_current_user();
             $test_caps = [];
             foreach ($mt_capabilities as $cap) {
-                $test_caps[$cap] = user_can($test_user, $cap) ? 'Yes' : 'No';
+                $test_caps[$cap] = user_can($test_user, $cap) ? __('Yes', 'mobility-trailblazers') : __('No', 'mobility-trailblazers');
             }
             $test_result = __('Permissions test completed. See capabilities table below.', 'mobility-trailblazers');
             break;
