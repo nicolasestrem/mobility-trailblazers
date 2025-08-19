@@ -245,35 +245,90 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
 
 <script>
 jQuery(document).ready(function($) {
-    // Search functionality
-    $('#mt-candidate-search').on('input', function() {
-        var searchTerm = $(this).val().toLowerCase();
-        filterCandidates();
-    });
+    'use strict';
     
-    // Status filter
-    $('#mt-status-filter').on('change', function() {
-        filterCandidates();
-    });
+    // Initialize dashboard filtering
+    initDashboardFiltering();
     
-    function filterCandidates() {
-        var searchTerm = $('#mt-candidate-search').val().toLowerCase();
+    /**
+     * Initialize dashboard filtering functionality
+     */
+    function initDashboardFiltering() {
+        // Search functionality with debounce
+        let searchTimer;
+        $('#mt-candidate-search').on('input', function() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function() {
+                filterDashboardCandidates();
+            }, 300);
+        });
+        
+        // Status filter
+        $('#mt-status-filter').on('change', function(e) {
+            e.preventDefault();
+            filterDashboardCandidates();
+        });
+        
+        // Initial filter to ensure correct display
+        filterDashboardCandidates();
+    }
+    
+    /**
+     * Filter candidates based on search and status
+     */
+    function filterDashboardCandidates() {
+        var searchTerm = $('#mt-candidate-search').val().toLowerCase().trim();
         var statusFilter = $('#mt-status-filter').val();
+        var visibleCount = 0;
         
         $('.mt-candidate-card').each(function() {
             var $card = $(this);
-            var name = $card.data('name');
-            var status = $card.data('status');
+            var name = $card.data('name') || '';
+            var status = $card.data('status') || '';
             
+            // Check search match
             var matchesSearch = searchTerm === '' || name.indexOf(searchTerm) !== -1;
+            
+            // Check status match
             var matchesStatus = statusFilter === '' || status === statusFilter;
             
             if (matchesSearch && matchesStatus) {
-                $card.show();
+                $card.show().removeClass('hidden');
+                visibleCount++;
             } else {
-                $card.hide();
+                $card.hide().addClass('hidden');
             }
         });
+        
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            showNoResults();
+        } else {
+            hideNoResults();
+        }
+        
+        console.log('Filtered candidates:', visibleCount, 'visible, search:', searchTerm, 'status:', statusFilter);
+    }
+    
+    /**
+     * Show no results message
+     */
+    function showNoResults() {
+        if (!$('.mt-no-results-message').length) {
+            $('.mt-candidates-list').append(
+                '<div class="mt-no-results-message mt-notice">' +
+                '<p><?php _e("No candidates match your search criteria.", "mobility-trailblazers"); ?></p>' +
+                '</div>'
+            );
+        }
+        $('.mt-no-results-message').show();
+    }
+    
+    /**
+     * Hide no results message
+     */
+    function hideNoResults() {
+        $('.mt-no-results-message').hide();
     }
     
     // Evaluation button click
