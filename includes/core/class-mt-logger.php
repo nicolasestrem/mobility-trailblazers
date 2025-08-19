@@ -13,6 +13,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Ensure config class is available
+if (!class_exists('MobilityTrailblazers\Core\MT_Config')) {
+    require_once MT_PLUGIN_DIR . 'includes/core/class-mt-config.php';
+}
+
 /**
  * Class MT_Logger
  *
@@ -42,7 +47,7 @@ class MT_Logger {
      * @return void
      */
     public static function debug($message, $context = []) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
+        if (MT_Config::should_log(self::LEVEL_DEBUG)) {
             self::log(self::LEVEL_DEBUG, $message, $context);
         }
     }
@@ -55,7 +60,9 @@ class MT_Logger {
      * @return void
      */
     public static function info($message, $context = []) {
-        self::log(self::LEVEL_INFO, $message, $context);
+        if (MT_Config::should_log(self::LEVEL_INFO)) {
+            self::log(self::LEVEL_INFO, $message, $context);
+        }
     }
     
     /**
@@ -66,7 +73,9 @@ class MT_Logger {
      * @return void
      */
     public static function warning($message, $context = []) {
-        self::log(self::LEVEL_WARNING, $message, $context);
+        if (MT_Config::should_log(self::LEVEL_WARNING)) {
+            self::log(self::LEVEL_WARNING, $message, $context);
+        }
     }
     
     /**
@@ -77,7 +86,9 @@ class MT_Logger {
      * @return void
      */
     public static function error($message, $context = []) {
-        self::log(self::LEVEL_ERROR, $message, $context);
+        if (MT_Config::should_log(self::LEVEL_ERROR)) {
+            self::log(self::LEVEL_ERROR, $message, $context);
+        }
     }
     
     /**
@@ -88,7 +99,9 @@ class MT_Logger {
      * @return void
      */
     public static function critical($message, $context = []) {
-        self::log(self::LEVEL_CRITICAL, $message, $context);
+        if (MT_Config::should_log(self::LEVEL_CRITICAL)) {
+            self::log(self::LEVEL_CRITICAL, $message, $context);
+        }
     }
     
     /**
@@ -100,8 +113,8 @@ class MT_Logger {
      * @return void
      */
     private static function log($level, $message, $context = []) {
-        // Only log if WordPress debug logging is enabled
-        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+        // Check if logging is enabled for this environment
+        if (!MT_Config::get('log_to_file', false)) {
             return;
         }
         

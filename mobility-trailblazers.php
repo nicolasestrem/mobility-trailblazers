@@ -37,11 +37,38 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('MT_VERSION', '2.5.33');
+define('MT_VERSION', '2.5.34');
 define('MT_PLUGIN_FILE', __FILE__);
 define('MT_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MT_PLUGIN_BASENAME', plugin_basename(__FILE__));
+
+// Environment detection (can be overridden in wp-config.php)
+if (!defined('MT_ENVIRONMENT')) {
+    // Automatic detection based on domain or WP environment
+    if (defined('WP_ENVIRONMENT_TYPE')) {
+        $wp_env = WP_ENVIRONMENT_TYPE;
+        if (in_array($wp_env, ['local', 'development'])) {
+            define('MT_ENVIRONMENT', 'development');
+        } elseif ($wp_env === 'staging') {
+            define('MT_ENVIRONMENT', 'staging');
+        } else {
+            define('MT_ENVIRONMENT', 'production');
+        }
+    } elseif (function_exists('wp_get_environment_type')) {
+        $wp_env = wp_get_environment_type();
+        if (in_array($wp_env, ['local', 'development'])) {
+            define('MT_ENVIRONMENT', 'development');
+        } elseif ($wp_env === 'staging') {
+            define('MT_ENVIRONMENT', 'staging');
+        } else {
+            define('MT_ENVIRONMENT', 'production');
+        }
+    } else {
+        // Default to production for safety
+        define('MT_ENVIRONMENT', 'production');
+    }
+}
 
 // Require the autoloader
 require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';

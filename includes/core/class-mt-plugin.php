@@ -15,6 +15,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Load configuration
+if (!class_exists('MobilityTrailblazers\Core\MT_Config')) {
+    require_once MT_PLUGIN_DIR . 'includes/core/class-mt-config.php';
+}
+
 /**
  * Class MT_Plugin
  *
@@ -159,8 +164,8 @@ class MT_Plugin {
         $admin_ajax = new \MobilityTrailblazers\Ajax\MT_Admin_Ajax();
         $admin_ajax->init();
         
-        // Debug Center AJAX (v2.3.0)
-        if (is_admin() && current_user_can('manage_options')) {
+        // Debug Center AJAX (v2.3.0) - Only in development/staging
+        if (is_admin() && current_user_can('manage_options') && !MT_Config::is_production()) {
             // Load utility classes if needed
             if (!class_exists('\MobilityTrailblazers\Utilities\MT_Database_Health')) {
                 require_once MT_PLUGIN_DIR . 'includes/utilities/class-mt-database-health.php';
