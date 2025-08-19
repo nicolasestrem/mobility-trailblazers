@@ -233,6 +233,15 @@ class MT_Shortcode_Renderer {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mt_ajax_nonce')
         ]);
+        
+        // Also localize with mt_frontend for evaluation form strings
+        wp_localize_script('mt-frontend', 'mt_frontend', [
+            'i18n' => [
+                'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
+                'error_try_again' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
+                'network_error' => __('Network error. Please check your connection and try again.', 'mobility-trailblazers'),
+            ]
+        ]);
     }
     
     /**
