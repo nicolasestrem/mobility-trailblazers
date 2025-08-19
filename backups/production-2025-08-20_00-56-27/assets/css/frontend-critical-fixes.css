@@ -1,0 +1,308 @@
+/**
+ * FRONTEND CRITICAL FIXES
+ * Emergency CSS fixes for display issues
+ * Date: 2025-08-19
+ * Priority: HIGHEST
+ */
+
+/* ===================================
+   CRITICAL FIX 1: HERO SECTION HEIGHT
+   =================================== */
+
+/* Hero Pattern Height Fix - Maximum 300px */
+.mt-hero-pattern,
+.elementor-section.mt-hero-pattern,
+.elementor-section.elementor-top-section.mt-hero-pattern,
+div[class*="hero"],
+section[class*="hero"],
+.hero-section,
+.hero-banner {
+    max-height: 300px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    overflow: hidden !important;
+}
+
+/* Force all hero-related sections to proper height */
+.elementor-widget-container [style*="height"],
+.elementor-section[style*="height"],
+.elementor-column[style*="height"] {
+    max-height: 300px !important;
+}
+
+/* Fix for any inline height styles over 300px */
+*[style*="height: 40"],
+*[style*="height: 50"],
+*[style*="height: 60"],
+*[style*="height: 70"],
+*[style*="min-height: 40"],
+*[style*="min-height: 50"],
+*[style*="min-height: 60"],
+*[style*="min-height: 70"] {
+    height: 300px !important;
+    max-height: 300px !important;
+    min-height: 300px !important;
+}
+
+/* ===================================
+   CRITICAL FIX 2: CANDIDATE GRID LAYOUT
+   =================================== */
+
+/* Force Grid Layout for Candidate Archive */
+.post-type-archive-mt_candidate .site-main,
+.archive.mt-candidates .site-main,
+body.archive[class*="candidate"] .site-main {
+    display: block !important;
+}
+
+.post-type-archive-mt_candidate .wp-block-group,
+.archive.mt-candidates .wp-block-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+    padding: 20px 0 !important;
+}
+
+/* Candidate Archive Grid Container Fix */
+.wp-block-group.has-global-padding {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+}
+
+/* Fix for WordPress archive pages showing as list */
+.wp-block-post-template {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+    list-style: none !important;
+    padding: 0 !important;
+}
+
+/* Individual candidate items in archive */
+.wp-block-post {
+    display: flex !important;
+    flex-direction: column !important;
+    background: white !important;
+    border: 2px solid #E5E7EB !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    text-align: center !important;
+    min-height: 320px !important;
+    transition: all 0.3s ease !important;
+}
+
+.wp-block-post:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    border-color: #004C5F !important;
+}
+
+/* ===================================
+   CRITICAL FIX 3: EVALUATION CRITERIA TEXT
+   =================================== */
+
+/* Force display of evaluation criteria descriptions */
+.mt-criterion-description,
+body .mt-criterion-description,
+.mt-criteria-grid .mt-criterion-description,
+.mt-evaluation-form .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 14px !important;
+    color: #6c757d !important;
+    margin-top: 5px !important;
+    line-height: 1.5 !important;
+    font-weight: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    white-space: normal !important;
+    text-overflow: visible !important;
+}
+
+/* Ensure parent containers don't hide descriptions */
+.mt-criterion-info,
+.mt-criterion-header,
+.mt-criterion-card {
+    overflow: visible !important;
+}
+
+/* ===================================
+   CRITICAL FIX 4: MOBILE RESPONSIVE
+   =================================== */
+
+/* Mobile Grid Fix */
+@media (max-width: 768px) {
+    .wp-block-group,
+    .wp-block-post-template {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+    }
+    
+    .wp-block-post {
+        min-height: 260px !important;
+        padding: 15px !important;
+    }
+    
+    /* Hero section mobile fix */
+    .mt-hero-pattern,
+    .elementor-section.mt-hero-pattern {
+        height: 250px !important;
+        max-height: 250px !important;
+        min-height: 250px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .wp-block-group,
+    .wp-block-post-template {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Hero section mobile fix */
+    .mt-hero-pattern,
+    .elementor-section.mt-hero-pattern {
+        height: 200px !important;
+        max-height: 200px !important;
+        min-height: 200px !important;
+    }
+}
+
+/* ===================================
+   CRITICAL FIX 5: Z-INDEX CONFLICTS
+   =================================== */
+
+/* Fix z-index layering issues */
+.mt-evaluation-form {
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+.mt-candidate-grid {
+    z-index: 2 !important;
+    position: relative !important;
+}
+
+.mt-hero-pattern {
+    z-index: 0 !important;
+    position: relative !important;
+}
+
+/* ===================================
+   CRITICAL FIX 6: CSS SPECIFICITY OVERRIDE
+   =================================== */
+
+/* Override theme conflicts with highest specificity */
+body.archive.post-type-archive-mt_candidate .site-main .wp-block-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+body.post-type-archive-mt_candidate .wp-block-post-template {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+/* Force grid layout regardless of theme */
+.candidates-archive .wp-block-group,
+.candidates-list .wp-block-group,
+[class*="candidate"] .wp-block-group {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+/* ===================================
+   CRITICAL FIX 7: ELEMENTOR CONFLICTS
+   =================================== */
+
+/* Fix Elementor widget conflicts */
+.elementor-widget-container .mt-candidates-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+.elementor-widget-container [style*="background: linear-gradient"] {
+    background: #f8f9fa !important;
+}
+
+.elementor-widget-container [style*="color: white"] {
+    color: #212529 !important;
+}
+
+/* ===================================
+   CRITICAL FIX 8: DISPLAY NONE REMOVAL
+   =================================== */
+
+/* Remove any display:none that shouldn't be there */
+.mt-candidate-card,
+.mt-candidate-grid-item,
+.mt-criterion-description,
+.mt-evaluation-criteria {
+    display: block !important;
+}
+
+.mt-candidates-grid {
+    display: grid !important;
+}
+
+/* Force visibility for hidden elements */
+[style*="display: none"].mt-candidate-card,
+[style*="display: none"].mt-criterion-description,
+[style*="visibility: hidden"].mt-candidate-card,
+[style*="visibility: hidden"].mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* ===================================
+   CRITICAL FIX 9: TOUCH FRIENDLY MOBILE
+   =================================== */
+
+/* Make touch-friendly for mobile */
+.mt-candidate-card,
+.wp-block-post,
+.mt-evaluation-form button {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Increase touch targets for mobile */
+@media (max-width: 768px) {
+    .mt-evaluation-form button,
+    .mt-score-option,
+    .mt-submit-evaluation {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        padding: 12px 20px !important;
+    }
+}
+
+/* ===================================
+   CRITICAL FIX 10: CROSS-BROWSER COMPATIBILITY
+   =================================== */
+
+/* Ensure grid works in all browsers */
+.mt-candidates-grid,
+.wp-block-post-template {
+    display: -ms-grid !important; /* IE 10-11 */
+    display: grid !important; /* Modern browsers */
+    -ms-grid-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+/* Flexbox fallback for older browsers */
+@supports not (display: grid) {
+    .mt-candidates-grid,
+    .wp-block-post-template {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 20px !important;
+    }
+    
+    .mt-candidate-card,
+    .wp-block-post {
+        flex: 0 1 280px !important;
+    }
+}

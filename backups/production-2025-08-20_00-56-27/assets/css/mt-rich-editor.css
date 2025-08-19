@@ -1,0 +1,425 @@
+/**
+ * Mobility Trailblazers Rich Text Editor Styles
+ * 
+ * @package MobilityTrailblazers
+ * @since 2.5.32
+ */
+
+/* Editor Wrapper */
+.mt-rich-editor-wrapper {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    margin-bottom: 15px;
+}
+
+.mt-rich-editor-wrapper.focused {
+    border-color: #004C5F;
+    box-shadow: 0 0 0 1px #004C5F;
+}
+
+/* Toolbar */
+.mt-rich-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    border-radius: 4px 4px 0 0;
+    gap: 4px;
+}
+
+/* Toolbar Buttons */
+.mt-toolbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.mt-toolbar-button:hover {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+.mt-toolbar-button:active,
+.mt-toolbar-button.active {
+    background: #004C5F;
+    border-color: #004C5F;
+    color: #fff;
+}
+
+.mt-toolbar-button.active .dashicons {
+    color: #fff;
+}
+
+.mt-toolbar-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mt-toolbar-button:disabled:hover {
+    background: #fff;
+    border-color: #ccc;
+}
+
+.mt-toolbar-button .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #555;
+    transition: color 0.2s ease;
+}
+
+.mt-toolbar-button:hover .dashicons {
+    color: #333;
+}
+
+/* Toolbar Separator */
+.mt-toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background: #ddd;
+    margin: 0 4px;
+}
+
+/* Dropdown */
+.mt-toolbar-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.mt-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 150px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-top: 4px;
+}
+
+.mt-dropdown-menu.show {
+    display: block;
+}
+
+.mt-dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background 0.2s ease;
+}
+
+.mt-dropdown-menu button:hover {
+    background: #f0f0f0;
+}
+
+.mt-dropdown-menu button[data-heading="h1"] {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.mt-dropdown-menu button[data-heading="h2"] {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.mt-dropdown-menu button[data-heading="h3"] {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Editor Content Area */
+.mt-rich-editor-content {
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.mt-rich-editor-content:focus {
+    outline: none;
+}
+
+/* Content Typography */
+.mt-rich-editor-content h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 20px 0 10px;
+    color: #004C5F;
+}
+
+.mt-rich-editor-content h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 18px 0 8px;
+    color: #004C5F;
+}
+
+.mt-rich-editor-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 16px 0 8px;
+    color: #333;
+}
+
+.mt-rich-editor-content p {
+    margin: 0 0 10px;
+}
+
+.mt-rich-editor-content ul,
+.mt-rich-editor-content ol {
+    margin: 10px 0;
+    padding-left: 30px;
+}
+
+.mt-rich-editor-content li {
+    margin: 5px 0;
+}
+
+.mt-rich-editor-content a {
+    color: #004C5F;
+    text-decoration: underline;
+}
+
+.mt-rich-editor-content a:hover {
+    color: #003C3D;
+}
+
+.mt-rich-editor-content blockquote {
+    margin: 15px 0;
+    padding-left: 15px;
+    border-left: 4px solid #004C5F;
+    color: #666;
+    font-style: italic;
+}
+
+.mt-rich-editor-content strong,
+.mt-rich-editor-content b {
+    font-weight: 600;
+}
+
+.mt-rich-editor-content em,
+.mt-rich-editor-content i {
+    font-style: italic;
+}
+
+.mt-rich-editor-content u {
+    text-decoration: underline;
+}
+
+/* Status Bar */
+.mt-rich-editor-status {
+    padding: 8px 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-char-count {
+    font-family: monospace;
+}
+
+/* Fallback Textarea */
+.mt-rich-editor-fallback {
+    width: 100%;
+    min-height: 200px;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 13px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.mt-editor-help {
+    margin-top: 8px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-left: 3px solid #004C5F;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Modal Integration Styles */
+#mt-inline-edit-modal .mt-tab-content {
+    padding: 0;
+}
+
+#mt-inline-edit-modal .mt-rich-editor-wrapper {
+    margin-bottom: 0;
+}
+
+/* Evaluation Criteria Special Styling */
+.mt-evaluation-criteria-editor .mt-rich-editor-content strong {
+    color: #004C5F;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* Quick Insert Templates */
+.mt-template-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.mt-template-button {
+    padding: 6px 12px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mt-template-button:hover {
+    background: #e0e0e0;
+    border-color: #999;
+}
+
+/* Loading State */
+.mt-editor-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.mt-editor-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #004C5F;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: mt-spin 0.8s linear infinite;
+}
+
+@keyframes mt-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .mt-rich-editor-toolbar {
+        padding: 6px;
+    }
+    
+    .mt-toolbar-button {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .mt-toolbar-button .dashicons {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .mt-rich-editor-content {
+        padding: 12px;
+        font-size: 13px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .mt-rich-editor-toolbar,
+    .mt-rich-editor-status {
+        display: none;
+    }
+    
+    .mt-rich-editor-wrapper {
+        border: none;
+    }
+    
+    .mt-rich-editor-content {
+        max-height: none;
+        padding: 0;
+    }
+}
+
+/* Accessibility */
+.mt-toolbar-button:focus {
+    outline: 2px solid #004C5F;
+    outline-offset: 2px;
+}
+
+.mt-rich-editor-content:focus-visible {
+    box-shadow: inset 0 0 0 2px #004C5F;
+}
+
+/* Dark Mode Support (if WordPress admin is in dark mode) */
+@media (prefers-color-scheme: dark) {
+    body.admin-color-midnight .mt-rich-editor-wrapper {
+        background: #23282d;
+        border-color: #464b50;
+    }
+    
+    body.admin-color-midnight .mt-rich-editor-toolbar,
+    body.admin-color-midnight .mt-rich-editor-status {
+        background: #32373c;
+        border-color: #464b50;
+    }
+    
+    body.admin-color-midnight .mt-toolbar-button {
+        background: #23282d;
+        border-color: #464b50;
+    }
+    
+    body.admin-color-midnight .mt-toolbar-button:hover {
+        background: #191f25;
+    }
+    
+    body.admin-color-midnight .mt-rich-editor-content {
+        color: #ccc;
+    }
+    
+    body.admin-color-midnight .mt-dropdown-menu {
+        background: #32373c;
+        border-color: #464b50;
+    }
+    
+    body.admin-color-midnight .mt-dropdown-menu button {
+        color: #ccc;
+    }
+    
+    body.admin-color-midnight .mt-dropdown-menu button:hover {
+        background: #23282d;
+    }
+}

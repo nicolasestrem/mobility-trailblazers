@@ -1,0 +1,88 @@
+/**
+ * Jury Dashboard Card Fix
+ * Fixes evaluation status card content cutoff issue
+ * 
+ * @since 2.5.34
+ * @package MobilityTrailblazers
+ */
+
+/* Fix card height and overflow issues */
+.mt-candidate-card {
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.mt-candidate-header {
+    flex-shrink: 0;
+    overflow: visible !important;
+    min-height: auto !important;
+}
+
+.mt-candidate-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure evaluation status is visible */
+.mt-evaluation-status {
+    margin: 15px 0 !important;
+    overflow: visible !important;
+    min-height: 45px !important;
+    display: block !important;
+    width: 100% !important;
+    text-align: center;
+}
+
+.mt-status-badge {
+    display: inline-block !important;
+    white-space: nowrap;
+    padding: 8px 18px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4 !important;
+    vertical-align: middle !important;
+}
+
+/* Ensure evaluate button is visible */
+.mt-evaluate-btn {
+    margin-top: auto;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+/* Fix category badge */
+.mt-candidate-category {
+    align-self: center;
+    margin-bottom: 10px;
+}
+
+/* Ensure proper spacing */
+.mt-candidate-name {
+    margin-bottom: 5px !important;
+    overflow: visible !important;
+}
+
+.mt-candidate-org {
+    margin-bottom: 0 !important;
+    overflow: visible !important;
+}
+
+/* Grid adjustments to prevent overlap */
+.mt-candidates-grid {
+    gap: 30px !important;
+}
+
+/* Ensure cards expand to content */
+.mt-candidates-grid .mt-candidate-card {
+    height: auto !important;
+    min-height: 320px;
+}
