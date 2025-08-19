@@ -139,6 +139,12 @@ msgstr "Ihnen wurden noch keine Kandidaten zugewiesen."
 msgid "All Statuses"
 msgstr "Alle Status"
 
+msgid "All Candidates"
+msgstr "Alle Kandidaten"
+
+msgid "View All Candidates"
+msgstr "Alle Kandidaten anzeigen"
+
 msgid "Evaluation Submitted"
 msgstr "Bewertung eingereicht"
 
