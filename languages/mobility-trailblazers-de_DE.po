@@ -3,10 +3,10 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mobility Trailblazers 2.1.0\n"
+"Project-Id-Version: Mobility Trailblazers 2.5.34\n"
 "Report-Msgid-Bugs-To: https://mobilitytrailblazers.com\n"
-"POT-Creation-Date: 2025-07-17 12:00+0000\n"
-"PO-Revision-Date: 2025-07-17 12:00+0000\n"
+"POT-Creation-Date: 2025-08-19 12:00+0000\n"
+"PO-Revision-Date: 2025-08-19 19:55+0000\n"
 "Last-Translator: Mobility Trailblazers Team\n"
 "Language-Team: German <de@mobilitytrailblazers.com>\n"
 "Language: de_DE\n"
@@ -1035,3 +1035,53 @@ msgstr "[Mobility Trailblazers] %d neue Kandidatenzuweisung(en)"
 
 msgid "Failed to send reminder to user ID %d"
 msgstr "Erinnerung an Benutzer-ID %d konnte nicht gesendet werden"
+
+# CSV Export Headers - Added for German localization
+msgid "Evaluation Count"
+msgstr "Anzahl Bewertungen"
+
+msgid "Courage Score"
+msgstr "Mut & Pioniergeist Bewertung"
+
+msgid "Innovation Score"
+msgstr "Innovationsgrad Bewertung"
+
+msgid "Implementation Score"
+msgstr "Umsetzungskraft & Wirkung Bewertung"
+
+msgid "Relevance Score"
+msgstr "Relevanz Bewertung"
+
+msgid "Visibility Score"
+msgstr "Vorbildfunktion & Sichtbarkeit Bewertung"
+
+msgid "Date"
+msgstr "Datum"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "Article"
+msgstr "Artikel"
+
+# Frontend Template Strings - Added for German localization
+msgid "Evaluation Overview"
+msgstr "Bewertungsübersicht"
+
+msgid "Total Evaluations"
+msgstr "Gesamtanzahl Bewertungen"
+
+msgid "In Progress"
+msgstr "In Bearbeitung"
+
+msgid "Jury Member Activity"
+msgstr "Jurymitglied Aktivität"
+
+msgid "Assigned"
+msgstr "Zugewiesen"
+
+msgid "Progress"
+msgstr "Fortschritt"
+
+msgid "No jury member data available."
+msgstr "Keine Jurymitglied-Daten verfügbar."

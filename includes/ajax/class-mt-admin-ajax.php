@@ -83,13 +83,13 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         $csv_data = [];
         $csv_data[] = [
-            'ID',
-            'Name',
-            'Organization',
-            'Position',
-            'Categories',
-            'Average Score',
-            'Evaluation Count'
+            __('ID', 'mobility-trailblazers'),
+            __('Name', 'mobility-trailblazers'),
+            __('Organization', 'mobility-trailblazers'),
+            __('Position', 'mobility-trailblazers'),
+            __('Categories', 'mobility-trailblazers'),
+            __('Average Score', 'mobility-trailblazers'),
+            __('Evaluation Count', 'mobility-trailblazers')
         ];
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
@@ -153,13 +153,13 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         $csv_data = [];
         $csv_data[] = [
-            'ID',
-            'Name',
-            'Organization',
-            'Position',
-            'Categories',
-            'Average Score',
-            'Evaluation Count'
+            __('ID', 'mobility-trailblazers'),
+            __('Name', 'mobility-trailblazers'),
+            __('Organization', 'mobility-trailblazers'),
+            __('Position', 'mobility-trailblazers'),
+            __('Categories', 'mobility-trailblazers'),
+            __('Average Score', 'mobility-trailblazers'),
+            __('Evaluation Count', 'mobility-trailblazers')
         ];
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
@@ -198,17 +198,17 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         $csv_data = [];
         $csv_data[] = [
-            'ID',
-            'Jury Member',
-            'Candidate',
-            'Courage Score',
-            'Innovation Score',
-            'Implementation Score',
-            'Relevance Score',
-            'Visibility Score',
-            'Total Score',
-            'Status',
-            'Date'
+            __('ID', 'mobility-trailblazers'),
+            __('Jury Member', 'mobility-trailblazers'),
+            __('Candidate', 'mobility-trailblazers'),
+            __('Courage Score', 'mobility-trailblazers'),
+            __('Innovation Score', 'mobility-trailblazers'),
+            __('Implementation Score', 'mobility-trailblazers'),
+            __('Relevance Score', 'mobility-trailblazers'),
+            __('Visibility Score', 'mobility-trailblazers'),
+            __('Total Score', 'mobility-trailblazers'),
+            __('Status', 'mobility-trailblazers'),
+            __('Date', 'mobility-trailblazers')
         ];
         
         foreach ($evaluations as $evaluation) {
@@ -217,8 +217,8 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             
             $csv_data[] = [
                 $evaluation->id,
-                $jury_member ? $jury_member->post_title : 'Unknown',
-                $candidate ? $candidate->post_title : 'Unknown',
+                $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
+                $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
                 $evaluation->courage_score,
                 $evaluation->innovation_score,
                 $evaluation->implementation_score,
@@ -255,17 +255,17 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         $csv_data = [];
         $csv_data[] = [
-            'ID',
-            'Jury Member',
-            'Candidate',
-            'Courage Score',
-            'Innovation Score',
-            'Implementation Score',
-            'Relevance Score',
-            'Visibility Score',
-            'Total Score',
-            'Status',
-            'Date'
+            __('ID', 'mobility-trailblazers'),
+            __('Jury Member', 'mobility-trailblazers'),
+            __('Candidate', 'mobility-trailblazers'),
+            __('Courage Score', 'mobility-trailblazers'),
+            __('Innovation Score', 'mobility-trailblazers'),
+            __('Implementation Score', 'mobility-trailblazers'),
+            __('Relevance Score', 'mobility-trailblazers'),
+            __('Visibility Score', 'mobility-trailblazers'),
+            __('Total Score', 'mobility-trailblazers'),
+            __('Status', 'mobility-trailblazers'),
+            __('Date', 'mobility-trailblazers')
         ];
         
         foreach ($evaluations as $evaluation) {
@@ -274,8 +274,8 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             
             $csv_data[] = [
                 $evaluation->id,
-                $jury_member ? $jury_member->post_title : 'Unknown',
-                $candidate ? $candidate->post_title : 'Unknown',
+                $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
+                $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
                 $evaluation->courage_score,
                 $evaluation->innovation_score,
                 $evaluation->implementation_score,
@@ -305,10 +305,10 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         $csv_data = [];
         $csv_data[] = [
-            'Jury Member',
-            'Candidate',
-            'Assigned Date',
-            'Evaluation Status'
+            __('Jury Member', 'mobility-trailblazers'),
+            __('Candidate', 'mobility-trailblazers'),
+            __('Assigned Date', 'mobility-trailblazers'),
+            __('Evaluation Status', 'mobility-trailblazers')
         ];
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
@@ -324,14 +324,14 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
                 'limit' => 1
             ]);
             
-            $status = 'Not Started';
+            $status = __('Not Started', 'mobility-trailblazers');
             if (!empty($evaluations)) {
-                $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+                $status = $evaluations[0]->status === 'completed' ? __('Completed', 'mobility-trailblazers') : __('Draft', 'mobility-trailblazers');
             }
             
             $csv_data[] = [
-                $jury_member ? $jury_member->post_title : 'Unknown',
-                $candidate ? $candidate->post_title : 'Unknown',
+                $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
+                $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
                 $assignment->assigned_at,
                 $status
             ];
@@ -375,10 +375,10 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         
         // Write headers
         fputcsv($output, [
-            'Jury Member',
-            'Candidate',
-            'Assigned Date',
-            'Evaluation Status'
+            __('Jury Member', 'mobility-trailblazers'),
+            __('Candidate', 'mobility-trailblazers'),
+            __('Assigned Date', 'mobility-trailblazers'),
+            __('Evaluation Status', 'mobility-trailblazers')
         ]);
         
         // Stream assignments in chunks to avoid memory issues
@@ -405,14 +405,14 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
                     'limit' => 1
                 ]);
                 
-                $status = 'Not Started';
+                $status = __('Not Started', 'mobility-trailblazers');
                 if (!empty($evaluations)) {
-                    $status = $evaluations[0]->status === 'completed' ? 'Completed' : 'Draft';
+                    $status = $evaluations[0]->status === 'completed' ? __('Completed', 'mobility-trailblazers') : __('Draft', 'mobility-trailblazers');
                 }
                 
                 fputcsv($output, [
-                    $jury_member ? $jury_member->post_title : 'Unknown',
-                    $candidate ? $candidate->post_title : 'Unknown',
+                    $jury_member ? $jury_member->post_title : __('Unknown', 'mobility-trailblazers'),
+                    $candidate ? $candidate->post_title : __('Unknown', 'mobility-trailblazers'),
                     $assignment->assigned_at,
                     $status
                 ]);
