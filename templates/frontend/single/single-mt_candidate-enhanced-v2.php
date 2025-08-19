@@ -14,6 +14,8 @@ if (!defined('ABSPATH')) {
 
 // Enqueue the enhanced styles
 wp_enqueue_style('mt-candidate-enhanced-v2', MT_PLUGIN_URL . 'assets/css/candidate-enhanced-v2.css', [], MT_VERSION);
+// Add the override CSS with maximum priority to force clean layout
+wp_enqueue_style('mt-candidate-profile-override', MT_PLUGIN_URL . 'assets/css/candidate-profile-override.css', ['mt-candidate-enhanced-v2'], MT_VERSION . '.2');
 
 get_header();
 
