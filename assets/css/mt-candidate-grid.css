@@ -94,6 +94,7 @@
     align-items: center !important;
     justify-content: center !important;
     flex-shrink: 0 !important;
+    position: relative !important;
 }
 
 /* Image Styling - Ensure proper fit */
