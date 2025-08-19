@@ -300,6 +300,22 @@ class MT_Plugin {
             MT_VERSION
         );
         
+        // Evaluation fix CSS (Issue #21 visual fix - ensures multiple buttons can appear selected)
+        wp_enqueue_style(
+            'mt-evaluation-fix',
+            MT_PLUGIN_URL . 'assets/css/evaluation-fix.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
+        // Language switcher enhanced CSS (Issue #24 - enhanced visibility)
+        wp_enqueue_style(
+            'mt-language-switcher-enhanced',
+            MT_PLUGIN_URL . 'assets/css/language-switcher-enhanced.css',
+            ['mt-frontend'],
+            MT_VERSION
+        );
+        
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
             wp_enqueue_style(

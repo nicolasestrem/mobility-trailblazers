@@ -809,7 +809,9 @@
         updateScoreDisplay($star.closest('.mt-criterion-card'), value);
     });
 
-    // Button scoring functionality
+    // Button scoring functionality - DISABLED: Fixed in evaluation-rating-fix.js for Issue #21
+    // This global handler was causing only one rating to work across all criteria
+    /*
     $(document).on('click', '.mt-score-button', function() {
         const $button = $(this);
         const value = $button.data('value');
@@ -824,6 +826,7 @@
         // Update total score when button is clicked
         MTJuryDashboard.updateTotalScore();
     });
+    */
 
     // Numeric input functionality
     $(document).on('input', '.mt-score-input', function() {

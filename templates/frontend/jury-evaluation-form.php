@@ -200,7 +200,7 @@ $criteria = [
                 
                 if (!empty(trim($bio_content))) : ?>
                     <div class="mt-candidate-bio" style="display: block !important;">
-                        <h3 style="color: #212529 !important;"><?php _e('Biography', 'mobility-trailblazers'); ?></h3>
+                        <h3 style="color: #212529 !important;"><?php _e('Description', 'mobility-trailblazers'); ?></h3>
                         <div class="mt-bio-content" style="display: block !important;">
                             <?php 
                             // Clean and format the biography content
@@ -325,26 +325,8 @@ $criteria = [
             </div>
         </div>
         
-        <!-- Comments Section -->
-        <div class="mt-comments-section">
-            <h2 class="mt-section-title"><?php _e('Additional Comments', 'mobility-trailblazers'); ?></h2>
-            <p class="mt-section-description">
-                <strong><?php _e('Who can see these comments?', 'mobility-trailblazers'); ?></strong><br>
-                <?php _e('Your comments are confidential and will only be viewed by the Mobility Trailblazers Award organizers to support the final decision.', 'mobility-trailblazers'); ?><br><br>
-                <strong><?php _e('Why should you leave comments?', 'mobility-trailblazers'); ?></strong><br>
-                <?php _e('Your qualitative insights help us get a more complete picture of the candidate beyond the numerical ratings. Please share special strengths, innovative approaches, or other relevant observations (optional).', 'mobility-trailblazers'); ?>
-            </p>
-            <textarea name="comments" 
-                      id="mt-comments" 
-                      class="mt-comments-textarea" 
-                      rows="6"
-                      placeholder="<?php esc_attr_e('Share your thoughts about this candidate\'s contributions to mobility innovation...', 'mobility-trailblazers'); ?>"><?php 
-                      echo $evaluation ? esc_textarea($evaluation->comments) : ''; 
-            ?></textarea>
-            <div class="mt-char-count">
-                <span id="mt-char-current">0</span> / 1000 <?php _e('characters', 'mobility-trailblazers'); ?>
-            </div>
-        </div>
+        <!-- Comments Section - Removed per Issue #25 -->
+        <!-- The additional comments section has been removed from individual evaluation pages -->
         
         <!-- Form Actions -->
         <div class="mt-form-actions">

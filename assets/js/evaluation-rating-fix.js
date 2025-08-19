@@ -3,6 +3,7 @@
  * Purpose: Fix the issue where only one rating can be selected across all categories
  * Issue #21: Evaluation page does not allow more than one rating across all categories
  * Created: 2025-08-18
+ * Updated: 2025-08-19 - Added proper button group handling
  */
 
 (function($) {
@@ -10,6 +11,58 @@
     
     // Wait for DOM to be fully loaded
     $(document).ready(function() {
+        
+        // CRITICAL FIX: Handle button groups independently for each criterion
+        function initializeButtonGroups() {
+            console.log('Initializing button groups fix...');
+            
+            // Remove ALL existing handlers from buttons to prevent conflicts
+            $('.mt-score-button').off();
+            $(document).off('click', '.mt-score-button');
+            
+            // Handle each button group independently
+            $('.mt-button-group').each(function() {
+                var $group = $(this);
+                var criterionKey = $group.data('criterion');
+                // CRITICAL FIX: Hidden input is INSIDE the group, not a sibling!
+                var $hiddenInput = $group.find('input[type="hidden"]');
+                
+                console.log('Setting up button group for criterion:', criterionKey);
+                
+                // Handle button clicks within this specific group
+                $group.find('.mt-score-button').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation(); // Prevent any other handlers
+                    
+                    var $button = $(this);
+                    var value = $button.data('value');
+                    
+                    // Remove active AND selected classes from all buttons IN THIS GROUP ONLY
+                    $group.find('.mt-score-button').removeClass('active selected');
+                    
+                    // Add both active AND selected classes to clicked button
+                    $button.addClass('active selected');
+                    
+                    // Update the hidden input for this criterion
+                    $hiddenInput.val(value);
+                    
+                    // Update the score display for this criterion
+                    var $card = $group.closest('.mt-criterion-card');
+                    $card.find('.mt-score-value').text(value);
+                    
+                    console.log('Updated criterion ' + criterionKey + ' to value: ' + value);
+                    
+                    // Update overall score
+                    updateOverallScore();
+                    
+                    // Also update using the original MTJuryDashboard function if it exists
+                    if (typeof MTJuryDashboard !== 'undefined' && MTJuryDashboard.updateTotalScore) {
+                        MTJuryDashboard.updateTotalScore();
+                    }
+                });
+            });
+        }
         
         // Fix 1: Ensure each slider operates independently
         function initializeIndependentSliders() {
@@ -80,11 +133,12 @@
             });
         }
         
-        // Fix 3: Update total score calculation
+        // Fix 3: Update total score calculation (works with both sliders and buttons)
         function updateOverallScore() {
             var total = 0;
             var count = 0;
             
+            // Check for sliders first
             $('.mt-score-slider').each(function() {
                 var value = parseFloat($(this).val());
                 if (!isNaN(value)) {
@@ -92,6 +146,19 @@
                     count++;
                 }
             });
+            
+            // If no sliders, check for button groups (hidden inputs)
+            if (count === 0) {
+                $('.mt-button-group').each(function() {
+                    // FIX: Hidden input is INSIDE the group
+                    var $hiddenInput = $(this).find('input[type="hidden"]');
+                    var value = parseFloat($hiddenInput.val());
+                    if (!isNaN(value)) {
+                        total += value;
+                        count++;
+                    }
+                });
+            }
             
             if (count > 0) {
                 var average = (total / count).toFixed(1);
@@ -180,10 +247,21 @@
                 $('.mt-score-slider').off();
                 $(document).off('input', '.mt-score-slider');
                 $(document).off('change', '.mt-score-slider');
+                $('.mt-score-button').off();
+                $(document).off('click', '.mt-score-button');
                 $('.mt-score-mark').off();
                 
                 // Then initialize our fixed handlers
-                initializeIndependentSliders();
+                // CRITICAL: Initialize button groups if they exist
+                if ($('.mt-button-group').length > 0) {
+                    initializeButtonGroups();
+                }
+                
+                // Initialize sliders if they exist
+                if ($('.mt-score-slider').length > 0) {
+                    initializeIndependentSliders();
+                }
+                
                 fixScoreMarks();
                 updateOverallScore();
                 validateEvaluation();

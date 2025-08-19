@@ -140,7 +140,7 @@ while (have_posts()) : the_post();
                     <section class="mt-content-section mt-innovation-summary">
                         <div class="mt-section-header">
                             <i class="dashicons dashicons-lightbulb"></i>
-                            <h2><?php _e('Innovation Summary', 'mobility-trailblazers'); ?></h2>
+                            <h2><?php _e('Description', 'mobility-trailblazers'); ?></h2>
                         </div>
                         <div class="mt-section-content">
                             <?php 

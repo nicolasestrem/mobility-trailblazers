@@ -22,12 +22,29 @@ $show_category = $atts['show_category'] === 'yes';
         $organization = get_post_meta(get_the_ID(), '_mt_organization', true);
         $position = get_post_meta(get_the_ID(), '_mt_position', true);
         $categories = wp_get_post_terms(get_the_ID(), 'mt_award_category');
+        $candidate_id = get_the_ID();
+        
+        // Special handling for Friedrich Dräxlmaier (Issue #13)
+        $image_style = '';
+        if ($candidate_id == 4627) {
+            $image_style = 'style="object-position: center 20% !important; object-fit: cover !important;"';
+        }
     ?>
-        <div class="mt-candidate-grid-item" data-candidate-id="<?php echo get_the_ID(); ?>">
+        <div class="mt-candidate-grid-item" data-candidate-id="<?php echo $candidate_id; ?>">
             <a href="<?php the_permalink(); ?>" class="mt-candidate-link">
                 <?php if (has_post_thumbnail()) : ?>
                     <div class="mt-candidate-image">
-                        <?php the_post_thumbnail('medium', ['class' => 'mt-candidate-photo']); ?>
+                        <?php 
+                        // Apply inline style for specific candidates
+                        if ($candidate_id == 4627) {
+                            the_post_thumbnail('medium', [
+                                'class' => 'mt-candidate-photo',
+                                'style' => 'object-position: center 20% !important; object-fit: cover !important;'
+                            ]);
+                        } else {
+                            the_post_thumbnail('medium', ['class' => 'mt-candidate-photo']);
+                        }
+                        ?>
                     </div>
                 <?php endif; ?>
                 

@@ -106,6 +106,32 @@ article.post-4627 img.mt-candidate-photo,
 }
 
 /* ===================================
+   ELEMENTOR WIDGET SPECIFIC FIXES
+   =================================== */
+
+/* Elementor widget default image positioning */
+.elementor-widget-mt_candidates_grid .mt-candidate-photo,
+.elementor-widget-mt_candidates_grid .mt-candidate-image img,
+.elementor-widget .mt-candidates-grid .mt-candidate-photo,
+.elementor-widget .mt-candidates-grid .mt-candidate-image img {
+    object-position: center 30% !important;
+    object-fit: cover !important;
+}
+
+/* Friedrich Dräxlmaier fix for Elementor widget - Issue #13 */
+.elementor-widget-mt_candidates_grid [data-candidate-id="4627"] .mt-candidate-photo,
+.elementor-widget-mt_candidates_grid [data-candidate-id="4627"] .mt-candidate-image img,
+.elementor-widget-mt_candidates_grid .mt-candidate-grid-item[data-candidate-id="4627"] img,
+.elementor-widget [data-candidate-id="4627"] .mt-candidate-photo,
+.elementor-widget [data-candidate-id="4627"] .mt-candidate-image img,
+.elementor-widget .mt-candidate-grid-item[data-candidate-id="4627"] img,
+.elementor .mt-candidate-grid-item[data-candidate-id="4627"] img,
+.elementor .mt-candidates-grid [data-candidate-id="4627"] img {
+    object-position: center 20% !important;
+    object-fit: cover !important;
+}
+
+/* ===================================
    PRINT STYLES
    =================================== */
 
