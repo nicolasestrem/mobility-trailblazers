@@ -1,0 +1,5 @@
+/* extra beige lock for common wrappers that may add backgrounds */
+.site, .mt-wrapper, .elementor-location-archive, .elementor-location-single { background:var(--mt-bg-beige); }
+
+/* map legacy card selectors to the new look */
+.candidate-card, .mt-candidate-card{ background:var(--mt-card-bg); border:1px solid var(--mt-border-soft); border-radius:16px; box-shadow:var(--mt-shadow); }

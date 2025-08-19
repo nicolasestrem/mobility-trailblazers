@@ -37,6 +37,21 @@ class MT_Template_Loader {
      * @return string Modified template path
      */
     public static function load_candidate_template($template) {
+        // Check for archive template
+        if (is_post_type_archive('mt_candidate')) {
+            // First check theme for override
+            $theme_template = locate_template(['archive-mt_candidate.php']);
+            if ($theme_template) {
+                return $theme_template;
+            }
+            
+            // Use plugin template
+            $plugin_template = MT_PLUGIN_DIR . 'templates/frontend/archive-mt_candidate.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+        
         // Only apply to single candidate posts
         if (!is_singular('mt_candidate')) {
             return $template;

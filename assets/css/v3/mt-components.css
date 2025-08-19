@@ -1,0 +1,31 @@
+/* clean white card */
+.mt-candidate-card{
+  background:var(--mt-card-bg);
+  border:1px solid var(--mt-border-soft);
+  border-radius:16px;
+  box-shadow:var(--mt-shadow);
+  padding:20px;
+  display:flex; flex-direction:column;
+  transition:transform .15s ease-out, box-shadow .15s ease-out;
+}
+.mt-candidate-card:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08); }
+
+/* avatar */
+.mt-card__image{
+  width:104px; height:104px; border-radius:999px;
+  object-fit:cover; object-position:30% 50%;
+  margin:16px auto 12px;
+  box-shadow:0 0 0 4px #fff, 0 0 0 6px var(--mt-border-soft);
+}
+
+/* text */
+.mt-card__title{ font-size:1.125rem; font-weight:600; text-align:center; margin:8px 0 2px; color:var(--mt-text); }
+.mt-card__role, .mt-card__org{ text-align:center; opacity:.78; }
+
+/* keep cards tidy */
+.mt-candidate-card ul, .mt-candidate-card ol{ list-style:none; padding:0; margin:0; }
+.mt-card__footer{ margin-top:auto; display:flex; justify-content:center; gap:12px; }
+
+/* buttons */
+.mt-button{ background:var(--mt-primary); color:#fff; border-radius:10px; padding:10px 14px; }
+.mt-button:hover{ background:var(--mt-secondary); }

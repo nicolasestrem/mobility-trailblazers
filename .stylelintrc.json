@@ -1,0 +1,12 @@
+{
+  "extends":"stylelint-config-standard",
+  "plugins":["stylelint-declaration-use-variable"],
+  "rules":{
+    "declaration-no-important": true,
+    "selector-max-id": 0,
+    "plugin/declaration-use-variable":[
+      [["/color/","/background/","/border-color/"]],
+      {"ignoreValues":["transparent","inherit","currentColor","#FFFFFF","#FFF","#000000","#000"]}
+    ]
+  }
+}

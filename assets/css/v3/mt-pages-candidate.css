@@ -1,0 +1,5 @@
+/* single page polish */
+.single-mt_candidate .mt-hero{ height:clamp(260px,45vh,400px); overflow:hidden; background:var(--mt-primary); color:#fff; }
+.single-mt_candidate .mt-criteria .card,
+.single-mt_candidate .mt-sidebar .card{ background:#fff; border:1px solid var(--mt-border-soft); border-radius:12px; }
+.single-mt_candidate .mt-criterion{ white-space:pre-line; }

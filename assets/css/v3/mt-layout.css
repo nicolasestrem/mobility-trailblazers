@@ -1,0 +1,12 @@
+/* beige everywhere */
+html, body { background:var(--mt-bg-beige); color:var(--mt-text); }
+
+/* container and grid */
+.mt-container{max-width:1200px;margin:0 auto;padding:0 var(--mt-space-4)}
+.mt-candidates-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:32px;
+  align-items:stretch;
+}
+@media (min-width:1024px){ .mt-candidates-grid{ grid-template-columns:repeat(3,1fr); } }
