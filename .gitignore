@@ -154,3 +154,5 @@ cleanup-*.sh
 /.claude
 
 /Photos of all candidates
+
+/.internal/

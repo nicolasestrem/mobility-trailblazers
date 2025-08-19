@@ -468,6 +468,9 @@ msgstr "Entwurf"
 msgid "You must be logged in as a jury member to access this dashboard."
 msgstr "Sie müssen als Jurymitglied angemeldet sein, um auf dieses Dashboard zugreifen zu können."
 
+msgid "Your jury member profile could not be found."
+msgstr "Ihr Jurymitglied-Profil konnte nicht gefunden werden."
+
 # Admin Messages
 msgid "Are you sure you want to change the default language? This will affect all users who haven't set a preference."
 msgstr "Sind Sie sicher, dass Sie die Standardsprache ändern möchten? Dies wirkt sich auf alle Benutzer aus, die keine Präferenz festgelegt haben."
