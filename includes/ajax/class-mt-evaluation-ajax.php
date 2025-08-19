@@ -116,15 +116,37 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $candidate_id = $this->get_int_param('candidate_id');
         error_log('MT AJAX - Processed candidate_id: ' . $candidate_id);
         
-        // Prepare evaluation data
+        // Prepare evaluation data with validation
+        $courage_score = $this->get_float_param('courage_score');
+        $innovation_score = $this->get_float_param('innovation_score');
+        $implementation_score = $this->get_float_param('implementation_score');
+        $relevance_score = $this->get_float_param('relevance_score');
+        $visibility_score = $this->get_float_param('visibility_score');
+        
+        // Validate scores are within 1-10 range
+        $scores_to_validate = [
+            'courage_score' => $courage_score,
+            'innovation_score' => $innovation_score,
+            'implementation_score' => $implementation_score,
+            'relevance_score' => $relevance_score,
+            'visibility_score' => $visibility_score
+        ];
+        
+        foreach ($scores_to_validate as $score_name => $score_value) {
+            if ($score_value < 0 || $score_value > 10) {
+                $this->error(__('Invalid score value. All scores must be between 0 and 10.', 'mobility-trailblazers'));
+                return;
+            }
+        }
+        
         $data = [
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $candidate_id,
-            'courage_score' => $this->get_float_param('courage_score'),
-            'innovation_score' => $this->get_float_param('innovation_score'),
-            'implementation_score' => $this->get_float_param('implementation_score'),
-            'relevance_score' => $this->get_float_param('relevance_score'),
-            'visibility_score' => $this->get_float_param('visibility_score'),
+            'courage_score' => $courage_score,
+            'innovation_score' => $innovation_score,
+            'implementation_score' => $implementation_score,
+            'relevance_score' => $relevance_score,
+            'visibility_score' => $visibility_score,
             'comments' => $this->get_textarea_param('comments'),
             'status' => $status
         ];
@@ -381,9 +403,10 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
      * Get ranked candidates for jury dashboard
      */
     public function get_jury_rankings() {
-        // Verify nonce
+        // Verify nonce with proper termination
         if (!check_ajax_referer('mt_ajax_nonce', 'nonce', false)) {
             $this->error(__('Security check failed', 'mobility-trailblazers'));
+            wp_die(); // Ensure execution stops
         }
         
         // Check permissions

@@ -60,11 +60,26 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_export_data');
         
-        $candidates = get_posts([
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ]);
+        // Get candidates with pagination for memory efficiency
+        $paged = 1;
+        $all_candidates = [];
+        
+        do {
+            $candidates = get_posts([
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => 50,
+                'paged' => $paged,
+                'post_status' => 'publish'
+            ]);
+            
+            if (!empty($candidates)) {
+                $all_candidates = array_merge($all_candidates, $candidates);
+            }
+            
+            $paged++;
+        } while (!empty($candidates));
+        
+        $candidates = $all_candidates;
         
         $csv_data = [];
         $csv_data[] = [
@@ -115,11 +130,26 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
             wp_die(__('Permission denied', 'mobility-trailblazers'));
         }
         
-        $candidates = get_posts([
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ]);
+        // Get candidates with pagination for memory efficiency
+        $paged = 1;
+        $all_candidates = [];
+        
+        do {
+            $candidates = get_posts([
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => 50,
+                'paged' => $paged,
+                'post_status' => 'publish'
+            ]);
+            
+            if (!empty($candidates)) {
+                $all_candidates = array_merge($all_candidates, $candidates);
+            }
+            
+            $paged++;
+        } while (!empty($candidates));
+        
+        $candidates = $all_candidates;
         
         $csv_data = [];
         $csv_data[] = [

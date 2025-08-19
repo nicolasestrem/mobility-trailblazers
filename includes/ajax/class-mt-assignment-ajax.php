@@ -97,9 +97,23 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_manage_assignments');
         
+        $jury_member_id = $this->get_int_param('jury_member_id');
+        $candidate_id = $this->get_int_param('candidate_id');
+        
+        // Validate IDs
+        if (!$jury_member_id || !get_post($jury_member_id)) {
+            $this->error(__('Invalid jury member selected.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        if (!$candidate_id || !get_post($candidate_id)) {
+            $this->error(__('Invalid candidate selected.', 'mobility-trailblazers'));
+            return;
+        }
+        
         $data = [
-            'jury_member_id' => $this->get_int_param('jury_member_id'),
-            'candidate_id' => $this->get_int_param('candidate_id')
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id
         ];
         
         $service = new MT_Assignment_Service();

@@ -529,17 +529,26 @@ class MT_Candidate_Import_Service {
      * @return array Results
      */
     public function import_candidate_photos($photos_dir, $dry_run = false) {
-        // Try to convert Windows path to Docker mounted path if needed
+        // Handle different path formats using WordPress functions
         if (!is_dir($photos_dir)) {
-            // Try Docker mounted path
-            $docker_path = str_replace('E:\OneDrive\CoWorkSpace\Tech Stack\Platform\plugin\mobility-trailblazers', '/var/www/html/wp-content/plugins/mobility-trailblazers', $photos_dir);
-            $docker_path = str_replace('\\', '/', $docker_path);
+            // Try to resolve the path relative to the plugin directory
+            $plugin_dir = plugin_dir_path(dirname(dirname(__FILE__)));
+            $relative_path = str_replace($plugin_dir, '', $photos_dir);
+            $resolved_path = $plugin_dir . trim($relative_path, '/\\');
             
-            if (is_dir($docker_path)) {
-                $photos_dir = $docker_path;
+            if (is_dir($resolved_path)) {
+                $photos_dir = $resolved_path;
             } else {
-                $this->results['messages'][] = __('Photos directory not found', 'mobility-trailblazers') . ': ' . $photos_dir;
-                return $this->results;
+                // Try upload directory
+                $upload_dir = wp_upload_dir();
+                $upload_path = $upload_dir['basedir'] . '/mobility-trailblazers/' . basename($photos_dir);
+                
+                if (is_dir($upload_path)) {
+                    $photos_dir = $upload_path;
+                } else {
+                    $this->results['messages'][] = __('Photos directory not found', 'mobility-trailblazers') . ': ' . $photos_dir;
+                    return $this->results;
+                }
             }
         }
         

@@ -330,7 +330,7 @@ if (have_posts()) :
                                 </a>
                             <?php endif; ?>
                             
-                            <a href="<?php echo esc_url(home_url('/candidate/')); ?>" class="mt-nav-link mt-nav-all">
+                            <a href="<?php echo esc_url(home_url('/candidates/')); ?>" class="mt-nav-link mt-nav-all">
                                 <i class="dashicons dashicons-list-view"></i>
                                 <span><?php _e('View All Candidates', 'mobility-trailblazers'); ?></span>
                             </a>

@@ -108,26 +108,54 @@ class MT_Assignment_Service implements MT_Service_Interface {
             return false;
         }
         
-        // Get all jury members
-        $jury_members = get_posts([
-            'post_type' => 'mt_jury_member',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'fields' => 'ids'
-        ]);
+        // Get all jury members with pagination
+        $paged = 1;
+        $all_jury_members = [];
+        
+        do {
+            $jury_members = get_posts([
+                'post_type' => 'mt_jury_member',
+                'posts_per_page' => 50,
+                'paged' => $paged,
+                'post_status' => 'publish',
+                'fields' => 'ids'
+            ]);
+            
+            if (!empty($jury_members)) {
+                $all_jury_members = array_merge($all_jury_members, $jury_members);
+            }
+            
+            $paged++;
+        } while (!empty($jury_members));
+        
+        $jury_members = $all_jury_members;
         
         if (empty($jury_members)) {
             $this->errors[] = __('No jury members found.', 'mobility-trailblazers');
             return false;
         }
         
-        // Get all candidates
-        $candidates = get_posts([
-            'post_type' => 'mt_candidate',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'fields' => 'ids'
-        ]);
+        // Get all candidates with pagination
+        $paged = 1;
+        $all_candidates = [];
+        
+        do {
+            $candidates = get_posts([
+                'post_type' => 'mt_candidate',
+                'posts_per_page' => 50,
+                'paged' => $paged,
+                'post_status' => 'publish',
+                'fields' => 'ids'
+            ]);
+            
+            if (!empty($candidates)) {
+                $all_candidates = array_merge($all_candidates, $candidates);
+            }
+            
+            $paged++;
+        } while (!empty($candidates));
+        
+        $candidates = $all_candidates;
         
         if (empty($candidates)) {
             $this->errors[] = __('No candidates found.', 'mobility-trailblazers');
