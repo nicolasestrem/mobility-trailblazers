@@ -137,7 +137,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             <select class="mt-filter-select" id="mt-status-filter">
                 <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
                 <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
-                <option value="draft"><?php _e('Draft', 'mobility-trailblazers'); ?></option>
                 <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
