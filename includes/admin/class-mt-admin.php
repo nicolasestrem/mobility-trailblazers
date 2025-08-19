@@ -731,6 +731,7 @@ class MT_Admin {
                 'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
                 'select_bulk_action' => __('Please select a bulk action', 'mobility-trailblazers'),
                 'select_assignments' => __('Please select at least one assignment', 'mobility-trailblazers'),
+                'remove' => __('Remove', 'mobility-trailblazers'),
             )
         ));
         

@@ -472,7 +472,7 @@ if (typeof mt_admin.i18n === 'undefined') {
                     mtShowNotification(mt_admin.i18n.error_occurred, 'error');
                 },
                 complete: () => {
-                    $button.prop('disabled', false).text('Remove');
+                    $button.prop('disabled', false).text(mt_admin.i18n.remove || 'Remove');
                 }
             });
         },

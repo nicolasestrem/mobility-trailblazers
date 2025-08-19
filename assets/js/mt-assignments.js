@@ -268,7 +268,7 @@
                 showNotification('An error occurred', 'error');
             },
             complete: function() {
-                $button.prop('disabled', false).text('Remove');
+                $button.prop('disabled', false).text(mt_admin.i18n.remove || 'Remove');
             }
         });
     }

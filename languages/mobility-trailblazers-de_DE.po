@@ -1085,3 +1085,28 @@ msgstr "Fortschritt"
 
 msgid "No jury member data available."
 msgstr "Keine Jurymitglied-Daten verfügbar."
+
+# Missing Button and Interface Translations - Second Pass German Localization
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Position"
+msgstr "Position"
+
+msgid "Organisation"
+msgstr "Organisation"
+
+msgid "Top 50"
+msgstr "Top 50"
+
+msgid "Nominator"
+msgstr "Nominator"
+
+msgid "LinkedIn-Link"
+msgstr "LinkedIn-Link"
+
+msgid "Webseite"
+msgstr "Webseite"
+
+msgid "Foto"
+msgstr "Foto"

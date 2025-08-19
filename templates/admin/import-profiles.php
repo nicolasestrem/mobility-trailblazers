@@ -329,21 +329,21 @@ $stats = [
                 
                 <h3><?php _e('Required Headers', 'mobility-trailblazers'); ?></h3>
                 <ul>
-                    <li><strong>Name</strong> - <?php _e('Candidate full name (required)', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Name', 'mobility-trailblazers'); ?></strong> - <?php _e('Candidate full name (required)', 'mobility-trailblazers'); ?></li>
                 </ul>
                 
                 <h3><?php _e('Optional Headers', 'mobility-trailblazers'); ?></h3>
                 <ul>
-                    <li><strong>ID</strong> - <?php _e('Unique identifier', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Position</strong> - <?php _e('Job title or role', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Organisation</strong> - <?php _e('Company or organization name', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Category</strong> - <?php _e('Award category (comma-separated for multiple)', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Top 50</strong> - <?php _e('Yes/No or Ja/Nein', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Nominator</strong> - <?php _e('Person who nominated the candidate', 'mobility-trailblazers'); ?></li>
-                    <li><strong>LinkedIn-Link</strong> - <?php _e('LinkedIn profile URL', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Webseite</strong> - <?php _e('Website URL', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Foto</strong> - <?php _e('Photo indicator (Ja/Yes) or URL', 'mobility-trailblazers'); ?></li>
-                    <li><strong>Description</strong> - <?php _e('Full description including evaluation criteria', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('ID', 'mobility-trailblazers'); ?></strong> - <?php _e('Unique identifier', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Position', 'mobility-trailblazers'); ?></strong> - <?php _e('Job title or role', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Organisation', 'mobility-trailblazers'); ?></strong> - <?php _e('Company or organization name', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Category', 'mobility-trailblazers'); ?></strong> - <?php _e('Award category (comma-separated for multiple)', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Top 50', 'mobility-trailblazers'); ?></strong> - <?php _e('Yes/No or Ja/Nein', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Nominator', 'mobility-trailblazers'); ?></strong> - <?php _e('Person who nominated the candidate', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('LinkedIn-Link', 'mobility-trailblazers'); ?></strong> - <?php _e('LinkedIn profile URL', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Webseite', 'mobility-trailblazers'); ?></strong> - <?php _e('Website URL', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Foto', 'mobility-trailblazers'); ?></strong> - <?php _e('Photo indicator (Ja/Yes) or URL', 'mobility-trailblazers'); ?></li>
+                    <li><strong><?php _e('Description', 'mobility-trailblazers'); ?></strong> - <?php _e('Full description including evaluation criteria', 'mobility-trailblazers'); ?></li>
                 </ul>
                 
                 <h3><?php _e('Tips', 'mobility-trailblazers'); ?></h3>
