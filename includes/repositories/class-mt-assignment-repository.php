@@ -8,7 +8,7 @@
 
 namespace MobilityTrailblazers\Repositories;
 
-use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+use MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface;
 use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
  *
  * Handles database operations for jury assignments
  */
-class MT_Assignment_Repository implements MT_Repository_Interface {
+class MT_Assignment_Repository implements MT_Assignment_Repository_Interface {
     
     /**
      * Table name
@@ -761,5 +761,213 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             WHERE option_name LIKE '_transient_mt_jury_assignments_%'
             OR option_name LIKE '_transient_timeout_mt_jury_assignments_%'
         ");
+    }
+    
+    /**
+     * Auto-distribute assignments
+     *
+     * @param array $options Distribution options
+     * @return array Distribution results
+     */
+    public function auto_distribute($options = []) {
+        global $wpdb;
+        
+        $defaults = [
+            'candidates_per_jury' => 5,
+            'max_total_assignments' => 100,
+            'clear_existing' => false,
+            'dry_run' => false
+        ];
+        
+        $options = wp_parse_args($options, $defaults);
+        
+        $results = [
+            'success' => false,
+            'assignments_created' => 0,
+            'assignments_cleared' => 0,
+            'errors' => [],
+            'dry_run' => $options['dry_run']
+        ];
+        
+        try {
+            // Clear existing assignments if requested
+            if ($options['clear_existing'] && !$options['dry_run']) {
+                $cleared = $this->clear_all(false);
+                $results['assignments_cleared'] = $cleared ? $this->count() : 0;
+            }
+            
+            // Get all active jury members and candidates
+            $jury_members = get_posts([
+                'post_type' => 'mt_jury_member',
+                'post_status' => 'publish',
+                'numberposts' => -1,
+                'fields' => 'ids'
+            ]);
+            
+            $candidates = get_posts([
+                'post_type' => 'mt_candidate',
+                'post_status' => 'publish',
+                'numberposts' => -1,
+                'fields' => 'ids'
+            ]);
+            
+            if (empty($jury_members) || empty($candidates)) {
+                $results['errors'][] = 'No jury members or candidates found';
+                return $results;
+            }
+            
+            // Distribute assignments
+            $assignments_to_create = [];
+            $jury_count = count($jury_members);
+            $candidate_count = count($candidates);
+            
+            foreach ($jury_members as $jury_id) {
+                // Shuffle candidates for random distribution
+                $shuffled_candidates = $candidates;
+                shuffle($shuffled_candidates);
+                
+                $assigned_count = 0;
+                foreach ($shuffled_candidates as $candidate_id) {
+                    if ($assigned_count >= $options['candidates_per_jury']) {
+                        break;
+                    }
+                    
+                    // Check if assignment already exists (if not clearing)
+                    if (!$options['clear_existing'] && $this->exists($jury_id, $candidate_id)) {
+                        continue;
+                    }
+                    
+                    $assignments_to_create[] = [
+                        'jury_member_id' => $jury_id,
+                        'candidate_id' => $candidate_id
+                    ];
+                    
+                    $assigned_count++;
+                }
+            }
+            
+            // Limit total assignments
+            if (count($assignments_to_create) > $options['max_total_assignments']) {
+                $assignments_to_create = array_slice($assignments_to_create, 0, $options['max_total_assignments']);
+            }
+            
+            if (!$options['dry_run']) {
+                $results['assignments_created'] = $this->bulk_create($assignments_to_create);
+            } else {
+                $results['assignments_created'] = count($assignments_to_create);
+            }
+            
+            $results['success'] = true;
+            
+            MT_Logger::info('Auto-distribution completed', $results);
+            
+        } catch (Exception $e) {
+            $results['errors'][] = $e->getMessage();
+            MT_Logger::error('Auto-distribution failed', ['error' => $e->getMessage()]);
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Rebalance assignments
+     *
+     * @return array Rebalancing results
+     */
+    public function rebalance_assignments() {
+        global $wpdb;
+        
+        $results = [
+            'success' => false,
+            'moved_assignments' => 0,
+            'errors' => []
+        ];
+        
+        try {
+            // Get assignment counts per jury member
+            $assignment_counts = $wpdb->get_results("
+                SELECT 
+                    jury_member_id,
+                    COUNT(*) as assignment_count
+                FROM {$this->table_name}
+                GROUP BY jury_member_id
+                ORDER BY assignment_count DESC
+            ");
+            
+            if (empty($assignment_counts)) {
+                $results['errors'][] = 'No assignments found to rebalance';
+                return $results;
+            }
+            
+            // Calculate average assignments per jury member
+            $total_assignments = array_sum(array_column($assignment_counts, 'assignment_count'));
+            $jury_count = count($assignment_counts);
+            $target_per_jury = ceil($total_assignments / $jury_count);
+            
+            // Find overloaded and underloaded jury members
+            $overloaded = [];
+            $underloaded = [];
+            
+            foreach ($assignment_counts as $count) {
+                if ($count->assignment_count > $target_per_jury) {
+                    $overloaded[] = $count;
+                } elseif ($count->assignment_count < $target_per_jury) {
+                    $underloaded[] = $count;
+                }
+            }
+            
+            // Move assignments from overloaded to underloaded
+            foreach ($overloaded as $over) {
+                $excess = $over->assignment_count - $target_per_jury;
+                
+                // Get some assignments from this jury member
+                $assignments_to_move = $wpdb->get_results($wpdb->prepare("
+                    SELECT * FROM {$this->table_name}
+                    WHERE jury_member_id = %d
+                    ORDER BY id ASC
+                    LIMIT %d
+                ", $over->jury_member_id, $excess));
+                
+                foreach ($assignments_to_move as $assignment) {
+                    // Find an underloaded jury member
+                    $target_jury = null;
+                    foreach ($underloaded as $key => $under) {
+                        if ($under->assignment_count < $target_per_jury) {
+                            $target_jury = $under;
+                            $underloaded[$key]->assignment_count++;
+                            break;
+                        }
+                    }
+                    
+                    if ($target_jury) {
+                        // Move the assignment
+                        $updated = $wpdb->update(
+                            $this->table_name,
+                            ['jury_member_id' => $target_jury->jury_member_id],
+                            ['id' => $assignment->id],
+                            ['%d'],
+                            ['%d']
+                        );
+                        
+                        if ($updated) {
+                            $results['moved_assignments']++;
+                        }
+                    }
+                }
+            }
+            
+            // Clear caches
+            $this->clear_all_assignment_caches();
+            
+            $results['success'] = true;
+            
+            MT_Logger::info('Assignment rebalancing completed', $results);
+            
+        } catch (Exception $e) {
+            $results['errors'][] = $e->getMessage();
+            MT_Logger::error('Assignment rebalancing failed', ['error' => $e->getMessage()]);
+        }
+        
+        return $results;
     }
 } 
