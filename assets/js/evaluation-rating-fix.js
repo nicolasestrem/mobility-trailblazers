@@ -4,6 +4,7 @@
  * Issue #21: Evaluation page does not allow more than one rating across all categories
  * Created: 2025-08-18
  * Updated: 2025-08-19 - Added proper button group handling
+ * Updated: 2025-08-20 - Fixed event handler conflicts with proper namespacing (.mt-evaluation)
  */
 (function($) {
     'use strict';
@@ -11,17 +12,17 @@
     $(document).ready(function() {
         // CRITICAL FIX: Handle button groups independently for each criterion
         function initializeButtonGroups() {
-            // Remove ALL existing handlers from buttons to prevent conflicts
-            $('.mt-score-button').off();
-            $(document).off('click', '.mt-score-button');
+            // Remove ONLY our namespaced handlers to prevent conflicts with other plugins
+            $('.mt-score-button').off('.mt-evaluation');
+            $(document).off('click.mt-evaluation', '.mt-score-button');
             // Handle each button group independently
             $('.mt-button-group').each(function() {
                 var $group = $(this);
                 var criterionKey = $group.data('criterion');
                 // CRITICAL FIX: Hidden input is INSIDE the group, not a sibling!
                 var $hiddenInput = $group.find('input[type="hidden"]');
-                // Handle button clicks within this specific group
-                $group.find('.mt-score-button').on('click', function(e) {
+                // Handle button clicks within this specific group with namespaced events
+                $group.find('.mt-score-button').on('click.mt-evaluation', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation(); // Prevent any other handlers
@@ -47,10 +48,9 @@
         }
         // Fix 1: Ensure each slider operates independently
         function initializeIndependentSliders() {
-            // Remove ALL existing event handlers to prevent conflicts
-            $('.mt-score-slider').off();
-            $(document).off('input', '.mt-score-slider');
-            $(document).off('change', '.mt-score-slider');
+            // Remove ONLY our namespaced event handlers to prevent conflicts with other plugins
+            $('.mt-score-slider').off('.mt-evaluation');
+            $(document).off('input.mt-evaluation change.mt-evaluation', '.mt-score-slider');
             // Initialize each slider independently
             $('.mt-score-slider').each(function() {
                 var $slider = $(this);
@@ -60,10 +60,10 @@
                     // Error logging removed for production
                     return;
                 }
-                // Remove any conflicting event handlers
-                $slider.off('change input');
-                // Add independent event handler
-                $slider.on('input change', function(e) {
+                // Remove any conflicting event handlers with our namespace
+                $slider.off('change.mt-evaluation input.mt-evaluation');
+                // Add independent event handler with namespace
+                $slider.on('input.mt-evaluation change.mt-evaluation', function(e) {
                     e.stopPropagation(); // Prevent event bubbling
                     var value = $(this).val();
                     var $card = $(this).closest('.mt-criterion-card');
@@ -84,8 +84,8 @@
         }
         // Fix 2: Ensure score marks work independently
         function fixScoreMarks() {
-            $('.mt-score-mark').off('click.global');
-            $('.mt-score-mark').on('click', function(e) {
+            $('.mt-score-mark').off('click.mt-evaluation');
+            $('.mt-score-mark').on('click.mt-evaluation', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var value = $(this).data('value');
@@ -133,7 +133,7 @@
         }
         // Fix 4: Prevent form submission if ratings are missing
         function validateEvaluation() {
-            $('#mt-evaluation-form').on('submit', function(e) {
+            $('#mt-evaluation-form').off('submit.mt-evaluation').on('submit.mt-evaluation', function(e) {
                 var allRated = true;
                 var unratedCriteria = [];
                 $('.mt-score-slider').each(function() {
@@ -157,7 +157,7 @@
         }
         // Fix 5: Ensure sliders work after AJAX loads
         function reinitializeAfterAjax() {
-            $(document).ajaxComplete(function(event, xhr, settings) {
+            $(document).off('ajaxComplete.mt-evaluation').on('ajaxComplete.mt-evaluation', function(event, xhr, settings) {
                 if (settings.url && (settings.url.includes('evaluate') || settings.url.includes('mt_get_candidate'))) {
                     setTimeout(function() {
                         initializeIndependentSliders();
@@ -188,13 +188,12 @@
         function initializeAllFixes() {
             // Wait a moment for any other scripts to load
             setTimeout(function() {
-                // Remove all conflicting handlers first
-                $('.mt-score-slider').off();
-                $(document).off('input', '.mt-score-slider');
-                $(document).off('change', '.mt-score-slider');
-                $('.mt-score-button').off();
-                $(document).off('click', '.mt-score-button');
-                $('.mt-score-mark').off();
+                // Remove only our namespaced handlers first to prevent conflicts with other plugins
+                $('.mt-score-slider').off('.mt-evaluation');
+                $(document).off('input.mt-evaluation change.mt-evaluation', '.mt-score-slider');
+                $('.mt-score-button').off('.mt-evaluation');
+                $(document).off('click.mt-evaluation', '.mt-score-button');
+                $('.mt-score-mark').off('.mt-evaluation');
                 // Then initialize our fixed handlers
                 // CRITICAL: Initialize button groups if they exist
                 if ($('.mt-button-group').length > 0) {
@@ -213,8 +212,8 @@
         }
         // Run initialization with higher priority
         initializeAllFixes();
-        // Also run on window load as fallback
-        $(window).on('load', function() {
+        // Also run on window load as fallback with namespace
+        $(window).off('load.mt-evaluation').on('load.mt-evaluation', function() {
             if ($('.mt-score-slider').length > 0) {
                 initializeAllFixes();
             }

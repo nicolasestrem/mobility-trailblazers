@@ -317,6 +317,18 @@ class MT_Plugin {
             true
         );
         
+        // Consolidated Hotfixes CSS - Combines multiple small hotfix files for better performance
+        // Includes: photo-adjustments.css, candidate-image-adjustments.css, evaluation-fix.css, 
+        // language-switcher-enhanced.css, mt-jury-dashboard-fix.css, emergency-fixes.css
+        wp_enqueue_style(
+            'mt-hotfixes-consolidated',
+            MT_PLUGIN_URL . 'assets/css/mt-hotfixes-consolidated.css',
+            ['mt-frontend', 'mt-candidate-grid', 'mt-evaluation-fixes'],
+            MT_VERSION
+        );
+        
+        // BACKUP: Individual hotfix files (kept as backup, uncomment if needed)
+        /*
         // Photo adjustments CSS (Issue #13 fix)
         wp_enqueue_style(
             'mt-photo-adjustments',
@@ -348,6 +360,7 @@ class MT_Plugin {
             ['mt-frontend'],
             MT_VERSION
         );
+        */
         
         // Legacy jury dashboard styles (for backward compatibility)
         if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
@@ -358,13 +371,13 @@ class MT_Plugin {
                 MT_VERSION
             );
             
-            // Fix for evaluation card content cutoff
-            wp_enqueue_style(
-                'mt-jury-dashboard-fix',
-                MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-fix.css',
-                ['mt-jury-dashboard'],
-                MT_VERSION
-            );
+            // Fix for evaluation card content cutoff (now included in mt-hotfixes-consolidated.css)
+            // wp_enqueue_style(
+            //     'mt-jury-dashboard-fix',
+            //     MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-fix.css',
+            //     ['mt-jury-dashboard'],
+            //     MT_VERSION
+            // );
         }
         
         // Scripts

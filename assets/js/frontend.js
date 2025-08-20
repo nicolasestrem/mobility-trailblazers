@@ -50,6 +50,146 @@
         }
     });
     
+    // Initialize interval and timeout storage
+    window.mtIntervals = window.mtIntervals || {};
+    window.mtTimeouts = window.mtTimeouts || {};
+    window.mtEventListeners = window.mtEventListeners || [];
+    
+    // Cleanup function for intervals and event listeners
+    window.mtCleanup = function() {
+        // Clear all intervals
+        if (window.mtIntervals) {
+            for (var key in window.mtIntervals) {
+                if (window.mtIntervals.hasOwnProperty(key)) {
+                    clearInterval(window.mtIntervals[key]);
+                    window.mtIntervals[key] = null;
+                }
+            }
+        }
+        
+        // Remove all tracked event listeners
+        if (window.mtEventListeners && window.mtEventListeners.length > 0) {
+            window.mtEventListeners.forEach(function(listener) {
+                if (listener.element && listener.element.removeEventListener) {
+                    listener.element.removeEventListener(listener.event, listener.handler);
+                }
+            });
+            window.mtEventListeners = [];
+        }
+        
+        // Stop all jQuery animations to prevent memory leaks
+        if (typeof jQuery !== 'undefined') {
+            jQuery('*').stop(true, true);
+            // Clean up any tooltips that might be lingering
+            jQuery('.mt-tooltip').remove();
+            jQuery('.mt-alert').remove();
+        }
+        
+        // Clear any timeouts that might be stored
+        if (window.mtTimeouts) {
+            for (var timeoutKey in window.mtTimeouts) {
+                if (window.mtTimeouts.hasOwnProperty(timeoutKey)) {
+                    clearTimeout(window.mtTimeouts[timeoutKey]);
+                    window.mtTimeouts[timeoutKey] = null;
+                }
+            }
+        }
+    };
+    
+    // Page unload cleanup
+    window.addEventListener('beforeunload', function() {
+        window.mtCleanup();
+    });
+    
+    // Page Visibility API to pause/resume intervals
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // Page is hidden, pause all intervals
+            if (window.mtIntervals) {
+                window.mtPausedIntervals = {};
+                for (var key in window.mtIntervals) {
+                    if (window.mtIntervals.hasOwnProperty(key) && window.mtIntervals[key]) {
+                        clearInterval(window.mtIntervals[key]);
+                        window.mtPausedIntervals[key] = true;
+                    }
+                }
+            }
+        } else {
+            // Page is visible again, resume intervals
+            if (window.mtPausedIntervals) {
+                // Restore rankings refresh interval (60 seconds)
+                if (window.mtPausedIntervals.rankingsRefresh) {
+                    // Create a closure to avoid potential memory leaks
+                    (function() {
+                        var refreshFn = function() {
+                            if (typeof jQuery !== 'undefined' && jQuery('#mt-rankings-container').length > 0) {
+                                jQuery.ajax({
+                                    url: mt_ajax.ajax_url,
+                                    type: 'POST',
+                                    data: {
+                                        action: 'mt_get_jury_rankings',
+                                        nonce: mt_ajax.nonce,
+                                        limit: 10
+                                    },
+                                    success: function(response) {
+                                        if (response.success && response.data.html) {
+                                            jQuery('#mt-rankings-container').html(response.data.html);
+                                            // Limit animation to visible items only
+                                            jQuery('.mt-ranking-item:visible').each(function(index) {
+                                                if (index < 20) { // Limit animations to prevent performance issues
+                                                    jQuery(this).css('opacity', '0').delay(index * 50).animate({
+                                                        opacity: 1
+                                                    }, 300);
+                                                }
+                                            });
+                                        }
+                                    },
+                                    error: function() {
+                                        // Fail silently, no logging needed
+                                    }
+                                });
+                            }
+                        };
+                        window.mtIntervals.rankingsRefresh = setInterval(refreshFn, 60000);
+                    })();
+                }
+                
+                // Restore inline rankings refresh interval (30 seconds)
+                if (window.mtPausedIntervals.inlineRankingsRefresh && jQuery('.mt-rankings-section').length > 0) {
+                    (function() {
+                        var inlineRefreshFn = function() {
+                            if (typeof jQuery !== 'undefined' && jQuery('.mt-rankings-section').length > 0) {
+                                // Check if we still have the container before refreshing
+                                if (jQuery('#mt-rankings-container').length > 0) {
+                                    jQuery.ajax({
+                                        url: mt_ajax.ajax_url,
+                                        type: 'POST',
+                                        data: {
+                                            action: 'mt_get_jury_rankings',
+                                            nonce: mt_ajax.nonce,
+                                            limit: 10
+                                        },
+                                        success: function(response) {
+                                            if (response.success && response.data.html) {
+                                                jQuery('#mt-rankings-container').html(response.data.html);
+                                            }
+                                        },
+                                        error: function() {
+                                            // Fail silently
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                        window.mtIntervals.inlineRankingsRefresh = setInterval(inlineRefreshFn, 30000);
+                    })();
+                }
+                
+                window.mtPausedIntervals = {};
+            }
+        }
+    });
+    
     // Force refresh evaluation form when returning from editing
     // This ensures criteria grid content is updated after editing candidates
     if (window.location.href.includes('evaluate=')) {
@@ -99,11 +239,15 @@
             $('.mt-alert').remove();
             // Add new alert
             $('body').prepend($alert);
-            // Auto-remove after 5 seconds
-            setTimeout(function() {
+            // Auto-remove after 5 seconds (tracked)
+            if (window.mtTimeouts.alertAutoRemove) {
+                clearTimeout(window.mtTimeouts.alertAutoRemove);
+            }
+            window.mtTimeouts.alertAutoRemove = setTimeout(function() {
                 $alert.fadeOut(function() {
                     $alert.remove();
                 });
+                delete window.mtTimeouts.alertAutoRemove;
             }, 5000);
             // Manual close
             $alert.find('.mt-alert-close').on('click', function() {
@@ -158,24 +302,39 @@
         },
         bindEvents: function() {
             var self = this;
+            
+            // Helper function to add tracked event listener
+            function addTrackedListener(element, event, handler) {
+                $(element).on(event, handler);
+                // Track delegated event listeners for cleanup if needed
+                if (window.mtEventListeners) {
+                    window.mtEventListeners.push({
+                        element: document,
+                        event: event,
+                        selector: element,
+                        handler: handler
+                    });
+                }
+            }
+            
             // Evaluation form submission
-            $(document).on('submit', '#mt-evaluation-form', function(e) {
+            addTrackedListener('#mt-evaluation-form', 'submit', function(e) {
                 self.submitEvaluation.call(self, e);
             });
             // Score slider updates
-            $(document).on('input', '.mt-score-slider', function() {
+            addTrackedListener('.mt-score-slider', 'input', function() {
                 self.updateScoreDisplay.call(this);
             });
             // Score mark clicks
-            $(document).on('click', '.mt-score-mark', function(e) {
+            addTrackedListener('.mt-score-mark', 'click', function(e) {
                 self.setScoreFromMark.call(this, e);
             });
             // Load evaluation modal
-            $(document).on('click', '.mt-evaluate-btn', function(e) {
+            addTrackedListener('.mt-evaluate-btn', 'click', function(e) {
                 self.loadEvaluation.call(self, e);
             });
             // Character count
-            $(document).on('input', '#mt-comments', function() {
+            addTrackedListener('#mt-comments', 'input', function() {
                 self.updateCharCount.call(this);
             });
         },
@@ -516,14 +675,26 @@
             }
         },
         
+        isSubmittingEvaluation: false, // Double-submission protection
+        
         submitEvaluation: function(e) {
             e.preventDefault();
+            
+            // Prevent double submission
+            if (this.isSubmittingEvaluation) {
+                console.log('Evaluation submission already in progress');
+                return false;
+            }
+            
             // Check if mt_ajax is available
             if (typeof mt_ajax === 'undefined' || !mt_ajax.nonce) {
                 MTJuryDashboard.showError(getI18nText('security_error', 'Security configuration error. Please refresh the page and try again.'));
                 return;
             }
-            var $form = $(this);
+            
+            this.isSubmittingEvaluation = true;
+            var self = this;
+            var $form = $(e.target);
             var $submitBtn = $form.find('button[type="submit"]');
             // Validate form selection
             // Validate scores (check all types of score inputs)
@@ -588,20 +759,26 @@
                         $('html, body').animate({ scrollTop: 0 }, 300);
                         // Re-enable button
                         $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
-                        // Redirect after 3 seconds
-                        setTimeout(function() {
+                        // Redirect after 3 seconds (tracked)
+                        if (window.mtTimeouts.evaluationRedirect) {
+                            clearTimeout(window.mtTimeouts.evaluationRedirect);
+                        }
+                        window.mtTimeouts.evaluationRedirect = setTimeout(function() {
                             window.location.href = window.location.pathname;
+                            delete window.mtTimeouts.evaluationRedirect;
                         }, 3000);
                     } else {
                         // Error message is in response.data.message
                         var errorMessage = response.data && response.data.message ? response.data.message : getI18nText('error', 'An error occurred. Please try again.');
                         MTJuryDashboard.showError(errorMessage);
                         $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
+                        self.isSubmittingEvaluation = false; // Reset submission flag
                     }
                 })
                 .fail(function() {
                     MTJuryDashboard.showError(getI18nText('error', 'An error occurred. Please try again.'));
                     $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
+                    self.isSubmittingEvaluation = false; // Reset submission flag
                 });
         },
         showError: function(message) {
@@ -722,8 +899,20 @@
                 }
             });
         }
-        // Optional: Refresh rankings periodically
-        setInterval(refreshRankings, 60000); // Every minute
+        // Store interval ID for cleanup
+        var rankingsRefreshInterval = null;
+        
+        // Optional: Refresh rankings periodically with cleanup
+        if (!window.mtIntervals) {
+            window.mtIntervals = {};
+        }
+        
+        // Clear any existing interval before setting new one
+        if (window.mtIntervals.rankingsRefresh) {
+            clearInterval(window.mtIntervals.rankingsRefresh);
+        }
+        
+        window.mtIntervals.rankingsRefresh = setInterval(refreshRankings, 60000); // Every minute
     });
     // Enhanced Rankings Interactivity
     jQuery(document).ready(function($) {
@@ -969,7 +1158,17 @@
         }
         // Auto-refresh rankings every 30 seconds if on dashboard
         if ($('.mt-rankings-section').length > 0) {
-            setInterval(refreshRankings, 30000);
+            // Store interval ID for cleanup
+            if (!window.mtIntervals) {
+                window.mtIntervals = {};
+            }
+            
+            // Clear any existing interval before setting new one
+            if (window.mtIntervals.inlineRankingsRefresh) {
+                clearInterval(window.mtIntervals.inlineRankingsRefresh);
+            }
+            
+            window.mtIntervals.inlineRankingsRefresh = setInterval(refreshRankings, 30000);
         }
     });
 })(jQuery); 

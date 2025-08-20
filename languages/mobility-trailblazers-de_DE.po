@@ -909,6 +909,12 @@ msgstr "Entwürfe"
 msgid "Average Score"
 msgstr "Durchschnittliche Bewertung"
 
+msgid "Average Score:"
+msgstr "Durchschnittliche Bewertung:"
+
+msgid "criteria evaluated"
+msgstr "Kriterien bewertet"
+
 msgid "About Me"
 msgstr "Über mich"
 
@@ -921,7 +927,7 @@ msgstr "Zuweisungsverteilungsanalyse"
 
 # Rankings Translations  
 msgid "Top Ranked Candidates"
-msgstr "Ihre Rangliste"
+msgstr "Rangliste der bewerteten Kandidaten"
 
 msgid "Your Rankings"
 msgstr "Ihre Rangliste"

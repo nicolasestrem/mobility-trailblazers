@@ -99,9 +99,19 @@ jQuery(document).ready(function($) {
     // ========================================
     // FIX 5: FORM SUBMISSION HANDLING
     // ========================================
+    var isSubmitting = false; // Double-submission protection
+    
     function fixFormSubmission() {
         $('#mt-evaluation-form').on('submit', function(e) {
             e.preventDefault();
+            
+            // Prevent double submission
+            if (isSubmitting) {
+                console.log('Form submission already in progress');
+                return false;
+            }
+            
+            isSubmitting = true;
             var $form = $(this);
             var formData = new FormData(this);
             // Add action
@@ -137,11 +147,13 @@ jQuery(document).ready(function($) {
                     } else {
                         showNotification('error', response.data || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.error_try_again ? mt_frontend.i18n.error_try_again : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'));
                         $submitBtn.prop('disabled', false).html(originalText);
+                        isSubmitting = false; // Reset submission flag
                     }
                 },
                 error: function() {
                     showNotification('error', mt_frontend && mt_frontend.i18n && mt_frontend.i18n.network_error ? mt_frontend.i18n.network_error : 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.');
                     $submitBtn.prop('disabled', false).html(originalText);
+                    isSubmitting = false; // Reset submission flag
                 }
             });
         });
