@@ -14,31 +14,6 @@
     'use strict';
 
     /**
-     * HTML escape function to prevent XSS attacks
-     * Escapes HTML special characters in user-provided content
-     * @param {string} text - The text to escape
-     * @returns {string} - The escaped text safe for HTML insertion
-     */
-    function escapeHtml(text) {
-        if (typeof text !== 'string') {
-            return '';
-        }
-        var map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;',
-            '/': '&#x2F;',
-            '`': '&#x60;',
-            '=': '&#x3D;'
-        };
-        return text.replace(/[&<>"'`=\/]/g, function(char) {
-            return map[char];
-        });
-    }
-
-    /**
      * MT Evaluations Admin Module
      */
     window.MTEvaluations = {
@@ -179,11 +154,11 @@
                     var percentage = (score.value / 10) * 100;
                     scoresHtml += `
                         <div class="mt-score-row">
-                            <div class="mt-score-label">${escapeHtml(score.label)}</div>
+                            <div class="mt-score-label">${score.label}</div>
                             <div class="mt-score-bar">
-                                <div class="mt-score-fill" style="width: ${escapeHtml(String(percentage))}%"></div>
+                                <div class="mt-score-fill" style="width: ${percentage}%"></div>
                             </div>
-                            <div class="mt-score-value">${escapeHtml(score.value.toFixed(1))}</div>
+                            <div class="mt-score-value">${score.value.toFixed(1)}</div>
                         </div>
                     `;
                 });
@@ -195,7 +170,7 @@
                     <div class="mt-modal-overlay"></div>
                     <div id="mt-evaluation-modal" class="mt-modal">
                         <div class="mt-modal-header">
-                            <h2>${escapeHtml(mt_evaluations_i18n.evaluation_details || 'Evaluation Details')} #${escapeHtml(String(data.id))}</h2>
+                            <h2>${mt_evaluations_i18n.evaluation_details || 'Evaluation Details'} #${data.id}</h2>
                             <button type="button" class="mt-modal-close" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -206,62 +181,62 @@
                                     <tbody>
                                         <tr>
                                             <th>${mt_evaluations_i18n.jury_member || 'Jury Member'}:</th>
-                                            <td>${escapeHtml(data.jury_member)}</td>
+                                            <td>${data.jury_member}</td>
                                         </tr>
                                         <tr>
                                             <th>${mt_evaluations_i18n.candidate || 'Candidate'}:</th>
-                                            <td>${escapeHtml(data.candidate)}</td>
+                                            <td>${data.candidate}</td>
                                         </tr>
                                         ${data.organization ? `
                                         <tr>
                                             <th>${mt_evaluations_i18n.organization || 'Organization'}:</th>
-                                            <td>${escapeHtml(data.organization)}</td>
+                                            <td>${data.organization}</td>
                                         </tr>` : ''}
                                         ${data.categories ? `
                                         <tr>
                                             <th>${mt_evaluations_i18n.categories || 'Categories'}:</th>
-                                            <td>${escapeHtml(data.categories)}</td>
+                                            <td>${data.categories}</td>
                                         </tr>` : ''}
                                         <tr>
                                             <th>${mt_evaluations_i18n.status || 'Status'}:</th>
-                                            <td><span class="mt-status mt-status-${escapeHtml(data.status)}">${escapeHtml(data.status)}</span></td>
+                                            <td><span class="mt-status mt-status-${data.status}">${data.status}</span></td>
                                         </tr>
                                         <tr>
                                             <th>${mt_evaluations_i18n.created || 'Created'}:</th>
-                                            <td>${escapeHtml(data.created_at)}</td>
+                                            <td>${data.created_at}</td>
                                         </tr>
                                         <tr>
                                             <th>${mt_evaluations_i18n.updated || 'Last Updated'}:</th>
-                                            <td>${escapeHtml(data.updated_at)}</td>
+                                            <td>${data.updated_at}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             
                             <div class="mt-evaluation-scores">
-                                <h3>${escapeHtml(mt_evaluations_i18n.scores || 'Evaluation Scores')}</h3>
+                                <h3>${mt_evaluations_i18n.scores || 'Evaluation Scores'}</h3>
                                 ${scoresHtml}
                                 <div class="mt-score-summary">
                                     <div class="mt-total-score">
-                                        <strong>${escapeHtml(mt_evaluations_i18n.total_score || 'Total Score')}:</strong>
-                                        <span class="mt-score-total">${escapeHtml(data.total_score.toFixed(1))} / 50</span>
+                                        <strong>${mt_evaluations_i18n.total_score || 'Total Score'}:</strong>
+                                        <span class="mt-score-total">${data.total_score.toFixed(1)} / 50</span>
                                     </div>
                                     <div class="mt-average-score">
-                                        <strong>${escapeHtml(mt_evaluations_i18n.average_score || 'Average')}:</strong>
-                                        <span class="mt-score-average">${escapeHtml(data.average_score.toFixed(2))}</span>
+                                        <strong>${mt_evaluations_i18n.average_score || 'Average'}:</strong>
+                                        <span class="mt-score-average">${data.average_score.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
                             
                             ${data.comments ? `
                             <div class="mt-evaluation-comments">
-                                <h3>${escapeHtml(mt_evaluations_i18n.comments || 'Comments')}</h3>
-                                <div class="mt-comments-text">${escapeHtml(data.comments)}</div>
+                                <h3>${mt_evaluations_i18n.comments || 'Comments'}</h3>
+                                <div class="mt-comments-text">${data.comments}</div>
                             </div>` : ''}
                         </div>
                         <div class="mt-modal-footer">
                             <button type="button" class="button button-primary mt-modal-close">
-                                ${escapeHtml(mt_evaluations_i18n.close || 'Close')}
+                                ${mt_evaluations_i18n.close || 'Close'}
                             </button>
                             <button type="button" class="button button-link-delete mt-delete-evaluation" data-id="${data.id}">
                                 ${mt_evaluations_i18n.delete || 'Delete Evaluation'}

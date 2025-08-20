@@ -524,54 +524,19 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         // Optionally delete all evaluations first
         if ($cascade_evaluations) {
             $evaluation_repo = new MT_Evaluation_Repository();
-            
-            // Use prepared DELETE instead of TRUNCATE for safety
-            // This ensures proper error handling and logging
-            $eval_table = $wpdb->prefix . 'mt_evaluations';
-            
-            // Start transaction for data integrity
-            $wpdb->query('START TRANSACTION');
-            
-            try {
-                // Delete all evaluations with proper error handling
-                $eval_result = $wpdb->query("DELETE FROM {$eval_table}");
-                
-                if ($eval_result === false) {
-                    throw new \Exception('Failed to delete evaluations: ' . $wpdb->last_error);
-                }
-                
-                // Clear all evaluation caches
-                $evaluation_repo->clear_all_evaluation_caches();
-            } catch (\Exception $e) {
-                $wpdb->query('ROLLBACK');
-                error_log('MT Assignment Repository: ' . $e->getMessage());
-                return false;
-            }
+            // Truncate evaluations table
+            $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}mt_evaluations");
+            // Clear all evaluation caches
+            $evaluation_repo->clear_all_evaluation_caches();
         }
         
-        // Use DELETE instead of TRUNCATE for better error handling and safety
-        // This prevents accidental data loss and provides proper logging
-        try {
-            $result = $wpdb->query("DELETE FROM {$this->table_name}");
-            
-            // Reset auto-increment counter safely
-            if ($result !== false) {
-                $wpdb->query("ALTER TABLE {$this->table_name} AUTO_INCREMENT = 1");
-            }
-        } catch (\Exception $e) {
-            if ($cascade_evaluations) {
-                $wpdb->query('ROLLBACK');
-            }
-            error_log('MT Assignment Repository: Failed to delete assignments: ' . $e->getMessage());
-            return false;
-        }
+        // Use TRUNCATE for better performance and to reset auto-increment
+        // TRUNCATE is safe here as we're intentionally removing all data
+        $result = $wpdb->query("TRUNCATE TABLE {$this->table_name}");
         
-        // Commit transaction if we started one
-        if ($cascade_evaluations) {
-            $wpdb->query('COMMIT');
-        }
-        
-        // Check result and handle errors
+        // TRUNCATE returns 0 on success, false on failure
+        // DELETE returns number of rows affected or false on failure
+        // We consider the operation successful if it doesn't return false
         if ($result !== false) {
             // Clear all related caches
             $this->clear_all_assignment_caches();

@@ -4,32 +4,6 @@
  */
 (function($) {
     'use strict';
-    
-    /**
-     * HTML escape function to prevent XSS attacks
-     * Escapes HTML special characters in user-provided content
-     * @param {string} text - The text to escape
-     * @returns {string} - The escaped text safe for HTML insertion
-     */
-    function escapeHtml(text) {
-        if (typeof text !== 'string') {
-            return '';
-        }
-        var map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;',
-            '/': '&#x2F;',
-            '`': '&#x60;',
-            '=': '&#x3D;'
-        };
-        return text.replace(/[&<>"'`=\/]/g, function(char) {
-            return map[char];
-        });
-    }
-    
     // Initialize mt_ajax object if not defined
     if (typeof mt_ajax === 'undefined') {
         // Fallback initialization for missing mt_ajax object
@@ -262,10 +236,10 @@
             var formHtml = `
                 <div class="mt-evaluation-wrapper">
                     <div class="mt-candidate-details">
-                        <h2>${escapeHtml(candidate.name)}</h2>
-                        <p class="mt-candidate-org">${escapeHtml(candidate.organization || '')}</p>
-                        ${candidate.photo_url ? `<img src="${escapeHtml(candidate.photo_url)}" alt="${escapeHtml(candidate.name)}" class="mt-candidate-photo-eval">` : ''}
-                        <div class="mt-candidate-bio">${escapeHtml(candidate.bio)}</div>
+                        <h2>${candidate.name}</h2>
+                        <p class="mt-candidate-org">${candidate.organization || ''}</p>
+                        ${candidate.photo_url ? `<img src="${candidate.photo_url}" alt="${candidate.name}" class="mt-candidate-photo-eval">` : ''}
+                        <div class="mt-candidate-bio">${candidate.bio}</div>
                     </div>
                     <form id="mt-evaluation-form" class="mt-evaluation-form">
                         <input type="hidden" name="candidate_id" value="${candidate.id}">
@@ -602,7 +576,7 @@
                     if (response.success) {
                         // Show success message - message is in response.data.message
                         var successMessage = response.data && response.data.message ? response.data.message : getI18nText('evaluation_submitted', 'Evaluation submitted successfully!');
-                        $('.mt-evaluation-header').after('<div class="mt-notice mt-notice-success">' + escapeHtml(successMessage) + '</div>');
+                        $('.mt-evaluation-header').after('<div class="mt-notice mt-notice-success">' + successMessage + '</div>');
                         // Update status badge
                         var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
                         if ($statusBadge.length) {
