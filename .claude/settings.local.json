@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__github-mcp__get_pull_request",
+      "mcp__filesystem-mcp__directory_tree",
+      "mcp__filesystem-mcp__list_allowed_directories"
+    ],
+    "deny": []
+  }
+}
