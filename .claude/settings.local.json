@@ -55,7 +55,8 @@
       "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\mobility-trailblazers.php\")",
       "mcp__filesystem-mcp__search_files",
       "mcp__filesystem-mcp__create_directory",
-      "mcp__filesystem-mcp__move_file"
+      "mcp__filesystem-mcp__move_file",
+      "mcp__filesystem-mcp__write_file"
     ],
     "deny": []
   }
