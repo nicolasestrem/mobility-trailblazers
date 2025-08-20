@@ -169,6 +169,19 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         if (!$has_assignment) {
+            // Log unauthorized attempt for security audit
+            MT_Audit_Logger::log(
+                'evaluation_unauthorized_attempt',
+                'evaluation',
+                0,
+                [
+                    'jury_member_id' => $jury_member->ID,
+                    'candidate_id' => $data['candidate_id'],
+                    'user_id' => $current_user_id,
+                    'attempted_action' => 'submit_evaluation'
+                ]
+            );
+            
             $this->error(__('You do not have permission to evaluate this candidate. Please contact an administrator.', 'mobility-trailblazers'));
             return;
         }
@@ -185,6 +198,24 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         if ($result) {
+            // Log successful evaluation submission
+            MT_Audit_Logger::log(
+                $status === 'draft' ? 'evaluation_draft_saved' : 'evaluation_submitted',
+                'evaluation',
+                $result,
+                [
+                    'jury_member_id' => $jury_member->ID,
+                    'candidate_id' => $data['candidate_id'],
+                    'status' => $status,
+                    'courage_score' => $courage_score,
+                    'innovation_score' => $innovation_score,
+                    'implementation_score' => $implementation_score,
+                    'relevance_score' => $relevance_score,
+                    'visibility_score' => $visibility_score,
+                    'total_score' => $courage_score + $innovation_score + $implementation_score + $relevance_score + $visibility_score
+                ]
+            );
+            
             $this->success(
                 ['evaluation_id' => $result],
                 $message
@@ -668,24 +699,26 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 }
             }
             
-            // Check if user has special permissions that allow evaluating any candidate
-            $can_evaluate_all = current_user_can('administrator') || current_user_can('mt_manage_evaluations');
+            // No user should be allowed to evaluate without proper assignment
+            // This ensures data integrity and prevents unauthorized evaluations
+            $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
             
-            // For table views from admin or managers, allow evaluation without assignment
-            $is_table_view = isset($_POST['context']) && $_POST['context'] === 'table';
+            // Log unauthorized attempt for security audit
+            MT_Audit_Logger::log(
+                'evaluation_unauthorized_attempt',
+                'evaluation',
+                0,
+                [
+                    'jury_member_id' => $jury_member->ID,
+                    'candidate_id' => $candidate_id,
+                    'user_id' => $current_user_id,
+                    'user_roles' => wp_get_current_user()->roles,
+                    'is_admin' => current_user_can('administrator'),
+                    'context' => isset($_POST['context']) ? $_POST['context'] : 'unknown'
+                ]
+            );
             
-            // Even administrators must have proper assignments for security
-            if (!$has_assignment) {
-                if ($can_evaluate_all) {
-                    // Log this for audit purposes
-                    error_log('WARNING: Admin/Manager evaluating without assignment - Jury: ' . $jury_member->ID . ', Candidate: ' . $candidate_id);
-                    // For now, allow admins but this should be reviewed
-                    error_log('  - User has admin/manager permissions - allowing evaluation (legacy behavior)');
-                } else {
-                    $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
-                    return;
-                }
-            }
+            return;
         }
         
         // Get existing evaluation if any
@@ -740,6 +773,20 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Get updated evaluation data
         $updated_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
+        
+        // Log successful inline evaluation save
+        MT_Audit_Logger::log(
+            'evaluation_inline_saved',
+            'evaluation',
+            $result,
+            [
+                'jury_member_id' => $jury_member->ID,
+                'candidate_id' => $candidate_id,
+                'context' => 'inline_grid',
+                'scores' => $scores,
+                'total_score' => $updated_evaluation ? floatval($updated_evaluation->total_score) : 0
+            ]
+        );
         
         $response_data = [
             'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
