@@ -81,6 +81,14 @@ if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
     require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
 }
 
+// Bootstrap container early for AJAX requests
+// This ensures the container is ready before any AJAX handlers try to use it
+if (defined('DOING_AJAX') && DOING_AJAX) {
+    // For AJAX requests, bootstrap immediately
+    $plugin = MobilityTrailblazers\Core\MT_Plugin::get_instance();
+    $plugin->ensure_services_for_ajax();
+}
+
 // Initialize the plugin
 add_action('plugins_loaded', function() {
     // Load text domain
@@ -92,7 +100,7 @@ add_action('plugins_loaded', function() {
     
     // Initialize migration runner
     MobilityTrailblazers\Core\MT_Migration_Runner::init();
-});
+}, 5); // Run early with priority 5
 
 // Activation hook
 register_activation_hook(__FILE__, function() {

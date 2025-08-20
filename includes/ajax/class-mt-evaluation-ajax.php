@@ -30,23 +30,69 @@ if (!defined('ABSPATH')) {
 class MT_Evaluation_Ajax extends MT_Base_Ajax {
     
     /**
-     * Get evaluation repository from container
+     * Get evaluation repository from container with fallback
      *
      * @return MT_Evaluation_Repository_Interface
      */
     private function get_evaluation_repository() {
-        $container = MT_Plugin::container();
-        return $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface');
+        try {
+            $container = MT_Plugin::container();
+            
+            // Debug: Check if container has the binding
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                $interface_name = 'MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface';
+                $has_binding = $container->has($interface_name);
+                if (!$has_binding) {
+                    error_log("MT Container Debug: Missing binding for {$interface_name}");
+                    
+                    // Try to trigger service registration again
+                    $plugin = MT_Plugin::get_instance();
+                    $container = $plugin->get_container();
+                    $has_binding_after_retry = $container->has($interface_name);
+                    error_log("MT Container Debug: After retry, has binding: " . ($has_binding_after_retry ? 'YES' : 'NO'));
+                }
+            }
+            
+            return $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface');
+            
+        } catch (\Exception $e) {
+            // Log the error
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log("MT Container Error in get_evaluation_repository: " . $e->getMessage());
+            }
+            
+            // Fallback to direct instantiation
+            if (!class_exists('MobilityTrailblazers\Repositories\MT_Evaluation_Repository')) {
+                require_once MT_PLUGIN_DIR . 'includes/repositories/class-mt-evaluation-repository.php';
+            }
+            
+            return new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        }
     }
     
     /**
-     * Get assignment repository from container
+     * Get assignment repository from container with fallback
      *
      * @return MT_Assignment_Repository_Interface
      */
     private function get_assignment_repository() {
-        $container = MT_Plugin::container();
-        return $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+        try {
+            $container = MT_Plugin::container();
+            return $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+            
+        } catch (\Exception $e) {
+            // Log the error
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log("MT Container Error in get_assignment_repository: " . $e->getMessage());
+            }
+            
+            // Fallback to direct instantiation
+            if (!class_exists('MobilityTrailblazers\Repositories\MT_Assignment_Repository')) {
+                require_once MT_PLUGIN_DIR . 'includes/repositories/class-mt-assignment-repository.php';
+            }
+            
+            return new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        }
     }
     
     /**
@@ -88,6 +134,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         // Verify nonce with proper error handling
         if (!$this->verify_nonce()) {
             $this->error(__('Security check failed. Please refresh the page and try again.', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Ensure container is properly initialized
+        if (!$this->ensure_container()) {
             return;
         }
         
@@ -926,6 +977,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $categories = ($candidate && is_object($candidate)) 
             ? wp_get_post_terms($evaluation->candidate_id, 'mt_category', ['fields' => 'names'])
             : [];
+        
+        // Ensure categories is an array (wp_get_post_terms can return WP_Error)
+        if (is_wp_error($categories)) {
+            $categories = [];
+        }
         
         // Prepare response data
         $data = [
