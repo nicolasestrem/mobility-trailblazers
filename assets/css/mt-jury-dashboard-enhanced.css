@@ -685,7 +685,7 @@ body .mt-jury-dashboard .mt-no-rankings {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    min-width: 900px;
+    min-width: 750px;
     font-size: 15px;
     background: #ffffff;
     border-radius: 14px;
@@ -705,6 +705,70 @@ body .mt-jury-dashboard .mt-no-rankings {
     font-size: 16px;
     letter-spacing: 0.5px;
     cursor: help;
+    min-width: 60px;
+}
+
+/* Specific column width constraints */
+.mt-evaluation-table th:nth-child(1) {
+    min-width: 70px;
+    width: 70px;
+}
+
+.mt-evaluation-table th:nth-child(2) {
+    min-width: 200px;
+    width: auto;
+}
+
+.mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
+    min-width: 80px;
+    width: 80px;
+}
+
+.mt-evaluation-table th:nth-last-child(2) {
+    min-width: 80px;
+    width: 80px;
+}
+
+.mt-evaluation-table th:last-child {
+    min-width: 140px;
+    width: 140px;
+}
+
+/* Enhanced table column headers with better tooltips */
+.mt-evaluation-table th[title] {
+    position: relative;
+    cursor: help;
+}
+
+.mt-evaluation-table th[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--mt-primary);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.mt-evaluation-table th[title]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--mt-primary);
+    z-index: 1001;
 }
 
 .mt-evaluation-table tbody tr {
@@ -816,17 +880,31 @@ body .mt-jury-dashboard .mt-no-rankings {
 
 /* Score input color coding */
 .mt-eval-score-input {
-    width: 60px;
+    width: 65px;
+    min-width: 65px;
     text-align: center;
     border: 2px solid var(--mt-secondary);
     border-radius: 4px;
-    padding: 6px 4px;
+    padding: 8px 6px;
     font-size: 14px;
     font-weight: 600;
     color: var(--mt-primary);
     background: var(--mt-bg-base);
     margin: 0 auto;
     display: block;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.mt-eval-score-input:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+    background: white;
+}
+
+.mt-eval-score-input:hover {
+    border-color: var(--mt-accent);
 }
 
 .mt-eval-score-input.score-high {
@@ -988,6 +1066,11 @@ body .mt-jury-dashboard .mt-no-rankings {
     body .mt-jury-dashboard .mt-criteria-grid-inline {
         grid-template-columns: repeat(auto-fit, minmax(70px,1fr)) !important;
     }
+    
+    .mt-evaluation-table-wrap {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1004,12 +1087,12 @@ body .mt-jury-dashboard .mt-no-rankings {
     }
     
     body .mt-jury-dashboard .mt-rankings-section {
-        padding: 20px !important;
+        padding: 15px !important;
     }
     
     body .mt-jury-dashboard .mt-rankings-header {
-        margin: -20px -20px 20px -20px !important;
-        padding: 20px !important;
+        margin: -15px -15px 20px -15px !important;
+        padding: 15px !important;
     }
     
     body .mt-jury-dashboard .mt-criterion-inline {
@@ -1022,6 +1105,12 @@ body .mt-jury-dashboard .mt-no-rankings {
     
     .mt-jury-stats {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mt-evaluation-table-wrap {
+        margin: 0 -15px !important;
+        border-radius: 0 !important;
+        padding: 0 0 15px 0 !important;
     }
 }
 

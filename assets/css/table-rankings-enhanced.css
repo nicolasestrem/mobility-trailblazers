@@ -257,17 +257,25 @@
 @media (max-width: 1200px) {
     .mt-evaluation-table {
         font-size: 14px;
+        min-width: 700px;
+    }
+    
+    .mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
+        min-width: 70px;
+        width: 70px;
     }
     
     .mt-eval-score-input {
-        width: 45px;
+        width: 55px;
+        min-width: 55px;
         font-size: 13px;
+        padding: 6px 4px;
     }
     
     .mt-btn-save-eval,
     .mt-btn-full-evaluation {
         font-size: 12px;
-        padding: 5px 10px;
+        padding: 5px 8px;
     }
 }
 
@@ -281,12 +289,28 @@
     
     .mt-evaluation-table {
         font-size: 13px;
-        min-width: 700px;
+        min-width: 650px;
+    }
+    
+    .mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
+        min-width: 60px;
+        width: 60px;
+    }
+    
+    .mt-evaluation-table th:nth-child(2) {
+        min-width: 160px;
     }
     
     .mt-eval-score-input {
-        width: 40px;
-        padding: 2px;
+        width: 50px;
+        min-width: 50px;
+        padding: 4px 2px;
+        font-size: 12px;
+    }
+    
+    .mt-evaluation-table-wrap {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
     }
 }
 
