@@ -137,6 +137,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             <select class="mt-filter-select" id="mt-status-filter">
                 <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
                 <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
+                <option value="draft"><?php _e('Draft Saved', 'mobility-trailblazers'); ?></option>
                 <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
@@ -265,11 +266,25 @@ jQuery(document).ready(function($) {
         // Status filter
         $('#mt-status-filter').on('change', function(e) {
             e.preventDefault();
+            console.log('Status filter changed to:', $(this).val());
             filterDashboardCandidates();
         });
         
         // Initial filter to ensure correct display
         filterDashboardCandidates();
+        
+        // Debug: Log all card data attributes on load
+        console.log('=== Debugging Card Data ===');
+        $('.mt-candidate-card').each(function(index) {
+            var $card = $(this);
+            console.log('Card ' + index + ':', {
+                name: $card.data('name'),
+                status: $card.data('status'),
+                title: $card.find('.mt-candidate-name').text(),
+                statusBadge: $card.find('.mt-status-badge').text()
+            });
+        });
+        console.log('=== End Debug ===');
     }
     
     /**
@@ -279,17 +294,37 @@ jQuery(document).ready(function($) {
         var searchTerm = $('#mt-candidate-search').val().toLowerCase().trim();
         var statusFilter = $('#mt-status-filter').val();
         var visibleCount = 0;
+        var totalCandidates = $('.mt-candidate-card').length;
+        
+        console.log('Starting filter - Search:', searchTerm, 'Status:', statusFilter, 'Total cards:', totalCandidates);
         
         $('.mt-candidate-card').each(function() {
             var $card = $(this);
-            var name = $card.data('name') || '';
-            var status = $card.data('status') || '';
+            var name = ($card.data('name') || '').toString().toLowerCase();
+            var status = ($card.data('status') || '').toString();
             
-            // Check search match
-            var matchesSearch = searchTerm === '' || name.indexOf(searchTerm) !== -1;
+            // Debug individual card data
+            console.log('Card data - Name:', name, 'Status:', status);
             
-            // Check status match
-            var matchesStatus = statusFilter === '' || status === statusFilter;
+            // Check search match - search in both data-name and the actual text content
+            var cardTitle = $card.find('.mt-candidate-name').text().toLowerCase();
+            var cardOrg = $card.find('.mt-candidate-org').text().toLowerCase();
+            var matchesSearch = searchTerm === '' || 
+                              name.indexOf(searchTerm) !== -1 || 
+                              cardTitle.indexOf(searchTerm) !== -1 ||
+                              cardOrg.indexOf(searchTerm) !== -1;
+            
+            // Check status match - normalize status values
+            var normalizedStatus = status.toLowerCase().trim();
+            var normalizedFilter = statusFilter.toLowerCase().trim();
+            var matchesStatus = statusFilter === '' || normalizedStatus === normalizedFilter;
+            
+            // Special handling for pending status (default when empty)
+            if (normalizedStatus === '' && normalizedFilter === 'pending') {
+                matchesStatus = true;
+            }
+            
+            console.log('Card match - Search:', matchesSearch, 'Status:', matchesStatus, 'Will show:', (matchesSearch && matchesStatus));
             
             if (matchesSearch && matchesStatus) {
                 $card.show().removeClass('hidden');
@@ -306,7 +341,7 @@ jQuery(document).ready(function($) {
             hideNoResults();
         }
         
-        console.log('Filtered candidates:', visibleCount, 'visible, search:', searchTerm, 'status:', statusFilter);
+        console.log('Filter complete - Visible:', visibleCount, 'of', totalCandidates);
     }
     
     /**
