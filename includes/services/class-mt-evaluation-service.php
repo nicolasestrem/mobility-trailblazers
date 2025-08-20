@@ -99,9 +99,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 do_action('mt_evaluation_updated', $existing->id, $evaluation_data);
                 
                 // Audit log
-                $action = isset($evaluation_data['status']) && $evaluation_data['status'] === 'completed' 
-                    ? 'evaluation_submitted' 
-                    : 'evaluation_draft_saved';
+                $action = 'evaluation_submitted';
                 MT_Audit_Logger::log($action, 'evaluation', $existing->id, $evaluation_data);
                 
                 error_log('MT Evaluation Service - Update successful, returning ID: ' . $existing->id);
@@ -121,9 +119,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 do_action('mt_evaluation_submitted', $result, $evaluation_data);
                 
                 // Audit log
-                $action = isset($evaluation_data['status']) && $evaluation_data['status'] === 'completed' 
-                    ? 'evaluation_submitted' 
-                    : 'evaluation_draft_saved';
+                $action = 'evaluation_submitted';
                 MT_Audit_Logger::log($action, 'evaluation', $result, $evaluation_data);
                 
                 error_log('MT Evaluation Service - Create successful, returning ID: ' . $result);
@@ -140,16 +136,6 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         return false;
     }
     
-    /**
-     * Save evaluation as draft
-     *
-     * @param array $data Evaluation data
-     * @return int|false Evaluation ID on success, false on failure
-     */
-    public function save_draft($data) {
-        $data['status'] = 'draft';
-        return $this->process($data);
-    }
     
     /**
      * Submit final evaluation
@@ -227,9 +213,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 do_action('mt_evaluation_submitted', $result, $data);
                 
                 // Audit log
-                $action = isset($data['status']) && $data['status'] === 'completed' 
-                    ? 'evaluation_submitted' 
-                    : 'evaluation_draft_saved';
+                $action = 'evaluation_submitted';
                 MT_Audit_Logger::log($action, 'evaluation', $result, $data);
                 
                 return $result;
@@ -348,9 +332,9 @@ class MT_Evaluation_Service implements MT_Service_Interface {
             return false;
         }
 
-        // Check if candidate exists - allow both draft and published candidates
+        // Check if candidate exists - only published candidates
         $candidate = get_post($candidate_id);
-        if (!$candidate || $candidate->post_type !== 'mt_candidate' || !in_array($candidate->post_status, ['publish', 'draft'])) {
+        if (!$candidate || $candidate->post_type !== 'mt_candidate' || $candidate->post_status !== 'publish') {
             return false;
         }
 
@@ -440,7 +424,6 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         $progress = [
             'total' => count($assignments),
             'completed' => 0,
-            'drafts' => 0,
             'pending' => 0,
             'candidates' => []
         ];
@@ -460,8 +443,6 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 
                 if ($eval->status === 'completed') {
                     $progress['completed']++;
-                } elseif ($eval->status === 'draft') {
-                    $progress['drafts']++;
                 } else {
                     // Handle any other statuses as pending
                     $progress['pending']++;
@@ -562,7 +543,7 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         $prepared = [
             'jury_member_id' => intval($data['jury_member_id']),
             'candidate_id' => intval($data['candidate_id']),
-            'status' => isset($data['status']) ? sanitize_text_field($data['status']) : 'draft'
+            'status' => isset($data['status']) ? sanitize_text_field($data['status']) : 'completed'
         ];
         
         // Add scores as floats (decimal(3,1) in database)

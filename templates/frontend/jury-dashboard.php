@@ -168,7 +168,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             
             <select class="mt-filter-select" id="mt-status-filter">
                 <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
-                <option value="draft"><?php _e('Draft', 'mobility-trailblazers'); ?></option>
                 <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
@@ -202,7 +201,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                     }
                 }
                 
-                $status = $evaluation ? $evaluation['status'] : 'draft';
+                $status = $evaluation ? $evaluation['status'] : 'pending';
                 $organization = get_post_meta($candidate->ID, '_mt_organization', true);
                 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
             ?>
@@ -228,8 +227,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                             
                             if ($status === 'completed') {
                                 $status_text = __('Completed', 'mobility-trailblazers');
-                            } elseif ($status === 'draft') {
-                                $status_text = __('Draft', 'mobility-trailblazers');
                             }
                             ?>
                             <span class="mt-status-badge <?php echo esc_attr($status_class); ?>">
@@ -357,7 +354,7 @@ jQuery(document).ready(function($) {
         $('.mt-candidate-card').each(function() {
             var $card = $(this);
             var name = ($card.data('name') || '').toString().toLowerCase();
-            var status = ($card.data('status') || 'draft').toString(); // Default to 'draft' if no status
+            var status = ($card.data('status') || 'pending').toString(); // Default to 'pending' if no status
             
             // Debug individual card data on mobile
             if (isMobile && window.console && window.console.log) {
@@ -377,8 +374,8 @@ jQuery(document).ready(function($) {
             var normalizedFilter = statusFilter.toLowerCase().trim();
             var matchesStatus = statusFilter === '' || normalizedStatus === normalizedFilter;
             
-            // Special handling for draft status (default when empty)
-            if (normalizedStatus === '' && normalizedFilter === 'draft') {
+            // Special handling for pending status (default when empty)
+            if (normalizedStatus === '' && normalizedFilter === 'pending') {
                 matchesStatus = true;
             }
             

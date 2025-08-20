@@ -51,8 +51,6 @@ msgstr "Wird verarbeitet..."
 msgid "Evaluation submitted successfully!"
 msgstr "Bewertung erfolgreich eingereicht!"
 
-msgid "Draft saved successfully!"
-msgstr "Entwurf erfolgreich gespeichert!"
 
 msgid "Congratulations! You have completed all evaluations!"
 msgstr "Herzlichen Glückwunsch! Sie haben alle Bewertungen abgeschlossen!"
@@ -72,8 +70,6 @@ msgstr "Zusätzliche Kommentare"
 msgid "Share your thoughts about this candidate's contributions to mobility innovation..."
 msgstr "Teilen Sie Ihre Gedanken zu den Beiträgen dieses Kandidaten zur Mobilitätsinnovation..."
 
-msgid "Save as Draft"
-msgstr "Als Entwurf speichern"
 
 msgid "Submit Evaluation"
 msgstr "Bewertung abschließen"
@@ -87,8 +83,6 @@ msgstr "Bewerten Sie jedes Kriterium von 0 (niedrigste) bis 10 (höchste) basier
 msgid "Consider the candidate's overall impact on mobility transformation"
 msgstr "Berücksichtigen Sie die Gesamtwirkung des Kandidaten auf die Mobilitätstransformation"
 
-msgid "You can save your evaluation as a draft and return later to complete it"
-msgstr "Sie können Ihre Bewertung als Entwurf speichern und später fortsetzen"
 
 msgid "Once submitted, you can still edit your evaluation if needed"
 msgstr "Nach dem Einreichen können Sie Ihre Bewertung bei Bedarf noch bearbeiten"
@@ -115,8 +109,6 @@ msgstr "Gesamt zugewiesen"
 msgid "Completed"
 msgstr "Abgeschlossen"
 
-msgid "In Draft"
-msgstr "Im Entwurf"
 
 msgid "Pending"
 msgstr "Ausstehend"
@@ -124,8 +116,6 @@ msgstr "Ausstehend"
 msgid "Not Started"
 msgstr "Nicht begonnen"
 
-msgid "Draft Saved"
-msgstr "Entwurf gespeichert"
 
 msgid "View/Edit Evaluation"
 msgstr "Bewertung ansehen/bearbeiten"
@@ -223,8 +213,6 @@ msgstr "Benachrichtigungs-E-Mail"
 msgid "Evaluation Settings"
 msgstr "Bewertungseinstellungen"
 
-msgid "Allow jury members to save drafts"
-msgstr "Jurymitgliedern erlauben, Entwürfe zu speichern"
 
 msgid "Allow jury members to edit submitted evaluations"
 msgstr "Jurymitgliedern erlauben, eingereichte Bewertungen zu bearbeiten"
@@ -474,8 +462,6 @@ msgstr "Diese Bewertung wurde eingereicht. Sie können sie immer noch bearbeiten
 msgid "Loading evaluation form..."
 msgstr "Bewertungsformular wird geladen..."
 
-msgid "Draft"
-msgstr "Entwurf"
 
 msgid "You must be logged in as a jury member to access this dashboard."
 msgstr "Sie müssen als Jurymitglied angemeldet sein, um auf dieses Dashboard zugreifen zu können."
@@ -672,8 +658,6 @@ msgstr "Erinnerung senden"
 msgid "Send Reminders to Incomplete"
 msgstr "Erinnerungen an Unvollständige senden"
 
-msgid "Remind About Drafts"
-msgstr "An Entwürfe erinnern"
 
 msgid "Export Coaching Report"
 msgstr "Coaching-Bericht exportieren"
@@ -903,8 +887,6 @@ msgstr "Zugewiesene Kandidaten"
 msgid "Submitted Evaluations"
 msgstr "Eingereichte Bewertungen"
 
-msgid "Drafts"
-msgstr "Entwürfe"
 
 msgid "Average Score"
 msgstr "Durchschnittliche Bewertung"

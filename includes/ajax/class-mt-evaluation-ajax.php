@@ -106,11 +106,8 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
         }
         
-        // Get status (draft or completed)
-        $status = $this->get_param('status', 'completed');
-        if (!in_array($status, ['draft', 'completed'])) {
-            $status = 'completed';
-        }
+        // Get status (always completed now)
+        $status = 'completed';
         
         // Debug: Check candidate_id specifically
         $raw_candidate_id = $this->get_param('candidate_id');
@@ -188,19 +185,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Process evaluation
         $service = new MT_Evaluation_Service();
-        
-        if ($status === 'draft') {
-            $result = $service->save_draft($data);
-            $message = __('Draft saved successfully!', 'mobility-trailblazers');
-        } else {
-            $result = $service->submit_final($data);
-            $message = __('Evaluation submitted successfully!', 'mobility-trailblazers');
-        }
+        $result = $service->submit_final($data);
+        $message = __('Evaluation submitted successfully!', 'mobility-trailblazers');
         
         if ($result) {
             // Log successful evaluation submission
             MT_Audit_Logger::log(
-                $status === 'draft' ? 'evaluation_draft_saved' : 'evaluation_submitted',
+                'evaluation_submitted',
                 'evaluation',
                 $result,
                 [
@@ -547,7 +538,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                     break;
                     
                 case 'reset':
-                    $result = $evaluation_repo->update($evaluation_id, ['status' => 'draft']);
+                    $result = $evaluation_repo->update($evaluation_id, ['status' => 'pending']);
                     if ($result) {
                         MT_Audit_Logger::log(
                             'evaluation_reset',
@@ -557,7 +548,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                                 'jury_member_id' => $evaluation->jury_member_id ?? null,
                                 'candidate_id' => $evaluation->candidate_id ?? null,
                                 'previous_status' => $evaluation->status ?? 'unknown',
-                                'new_status' => 'draft'
+                                'new_status' => 'pending'
                             ]
                         );
                     }
@@ -625,7 +616,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $past_tense = [
             'approve' => 'approved',
             'reject' => 'rejected',
-            'reset' => 'reset to draft',
+            'reset' => 'reset to pending',
             'delete' => 'deleted'
         ];
         
