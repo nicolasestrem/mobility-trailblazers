@@ -32,7 +32,9 @@
       "mcp__docker-mcp__docker_ps",
       "Bash(docker exec:*)",
       "Bash(php:*)",
-      "mcp__docker-mcp__docker_exec"
+      "mcp__docker-mcp__docker_exec",
+      "mcp__kapture__console_logs",
+      "mcp__kapture__keypress"
     ],
     "deny": []
   }
