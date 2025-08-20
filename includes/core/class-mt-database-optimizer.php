@@ -10,6 +10,8 @@
 
 namespace MobilityTrailblazers\Core;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -167,7 +169,10 @@ class MT_Database_Optimizer {
             ));
             
             if ($index_exists) {
-                error_log("MT Optimizer: Index {$index_name} already exists on {$table}");
+                MT_Logger::debug('Database index already exists', [
+                    'index_name' => $index_name,
+                    'table' => $table
+                ]);
                 return false;
             }
             
@@ -184,15 +189,25 @@ class MT_Database_Optimizer {
             $result = $wpdb->query($sql);
             
             if ($result === false) {
-                error_log("MT Optimizer: Failed to add index {$index_name}: " . $wpdb->last_error);
+                MT_Logger::database_error('ADD INDEX', $table, $wpdb->last_error, [
+                    'index_name' => $index_name
+                ]);
                 return false;
             }
             
-            error_log("MT Optimizer: Successfully added index {$index_name} to {$table}");
+            MT_Logger::info('Database index added successfully', [
+                'index_name' => $index_name,
+                'table' => $table
+            ]);
             return true;
             
         } catch (\Exception $e) {
-            error_log("MT Optimizer: Exception adding index {$index_name}: " . $e->getMessage());
+            MT_Logger::error('Database index creation failed', [
+                'index_name' => $index_name,
+                'table' => $table,
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }

@@ -131,7 +131,7 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         $data = wp_parse_args($data, $defaults);
         
         // Log the data being inserted
-        error_log('MT Assignment Repository - Creating assignment with data: ' . print_r($data, true));
+        MT_Logger::debug('Creating assignment', ['data' => $data]);
         
         // Generate format specifiers dynamically
         $formats = [];
@@ -150,9 +150,9 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
         );
         
         if ($result === false) {
-            error_log('MT Assignment Repository - Insert failed. Last error: ' . $wpdb->last_error);
+            MT_Logger::database_error('INSERT', $this->table_name, $wpdb->last_error, ['data' => $data]);
         } else {
-            error_log('MT Assignment Repository - Insert successful. ID: ' . $wpdb->insert_id);
+            MT_Logger::debug('Assignment created successfully', ['assignment_id' => $wpdb->insert_id]);
             // Clear related caches
             $this->clear_assignment_caches($data['jury_member_id'] ?? null);
         }
@@ -265,11 +265,18 @@ class MT_Assignment_Repository implements MT_Repository_Interface {
             $candidate_id
         );
         
-        error_log('MT Assignment Repository - Checking assignment with query: ' . $query);
+        MT_Logger::debug('Checking assignment existence', [
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id
+        ]);
         
         $count = $wpdb->get_var($query);
         
-        error_log('MT Assignment Repository - Assignment count: ' . $count . ' for jury_member_id=' . $jury_member_id . ', candidate_id=' . $candidate_id);
+        MT_Logger::debug('Assignment existence check result', [
+            'count' => $count,
+            'jury_member_id' => $jury_member_id,
+            'candidate_id' => $candidate_id
+        ]);
         
         return $count > 0;
     }

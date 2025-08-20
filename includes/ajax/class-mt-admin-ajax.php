@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Ajax;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -616,7 +618,10 @@ class MT_Admin_Ajax extends MT_Base_Ajax {
         }
         
         // Log for debugging
-        error_log('MT Bulk Candidate: action=' . $action . ', count=' . count($candidate_ids));
+        MT_Logger::info('Bulk candidate operation', [
+            'action' => $action,
+            'candidate_count' => count($candidate_ids)
+        ]);
         
         $success_count = 0;
         $errors = [];

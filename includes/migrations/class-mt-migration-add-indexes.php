@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Migrations;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -63,9 +65,9 @@ class MT_Migration_Add_Indexes {
         // Log migration completion
         if ($success) {
             update_option('mt_migration_indexes_added', current_time('mysql'));
-            error_log('MT Migration: Successfully added performance indexes');
+            MT_Logger::info('Database migration completed successfully: performance indexes added');
         } else {
-            error_log('MT Migration: Some indexes could not be added');
+            MT_Logger::error('Database migration failed: some indexes could not be added');
         }
         
         return $success;
@@ -86,7 +88,10 @@ class MT_Migration_Add_Indexes {
         $existing = $wpdb->get_results("SHOW INDEX FROM $table WHERE Key_name = '$index_name'");
         
         if (!empty($existing)) {
-            error_log("MT Migration: Index $index_name already exists on $table");
+            MT_Logger::debug("Database index already exists", [
+                'index_name' => $index_name,
+                'table' => $table
+            ]);
             return true;
         }
         
@@ -100,11 +105,19 @@ class MT_Migration_Add_Indexes {
         $result = $wpdb->query($query);
         
         if ($result === false) {
-            error_log("MT Migration: Failed to add index $index_name on $table. Error: " . $wpdb->last_error);
+            MT_Logger::database_error('ADD INDEX', $table, $wpdb->last_error, [
+                'index_name' => $index_name,
+                'columns' => $columns,
+                'query' => $query
+            ]);
             return false;
         }
         
-        error_log("MT Migration: Successfully added index $index_name on $table");
+        MT_Logger::info('Database index added successfully', [
+            'index_name' => $index_name,
+            'table' => $table,
+            'columns' => $columns
+        ]);
         return true;
     }
     
@@ -153,10 +166,15 @@ class MT_Migration_Add_Indexes {
                     $result = $wpdb->query($query);
                     
                     if ($result === false) {
-                        error_log("MT Migration: Failed to remove index $index_name from $table");
+                        MT_Logger::database_error('DROP INDEX', $table, $wpdb->last_error, [
+                            'index_name' => $index_name
+                        ]);
                         $success = false;
                     } else {
-                        error_log("MT Migration: Successfully removed index $index_name from $table");
+                        MT_Logger::info('Database index removed successfully', [
+                            'index_name' => $index_name,
+                            'table' => $table
+                        ]);
                     }
                 }
             }

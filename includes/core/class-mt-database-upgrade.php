@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Core;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -203,9 +205,9 @@ class MT_Database_Upgrade {
         // Check if table was created successfully
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$candidates_table}'");
         if ($table_exists) {
-            error_log('Candidates table created successfully: ' . $candidates_table);
+            MT_Logger::info('Database table created successfully', ['table' => $candidates_table]);
         } else {
-            error_log('Failed to create candidates table: ' . $candidates_table . ' - Error: ' . $wpdb->last_error);
+            MT_Logger::database_error('CREATE TABLE', $candidates_table, $wpdb->last_error);
         }
     }
     
@@ -225,7 +227,7 @@ class MT_Database_Upgrade {
         $results = \MobilityTrailblazers\Core\MT_Database_Optimizer::optimize();
         
         // Log results
-        error_log('MT Database Optimization Results: ' . print_r($results, true));
+        MT_Logger::info('Database optimization completed', ['results' => $results]);
         
         // Store optimization results for admin notice
         set_transient('mt_db_optimization_results', $results, HOUR_IN_SECONDS);

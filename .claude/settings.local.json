@@ -45,7 +45,15 @@
       "mcp__filesystem-mcp__read_file",
       "mcp__mysql-mcp__mt_debug_check",
       "Bash(find:*)",
-      "mcp__filesystem-mcp__edit_file"
+      "mcp__filesystem-mcp__edit_file",
+      "mcp__wordpress-mcp__wp_debug_log",
+      "Bash(C:/xampp/php/php.exe scripts/compile-mo.php)",
+      "mcp__wordpress-mcp__wp_cli",
+      "mcp__filesystem-mcp__get_file_info",
+      "Bash(grep:*)",
+      "Bash(where php)",
+      "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\mobility-trailblazers.php\")",
+      "mcp__filesystem-mcp__search_files"
     ],
     "deny": []
   }

@@ -9,6 +9,7 @@
 namespace MobilityTrailblazers\Repositories;
 
 use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -128,7 +129,7 @@ class MT_Candidate_Repository implements MT_Repository_Interface {
         
         // Ensure required fields
         if (empty($data['name']) || empty($data['slug'])) {
-            error_log('Missing required fields for candidate creation: ' . print_r($data, true));
+            MT_Logger::warning('Candidate creation failed: missing required fields', ['data' => $data]);
             return false;
         }
         
@@ -156,7 +157,7 @@ class MT_Candidate_Repository implements MT_Repository_Interface {
         $result = $wpdb->insert($this->table, $insert_data);
         
         if ($result === false) {
-            error_log('Failed to create candidate: ' . $wpdb->last_error);
+            MT_Logger::database_error('INSERT', $this->table, $wpdb->last_error, ['data' => $insert_data]);
             return false;
         }
         
@@ -224,7 +225,7 @@ class MT_Candidate_Repository implements MT_Repository_Interface {
         );
         
         if ($result === false) {
-            error_log('Failed to update candidate ' . $id . ': ' . $wpdb->last_error);
+            MT_Logger::database_error('UPDATE', $this->table, $wpdb->last_error, ['id' => $id, 'data' => $update_data]);
             return false;
         }
         

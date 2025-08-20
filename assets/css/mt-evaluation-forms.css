@@ -453,11 +453,57 @@ body .mt-criterion-label {
     margin: 0 0 5px 0 !important;
 }
 
-body .mt-criterion-description {
+/* Criterion Description - Enhanced visibility fixes */
+body .mt-criterion-description,
+.mt-criterion-description,
+.mt-criteria-grid .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     font-size: 14px !important;
-    color: var(--mt-body-text) !important;
-    margin: 0 !important;
+    color: var(--mt-body-text, #6c757d) !important;
+    margin: 5px 0 0 0 !important;
     line-height: 1.5 !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    position: static !important;
+    z-index: auto !important;
+    clip: auto !important;
+    clip-path: none !important;
+}
+
+/* Additional specificity for evaluation forms */
+#mt-evaluation-form .mt-criterion-description,
+.mt-evaluation-page .mt-criterion-description,
+.mt-form-cards .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Prevent pseudo-elements from hiding content */
+.mt-criterion-description::before,
+.mt-criterion-description::after {
+    content: none !important;
+}
+
+/* German language specific display */
+body[lang="de-DE"] .mt-criterion-description,
+html[lang="de-DE"] .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure parent containers don't hide children */
+.mt-criterion-info,
+.mt-criterion-header,
+.mt-criterion-card {
+    overflow: visible !important;
 }
 
 /* ===================================

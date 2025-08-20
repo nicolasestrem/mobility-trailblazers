@@ -10,6 +10,8 @@
 
 namespace MobilityTrailblazers\Admin;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -353,7 +355,7 @@ class MT_Candidate_Columns {
         if (!empty($result['messages'])) {
             // Log messages for debugging
             foreach ($result['messages'] as $message) {
-                error_log('MT CSV Import: ' . $message);
+                MT_Logger::info('CSV Import', ['message' => $message]);
             }
         }
         

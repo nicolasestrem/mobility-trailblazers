@@ -30,8 +30,8 @@ if ($remove_data === '1') {
     \MobilityTrailblazers\Core\MT_Uninstaller::remove_all_data();
     
     // Log the uninstallation if possible
-    if (function_exists('error_log')) {
-        error_log('Mobility Trailblazers: All plugin data has been removed as per user settings.');
+    if (class_exists('MobilityTrailblazers\\Core\\MT_Logger')) {
+        \MobilityTrailblazers\Core\MT_Logger::info('Plugin data removed as per user settings during uninstall');
     }
 } else {
     // User chose to preserve data

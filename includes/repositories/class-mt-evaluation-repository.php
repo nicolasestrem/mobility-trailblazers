@@ -413,7 +413,7 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                 return $id;
             }
             
-            error_log('MT Evaluation Repository - Update failed: ' . $wpdb->last_error);
+            MT_Logger::database_error('UPDATE', $this->table_name, $wpdb->last_error, ['id' => $id, 'data' => $data]);
             return false;
         } else {
             // Check if evaluation already exists
@@ -454,7 +454,7 @@ class MT_Evaluation_Repository implements MT_Repository_Interface {
                     return $wpdb->insert_id;
                 }
                 
-                error_log('MT Evaluation Repository - Insert failed: ' . $wpdb->last_error);
+                MT_Logger::database_error('INSERT', $this->table_name, $wpdb->last_error, ['data' => $insert_data]);
                 return false;
             }
         }
