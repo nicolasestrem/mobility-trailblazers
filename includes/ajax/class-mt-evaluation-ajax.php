@@ -50,6 +50,9 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // View details modal
         add_action('wp_ajax_mt_get_evaluation_details', [$this, 'get_evaluation_details']);
+        
+        // Delete single evaluation
+        add_action('wp_ajax_mt_delete_evaluation', [$this, 'delete_evaluation']);
     }
     
     /**
@@ -911,6 +914,66 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         ];
         
         $this->success($data);
+    }
+    
+    /**
+     * Delete single evaluation
+     *
+     * @return void
+     */
+    public function delete_evaluation() {
+        // Verify nonce
+        if (!$this->verify_nonce('mt_admin_nonce')) {
+            $this->error(__('Security check failed', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Check permissions
+        if (!current_user_can('mt_manage_evaluations') && !current_user_can('administrator')) {
+            $this->error(__('Permission denied', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get evaluation ID
+        $evaluation_id = $this->get_int_param('evaluation_id');
+        if (!$evaluation_id) {
+            $this->error(__('Invalid evaluation ID', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Get evaluation details for audit log
+        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation = $evaluation_repo->find($evaluation_id);
+        
+        if (!$evaluation) {
+            $this->error(__('Evaluation not found', 'mobility-trailblazers'));
+            return;
+        }
+        
+        // Delete the evaluation
+        $result = $evaluation_repo->delete($evaluation_id);
+        
+        if ($result) {
+            // Log the deletion
+            MT_Audit_Logger::log(
+                'evaluation_deleted',
+                'evaluation',
+                $evaluation_id,
+                [
+                    'jury_member_id' => $evaluation->jury_member_id,
+                    'candidate_id' => $evaluation->candidate_id,
+                    'status' => $evaluation->status,
+                    'total_score' => $evaluation->total_score ?? 0
+                ]
+            );
+            
+            $this->success(
+                ['deleted_id' => $evaluation_id],
+                __('Evaluation deleted successfully', 'mobility-trailblazers')
+            );
+        } else {
+            $this->error(__('Failed to delete evaluation', 'mobility-trailblazers'));
+        }
     }
 
 } 

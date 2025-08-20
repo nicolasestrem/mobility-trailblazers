@@ -637,6 +637,51 @@ class MT_Admin {
             true
         );
         
+        // Enqueue Evaluations page assets
+        if (isset($_GET['page']) && $_GET['page'] === 'mt-evaluations') {
+            wp_enqueue_style(
+                'mt-evaluations-admin',
+                MT_PLUGIN_URL . 'assets/css/mt-evaluations-admin.css',
+                ['mt-admin'],
+                MT_VERSION
+            );
+            
+            wp_enqueue_script(
+                'mt-evaluations-admin',
+                MT_PLUGIN_URL . 'assets/js/mt-evaluations-admin.js',
+                ['jquery', 'mt-admin'],
+                MT_VERSION,
+                true
+            );
+            
+            // Localize script for evaluations
+            wp_localize_script('mt-evaluations-admin', 'mt_evaluations_vars', [
+                'nonce' => wp_create_nonce('mt_admin_nonce'),
+                'ajax_url' => admin_url('admin-ajax.php')
+            ]);
+            
+            wp_localize_script('mt-evaluations-admin', 'mt_evaluations_i18n', [
+                'loading' => __('Loading...', 'mobility-trailblazers'),
+                'close' => __('Close', 'mobility-trailblazers'),
+                'delete' => __('Delete Evaluation', 'mobility-trailblazers'),
+                'confirm_delete' => __('Are you sure you want to delete this evaluation?', 'mobility-trailblazers'),
+                'confirm_bulk_delete' => __('Are you sure you want to delete the selected evaluations?', 'mobility-trailblazers'),
+                'no_selection' => __('Please select at least one evaluation.', 'mobility-trailblazers'),
+                'evaluation_details' => __('Evaluation Details', 'mobility-trailblazers'),
+                'jury_member' => __('Jury Member', 'mobility-trailblazers'),
+                'candidate' => __('Candidate', 'mobility-trailblazers'),
+                'organization' => __('Organization', 'mobility-trailblazers'),
+                'categories' => __('Categories', 'mobility-trailblazers'),
+                'status' => __('Status', 'mobility-trailblazers'),
+                'created' => __('Created', 'mobility-trailblazers'),
+                'updated' => __('Last Updated', 'mobility-trailblazers'),
+                'scores' => __('Evaluation Scores', 'mobility-trailblazers'),
+                'total_score' => __('Total Score', 'mobility-trailblazers'),
+                'average_score' => __('Average', 'mobility-trailblazers'),
+                'comments' => __('Comments', 'mobility-trailblazers')
+            ]);
+        }
+        
         // Enqueue Debug Center assets if on Debug Center page and not in production
         if (isset($_GET['page']) && $_GET['page'] === 'mt-debug-center' && (defined('WP_DEBUG') && WP_DEBUG)) {
             // Debug Center styles are now included in admin.css
