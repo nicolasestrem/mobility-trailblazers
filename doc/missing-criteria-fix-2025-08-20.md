@@ -1,7 +1,7 @@
 # Fix: Missing Evaluation Criteria for 11 Candidates
 
 ## Issue Description
-**Date Identified:** January 20, 2025
+**Date Identified:** August 20, 2025
 **Version:** 2.5.37
 **Severity:** High - Affecting jury evaluation process
 

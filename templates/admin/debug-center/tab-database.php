@@ -221,7 +221,7 @@ if (!is_array($all_tables)) {
             </div>
             
             <?php 
-            // REMOVED: Delete All Candidates button - dangerous operation removed 2025-01-20
+            // REMOVED: Delete All Candidates button - dangerous operation removed 2025-08-20
             // This feature was permanently disabled for security reasons
             if (defined('MT_DEV_TOOLS') && MT_DEV_TOOLS && defined('WP_DEBUG') && WP_DEBUG) : ?>
             <!-- Delete All Candidates - Only visible in development with MT_DEV_TOOLS enabled -->

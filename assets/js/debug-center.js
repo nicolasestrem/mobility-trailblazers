@@ -52,7 +52,7 @@
             // Widget refresh
             $(document).on('click', '.mt-refresh-widget', this.refreshWidget.bind(this));
             
-            // REMOVED: Delete all candidates - dangerous operation removed 2025-01-20
+            // REMOVED: Delete all candidates - dangerous operation removed 2025-08-20
         },
         
         /**
@@ -570,7 +570,7 @@
             });
         },
         
-        // REMOVED: deleteAllCandidates method - dangerous operation removed 2025-01-20
+        // REMOVED: deleteAllCandidates method - dangerous operation removed 2025-08-20
     };
     
     // Initialize when document is ready

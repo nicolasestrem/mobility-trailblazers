@@ -144,7 +144,7 @@ private function is_using_elementor_widgets() {
 - `assets/css/v3/mt-visual-tune.css` - Added documentation and variables
 
 ### Documentation Added
-- `doc/performance-optimization-2025-01-19.md` (this file)
+- `doc/performance-optimization-2025-08-19.md` (this file)
 - `doc/css-v3-implementation.md` - Updated with new optimizations
 
 ## Conclusion

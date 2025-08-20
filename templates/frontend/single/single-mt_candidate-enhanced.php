@@ -264,7 +264,7 @@ while (have_posts()) : the_post();
                     </div>
                 </div>
 
-                <!-- Evaluation CTA removed 2025-01-20 -->
+                <!-- Evaluation CTA removed 2025-08-20 -->
                 <!-- Button was showing for all jury members regardless of assignment status -->
                 <!-- Evaluations should only be started from the jury dashboard where assignments are properly checked -->
 
