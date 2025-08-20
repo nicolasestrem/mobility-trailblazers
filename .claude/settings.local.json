@@ -31,7 +31,9 @@
       "mcp__memory__search_nodes",
       "mcp__kapture__navigate",
       "mcp__kapture__list_tabs",
-      "mcp__kapture__dom"
+      "mcp__kapture__dom",
+      "mcp__docker-mcp__docker_exec",
+      "mcp__docker-mcp__mobility_status"
     ],
     "deny": [],
     "ask": []
