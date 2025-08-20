@@ -10,9 +10,25 @@ if (!defined('ABSPATH')) {
 
 echo "=== FINAL CONTAINER VALIDATION ===\n\n";
 
-// Test container validation
-$is_valid = MobilityTrailblazers\Core\MT_Plugin::validate_container();
-echo "Container Validation: " . ($is_valid ? "PASSED" : "FAILED") . "\n";
+// Ensure container is bootstrapped before validation
+try {
+    $plugin = MobilityTrailblazers\Core\MT_Plugin::get_instance();
+    if (!$plugin) {
+        echo "Container Bootstrap: FAILED - Plugin instance not available\n";
+        exit(1);
+    }
+    
+    // Ensure services are registered for the validation
+    $plugin->ensure_services_for_ajax();
+    echo "Container Bootstrap: SUCCESS\n";
+    
+    // Test container validation
+    $is_valid = MobilityTrailblazers\Core\MT_Plugin::validate_container();
+    echo "Container Validation: " . ($is_valid ? "PASSED" : "FAILED") . "\n";
+} catch (Exception $e) {
+    echo "Container Bootstrap: FAILED - " . $e->getMessage() . "\n";
+    exit(1);
+}
 
 // Test actual resolution
 try {
@@ -29,4 +45,5 @@ try {
 } catch (Exception $e) {
     echo "\n=== FIX STATUS: FAILED ===\n";
     echo "Error: " . $e->getMessage() . "\n";
+    echo "Stack trace:\n" . $e->getTraceAsString() . "\n";
 }

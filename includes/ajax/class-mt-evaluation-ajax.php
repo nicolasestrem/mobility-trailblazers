@@ -373,6 +373,15 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'fields' => 'names'
         ]);
         
+        // Handle WP_Error case
+        if (is_wp_error($categories)) {
+            MT_Logger::warning('Failed to get categories in get_candidate_details', [
+                'candidate_id' => $candidate_id,
+                'error_message' => $categories->get_error_message()
+            ]);
+            $categories = [];
+        }
+        
         // Get featured image
         $photo_url = get_the_post_thumbnail_url($candidate_id, 'large');
         
@@ -980,6 +989,12 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Ensure categories is an array (wp_get_post_terms can return WP_Error)
         if (is_wp_error($categories)) {
+            // Log the error for debugging
+            MT_Logger::warning('Failed to get categories for evaluation details', [
+                'candidate_id' => $evaluation->candidate_id,
+                'error_message' => $categories->get_error_message(),
+                'error_code' => $categories->get_error_code()
+            ]);
             $categories = [];
         }
         
