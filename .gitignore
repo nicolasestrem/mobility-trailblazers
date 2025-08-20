@@ -104,3 +104,5 @@ cleanup-*.sh
 /scripts/
 /scripts
 /scripts
+/doc
+/report/
