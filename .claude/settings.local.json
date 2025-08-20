@@ -44,7 +44,8 @@
       "Bash(git mv:*)",
       "mcp__filesystem-mcp__read_file",
       "mcp__mysql-mcp__mt_debug_check",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__filesystem-mcp__edit_file"
     ],
     "deny": []
   }

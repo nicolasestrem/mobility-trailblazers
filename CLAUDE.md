@@ -21,6 +21,8 @@ This project benefits from using multiple specialized agents and MCP servers dep
 
 ### Recommended Agents for Common Tasks
 
+Always deploy one or several agent most relevant to the task
+
 **WordPress Development:**
 - `wordpress-code-reviewer` - Review plugin code for WordPress best practices, security, and performance
 - `security-audit-specialist` - Audit for SQL injection, XSS, and other vulnerabilities
@@ -54,6 +56,9 @@ This project benefits from using multiple specialized agents and MCP servers dep
 
 **Version Control:**
 - `mcp__github` - Repository management and pull requests
+
+**think**
+- sequential-thinking - Think better
 
 ### Example Usage Patterns
 
