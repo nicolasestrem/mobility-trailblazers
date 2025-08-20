@@ -6,7 +6,7 @@ This document describes the candidate import system implemented for the Mobility
 ## Version
 - **Implementation Date**: August 2025
 - **Plugin Version**: 2.5.26
-- **Author**: Nicolas Estrem
+- **Author**: Mobility Trailblazers - Nicolas Estrem
 
 ## System Components
 

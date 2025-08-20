@@ -144,7 +144,7 @@ CREATE TABLE wp_mt_candidates (
 - `phpoffice/phpspreadsheet`: ^1.29 (Excel file reading)
 
 ## Credits
-- **Development**: Nicolas Estrem
+- **Development**: Mobility Trailblazers - Nicolas Estrem
 - **Testing**: Mobility Trailblazers Team
 - **Project Lead**: Tobias Tomczak
 
