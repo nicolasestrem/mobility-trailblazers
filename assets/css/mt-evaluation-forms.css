@@ -23,9 +23,12 @@
 .mt-criteria-info-section {
     background: #ffffff;
     padding: 30px;
-    margin: 30px 0;
+    margin: 30px auto;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .mt-criteria-info-section .mt-section-title {
@@ -82,6 +85,20 @@
     color: #4b5563;
 }
 
+/* Ensure evaluation page has proper width */
+.mt-evaluation-page {
+    width: 100%;
+    max-width: 100%;
+}
+
+.mt-evaluation-page .mt-criteria-info-section {
+    clear: both;
+    display: block;
+    width: calc(100% + 60px);
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
 /* Mobile responsiveness for criteria info */
 @media (max-width: 768px) {
     .mt-criteria-info-grid {
@@ -91,6 +108,7 @@
     .mt-criteria-info-section {
         padding: 20px;
         margin: 20px -10px;
+        width: calc(100% + 20px);
     }
     
     .mt-criterion-info-card {

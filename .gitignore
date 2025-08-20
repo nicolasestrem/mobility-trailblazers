@@ -80,3 +80,4 @@ scripts/fix-*.sh
 !assets/
 !templates/
 !languages/
+/scripts
