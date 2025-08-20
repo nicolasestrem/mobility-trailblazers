@@ -157,3 +157,7 @@ cleanup-*.sh
 
 /.internal/
 /doc/report
+doc/USERNAME_FIX_GUIDE.md
+doc/fix-jury-usernames-comprehensive-2025-08-20.sql
+/sql
+/scripts
