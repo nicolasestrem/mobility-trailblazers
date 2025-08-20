@@ -89,11 +89,56 @@ class MT_Coaching {
     public function get_coaching_statistics() {
         global $wpdb;
         
+        // First get all jury members from the custom post type
+        $jury_members = get_posts([
+            'post_type' => 'mt_jury_member',
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ]);
+        
+        // Get jury member IDs and their associated user IDs
+        $jury_member_ids = [];
+        $jury_member_map = [];
+        
+        foreach ($jury_members as $jury_member) {
+            $jury_member_ids[] = $jury_member->ID;
+            // Map jury member post ID to user data
+            $user_id = get_post_meta($jury_member->ID, '_mt_user_id', true);
+            if ($user_id) {
+                $user = get_user_by('id', $user_id);
+                if ($user) {
+                    $jury_member_map[$jury_member->ID] = [
+                        'user_id' => $user_id,
+                        'display_name' => $jury_member->post_title,
+                        'user_email' => $user->user_email
+                    ];
+                }
+            } else {
+                // Fallback to jury member title if no user linked
+                $jury_member_map[$jury_member->ID] = [
+                    'user_id' => 0,
+                    'display_name' => $jury_member->post_title,
+                    'user_email' => get_post_meta($jury_member->ID, '_mt_email', true) ?: ''
+                ];
+            }
+        }
+        
+        if (empty($jury_member_ids)) {
+            return [
+                'jury_stats' => [],
+                'total_assigned' => 0,
+                'total_completed' => 0,
+                'total_drafts' => 0,
+                'completion_rate' => 0
+            ];
+        }
+        
+        // Get statistics for each jury member
+        $jury_member_ids_str = implode(',', array_map('intval', $jury_member_ids));
+        
         $stats = $wpdb->get_results("
             SELECT 
-                u.ID,
-                u.display_name,
-                u.user_email,
+                a.jury_member_id,
                 COUNT(DISTINCT a.candidate_id) as assigned,
                 COUNT(DISTINCT e.candidate_id) as completed,
                 COUNT(DISTINCT CASE WHEN e.status = 'draft' THEN e.candidate_id END) as drafts,
@@ -103,30 +148,65 @@ class MT_Coaching {
                     ELSE NULL 
                 END) as avg_score,
                 MAX(e.updated_at) as last_activity
-            FROM {$wpdb->users} u
-            LEFT JOIN {$wpdb->prefix}mt_jury_assignments a ON u.ID = a.jury_member_id
-            LEFT JOIN {$wpdb->prefix}mt_evaluations e ON u.ID = e.jury_member_id AND a.candidate_id = e.candidate_id
-            WHERE u.ID IN (
-                SELECT user_id FROM {$wpdb->usermeta} 
-                WHERE meta_key = 'mt_jury_member' AND meta_value = 'yes'
-            )
-            GROUP BY u.ID
-            ORDER BY u.display_name ASC
+            FROM {$wpdb->prefix}mt_jury_assignments a
+            LEFT JOIN {$wpdb->prefix}mt_evaluations e ON a.jury_member_id = e.jury_member_id AND a.candidate_id = e.candidate_id
+            WHERE a.jury_member_id IN ({$jury_member_ids_str})
+            GROUP BY a.jury_member_id
         ");
+        
+        // Merge jury member data with statistics
+        $final_stats = [];
+        foreach ($stats as $stat) {
+            if (isset($jury_member_map[$stat->jury_member_id])) {
+                $jury_data = $jury_member_map[$stat->jury_member_id];
+                $stat->ID = $jury_data['user_id'];
+                $stat->display_name = $jury_data['display_name'];
+                $stat->user_email = $jury_data['user_email'];
+                $final_stats[] = $stat;
+            }
+        }
+        
+        // Handle jury members with no statistics
+        foreach ($jury_member_map as $jury_id => $jury_data) {
+            $found = false;
+            foreach ($stats as $stat) {
+                if ($stat->jury_member_id == $jury_id) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $final_stats[] = (object)[
+                    'ID' => $jury_data['user_id'],
+                    'display_name' => $jury_data['display_name'],
+                    'user_email' => $jury_data['user_email'],
+                    'assigned' => 0,
+                    'completed' => 0,
+                    'drafts' => 0,
+                    'avg_score' => null,
+                    'last_activity' => null
+                ];
+            }
+        }
+        
+        // Sort by display name
+        usort($final_stats, function($a, $b) {
+            return strcasecmp($a->display_name, $b->display_name);
+        });
         
         // Calculate overall statistics
         $total_assigned = 0;
         $total_completed = 0;
         $total_drafts = 0;
         
-        foreach ($stats as $stat) {
+        foreach ($final_stats as $stat) {
             $total_assigned += $stat->assigned;
             $total_completed += $stat->completed;
             $total_drafts += $stat->drafts;
         }
         
         return [
-            'jury_stats' => $stats,
+            'jury_stats' => $final_stats,
             'total_assigned' => $total_assigned,
             'total_completed' => $total_completed,
             'total_drafts' => $total_drafts,
