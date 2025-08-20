@@ -129,7 +129,6 @@
                 $('.mt-average-score').text(average + '/10');
                 // Update evaluation status
                 $('.mt-evaluated-count').text('(' + count + '/5 criteria evaluated)');
-                ');
             }
         }
         // Fix 4: Prevent form submission if ratings are missing
@@ -152,7 +151,7 @@
                 }
                 // Log submission data for debugging
                 $('.mt-score-slider').each(function() {
-                    .attr('name') + ': ' + $(this).val());
+                    console.log($(this).attr('name') + ': ' + $(this).val());
                 });
             });
         }
@@ -225,7 +224,7 @@
             reinitialize: initializeAllFixes,
             checkValues: function() {
                 $('.mt-score-slider').each(function() {
-                    .attr('name') + ': ' + $(this).val());
+                    console.log($(this).attr('name') + ': ' + $(this).val());
                 });
             }
         };
