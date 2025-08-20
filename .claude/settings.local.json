@@ -36,7 +36,11 @@
       "mcp__docker-mcp__mobility_status",
       "mcp__docker-mcp__mobility_status",
       "mcp__mysql-mcp__mt_debug_check",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "mcp__filesystem__list_allowed_directories",
+      "mcp__wordpress__wp_debug_log",
+      "Bash(php:*)",
+      "Bash(wp:*)"
     ],
     "deny": [],
     "ask": []

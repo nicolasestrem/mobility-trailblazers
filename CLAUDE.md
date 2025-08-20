@@ -1,315 +1,319 @@
-# CLAUDE.md - Mobility Trailblazers AI Context
+# CLAUDE.md
 
-## CRITICAL PROJECT CONTEXT
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**PROJECT**: WordPress Plugin - Mobility Trailblazers Award Platform  
-**DEADLINE**: August 21st, 2025 (MISSED - IMMEDIATE CRISIS)  
-**CURRENT VERSION**: 2.5.34  
-**PRIMARY LANGUAGE**: German (DACH region)  
+## Project Overview
 
-## IMMEDIATE PRIORITIES
+**Project**: Mobility Trailblazers WordPress Plugin  
+**Version**: 2.5.36  
+**Purpose**: Award platform for recognizing the 25 most innovative mobility shapers in DACH region  
+**Critical Date**: October 30, 2025 - Live award ceremony  
+**Tech Stack**: WordPress 5.8+, PHP 7.4+, MariaDB, Docker, Elementor  
 
-1. **DESIGN UX** - Critical for jury engagement
-2. **MOBILE OPTIMIZATION** - Critical for jury evaluation workflow
-3. **GERMAN LOCALIZATION** - 1000+ strings, cultural adaptation required
-4. **PERFORMANCE** - Database queries must handle 200+ candidates efficiently
-5. **LIVE EVENT PREP** - October 30, 2025 real-time voting system
+## Critical Commands
 
-## DEVELOPMENT CONSTRAINTS
-
-- **NO EMAIL FUNCTIONALITY**: Never implement email features
-- **GERMAN-FIRST**: All UI/UX designed for German speakers
-- **MOBILE-FIRST**: 70% traffic expected from mobile
-- **WORDPRESS STANDARDS**: Follow WP coding standards strictly
-- **PREFIX EVERYTHING**: Use `mt_` for functions, `MT_` for classes, `--mt-` for CSS
-
-## FILE STRUCTURE CONTEXT
-
-```
-/includes/core/
-├── class-mt-plugin.php           # Main plugin orchestration
-├── class-mt-database.php         # Database operations (CRITICAL)
-├── class-mt-evaluations.php      # Jury scoring logic
-└── class-mt-import.php           # Excel import system (ACTIVE DEV)
-
-/includes/admin/
-├── class-mt-admin.php            # Admin dashboard
-├── class-mt-candidates.php       # Candidate management (CRITICAL)
-└── class-mt-jury.php            # Jury workflow
-
-/assets/
-├── css/admin-styles.css          # Uses --mt- CSS variables
-├── js/design-enhancements.js     # Frontend interactions
-└── images/                       # WebP format preferred
-
-/templates/
-├── admin/candidate-list.php      # Candidate management UI
-└── public/voting-interface.php   # Public voting (mobile-critical)
-```
-
-## DATABASE SCHEMA
-
-```sql
--- Core candidate data
-wp_posts (post_type: 'mt_candidate')
-wp_postmeta (photos, German descriptions)
-
--- Custom tables (wp_mt_ prefix required)
-wp_mt_evaluations (jury_id, candidate_id, scores 1-10, 5 criteria)
-wp_mt_assignments (jury-candidate relationships)
-wp_mt_votes (public voting data)
-```
-
-## CODING PATTERNS
-
-### Function Naming
-```php
-// CORRECT patterns
-mt_get_candidates()
-mt_calculate_scores() 
-mt_import_excel_data()
-MT_Evaluations::process_scoring()
-
-// INCORRECT patterns
-get_candidates() // Missing prefix
-mobility_get_data() // Wrong prefix
-```
-
-### Database Operations
-```php
-// ALWAYS use prepared statements
-$wpdb->prepare("SELECT * FROM wp_mt_evaluations WHERE jury_id = %d", $jury_id);
-
-// NEVER use direct queries
-$wpdb->get_results("SELECT * FROM wp_mt_evaluations WHERE jury_id = " . $jury_id);
-```
-
-### German Localization
-```php
-// CORRECT
-__('Kandidat erfolgreich gespeichert', 'mobility-trailblazers')
-_e('Bewertung abgeschlossen', 'mobility-trailblazers')
-
-// All strings must be in German .po file
-```
-
-## CURRENT ACTIVE DEVELOPMENT
-
-### Excel Import System (HIGH PRIORITY)
-- **File**: `/includes/admin/class-mt-candidates.php`
-- **Dependency**: `phpoffice/phpspreadsheet`
-- **Requirements**: Handle German content, photos, UTF-8 encoding
-- **Test Data**: 48 candidates successfully imported
-
-### Performance Issues (CRITICAL)
-- **Problem**: Database queries slow with 200+ candidates
-- **Solution**: Query optimization, proper indexing
-- **Files to check**: `class-mt-database.php`, `class-mt-evaluations.php`
-
-### Mobile UX (URGENT)
-- **Problem**: Jury evaluation interface not touch-optimized
-- **Files**: `/templates/admin/jury-evaluation.php`, `/assets/css/admin-styles.css`
-- **Requirement**: Touch-friendly on tablets/phones
-
-## TESTING REQUIREMENTS
+### Development Environment
 
 ```bash
-# ALWAYS run before committing
-phpunit                           # Full test suite
-phpunit tests/test-import.php     # Import functionality
-phpunit tests/test-evaluations.php # Scoring system
+# PowerShell scripts for Windows development
+./scripts/minify-assets.ps1           # Minify CSS/JS for production
+./scripts/regenerate-mo.ps1           # Compile German translations
+./scripts/production-backup.ps1       # Backup production data
+./scripts/production-cleanup.ps1      # Clean production environment
+
+# WordPress CLI (via Docker)
+docker exec mobility_wordpress_dev wp cache flush
+docker exec mobility_wordpress_dev wp plugin list
+docker exec mobility_wordpress_dev wp db query "SELECT * FROM wp_mt_evaluations"
 ```
 
-### Test Coverage Required
-- Import system with German content
-- Jury evaluation workflow
-- Vote counting accuracy
-- Mobile responsiveness
+### Testing & Validation
 
-## SECURITY REQUIREMENTS
+```bash
+# Run PHP scripts directly
+php scripts/debug-db-create.php       # Check database tables
+php scripts/compile-translations.php  # Compile .po to .mo files
+php scripts/dry-run-import.php        # Test CSV import without saving
+```
+
+## High-Level Architecture
+
+### Core Plugin Structure
+
+The plugin follows a **Repository-Service-Controller** pattern with WordPress integration:
+
+1. **Main Entry**: `mobility-trailblazers.php` - Plugin bootstrap
+2. **Core Orchestration**: `/includes/core/class-mt-plugin.php` - Manages all plugin components
+3. **Database Layer**: Custom tables (`wp_mt_evaluations`, `wp_mt_assignments`) + WordPress post types
+4. **AJAX System**: Base class pattern with security validation in `/includes/ajax/`
+5. **Frontend Integration**: Elementor widgets + shortcodes + templates
+
+### Key Architectural Decisions
+
+- **Custom Post Types**: `mt_candidate` and `mt_jury_member` for WordPress integration
+- **Custom Tables**: Performance-optimized for 490+ candidates and complex evaluations
+- **AJAX-First**: Real-time updates for jury evaluations and assignments
+- **Security Pattern**: Base AJAX class enforces nonce + capability checks
+- **Localization**: German-first with 1000+ translated strings
+
+### Data Flow
+
+```
+User Action → AJAX Request → Base Validation → Service Layer → Repository → Database
+                    ↓
+            JavaScript Handler ← JSON Response ← Service Result
+```
+
+## Critical Development Rules
+
+### Naming Conventions
 
 ```php
-// ALWAYS verify capabilities
-if (!current_user_can('manage_options')) {
+// Functions: ALWAYS prefix with mt_
+mt_get_candidates()
+mt_calculate_scores()
+
+// Classes: ALWAYS prefix with MT_
+class MT_Evaluations
+class MT_Import_Handler
+
+// Database: ALWAYS use wp_mt_ prefix for custom tables
+$wpdb->prefix . 'mt_evaluations'
+
+// CSS: ALWAYS use --mt- prefix for custom properties
+--mt-primary-color
+--mt-spacing-unit
+
+// JavaScript: ALWAYS use mt prefix for globals
+window.mtAjaxObject
+window.mtEvaluations
+```
+
+### Security Requirements
+
+```php
+// ALWAYS verify nonces
+wp_verify_nonce($_POST['nonce'], 'mt_action_name');
+
+// ALWAYS check capabilities
+if (!current_user_can('mt_submit_evaluations')) {
     wp_die(__('Insufficient permissions', 'mobility-trailblazers'));
 }
 
-// ALWAYS use nonces
-wp_verify_nonce($_POST['nonce'], 'mt_action_name');
-
 // ALWAYS sanitize input
-$candidate_name = sanitize_text_field($_POST['name']);
+$candidate_id = absint($_POST['candidate_id']);
+$evaluation_text = sanitize_textarea_field($_POST['comments']);
+
+// ALWAYS use prepared statements
+$wpdb->prepare("SELECT * FROM {$wpdb->prefix}mt_evaluations WHERE jury_id = %d", $jury_id);
 ```
 
-## COMMON DEBUG PATTERNS
+### German Localization
 
 ```php
-// Enable debug logging
-if (defined('MT_DEBUG') && MT_DEBUG) {
-    error_log('MT Debug: ' . $message);
-}
+// ALWAYS wrap user-facing strings
+__('Text in German', 'mobility-trailblazers')
+_e('Echo text in German', 'mobility-trailblazers')
 
-// Database debug
-if (defined('WP_DEBUG') && WP_DEBUG) {
-    error_log($wpdb->last_query);
-    error_log($wpdb->last_error);
-}
+// ALWAYS use formal "Sie" form in German
+// NEVER use informal "Du" form
 ```
 
-## PERFORMANCE OPTIMIZATION
+## Import/Export System
 
-### Database Queries
+### CSV Import Architecture
+
+- **Primary Handler**: `/includes/admin/class-mt-import-handler.php`
+- **AJAX Support**: `/includes/ajax/class-mt-import-ajax.php`
+- **JavaScript**: `/assets/js/csv-import.js`
+
+### Import Methods
+
+1. **Quick Import**: Direct CSV upload via Candidates page
+2. **Advanced Import**: Full validation with dry-run via Import Profiles
+3. **Excel Support**: Client-side conversion before import
+
+### Field Mapping
+
+The import system recognizes both English and German field names:
+- `name` / `Name` / `Kandidat`
+- `email` / `E-Mail` / `Email`
+- `biography` / `Biografie` / `Kurzbiografie`
+
+## Database Schema
+
+### Custom Tables
+
+```sql
+-- Evaluations table
+CREATE TABLE wp_mt_evaluations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    jury_member_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    criterion_1 DECIMAL(3,1),  -- Mut & Pioniergeist
+    criterion_2 DECIMAL(3,1),  -- Innovationsgrad
+    criterion_3 DECIMAL(3,1),  -- Umsetzungskraft
+    criterion_4 DECIMAL(3,1),  -- Relevanz
+    criterion_5 DECIMAL(3,1),  -- Vorbildfunktion
+    comments TEXT,
+    status VARCHAR(20) DEFAULT 'draft',
+    INDEX idx_jury_candidate (jury_member_id, candidate_id)
+);
+
+-- Assignments table
+CREATE TABLE wp_mt_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    jury_member_id INT NOT NULL,
+    candidate_id INT NOT NULL,
+    assigned_by INT,
+    assigned_at DATETIME,
+    INDEX idx_assignments (jury_member_id, candidate_id)
+);
+```
+
+## Frontend Components
+
+### Elementor Widgets
+
+Located in `/includes/integrations/elementor/widgets/`:
+- `class-mt-widget-candidates-grid.php` - Candidate grid display
+- `class-mt-widget-jury-dashboard.php` - Jury member interface
+- `class-mt-widget-evaluation-stats.php` - Statistics display
+
+### Templates
+
+- **Admin**: `/templates/admin/` - Backend interfaces
+- **Frontend**: `/templates/frontend/` - Public-facing templates
+- **Single**: `/templates/frontend/single/` - Individual candidate pages
+
+## Performance Optimization
+
+### Query Optimization
+
 ```php
-// GOOD: Use WP_Query properly
-$candidates = new WP_Query([
-    'post_type' => 'mt_candidate',
-    'posts_per_page' => -1,
-    'meta_query' => $meta_conditions
-]);
+// GOOD: Single query with joins
+$candidates = $wpdb->get_results("
+    SELECT p.*, pm.meta_value as score
+    FROM {$wpdb->posts} p
+    LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+    WHERE p.post_type = 'mt_candidate'
+    AND pm.meta_key = '_mt_total_score'
+    ORDER BY pm.meta_value DESC
+");
 
-// BAD: Multiple queries in loops
+// BAD: Multiple queries in loop
 foreach ($candidates as $candidate) {
-    $meta = get_post_meta($candidate->ID); // Avoid in loops
+    $score = get_post_meta($candidate->ID, '_mt_total_score', true);
 }
 ```
 
-### Image Handling
-```php
-// REQUIRED: WebP format for photos
-// REQUIRED: Multiple sizes for responsive
-// REQUIRED: Lazy loading for mobile
-```
+### Asset Loading
 
-## GERMAN LOCALIZATION CONTEXT
+- CSS files are minified to `/assets/min/css/`
+- JavaScript files are minified to `/assets/min/js/`
+- Use `wp_enqueue_*` with proper dependencies
 
-### UI Text Requirements
-- Formal "Sie" form, not "Du"
-- Professional business German
-- Cultural sensitivity for DACH region
-- Industry-specific mobility terminology
+## Debugging
 
-### Files to Update
-```
-/languages/mobility-trailblazers-de_DE.po  # Source translations
-/languages/mobility-trailblazers-de_DE.mo  # Compiled (auto-generated)
-```
-
-## ELEMENTOR INTEGRATION
-
-### Custom Widgets (4 active)
-```
-/includes/integrations/elementor/
-├── candidate-grid-widget.php    # Public candidate display
-├── voting-widget.php           # Public voting interface
-├── results-widget.php          # Live results display
-└── jury-stats-widget.php       # Admin statistics
-```
-
-## ERROR HANDLING PATTERNS
+### Debug Mode
 
 ```php
-// REQUIRED error handling
-try {
-    $result = mt_process_import($file);
-    if (is_wp_error($result)) {
-        wp_die($result->get_error_message());
-    }
-} catch (Exception $e) {
-    error_log('MT Error: ' . $e->getMessage());
-    wp_die(__('Import failed', 'mobility-trailblazers'));
+// Enable in wp-config.php
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('MT_DEBUG', true);
+
+// Use in code
+if (defined('MT_DEBUG') && MT_DEBUG) {
+    error_log('MT Debug: ' . print_r($data, true));
 }
 ```
 
-## DEPLOYMENT CONTEXT
+### Debug Center
 
-### Production Environment
-- **Server**: Docker containers via Komodo
-- **Database**: MariaDB with Redis caching
-- **SSL**: HTTPS required
-- **Monitoring**: Custom diagnostics system
+Access via **MT Award System → Debug Center** for:
+- Database health checks
+- Error log viewing
+- System diagnostics
+- Script testing
 
-### Pre-deployment Checklist
+## Common Tasks
+
+### Adding a New Evaluation Criterion
+
+1. Update database schema in `/includes/core/class-mt-activator.php`
+2. Add field to evaluation form in `/templates/admin/jury-evaluation-form.php`
+3. Update AJAX handler in `/includes/ajax/class-mt-evaluation-ajax.php`
+4. Add translation strings to `/languages/mobility-trailblazers-de_DE.po`
+5. Regenerate .mo file: `./scripts/regenerate-mo.ps1`
+
+### Creating a New Elementor Widget
+
+1. Create widget class in `/includes/integrations/elementor/widgets/`
+2. Extend `MT_Widget_Base` class
+3. Register in `/includes/integrations/elementor/class-mt-elementor-loader.php`
+4. Add frontend template in `/templates/frontend/`
+5. Add CSS to `/assets/css/` and enqueue properly
+
+### Implementing a New Import Format
+
+1. Extend `MT_Import_Handler` class
+2. Override `parse_file()` and `map_fields()` methods
+3. Add format detection in `detect_format()`
+4. Update UI in `/templates/admin/import-export.php`
+5. Add JavaScript handler if needed
+
+## Testing Checklist
+
+Before deployment, always verify:
+
+- [ ] German translations are complete (`./scripts/regenerate-mo.ps1`)
+- [ ] Assets are minified (`./scripts/minify-assets.ps1`)
+- [ ] Database migrations run correctly
+- [ ] AJAX endpoints return proper JSON
+- [ ] Nonce verification works
+- [ ] Capability checks are in place
+- [ ] Import/export handles German characters
+- [ ] Mobile responsive design works
+- [ ] Elementor widgets render correctly
+- [ ] Cache is cleared after updates
+
+## Production Deployment
+
+### Pre-deployment
+
 ```bash
-1. Run full test suite
-2. Check German translations
-3. Test mobile interfaces
-4. Verify database migrations
-5. Test import system with sample data
+# Backup current state
+./scripts/production-backup.ps1
+
+# Clean unnecessary files
+./scripts/production-cleanup.ps1
+
+# Minify assets
+./scripts/minify-assets.ps1
+
+# Compile translations
+./scripts/regenerate-mo.ps1
 ```
 
-## LIVE EVENT REQUIREMENTS (Oct 30, 2025)
+### Post-deployment
 
-### Real-time Features Needed
-- Public voting with live updates
-- Results calculation and display
-- Winner announcement system
-- Media export capabilities
-
-### Technical Requirements
-- Zero downtime tolerance
-- Sub-second response times
-- Mobile-optimized interfaces
-- Accurate vote counting (99.9%)
-
-## TROUBLESHOOTING QUICK REFERENCE
-
-### Import Issues
 ```bash
-# Check file encoding
-file -bi uploaded_file.xlsx
+# Clear all caches
+docker exec mobility_wordpress_dev wp cache flush
 
-# Verify photo formats
-ls -la /wp-content/uploads/mobility-trailblazers/
+# Verify database
+docker exec mobility_wordpress_dev wp db query "SHOW TABLES LIKE 'wp_mt_%'"
 
-# Database check
-wp db query "SELECT COUNT(*) FROM wp_posts WHERE post_type='mt_candidate'"
+# Check plugin status
+docker exec mobility_wordpress_dev wp plugin list --status=active
 ```
 
-### Performance Issues
-```bash
-# Enable query debugging
-define('SAVEQUERIES', true);
+## Critical Notes
 
-# Check slow queries
-wp db query "SHOW PROCESSLIST"
-
-# Clear caches
-wp cache flush
-```
-
-## CURRENT BUGS & KNOWN ISSUES
-
-1. **Assignment table schema mismatch** - Requires migration
-2. **Mobile touch events** - jQuery UI tooltip conflicts
-3. **Large dataset performance** - Query optimization needed
-4. **German character encoding** - UTF-8 validation required
-
-## AI DEVELOPMENT INSTRUCTIONS
-
-### When modifying code:
-1. **Check existing patterns** in similar files first
-2. **Test mobile interfaces** - majority of users on mobile
-3. **Verify German translations** - add new strings to .po file
-4. **Run tests** - PHPUnit required before committing
-5. **Follow WordPress standards** - use WordPress functions, not pure PHP
-6. **Optimize for performance** - consider 200+ candidates impact
-
-### When debugging:
-1. **Enable debug mode** - Check WP_DEBUG and MT_DEBUG
-2. **Check error logs** - /wp-content/debug.log
-3. **Test with sample data** - Use /data/ folder samples
-4. **Verify database state** - Check custom table integrity
-
-### Critical success factors:
-- **Deadline adherence** - August 18, 2025 deadline MISSED - emergency mode
-- **Mobile experience** - Touch-optimized interfaces required IMMEDIATELY
-- **German localization** - Professional, culturally appropriate
-- **Performance** - Handle 200+ candidates efficiently
-- **Reliability** - Zero tolerance for live event failures
-
----
-
-**CONTEXT UPDATE FREQUENCY**: Update this file with each significant change  
-**LAST UPDATED**: August 19, 2025  
-**CRITICAL STATUS**: DEADLINE MISSED - EMERGENCY MODE  
-**IMMEDIATE ACTION**: Deploy platform TODAY for jury onboarding
+1. **NEVER** modify database schema without migration script
+2. **ALWAYS** test imports with German special characters (ä, ö, ü, ß)
+3. **ALWAYS** verify mobile responsiveness for jury interfaces
+4. **NEVER** hardcode URLs - use WordPress functions
+5. **ALWAYS** use WordPress transients for caching, not custom solutions
+6. **CRITICAL**: October 30, 2025 live event requires zero-downtime deployment
