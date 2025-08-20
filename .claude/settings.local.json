@@ -9,7 +9,21 @@
       "mcp__mysql-mcp__mysql_tables",
       "mcp__mysql-mcp__mysql_describe",
       "WebFetch(domain:app.screencast.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__mysql-mcp__mysql_query",
+      "mcp__kapture__list_tabs",
+      "mcp__kapture__navigate",
+      "mcp__kapture__screenshot",
+      "mcp__kapture__click",
+      "mcp__kapture__elements",
+      "mcp__kapture__tab_detail",
+      "mcp__kapture__keypress",
+      "mcp__kapture__dom",
+      "mcp__kapture__console_logs",
+      "mcp__kapture__dom",
+      "mcp__docker-mcp__wp_cli",
+      "Bash(powershell:*)",
+      "mcp__kapture__reload"
     ],
     "deny": []
   }

@@ -49,6 +49,24 @@
             });
         }
     });
+    
+    // Force refresh evaluation form when returning from editing
+    // This ensures criteria grid content is updated after editing candidates
+    if (window.location.href.includes('evaluate=')) {
+        // Check if we're coming back from editing
+        var referrer = document.referrer;
+        if (referrer && (referrer.includes('action=edit') || referrer.includes('action=elementor'))) {
+            // Store flag to prevent infinite refresh loop
+            if (!sessionStorage.getItem('mt_evaluation_refreshed')) {
+                sessionStorage.setItem('mt_evaluation_refreshed', 'true');
+                // Force refresh to get updated content
+                window.location.reload(true);
+            }
+        } else {
+            // Clear refresh flag if not coming from edit
+            sessionStorage.removeItem('mt_evaluation_refreshed');
+        }
+    }
     // Initialize error handler
     window.MTErrorHandler = {
         /**
@@ -481,6 +499,23 @@
                 $('#mt-char-current').text($textarea.val().length);
             }
         },
+        /**
+         * Refresh criteria content for candidate
+         */
+        refreshCriteriaContent: function(candidateId) {
+            if ($('.mt-criteria-info-section').length > 0) {
+                // Force page reload to get fresh content
+                // This ensures all caches are bypassed
+                var currentUrl = window.location.href;
+                if (currentUrl.includes('?')) {
+                    currentUrl += '&refresh=' + Date.now();
+                } else {
+                    currentUrl += '?refresh=' + Date.now();
+                }
+                window.location.href = currentUrl;
+            }
+        },
+        
         submitEvaluation: function(e) {
             e.preventDefault();
             // Check if mt_ajax is available

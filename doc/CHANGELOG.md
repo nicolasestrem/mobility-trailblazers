@@ -3,6 +3,29 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.38] - 2025-01-20
+### Fixed
+- **Criteria Grid Cache Issue**: Fixed urgent caching issue where criteria grid wasn't updating after candidate edits
+  - Enhanced cache clearing in `MT_Performance_Optimizer` for post meta updates
+  - Added hooks for `updated_post_meta` and `added_post_meta` events to clear relevant caches
+  - Added `elementor/editor/after_save` hook to clear cache after Elementor saves
+  - New methods: `clear_cache_on_meta_update()` and `clear_cache_after_elementor_save()`
+  - Modified: `includes/core/class-mt-performance-optimizer.php`
+
+### Enhanced
+- **Frontend Page Refresh System**: Automatic page refresh when returning from editing
+  - Added intelligent refresh detection for 'action=edit' and 'action=elementor' referrers
+  - Implemented sessionStorage-based refresh loop prevention
+  - Added `refreshCriteriaContent()` method for future AJAX updates
+  - Modified: `assets/js/frontend.js`
+
+### Technical Details
+- Cache clearing now triggers on all post meta changes for candidate posts
+- Elementor editor saves properly clear cached criteria grid content
+- Automatic refresh provides immediate user feedback while maintaining performance
+- Fallback AJAX update system prepared for future implementation
+
+
 ## [2.5.34] - 2025-01-19
 ### Added
 - **CSS v3 Design System**: Complete redesign with clean, modern styling

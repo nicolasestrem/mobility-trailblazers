@@ -32,8 +32,15 @@ class MT_Performance_Optimizer {
         add_filter('posts_clauses', [__CLASS__, 'optimize_post_queries'], 10, 2);
         
         // Cache optimization
-        add_action('save_post', [__CLASS__, 'clear_related_caches']);
+        add_action('save_post', [__CLASS__, 'clear_related_caches'], 999);
         add_action('deleted_post', [__CLASS__, 'clear_related_caches']);
+        
+        // Clear cache when post meta is updated directly
+        add_action('updated_post_meta', [__CLASS__, 'clear_cache_on_meta_update'], 10, 4);
+        add_action('added_post_meta', [__CLASS__, 'clear_cache_on_meta_update'], 10, 4);
+        
+        // Handle Elementor saves
+        add_action('elementor/editor/after_save', [__CLASS__, 'clear_cache_after_elementor_save'], 10, 2);
     }
     
     /**
@@ -208,10 +215,64 @@ class MT_Performance_Optimizer {
         $post_type = get_post_type($post_id);
         
         if (in_array($post_type, ['mt_candidate', 'mt_jury_member'])) {
+            // Clear post meta cache for this specific post
+            // This ensures the criteria grid content is refreshed after editing
+            wp_cache_delete($post_id, 'post_meta');
+            clean_post_cache($post_id);
+            
             // Clear evaluation caches
             self::clear_evaluation_caches();
             
             // Clear assignment caches
+            self::clear_assignment_caches();
+            
+            // Clear any page caches if caching plugins are active
+            if (function_exists('wp_cache_flush')) {
+                wp_cache_flush();
+            }
+        }
+    }
+    
+    /**
+     * Clear cache when post meta is updated
+     * 
+     * @param int    $meta_id    ID of updated metadata entry
+     * @param int    $post_id    Post ID
+     * @param string $meta_key   Meta key
+     * @param mixed  $meta_value Meta value
+     */
+    public static function clear_cache_on_meta_update($meta_id, $post_id, $meta_key, $meta_value) {
+        $post_type = get_post_type($post_id);
+        
+        // Clear cache if it's a candidate and the meta key is related to criteria
+        if ($post_type === 'mt_candidate' && strpos($meta_key, '_mt_criterion_') === 0) {
+            wp_cache_delete($post_id, 'post_meta');
+            clean_post_cache($post_id);
+            
+            // Clear all evaluation-related caches
+            self::clear_evaluation_caches();
+        }
+    }
+    
+    /**
+     * Clear cache after Elementor save
+     * 
+     * @param int   $post_id Post ID
+     * @param array $data    Editor data
+     */
+    public static function clear_cache_after_elementor_save($post_id, $data) {
+        $post_type = get_post_type($post_id);
+        
+        if ($post_type === 'mt_candidate') {
+            // Clear all caches for this candidate
+            wp_cache_delete($post_id, 'post_meta');
+            clean_post_cache($post_id);
+            
+            // Clear WordPress object cache
+            wp_cache_flush();
+            
+            // Clear evaluation caches
+            self::clear_evaluation_caches();
             self::clear_assignment_caches();
         }
     }
