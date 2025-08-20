@@ -96,24 +96,65 @@ if (have_posts()) :
             }
         }
     } else {
-        // Fallback to parsing from _mt_evaluation_criteria meta
-        $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
-        if ($eval_criteria) {
-            // Parse the text for sections
-            $sections = [
-                'courage' => ['pattern' => '/\*\*Mut\s*&\s*Pioniergeist:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Mut & Pioniergeist'],
-                'innovation' => ['pattern' => '/\*\*Innovationsgrad:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Innovationsgrad'],
-                'implementation' => ['pattern' => '/\*\*Umsetzungskraft\s*&\s*Wirkung:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Umsetzungskraft & Wirkung'],
-                'relevance' => ['pattern' => '/\*\*Relevanz\s*für\s*die\s*Mobilitätswende:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Relevanz für die Mobilitätswende'],
-                'visibility' => ['pattern' => '/\*\*Vorbildfunktion\s*&\s*Sichtbarkeit:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Vorbildfunktion & Sichtbarkeit']
+        // First try to get individual criterion fields (these are updated directly)
+        $criterion_courage = get_post_meta($candidate_id, '_mt_criterion_courage', true);
+        $criterion_innovation = get_post_meta($candidate_id, '_mt_criterion_innovation', true);
+        $criterion_implementation = get_post_meta($candidate_id, '_mt_criterion_implementation', true);
+        $criterion_relevance = get_post_meta($candidate_id, '_mt_criterion_relevance', true);
+        $criterion_visibility = get_post_meta($candidate_id, '_mt_criterion_visibility', true);
+        
+        // Build parsed_criteria from individual fields if they exist
+        if ($criterion_courage) {
+            $parsed_criteria['courage'] = [
+                'label' => 'Mut & Pioniergeist',
+                'content' => $criterion_courage
             ];
-            
-            foreach ($sections as $key => $section) {
-                if (preg_match($section['pattern'], $eval_criteria, $matches)) {
-                    $parsed_criteria[$key] = [
-                        'label' => $section['label'],
-                        'content' => trim($matches[1])
-                    ];
+        }
+        if ($criterion_innovation) {
+            $parsed_criteria['innovation'] = [
+                'label' => 'Innovationsgrad',
+                'content' => $criterion_innovation
+            ];
+        }
+        if ($criterion_implementation) {
+            $parsed_criteria['implementation'] = [
+                'label' => 'Umsetzungskraft & Wirkung',
+                'content' => $criterion_implementation
+            ];
+        }
+        if ($criterion_relevance) {
+            $parsed_criteria['relevance'] = [
+                'label' => 'Relevanz für die Mobilitätswende',
+                'content' => $criterion_relevance
+            ];
+        }
+        if ($criterion_visibility) {
+            $parsed_criteria['visibility'] = [
+                'label' => 'Vorbildfunktion & Sichtbarkeit',
+                'content' => $criterion_visibility
+            ];
+        }
+        
+        // If no individual fields, fallback to parsing from _mt_evaluation_criteria meta
+        if (empty($parsed_criteria)) {
+            $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
+            if ($eval_criteria) {
+                // Parse the text for sections
+                $sections = [
+                    'courage' => ['pattern' => '/\*\*Mut\s*&\s*Pioniergeist:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Mut & Pioniergeist'],
+                    'innovation' => ['pattern' => '/\*\*Innovationsgrad:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Innovationsgrad'],
+                    'implementation' => ['pattern' => '/\*\*Umsetzungskraft\s*&\s*Wirkung:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Umsetzungskraft & Wirkung'],
+                    'relevance' => ['pattern' => '/\*\*Relevanz\s*für\s*die\s*Mobilitätswende:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Relevanz für die Mobilitätswende'],
+                    'visibility' => ['pattern' => '/\*\*Vorbildfunktion\s*&\s*Sichtbarkeit:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Vorbildfunktion & Sichtbarkeit']
+                ];
+                
+                foreach ($sections as $key => $section) {
+                    if (preg_match($section['pattern'], $eval_criteria, $matches)) {
+                        $parsed_criteria[$key] = [
+                            'label' => $section['label'],
+                            'content' => trim($matches[1])
+                        ];
+                    }
                 }
             }
         }

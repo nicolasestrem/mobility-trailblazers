@@ -93,6 +93,11 @@ class MT_Plugin {
         $taxonomies = new MT_Taxonomies();
         $taxonomies->init();
         
+        // Initialize Performance Optimizer for cache management
+        if (class_exists('MobilityTrailblazers\Core\MT_Performance_Optimizer')) {
+            MT_Performance_Optimizer::init();
+        }
+        
         // Setup roles and capabilities
         $roles = new MT_Roles();
         add_action('init', [$roles, 'add_capabilities']);

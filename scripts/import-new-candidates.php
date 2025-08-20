@@ -89,13 +89,29 @@ function parse_evaluation_criteria($description) {
     }
     
     // Parse Relevanz für die Mobilitätswende / Relevanz & Impact
+    // Updated pattern to be more flexible and handle cases where these fields might be missing
     if (preg_match('/Relevanz\s*(?:für die Mobilitätswende|&\s*Impact)?:\s*(.+?)(?=(?:Mut\s*&|Innovationsgrad:|Umsetzungs|Sichtbarkeit|Vorbildfunktion|$))/isu', $description, $matches)) {
         $criteria['relevance'] = trim($matches[1]);
     }
     
     // Parse Sichtbarkeit & Reichweite / Vorbildfunktion & Sichtbarkeit
+    // Updated to handle variations and ensure it captures the last criterion even without clear end marker
     if (preg_match('/(?:Sichtbarkeit\s*&\s*Reichweite|Vorbildfunktion\s*&\s*Sichtbarkeit):\s*(.+?)$/isu', $description, $matches)) {
         $criteria['visibility'] = trim($matches[1]);
+    } elseif (preg_match('/(?:Sichtbarkeit|Vorbildfunktion):\s*(.+?)$/isu', $description, $matches)) {
+        // Fallback pattern for simpler format
+        $criteria['visibility'] = trim($matches[1]);
+    }
+    
+    // Validation: Log warning if any criteria are missing
+    $missing = [];
+    foreach ($criteria as $key => $value) {
+        if (empty($value)) {
+            $missing[] = $key;
+        }
+    }
+    if (!empty($missing)) {
+        error_log("WARNING: Missing evaluation criteria for candidate - Missing fields: " . implode(', ', $missing));
     }
     
     return $criteria;
@@ -209,12 +225,12 @@ while (($data = fgetcsv($handle)) !== FALSE) {
             // Overview/Biography
             '_mt_description_full' => $overview,
             
-            // Evaluation criteria
-            '_mt_evaluation_courage' => $criteria['courage'],
-            '_mt_evaluation_innovation' => $criteria['innovation'],
-            '_mt_evaluation_implementation' => $criteria['implementation'],
-            '_mt_evaluation_relevance' => $criteria['relevance'],
-            '_mt_evaluation_visibility' => $criteria['visibility'],
+            // Evaluation criteria - Using correct meta keys
+            '_mt_criterion_courage' => $criteria['courage'],
+            '_mt_criterion_innovation' => $criteria['innovation'],
+            '_mt_criterion_implementation' => $criteria['implementation'],
+            '_mt_criterion_relevance' => $criteria['relevance'],
+            '_mt_criterion_visibility' => $criteria['visibility'],
         ]
     ];
     
