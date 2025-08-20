@@ -9,8 +9,11 @@
 namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
+use MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 use MobilityTrailblazers\Core\MT_Audit_Logger;
+use MobilityTrailblazers\Core\MT_Logger;
+use MobilityTrailblazers\Core\MT_Plugin;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -27,7 +30,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
     /**
      * Repository instance
      *
-     * @var MT_Assignment_Repository
+     * @var MT_Assignment_Repository_Interface
      */
     private $repository;
     
@@ -39,10 +42,34 @@ class MT_Assignment_Service implements MT_Service_Interface {
     private $errors = [];
     
     /**
-     * Constructor
+     * Constructor with dependency injection support
+     *
+     * @param MT_Assignment_Repository_Interface|null $repository Optional repository dependency
      */
-    public function __construct() {
-        $this->repository = new MT_Assignment_Repository();
+    public function __construct(MT_Assignment_Repository_Interface $repository = null) {
+        // Use dependency injection if repository is provided
+        if ($repository !== null) {
+            $this->repository = $repository;
+            return;
+        }
+        
+        // Backward compatibility: try to get repository from container
+        try {
+            $container = MT_Plugin::container();
+            
+            if ($container->has('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface')) {
+                $this->repository = $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+            } else {
+                // Fallback to direct instantiation
+                $this->repository = new MT_Assignment_Repository();
+            }
+        } catch (\Exception $e) {
+            // Final fallback: direct instantiation
+            MT_Logger::warning('Container not available for Assignment Service', [
+                'exception' => $e->getMessage()
+            ]);
+            $this->repository = new MT_Assignment_Repository();
+        }
     }
     
     /**

@@ -12,6 +12,9 @@ use MobilityTrailblazers\Services\MT_Assignment_Service;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
 use MobilityTrailblazers\Core\MT_Logger;
+use MobilityTrailblazers\Core\MT_Plugin;
+use MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface;
+use MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -24,6 +27,26 @@ if (!defined('ABSPATH')) {
  * Handles AJAX requests for assignments
  */
 class MT_Assignment_Ajax extends MT_Base_Ajax {
+    
+    /**
+     * Get assignment repository from container
+     *
+     * @return MT_Assignment_Repository_Interface
+     */
+    private function get_assignment_repository() {
+        $container = MT_Plugin::container();
+        return $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+    }
+    
+    /**
+     * Get evaluation repository from container
+     *
+     * @return MT_Evaluation_Repository_Interface
+     */
+    private function get_evaluation_repository() {
+        $container = MT_Plugin::container();
+        return $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface');
+    }
     
     /**
      * Initialize AJAX handlers
@@ -62,7 +85,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             $this->error(__('Invalid jury member ID.', 'mobility-trailblazers'));
         }
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $assignments = $assignment_repo->get_by_jury_member($jury_member_id);
         
         $this->success([
@@ -80,7 +103,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $this->verify_nonce('mt_admin_nonce');
         $this->check_permission('mt_manage_assignments');
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $candidates = $assignment_repo->get_unassigned_candidates();
         
         $this->success([
@@ -177,7 +200,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             $this->error(__('Invalid parameters.', 'mobility-trailblazers'));
         }
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $assignments = [];
         
         foreach ($candidate_ids as $candidate_id) {
@@ -232,7 +255,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             return;
         }
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $created = 0;
         $errors = 0;
         $already_exists = 0;
@@ -328,7 +351,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         $assignment_service = new MT_Assignment_Service();
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $created = 0;
         $errors = 0;
         
@@ -378,8 +401,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         // Check permissions - requires manage_settings capability
         $this->check_permission('mt_manage_settings');
         
-        $assignment_repo = new MT_Assignment_Repository();
-        $evaluation_repo = new MT_Evaluation_Repository();
+        $assignment_repo = $this->get_assignment_repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         
         // Clear all assignments AND evaluations
         // This ensures all related data is removed
@@ -477,7 +500,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Initialize repository
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         
         // Clear existing assignments if requested
         if (isset($_POST['clear_existing']) && $_POST['clear_existing'] === 'true') {
@@ -485,7 +508,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             $clear_result = $assignment_repo->clear_all(true); // true = cascade delete evaluations
             if ($clear_result) {
                 // Clear evaluation caches too
-                $evaluation_repo = new MT_Evaluation_Repository();
+                $evaluation_repo = $this->get_evaluation_repository();
                 $evaluation_repo->clear_all_evaluation_caches();
                 
                 // Clear all transients
@@ -770,7 +793,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         // Log for debugging
         MT_Logger::info('Bulk assignment removal', ['assignment_count' => count($assignment_ids)]);
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $success_count = 0;
         $errors = [];
         
@@ -845,7 +868,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             'new_jury_member_id' => $new_jury_member_id
         ]);
         
-        $assignment_repo = new MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $success_count = 0;
         $errors = [];
         $skipped = 0;
@@ -947,8 +970,8 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             wp_die(__('No assignments selected for export.', 'mobility-trailblazers'));
         }
         
-        $assignment_repo = new MT_Assignment_Repository();
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $assignment_repo = $this->get_assignment_repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         
         // Set headers for CSV download
         header('Content-Type: text/csv; charset=utf-8');
