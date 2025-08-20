@@ -143,7 +143,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             
             <select class="mt-filter-select" id="mt-status-filter">
                 <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
-                <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
+                <option value="draft"><?php _e('Draft', 'mobility-trailblazers'); ?></option>
                 <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
@@ -177,7 +177,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                     }
                 }
                 
-                $status = $evaluation ? $evaluation['status'] : 'pending';
+                $status = $evaluation ? $evaluation['status'] : 'draft';
                 $organization = get_post_meta($candidate->ID, '_mt_organization', true);
                 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
             ?>
@@ -203,6 +203,8 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                             
                             if ($status === 'completed') {
                                 $status_text = __('Completed', 'mobility-trailblazers');
+                            } elseif ($status === 'draft') {
+                                $status_text = __('Draft', 'mobility-trailblazers');
                             }
                             ?>
                             <span class="mt-status-badge <?php echo esc_attr($status_class); ?>">
@@ -321,8 +323,8 @@ jQuery(document).ready(function($) {
             var normalizedFilter = statusFilter.toLowerCase().trim();
             var matchesStatus = statusFilter === '' || normalizedStatus === normalizedFilter;
             
-            // Special handling for pending status (default when empty)
-            if (normalizedStatus === '' && normalizedFilter === 'pending') {
+            // Special handling for draft status (default when empty)
+            if (normalizedStatus === '' && normalizedFilter === 'draft') {
                 matchesStatus = true;
             }
             
