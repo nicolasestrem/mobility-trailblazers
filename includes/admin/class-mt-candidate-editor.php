@@ -37,6 +37,9 @@ class MT_Candidate_Editor {
         add_action('admin_footer', [$this, 'add_inline_edit_modal']);
         add_action('wp_ajax_mt_update_candidate_content', [$this, 'ajax_update_content']);
         add_action('wp_ajax_mt_get_candidate_content', [$this, 'ajax_get_content']);
+        
+        // Add inline edit button to post row actions
+        add_filter('post_row_actions', [$this, 'add_inline_edit_button'], 10, 2);
     }
     
     /**
@@ -81,10 +84,8 @@ class MT_Candidate_Editor {
                 'textarea_name' => 'mt_overview',
                 'media_buttons' => true,
                 'textarea_rows' => 10,
-                'tinymce' => [
-                    'toolbar1' => 'formatselect,bold,italic,underline,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,undo,redo',
-                    'toolbar2' => '',
-                ]
+                'tinymce' => true,
+                'quicktags' => true
             ]);
             ?>
         </div>
@@ -99,19 +100,58 @@ class MT_Candidate_Editor {
         ?>
         <div class="mt-editor-wrapper">
             <p class="description">
-                <?php _e('Enter the evaluation criteria content. Use **bold** for criteria headers (e.g., **Mut & Pioniergeist:**)', 'mobility-trailblazers'); ?>
+                <?php _e('Enter the evaluation criteria content. Use bold text for criteria headers (e.g., Mut & Pioniergeist:)', 'mobility-trailblazers'); ?>
             </p>
             <?php
-            wp_editor($criteria, 'mt_evaluation_criteria', [
+            // Use a unique editor ID to avoid conflicts
+            $editor_id = 'mt_criteria_editor_' . $post->ID;
+            
+            // Configure editor settings
+            $editor_settings = array(
                 'textarea_name' => 'mt_evaluation_criteria',
                 'media_buttons' => false,
                 'textarea_rows' => 20,
-                'tinymce' => [
-                    'toolbar1' => 'formatselect,bold,italic,underline,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,undo,redo',
-                    'toolbar2' => '',
-                ]
-            ]);
+                'teeny' => false,
+                'tinymce' => array(
+                    'toolbar1' => 'formatselect,bold,italic,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,wp_more,spellchecker,fullscreen,wp_adv',
+                    'toolbar2' => 'strikethrough,hr,forecolor,pastetext,removeformat,charmap,outdent,indent,undo,redo,wp_help',
+                    'plugins' => 'charmap,colorpicker,hr,lists,media,paste,tabfocus,textcolor,fullscreen,wordpress,wpautoresize,wpeditimage,wpemoji,wpgallery,wplink,wpdialogs,wptextpattern,wpview'
+                ),
+                'quicktags' => true,
+                'dfw' => false
+            );
+            
+            // Output the editor
+            wp_editor($criteria, $editor_id, $editor_settings);
             ?>
+            <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                // Fix the form submission to use the correct field name
+                $('#post').on('submit', function() {
+                    var content = '';
+                    if (typeof tinymce !== 'undefined') {
+                        var editor = tinymce.get('<?php echo $editor_id; ?>');
+                        if (editor) {
+                            content = editor.getContent();
+                        }
+                    }
+                    if (!content) {
+                        content = $('#<?php echo $editor_id; ?>').val();
+                    }
+                    
+                    // Create hidden field with correct name if it doesn't exist
+                    if (!$('input[name="mt_evaluation_criteria"]').length) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'mt_evaluation_criteria',
+                            value: content
+                        }).appendTo('#post');
+                    } else {
+                        $('input[name="mt_evaluation_criteria"]').val(content);
+                    }
+                });
+            });
+            </script>
             <div class="mt-criteria-helper">
                 <h4><?php _e('Standard Criteria Headers:', 'mobility-trailblazers'); ?></h4>
                 <ul>
@@ -217,28 +257,17 @@ class MT_Candidate_Editor {
             }
         ');
         
-        // Add JavaScript for inline editing
-        if ($hook === 'edit.php') {
-            // Enqueue rich text editor assets
-            wp_enqueue_script(
-                'mt-rich-editor',
-                MT_PLUGIN_URL . 'assets/js/mt-rich-editor.js',
-                [],
-                MT_VERSION,
-                true
-            );
+        // Add JavaScript for inline editing on list page
+        if ($hook === 'edit.php' && $post_type === 'mt_candidate') {
+            // Enqueue WordPress editor scripts for modal
+            wp_enqueue_editor();
+            wp_enqueue_script('wp-tinymce');
             
-            wp_enqueue_style(
-                'mt-rich-editor',
-                MT_PLUGIN_URL . 'assets/css/mt-rich-editor.css',
-                ['dashicons'],
-                MT_VERSION
-            );
-            
+            // Enqueue our candidate editor script
             wp_enqueue_script(
                 'mt-candidate-editor',
                 MT_PLUGIN_URL . 'assets/js/candidate-editor.js',
-                ['jquery', 'mt-rich-editor'],
+                ['jquery', 'wp-tinymce'],
                 MT_VERSION,
                 true
             );
@@ -254,6 +283,35 @@ class MT_Candidate_Editor {
                     'saved' => __('Saved!', 'mobility-trailblazers'),
                     'error' => __('Error saving content', 'mobility-trailblazers'),
                 ]
+            ]);
+        }
+        
+        // Also enqueue on the post edit page to fix the inline editors
+        if (($hook === 'post.php' || $hook === 'post-new.php') && $post_type === 'mt_candidate') {
+            // Enqueue WordPress editor properly
+            wp_enqueue_editor();
+            
+            // Enqueue our script to reinitialize editors if needed
+            wp_enqueue_script(
+                'mt-candidate-editor',
+                MT_PLUGIN_URL . 'assets/js/candidate-editor.js',
+                ['jquery', 'wp-editor'],
+                MT_VERSION,
+                true
+            );
+            
+            // Enqueue the editor fix script
+            wp_enqueue_script(
+                'mt-fix-editors',
+                MT_PLUGIN_URL . 'assets/js/fix-editors.js',
+                ['jquery', 'wp-editor', 'wp-tinymce'],
+                MT_VERSION,
+                true
+            );
+            
+            wp_localize_script('mt-candidate-editor', 'mtCandidateEditor', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mt_candidate_editor')
             ]);
         }
     }
@@ -442,6 +500,20 @@ class MT_Candidate_Editor {
             'criteria' => $criteria,
             'post_id' => $post_id
         ]);
+    }
+    
+    /**
+     * Add inline edit button to post row actions
+     */
+    public function add_inline_edit_button($actions, $post) {
+        if ($post->post_type === 'mt_candidate' && current_user_can('edit_post', $post->ID)) {
+            $actions['mt_inline_edit'] = sprintf(
+                '<a href="#" class="mt-inline-edit-btn" data-post-id="%d">%s</a>',
+                $post->ID,
+                __('Quick Edit Content', 'mobility-trailblazers')
+            );
+        }
+        return $actions;
     }
 }
 

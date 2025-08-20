@@ -54,10 +54,36 @@ if (have_posts()) :
     }
     
     
-    // Parse evaluation criteria from description sections
+    // Parse evaluation criteria - prioritize meta fields over database
     $parsed_criteria = [];
-    if ($description_sections) {
-        // Map internal keys to display labels
+    
+    // First check if we have the combined criteria field from editor
+    $eval_criteria_meta = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
+    
+    if ($eval_criteria_meta && !empty(trim($eval_criteria_meta))) {
+        // Parse the meta field for sections - handle both ** and <strong> formats
+        $sections = [
+            'courage' => ['pattern' => '/(?:<strong>|\\*\\*)Mut\s*(?:&amp;|&)\s*Pioniergeist:(?:<\/strong>|\\*\\*)(?:<br>|<br\/>|\s)*(.+?)(?=<strong>|\\*\\*|$)/is', 'label' => 'Mut & Pioniergeist'],
+            'innovation' => ['pattern' => '/(?:<strong>|\\*\\*)Innovationsgrad:(?:[^<]*<\/strong>|\\*\\*)(?:<br>|<br\/>|\s)*(.+?)(?=<strong>|\\*\\*|$)/is', 'label' => 'Innovationsgrad'],
+            'implementation' => ['pattern' => '/(?:<strong>|\\*\\*)Umsetzungskraft\s*(?:&amp;|&)\s*Wirkung:(?:<\/strong>|\\*\\*)(?:<br>|<br\/>|\s)*(.+?)(?=<strong>|\\*\\*|$)/is', 'label' => 'Umsetzungskraft & Wirkung'],
+            'relevance' => ['pattern' => '/(?:<strong>|\\*\\*)Relevanz\s*für\s*die\s*Mobilitätswende:(?:<\/strong>|\\*\\*)(?:<br>|<br\/>|\s)*(.+?)(?=<strong>|\\*\\*|$)/is', 'label' => 'Relevanz für die Mobilitätswende'],
+            'visibility' => ['pattern' => '/(?:<strong>|\\*\\*)Vorbildfunktion\s*(?:&amp;|&)\s*Sichtbarkeit:(?:<\/strong>|\\*\\*)(?:<br>|<br\/>|\s)*(.+?)(?=<strong>|\\*\\*|$)/is', 'label' => 'Vorbildfunktion & Sichtbarkeit']
+        ];
+        
+        foreach ($sections as $key => $section) {
+            if (preg_match($section['pattern'], $eval_criteria_meta, $matches)) {
+                // Clean up the content - remove <br> tags and trim
+                $content = str_replace(['<br>', '<br/>', '<br />'], "\n", $matches[1]);
+                $content = trim(strip_tags($content));
+                
+                $parsed_criteria[$key] = [
+                    'label' => $section['label'],
+                    'content' => $content
+                ];
+            }
+        }
+    } elseif ($description_sections) {
+        // Fallback to database table sections
         $criteria_mapping = [
             'mut_pioniergeist' => [
                 'key' => 'courage',
@@ -92,28 +118,6 @@ if (have_posts()) :
                     'label' => $criteria['label'],
                     'content' => nl2br($criteria['content']) // Preserve line breaks
                 ];
-            }
-        }
-    } else {
-        // Fallback to parsing from _mt_evaluation_criteria meta
-        $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
-        if ($eval_criteria) {
-            // Parse the text for sections
-            $sections = [
-                'courage' => ['pattern' => '/\*\*Mut\s*&\s*Pioniergeist:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Mut & Pioniergeist'],
-                'innovation' => ['pattern' => '/\*\*Innovationsgrad:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Innovationsgrad'],
-                'implementation' => ['pattern' => '/\*\*Umsetzungskraft\s*&\s*Wirkung:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Umsetzungskraft & Wirkung'],
-                'relevance' => ['pattern' => '/\*\*Relevanz\s*für\s*die\s*Mobilitätswende:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Relevanz für die Mobilitätswende'],
-                'visibility' => ['pattern' => '/\*\*Vorbildfunktion\s*&\s*Sichtbarkeit:\*\*\s*(.+?)(?=\*\*|$)/is', 'label' => 'Vorbildfunktion & Sichtbarkeit']
-            ];
-            
-            foreach ($sections as $key => $section) {
-                if (preg_match($section['pattern'], $eval_criteria, $matches)) {
-                    $parsed_criteria[$key] = [
-                        'label' => $section['label'],
-                        'content' => trim($matches[1])
-                    ];
-                }
             }
         }
     }

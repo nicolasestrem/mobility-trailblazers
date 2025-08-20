@@ -34,7 +34,12 @@
       "Bash(php:*)",
       "mcp__docker-mcp__docker_exec",
       "mcp__kapture__console_logs",
-      "mcp__kapture__keypress"
+      "mcp__kapture__keypress",
+      "mcp__docker-mcp__mobility_status",
+      "mcp__kapture__new_tab",
+      "mcp__docker-mcp__wp_logs",
+      "Bash(curl:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

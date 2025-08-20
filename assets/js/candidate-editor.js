@@ -1,63 +1,55 @@
 /**
- * Candidate Content Editor JavaScript
+ * Candidate Content Editor JavaScript with Rich Text Support
  * 
  * @package MobilityTrailblazers
  * @since 2.5.21
  */
 (function($) {
     'use strict';
+    
     var MTCandidateEditor = {
         currentPostId: null,
-        tempContent: {},
-        richEditorsInitialized: false,
-        hasUnsavedChanges: false,
         originalContent: {},
+        hasUnsavedChanges: false,
+        activeEditors: {},
+        
         init: function() {
-            this.addEditButtons();
             this.bindEvents();
         },
-        addEditButtons: function() {
-            // Add edit button to each candidate row
-            $('#the-list tr').each(function() {
-                var $row = $(this);
-                var postId = $row.find('input[name="post[]"]').val();
-                if (postId) {
-                    var $titleCol = $row.find('.column-title strong');
-                    var editBtn = '<a class="mt-inline-edit-btn" data-post-id="' + postId + '" href="#">' +
-                                 '<span class="dashicons dashicons-edit"></span> ' +
-                                 mtCandidateEditor.i18n.edit +
-                                 '</a>';
-                    $titleCol.append(editBtn);
-                }
-            });
-        },
+        
         bindEvents: function() {
             var self = this;
+            
             // Edit button click
             $(document).on('click', '.mt-inline-edit-btn', function(e) {
                 e.preventDefault();
                 var postId = $(this).data('post-id');
                 self.openEditModal(postId);
             });
+            
             // Tab switching
-            $('.mt-tab-btn').on('click', function() {
+            $(document).on('click', '.mt-tab-btn', function() {
                 var tab = $(this).data('tab');
                 self.switchTab(tab);
             });
+            
             // Save button
-            $('.mt-save-content').on('click', function() {
+            $(document).on('click', '.mt-save-content', function() {
                 self.saveContent();
             });
+            
             // Cancel button
-            $('.mt-cancel-edit').on('click', function() {
+            $(document).on('click', '.mt-cancel-edit', function() {
                 self.closeModal();
             });
+            
             // Close modal on background click
             $('#mt-inline-edit-modal').on('click', function(e) {
                 if (e.target === this) {
                     self.closeModal();
                 }
             });
+            
             // ESC key to close
             $(document).on('keydown', function(e) {
                 if (e.key === 'Escape' && $('#mt-inline-edit-modal').is(':visible')) {
@@ -65,12 +57,17 @@
                 }
             });
         },
+        
         openEditModal: function(postId) {
             var self = this;
             this.currentPostId = postId;
-            // Show loading state
+            
+            // Show modal
             $('#mt-inline-edit-modal').show();
-            $('.mt-modal-body').html('<div class="spinner is-active" style="float:none;margin:50px auto;"></div>');
+            
+            // Show loading state
+            $('.mt-modal-body').html('<div style="text-align:center;padding:50px;">Loading...</div>');
+            
             // Load content via AJAX
             $.ajax({
                 url: ajaxurl,
@@ -78,212 +75,288 @@
                 data: {
                     action: 'mt_get_candidate_content',
                     post_id: postId,
-                    nonce: mtCandidateEditor.nonce
+                    nonce: $('#mt_candidate_editor_nonce').val() || mtCandidateEditor.nonce
                 },
                 success: function(response) {
                     if (response.success) {
                         self.populateModal(response.data);
                     } else {
-                        alert(response.data.message || mtCandidateEditor.i18n.error);
+                        alert(response.data.message || 'Error loading content');
                         self.closeModal();
                     }
                 },
                 error: function() {
-                    alert(mtCandidateEditor.i18n.error);
+                    alert('Error loading content');
                     self.closeModal();
                 }
             });
         },
+        
         populateModal: function(data) {
             var self = this;
+            
             // Store original content
             self.originalContent = {
                 overview: data.overview || '',
-                criteria: data.criteria || '',
-                biography: data.biography || ''
+                criteria: data.criteria || ''
             };
+            
             // Reset unsaved changes flag
             self.hasUnsavedChanges = false;
-            self.tempContent = {};
-            // Check if rich editor is available
-            var useRichEditor = typeof MTRichEditor !== 'undefined' && MTRichEditor.isSupported();
-            if (useRichEditor) {
-                // Create containers for rich editors
-                var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
-                                  '<div id="mt-edit-overview"></div>' +
-                                  '</div>' +
-                                  '<div class="mt-tab-content" data-content="criteria">' +
-                                  '<div class="mt-template-buttons">' +
-                                  '<button type="button" class="mt-template-button" data-template="criteria-headers">Insert Standard Criteria Headers</button>' +
-                                  '</div>' +
-                                  '<div id="mt-edit-criteria"></div>' +
-                                  '</div>' +
-                                  '<div class="mt-tab-content" data-content="biography">' +
-                                  '<div id="mt-edit-biography"></div>' +
-                                  '</div>';
-                $('.mt-modal-body').html(modalBodyHTML);
-                // Destroy any existing editors
-                if (self.richEditorsInitialized) {
-                    MTRichEditor.destroy('mt-edit-overview');
-                    MTRichEditor.destroy('mt-edit-criteria');
-                    MTRichEditor.destroy('mt-edit-biography');
-                }
-                // Initialize rich editors with content
-                MTRichEditor.init('mt-edit-overview', {
-                    content: data.overview || '',
-                    minHeight: 200,
-                    maxHeight: 400,
-                    label: 'Beschreibung',
-                    autosave: true,
-                    onAutosave: function(content) {
-                        self.tempSave('overview', content);
-                    },
-                    onChange: function(content) {
-                        self.checkForChanges('overview', content);
-                    }
-                });
-                MTRichEditor.init('mt-edit-criteria', {
-                    content: data.criteria || '',
-                    minHeight: 300,
-                    maxHeight: 500,
-                    label: 'Evaluation Criteria',
-                    autosave: true,
-                    onAutosave: function(content) {
-                        self.tempSave('criteria', content);
-                    },
-                    onChange: function(content) {
-                        self.checkForChanges('criteria', content);
-                    }
-                });
-                MTRichEditor.init('mt-edit-biography', {
-                    content: data.biography || '',
-                    minHeight: 200,
-                    maxHeight: 400,
-                    label: 'Biography',
-                    autosave: true,
-                    onAutosave: function(content) {
-                        self.tempSave('biography', content);
-                    },
-                    onChange: function(content) {
-                        self.checkForChanges('biography', content);
-                    }
-                });
-                self.richEditorsInitialized = true;
-                // Add class to wrapper for criteria-specific styling
-                $('#mt-edit-criteria').parent().addClass('mt-evaluation-criteria-editor');
-                // Bind template button
-                $('.mt-template-button').off('click').on('click', function() {
-                    var template = $(this).data('template');
-                    if (template === 'criteria-headers') {
-                        self.insertCriteriaTemplate();
-                    }
-                });
-            } else {
-                // Fallback to textareas
-                var modalBodyHTML = '<div class="mt-tab-content active" data-content="overview">' +
-                                  '<textarea id="mt-edit-overview" rows="10"></textarea>' +
-                                  '</div>' +
-                                  '<div class="mt-tab-content" data-content="criteria">' +
-                                  '<textarea id="mt-edit-criteria" rows="15"></textarea>' +
-                                  '</div>' +
-                                  '<div class="mt-tab-content" data-content="biography">' +
-                                  '<textarea id="mt-edit-biography" rows="10"></textarea>' +
-                                  '</div>';
-                $('.mt-modal-body').html(modalBodyHTML);
-                // Populate textareas
-                $('#mt-edit-overview').val(data.overview || '').on('input', function() {
-                    self.checkForChanges('overview', $(this).val());
-                });
-                $('#mt-edit-criteria').val(data.criteria || '').on('input', function() {
-                    self.checkForChanges('criteria', $(this).val());
-                });
-                $('#mt-edit-biography').val(data.biography || '').on('input', function() {
-                    self.checkForChanges('biography', $(this).val());
-                });
-            }
+            
+            // Build modal content with rich text editors
+            var modalBodyHTML = 
+                '<div class="mt-tab-content active" data-content="overview">' +
+                    '<div class="mt-editor-container">' +
+                        '<textarea id="mt-edit-overview" class="mt-rich-editor" rows="10" style="width:100%;"></textarea>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="mt-tab-content" data-content="criteria" style="display:none;">' +
+                    '<div style="margin-bottom:10px;">' +
+                        '<button type="button" class="button mt-insert-template">Insert Criteria Template</button>' +
+                    '</div>' +
+                    '<div class="mt-editor-container">' +
+                        '<textarea id="mt-edit-criteria" class="mt-rich-editor" rows="15" style="width:100%;"></textarea>' +
+                    '</div>' +
+                    '<div style="margin-top:10px;padding:10px;background:#f0f0f0;border-radius:3px;font-size:12px;">' +
+                        '<strong>Format Tips:</strong><br>' +
+                        'Use bold text for criteria headers (e.g., <strong>Mut & Pioniergeist:</strong>)<br>' +
+                        'Add line breaks between sections for better readability' +
+                    '</div>' +
+                '</div>';
+            
+            $('.mt-modal-body').html(modalBodyHTML);
+            
+            // Set initial content in textareas
+            $('#mt-edit-overview').val(data.overview || '');
+            $('#mt-edit-criteria').val(data.criteria || '');
+            
+            // Initialize TinyMCE editors with delay to ensure DOM is ready
+            setTimeout(function() {
+                self.initRichEditors();
+            }, 100);
+            
+            // Bind template button
+            $('.mt-insert-template').on('click', function() {
+                self.insertCriteriaTemplate();
+            });
+            
             // Reset to first tab
             this.switchTab('overview');
         },
+        
+        initRichEditors: function() {
+            var self = this;
+            
+            // Destroy existing editors if any
+            self.destroyEditors();
+            
+            // Initialize WordPress editor for overview
+            var overviewSettings = {
+                tinymce: {
+                    wpautop: true,
+                    plugins: 'lists,link,wordpress,wplink,wptextpattern',
+                    toolbar1: 'formatselect,bold,italic,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,wp_more,spellchecker,fullscreen,wp_adv',
+                    toolbar2: 'strikethrough,hr,forecolor,pastetext,removeformat,charmap,outdent,indent,undo,redo,wp_help',
+                    height: 300,
+                    setup: function(editor) {
+                        self.activeEditors.overview = editor;
+                        editor.on('change keyup', function() {
+                            self.hasUnsavedChanges = true;
+                        });
+                    }
+                },
+                quicktags: true,
+                mediaButtons: true
+            };
+            
+            // Initialize WordPress editor for criteria
+            var criteriaSettings = {
+                tinymce: {
+                    wpautop: true,
+                    plugins: 'lists,link,wordpress,wplink,wptextpattern',
+                    toolbar1: 'formatselect,bold,italic,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,wp_more,spellchecker,fullscreen,wp_adv',
+                    toolbar2: 'strikethrough,hr,forecolor,pastetext,removeformat,charmap,outdent,indent,undo,redo,wp_help',
+                    height: 400,
+                    setup: function(editor) {
+                        self.activeEditors.criteria = editor;
+                        editor.on('change keyup', function() {
+                            self.hasUnsavedChanges = true;
+                        });
+                    }
+                },
+                quicktags: true,
+                mediaButtons: false
+            };
+            
+            // Use wp.editor API if available (WordPress 4.8+)
+            if (typeof wp !== 'undefined' && wp.editor) {
+                // Remove any existing instance first
+                wp.editor.remove('mt-edit-overview');
+                wp.editor.remove('mt-edit-criteria');
+                
+                // Initialize editors
+                wp.editor.initialize('mt-edit-overview', overviewSettings);
+                wp.editor.initialize('mt-edit-criteria', criteriaSettings);
+            } 
+            // Fallback to direct TinyMCE initialization
+            else if (typeof tinymce !== 'undefined') {
+                // Remove existing instances
+                tinymce.remove('#mt-edit-overview');
+                tinymce.remove('#mt-edit-criteria');
+                
+                // Init overview editor
+                tinymce.init({
+                    selector: '#mt-edit-overview',
+                    height: 300,
+                    menubar: false,
+                    plugins: 'lists link wordpress wplink',
+                    toolbar: 'formatselect | bold italic | bullist numlist | link unlink | removeformat',
+                    content_css: false,
+                    setup: function(editor) {
+                        self.activeEditors.overview = editor;
+                        editor.on('change keyup', function() {
+                            self.hasUnsavedChanges = true;
+                        });
+                    }
+                });
+                
+                // Init criteria editor
+                tinymce.init({
+                    selector: '#mt-edit-criteria',
+                    height: 400,
+                    menubar: false,
+                    plugins: 'lists link wordpress wplink',
+                    toolbar: 'formatselect | bold italic | bullist numlist | link unlink | removeformat',
+                    content_css: false,
+                    setup: function(editor) {
+                        self.activeEditors.criteria = editor;
+                        editor.on('change keyup', function() {
+                            self.hasUnsavedChanges = true;
+                        });
+                    }
+                });
+            }
+            // Plain textarea fallback
+            else {
+                console.warn('WordPress editor not available, using plain textareas');
+                
+                $('#mt-edit-overview').on('input', function() {
+                    self.hasUnsavedChanges = true;
+                });
+                
+                $('#mt-edit-criteria').on('input', function() {
+                    self.hasUnsavedChanges = true;
+                });
+            }
+        },
+        
+        destroyEditors: function() {
+            // Use wp.editor API if available
+            if (typeof wp !== 'undefined' && wp.editor) {
+                wp.editor.remove('mt-edit-overview');
+                wp.editor.remove('mt-edit-criteria');
+            }
+            // Fallback to TinyMCE
+            else if (typeof tinymce !== 'undefined') {
+                tinymce.remove('#mt-edit-overview');
+                tinymce.remove('#mt-edit-criteria');
+            }
+            this.activeEditors = {};
+        },
+        
         insertCriteriaTemplate: function() {
-            var template = '<strong>Mut & Pioniergeist:</strong><br><br>' +
-                          '<strong>Innovationsgrad:</strong><br><br>' +
-                          '<strong>Umsetzungskraft & Wirkung:</strong><br><br>' +
-                          '<strong>Relevanz für die Mobilitätswende:</strong><br><br>' +
-                          '<strong>Vorbildfunktion & Sichtbarkeit:</strong><br><br>';
-            if (typeof MTRichEditor !== 'undefined') {
-                var currentContent = MTRichEditor.getContent('mt-edit-criteria');
-                MTRichEditor.setContent('mt-edit-criteria', currentContent + template);
-            }
-        },
-        tempSave: function(field, content) {
-            // Store auto-saved content temporarily
-            this.tempContent[field] = content;
-        },
-        checkForChanges: function(field, content) {
-            // Check if content has changed from original
-            if (content !== this.originalContent[field]) {
-                this.hasUnsavedChanges = true;
-            } else {
-                // Check if all fields match original
-                var allMatch = true;
-                for (var key in this.originalContent) {
-                    var currentValue = this.tempContent[key] || this.originalContent[key];
-                    if (key === field) {
-                        currentValue = content;
-                    }
-                    if (currentValue !== this.originalContent[key]) {
-                        allMatch = false;
-                        break;
-                    }
+            var template = '<strong>Mut & Pioniergeist:</strong><br>\n' +
+                          '[Content here]<br><br>\n' +
+                          '<strong>Innovationsgrad:</strong><br>\n' +
+                          '[Content here]<br><br>\n' +
+                          '<strong>Umsetzungskraft & Wirkung:</strong><br>\n' +
+                          '[Content here]<br><br>\n' +
+                          '<strong>Relevanz für die Mobilitätswende:</strong><br>\n' +
+                          '[Content here]<br><br>\n' +
+                          '<strong>Vorbildfunktion & Sichtbarkeit:</strong><br>\n' +
+                          '[Content here]';
+            
+            // Try wp.editor first
+            if (typeof wp !== 'undefined' && wp.editor) {
+                var currentContent = wp.editor.getContent('mt-edit-criteria');
+                if (currentContent && !confirm('This will replace the current content. Continue?')) {
+                    return;
                 }
-                this.hasUnsavedChanges = !allMatch;
+                wp.editor.setContent(template, 'mt-edit-criteria');
+                this.hasUnsavedChanges = true;
+            }
+            // Try TinyMCE editor
+            else if (this.activeEditors.criteria) {
+                var currentContent = this.activeEditors.criteria.getContent();
+                if (currentContent && !confirm('This will replace the current content. Continue?')) {
+                    return;
+                }
+                this.activeEditors.criteria.setContent(template);
+                this.hasUnsavedChanges = true;
+            } 
+            // Fallback for plain textarea
+            else {
+                var $textarea = $('#mt-edit-criteria');
+                var currentContent = $textarea.val();
+                
+                if (currentContent && !confirm('This will replace the current content. Continue?')) {
+                    return;
+                }
+                
+                $textarea.val(template).trigger('input');
             }
         },
+        
         switchTab: function(tab) {
             // Update tab buttons
             $('.mt-tab-btn').removeClass('active');
             $('.mt-tab-btn[data-tab="' + tab + '"]').addClass('active');
+            
             // Update content
-            $('.mt-tab-content').removeClass('active');
-            $('.mt-tab-content[data-content="' + tab + '"]').addClass('active');
+            $('.mt-tab-content').hide();
+            $('.mt-tab-content[data-content="' + tab + '"]').show();
+            
+            // Refresh editor if needed
+            if (this.activeEditors[tab]) {
+                this.activeEditors[tab].focus();
+            }
         },
+        
+        getEditorContent: function(editorId) {
+            // Try wp.editor API first
+            if (typeof wp !== 'undefined' && wp.editor) {
+                return wp.editor.getContent(editorId);
+            }
+            // Try TinyMCE
+            else if (typeof tinymce !== 'undefined') {
+                var editor = tinymce.get(editorId);
+                if (editor) {
+                    return editor.getContent();
+                }
+            }
+            // Fallback to textarea value
+            return $('#' + editorId).val();
+        },
+        
         saveContent: function() {
             var self = this;
             var $saveBtn = $('.mt-save-content');
+            
             // Show saving state
-            $saveBtn.prop('disabled', true).text(mtCandidateEditor.i18n.saving);
+            $saveBtn.prop('disabled', true).text('Saving...');
+            
             // Get active tab
             var activeTab = $('.mt-tab-btn.active').data('tab');
             var content = '';
-            // Check if using rich editor
-            var useRichEditor = typeof MTRichEditor !== 'undefined' && self.richEditorsInitialized;
-            if (useRichEditor) {
-                // Get content from rich editor
-                switch(activeTab) {
-                    case 'overview':
-                        content = MTRichEditor.getContent('mt-edit-overview');
-                        break;
-                    case 'criteria':
-                        content = MTRichEditor.getContent('mt-edit-criteria');
-                        break;
-                    case 'biography':
-                        content = MTRichEditor.getContent('mt-edit-biography');
-                        break;
-                }
-            } else {
-                // Get content from textarea
-                switch(activeTab) {
-                    case 'overview':
-                        content = $('#mt-edit-overview').val();
-                        break;
-                    case 'criteria':
-                        content = $('#mt-edit-criteria').val();
-                        break;
-                    case 'biography':
-                        content = $('#mt-edit-biography').val();
-                        break;
-                }
+            
+            // Get content from the appropriate editor
+            if (activeTab === 'overview') {
+                content = self.getEditorContent('mt-edit-overview');
+            } else if (activeTab === 'criteria') {
+                content = self.getEditorContent('mt-edit-criteria');
             }
+            
             // Save via AJAX
             $.ajax({
                 url: ajaxurl,
@@ -293,28 +366,52 @@
                     post_id: self.currentPostId,
                     field: activeTab,
                     content: content,
-                    nonce: mtCandidateEditor.nonce
+                    nonce: $('#mt_candidate_editor_nonce').val() || mtCandidateEditor.nonce
                 },
                 success: function(response) {
                     if (response.success) {
                         // Update original content with saved value
                         self.originalContent[activeTab] = content;
                         self.hasUnsavedChanges = false;
-                        $saveBtn.text(mtCandidateEditor.i18n.saved);
+                        
+                        $saveBtn.text('Saved!');
+                        
+                        // Update the main form fields if they exist
+                        if (activeTab === 'overview' && $('#mt_overview').length) {
+                            // Update textarea
+                            $('#mt_overview').val(content);
+                            // Update TinyMCE if exists
+                            if (typeof wp !== 'undefined' && wp.editor) {
+                                wp.editor.setContent(content, 'mt_overview');
+                            } else if (typeof tinymce !== 'undefined' && tinymce.get('mt_overview')) {
+                                tinymce.get('mt_overview').setContent(content);
+                            }
+                        } else if (activeTab === 'criteria' && $('#mt_evaluation_criteria').length) {
+                            // Update textarea
+                            $('#mt_evaluation_criteria').val(content);
+                            // Update TinyMCE if exists
+                            if (typeof wp !== 'undefined' && wp.editor) {
+                                wp.editor.setContent(content, 'mt_evaluation_criteria');
+                            } else if (typeof tinymce !== 'undefined' && tinymce.get('mt_evaluation_criteria')) {
+                                tinymce.get('mt_evaluation_criteria').setContent(content);
+                            }
+                        }
+                        
                         setTimeout(function() {
-                            $saveBtn.prop('disabled', false).text(mtCandidateEditor.i18n.save);
+                            $saveBtn.prop('disabled', false).text('Save Changes');
                         }, 2000);
                     } else {
-                        alert(response.data.message || mtCandidateEditor.i18n.error);
-                        $saveBtn.prop('disabled', false).text(mtCandidateEditor.i18n.save);
+                        alert(response.data.message || 'Error saving content');
+                        $saveBtn.prop('disabled', false).text('Save Changes');
                     }
                 },
                 error: function() {
-                    alert(mtCandidateEditor.i18n.error);
-                    $saveBtn.prop('disabled', false).text(mtCandidateEditor.i18n.save);
+                    alert('Error saving content');
+                    $saveBtn.prop('disabled', false).text('Save Changes');
                 }
             });
         },
+        
         closeModal: function() {
             // Check for unsaved changes
             if (this.hasUnsavedChanges) {
@@ -322,26 +419,25 @@
                     return;
                 }
             }
-            // Destroy editors if initialized
-            if (this.richEditorsInitialized) {
-                MTRichEditor.destroy('mt-edit-overview');
-                MTRichEditor.destroy('mt-edit-criteria');
-                MTRichEditor.destroy('mt-edit-biography');
-                this.richEditorsInitialized = false;
-            }
+            
+            // Destroy editors before closing
+            this.destroyEditors();
+            
             $('#mt-inline-edit-modal').hide();
             this.currentPostId = null;
-            this.tempContent = {};
+            this.hasUnsavedChanges = false;
         }
     };
-    // Add AJAX handler for getting content
+    
+    // Initialize when document is ready
     $(document).ready(function() {
-        // Add the get content handler
-        if (typeof ajaxurl !== 'undefined') {
-            $.post(ajaxurl, {
-                action: 'mt_register_get_content_handler'
-            });
+        // Initialize modal editor if modal exists
+        if ($('#mt-inline-edit-modal').length) {
+            MTCandidateEditor.init();
         }
-        MTCandidateEditor.init();
     });
+    
+    // Make it globally available
+    window.MTCandidateEditor = MTCandidateEditor;
+    
 })(jQuery);
