@@ -442,11 +442,10 @@ class MT_Admin {
      * @return void
      */
     public function render_diagnostics_page() {
+        // Deprecated - redirect to debug center with diagnostics tab
         wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
-        wp_die();
+        exit;
     }
-    
-    /**
     
     /**
      * Render audit log page
@@ -703,6 +702,10 @@ class MT_Admin {
                 'export_started' => __('Export started. Download will begin shortly.', 'mobility-trailblazers'),
                 'select_bulk_action' => __('Please select a bulk action', 'mobility-trailblazers'),
                 'select_assignments' => __('Please select at least one assignment', 'mobility-trailblazers'),
+                'remove' => __('Remove', 'mobility-trailblazers'),
+                'error' => __('Error', 'mobility-trailblazers'),
+                'select_jury_candidates' => __('Please select a jury member and at least one candidate.', 'mobility-trailblazers'),
+                'assignments_cleared' => __('All assignments have been cleared.', 'mobility-trailblazers'),
             )
         ));
         

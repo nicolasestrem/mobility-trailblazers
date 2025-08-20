@@ -126,7 +126,8 @@ jQuery(document).ready(function($) {
                 success: function(response) {
                     if (response.success) {
                         // Show success message
-                        showNotification('success', response.data.message || 'Evaluation submitted successfully!');
+                        showNotification('success', response.data.message || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted ? mt_frontend.i18n.evaluation_submitted : 'Bewertung erfolgreich abgeschickt!'));
+                        
                         // Update status badge
                         updateStatusBadge('completed');
                         // Redirect after delay
@@ -134,12 +135,12 @@ jQuery(document).ready(function($) {
                             window.location.href = response.data.redirect || window.location.href.split('?')[0];
                         }, 2000);
                     } else {
-                        showNotification('error', response.data || 'An error occurred. Please try again.');
+                        showNotification('error', response.data || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.error_try_again ? mt_frontend.i18n.error_try_again : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'));
                         $submitBtn.prop('disabled', false).html(originalText);
                     }
                 },
                 error: function() {
-                    showNotification('error', 'Network error. Please check your connection and try again.');
+                    showNotification('error', mt_frontend && mt_frontend.i18n && mt_frontend.i18n.network_error ? mt_frontend.i18n.network_error : 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.');
                     $submitBtn.prop('disabled', false).html(originalText);
                 }
             });

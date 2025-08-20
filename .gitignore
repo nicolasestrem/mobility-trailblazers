@@ -1,123 +1,78 @@
-# Production .gitignore for Mobility Trailblazers
-# =================================================
+# Mobility Trailblazers .gitignore
+# =================================
 
-# WordPress Core (should not be in plugin repo)
-wp-config.php
-wp-content/uploads/
-wp-content/cache/
-wp-content/upgrade/
+# Debug and temporary files
+/tools/
+/sql/
+*debug*.php
+*diagnose*.php
+*fix-*.php
+*fix-*.sh
+*fix-*.sql
 
-# Temporary & Log Files
-*.tmp
-*.temp
-*.cache
+# Files with credentials
+*credentials*
+*password*
+*.env
+.env.*
+
+# Trash/temporary directories
+/_trash*/
+/tmp/
+/temp/
+
+# Backup files
+*.backup
+*.bak
+*.old
+*backup*.sql
+*backup*.php
+
+# Database dumps
+*.sql
+*.dump
+*.mysql
+
+# Log files
 *.log
-error_log
 debug.log
+error.log
 
-# OS Files
-.DS_Store
-.DS_Store?
-._*
-Thumbs.db
-desktop.ini
-.Trashes
-
-# Editor Files
+# IDE and editor files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
-.idea/
-.vscode/
-*.sublime-*
-*.code-workspace
+.DS_Store
+Thumbs.db
 
-# Backup Files
-*.bak
-*.backup
-*.orig
-*.old
-
-# Local Configuration
-*.local.php
-*.local.json
-.env
-.env.*
-!.env.example
-
-# Development Files (removed from production)
-/debug/
-/tests/
-/tools/
-/node_modules/
-/vendor/
-composer.json
-composer.lock
-package.json
-package-lock.json
-phpunit.xml
-.phpunit.result.cache
-.phpcs.xml
-.eslintrc*
-.prettierrc*
-webpack.config.js
-
-# Build Files
-/dist/
-/build/
-*.map
-*.min.js.map
-*.min.css.map
-
-# Documentation Archives
-/doc/archived/
-/doc/test-*
-
-# Data Files
-/data/*.local.csv
-/data/test-*
-
-# Session Files
-SESSION_*.md
-
-# Development Scripts
+# Test files
 test-*.php
-create-*.php
-fix-*.php
-migrate-*.php
-import-*.php
-cleanup-*.php
-debug-*.php
-*.ps1
-*.bat
+test-*.sh
+testing/
 
-# Git Development
-.gitattributes
-.github/
+# Session and cache files
+*.session
+*.cache
 
-# Docker & DevContainers
-.devcontainer/
-docker-compose.override.yml
+# WordPress specific
+wp-config.php
+wp-config-local.php
 
-# MCP & Claude Files
-.claude/
-.cursor/
+# Keep important documentation
+!doc/*.md
+!README.md
+!CHANGELOG.md
 
-.claude.json
-.claude-local.json
-.mcp.json
+# But exclude sensitive docs
+doc/*fix*.sql
+doc/*USERNAME_FIX_GUIDE*
 
-# Development files (keep out of main branch)
-/debug/
-/tests/
-/tools/
-/qa_i18n/
-/reports/
-/mcp-tools/
-/.devcontainer/
-phpunit.xml
-package.json
-package-lock.json
+# Scripts to exclude
+scripts/*credentials*
+scripts/*production*.sh
+scripts/fix-*.sh
 
 # Sample and test data
 sample-*.csv
@@ -140,15 +95,10 @@ cleanup-*.sh
 # Photos (keep in repo but ignore changes)
 /Photos_candidates/
 
-# Keep Essential Directories
-!assets/
+# Keep the main plugin files
+!mobility-trailblazers.php
 !includes/
-!languages/
+!assets/
 !templates/
-!doc/
-/.claude
-
-/Photos of all candidates
-
-/.internal/
-/doc/report
+!languages/
+/scripts

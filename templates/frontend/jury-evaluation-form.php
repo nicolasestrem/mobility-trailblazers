@@ -27,6 +27,13 @@ $website_url = get_post_meta($candidate->ID, '_mt_website_url', true) ?: '';
 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
 $photo_id = get_post_thumbnail_id($candidate->ID);
 
+// Get individual evaluation criteria content
+$criterion_courage = get_post_meta($candidate->ID, '_mt_criterion_courage', true) ?: '';
+$criterion_innovation = get_post_meta($candidate->ID, '_mt_criterion_innovation', true) ?: '';
+$criterion_implementation = get_post_meta($candidate->ID, '_mt_criterion_implementation', true) ?: '';
+$criterion_relevance = get_post_meta($candidate->ID, '_mt_criterion_relevance', true) ?: '';
+$criterion_visibility = get_post_meta($candidate->ID, '_mt_criterion_visibility', true) ?: '';
+
 // Get existing evaluation if any
 $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
 $existing = $evaluation_repo->find_all([
@@ -216,6 +223,74 @@ $criteria = [
             </div>
         </div>
     </div>
+    
+    <!-- Evaluation Criteria Information -->
+    <?php if ($criterion_courage || $criterion_innovation || $criterion_implementation || $criterion_relevance || $criterion_visibility) : ?>
+    <div class="mt-criteria-info-section">
+        <h2 class="mt-section-title"><?php _e('Bewertungskriterien Details', 'mobility-trailblazers'); ?></h2>
+        <div class="mt-criteria-info-grid">
+            <?php if ($criterion_courage) : ?>
+            <div class="mt-criterion-info-card" style="border-left: 4px solid #e74c3c;">
+                <div class="mt-criterion-info-header">
+                    <span class="dashicons dashicons-superhero" style="color: #e74c3c; font-size: 24px;"></span>
+                    <h3 class="mt-criterion-info-title"><?php _e('Mut & Pioniergeist', 'mobility-trailblazers'); ?></h3>
+                </div>
+                <div class="mt-criterion-info-content">
+                    <?php echo wp_kses_post(wpautop($criterion_courage)); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($criterion_innovation) : ?>
+            <div class="mt-criterion-info-card" style="border-left: 4px solid #f39c12;">
+                <div class="mt-criterion-info-header">
+                    <span class="dashicons dashicons-lightbulb" style="color: #f39c12; font-size: 24px;"></span>
+                    <h3 class="mt-criterion-info-title"><?php _e('Innovationsgrad', 'mobility-trailblazers'); ?></h3>
+                </div>
+                <div class="mt-criterion-info-content">
+                    <?php echo wp_kses_post(wpautop($criterion_innovation)); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($criterion_implementation) : ?>
+            <div class="mt-criterion-info-card" style="border-left: 4px solid #27ae60;">
+                <div class="mt-criterion-info-header">
+                    <span class="dashicons dashicons-hammer" style="color: #27ae60; font-size: 24px;"></span>
+                    <h3 class="mt-criterion-info-title"><?php _e('Umsetzungskraft & Wirkung', 'mobility-trailblazers'); ?></h3>
+                </div>
+                <div class="mt-criterion-info-content">
+                    <?php echo wp_kses_post(wpautop($criterion_implementation)); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($criterion_relevance) : ?>
+            <div class="mt-criterion-info-card" style="border-left: 4px solid #3498db;">
+                <div class="mt-criterion-info-header">
+                    <span class="dashicons dashicons-location-alt" style="color: #3498db; font-size: 24px;"></span>
+                    <h3 class="mt-criterion-info-title"><?php _e('Relevanz für die Mobilitätswende', 'mobility-trailblazers'); ?></h3>
+                </div>
+                <div class="mt-criterion-info-content">
+                    <?php echo wp_kses_post(wpautop($criterion_relevance)); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($criterion_visibility) : ?>
+            <div class="mt-criterion-info-card" style="border-left: 4px solid #9b59b6;">
+                <div class="mt-criterion-info-header">
+                    <span class="dashicons dashicons-visibility" style="color: #9b59b6; font-size: 24px;"></span>
+                    <h3 class="mt-criterion-info-title"><?php _e('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'); ?></h3>
+                </div>
+                <div class="mt-criterion-info-content">
+                    <?php echo wp_kses_post(wpautop($criterion_visibility)); ?>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
     
     <!-- Evaluation Form -->
     <form id="mt-evaluation-form" class="<?php echo esc_attr($form_class); ?>" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">

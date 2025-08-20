@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(grep:*)",
+      "mcp__kapture__screenshot",
+      "mcp__filesystem-mcp__read_multiple_files",
+      "mcp__filesystem-mcp__list_allowed_directories",
+      "mcp__filesystem-mcp__directory_tree",
+      "mcp__kapture__console_logs",
+      "mcp__docker__wp_cli",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(wp i18n make-pot:*)",
+      "mcp__mysql__mysql_tables",
+      "mcp__mysql__mysql_describe",
+      "mcp__mysql__mysql_query",
+      "mcp__filesystem__directory_tree",
+      "mcp__filesystem-mcp__read_file",
+      "mcp__filesystem__list_directory",
+      "mcp__docker__mobility_status",
+      "mcp__wordpress__wp_cache_flush",
+      "mcp__filesystem__get_file_info",
+      "Bash(mv:*)",
+      "mcp__kapture__new_tab",
+      "Bash(sed:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(git reset:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
