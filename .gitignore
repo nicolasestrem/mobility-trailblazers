@@ -1,7 +1,7 @@
 # Mobility Trailblazers .gitignore
 # =================================
 
-# Debug and temporary files
+# ===== Development & Debug Files =====
 /tools/
 /sql/
 *debug*.php
@@ -9,36 +9,47 @@
 *fix-*.php
 *fix-*.sh
 *fix-*.sql
+test-*.php
+test-*.sh
+/testing/
 
-# Files with credentials
+# ===== Security & Credentials =====
 *credentials*
 *password*
 *.env
 .env.*
+wp-config.php
+wp-config-local.php
 
-# Trash/temporary directories
+# ===== Temporary Files & Directories =====
 /_trash*/
 /tmp/
 /temp/
+*.session
+*.cache
 
-# Backup files
+# ===== Backup Files =====
 *.backup
 *.bak
 *.old
 *backup*.sql
 *backup*.php
+backup-*/
+/archived/
+/deprecated/
+*-deprecated.*
 
-# Database dumps
+# ===== Database Files =====
 *.sql
 *.dump
 *.mysql
 
-# Log files
+# ===== Log Files =====
 *.log
 debug.log
 error.log
 
-# IDE and editor files
+# ===== IDE & System Files =====
 .vscode/
 .idea/
 *.swp
@@ -47,19 +58,20 @@ error.log
 .DS_Store
 Thumbs.db
 
-# Test files
-test-*.php
-test-*.sh
-testing/
+# ===== Scripts & Executables =====
+*.ps1
+*.bat
+cleanup-*.sh
+scripts/*credentials*
+scripts/*production*.sh
+scripts/fix-*.sh
 
-# Session and cache files
-*.session
-*.cache
+# ===== Data & Sample Files =====
+sample-*.csv
+test-*.csv
+/data/templates/
 
-# WordPress specific
-wp-config.php
-wp-config-local.php
-
+# ===== Documentation Exceptions =====
 # Keep important documentation
 !doc/*.md
 !README.md
@@ -69,38 +81,15 @@ wp-config-local.php
 doc/*fix*.sql
 doc/*USERNAME_FIX_GUIDE*
 
-# Scripts to exclude
-scripts/*credentials*
-scripts/*production*.sh
-scripts/fix-*.sh
-
-# Sample and test data
-sample-*.csv
-test-*.csv
-/data/templates/
-
-# Backup and deprecated files
-*.backup
-*.bak
-backup-*/
-archived/
-deprecated/
-*-deprecated.*
-
-# Scripts
-*.ps1
-*.bat
-cleanup-*.sh
-
-# Photos (keep in repo but ignore changes)
+# ===== Directory Exclusions =====
+/scripts/
+/doc/
+/report/
 /Photos_candidates/
 
-# Keep the main plugin files
+# ===== Core Plugin Files (Keep These) =====
 !mobility-trailblazers.php
 !includes/
 !assets/
 !templates/
 !languages/
-/scripts
-/scripts
-/scripts
