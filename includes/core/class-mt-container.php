@@ -281,21 +281,64 @@ class MT_Container {
     /**
      * Register a service provider
      *
-     * @param MT_Service_Provider $provider Service provider
+     * Service providers are used to bootstrap services and dependencies
+     * following WordPress plugin architecture patterns.
+     *
+     * @since 2.6.0
+     *
+     * @param MT_Service_Provider|string $provider Service provider instance or fully-qualified class name
      * @return void
+     * @throws \Exception If provider class is invalid
      */
     public function register_provider($provider) {
         if (is_string($provider)) {
-            $provider = new $provider($this);
+            // Security validation: Check if class exists
+            if (!class_exists($provider)) {
+                throw new \Exception(
+                    sprintf(
+                        /* translators: %s: provider class name */
+                        __('Provider class %s does not exist', 'mobility-trailblazers'),
+                        esc_html($provider)
+                    )
+                );
+            }
+            
+            // Security validation: Check if class extends MT_Service_Provider
+            if (!is_subclass_of($provider, MT_Service_Provider::class)) {
+                throw new \Exception(
+                    sprintf(
+                        /* translators: %s: provider class name */
+                        __('Provider %s must extend MT_Service_Provider', 'mobility-trailblazers'),
+                        esc_html($provider)
+                    )
+                );
+            }
+            
+            try {
+                $provider = new $provider($this);
+            } catch (\Throwable $e) {
+                throw new \Exception(
+                    sprintf(
+                        /* translators: 1: provider class name, 2: error message */
+                        __('Failed to instantiate provider %1$s: %2$s', 'mobility-trailblazers'),
+                        esc_html($provider),
+                        esc_html($e->getMessage())
+                    )
+                );
+            }
         }
         
-        if ($provider instanceof MT_Service_Provider) {
-            $provider->register();
-            
-            // Call boot method if it exists
-            if (method_exists($provider, 'boot')) {
-                $provider->boot();
-            }
+        if (!($provider instanceof MT_Service_Provider)) {
+            throw new \Exception(
+                __('Provider must be an instance of MT_Service_Provider or a valid class name', 'mobility-trailblazers')
+            );
+        }
+        
+        $provider->register();
+        
+        // Call boot method if it exists
+        if (method_exists($provider, 'boot')) {
+            $provider->boot();
         }
     }
 }
