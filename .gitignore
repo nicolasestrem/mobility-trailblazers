@@ -83,7 +83,6 @@ doc/*USERNAME_FIX_GUIDE*
 
 # ===== Directory Exclusions =====
 /scripts/
-/doc/
 /report/
 /Photos_candidates/
 
