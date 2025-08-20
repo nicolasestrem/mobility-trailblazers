@@ -185,14 +185,6 @@
   - Modified: `includes/core/class-mt-plugin.php` (added stylesheet enqueue)
   - Can be used as template for fixing other candidates with similar issues
 
-### Technical Details
-- Default `object-position` changed from `center center` to `center 30%` for better face visibility
-- Specific adjustment for Friedrich Dräxlmaier using post ID 4627 selectors
-- Supports multiple selector patterns: body class, data attributes, and href matching
-- Mobile-responsive with adjusted positioning for smaller screens
-
-
-## [2.5.31] - 2025-08-18
 ### Removed
 - **Scroll-to-Top Implementation**: Complete removal of all scroll-to-top functionality
   - Deleted custom implementation that was causing conflicts and never properly integrated
@@ -201,30 +193,18 @@
   - Modified: `includes/integrations/elementor/class-mt-elementor-loader.php`
   - Documented cleanup in developer guide for future reference
 
-### Fixed
-- **Code Cleanup**: Removed redundant and non-functional code
-  - Eliminated ultra-aggressive CSS with excessive !important declarations
-  - Removed unused JavaScript classes and implementations
-  - Cleaned up widget registrations
-
-### Preserved
-- **Working Features**: Maintained all functional components
-  - Animation system v2.5.29 remains intact
-  - Spacing fixes that resolved white bar issues preserved
-  - All other Elementor widgets continue functioning
-
 ### Technical Details
-- Maximum z-index (2147483647) ensures button appears above all content
-- Inline styles in JavaScript bypass CSS cascade conflicts
-- GPU acceleration with `transform3d` for smooth animations
-- Reduced motion support for accessibility compliance
-- Cross-browser compatible with IE11+ support
-- Widget registration in Elementor under "Mobility Trailblazers" category
+- Default `object-position` changed from `center center` to `center 30%` for better face visibility
+- Specific adjustment for Friedrich Dräxlmaier using post ID 4627 selectors
+- Supports multiple selector patterns: body class, data attributes, and href matching
+- Mobile-responsive with adjusted positioning for smaller screens
+- Eliminated ultra-aggressive CSS with excessive !important declarations
+- Animation system v2.5.29 remains intact with all working features preserved
 
-### Production Deployment
-- All files uploaded to production FTP server
-- Plugin version incremented to 2.5.30
-- Ready for immediate use across multiple sites via Elementor widget
+## [2.5.30] - 2025-08-18 [REVERTED]
+### Note
+- **Version reverted due to scroll-to-top implementation conflicts**
+- This version was quickly superseded by 2.5.31 which removed the problematic scroll-to-top functionality
 
 ## [2.5.29] - 2025-08-18
 ### Added
@@ -332,11 +312,59 @@
   - Ensured all quick facts and candidate information display completely
 
 ## [2.5.26] - 2025-08-18
+### Major Enhancement - Candidate Management System
+#### New Features
+- **Candidate Import System**: Comprehensive Excel import functionality
+  - Admin interface at WordPress Admin → Mobility Trailblazers → Import Candidates
+  - Support for .xlsx files with smart header detection
+  - Automatic WebP photo import and attachment
+  - Dry run mode for testing imports before execution
+  - Automatic CSV backup system before data deletion
+
+- **Database Enhancements**: New table structure for improved data handling
+  - New `wp_mt_candidates` table with LONGTEXT fields to prevent data truncation
+  - JSON storage for structured 6 German evaluation sections
+  - UTF8MB4 support for German special characters
+  - Performance indexes for optimized queries
+
+- **Frontend Template Improvements**: Enhanced candidate profile display
+  - New candidate profile template with automatic German section formatting
+  - Evaluation criteria cards with grid layout and color-coded sections
+  - Sidebar navigation with Quick Facts widget and "View All Candidates" button
+  - Mobile-optimized responsive design
+
+#### German Section Parsing
+Automatic parsing and display of 6 evaluation criteria:
+- Überblick (Overview)
+- Mut & Pioniergeist (Courage & Pioneer Spirit)
+- Innovationsgrad (Innovation Level)
+- Umsetzungskraft & Wirkung (Implementation & Impact)
+- Relevanz für die Mobilitätswende (Relevance for Mobility Transformation)
+- Vorbildfunktion & Sichtbarkeit (Role Model & Visibility)
+
+#### Files Added
+- `includes/repositories/class-mt-candidate-repository.php`
+- `includes/services/class-mt-candidate-import-service.php`
+- `includes/admin/class-mt-candidate-importer.php`
+- `templates/frontend/single/single-mt_candidate-enhanced-v2.php`
+- `assets/css/candidate-enhanced-v2.css`
+- `doc/candidate-import-system.md`
+
+#### Technical Improvements
+- Performance optimizations with proper database indexing
+- Enhanced security with nonce verification and capability checks
+- Docker environment support with Windows/Linux path compatibility
+- PHP 7.4+ and WordPress 5.8+ compatibility
+
 ### Fixed
 - **Evaluation Title Readability**: Changed "Kandidat bewerten" / "Evaluate Candidate" title color to copper (#C1693C) for better visibility
   - Applied copper color to evaluation title on all screen sizes
   - Fixes readability issue on dark background
   - Consistent with brand accent color
+- Fixed truncation issues with long German text descriptions
+- Resolved character encoding problems with umlauts
+- Fixed layout issues with overlapping sidebar
+- Corrected category badge display problems
 
 ## [2.5.25] - 2025-08-18
 ### Fixed
@@ -511,7 +539,7 @@
     - `debug/create-elementor-templates.php`
   - Modified `includes/admin/class-mt-admin.php` to load the tool
 
-## [2.5.16] - 2025-08-20
+## [2.5.16] - 2025-08-17
 ### Removed
 - **Email Functionality**: Completely removed all email features from the plugin
   - Deleted MT_Email_Service class and email service infrastructure
@@ -529,7 +557,7 @@
   - Kept only "Export Coaching Report" and "Refresh Statistics" functionality
   - Cleaner, more focused dashboard for tracking progress
 
-## [2.5.15] - 2025-08-20
+## [2.5.15] - 2025-08-17
 ### Fixed
 - **View Details Button**: Fixed non-working View Details button in evaluations admin page
   - Changed MTEvaluationManager from const to window object for proper scope
@@ -548,7 +576,7 @@
 - **JavaScript Initialization**: Better module initialization for admin pages
 - **Code Quality**: Removed unnecessary complexity in favor of simpler solutions
 
-## [2.5.14] - 2025-08-20
+## [2.5.14] - 2025-08-17
 ### Fixed
 - **Candidate Card Backgrounds**: Applied consistent cream background (#F8F0E3) with blue accent borders
   - Fixed missing background colors on candidate link cards
@@ -570,7 +598,7 @@
 - **Visual Hierarchy**: Improved distinction between different content areas
 - **User Experience**: Smoother transitions and clearer interactive states
 
-## [2.5.13] - 2025-08-20
+## [2.5.13] - 2025-08-17
 ### Security
 - **Debug Center Audit**: Complete security overhaul of admin debug interface
   - Enhanced nonce verification on all AJAX endpoints

@@ -975,21 +975,636 @@ $.post(ajaxurl, {action: 'mt_refresh_nonce'}, function(response) {
 2. Check user capabilities
 3. Verify admin-ajax.php accessibility
 
-### Performance Optimization
+#### CSS Unit Spacing Issues
 
+**Problem**: Invalid CSS units causing layout problems
+
+**Common Patterns**:
+- `300 px` instead of `300px`
+- `1 rem` instead of `1rem`
+- `0.5 fr` instead of `0.5fr`
+
+**Solution**: Use regex pattern to detect and fix:
+```bash
+# Find invalid unit spacing
+grep -r "\d\s\+(px|rem|em|fr|deg|s|ms|%|vw|vh)" assets/css/
+
+# Fix with sed (backup first)
+sed -i 's/\([0-9]\)\s\+\([a-z%]\)/\1\2/g' file.css
+```
+
+#### Evaluation Criteria Missing
+
+**Problem**: Jury evaluation pages missing candidate criteria details
+
+**Root Cause**: Template looking for content in wrong meta fields
+
+**Solution**:
+1. Verify criteria meta fields exist:
 ```php
-// Enable query caching
-define('MT_ENABLE_CACHE', true);
+$criteria = [
+    '_mt_criterion_courage',
+    '_mt_criterion_innovation', 
+    '_mt_criterion_implementation',
+    '_mt_criterion_relevance',
+    '_mt_criterion_visibility'
+];
 
-// Optimize database queries
-$wpdb->query("OPTIMIZE TABLE {$wpdb->mt_evaluations}");
-
-// Use transients for expensive operations
-$candidates = get_transient('mt_all_candidates');
-if (false === $candidates) {
-    $candidates = get_posts(['post_type' => 'mt_candidate', 'posts_per_page' => -1]);
-    set_transient('mt_all_candidates', $candidates, HOUR_IN_SECONDS);
+foreach ($criteria as $field) {
+    $value = get_post_meta($candidate_id, $field, true);
+    if (empty($value)) {
+        MT_Logger::warning("Missing {$field} for candidate {$candidate_id}");
+    }
 }
+```
+
+2. Update template to retrieve correct fields
+3. Add fallback display if criteria missing
+
+#### JavaScript Memory Leaks
+
+**Problem**: Browser becomes slow after extended use
+
+**Symptoms**:
+- Increasing memory usage
+- Slower response times
+- Browser crashes
+
+**Solutions**:
+1. Implement cleanup functions:
+```javascript
+// Global cleanup function
+window.mtCleanup = function() {
+    // Clear intervals
+    if (window.mtIntervals) {
+        window.mtIntervals.forEach(clearInterval);
+        window.mtIntervals = [];
+    }
+    
+    // Remove event listeners
+    $(document).off('.mt-namespace');
+    
+    // Clear cached data
+    if (window.mtCache) {
+        window.mtCache = {};
+    }
+};
+```
+
+2. Use Page Visibility API:
+```javascript
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+        // Pause operations when tab hidden
+        pausePolling();
+    } else {
+        // Resume when visible
+        resumePolling();
+    }
+});
+```
+
+#### Double Submission Issues
+
+**Problem**: Forms submit multiple times causing data corruption
+
+**Solution**: Implement submission flags:
+```javascript
+var isSubmitting = false;
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (isSubmitting) {
+        console.log('Submission already in progress');
+        return false;
+    }
+    
+    isSubmitting = true;
+    var $button = $(this);
+    
+    $.ajax({
+        // ... ajax config
+        complete: function() {
+            isSubmitting = false;
+            $button.prop('disabled', false);
+        }
+    });
+}
+```
+
+#### Image Positioning Problems
+
+**Problem**: Candidate faces cropped in photos
+
+**Solution**: Use object-position adjustment:
+```css
+/* Specific candidate fix */
+body.postid-4627 .mt-candidate-hero-photo {
+    object-position: center 25% !important;
+}
+
+/* Global improvement */
+.mt-candidate-hero-photo {
+    object-position: center 30% !important; /* Better default */
+}
+```
+
+#### Cache-Related Issues
+
+**Problem**: Changes not appearing or stale data
+
+**Solutions**:
+1. Clear WordPress cache:
+```bash
+wp cache flush
+```
+
+2. Clear plugin transients:
+```php
+delete_transient('mt_all_candidates');
+delete_transient('mt_evaluation_stats');
+```
+
+3. Force reload assets:
+```php
+// Update version number in plugin file
+define('MT_VERSION', '2.5.38-' . time());
+```
+
+#### Settings Not Saving
+
+**Problem**: Admin settings form not persisting changes
+
+**Debug Steps**:
+1. Check nonce verification
+2. Verify user capabilities
+3. Check for PHP errors:
+```bash
+tail -f /var/log/wordpress/debug.log
+```
+
+4. Test option saving directly:
+```php
+update_option('mt_test_setting', 'test_value');
+echo get_option('mt_test_setting'); // Should output 'test_value'
+```
+
+## Performance Best Practices
+
+### Database Optimization
+
+#### Query Optimization
+
+**Use Prepared Statements Always**:
+```php
+// Bad - SQL injection risk
+$results = $wpdb->get_results("SELECT * FROM {$table} WHERE id = {$user_input}");
+
+// Good - Secure and optimized
+$results = $wpdb->get_results(
+    $wpdb->prepare(
+        "SELECT * FROM {$table} WHERE id = %d",
+        $user_input
+    )
+);
+```
+
+**Index Usage**:
+```sql
+-- Add indexes for frequently queried columns
+ALTER TABLE wp_mt_evaluations ADD INDEX idx_status_updated (status, updated_at);
+ALTER TABLE wp_mt_assignments ADD INDEX idx_jury_status (jury_member_id, status);
+```
+
+**Query Analysis**:
+```php
+// Enable query debugging
+define('SAVEQUERIES', true);
+
+// Analyze slow queries
+foreach ($wpdb->queries as $query) {
+    if ($query[1] > 0.1) { // Queries taking > 100ms
+        MT_Logger::warning('Slow query detected', [
+            'query' => $query[0],
+            'time' => $query[1]
+        ]);
+    }
+}
+```
+
+#### Caching Strategies
+
+**Transient Caching**:
+```php
+// Cache expensive calculations
+function get_evaluation_statistics() {
+    $cache_key = 'mt_eval_stats_' . md5(serialize(func_get_args()));
+    $stats = get_transient($cache_key);
+    
+    if (false === $stats) {
+        $stats = calculate_evaluation_statistics();
+        set_transient($cache_key, $stats, HOUR_IN_SECONDS);
+    }
+    
+    return $stats;
+}
+```
+
+**Object Caching**:
+```php
+// Use object cache for frequently accessed data
+function get_candidate_meta($candidate_id, $key) {
+    $cache_key = "mt_candidate_meta_{$candidate_id}_{$key}";
+    $value = wp_cache_get($cache_key, 'mt_candidates');
+    
+    if (false === $value) {
+        $value = get_post_meta($candidate_id, $key, true);
+        wp_cache_set($cache_key, $value, 'mt_candidates', 300); // 5 minutes
+    }
+    
+    return $value;
+}
+```
+
+### Asset Optimization
+
+#### CSS Loading Strategy
+
+**Conditional Loading**:
+```php
+// Load only necessary CSS
+public function enqueue_styles() {
+    // Always load core styles
+    wp_enqueue_style('mt-core', MT_PLUGIN_URL . 'assets/css/core.css');
+    
+    // Conditional loading based on page type
+    if (is_singular('mt_candidate')) {
+        wp_enqueue_style('mt-candidate', MT_PLUGIN_URL . 'assets/css/candidate.css');
+    }
+    
+    if ($this->is_using_elementor_widgets()) {
+        wp_enqueue_style('mt-v3-system', MT_PLUGIN_URL . 'assets/css/v3/mt-tokens.css');
+    }
+}
+```
+
+**CSS Consolidation**:
+```php
+// Combine related CSS files
+wp_enqueue_style(
+    'mt-hotfixes-consolidated',
+    MT_PLUGIN_URL . 'assets/css/mt-hotfixes-consolidated.css',
+    ['mt-frontend'],
+    MT_VERSION
+);
+```
+
+#### JavaScript Optimization
+
+**Module Pattern with Cleanup**:
+```javascript
+var MTModule = (function($) {
+    'use strict';
+    
+    var intervals = [];
+    var timeouts = [];
+    var isInitialized = false;
+    
+    function init() {
+        if (isInitialized) return;
+        
+        bindEvents();
+        startPolling();
+        isInitialized = true;
+    }
+    
+    function startPolling() {
+        var intervalId = setInterval(updateData, 5000);
+        intervals.push(intervalId);
+    }
+    
+    function cleanup() {
+        intervals.forEach(clearInterval);
+        timeouts.forEach(clearTimeout);
+        intervals = [];
+        timeouts = [];
+        isInitialized = false;
+    }
+    
+    // Page Visibility API for resource management
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            cleanup();
+        } else if (!isInitialized) {
+            init();
+        }
+    });
+    
+    return {
+        init: init,
+        cleanup: cleanup
+    };
+})(jQuery);
+```
+
+### Memory Management
+
+**PHP Memory Optimization**:
+```php
+// Free memory after large operations
+function process_large_dataset($data) {
+    foreach (array_chunk($data, 100) as $chunk) {
+        process_chunk($chunk);
+        unset($chunk); // Free memory
+    }
+    
+    // Force garbage collection
+    if (function_exists('gc_collect_cycles')) {
+        gc_collect_cycles();
+    }
+}
+```
+
+**JavaScript Memory Management**:
+```javascript
+// Prevent memory leaks in event handlers
+function bindEvents() {
+    // Use namespaced events for easy cleanup
+    $(document).on('click.mt-evaluation', '.evaluate-btn', handleEvaluation);
+    $(document).on('change.mt-evaluation', '.score-input', handleScoreChange);
+}
+
+function unbindEvents() {
+    $(document).off('.mt-evaluation');
+}
+```
+
+### Performance Monitoring
+
+**Query Performance Tracking**:
+```php
+class MT_Performance_Monitor {
+    private static $queries = [];
+    
+    public static function log_query($query, $time) {
+        self::$queries[] = [
+            'query' => $query,
+            'time' => $time,
+            'backtrace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)
+        ];
+    }
+    
+    public static function get_slow_queries($threshold = 0.1) {
+        return array_filter(self::$queries, function($q) use ($threshold) {
+            return $q['time'] > $threshold;
+        });
+    }
+}
+```
+
+## CSS and Styling Guidelines
+
+### CSS Architecture
+
+#### Design Token System
+
+**Color Tokens**:
+```css
+:root {
+    /* Brand Colors */
+    --mt-primary: #003C3D;
+    --mt-secondary: #004C5F;
+    --mt-accent: #C1693C;
+    --mt-kupfer-soft: #BB6F52;
+    
+    /* Background Colors */
+    --mt-bg-beige: #F8F0E3;
+    --mt-card-bg: #FFFFFF;
+    --mt-overlay-bg: rgba(0, 60, 61, 0.9);
+    
+    /* Text Colors */
+    --mt-text: #302C37;
+    --mt-text-light: #6c757d;
+    --mt-text-inverse: #FFFFFF;
+    
+    /* Border Colors */
+    --mt-border-soft: #E8DCC9;
+    --mt-border-focus: #26a69a;
+}
+```
+
+**Spacing Tokens**:
+```css
+:root {
+    /* Spacing Scale */
+    --mt-space-1: 4px;
+    --mt-space-2: 8px;
+    --mt-space-3: 12px;
+    --mt-space-4: 16px;
+    --mt-space-6: 24px;
+    --mt-space-8: 32px;
+    --mt-space-12: 48px;
+    --mt-space-16: 64px;
+    
+    /* Component Sizes */
+    --mt-avatar-size: 104px;
+    --mt-card-border-radius: 16px;
+    --mt-button-height: 44px;
+}
+```
+
+#### Component-Based CSS
+
+**BEM Methodology**:
+```css
+/* Block */
+.mt-candidate-card {
+    background: var(--mt-card-bg);
+    border-radius: var(--mt-card-border-radius);
+    padding: var(--mt-space-6);
+}
+
+/* Element */
+.mt-candidate-card__image {
+    width: var(--mt-avatar-size);
+    height: var(--mt-avatar-size);
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+/* Modifier */
+.mt-candidate-card--featured {
+    border: 2px solid var(--mt-accent);
+    transform: scale(1.02);
+}
+```
+
+**Scoped Styles for Widgets**:
+```css
+/* Scope all styles to widget container */
+.elementor-widget-mt_candidates_grid {
+    /* Widget-specific styles here */
+}
+
+.elementor-widget-mt_candidates_grid .mt-candidate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--mt-space-6);
+}
+```
+
+### Responsive Design Patterns
+
+**Mobile-First Approach**:
+```css
+/* Mobile default */
+.mt-candidate-grid {
+    grid-template-columns: 1fr;
+    gap: var(--mt-space-4);
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .mt-candidate-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--mt-space-6);
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .mt-candidate-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+```
+
+**Container Queries (Future)**:
+```css
+/* When container query support improves */
+@container (min-width: 600px) {
+    .mt-candidate-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+```
+
+### CSS Performance Guidelines
+
+#### Specificity Management
+
+**Avoid !important**:
+```css
+/* Bad - High specificity, hard to override */
+.mt-card .mt-card__title.mt-title-large {
+    font-size: 24px !important;
+}
+
+/* Good - Scoped specificity */
+.elementor-widget-mt_candidates_grid .mt-card__title {
+    font-size: 24px;
+}
+```
+
+**Use CSS Custom Properties for Overrides**:
+```css
+/* Base component */
+.mt-button {
+    background: var(--mt-button-bg, var(--mt-primary));
+    color: var(--mt-button-color, white);
+}
+
+/* Context-specific override */
+.mt-hero-section {
+    --mt-button-bg: var(--mt-accent);
+    --mt-button-color: white;
+}
+```
+
+#### Selector Optimization
+
+**Efficient Selectors**:
+```css
+/* Good - Specific, shallow */
+.mt-candidate-card .mt-card__title {}
+
+/* Bad - Deep nesting, slow */
+.mt-section .mt-container .mt-grid .mt-card .mt-content .mt-title {}
+
+/* Good - Class-based targeting */
+.mt-card-title-large {}
+```
+
+### Animation Guidelines
+
+**Performance-Conscious Animations**:
+```css
+/* Use transform and opacity for smooth animations */
+.mt-card {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    will-change: transform; /* Hint to browser for optimization */
+}
+
+.mt-card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+    .mt-card {
+        transition: none;
+    }
+}
+```
+
+**GPU-Accelerated Properties**:
+```css
+/* Use these properties for smooth animations */
+.mt-animated-element {
+    transform: translateZ(0); /* Force GPU acceleration */
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%) translateZ(0);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) translateZ(0);
+        opacity: 1;
+    }
+}
+```
+
+### CSS Quality Assurance
+
+**Stylelint Configuration**:
+```json
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "declaration-no-important": true,
+    "color-named": "never",
+    "selector-max-id": 0,
+    "selector-max-universal": 1,
+    "custom-property-pattern": "^mt-[a-z-]+$"
+  }
+}
+```
+
+**CSS Validation Workflow**:
+```bash
+# Install stylelint
+npm install -g stylelint stylelint-config-standard
+
+# Validate CSS files
+stylelint "assets/css/**/*.css"
+
+# Auto-fix common issues
+stylelint "assets/css/**/*.css" --fix
 ```
 
 ## Removed Functionality (v2.5.38)

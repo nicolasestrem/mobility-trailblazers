@@ -1,19 +1,21 @@
 # Mobility Trailblazers - Import/Export & Localization Guide
-*Last Updated: August 17, 2025 | Version 2.5.8*
+*Last Updated: August 20, 2025 | Version 2.5.37*
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
 2. [CSV Format Specifications](#csv-format-specifications)
 3. [Excel to CSV Conversion](#excel-to-csv-conversion)
 4. [Import Methods](#import-methods)
-5. [AJAX Import with Progress](#ajax-import-with-progress)
-6. [Field Mapping & Validation](#field-mapping--validation)
-7. [German Text Parsing](#german-text-parsing)
-8. [Export Functionality](#export-functionality)
-9. [German Localization](#german-localization)
-10. [System Architecture](#system-architecture)
-11. [Troubleshooting](#troubleshooting)
-12. [Developer Reference](#developer-reference)
+5. [Migration Procedures](#migration-procedures)
+6. [AJAX Import with Progress](#ajax-import-with-progress)
+7. [Field Mapping & Validation](#field-mapping--validation)
+8. [German Text Parsing](#german-text-parsing)
+9. [Export Functionality](#export-functionality)
+10. [German Localization](#german-localization)
+11. [System Architecture](#system-architecture)
+12. [Troubleshooting](#troubleshooting)
+13. [Admin Cleanup Procedures](#admin-cleanup-procedures)
+14. [Developer Reference](#developer-reference)
 
 ---
 
@@ -40,7 +42,14 @@
 5. Review validation report
 6. Click **Import** to process
 
-#### Method 3: Excel Conversion
+#### Method 3: Advanced Excel Import (Recommended)
+1. Navigate to **Mobility Trailblazers → Import Candidates**
+2. Use default file paths or browse to your Excel file
+3. Enable "Also import candidate photos" if photos are available
+4. Run dry run first to preview changes
+5. Execute actual import after verification
+
+#### Method 4: Excel to CSV Conversion
 1. Open `tools/excel-to-csv-converter.html` in browser
 2. Drag your Excel file onto the upload area
 3. Review preview (first 10 records)
@@ -208,7 +217,27 @@ php tools/excel-to-csv-converter.php
 - **Validate URLs**: Check URL format
 - **Import photos**: Download from URLs
 
-### Method 3: AJAX Import with Progress Tracking
+### Method 3: Advanced Excel Import System
+
+**Location**: WordPress Admin → Mobility Trailblazers → Import Candidates
+
+**Implementation**: `includes/admin/class-mt-candidate-importer.php`
+
+**Features**:
+- Direct Excel file processing (no CSV conversion needed)
+- Photo import from directory
+- German criteria parsing
+- Dry run capability
+- Comprehensive validation
+- Backup creation before operations
+
+**Process**:
+1. Select Excel file and photo directory
+2. Choose import options (photos, dry run)
+3. Execute import with real-time feedback
+4. Review detailed results and statistics
+
+### Method 4: AJAX Import with Progress Tracking
 
 **Location**: Import/Export page → Import via AJAX
 
@@ -220,6 +249,89 @@ php tools/excel-to-csv-converter.php
 - Row-by-row processing
 - Detailed error messages
 - Pause/resume capability
+
+---
+
+## Migration Procedures
+
+### Overview
+Complete migration of candidate data from Excel to WordPress, including evaluation criteria extraction and photo attachment.
+
+### Migration Steps
+
+#### Phase 1: Preparation
+1. **Backup existing data**:
+   ```bash
+   wp db export backup-$(date +%Y%m%d).sql
+   ```
+
+2. **Prepare migration scripts**:
+   - `scripts/delete-all-candidates.php` - Safe candidate removal
+   - `scripts/import-new-candidates.php` - CSV import with criteria parsing
+   - `scripts/attach-existing-photos.php` - Photo attachment
+   - `scripts/fix-meta-field-names.php` - Field name compatibility
+
+#### Phase 2: Data Migration
+1. **Delete existing candidates** (preserves jury members):
+   ```bash
+   php scripts/delete-all-candidates.php
+   ```
+
+2. **Import new candidates**:
+   ```bash
+   php scripts/import-new-candidates.php
+   ```
+
+3. **Attach photos from media library**:
+   ```bash
+   php scripts/attach-existing-photos.php
+   ```
+
+#### Phase 3: Validation
+1. **Verify candidate count and data integrity**
+2. **Check photo attachments**
+3. **Validate German criteria extraction**
+4. **Test template rendering**
+
+### Migration Best Practices
+
+#### Meta Field Compatibility
+Save data in multiple field formats for template compatibility:
+```php
+// Save for both old and new templates
+update_post_meta($post_id, '_mt_overview', $overview);
+update_post_meta($post_id, '_mt_description_full', $overview);
+```
+
+#### Biography Generation
+For candidates missing biography text, generate from role/organization:
+```php
+$biography = sprintf(
+    "%s ist %s bei %s und trägt zur Mobilitätswende bei.",
+    $name, $position, $organization
+);
+```
+
+#### Evaluation Criteria Handling
+Extract structured criteria from German description text:
+- Mut & Pioniergeist
+- Innovationsgrad  
+- Umsetzungsstärke & Wirkung
+- Relevanz für die Mobilitätswende
+- Sichtbarkeit & Reichweite
+
+### Post-Migration Cleanup
+
+#### Database Tables to Reset
+- `wp_mt_evaluations` - Clear for new evaluation cycle
+- `wp_mt_votes` - Reset voting data
+- `wp_mt_candidate_scores` - Clear calculated scores
+- `wp_mt_jury_assignments` - Reset assignments
+
+#### Temporary Files to Remove
+- Browser-accessible migration scripts
+- Emergency fix files
+- Development backup files
 
 ---
 
@@ -732,6 +844,67 @@ MT_Import_Export (Admin UI)
 
 ## Troubleshooting
 
+### Quick Import Issues
+
+#### Issue: "Excel file not found" error
+**Causes**:
+- Incorrect file path
+- File moved or renamed
+- Permission issues
+
+**Solutions**:
+```bash
+# Verify file exists
+ls -la "path/to/excel/file.xlsx"
+
+# Check permissions
+chmod 644 "path/to/excel/file.xlsx"
+
+# Use full absolute path
+```
+
+#### Issue: German criteria sections missing
+**Causes**:
+- Description field empty
+- Wrong section headers
+- Encoding issues
+
+**Solutions**:
+```
+Ensure Excel Description column contains sections with headers:
+- Überblick:
+- Mut & Pioniergeist:
+- Innovationsgrad:
+- Umsetzungskraft & Wirkung:
+- Relevanz für die Mobilitätswende:
+- Vorbildfunktion & Sichtbarkeit:
+```
+
+#### Issue: Photos not attaching during import
+**Causes**:
+- Photo directory not found
+- Filename mismatch
+- Permission issues
+
+**Solutions**:
+```bash
+# Verify photo directory structure
+ls -la "path/to/photos/"
+
+# Check for candidate name matches
+# Photos should match: "firstname-lastname.webp"
+
+# Run separate photo attachment
+php scripts/attach-existing-photos.php
+```
+
+### Legacy Import Issues
+
+#### Issue: Import page shows "mt-import-profiles" not found
+**Solution**: This page was removed in v2.5.37. Use the newer "Import Candidates" page instead:
+- **Old URL**: `admin.php?page=mt-import-profiles` (removed)
+- **New URL**: `admin.php?page=mt-candidate-importer` (active)
+
 ### Common Issues and Solutions
 
 #### Issue: "Invalid file type" error
@@ -811,6 +984,7 @@ Ensure valid URL format:
 - File too large
 - Server timeout
 - Memory limit
+- Photo processing time
 
 **Solutions**:
 ```php
@@ -818,6 +992,10 @@ Ensure valid URL format:
 // Or increase PHP limits:
 set_time_limit(300);
 ini_set('memory_limit', '256M');
+
+// For photo imports, process separately:
+// 1. Import candidates first (without photos)
+// 2. Run photo attachment script separately
 ```
 
 #### Issue: Duplicate entries created
@@ -853,6 +1031,84 @@ MT CSV Import: Found 50 rows
 MT CSV Import: Row 5 - Invalid email format
 MT CSV Import: Completed - 48 imported, 2 errors
 ```
+
+---
+
+## Admin Cleanup Procedures
+
+### Removing Import Pages
+
+When consolidating import functionality, follow this process to safely remove redundant pages:
+
+#### 1. Identify Dependencies
+Before removing any import page, check dependencies:
+```bash
+grep -r "mt-import-profiles" includes/
+grep -r "MT_Import_Handler" includes/
+```
+
+#### 2. Preserve Core Classes
+Keep essential classes that may be used by multiple systems:
+- `MT_Import_Handler` - Used by Import/Export page and AJAX handlers
+- Core service classes with static methods
+- Database migration utilities
+
+#### 3. Safe Removal Process
+1. **Remove menu registration** from `class-mt-admin.php`
+2. **Delete template files** (e.g., `templates/admin/import-profiles.php`)
+3. **Keep handler classes** if used elsewhere
+4. **Update documentation** to reflect changes
+
+#### 4. Testing Checklist
+- ✅ Remaining import systems function
+- ✅ No broken menu links
+- ✅ AJAX handlers still operational
+- ✅ Export functionality preserved
+
+### Import System Comparison
+
+Current active import systems:
+
+| System | Menu Location | File Types | Features |
+|--------|--------------|------------|----------|
+| **Quick Import** | All Candidates → Import CSV | CSV | Simple upload, basic validation |
+| **Import/Export** | MT Award System → Import/Export | CSV | Advanced options, dry run |
+| **Candidate Importer** | MT Award System → Import Candidates | Excel + Photos | Full workflow, criteria parsing |
+
+### Backup Procedures
+
+Before any major import operation:
+
+```bash
+# Database backup
+wp db export backup-$(date +%Y%m%d-%H%M%S).sql
+
+# Media library backup (if processing photos)
+tar -czf media-backup-$(date +%Y%m%d).tar.gz wp-content/uploads/
+
+# Plugin state backup
+cp -r wp-content/plugins/mobility-trailblazers/ ../plugin-backup/
+```
+
+### Recovery Procedures
+
+If import fails or causes issues:
+
+1. **Database Recovery**:
+   ```bash
+   wp db import backup-YYYYMMDD-HHMMSS.sql
+   ```
+
+2. **Clear corrupted data**:
+   ```bash
+   wp post delete $(wp post list --post_type=mt_candidate --format=ids) --force
+   ```
+
+3. **Reset plugin state**:
+   ```bash
+   wp plugin deactivate mobility-trailblazers
+   wp plugin activate mobility-trailblazers
+   ```
 
 ---
 
