@@ -42,7 +42,7 @@ if (!empty($jury_members)) {
 
 <div class="mt-rankings-section">
     <div class="mt-rankings-header">
-        <h2><?php _e('Top Ranked Candidates', 'mobility-trailblazers'); ?></h2>
+        <h2><?php _e('Your Rankings', 'mobility-trailblazers'); ?></h2>
         <p class="mt-rankings-subtitle"><?php _e('Real-time ranking based on evaluation scores', 'mobility-trailblazers'); ?></p>
     </div>
     <div class="mt-evaluation-table-wrap">

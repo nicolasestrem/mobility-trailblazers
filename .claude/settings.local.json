@@ -40,7 +40,16 @@
       "mcp__filesystem__list_allowed_directories",
       "mcp__wordpress__wp_debug_log",
       "Bash(php:*)",
-      "Bash(wp:*)"
+      "Bash(wp:*)",
+      "mcp__github-mcp__list_issues",
+      "Bash(gh issue list:*)",
+      "Bash(docker exec:*)",
+      "mcp__wordpress-mcp__wp_cache_flush",
+      "mcp__docker-mcp__wp_cli",
+      "mcp__kapture__reload",
+      "mcp__kapture__keypress",
+      "mcp__kapture__click",
+      "mcp__kapture__select"
     ],
     "deny": [],
     "ask": []

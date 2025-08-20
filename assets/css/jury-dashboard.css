@@ -51,6 +51,11 @@
     position: relative;
 }
 
+.mt-progress-bar.mt-progress-complete {
+    background: rgba(0, 163, 42, 0.1);
+    border: 2px solid #00a32a;
+}
+
 .mt-progress-fill {
     background: white;
     height: 100%;
@@ -62,11 +67,56 @@
     min-width: 80px;
 }
 
+.mt-progress-complete .mt-progress-fill {
+    background: linear-gradient(90deg, #00a32a, #00c436);
+}
+
 .mt-progress-text {
     color: var(--mt-primary);
     font-weight: bold;
     font-size: 16px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.mt-progress-complete .mt-progress-text {
+    color: white;
+}
+
+/* Completion Badge */
+.mt-completion-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    animation: celebrateAnimation 0.5s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mt-completion-badge strong {
+    color: #664800;
+    font-size: 18px;
+}
+
+@keyframes celebrateAnimation {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* ========================================

@@ -54,6 +54,9 @@ msgstr "Bewertung erfolgreich eingereicht!"
 msgid "Draft saved successfully!"
 msgstr "Entwurf erfolgreich gespeichert!"
 
+msgid "Congratulations! You have completed all evaluations!"
+msgstr "Herzlichen Glückwunsch! Sie haben alle Bewertungen abgeschlossen!"
+
 msgid "Please rate all criteria before submitting."
 msgstr "Bitte bewerten Sie alle Kriterien vor dem Absenden."
 
@@ -918,7 +921,10 @@ msgstr "Zuweisungsverteilungsanalyse"
 
 # Rankings Translations  
 msgid "Top Ranked Candidates"
-msgstr "Rangliste der bewerteten Kandidaten"
+msgstr "Ihre Rangliste"
+
+msgid "Your Rankings"
+msgstr "Ihre Rangliste"
 
 msgid "Real-time ranking based on evaluation scores"
 msgstr "Echtzeit-Ranking basierend auf Bewertungsergebnissen"

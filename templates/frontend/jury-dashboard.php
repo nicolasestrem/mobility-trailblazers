@@ -97,16 +97,27 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
         <?php endif; ?>
         
         <?php if ((isset($dashboard_settings['show_progress_bar']) ? $dashboard_settings['show_progress_bar'] : true) && $progress['total'] > 0) : ?>
-        <div class="<?php echo esc_attr($progress_class); ?>">
+        <div class="<?php echo esc_attr($progress_class); ?> <?php echo $progress['completion_rate'] == 100 ? 'mt-progress-complete' : ''; ?>">
             <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress['completion_rate']); ?>%">
-                <span class="mt-progress-text"><?php echo esc_html($progress['completion_rate']); ?>%</span>
+                <span class="mt-progress-text">
+                    <?php if ($progress['completion_rate'] == 100) : ?>
+                        <span class="dashicons dashicons-yes-alt" style="color: #00a32a; margin-right: 5px;"></span>
+                    <?php endif; ?>
+                    <?php echo esc_html($progress['completion_rate']); ?>%
+                </span>
             </div>
         </div>
+        <?php if ($progress['completion_rate'] == 100) : ?>
+            <div class="mt-completion-badge">
+                <span class="dashicons dashicons-awards" style="font-size: 24px; color: #ffd700;"></span>
+                <strong><?php _e('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'); ?></strong>
+            </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
     
     <?php if (isset($dashboard_settings['show_stats_cards']) ? $dashboard_settings['show_stats_cards'] : true) : ?>
-    <div class="mt-stats-grid">
+    <div class="mt-stats-grid" style="grid-template-columns: repeat(3, 1fr);">
         <div class="mt-stat-card">
             <p class="mt-stat-number"><?php echo esc_html($progress['total']); ?></p>
             <p class="mt-stat-label"><?php _e('Total Assigned', 'mobility-trailblazers'); ?></p>
@@ -114,10 +125,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
         <div class="mt-stat-card">
             <p class="mt-stat-number"><?php echo esc_html($progress['completed']); ?></p>
             <p class="mt-stat-label"><?php _e('Completed', 'mobility-trailblazers'); ?></p>
-        </div>
-        <div class="mt-stat-card">
-            <p class="mt-stat-number"><?php echo esc_html($progress['drafts']); ?></p>
-            <p class="mt-stat-label"><?php _e('In Draft', 'mobility-trailblazers'); ?></p>
         </div>
         <div class="mt-stat-card">
             <p class="mt-stat-number"><?php echo esc_html($progress['pending']); ?></p>
@@ -137,7 +144,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             <select class="mt-filter-select" id="mt-status-filter">
                 <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
                 <option value="pending"><?php _e('Pending', 'mobility-trailblazers'); ?></option>
-                <option value="draft"><?php _e('Draft Saved', 'mobility-trailblazers'); ?></option>
                 <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
             </select>
         </div>
@@ -195,9 +201,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                             $status_class = 'mt-status-' . $status;
                             $status_text = __('Not Started', 'mobility-trailblazers');
                             
-                            if ($status === 'draft') {
-                                $status_text = __('Draft Saved', 'mobility-trailblazers');
-                            } elseif ($status === 'completed') {
+                            if ($status === 'completed') {
                                 $status_text = __('Completed', 'mobility-trailblazers');
                             }
                             ?>
@@ -212,8 +216,6 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                             <?php
                             if ($status === 'completed') {
                                 _e('View/Edit Evaluation', 'mobility-trailblazers');
-                            } elseif ($status === 'draft') {
-                                _e('Continue Evaluation', 'mobility-trailblazers');
                             } else {
                                 _e('Start Evaluation', 'mobility-trailblazers');
                             }

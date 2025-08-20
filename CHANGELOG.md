@@ -5,6 +5,38 @@ All notable changes to the Mobility Trailblazers plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.37] - 2025-08-20
+
+### 🐛 Fixes - GitHub Issues Resolution
+- **Fixed Issue #51**: Jury dashboard dropdown menu now properly filters candidates
+- **Fixed Issue #50**: Removed all "Draft" status references from the dashboard
+  - Removed "In Draft" stats card
+  - Removed "Draft Saved" option from status filter dropdown
+  - Simplified status to only "Pending" and "Completed"
+- **Fixed Issue #49**: Changed German translation from "Rangliste der bewerteten Kandidaten" to "Ihre Rangliste"
+- **Fixed Issue #48**: Added 100% completion indicator for jury members
+  - Added visual celebration badge when all evaluations are complete
+  - Enhanced progress bar styling for completed state
+  - Added checkmark icon and congratulations message
+- **Fixed Issue #47**: Fixed dashboard viewport issues at 100% zoom
+  - Added responsive CSS fixes for standard desktop viewports
+  - Fixed table overflow and content cutoff issues
+  - Ensured proper box-sizing and max-width constraints
+- **Fixed Issue #42**: Implemented missing Elementor import functionality
+  - Added import form to Elementor Export page
+  - Renamed page to "Elementor Import/Export"
+  - Added JSON file upload support
+  - Added error handling and success messages
+  - Created `handle_import_template()` and `import_elementor_template()` methods
+
+### 📝 Files Modified
+- `templates/frontend/jury-dashboard.php` - Removed draft references, added completion marker
+- `templates/frontend/partials/jury-rankings.php` - Updated title translation
+- `languages/mobility-trailblazers-de_DE.po` - Updated German translations
+- `assets/css/jury-dashboard.css` - Added completion badge styles
+- `assets/css/mt-jury-dashboard-fix.css` - Added viewport and responsive fixes
+- `includes/admin/tools/class-mt-elementor-export.php` - Added import functionality
+
 ## [2.5.35] - 2025-08-19 EMERGENCY
 
 ### 🚨 CRITICAL FIXES - Boss Review Issues
