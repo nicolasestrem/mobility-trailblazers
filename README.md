@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.5.37
+**Version:** 2.6.0
 **Author:** Mobility Trailblazers - Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  
@@ -33,7 +33,15 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 - **Dashboard Widgets**: Custom WordPress widgets for jury and admin interfaces
 - **Debug Center**: Comprehensive diagnostics and maintenance tools for system health monitoring
 
-### Recent Enhancements (v2.5.38 - v2.2.28)
+### Recent Enhancements (v2.6.0 - v2.2.28)
+
+#### Dependency Injection Architecture (v2.6.0)
+- **Container System**: Lightweight DI container for service management
+- **Service Providers**: Organized service registration and bootstrapping
+- **Interface-Based Design**: All services and repositories implement interfaces
+- **SOLID Principles**: Complete adherence to SOLID design principles
+- **Improved Testability**: Easy mocking and isolation for unit testing
+- **Backward Compatibility**: Facade pattern preserves legacy code functionality
 
 #### Code Quality Refactoring (v2.5.38)
 - **Email Service Removal**: Complete elimination of email functionality for streamlined operation
@@ -72,12 +80,15 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 ```
 mobility-trailblazers/
 ├── includes/
-│   ├── core/              # MT_Plugin, Activator, Database
+│   ├── core/              # MT_Plugin, Container, Service Provider
+│   ├── providers/         # Service provider implementations
+│   ├── interfaces/        # Service and repository interfaces
 │   ├── admin/             # Admin interfaces and columns
 │   ├── ajax/              # AJAX handlers with base class
-│   ├── repositories/      # Data access layer
-│   ├── services/          # Business logic
+│   ├── repositories/      # Data access layer (interface-based)
+│   ├── services/          # Business logic (DI-enabled)
 │   ├── widgets/           # Dashboard widgets
+│   ├── legacy/            # Backward compatibility layer
 │   └── utilities/         # Helper functions
 ├── templates/             # Frontend templates
 ├── assets/               
@@ -86,6 +97,13 @@ mobility-trailblazers/
 ├── languages/            # i18n support (German/English)
 └── doc/                  # Comprehensive documentation
 ```
+
+### Dependency Injection Architecture
+- **Container**: `MT_Container` manages service lifecycle and dependencies
+- **Service Providers**: Organized registration of services and repositories
+- **Interfaces**: All major components implement interfaces for flexibility
+- **Auto-Resolution**: Automatic dependency injection through reflection
+- **Testing Support**: Easy mocking and test double injection
 
 ### Database Schema
 ```sql
@@ -191,8 +209,13 @@ npm run build
 
 ### Core Documentation
 - **[Developer Guide](doc/developer-guide.md)** - Complete technical reference, architecture, testing, and troubleshooting
+- **[Architecture Overview](doc/ARCHITECTURE.md)** - System architecture and design patterns
+- **[Dependency Injection Guide](doc/DEPENDENCY-INJECTION-GUIDE.md)** - DI container usage and patterns
+- **[API Reference](doc/API-REFERENCE.md)** - Complete API documentation for all components
+- **[Migration Guide](doc/MIGRATION-GUIDE.md)** - Step-by-step migration to DI architecture
+- **[Testing Strategies](doc/TESTING-STRATEGIES.md)** - Testing patterns with dependency injection
 - **[Import/Export Guide](doc/import-export-guide.md)** - CSV/Excel handling and German localization
-- **[Changelog](doc/changelog.md)** - Complete version history (v2.5.8 to v2.2.0)
+- **[Changelog](doc/changelog.md)** - Complete version history (v2.6.0 to v2.2.0)
 
 ### Archived Documentation
 - **[Archived](doc/archived/)** - Historical documentation and dated fix reports
@@ -225,10 +248,11 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Version**: 2.5.37 (August 20, 2025)
+**Current Version**: 2.6.0 (August 20, 2025)
 **Status**: Production Ready ✅
 
 ### Recent Updates
+- ✅ Dependency injection architecture (v2.6.0) - Container, service providers, interfaces
 - ✅ Major code quality refactoring (v2.5.38) - Email removal, performance fixes, CSS consolidation
 - ✅ Testing infrastructure with PHPUnit and live diagnostics
 - ✅ German localization (1000+ strings translated)
@@ -246,4 +270,4 @@ Located in `../../Documentation/`:
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 20, 2025 | Version 2.5.37*
+*Last updated: August 20, 2025 | Version 2.6.0*

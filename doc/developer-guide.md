@@ -1,6 +1,6 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.5.38 | Last Updated: August 20, 2025*
+*Version 2.6.0 | Last Updated: August 20, 2025*
 
 ## Table of Contents
 
@@ -8,18 +8,19 @@
 2. [File Structure](#file-structure)
 3. [JavaScript Architecture](#javascript-architecture)
 4. [PHP Architecture](#php-architecture)
-5. [AJAX System](#ajax-system)
-6. [Database Schema](#database-schema)
-7. [Security Implementation](#security-implementation)
-8. [Frontend Assets](#frontend-assets)
-9. [UI Templates & Components](#ui-templates--components)
-10. [Photo Management System](#photo-management-system)
-11. [Auto-Assignment System](#auto-assignment-system)
-12. [Rich Text Editor](#rich-text-editor)
-13. [Testing Infrastructure](#testing-infrastructure)
-14. [Debug Center](#debug-center)
-15. [Troubleshooting](#troubleshooting)
-16. [Best Practices](#best-practices)
+5. [Dependency Injection Architecture](#dependency-injection-architecture)
+6. [AJAX System](#ajax-system)
+7. [Database Schema](#database-schema)
+8. [Security Implementation](#security-implementation)
+9. [Frontend Assets](#frontend-assets)
+10. [UI Templates & Components](#ui-templates--components)
+11. [Photo Management System](#photo-management-system)
+12. [Auto-Assignment System](#auto-assignment-system)
+13. [Rich Text Editor](#rich-text-editor)
+14. [Testing Infrastructure](#testing-infrastructure)
+15. [Debug Center](#debug-center)
+16. [Troubleshooting](#troubleshooting)
+17. [Best Practices](#best-practices)
 
 ## Architecture Overview
 
@@ -28,6 +29,9 @@ The Mobility Trailblazers plugin follows a modern MVC architecture with clear se
 ### Core Design Patterns
 
 - **Repository-Service-Controller**: Clean data access and business logic separation
+- **Dependency Injection Container**: Modern IoC container for service management
+- **Service Provider Pattern**: Modular service registration and bootstrapping
+- **Interface-Based Design**: SOLID principles implementation with clear contracts
 - **WordPress Integration**: Leverages WordPress APIs while maintaining modularity
 - **AJAX-First**: Real-time updates without page refreshes
 - **Security-First**: Comprehensive nonce verification and capability checks
@@ -179,17 +183,28 @@ function saveEvaluation(e) {
 
 ## PHP Architecture
 
-### Service Layer Pattern
+### Modern Service Layer with Dependency Injection
 
 ```php
-class MT_Assignment_Service {
+class MT_Assignment_Service implements MT_Assignment_Service_Interface {
     private $repository;
+    private $logger;
+    private $validator;
     
-    public function __construct(MT_Assignment_Repository $repository) {
+    public function __construct(
+        MT_Assignment_Repository_Interface $repository,
+        MT_Logger_Interface $logger,
+        MT_Validator_Interface $validator
+    ) {
         $this->repository = $repository;
+        $this->logger = $logger;
+        $this->validator = $validator;
     }
     
     public function auto_assign_candidates($jury_member_id, $count = 10) {
+        // Validate input
+        $this->validator->validate_jury_member($jury_member_id);
+        
         // Business logic
         $available = $this->repository->get_unassigned_candidates();
         $conflicts = $this->check_conflicts($jury_member_id);
@@ -198,9 +213,21 @@ class MT_Assignment_Service {
         $filtered = array_diff($available, $conflicts);
         $selected = array_slice($filtered, 0, $count);
         
-        return $this->repository->create_assignments($jury_member_id, $selected);
+        $result = $this->repository->create_assignments($jury_member_id, $selected);
+        
+        // Log operation
+        $this->logger->info('Auto-assignment completed', [
+            'jury_member_id' => $jury_member_id,
+            'assignments_created' => count($result)
+        ]);
+        
+        return $result;
     }
 }
+
+// Getting service from container
+$container = MT_Container::get_instance();
+$assignment_service = $container->get('MT_Assignment_Service');
 ```
 
 ### Repository Pattern
@@ -237,6 +264,288 @@ class MT_Evaluation_Repository {
 }
 ```
 
+## Dependency Injection Architecture
+
+### Overview
+
+The plugin now implements a modern dependency injection container system that follows SOLID principles and provides clean separation of concerns. This architecture improves testability, maintainability, and modularity.
+
+### Container Implementation
+
+```php
+// Container initialization
+$container = MT_Container::get_instance();
+
+// Service registration through service providers
+$container->register_provider(new MT_Core_Service_Provider());
+$container->register_provider(new MT_Evaluation_Service_Provider());
+$container->register_provider(new MT_Assignment_Service_Provider());
+
+// Automatic dependency resolution
+$evaluation_service = $container->get('MT_Evaluation_Service');
+```
+
+### Service Provider Pattern
+
+```php
+class MT_Evaluation_Service_Provider implements MT_Service_Provider_Interface {
+    public function register(MT_Container_Interface $container): void {
+        // Register repository
+        $container->singleton('MT_Evaluation_Repository_Interface', function($container) {
+            return new MT_Evaluation_Repository();
+        });
+        
+        // Register validator
+        $container->singleton('MT_Validator_Interface', function($container) {
+            return new MT_Validator();
+        });
+        
+        // Register service with dependencies
+        $container->singleton('MT_Evaluation_Service', function($container) {
+            return new MT_Evaluation_Service(
+                $container->get('MT_Evaluation_Repository_Interface'),
+                $container->get('MT_Logger_Interface'),
+                $container->get('MT_Validator_Interface')
+            );
+        });
+    }
+    
+    public function boot(MT_Container_Interface $container): void {
+        // Bootstrap logic after all services are registered
+        $evaluation_service = $container->get('MT_Evaluation_Service');
+        $evaluation_service->initialize();
+    }
+}
+```
+
+### Interface-Based Design
+
+```php
+// Service interfaces define contracts
+interface MT_Evaluation_Service_Interface {
+    public function save_evaluation(int $id, array $scores, string $comments = ''): bool;
+    public function get_evaluation(int $id): ?MT_Evaluation;
+    public function calculate_average_score(array $scores): float;
+}
+
+// Repository interfaces for data access
+interface MT_Evaluation_Repository_Interface {
+    public function find(int $id): ?MT_Evaluation;
+    public function create(array $data): int;
+    public function update(int $id, array $data): bool;
+    public function delete(int $id): bool;
+}
+
+// Logger interface for consistent logging
+interface MT_Logger_Interface {
+    public function debug(string $message, array $context = []): void;
+    public function info(string $message, array $context = []): void;
+    public function warning(string $message, array $context = []): void;
+    public function error(string $message, array $context = []): void;
+    public function critical(string $message, array $context = []): void;
+}
+```
+
+### Dependency Resolution Examples
+
+```php
+// Automatic constructor injection
+class MT_Assignment_Service {
+    public function __construct(
+        private MT_Assignment_Repository_Interface $repository,
+        private MT_Logger_Interface $logger,
+        private MT_Cache_Interface $cache,
+        private MT_Event_Dispatcher_Interface $events
+    ) {}
+}
+
+// Container resolves all dependencies automatically
+$assignment_service = $container->get('MT_Assignment_Service');
+
+// Manual dependency injection for specific use cases
+$custom_service = $container->make('MT_Custom_Service', [
+    'custom_parameter' => $specific_value
+]);
+```
+
+### Service Configuration
+
+```php
+// Configuration-based service registration
+class MT_Core_Service_Provider implements MT_Service_Provider_Interface {
+    public function register(MT_Container_Interface $container): void {
+        // Core services
+        $container->singleton('MT_Logger_Interface', MT_Logger::class);
+        $container->singleton('MT_Cache_Interface', MT_Cache::class);
+        $container->singleton('MT_Validator_Interface', MT_Validator::class);
+        
+        // Event system
+        $container->singleton('MT_Event_Dispatcher_Interface', function($container) {
+            $dispatcher = new MT_Event_Dispatcher();
+            $dispatcher->add_subscriber(new MT_Evaluation_Subscriber());
+            $dispatcher->add_subscriber(new MT_Assignment_Subscriber());
+            return $dispatcher;
+        });
+        
+        // Database services
+        $container->bind('MT_Database_Migration_Interface', MT_Database_Migration::class);
+    }
+}
+```
+
+### Testing with Dependency Injection
+
+```php
+class MT_Evaluation_Service_Test extends WP_UnitTestCase {
+    private $container;
+    private $evaluation_service;
+    
+    public function setUp(): void {
+        parent::setUp();
+        
+        // Create test container
+        $this->container = new MT_Container();
+        
+        // Register test doubles
+        $this->container->singleton('MT_Evaluation_Repository_Interface', function() {
+            return $this->createMock(MT_Evaluation_Repository_Interface::class);
+        });
+        
+        $this->container->singleton('MT_Logger_Interface', function() {
+            return $this->createMock(MT_Logger_Interface::class);
+        });
+        
+        $this->container->singleton('MT_Validator_Interface', function() {
+            return $this->createMock(MT_Validator_Interface::class);
+        });
+        
+        // Get service under test
+        $this->evaluation_service = $this->container->get('MT_Evaluation_Service');
+    }
+    
+    public function test_save_evaluation_with_valid_data(): void {
+        // Arrange
+        $repository = $this->container->get('MT_Evaluation_Repository_Interface');
+        $repository->expects($this->once())
+                  ->method('update')
+                  ->with(1, ['scores' => [8.5, 9.0, 7.5]])
+                  ->willReturn(true);
+        
+        // Act
+        $result = $this->evaluation_service->save_evaluation(1, [8.5, 9.0, 7.5]);
+        
+        // Assert
+        $this->assertTrue($result);
+    }
+}
+```
+
+### Migration from Legacy Code
+
+```php
+// Legacy pattern (before DI)
+class MT_Old_Service {
+    public function __construct() {
+        $this->repository = new MT_Evaluation_Repository(); // Hard dependency
+        $this->logger = new MT_Logger(); // Hard dependency
+    }
+}
+
+// Modern pattern (with DI)
+class MT_New_Service {
+    public function __construct(
+        private MT_Evaluation_Repository_Interface $repository,
+        private MT_Logger_Interface $logger
+    ) {
+        // Dependencies injected, easily testable
+    }
+}
+
+// Migration helper for gradual adoption
+class MT_Legacy_Bridge {
+    public static function get_evaluation_service(): MT_Evaluation_Service {
+        $container = MT_Container::get_instance();
+        return $container->get('MT_Evaluation_Service');
+    }
+}
+
+// In legacy code
+$service = MT_Legacy_Bridge::get_evaluation_service(); // Gradual migration
+```
+
+### Container Configuration
+
+```php
+// Container initialization in main plugin class
+class MT_Plugin {
+    private MT_Container $container;
+    
+    public function __construct() {
+        $this->container = MT_Container::get_instance();
+        $this->register_services();
+        $this->boot_services();
+    }
+    
+    private function register_services(): void {
+        // Register all service providers
+        $providers = [
+            new MT_Core_Service_Provider(),
+            new MT_Database_Service_Provider(),
+            new MT_Evaluation_Service_Provider(),
+            new MT_Assignment_Service_Provider(),
+            new MT_Import_Service_Provider(),
+            new MT_Admin_Service_Provider(),
+            new MT_Ajax_Service_Provider(),
+        ];
+        
+        foreach ($providers as $provider) {
+            $this->container->register_provider($provider);
+        }
+    }
+    
+    private function boot_services(): void {
+        $this->container->boot();
+    }
+    
+    public function get_container(): MT_Container {
+        return $this->container;
+    }
+}
+```
+
+### Helper Methods for Service Access
+
+```php
+// Global helper function
+function mt_container(): MT_Container {
+    return MT_Container::get_instance();
+}
+
+// Service accessor helpers
+function mt_service(string $service_name) {
+    return mt_container()->get($service_name);
+}
+
+// Specific service helpers
+function mt_evaluation_service(): MT_Evaluation_Service {
+    return mt_service('MT_Evaluation_Service');
+}
+
+function mt_assignment_service(): MT_Assignment_Service {
+    return mt_service('MT_Assignment_Service');
+}
+
+function mt_logger(): MT_Logger_Interface {
+    return mt_service('MT_Logger_Interface');
+}
+
+// Usage in WordPress hooks
+add_action('wp_ajax_mt_save_evaluation', function() {
+    $service = mt_evaluation_service();
+    // ... handle request
+});
+```
+
 ## AJAX System
 
 ### Security Implementation
@@ -263,27 +572,67 @@ class MT_Ajax_Base {
 }
 ```
 
-### AJAX Handler Example
+### Modern AJAX Handler with Container
 
 ```php
-public function handle_save_evaluation() {
-    $this->verify_request();
+class MT_Evaluation_Ajax extends MT_Base_Ajax {
+    private MT_Container $container;
     
-    $evaluation_id = intval($_POST['evaluation_id']);
-    $scores = array_map('floatval', $_POST['scores']);
+    public function __construct(MT_Container $container) {
+        $this->container = $container;
+        parent::__construct();
+    }
     
-    try {
-        $service = new MT_Evaluation_Service();
-        $result = $service->save_evaluation($evaluation_id, $scores);
+    public function handle_save_evaluation() {
+        $this->verify_request();
         
-        wp_send_json_success([
-            'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
-            'data' => $result
-        ]);
-    } catch (Exception $e) {
-        wp_send_json_error([
-            'message' => $e->getMessage()
-        ]);
+        $evaluation_id = intval($_POST['evaluation_id']);
+        $scores = array_map('floatval', $_POST['scores']);
+        $comments = sanitize_textarea_field($_POST['comments'] ?? '');
+        
+        try {
+            // Get service from container
+            $service = $this->container->get('MT_Evaluation_Service');
+            $result = $service->save_evaluation($evaluation_id, $scores, $comments);
+            
+            wp_send_json_success([
+                'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
+                'data' => $result
+            ]);
+        } catch (Exception $e) {
+            // Logger is also injected through container
+            $logger = $this->container->get('MT_Logger_Interface');
+            $logger->error('Evaluation save failed', [
+                'evaluation_id' => $evaluation_id,
+                'user_id' => get_current_user_id(),
+                'error' => $e->getMessage()
+            ]);
+            
+            wp_send_json_error([
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+    
+    // Helper method for getting services
+    protected function get_service(string $service_name) {
+        return $this->container->get($service_name);
+    }
+}
+
+// Registration in service provider
+class MT_Ajax_Service_Provider implements MT_Service_Provider_Interface {
+    public function register(MT_Container_Interface $container): void {
+        $container->singleton('MT_Evaluation_Ajax', function($container) {
+            return new MT_Evaluation_Ajax($container);
+        });
+    }
+    
+    public function boot(MT_Container_Interface $container): void {
+        // Register AJAX handlers
+        $evaluation_ajax = $container->get('MT_Evaluation_Ajax');
+        add_action('wp_ajax_mt_save_evaluation', [$evaluation_ajax, 'handle_save_evaluation']);
+        add_action('wp_ajax_nopriv_mt_save_evaluation', [$evaluation_ajax, 'handle_save_evaluation']);
     }
 }
 ```
@@ -1830,6 +2179,22 @@ wp_enqueue_style(
 - [ ] Directory traversal prevented
 - [ ] Error messages sanitized
 
+## Additional Documentation
+
+### Related Documentation Files
+
+- **[Dependency Injection Guide](DEPENDENCY-INJECTION-GUIDE.md)** - Comprehensive guide to the DI architecture
+- **[API Reference](API-REFERENCE.md)** - Complete API documentation for all services and interfaces
+- **[Migration Guide](MIGRATION-GUIDE.md)** - Step-by-step guide for migrating legacy code to DI patterns
+- **[Testing Strategies](TESTING-STRATEGIES.md)** - Best practices for testing with dependency injection
+- **[Rich Text Editor Documentation](rich-text-editor.md)** - Detailed implementation guide for the rich text editor
+
+### External Resources
+
+- **[WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)** - WordPress development standards
+- **[PSR-11 Container Interface](https://www.php-fig.org/psr/psr-11/)** - Container interface specification
+- **[SOLID Principles](https://en.wikipedia.org/wiki/SOLID)** - Object-oriented design principles
+
 ---
 
-*For additional support, refer to the WordPress Plugin Handbook and the project's GitHub repository.*
+*For additional support, refer to the WordPress Plugin Handbook, the related documentation files above, and the project's GitHub repository.*
