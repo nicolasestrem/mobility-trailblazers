@@ -25,7 +25,7 @@ class MT_Elementor_Export {
      */
     public function init() {
         add_action('admin_menu', [$this, 'add_admin_menu']);
-        add_action('admin_post_mt_create_elementor_templates', [$this, 'handle_create_templates']);
+        add_action('admin_post_mt_create_elementor_export_templates', [$this, 'handle_create_templates']);
         add_action('admin_post_mt_import_elementor_template', [$this, 'handle_import_template']);
     }
     
@@ -123,7 +123,7 @@ class MT_Elementor_Export {
                 
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                     <?php wp_nonce_field('mt_create_elementor_templates', 'mt_elementor_nonce'); ?>
-                    <input type="hidden" name="action" value="mt_create_elementor_templates">
+                    <input type="hidden" name="action" value="mt_create_elementor_export_templates">
                     
                     <p>
                         <button type="submit" class="button button-primary">
