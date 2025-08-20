@@ -12,6 +12,7 @@ namespace MobilityTrailblazers\Ajax;
 
 use MobilityTrailblazers\Services\MT_Evaluation_Service;
 use MobilityTrailblazers\Core\MT_Audit_Logger;
+use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -71,9 +72,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         if (defined('WP_DEBUG') && WP_DEBUG) {
             $current_user_id = get_current_user_id();
             $user = wp_get_current_user();
-            error_log('MT AJAX - User ID: ' . $current_user_id);
-            error_log('MT AJAX - User roles: ' . implode(', ', $user->roles));
-            error_log('MT AJAX - Can submit evaluations: ' . (current_user_can('mt_submit_evaluations') ? 'true' : 'false'));
+            MT_Logger::debug('Evaluation AJAX user info', [
+                'user_id' => $current_user_id,
+                'user_roles' => $user->roles,
+                'can_submit_evaluations' => current_user_can('mt_submit_evaluations')
+            ]);
         }
         
         // Check permissions
@@ -83,27 +86,30 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Debug: Log raw POST data
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT AJAX - Raw POST data: ' . print_r($_POST, true));
+            MT_Logger::debug('Evaluation AJAX POST data', ['post_data' => $_POST]);
         }
         
         // Get current user as jury member
         $current_user_id = get_current_user_id();
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT AJAX - Current user ID: ' . $current_user_id);
+            MT_Logger::debug('Evaluation AJAX processing for user', ['user_id' => $current_user_id]);
         }
         
         $jury_member = $this->get_jury_member_by_user_id($current_user_id);
         
         if (!$jury_member) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MT AJAX - Jury member not found for user ID: ' . $current_user_id);
+                MT_Logger::warning('Jury member not found for user', ['user_id' => $current_user_id]);
             }
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
             return;
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT AJAX - Found jury member: ' . $jury_member->ID . ' for user: ' . $current_user_id);
+            MT_Logger::debug('Jury member found for evaluation', [
+                'jury_member_id' => $jury_member->ID,
+                'user_id' => $current_user_id
+            ]);
         }
         
         // Get status (draft or completed)
@@ -114,9 +120,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         // Debug: Check candidate_id specifically
         $raw_candidate_id = $this->get_param('candidate_id');
-        error_log('MT AJAX - Raw candidate_id from POST: ' . var_export($raw_candidate_id, true));
+        MT_Logger::debug('Evaluation candidate ID processing', [
+            'raw_candidate_id' => $raw_candidate_id
+        ]);
         $candidate_id = $this->get_int_param('candidate_id');
-        error_log('MT AJAX - Processed candidate_id: ' . $candidate_id);
+        MT_Logger::debug('Candidate ID processed', ['processed_candidate_id' => $candidate_id]);
         
         // Prepare evaluation data with validation
         $courage_score = $this->get_float_param('courage_score');
@@ -153,20 +161,30 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'status' => $status
         ];
         
-        error_log('MT AJAX - Evaluation data prepared: ' . print_r($data, true));
+        MT_Logger::debug('Evaluation data prepared', ['data' => $data]);
         
         // Debug: Check if assignment exists
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
         $has_assignment = $assignment_repo->exists($jury_member->ID, $data['candidate_id']);
         
-        error_log('MT AJAX - Assignment check: jury_member_id=' . $jury_member->ID . ', candidate_id=' . $data['candidate_id'] . ', has_assignment=' . ($has_assignment ? 'true' : 'false'));
+        MT_Logger::debug('Evaluation assignment check', [
+            'jury_member_id' => $jury_member->ID,
+            'candidate_id' => $data['candidate_id'],
+            'has_assignment' => $has_assignment
+        ]);
         
         // Debug: Let's also check what assignments exist for this jury member
         $all_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
-        error_log('MT AJAX - All assignments for jury member ' . $jury_member->ID . ': ' . count($all_assignments));
-        foreach ($all_assignments as $assignment) {
-            error_log('MT AJAX - Assignment: jury_member_id=' . $assignment->jury_member_id . ', candidate_id=' . $assignment->candidate_id);
-        }
+        MT_Logger::debug('Evaluation jury member assignments', [
+            'jury_member_id' => $jury_member->ID,
+            'assignment_count' => count($all_assignments),
+            'assignments' => array_map(function($assignment) {
+                return [
+                    'jury_member_id' => $assignment->jury_member_id,
+                    'candidate_id' => $assignment->candidate_id
+                ];
+            }, $all_assignments)
+        ]);
         
         if (!$has_assignment) {
             $this->error(__('You do not have permission to evaluate this candidate. Please contact an administrator.', 'mobility-trailblazers'));
@@ -393,12 +411,15 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'post_status' => 'publish'
         ];
         
-        error_log('MT AJAX - Looking for jury member with _mt_user_id = ' . $user_id);
+        MT_Logger::debug('Looking for jury member by user ID', ['user_id' => $user_id]);
         
         $jury_members = get_posts($args);
         
         if (!empty($jury_members)) {
-            error_log('MT AJAX - Jury member found: ID=' . $jury_members[0]->ID . ', Title=' . $jury_members[0]->post_title);
+            MT_Logger::debug('Jury member found', [
+                'jury_member_id' => $jury_members[0]->ID,
+                'title' => $jury_members[0]->post_title
+            ]);
             return $jury_members[0];
         }
         
@@ -415,13 +436,17 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
                 update_post_meta($jury_member->ID, '_mt_user_id', $user_id);
                 delete_post_meta($jury_member->ID, $old_key, $user_id);
                 
-                error_log('MT AJAX - Migrated jury member ' . $jury_member->ID . ' from meta key "' . $old_key . '" to "_mt_user_id"');
+                MT_Logger::info('Jury member metadata migrated', [
+                    'jury_member_id' => $jury_member->ID,
+                    'old_meta_key' => $old_key,
+                    'new_meta_key' => '_mt_user_id'
+                ]);
                 return $jury_member;
             }
         }
         
         // If still no jury member found, log additional debug info
-        error_log('MT AJAX - No jury member found for user ' . $user_id . ' even after migration attempt');
+        MT_Logger::warning('No jury member found for user after migration attempt', ['user_id' => $user_id]);
         
         // Get all jury members and check their meta
         $all_jury_members = get_posts([
@@ -432,7 +457,11 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         foreach ($all_jury_members as $jm) {
             $all_meta = get_post_meta($jm->ID);
-            error_log('MT AJAX - Jury member ' . $jm->ID . ' (' . $jm->post_title . ') meta: ' . print_r($all_meta, true));
+            MT_Logger::debug('Jury member metadata debug', [
+                'jury_member_id' => $jm->ID,
+                'title' => $jm->post_title,
+                'metadata' => $all_meta
+            ]);
         }
         
         return null;
@@ -468,7 +497,10 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Log for debugging
-        error_log('MT Bulk Evaluation: action=' . $action . ', count=' . count($evaluation_ids));
+        MT_Logger::info('Bulk evaluation operation', [
+            'action' => $action,
+            'evaluation_count' => count($evaluation_ids)
+        ]);
         
         $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
         $success_count = 0;
@@ -607,13 +639,13 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
     public function save_inline_evaluation() {
         // Log inline evaluation attempt for debugging if WP_DEBUG is enabled
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT: Inline evaluation save attempt by user ' . get_current_user_id());
+            MT_Logger::debug('Inline evaluation save attempt', ['user_id' => get_current_user_id()]);
         }
         
         // Verify nonce using base class method
         if (!$this->verify_nonce('mt_ajax_nonce')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MT: Inline evaluation nonce verification failed for user ' . get_current_user_id());
+                MT_Logger::security_event('Inline evaluation nonce verification failed', ['user_id' => get_current_user_id()]);
             }
             $this->error(__('Security check failed', 'mobility-trailblazers'));
             return;
@@ -642,31 +674,32 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $scores = isset($_POST['scores']) ? $_POST['scores'] : [];
         
         // Enhanced debugging for assignment verification
-        error_log('MT Inline Save - Debug Info:');
-        error_log('  - Current User ID: ' . $current_user_id);
-        error_log('  - User Roles: ' . implode(', ', wp_get_current_user()->roles));
-        error_log('  - Jury Member ID: ' . $jury_member->ID);
-        error_log('  - Candidate ID: ' . $candidate_id);
-        error_log('  - Scores: ' . print_r($scores, true));
-        error_log('  - Is Administrator: ' . (current_user_can('administrator') ? 'YES' : 'NO'));
-        error_log('  - Can Manage Evaluations: ' . (current_user_can('mt_manage_evaluations') ? 'YES' : 'NO'));
+        MT_Logger::debug('Inline evaluation save debug info', [
+            'current_user_id' => $current_user_id,
+            'user_roles' => wp_get_current_user()->roles,
+            'jury_member_id' => $jury_member->ID,
+            'candidate_id' => $candidate_id,
+            'scores' => $scores,
+            'is_administrator' => current_user_can('administrator'),
+            'can_manage_evaluations' => current_user_can('mt_manage_evaluations')
+        ]);
         
         // Verify assignment
         $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
         $assignment_exists = $assignment_repo->exists($jury_member->ID, $candidate_id);
         
-        error_log('  - Assignment exists: ' . ($assignment_exists ? 'YES' : 'NO'));
+        MT_Logger::debug('Assignment existence check', ['assignment_exists' => $assignment_exists]);
         
         // If assignment doesn't exist, let's check what assignments this jury member has
         if (!$assignment_exists) {
             $jury_assignments = $assignment_repo->get_by_jury_member($jury_member->ID);
-            error_log('  - Total assignments for jury member: ' . count($jury_assignments));
-            if (!empty($jury_assignments)) {
-                error_log('  - Assigned candidate IDs:');
-                foreach ($jury_assignments as $assignment) {
-                    error_log('    - Candidate ID: ' . $assignment->candidate_id);
-                }
-            }
+            MT_Logger::debug('Jury member assignments check', [
+                'jury_member_id' => $jury_member->ID,
+                'total_assignments' => count($jury_assignments),
+                'assigned_candidate_ids' => array_map(function($assignment) {
+                    return $assignment->candidate_id;
+                }, $jury_assignments)
+            ]);
             
             // Check if user has special permissions that allow evaluating any candidate
             $can_evaluate_all = current_user_can('administrator') || current_user_can('mt_manage_evaluations');
@@ -675,12 +708,15 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $is_table_view = isset($_POST['context']) && $_POST['context'] === 'table';
             
             // Even administrators must have proper assignments for security
-            if (!$has_assignment) {
+            if (!$assignment_exists) {
                 if ($can_evaluate_all) {
                     // Log this for audit purposes
-                    error_log('WARNING: Admin/Manager evaluating without assignment - Jury: ' . $jury_member->ID . ', Candidate: ' . $candidate_id);
+                    MT_Logger::warning('Admin/Manager evaluating without assignment', [
+                        'jury_member_id' => $jury_member->ID,
+                        'candidate_id' => $candidate_id
+                    ]);
                     // For now, allow admins but this should be reviewed
-                    error_log('  - User has admin/manager permissions - allowing evaluation (legacy behavior)');
+                    MT_Logger::info('Legacy behavior: allowing evaluation for admin/manager without assignment');
                 } else {
                     $this->error(__('You are not assigned to evaluate this candidate', 'mobility-trailblazers'));
                     return;
@@ -726,14 +762,14 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Log final data for debugging
-        error_log('MT Inline Save - Final evaluation data: ' . print_r($evaluation_data, true));
+        MT_Logger::debug('Final evaluation data for inline save', ['evaluation_data' => $evaluation_data]);
         
         // Save evaluation
         $evaluation_service = new \MobilityTrailblazers\Services\MT_Evaluation_Service();
         $result = $evaluation_service->save_evaluation($evaluation_data);
         
         if (is_wp_error($result)) {
-            error_log('MT Inline Save - Error: ' . $result->get_error_message());
+            MT_Logger::error('Inline evaluation save failed', ['error_message' => $result->get_error_message()]);
             $this->error($result->get_error_message());
             return;
         }
@@ -749,7 +785,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         ];
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT: Inline evaluation saved successfully for candidate ' . $candidate_id);
+            MT_Logger::info('Inline evaluation saved successfully', ['candidate_id' => $candidate_id]);
         }
         
         $this->success($response_data);

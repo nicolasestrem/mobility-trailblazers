@@ -14,6 +14,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 /**
  * Force German locale for the entire plugin
  */
@@ -186,6 +188,6 @@ add_action('wp_head', function() {
  */
 add_action('init', function() {
     if (current_user_can('administrator')) {
-        error_log('MT Emergency Fixes: German language and display fixes activated - ' . date('Y-m-d H:i:s'));
+        MT_Logger::info('Emergency German language and display fixes activated');
     }
 });

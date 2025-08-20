@@ -67,31 +67,34 @@ class MT_Evaluation_Service implements MT_Service_Interface {
         $this->errors = [];
         
         // Debug: Log the incoming data
-        error_log('MT Evaluation Service - Incoming data: ' . print_r($data, true));
+        MT_Logger::debug('Processing evaluation data', ['data' => $data]);
         
         // Validate input
         if (!$this->validate($data)) {
-            error_log('MT Evaluation Service - Validation failed: ' . print_r($this->errors, true));
+            MT_Logger::warning('Evaluation validation failed', ['errors' => $this->errors]);
             return false;
         }
         
         // Check if user has permission
         if (!$this->check_permission($data['jury_member_id'], $data['candidate_id'])) {
             $this->errors[] = __('You do not have permission to evaluate this candidate.', 'mobility-trailblazers');
-            error_log('MT Evaluation Service - Permission check failed for jury_member_id: ' . $data['jury_member_id'] . ', candidate_id: ' . $data['candidate_id']);
+            MT_Logger::warning('Evaluation permission check failed', [
+                'jury_member_id' => $data['jury_member_id'],
+                'candidate_id' => $data['candidate_id']
+            ]);
             return false;
         }
         
         // Prepare data
         $evaluation_data = $this->prepare_data($data);
-        error_log('MT Evaluation Service - Prepared data: ' . print_r($evaluation_data, true));
+        MT_Logger::debug('Evaluation data prepared', ['evaluation_data' => $evaluation_data]);
         
         // Check if evaluation exists
         $existing = $this->get_existing_evaluation($data['jury_member_id'], $data['candidate_id']);
         
         if ($existing) {
             // Update existing evaluation
-            error_log('MT Evaluation Service - Updating existing evaluation ID: ' . $existing->id);
+            MT_Logger::debug('Updating existing evaluation', ['evaluation_id' => $existing->id]);
             $result = $this->repository->update($existing->id, $evaluation_data);
             
             if ($result) {
@@ -104,16 +107,16 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                     : 'evaluation_draft_saved';
                 MT_Audit_Logger::log($action, 'evaluation', $existing->id, $evaluation_data);
                 
-                error_log('MT Evaluation Service - Update successful, returning ID: ' . $existing->id);
+                MT_Logger::debug('Evaluation updated successfully', ['evaluation_id' => $existing->id]);
                 return $existing->id;
             } else {
-                error_log('MT Evaluation Service - Update failed');
+                MT_Logger::error('Evaluation update failed');
                 $this->errors[] = __('Failed to update existing evaluation.', 'mobility-trailblazers');
                 return false;
             }
         } else {
             // Create new evaluation
-            error_log('MT Evaluation Service - Creating new evaluation');
+            MT_Logger::debug('Creating new evaluation');
             $result = $this->repository->create($evaluation_data);
             
             if ($result) {
@@ -126,17 +129,17 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                     : 'evaluation_draft_saved';
                 MT_Audit_Logger::log($action, 'evaluation', $result, $evaluation_data);
                 
-                error_log('MT Evaluation Service - Create successful, returning ID: ' . $result);
+                MT_Logger::debug('Evaluation created successfully', ['evaluation_id' => $result]);
                 return $result;
             } else {
-                error_log('MT Evaluation Service - Create failed');
+                MT_Logger::error('Evaluation creation failed');
                 $this->errors[] = __('Failed to create new evaluation.', 'mobility-trailblazers');
                 return false;
             }
         }
         
         $this->errors[] = __('Failed to save evaluation. Please try again.', 'mobility-trailblazers');
-        error_log('MT Evaluation Service - Process failed, errors: ' . print_r($this->errors, true));
+        MT_Logger::error('Evaluation process failed', ['errors' => $this->errors]);
         return false;
     }
     

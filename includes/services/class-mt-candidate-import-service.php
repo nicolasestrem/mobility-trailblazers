@@ -9,6 +9,7 @@
 namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Repositories\MT_Candidate_Repository;
+use MobilityTrailblazers\Core\MT_Logger;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
@@ -148,7 +149,11 @@ class MT_Candidate_Import_Service {
             
         } catch (\Exception $e) {
             $this->results['messages'][] = __('Error reading Excel file', 'mobility-trailblazers') . ': ' . $e->getMessage();
-            error_log('Excel import failed: ' . $e->getMessage() . ' - File: ' . $file_path);
+            MT_Logger::error('Excel import failed', [
+                'file_path' => $file_path,
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
         
         return $this->results;
@@ -495,7 +500,10 @@ class MT_Candidate_Import_Service {
         
         fclose($handle);
         
-        error_log('Candidates backed up to: ' . $file_path . ' (Count: ' . count($candidates) . ')');
+        MT_Logger::info('Candidates backed up successfully', [
+            'file_path' => $file_path,
+            'candidate_count' => count($candidates)
+        ]);
         
         return $file_path;
     }

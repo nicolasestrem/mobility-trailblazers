@@ -11,6 +11,7 @@ namespace MobilityTrailblazers\Ajax;
 use MobilityTrailblazers\Services\MT_Assignment_Service;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
+use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -205,9 +206,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Handle manual assignment of candidates to a jury member
      */
     public function manual_assign() {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT: Manual assignment request by user ' . get_current_user_id());
-        }
+        MT_Logger::debug('Manual assignment request initiated', ['user_id' => get_current_user_id()]);
         
         // Verify nonce
         if (!$this->verify_nonce('mt_admin_nonce')) {
@@ -223,8 +222,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             ? array_map('intval', $_POST['candidate_ids']) 
             : array();
         
-        error_log('MT Manual Assignment: jury_member_id=' . $jury_member_id);
-        error_log('MT Manual Assignment: candidate_ids=' . print_r($candidate_ids, true));
+        MT_Logger::debug('Assignment parameters', [
+            'jury_member_id' => $jury_member_id,
+            'candidate_ids' => $candidate_ids
+        ]);
         
         if (!$jury_member_id || empty($candidate_ids)) {
             $this->error(__('Please select a jury member and at least one candidate.', 'mobility-trailblazers'));
@@ -290,24 +291,18 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
      * Handle bulk assignment creation
      */
     public function bulk_create_assignments() {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('MT: Manual assignment request by user ' . get_current_user_id());
-        }
+        MT_Logger::debug('Bulk assignment creation request initiated', ['user_id' => get_current_user_id()]);
         
         // Verify nonce - use mt_admin_nonce for admin actions
         if (!$this->verify_nonce('mt_admin_nonce')) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MT: Manual assignment nonce verification failed for user ' . get_current_user_id());
-            }
+            MT_Logger::security_event('Bulk assignment nonce verification failed', ['user_id' => get_current_user_id()]);
             $this->error(__('Security check failed.', 'mobility-trailblazers'));
             return;
         }
         
         // Check permissions
         if (!current_user_can('mt_manage_assignments')) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('MT: Manual assignment permission denied for user ' . get_current_user_id());
-            }
+            MT_Logger::security_event('Assignment permission denied', ['user_id' => get_current_user_id()]);
             $this->error(__('You do not have permission to manage assignments.', 'mobility-trailblazers'));
             return;
         }
@@ -318,11 +313,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             ? array_map('intval', $_POST['candidate_ids']) 
             : array();
         
-        error_log('MT Manual Assignment: jury_member_id=' . $jury_member_id);
-        error_log('MT Manual Assignment: candidate_ids=' . print_r($candidate_ids, true));
+        MT_Logger::debug('Assignment parameters', [
+            'jury_member_id' => $jury_member_id,
+            'candidate_ids' => $candidate_ids
+        ]);
         
         if (!$jury_member_id || empty($candidate_ids)) {
-            error_log('MT Manual Assignment: Invalid data - jury_member_id or candidate_ids empty');
+            MT_Logger::warning('Assignment invalid data', [
+                'jury_member_id' => $jury_member_id,
+                'candidate_ids_count' => count($candidate_ids)
+            ]);
             $this->error(__('Invalid data provided.', 'mobility-trailblazers'));
             return;
         }
@@ -401,10 +401,13 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 ));
                 
                 if ($result === false) {
-                    error_log('MT Assignment: Failed to clear transients - ' . $wpdb->last_error);
+                    MT_Logger::database_error('DELETE transients', $wpdb->options, $wpdb->last_error);
                 }
             } catch (\Exception $e) {
-                error_log('MT Assignment: Exception clearing transients - ' . $e->getMessage());
+                MT_Logger::error('Failed to clear assignment transients', [
+                    'error_message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
             }
             
             // Clear object cache if available
@@ -438,8 +441,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         $candidates_per_jury = isset($_POST['candidates_per_jury']) ? intval($_POST['candidates_per_jury']) : 5;
         
         // Log for debugging
-        error_log('MT Auto Assign: Starting auto-assignment');
-        error_log('MT Auto Assign: method=' . $method . ', candidates_per_jury=' . $candidates_per_jury);
+        MT_Logger::info('Starting auto-assignment', [
+            'method' => $method,
+            'candidates_per_jury' => $candidates_per_jury
+        ]);
         
         // Get active jury members
         $jury_args = [
@@ -449,7 +454,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         ];
         $jury_members = get_posts($jury_args);
         
-        error_log('MT Auto Assign: Found ' . count($jury_members) . ' jury members');
+        MT_Logger::debug('Auto-assignment jury members loaded', ['count' => count($jury_members)]);
         
         if (empty($jury_members)) {
             $this->error(__('No jury members found.', 'mobility-trailblazers'));
@@ -464,7 +469,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         ];
         $candidates = get_posts($candidate_args);
         
-        error_log('MT Auto Assign: Found ' . count($candidates) . ' candidates');
+        MT_Logger::debug('Auto-assignment candidates loaded', ['count' => count($candidates)]);
         
         if (empty($candidates)) {
             $this->error(__('No candidates found.', 'mobility-trailblazers'));
@@ -489,16 +494,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                              WHERE option_name LIKE '_transient_mt_%' 
                              OR option_name LIKE '_transient_timeout_mt_%'");
                 
-                error_log('MT Auto Assign: Cleared all existing assignments and evaluations');
+                MT_Logger::info('Auto-assignment: cleared existing assignments and evaluations');
             } else {
-                error_log('MT Auto Assign: Failed to clear existing assignments');
+                MT_Logger::error('Auto-assignment: failed to clear existing assignments');
             }
         }
         $assignments_created = 0;
         $errors = [];
         
         // Log distribution method being used
-        error_log('MT Auto Assign: Using distribution method: ' . $method);
+        MT_Logger::info('Auto-assignment distribution method selected', ['method' => $method]);
         
         // Perform assignment based on method
         if ($method === 'balanced') {
@@ -514,9 +519,11 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             $reviews_per_candidate = floor($total_assignments_needed / $candidate_count);
             $extra_reviews = $total_assignments_needed % $candidate_count;
             
-            error_log('MT Auto Assign: Balanced - Total assignments needed: ' . $total_assignments_needed);
-            error_log('MT Auto Assign: Balanced - Reviews per candidate: ' . $reviews_per_candidate);
-            error_log('MT Auto Assign: Balanced - Extra reviews to distribute: ' . $extra_reviews);
+            MT_Logger::debug('Auto-assignment balanced distribution parameters', [
+                'total_assignments_needed' => $total_assignments_needed,
+                'reviews_per_candidate' => $reviews_per_candidate,
+                'extra_reviews' => $extra_reviews
+            ]);
             
             // Create an array to track how many times each candidate is assigned
             $candidate_assignment_count = [];
@@ -579,20 +586,30 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                         $jury_assignments++;
                         $candidate_assignment_count[$candidate->ID]++;
                         
-                        error_log('MT Auto Assign: Assigned candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
+                        MT_Logger::debug('Auto-assignment: candidate assigned', [
+                            'candidate_id' => $candidate->ID,
+                            'jury_member_id' => $jury_member->ID
+                        ]);
                     } else {
                         $errors[] = sprintf(
                             __('Failed to assign %s to %s', 'mobility-trailblazers'),
                             $candidate->post_title,
                             $jury_member->post_title
                         );
-                        error_log('MT Auto Assign: Failed to assign candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
+                        MT_Logger::warning('Auto-assignment: failed to assign candidate', [
+                            'candidate_id' => $candidate->ID,
+                            'jury_member_id' => $jury_member->ID
+                        ]);
                     }
                 }
                 
                 // Log if jury member didn't get enough assignments
                 if ($jury_assignments < $candidates_per_jury) {
-                    error_log('MT Auto Assign: Warning - Jury member ' . $jury_member->ID . ' only got ' . $jury_assignments . ' assignments (requested: ' . $candidates_per_jury . ')');
+                    MT_Logger::warning('Auto-assignment: jury member under-assigned', [
+                        'jury_member_id' => $jury_member->ID,
+                        'actual_assignments' => $jury_assignments,
+                        'requested_assignments' => $candidates_per_jury
+                    ]);
                 }
             }
             
@@ -600,13 +617,13 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             // RANDOM DISTRIBUTION
             // Goal: Each jury member gets exactly candidates_per_jury candidates, selected randomly
             
-            error_log('MT Auto Assign: Random - Starting random distribution');
+            MT_Logger::debug('Auto-assignment: starting random distribution');
             
             // Shuffle the candidates array once for efficiency
             $shuffled_candidates = $candidates;
             shuffle($shuffled_candidates);
             
-            error_log('MT Auto Assign: Random - Shuffled ' . count($shuffled_candidates) . ' candidates');
+            MT_Logger::debug('Auto-assignment: candidates shuffled', ['count' => count($shuffled_candidates)]);
             
             // Process each jury member
             foreach ($jury_members as $jury_member) {
@@ -619,7 +636,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                 $jury_assignments = count($existing_for_jury);
                 
                 if ($jury_assignments > 0) {
-                    error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' has ' . $jury_assignments . ' existing assignments');
+                    MT_Logger::debug('Auto-assignment: jury member existing assignments', [
+                        'jury_member_id' => $jury_member->ID,
+                        'existing_assignments' => $jury_assignments
+                    ]);
                 }
                 
                 // Try to assign candidates from the shuffled list
@@ -646,19 +666,29 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                         $assignments_created++;
                         $jury_assignments++;
                         
-                        error_log('MT Auto Assign: Random - Assigned candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
+                        MT_Logger::debug('Auto-assignment: random candidate assigned', [
+                            'candidate_id' => $candidate->ID,
+                            'jury_member_id' => $jury_member->ID
+                        ]);
                     } else {
                         $errors[] = sprintf(
                             __('Failed to assign %s to %s', 'mobility-trailblazers'),
                             $candidate->post_title,
                             $jury_member->post_title
                         );
-                        error_log('MT Auto Assign: Random - Failed to assign candidate ' . $candidate->ID . ' to jury ' . $jury_member->ID);
+                        MT_Logger::warning('Auto-assignment: random assignment failed', [
+                            'candidate_id' => $candidate->ID,
+                            'jury_member_id' => $jury_member->ID
+                        ]);
                     }
                 }
                 
                 // Log statistics for this jury member
-                error_log('MT Auto Assign: Random - Jury ' . $jury_member->ID . ' got ' . $jury_assignments . ' assignments after checking ' . $candidates_checked . ' candidates');
+                MT_Logger::debug('Auto-assignment: jury member final assignment count', [
+                    'jury_member_id' => $jury_member->ID,
+                    'final_assignments' => $jury_assignments,
+                    'candidates_checked' => $candidates_checked
+                ]);
                 
                 // Warn if jury member didn't get enough assignments
                 if ($jury_assignments < $candidates_per_jury) {
@@ -669,13 +699,16 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
                         $candidates_per_jury
                     );
                     $errors[] = $warning_msg;
-                    error_log('MT Auto Assign: Random - Warning: ' . $warning_msg);
+                    MT_Logger::warning('Auto-assignment random warning', ['message' => $warning_msg]);
                 }
             }
         }
         
         // Log final statistics
-        error_log('MT Auto Assign: Completed - ' . $assignments_created . ' assignments created, ' . count($errors) . ' errors');
+        MT_Logger::info('Auto-assignment completed', [
+            'assignments_created' => $assignments_created,
+            'error_count' => count($errors)
+        ]);
         
         // Prepare response
         if ($assignments_created > 0) {
@@ -735,7 +768,7 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Log for debugging
-        error_log('MT Bulk Remove: count=' . count($assignment_ids));
+        MT_Logger::info('Bulk assignment removal', ['assignment_count' => count($assignment_ids)]);
         
         $assignment_repo = new MT_Assignment_Repository();
         $success_count = 0;
@@ -807,7 +840,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
         }
         
         // Log for debugging
-        error_log('MT Bulk Reassign: count=' . count($assignment_ids) . ', new_jury_member_id=' . $new_jury_member_id);
+        MT_Logger::info('Bulk assignment reassignment', [
+            'assignment_count' => count($assignment_ids),
+            'new_jury_member_id' => $new_jury_member_id
+        ]);
         
         $assignment_repo = new MT_Assignment_Repository();
         $success_count = 0;
@@ -828,7 +864,10 @@ class MT_Assignment_Ajax extends MT_Base_Ajax {
             
             if ($existing) {
                 $skipped++;
-                error_log('MT Bulk Reassign: Assignment already exists for jury ' . $new_jury_member_id . ' and candidate ' . $assignment->candidate_id);
+                MT_Logger::warning('Bulk reassignment: assignment already exists', [
+                    'new_jury_member_id' => $new_jury_member_id,
+                    'candidate_id' => $assignment->candidate_id
+                ]);
                 continue;
             }
             

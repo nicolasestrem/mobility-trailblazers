@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Integrations\Elementor;
 
+use MobilityTrailblazers\Core\MT_Logger;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -121,7 +123,11 @@ class MT_Elementor_Loader {
                     try {
                         $widgets_manager->register(new $class_name());
                     } catch (\Exception $e) {
-                        error_log('MT Elementor: Failed to register widget ' . $class_name . ': ' . $e->getMessage());
+                        MT_Logger::error('Elementor widget registration failed', [
+                            'widget_class' => $class_name,
+                            'error_message' => $e->getMessage(),
+                            'file' => $file
+                        ]);
                     }
                 }
             }

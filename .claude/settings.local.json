@@ -49,7 +49,8 @@
       "mcp__wordpress-mcp__wp_debug_log",
       "Bash(C:/xampp/php/php.exe scripts/compile-mo.php)",
       "mcp__wordpress-mcp__wp_cli",
-      "mcp__filesystem-mcp__get_file_info"
+      "mcp__filesystem-mcp__get_file_info",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
