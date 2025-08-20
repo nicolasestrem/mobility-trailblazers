@@ -460,8 +460,11 @@ class MT_Evaluation_Service implements MT_Service_Interface {
                 
                 if ($eval->status === 'completed') {
                     $progress['completed']++;
-                } else {
+                } elseif ($eval->status === 'draft') {
                     $progress['drafts']++;
+                } else {
+                    // Handle any other statuses as pending
+                    $progress['pending']++;
                 }
             } else {
                 $progress['pending']++;
