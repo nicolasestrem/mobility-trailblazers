@@ -283,6 +283,9 @@ jQuery(document).ready(function($) {
      * Initialize dashboard filtering functionality
      */
     function initDashboardFiltering() {
+        // Detect if on mobile device
+        var isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         // Search functionality with debounce
         let searchTimer;
         $('#mt-candidate-search').on('input', function() {
@@ -299,21 +302,38 @@ jQuery(document).ready(function($) {
             filterDashboardCandidates();
         });
         
-        // Initial filter to ensure correct display
-        filterDashboardCandidates();
+        // Only run initial filter if search or status filter has a value
+        // This prevents hiding all candidates on initial load on mobile
+        var hasSearchValue = $('#mt-candidate-search').val() !== '';
+        var hasStatusFilter = $('#mt-status-filter').val() !== '';
+        
+        if (hasSearchValue || hasStatusFilter) {
+            filterDashboardCandidates();
+        } else {
+            // Ensure all cards are visible on initial load
+            $('.mt-candidate-card').show().removeClass('hidden');
+            hideNoResults();
+        }
         
         // Debug: Log all card data attributes on load
-        console.log('=== Debugging Card Data ===');
-        $('.mt-candidate-card').each(function(index) {
-            var $card = $(this);
-            console.log('Card ' + index + ':', {
-                name: $card.data('name'),
-                status: $card.data('status'),
-                title: $card.find('.mt-candidate-name').text(),
-                statusBadge: $card.find('.mt-status-badge').text()
+        if (isMobile || window.location.hash === '#debug') {
+            console.log('=== Mobile Debug Info ===');
+            console.log('Device is mobile:', isMobile);
+            console.log('Window width:', window.innerWidth);
+            console.log('User Agent:', navigator.userAgent);
+            $('.mt-candidate-card').each(function(index) {
+                var $card = $(this);
+                console.log('Card ' + index + ':', {
+                    name: $card.data('name'),
+                    status: $card.data('status'),
+                    title: $card.find('.mt-candidate-name').text(),
+                    statusBadge: $card.find('.mt-status-badge').text(),
+                    isVisible: $card.is(':visible')
+                });
             });
-        });
-        console.log('=== End Debug ===');
+            console.log('Total cards found:', $('.mt-candidate-card').length);
+            console.log('=== End Debug ===');
+        }
     }
     
     /**
@@ -324,16 +344,25 @@ jQuery(document).ready(function($) {
         var statusFilter = $('#mt-status-filter').val();
         var visibleCount = 0;
         var totalCandidates = $('.mt-candidate-card').length;
+        var isMobile = window.innerWidth <= 768;
         
-        console.log('Starting filter - Search:', searchTerm, 'Status:', statusFilter, 'Total cards:', totalCandidates);
+        // If no candidates found, don't filter
+        if (totalCandidates === 0) {
+            console.log('No candidate cards found to filter');
+            return;
+        }
+        
+        console.log('Starting filter - Search:', searchTerm, 'Status:', statusFilter, 'Total cards:', totalCandidates, 'Mobile:', isMobile);
         
         $('.mt-candidate-card').each(function() {
             var $card = $(this);
             var name = ($card.data('name') || '').toString().toLowerCase();
-            var status = ($card.data('status') || '').toString();
+            var status = ($card.data('status') || 'draft').toString(); // Default to 'draft' if no status
             
-            // Debug individual card data
-            console.log('Card data - Name:', name, 'Status:', status);
+            // Debug individual card data on mobile
+            if (isMobile && window.console && window.console.log) {
+                console.log('Card data - Name:', name, 'Status:', status);
+            }
             
             // Check search match - search in both data-name and the actual text content
             var cardTitle = $card.find('.mt-candidate-name').text().toLowerCase();
@@ -353,10 +382,14 @@ jQuery(document).ready(function($) {
                 matchesStatus = true;
             }
             
-            console.log('Card match - Search:', matchesSearch, 'Status:', matchesStatus, 'Will show:', (matchesSearch && matchesStatus));
+            // On mobile, be more lenient with filtering if no filters are active
+            if (isMobile && searchTerm === '' && statusFilter === '') {
+                matchesSearch = true;
+                matchesStatus = true;
+            }
             
             if (matchesSearch && matchesStatus) {
-                $card.show().removeClass('hidden');
+                $card.show().removeClass('hidden').css('display', ''); // Ensure display is not forced to none
                 visibleCount++;
             } else {
                 $card.hide().addClass('hidden');
@@ -364,7 +397,7 @@ jQuery(document).ready(function($) {
         });
         
         // Show/hide no results message
-        if (visibleCount === 0) {
+        if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '')) {
             showNoResults();
         } else {
             hideNoResults();

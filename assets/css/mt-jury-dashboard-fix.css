@@ -151,3 +151,96 @@ body .mt-jury-dashboard * {
     min-width: auto !important;
     width: 100% !important;
 }
+
+/* Mobile-specific fixes for candidate display */
+@media screen and (max-width: 768px) {
+    /* Ensure candidates list is always visible on mobile */
+    .mt-jury-dashboard .mt-candidates-list {
+        display: grid !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+        gap: 15px !important;
+        padding: 10px 0 !important;
+    }
+    
+    /* Force candidate cards to be visible */
+    .mt-jury-dashboard .mt-candidate-card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        transform: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Only hide cards explicitly marked as hidden by JavaScript */
+    .mt-jury-dashboard .mt-candidate-card.hidden {
+        display: none !important;
+    }
+    
+    /* Ensure cards content is visible */
+    .mt-candidate-header,
+    .mt-candidate-body {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+    }
+    
+    /* Fix search and filter controls */
+    .mt-search-filters {
+        margin-bottom: 20px !important;
+    }
+    
+    .mt-search-box {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .mt-search-input,
+    .mt-filter-select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .mt-jury-dashboard .mt-candidates-list {
+        grid-template-columns: 1fr !important;
+        padding: 10px 0 !important;
+    }
+    
+    .mt-jury-dashboard .mt-candidate-card {
+        margin-bottom: 10px !important;
+    }
+    
+    /* Ensure stats grid is responsive */
+    .mt-stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    /* Optimize card spacing on small screens */
+    .mt-candidate-header {
+        padding: 12px !important;
+    }
+    
+    .mt-candidate-body {
+        padding: 12px !important;
+    }
+}
+
+/* Fix for iOS Safari specific issues */
+@supports (-webkit-overflow-scrolling: touch) {
+    .mt-jury-dashboard {
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .mt-candidates-list {
+        -webkit-transform: translateZ(0) !important;
+        transform: translateZ(0) !important;
+    }
+}

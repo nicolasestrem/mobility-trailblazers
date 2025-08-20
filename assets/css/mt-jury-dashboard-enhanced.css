@@ -1079,7 +1079,23 @@ body .mt-jury-dashboard .mt-no-rankings {
     }
     
     body .mt-jury-dashboard .mt-candidates-list {
-        grid-template-columns: repeat(auto-fit, minmax(200px,1fr)) !important;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(250px,1fr)) !important;
+        gap: 15px !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure candidate cards are always visible on mobile */
+    body .mt-jury-dashboard .mt-candidate-card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-height: auto !important;
+    }
+    
+    body .mt-jury-dashboard .mt-candidate-card.hidden {
+        display: none !important;
     }
     
     body .mt-jury-dashboard .mt-stats-grid {
@@ -1116,7 +1132,24 @@ body .mt-jury-dashboard .mt-no-rankings {
 
 @media (max-width: 480px) {
     body .mt-jury-dashboard .mt-candidates-list {
+        display: grid !important;
         grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Force cards to be visible on small screens */
+    body .mt-jury-dashboard .mt-candidate-card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    body .mt-jury-dashboard .mt-candidate-card.hidden {
+        display: none !important;
     }
     
     body .mt-jury-dashboard .mt-stats-grid {

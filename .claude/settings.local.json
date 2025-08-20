@@ -3,7 +3,13 @@
     "allow": [
       "mcp__github-mcp__get_pull_request",
       "mcp__filesystem-mcp__directory_tree",
-      "mcp__filesystem-mcp__list_allowed_directories"
+      "mcp__filesystem-mcp__list_allowed_directories",
+      "mcp__filesystem-mcp__list_directory",
+      "mcp__filesystem-mcp__read_multiple_files",
+      "mcp__mysql-mcp__mysql_tables",
+      "mcp__mysql-mcp__mysql_describe",
+      "WebFetch(domain:app.screencast.com)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
