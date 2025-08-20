@@ -141,6 +141,20 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             }
         }
         
+        // Get and validate comments with character limit
+        $comments = $this->get_textarea_param('comments');
+        
+        // Enforce server-side character limit (1000 characters)
+        $max_comment_length = 1000;
+        if (strlen($comments) > $max_comment_length) {
+            // Truncate to maximum length rather than rejecting
+            // This prevents data loss if client-side validation fails
+            $comments = substr($comments, 0, $max_comment_length);
+            
+            // Log the truncation for monitoring
+            error_log('MT AJAX - Comments truncated for jury member ' . $jury_member->ID . ' evaluating candidate ' . $candidate_id);
+        }
+        
         $data = [
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $candidate_id,
@@ -149,7 +163,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'implementation_score' => $implementation_score,
             'relevance_score' => $relevance_score,
             'visibility_score' => $visibility_score,
-            'comments' => $this->get_textarea_param('comments'),
+            'comments' => $comments,
             'status' => $status
         ];
         
@@ -247,6 +261,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $candidate_id = $this->get_int_param('candidate_id');
         if (!$candidate_id) {
             $this->error(__('Invalid candidate ID.', 'mobility-trailblazers'));
+            return;
         }
         
         // Get current user as jury member
@@ -255,6 +270,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         if (!$jury_member) {
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            return;
         }
         
         // Get evaluation
@@ -293,6 +309,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         $candidate_id = $this->get_int_param('candidate_id');
         if (!$candidate_id) {
             $this->error(__('Invalid candidate ID.', 'mobility-trailblazers'));
+            return;
         }
         
         // Get candidate
@@ -352,6 +369,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         
         if (!$jury_member) {
             $this->error(__('Your jury member profile could not be found.', 'mobility-trailblazers'));
+            return;
         }
         
         // Get progress
@@ -751,10 +769,25 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $evaluation_data['visibility_score'] = 0;
         }
         
-        // Update with new scores from the form
+        // Update with new scores from the form with proper validation
+        $valid_criteria = ['courage_score', 'innovation_score', 'implementation_score', 'relevance_score', 'visibility_score'];
         foreach ($scores as $criterion => $score) {
+            // Validate criterion name to prevent injection
+            if (!in_array($criterion, $valid_criteria)) {
+                continue;
+            }
+            
+            // Validate score is numeric and within valid range
             if (!empty($criterion) && is_numeric($score)) {
-                $evaluation_data[$criterion] = floatval($score);
+                $score_value = floatval($score);
+                
+                // Enforce score range 0-10
+                if ($score_value < 0 || $score_value > 10) {
+                    $this->error(__('Invalid score value. All scores must be between 0 and 10.', 'mobility-trailblazers'));
+                    return;
+                }
+                
+                $evaluation_data[$criterion] = $score_value;
             }
         }
         

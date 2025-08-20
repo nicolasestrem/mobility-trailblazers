@@ -20,12 +20,52 @@ $csv_file = null;
 foreach ($argv as $arg) {
     if (strpos($arg, '--csv=') === 0) {
         $csv_file = substr($arg, 6);
+        
+        // Validate path to prevent directory traversal attacks
+        // Remove any path traversal attempts
+        $csv_file = str_replace(['../', '..\\', './', '.\\'], '', $csv_file);
+        
+        // Ensure the file has .csv extension
+        if (pathinfo($csv_file, PATHINFO_EXTENSION) !== 'csv') {
+            die("Error: File must have .csv extension\n");
+        }
+        
+        // Convert to absolute path and validate it exists
+        $csv_file = realpath($csv_file);
+        
+        if ($csv_file === false) {
+            die("Error: CSV file does not exist or is not accessible\n");
+        }
+        
+        // Ensure the file is within allowed directories
+        $allowed_dirs = [
+            realpath(dirname(__FILE__) . '/..'),  // Plugin directory
+            '/tmp',  // Temporary directory
+            sys_get_temp_dir(),  // System temp directory
+        ];
+        
+        $is_allowed = false;
+        foreach ($allowed_dirs as $dir) {
+            if ($dir && strpos($csv_file, $dir) === 0) {
+                $is_allowed = true;
+                break;
+            }
+        }
+        
+        if (!$is_allowed) {
+            die("Error: CSV file must be within the plugin directory or temp directory\n");
+        }
     }
 }
 
 // Default CSV file location
 if (!$csv_file) {
     $csv_file = dirname(__FILE__) . '/../Photos_candidates/mobility_trailblazers_candidates.csv';
+    
+    // Validate default path
+    if (!file_exists($csv_file)) {
+        die("Error: Default CSV file not found at: $csv_file\n");
+    }
 }
 
 // Load WordPress

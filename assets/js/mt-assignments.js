@@ -79,12 +79,15 @@
         var method = $('#assignment_method').val();
         var candidatesPerJury = $('#candidates_per_jury').val();
         var clearExisting = $('#clear_existing').is(':checked') ? 'true' : 'false';
-        var ajaxUrl = (typeof mt_admin !== 'undefined' && mt_admin.ajax_url) 
-            ? mt_admin.ajax_url 
-            : ajaxurl;
-        var nonce = (typeof mt_admin !== 'undefined' && mt_admin.nonce) 
-            ? mt_admin.nonce 
-            : $('#mt_admin_nonce').val();
+        // Validate required AJAX configuration
+        if (typeof mt_admin === 'undefined' || !mt_admin.ajax_url || !mt_admin.nonce) {
+            alert('Security configuration error. Please refresh the page and try again.');
+            console.error('MT Assignments: Required mt_admin object not properly initialized');
+            return;
+        }
+        
+        var ajaxUrl = mt_admin.ajax_url;
+        var nonce = mt_admin.nonce;
         $.ajax({
             url: ajaxUrl,
             type: 'POST',
@@ -131,12 +134,15 @@
             showNotification(mt_admin && mt_admin.i18n && mt_admin.i18n.select_jury_candidates ? mt_admin.i18n.select_jury_candidates : 'Bitte wählen Sie ein Jurymitglied und mindestens einen Kandidaten aus.', 'warning');
             return;
         }
-        var ajaxUrl = (typeof mt_admin !== 'undefined' && mt_admin.ajax_url) 
-            ? mt_admin.ajax_url 
-            : ajaxurl;
-        var nonce = (typeof mt_admin !== 'undefined' && mt_admin.nonce) 
-            ? mt_admin.nonce 
-            : $('#mt_admin_nonce').val();
+        // Validate required AJAX configuration
+        if (typeof mt_admin === 'undefined' || !mt_admin.ajax_url || !mt_admin.nonce) {
+            alert('Security configuration error. Please refresh the page and try again.');
+            console.error('MT Assignments: Required mt_admin object not properly initialized');
+            return;
+        }
+        
+        var ajaxUrl = mt_admin.ajax_url;
+        var nonce = mt_admin.nonce;
         $.ajax({
             url: ajaxUrl,
             type: 'POST',
@@ -179,12 +185,15 @@
         if (!confirm('Are you sure you want to remove this assignment?')) {
             return;
         }
-        var ajaxUrl = (typeof mt_admin !== 'undefined' && mt_admin.ajax_url) 
-            ? mt_admin.ajax_url 
-            : ajaxurl;
-        var nonce = (typeof mt_admin !== 'undefined' && mt_admin.nonce) 
-            ? mt_admin.nonce 
-            : $('#mt_admin_nonce').val();
+        // Validate required AJAX configuration
+        if (typeof mt_admin === 'undefined' || !mt_admin.ajax_url || !mt_admin.nonce) {
+            alert('Security configuration error. Please refresh the page and try again.');
+            console.error('MT Assignments: Required mt_admin object not properly initialized');
+            return;
+        }
+        
+        var ajaxUrl = mt_admin.ajax_url;
+        var nonce = mt_admin.nonce;
         $.ajax({
             url: ajaxUrl,
             type: 'POST',
@@ -227,12 +236,15 @@
         if (!confirm('This will remove ALL jury assignments. Are you absolutely sure?')) {
             return;
         }
-        var ajaxUrl = (typeof mt_admin !== 'undefined' && mt_admin.ajax_url) 
-            ? mt_admin.ajax_url 
-            : ajaxurl;
-        var nonce = (typeof mt_admin !== 'undefined' && mt_admin.nonce) 
-            ? mt_admin.nonce 
-            : $('#mt_admin_nonce').val();
+        // Validate required AJAX configuration
+        if (typeof mt_admin === 'undefined' || !mt_admin.ajax_url || !mt_admin.nonce) {
+            alert('Security configuration error. Please refresh the page and try again.');
+            console.error('MT Assignments: Required mt_admin object not properly initialized');
+            return;
+        }
+        
+        var ajaxUrl = mt_admin.ajax_url;
+        var nonce = mt_admin.nonce;
         $.ajax({
             url: ajaxUrl,
             type: 'POST',
@@ -264,12 +276,15 @@
         });
     }
     function exportAssignments() {
-        var ajaxUrl = (typeof mt_admin !== 'undefined' && mt_admin.ajax_url) 
-            ? mt_admin.ajax_url 
-            : ajaxurl;
-        var nonce = (typeof mt_admin !== 'undefined' && mt_admin.nonce) 
-            ? mt_admin.nonce 
-            : $('#mt_admin_nonce').val();
+        // Validate required AJAX configuration
+        if (typeof mt_admin === 'undefined' || !mt_admin.ajax_url || !mt_admin.nonce) {
+            alert('Security configuration error. Please refresh the page and try again.');
+            console.error('MT Assignments: Required mt_admin object not properly initialized');
+            return;
+        }
+        
+        var ajaxUrl = mt_admin.ajax_url;
+        var nonce = mt_admin.nonce;
         // Create a form to trigger download
         var form = $('<form/>', {
             action: ajaxUrl,

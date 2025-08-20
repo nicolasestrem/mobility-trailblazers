@@ -215,6 +215,7 @@ abstract class MT_Base_Ajax {
      * @return void
      */
     protected function handle_exception(\Exception $e, $context = '') {
+        // Log detailed error information for debugging (server-side only)
         MT_Logger::critical('AJAX Exception: ' . $context, [
             'exception' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
@@ -223,7 +224,22 @@ abstract class MT_Base_Ajax {
             'context' => $context
         ]);
 
-        $this->error(__('An unexpected error occurred. Please try again.', 'mobility-trailblazers'));
+        // Generate a unique error ID for tracking
+        $error_id = wp_generate_password(8, false);
+        
+        // Log the error ID for correlation
+        error_log('MT AJAX Error ID: ' . $error_id . ' - ' . $e->getMessage());
+        
+        // Return generic error message to prevent information disclosure
+        // Never expose system paths, database details, or stack traces to users
+        $user_message = __('An unexpected error occurred. Please try again.', 'mobility-trailblazers');
+        
+        // Only show error ID to administrators for debugging
+        if (current_user_can('manage_options')) {
+            $user_message .= sprintf(' (Error ID: %s)', $error_id);
+        }
+        
+        $this->error($user_message);
     }
 
     /**
