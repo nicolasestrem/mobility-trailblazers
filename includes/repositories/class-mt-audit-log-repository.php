@@ -251,4 +251,205 @@ class MT_Audit_Log_Repository implements MT_Audit_Log_Repository_Interface {
             'recent_activity' => (int) $recent_activity
         ];
     }
+    
+    /**
+     * Log an audit event
+     *
+     * @param string $action Action performed
+     * @param string $object_type Type of object affected
+     * @param int $object_id ID of object affected
+     * @param array $details Additional details
+     * @param int $user_id User ID (optional, defaults to current user)
+     * @return int|false Log entry ID or false on failure
+     */
+    public function log($action, $object_type, $object_id, $details = [], $user_id = null) {
+        global $wpdb;
+        
+        if ($user_id === null) {
+            $user_id = get_current_user_id();
+        }
+        
+        $data = [
+            'user_id' => $user_id,
+            'action' => $action,
+            'object_type' => $object_type,
+            'object_id' => $object_id,
+            'details' => maybe_serialize($details),
+            'ip_address' => $this->get_client_ip(),
+            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
+            'created_at' => current_time('mysql')
+        ];
+        
+        $result = $wpdb->insert($this->table_name, $data, [
+            '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s'
+        ]);
+        
+        return $result !== false ? $wpdb->insert_id : false;
+    }
+    
+    /**
+     * Get logs by user
+     *
+     * @param int $user_id User ID
+     * @param int $limit Number of entries to retrieve
+     * @return array Log entries
+     */
+    public function get_by_user($user_id, $limit = 100) {
+        return $this->get_logs([
+            'user_id' => $user_id,
+            'per_page' => $limit,
+            'page' => 1
+        ])['items'];
+    }
+    
+    /**
+     * Get logs by object
+     *
+     * @param string $object_type Object type
+     * @param int $object_id Object ID
+     * @param int $limit Number of entries to retrieve
+     * @return array Log entries
+     */
+    public function get_by_object($object_type, $object_id, $limit = 100) {
+        return $this->get_logs([
+            'object_type' => $object_type,
+            'object_id' => $object_id,
+            'per_page' => $limit,
+            'page' => 1
+        ])['items'];
+    }
+    
+    /**
+     * Get logs by action
+     *
+     * @param string $action Action name
+     * @param int $limit Number of entries to retrieve
+     * @return array Log entries
+     */
+    public function get_by_action($action, $limit = 100) {
+        return $this->get_logs([
+            'action' => $action,
+            'per_page' => $limit,
+            'page' => 1
+        ])['items'];
+    }
+    
+    /**
+     * Clean old logs
+     *
+     * @param int $days Number of days to keep
+     * @return int Number of logs deleted
+     */
+    public function clean_old_logs($days = 90) {
+        return $this->cleanup_old_logs($days);
+    }
+    
+    /**
+     * Get client IP address
+     *
+     * @return string
+     */
+    private function get_client_ip() {
+        $ip_keys = ['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'];
+        
+        foreach ($ip_keys as $key) {
+            if (!empty($_SERVER[$key])) {
+                $ip = $_SERVER[$key];
+                if (strpos($ip, ',') !== false) {
+                    $ip = explode(',', $ip)[0];
+                }
+                return trim($ip);
+            }
+        }
+        
+        return '';
+    }
+    
+    // Required base repository methods (from MT_Repository_Interface)
+    
+    /**
+     * Find all records
+     *
+     * @param array $args Query arguments
+     * @return array
+     */
+    public function find_all($args = []) {
+        return $this->get_logs($args)['items'];
+    }
+    
+    /**
+     * Find record by ID
+     *
+     * @param int $id Record ID
+     * @return object|null
+     */
+    public function find($id) {
+        return $this->get_by_id($id);
+    }
+    
+    /**
+     * Create a new record
+     *
+     * @param array $data Record data
+     * @return int|false
+     */
+    public function create($data) {
+        return $this->log(
+            $data['action'] ?? '',
+            $data['object_type'] ?? '',
+            $data['object_id'] ?? 0,
+            $data['details'] ?? [],
+            $data['user_id'] ?? null
+        );
+    }
+    
+    /**
+     * Update a record
+     *
+     * @param int $id Record ID
+     * @param array $data Data to update
+     * @return bool
+     */
+    public function update($id, $data) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            $this->table_name,
+            $data,
+            ['id' => $id]
+        ) !== false;
+    }
+    
+    /**
+     * Delete a record
+     *
+     * @param int $id Record ID
+     * @return bool
+     */
+    public function delete($id) {
+        global $wpdb;
+        
+        return $wpdb->delete(
+            $this->table_name,
+            ['id' => $id],
+            ['%d']
+        ) !== false;
+    }
+    
+    /**
+     * Check if record exists
+     *
+     * @param int $id Record ID
+     * @return bool
+     */
+    public function exists($id) {
+        global $wpdb;
+        
+        $count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$this->table_name} WHERE id = %d",
+            $id
+        ));
+        
+        return $count > 0;
+    }
 }
