@@ -101,6 +101,6 @@ cleanup-*.sh
 !assets/
 !templates/
 !languages/
-/scripts
+/scripts/
 /scripts
 /scripts
