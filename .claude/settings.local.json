@@ -33,7 +33,10 @@
       "mcp__kapture__list_tabs",
       "mcp__kapture__dom",
       "mcp__docker-mcp__docker_exec",
-      "mcp__docker-mcp__mobility_status"
+      "mcp__docker-mcp__mobility_status",
+      "mcp__docker-mcp__mobility_status",
+      "mcp__mysql-mcp__mt_debug_check",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
