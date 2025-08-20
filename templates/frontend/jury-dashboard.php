@@ -83,11 +83,28 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
 ?>
 
 <div class="mt-jury-dashboard">
-    <div class="<?php echo esc_attr($header_class); ?>" 
+    <?php if ($progress['completion_rate'] == 100) : ?>
+        <div class="mt-completion-status-banner">
+            <div class="mt-completion-status-content">
+                <span class="dashicons dashicons-yes-alt"></span>
+                <strong><?php _e('EVALUATION COMPLETE', 'mobility-trailblazers'); ?></strong>
+                <span class="mt-completion-subtitle"><?php _e('All assignments finished!', 'mobility-trailblazers'); ?></span>
+            </div>
+        </div>
+    <?php endif; ?>
+    
+    <div class="<?php echo esc_attr($header_class); ?> <?php echo $progress['completion_rate'] == 100 ? 'mt-header-completed' : ''; ?>" 
          style="<?php echo (isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient') === 'solid' ? 'background-color: ' . esc_attr(isset($dashboard_settings['primary_color']) ? $dashboard_settings['primary_color'] : '#0073aa') : ''; ?>">
         
         <?php if (isset($dashboard_settings['show_welcome_message']) ? $dashboard_settings['show_welcome_message'] : true) : ?>
-            <h1><?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($current_user->display_name)); ?></h1>
+            <h1>
+                <?php printf(__('Welcome, %s', 'mobility-trailblazers'), esc_html($current_user->display_name)); ?>
+                <?php if ($progress['completion_rate'] == 100) : ?>
+                    <span class="mt-completion-icon-header">
+                        <span class="dashicons dashicons-awards"></span>
+                    </span>
+                <?php endif; ?>
+            </h1>
         <?php endif; ?>
         
         <?php if (!empty(isset($dashboard_settings['intro_text']) ? $dashboard_settings['intro_text'] : '')) : ?>
@@ -108,9 +125,17 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             </div>
         </div>
         <?php if ($progress['completion_rate'] == 100) : ?>
-            <div class="mt-completion-badge">
-                <span class="dashicons dashicons-awards" style="font-size: 24px; color: #ffd700;"></span>
-                <strong><?php _e('Congratulations! You have completed all evaluations!', 'mobility-trailblazers'); ?></strong>
+            <div class="mt-completion-badge mt-completion-enhanced">
+                <div class="mt-completion-icon-large">
+                    <span class="dashicons dashicons-awards"></span>
+                </div>
+                <div class="mt-completion-text">
+                    <strong><?php _e('Congratulations!', 'mobility-trailblazers'); ?></strong>
+                    <p><?php _e('You have completed all evaluations!', 'mobility-trailblazers'); ?></p>
+                    <div class="mt-completion-timestamp">
+                        <?php _e('Mission accomplished', 'mobility-trailblazers'); ?> ✓
+                    </div>
+                </div>
             </div>
         <?php endif; ?>
         <?php endif; ?>

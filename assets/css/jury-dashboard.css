@@ -84,38 +84,236 @@
     color: white;
 }
 
-/* Completion Badge */
-.mt-completion-badge {
-    background: linear-gradient(135deg, #ffd700, #ffed4e);
-    border: 2px solid #ffc107;
-    border-radius: 12px;
+/* Completion Status Banner */
+.mt-completion-status-banner {
+    background: linear-gradient(135deg, #00a32a, #00c436);
+    color: white;
     padding: 15px 20px;
-    margin-top: 20px;
+    margin: -40px -40px 20px -40px;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-    animation: celebrateAnimation 0.5s ease-out;
+    box-shadow: 0 4px 15px rgba(0, 163, 42, 0.3);
+    animation: completionSlideDown 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-completion-status-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.mt-completion-status-content {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
 }
 
-.mt-completion-badge strong {
+.mt-completion-status-content .dashicons {
+    font-size: 24px;
+    animation: bounceIcon 1s ease-in-out infinite alternate;
+}
+
+.mt-completion-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-left: 10px;
+}
+
+/* Header when completed */
+.mt-header-completed {
+    border: 3px solid #00a32a;
+    position: relative;
+}
+
+.mt-completion-icon-header {
+    color: #ffd700;
+    margin-left: 10px;
+    display: inline-block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.mt-completion-icon-header .dashicons {
+    font-size: 32px;
+}
+
+/* Enhanced Completion Badge */
+.mt-completion-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 3px solid #ffc107;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    animation: celebrateAnimation 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-completion-enhanced {
+    background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+    background-size: 200% 200%;
+    animation: celebrateAnimation 0.8s ease-out, gradientShift 3s ease-in-out infinite;
+    transform: scale(1.02);
+    border: 3px solid #ff6b35;
+}
+
+.mt-completion-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff6b35, #ffd700, #00a32a, #ffd700);
+    background-size: 400% 400%;
+    border-radius: 16px;
+    z-index: -1;
+    animation: gradientBorder 2s linear infinite;
+}
+
+.mt-completion-icon-large {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b35, #ffc107);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.mt-completion-icon-large .dashicons {
+    font-size: 40px;
+    color: white;
+    animation: spin 3s linear infinite;
+}
+
+.mt-completion-text strong {
     color: #664800;
-    font-size: 18px;
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.mt-completion-text p {
+    color: #664800;
+    font-size: 16px;
+    margin: 5px 0;
+    font-weight: 600;
+}
+
+.mt-completion-timestamp {
+    background: rgba(255, 255, 255, 0.8);
+    color: #00a32a;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-block;
+    border: 2px solid #00a32a;
 }
 
 @keyframes celebrateAnimation {
     0% {
-        transform: scale(0.9);
+        transform: scale(0.9) rotate(-5deg);
         opacity: 0;
     }
     50% {
-        transform: scale(1.05);
+        transform: scale(1.08) rotate(2deg);
     }
     100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes completionSlideDown {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes bounceIcon {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
         transform: scale(1);
         opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes gradientBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
     }
 }
 
@@ -627,9 +825,35 @@
         padding: 25px;
     }
     
+    .mt-completion-status-banner {
+        margin: -25px -25px 20px -25px;
+        padding: 12px 15px;
+    }
+    
+    .mt-completion-status-content {
+        font-size: 16px;
+    }
+    
+    .mt-completion-status-content .dashicons {
+        font-size: 20px;
+    }
+    
     .mt-dashboard-header {
         margin: -25px -25px 25px -25px;
         padding: 25px;
+    }
+    
+    .mt-completion-icon-large {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .mt-completion-icon-large .dashicons {
+        font-size: 30px;
+    }
+    
+    .mt-completion-text strong {
+        font-size: 20px;
     }
     
     .mt-dashboard-header h1 {
@@ -671,6 +895,39 @@
         padding: 20px;
         border-radius: 0;
         margin: 0;
+    }
+    
+    .mt-completion-status-banner {
+        margin: -20px -20px 15px -20px;
+        padding: 10px;
+    }
+    
+    .mt-completion-status-content {
+        font-size: 14px;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .mt-completion-subtitle {
+        margin-left: 0;
+    }
+    
+    .mt-completion-icon-large {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .mt-completion-icon-large .dashicons {
+        font-size: 25px;
+    }
+    
+    .mt-completion-text strong {
+        font-size: 18px;
+    }
+    
+    .mt-completion-timestamp {
+        font-size: 12px;
+        padding: 6px 12px;
     }
     
     .mt-stats-grid {
