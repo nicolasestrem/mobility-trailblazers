@@ -47,13 +47,12 @@ if (have_posts()) :
     $website = $candidate_data ? $candidate_data->website_url : get_post_meta($candidate_id, '_mt_website_url', true);
     $categories = wp_get_post_terms($candidate_id, 'mt_candidate_category');
     
-    // Get overview (Überblick) from description sections or meta
-    $overview = '';
-    if ($description_sections && !empty($description_sections['ueberblick'])) {
+    // Get overview (Überblick) - prioritize meta field (from editor) over database table
+    $overview = get_post_meta($candidate_id, '_mt_overview', true);
+    if (empty($overview) && $description_sections && !empty($description_sections['ueberblick'])) {
         $overview = $description_sections['ueberblick'];
-    } else {
-        $overview = get_post_meta($candidate_id, '_mt_overview', true);
     }
+    
     
     // Parse evaluation criteria from description sections
     $parsed_criteria = [];

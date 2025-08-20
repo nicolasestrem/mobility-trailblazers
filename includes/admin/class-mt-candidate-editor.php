@@ -62,16 +62,6 @@ class MT_Candidate_Editor {
             'normal',
             'high'
         );
-        
-        // Biography meta box
-        add_meta_box(
-            'mt_biography',
-            __('Biography', 'mobility-trailblazers'),
-            [$this, 'render_biography_box'],
-            'mt_candidate',
-            'normal',
-            'default'
-        );
     }
     
     /**
@@ -140,31 +130,6 @@ class MT_Candidate_Editor {
     }
     
     /**
-     * Render Biography meta box
-     */
-    public function render_biography_box($post) {
-        $personality = get_post_meta($post->ID, '_mt_personality', true);
-        ?>
-        <div class="mt-editor-wrapper">
-            <p class="description">
-                <?php _e('This content appears in the Biography section on the candidate profile page.', 'mobility-trailblazers'); ?>
-            </p>
-            <?php
-            wp_editor($personality, 'mt_personality', [
-                'textarea_name' => 'mt_personality',
-                'media_buttons' => true,
-                'textarea_rows' => 10,
-                'tinymce' => [
-                    'toolbar1' => 'formatselect,bold,italic,underline,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,undo,redo',
-                    'toolbar2' => '',
-                ]
-            ]);
-            ?>
-        </div>
-        <?php
-    }
-    
-    /**
      * Save meta data
      */
     public function save_meta_data($post_id, $post) {
@@ -192,11 +157,6 @@ class MT_Candidate_Editor {
         // Save Evaluation Criteria
         if (isset($_POST['mt_evaluation_criteria'])) {
             update_post_meta($post_id, '_mt_evaluation_criteria', wp_kses_post($_POST['mt_evaluation_criteria']));
-        }
-        
-        // Save Biography
-        if (isset($_POST['mt_personality'])) {
-            update_post_meta($post_id, '_mt_personality', wp_kses_post($_POST['mt_personality']));
         }
     }
     
@@ -317,9 +277,6 @@ class MT_Candidate_Editor {
                     <button class="mt-tab-btn" data-tab="criteria">
                         <?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?>
                     </button>
-                    <button class="mt-tab-btn" data-tab="biography">
-                        <?php _e('Biography', 'mobility-trailblazers'); ?>
-                    </button>
                 </div>
                 <div class="mt-modal-body">
                     <div class="mt-tab-content active" data-content="overview">
@@ -327,9 +284,6 @@ class MT_Candidate_Editor {
                     </div>
                     <div class="mt-tab-content" data-content="criteria">
                         <textarea id="mt-edit-criteria" rows="15"></textarea>
-                    </div>
-                    <div class="mt-tab-content" data-content="biography">
-                        <textarea id="mt-edit-biography" rows="10"></textarea>
                     </div>
                 </div>
                 <div class="mt-modal-footer">
@@ -446,8 +400,7 @@ class MT_Candidate_Editor {
         // Map field names to meta keys
         $field_map = [
             'overview' => '_mt_overview',
-            'criteria' => '_mt_evaluation_criteria',
-            'biography' => '_mt_personality'
+            'criteria' => '_mt_evaluation_criteria'
         ];
         
         if (!isset($field_map[$field])) {
@@ -483,12 +436,10 @@ class MT_Candidate_Editor {
         // Get all content fields
         $overview = get_post_meta($post_id, '_mt_overview', true);
         $criteria = get_post_meta($post_id, '_mt_evaluation_criteria', true);
-        $biography = get_post_meta($post_id, '_mt_personality', true);
         
         wp_send_json_success([
             'overview' => $overview,
             'criteria' => $criteria,
-            'biography' => $biography,
             'post_id' => $post_id
         ]);
     }

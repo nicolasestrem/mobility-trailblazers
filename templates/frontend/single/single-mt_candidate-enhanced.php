@@ -22,7 +22,6 @@ while (have_posts()) : the_post();
     $display_name = get_post_meta($candidate_id, '_mt_display_name', true) ?: get_the_title();
     $overview = get_post_meta($candidate_id, '_mt_overview', true);
     $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
-    $personality = get_post_meta($candidate_id, '_mt_personality', true) ?: get_post_meta($candidate_id, '_mt_personality_motivation', true);
     $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true);
     $website = get_post_meta($candidate_id, '_mt_website', true);
     $categories = wp_get_post_terms($candidate_id, 'mt_award_category');
@@ -199,19 +198,6 @@ while (have_posts()) : the_post();
                     </section>
                 <?php endif; ?>
 
-                <!-- Biography Section -->
-                <?php if ($personality) : ?>
-                    <section class="mt-content-section mt-biography">
-                        <div class="mt-section-header">
-                            <i class="dashicons dashicons-admin-users"></i>
-                            <h2><?php _e('Biography', 'mobility-trailblazers'); ?></h2>
-                        </div>
-                        <div class="mt-section-content">
-                            <?php echo wp_kses_post($personality); ?>
-                        </div>
-                    </section>
-                <?php endif; ?>
-
                 <!-- Fallback for unstructured criteria -->
                 <?php if (empty($parsed_criteria) && $eval_criteria) : ?>
                     <section class="mt-content-section mt-evaluation-criteria">
@@ -226,7 +212,7 @@ while (have_posts()) : the_post();
                 <?php endif; ?>
 
                 <!-- Additional Comments -->
-                <?php if (!$overview && empty($parsed_criteria) && !$eval_criteria && !$personality) : ?>
+                <?php if (!$overview && empty($parsed_criteria) && !$eval_criteria) : ?>
                     <div class="mt-placeholder-notice">
                         <div class="mt-notice-icon">
                             <i class="dashicons dashicons-info"></i>

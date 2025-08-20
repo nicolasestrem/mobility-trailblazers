@@ -18,11 +18,17 @@ while (have_posts()) : the_post();
     $organization = get_post_meta($candidate_id, '_mt_organization', true) ?: '';
     $position = get_post_meta($candidate_id, '_mt_position', true) ?: '';
     $display_name = get_post_meta($candidate_id, '_mt_candidate_name', true) ?: get_the_title();
-    // Get the full description from post_content which contains all sections
-    $full_description = get_the_content();
     
-    // Also get the overview meta field as fallback
-    $overview_meta = get_post_meta($candidate_id, '_mt_description_full', true) ?: '';
+    // Get content from all possible sources in priority order
+    $full_description = get_the_content();
+    if (empty($full_description)) {
+        // Check the custom editor's overview field
+        $full_description = get_post_meta($candidate_id, '_mt_overview', true);
+    }
+    if (empty($full_description)) {
+        // Fallback to legacy description field
+        $full_description = get_post_meta($candidate_id, '_mt_description_full', true);
+    }
     $linkedin = get_post_meta($candidate_id, '_mt_linkedin_url', true) ?: '';
     $website = get_post_meta($candidate_id, '_mt_website_url', true) ?: '';
     
@@ -51,6 +57,16 @@ while (have_posts()) : the_post();
     }
     if ($eval_visibility) {
         $criteria_sections['vorbild'] = $eval_visibility;
+    }
+    
+    // If no individual criteria, check for combined criteria field from editor
+    if (empty($criteria_sections)) {
+        $combined_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
+        if ($combined_criteria) {
+            // Parse the combined criteria text to extract sections
+            // This maintains compatibility with the custom editor
+            $criteria_sections['combined'] = $combined_criteria;
+        }
     }
 ?>
 
@@ -512,14 +528,12 @@ while (have_posts()) : the_post();
         <div class="mt-content-container">
             <div class="mt-main-content">
                 <?php 
-                // Display the full content if available, otherwise fall back to overview meta
-                $content_to_display = !empty($full_description) ? $full_description : $overview_meta;
-                
-                if ($content_to_display) : 
+                // Display the full content if available
+                if ($full_description) : 
                     // Check if content has sections (contains headers like "Mut & Pioniergeist")
-                    if (strpos($content_to_display, 'Mut &') !== false || 
-                        strpos($content_to_display, 'Innovation') !== false ||
-                        strpos($content_to_display, 'Umsetzung') !== false) :
+                    if (strpos($full_description, 'Mut &') !== false || 
+                        strpos($full_description, 'Innovation') !== false ||
+                        strpos($full_description, 'Umsetzung') !== false) :
                         // Content has multiple sections, display as formatted content
                         ?>
                         <div class="mt-overview-section">
@@ -527,7 +541,7 @@ while (have_posts()) : the_post();
                             <div class="mt-section-content">
                                 <?php 
                                 // Parse and format the content with proper sections
-                                $formatted_content = $content_to_display;
+                                $formatted_content = $full_description;
                                 
                                 // Convert section headers to proper HTML headers
                                 $formatted_content = preg_replace('/^(Überblick|Mut & Pioniergeist|Innovationsgrad|Umsetzungskraft & Wirkung|Relevanz für die Mobilitätswende|Vorbildfunktion & Sichtbarkeit)$/m', '<h3 class="mt-content-subheading">$1</h3>', $formatted_content);
@@ -541,7 +555,7 @@ while (have_posts()) : the_post();
                         <div class="mt-overview-section">
                             <h2 class="mt-section-heading">Überblick</h2>
                             <div class="mt-section-content">
-                                <?php echo wp_kses_post(wpautop($content_to_display)); ?>
+                                <?php echo wp_kses_post(wpautop($full_description)); ?>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -549,57 +563,67 @@ while (have_posts()) : the_post();
                 
                 <?php if (!empty($criteria_sections)) : ?>
                     <h2 class="mt-section-heading"><?php _e('Evaluation Criteria', 'mobility-trailblazers'); ?></h2>
-                    <div class="mt-criteria-grid">
-                        <?php if (isset($criteria_sections['mut'])) : ?>
-                            <div class="mt-criterion-card mut">
-                                <div class="mt-criterion-icon">🚀</div>
-                                <h3 class="mt-criterion-title">Mut & Pioniergeist</h3>
-                                <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['mut']); ?>
-                                </div>
+                    <?php if (isset($criteria_sections['combined'])) : ?>
+                        <!-- Display combined criteria from editor -->
+                        <div class="mt-overview-section">
+                            <div class="mt-section-content">
+                                <?php echo wp_kses_post(wpautop($criteria_sections['combined'])); ?>
                             </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($criteria_sections['innovation'])) : ?>
-                            <div class="mt-criterion-card innovation">
-                                <div class="mt-criterion-icon">💡</div>
-                                <h3 class="mt-criterion-title">Innovationsgrad</h3>
-                                <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['innovation']); ?>
+                        </div>
+                    <?php else : ?>
+                        <!-- Display individual criteria cards -->
+                        <div class="mt-criteria-grid">
+                            <?php if (isset($criteria_sections['mut'])) : ?>
+                                <div class="mt-criterion-card mut">
+                                    <div class="mt-criterion-icon">🚀</div>
+                                    <h3 class="mt-criterion-title">Mut & Pioniergeist</h3>
+                                    <div class="mt-criterion-content">
+                                        <?php echo wp_kses_post($criteria_sections['mut']); ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($criteria_sections['umsetzung'])) : ?>
-                            <div class="mt-criterion-card umsetzung">
-                                <div class="mt-criterion-icon">⚡</div>
-                                <h3 class="mt-criterion-title">Umsetzungskraft & Wirkung</h3>
-                                <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['umsetzung']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($criteria_sections['innovation'])) : ?>
+                                <div class="mt-criterion-card innovation">
+                                    <div class="mt-criterion-icon">💡</div>
+                                    <h3 class="mt-criterion-title">Innovationsgrad</h3>
+                                    <div class="mt-criterion-content">
+                                        <?php echo wp_kses_post($criteria_sections['innovation']); ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($criteria_sections['relevanz'])) : ?>
-                            <div class="mt-criterion-card relevanz">
-                                <div class="mt-criterion-icon">🌍</div>
-                                <h3 class="mt-criterion-title">Relevanz für die Mobilitätswende</h3>
-                                <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['relevanz']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($criteria_sections['umsetzung'])) : ?>
+                                <div class="mt-criterion-card umsetzung">
+                                    <div class="mt-criterion-icon">⚡</div>
+                                    <h3 class="mt-criterion-title">Umsetzungskraft & Wirkung</h3>
+                                    <div class="mt-criterion-content">
+                                        <?php echo wp_kses_post($criteria_sections['umsetzung']); ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (isset($criteria_sections['vorbild'])) : ?>
-                            <div class="mt-criterion-card vorbild">
-                                <div class="mt-criterion-icon">⭐</div>
-                                <h3 class="mt-criterion-title">Vorbildfunktion & Sichtbarkeit</h3>
-                                <div class="mt-criterion-content">
-                                    <?php echo wp_kses_post($criteria_sections['vorbild']); ?>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($criteria_sections['relevanz'])) : ?>
+                                <div class="mt-criterion-card relevanz">
+                                    <div class="mt-criterion-icon">🌍</div>
+                                    <h3 class="mt-criterion-title">Relevanz für die Mobilitätswende</h3>
+                                    <div class="mt-criterion-content">
+                                        <?php echo wp_kses_post($criteria_sections['relevanz']); ?>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($criteria_sections['vorbild'])) : ?>
+                                <div class="mt-criterion-card vorbild">
+                                    <div class="mt-criterion-icon">⭐</div>
+                                    <h3 class="mt-criterion-title">Vorbildfunktion & Sichtbarkeit</h3>
+                                    <div class="mt-criterion-content">
+                                        <?php echo wp_kses_post($criteria_sections['vorbild']); ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
                 
                 <!-- Navigation -->
