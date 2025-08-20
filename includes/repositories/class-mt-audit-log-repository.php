@@ -8,6 +8,8 @@
 
 namespace MobilityTrailblazers\Repositories;
 
+use MobilityTrailblazers\Interfaces\MT_Audit_Log_Repository_Interface;
+
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
     exit;
@@ -18,7 +20,7 @@ if (!defined('ABSPATH')) {
  *
  * Handles database operations for audit log
  */
-class MT_Audit_Log_Repository {
+class MT_Audit_Log_Repository implements MT_Audit_Log_Repository_Interface {
     
     /**
      * Table name

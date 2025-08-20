@@ -35,6 +35,13 @@ class MT_Plugin {
     private static $instance = null;
     
     /**
+     * Dependency Injection Container
+     *
+     * @var MT_Container
+     */
+    private $container = null;
+    
+    /**
      * Get plugin instance
      *
      * @return MT_Plugin
@@ -48,10 +55,78 @@ class MT_Plugin {
     }
     
     /**
+     * Get container instance
+     *
+     * @return MT_Container
+     */
+    public static function container() {
+        return self::get_instance()->get_container();
+    }
+    
+    /**
+     * Get container instance
+     *
+     * @return MT_Container
+     */
+    public function get_container() {
+        if (null === $this->container) {
+            $this->container = MT_Container::get_instance();
+            $this->register_services();
+        }
+        return $this->container;
+    }
+    
+    /**
      * Constructor
      */
     private function __construct() {
-        // Prevent direct instantiation
+        // Initialize container early
+        $this->container = MT_Container::get_instance();
+    }
+    
+    /**
+     * Register services with the container
+     *
+     * @return void
+     */
+    private function register_services() {
+        // Load container and service provider if not already loaded
+        if (!class_exists('MobilityTrailblazers\Core\MT_Container')) {
+            require_once MT_PLUGIN_DIR . 'includes/core/class-mt-container.php';
+        }
+        
+        if (!class_exists('MobilityTrailblazers\Core\MT_Service_Provider')) {
+            require_once MT_PLUGIN_DIR . 'includes/core/class-mt-service-provider.php';
+        }
+        
+        // Register providers
+        $providers = [
+            'MobilityTrailblazers\Providers\MT_Repository_Provider',
+            'MobilityTrailblazers\Providers\MT_Services_Provider',
+        ];
+        
+        foreach ($providers as $provider_class) {
+            $provider_file = $this->get_provider_file($provider_class);
+            if (file_exists($provider_file)) {
+                require_once $provider_file;
+                if (class_exists($provider_class)) {
+                    $this->container->register_provider(new $provider_class($this->container));
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get provider file path from class name
+     *
+     * @param string $provider_class Provider class name
+     * @return string File path
+     */
+    private function get_provider_file($provider_class) {
+        $class_parts = explode('\\', $provider_class);
+        $class_name = end($class_parts);
+        $file_name = 'class-' . str_replace('_', '-', strtolower($class_name)) . '.php';
+        return MT_PLUGIN_DIR . 'includes/providers/' . $file_name;
     }
     
     /**
@@ -60,6 +135,9 @@ class MT_Plugin {
      * @return void
      */
     public function init() {
+        // Initialize container and register services
+        $this->get_container();
+        
         // Load Composer autoload for PhpSpreadsheet
         if (file_exists(MT_PLUGIN_DIR . 'vendor/autoload.php')) {
             require_once MT_PLUGIN_DIR . 'vendor/autoload.php';

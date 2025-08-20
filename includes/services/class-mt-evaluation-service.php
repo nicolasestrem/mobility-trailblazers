@@ -12,9 +12,12 @@ namespace MobilityTrailblazers\Services;
 
 use MobilityTrailblazers\Interfaces\MT_Service_Interface;
 use MobilityTrailblazers\Repositories\MT_Evaluation_Repository;
-use MobilityTrailblazers\Core\MT_Logger;
+use MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface;
 use MobilityTrailblazers\Repositories\MT_Assignment_Repository;
+use MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface;
+use MobilityTrailblazers\Core\MT_Logger;
 use MobilityTrailblazers\Core\MT_Audit_Logger;
+use MobilityTrailblazers\Core\MT_Container;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -31,14 +34,14 @@ class MT_Evaluation_Service implements MT_Service_Interface {
     /**
      * Repository instance
      *
-     * @var MT_Evaluation_Repository
+     * @var MT_Evaluation_Repository_Interface
      */
     private $repository;
     
     /**
      * Assignment repository instance
      *
-     * @var MT_Assignment_Repository
+     * @var MT_Assignment_Repository_Interface
      */
     private $assignment_repository;
     
@@ -50,11 +53,52 @@ class MT_Evaluation_Service implements MT_Service_Interface {
     private $errors = [];
     
     /**
-     * Constructor
+     * Constructor with dependency injection support
+     * 
+     * Accepts repository dependencies as parameters while maintaining backward compatibility.
+     * If no dependencies are provided, falls back to getting them from the container.
+     *
+     * @param MT_Evaluation_Repository_Interface|null $evaluation_repository Optional evaluation repository
+     * @param MT_Assignment_Repository_Interface|null $assignment_repository Optional assignment repository
      */
-    public function __construct() {
-        $this->repository = new MT_Evaluation_Repository();
-        $this->assignment_repository = new MT_Assignment_Repository();
+    public function __construct(
+        MT_Evaluation_Repository_Interface $evaluation_repository = null,
+        MT_Assignment_Repository_Interface $assignment_repository = null
+    ) {
+        // Use dependency injection if repositories are provided
+        if ($evaluation_repository !== null && $assignment_repository !== null) {
+            $this->repository = $evaluation_repository;
+            $this->assignment_repository = $assignment_repository;
+            return;
+        }
+        
+        // Backward compatibility: try to get repositories from container first
+        try {
+            $container = MT_Container::get_instance();
+            
+            // Try to get from container if available
+            if ($container->has('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface')) {
+                $this->repository = $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface');
+            } else {
+                // Fallback to direct instantiation for backward compatibility
+                $this->repository = new MT_Evaluation_Repository();
+            }
+            
+            if ($container->has('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface')) {
+                $this->assignment_repository = $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+            } else {
+                // Fallback to direct instantiation for backward compatibility  
+                $this->assignment_repository = new MT_Assignment_Repository();
+            }
+        } catch (\Exception $e) {
+            // Final fallback: direct instantiation (maintains 100% backward compatibility)
+            MT_Logger::warning('Container not available, falling back to direct instantiation', [
+                'exception' => $e->getMessage()
+            ]);
+            
+            $this->repository = $evaluation_repository ?: new MT_Evaluation_Repository();
+            $this->assignment_repository = $assignment_repository ?: new MT_Assignment_Repository();
+        }
     }
     
     /**

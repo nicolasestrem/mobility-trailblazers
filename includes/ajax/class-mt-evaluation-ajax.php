@@ -13,6 +13,9 @@ namespace MobilityTrailblazers\Ajax;
 use MobilityTrailblazers\Services\MT_Evaluation_Service;
 use MobilityTrailblazers\Core\MT_Audit_Logger;
 use MobilityTrailblazers\Core\MT_Logger;
+use MobilityTrailblazers\Core\MT_Plugin;
+use MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface;
+use MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface;
 
 // Exit if accessed directly
 if (!defined('ABSPATH')) {
@@ -25,6 +28,26 @@ if (!defined('ABSPATH')) {
  * Handles AJAX requests for evaluations
  */
 class MT_Evaluation_Ajax extends MT_Base_Ajax {
+    
+    /**
+     * Get evaluation repository from container
+     *
+     * @return MT_Evaluation_Repository_Interface
+     */
+    private function get_evaluation_repository() {
+        $container = MT_Plugin::container();
+        return $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface');
+    }
+    
+    /**
+     * Get assignment repository from container
+     *
+     * @return MT_Assignment_Repository_Interface
+     */
+    private function get_assignment_repository() {
+        $container = MT_Plugin::container();
+        return $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface');
+    }
     
     /**
      * Initialize AJAX handlers
@@ -164,7 +187,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         MT_Logger::debug('Evaluation data prepared', ['data' => $data]);
         
         // Debug: Check if assignment exists
-        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $has_assignment = $assignment_repo->exists($jury_member->ID, $data['candidate_id']);
         
         MT_Logger::debug('Evaluation assignment check', [
@@ -245,7 +268,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get evaluation
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $evaluations = $evaluation_repo->find_all([
             'jury_member_id' => $jury_member->ID,
             'candidate_id' => $candidate_id,
@@ -370,7 +393,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $this->error(__('Jury member not found', 'mobility-trailblazers'));
         }
         
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 10;
         
         $rankings = $evaluation_repo->get_ranked_candidates_for_jury($jury_member->ID, $limit);
@@ -502,7 +525,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             'evaluation_count' => count($evaluation_ids)
         ]);
         
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $success_count = 0;
         $errors = [];
         
@@ -685,7 +708,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         ]);
         
         // Verify assignment
-        $assignment_repo = new \MobilityTrailblazers\Repositories\MT_Assignment_Repository();
+        $assignment_repo = $this->get_assignment_repository();
         $assignment_exists = $assignment_repo->exists($jury_member->ID, $candidate_id);
         
         MT_Logger::debug('Assignment existence check', ['assignment_exists' => $assignment_exists]);
@@ -725,7 +748,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get existing evaluation if any
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $existing_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
         
         // Prepare evaluation data
@@ -878,7 +901,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get evaluation data
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $evaluation = $evaluation_repo->find($evaluation_id);
         
         if (!$evaluation) {
@@ -978,7 +1001,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         }
         
         // Get evaluation details for audit log
-        $evaluation_repo = new \MobilityTrailblazers\Repositories\MT_Evaluation_Repository();
+        $evaluation_repo = $this->get_evaluation_repository();
         $evaluation = $evaluation_repo->find($evaluation_id);
         
         if (!$evaluation) {
