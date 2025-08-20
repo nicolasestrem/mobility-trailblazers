@@ -346,6 +346,29 @@ abstract class MT_Base_Ajax {
     }
     
     /**
+     * Ensure container is properly initialized
+     * Call this in AJAX handlers that rely on the container
+     *
+     * @return bool True if container is ready
+     */
+    protected function ensure_container() {
+        // Check if container is valid
+        if (!\MobilityTrailblazers\Core\MT_Plugin::validate_container()) {
+            // Try to force re-initialization
+            $plugin = \MobilityTrailblazers\Core\MT_Plugin::get_instance();
+            $container = $plugin->get_container();
+            
+            // Try again
+            if (!\MobilityTrailblazers\Core\MT_Plugin::validate_container()) {
+                $this->error(__('Service initialization error. Please refresh the page and try again.', 'mobility-trailblazers'));
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Initialize AJAX handler
      *
      * @return void

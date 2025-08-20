@@ -42,6 +42,13 @@ class MT_Plugin {
     private $container = null;
     
     /**
+     * Flag to track if services are registered
+     *
+     * @var bool
+     */
+    private $services_registered = false;
+    
+    /**
      * Get plugin instance
      *
      * @return MT_Plugin
@@ -64,15 +71,55 @@ class MT_Plugin {
     }
     
     /**
+     * Validate container has required services
+     * 
+     * @return bool True if container is properly configured
+     */
+    public static function validate_container() {
+        try {
+            $container = self::container();
+            
+            // Check critical service bindings
+            $critical_services = [
+                'MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface',
+                'MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface'
+            ];
+            
+            foreach ($critical_services as $service) {
+                if (!$container->has($service)) {
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log("MT Container Validation Failed: Missing {$service}");
+                    }
+                    return false;
+                }
+            }
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log("MT Container Validation Exception: " . $e->getMessage());
+            }
+            return false;
+        }
+    }
+    
+    /**
      * Get container instance
      *
      * @return MT_Container
      */
     public function get_container() {
+        // Ensure container is created
         if (null === $this->container) {
             $this->container = MT_Container::get_instance();
+        }
+        
+        // Ensure services are registered (critical for AJAX context)
+        if (!$this->services_registered) {
             $this->register_services();
         }
+        
         return $this->container;
     }
     
@@ -82,6 +129,23 @@ class MT_Plugin {
     private function __construct() {
         // Initialize container early
         $this->container = MT_Container::get_instance();
+        
+        // For AJAX requests, ensure services are registered immediately
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            add_action('wp_loaded', [$this, 'ensure_services_for_ajax'], 5);
+        }
+    }
+    
+    /**
+     * Ensure services are registered for AJAX requests
+     * This is called early in the WordPress lifecycle for AJAX requests
+     *
+     * @return void
+     */
+    public function ensure_services_for_ajax() {
+        if (!$this->services_registered) {
+            $this->register_services();
+        }
     }
     
     /**
@@ -90,29 +154,68 @@ class MT_Plugin {
      * @return void
      */
     private function register_services() {
-        // Load container and service provider if not already loaded
-        if (!class_exists('MobilityTrailblazers\Core\MT_Container')) {
-            require_once MT_PLUGIN_DIR . 'includes/core/class-mt-container.php';
+        // Prevent double registration
+        if ($this->services_registered) {
+            return;
         }
         
-        if (!class_exists('MobilityTrailblazers\Core\MT_Service_Provider')) {
-            require_once MT_PLUGIN_DIR . 'includes/core/class-mt-service-provider.php';
-        }
-        
-        // Register providers
-        $providers = [
-            'MobilityTrailblazers\Providers\MT_Repository_Provider',
-            'MobilityTrailblazers\Providers\MT_Services_Provider',
-        ];
-        
-        foreach ($providers as $provider_class) {
-            $provider_file = $this->get_provider_file($provider_class);
-            if (file_exists($provider_file)) {
-                require_once $provider_file;
-                if (class_exists($provider_class)) {
-                    $this->container->register_provider(new $provider_class($this->container));
+        try {
+            // Load container and service provider if not already loaded
+            if (!class_exists('MobilityTrailblazers\Core\MT_Container')) {
+                require_once MT_PLUGIN_DIR . 'includes/core/class-mt-container.php';
+            }
+            
+            if (!class_exists('MobilityTrailblazers\Core\MT_Service_Provider')) {
+                require_once MT_PLUGIN_DIR . 'includes/core/class-mt-service-provider.php';
+            }
+            
+            // Register providers
+            $providers = [
+                'MobilityTrailblazers\Providers\MT_Repository_Provider',
+                'MobilityTrailblazers\Providers\MT_Services_Provider',
+            ];
+            
+            foreach ($providers as $provider_class) {
+                $provider_file = $this->get_provider_file($provider_class);
+                if (file_exists($provider_file)) {
+                    require_once $provider_file;
+                    if (class_exists($provider_class)) {
+                        $this->container->register_provider(new $provider_class($this->container));
+                        
+                        // Debug logging for development
+                        if (defined('WP_DEBUG') && WP_DEBUG && function_exists('error_log')) {
+                            error_log("MT Container: Registered provider {$provider_class}");
+                        }
+                    } else {
+                        // Log missing provider class
+                        if (defined('WP_DEBUG') && WP_DEBUG && function_exists('error_log')) {
+                            error_log("MT Container: Provider class {$provider_class} not found after loading file");
+                        }
+                    }
+                } else {
+                    // Log missing provider file
+                    if (defined('WP_DEBUG') && WP_DEBUG && function_exists('error_log')) {
+                        error_log("MT Container: Provider file not found: {$provider_file}");
+                    }
                 }
             }
+            
+            // Mark services as registered
+            $this->services_registered = true;
+            
+            // Debug logging
+            if (defined('WP_DEBUG') && WP_DEBUG && function_exists('error_log')) {
+                error_log("MT Container: All services registered successfully");
+            }
+            
+        } catch (\Exception $e) {
+            // Log the error but don't break the application
+            if (function_exists('error_log')) {
+                error_log("MT Container Error: " . $e->getMessage());
+            }
+            
+            // Try to continue without dependency injection
+            $this->services_registered = false;
         }
     }
     

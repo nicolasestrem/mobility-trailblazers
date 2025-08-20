@@ -8,7 +8,7 @@
 
 namespace MobilityTrailblazers\Repositories;
 
-use MobilityTrailblazers\Interfaces\MT_Repository_Interface;
+use MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface;
 use MobilityTrailblazers\Core\MT_Logger;
 
 // Exit if accessed directly
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
  *
  * Handles database operations for evaluations
  */
-class MT_Evaluation_Repository implements MT_Repository_Interface {
+class MT_Evaluation_Repository implements MT_Evaluation_Repository_Interface {
     
     /**
      * Table name
