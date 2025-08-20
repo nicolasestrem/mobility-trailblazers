@@ -225,3 +225,4 @@ class MT_Logger {
         self::warning("Security Event: $event", $context);
     }
 }
+

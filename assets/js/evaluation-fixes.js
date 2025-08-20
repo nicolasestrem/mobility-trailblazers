@@ -3,10 +3,8 @@
  * Created: 2025-08-17
  * Purpose: Fix broken evaluation form functionality
  */
-
 jQuery(document).ready(function($) {
     'use strict';
-    
     // ========================================
     // FIX 1: RESTORE SLIDER FUNCTIONALITY
     // ========================================
@@ -16,7 +14,6 @@ jQuery(document).ready(function($) {
             var $buttonGroup = $(this);
             var criterion = $buttonGroup.data('criterion');
             var currentValue = $buttonGroup.find('input[type="hidden"]').val() || 5;
-            
             // Create slider HTML
             var sliderHTML = `
                 <div class="mt-score-slider-container">
@@ -31,36 +28,29 @@ jQuery(document).ready(function($) {
                     <div class="mt-slider-value">${currentValue}</div>
                 </div>
             `;
-            
             // Replace button group with slider
             $buttonGroup.replaceWith(sliderHTML);
         });
-        
         // Initialize slider events
         $('.mt-score-slider').on('input change', function() {
             var $slider = $(this);
             var value = $slider.val();
             var $display = $slider.siblings('.mt-slider-value');
-            
             // Update display
             $display.text(value);
-            
             // Update score display if exists
             var $card = $slider.closest('.mt-criterion-card');
             $card.find('.mt-score-value').text(value);
-            
             // Update total score
             updateTotalScore();
         });
     }
-    
     // ========================================
     // FIX 2: CALCULATE TOTAL SCORE
     // ========================================
     function updateTotalScore() {
         var total = 0;
         var count = 0;
-        
         $('.mt-score-slider').each(function() {
             var value = parseFloat($(this).val());
             if (!isNaN(value)) {
@@ -68,23 +58,18 @@ jQuery(document).ready(function($) {
                 count++;
             }
         });
-        
         var average = count > 0 ? (total / count).toFixed(1) : 0;
         $('#mt-total-score').text(average);
-        
         // Update visual indicator
         updateScoreIndicator(average);
     }
-    
     // ========================================
     // FIX 3: VISUAL SCORE INDICATOR
     // ========================================
     function updateScoreIndicator(score) {
         var $indicator = $('.mt-total-score-display');
-        
         // Remove existing classes
         $indicator.removeClass('score-low score-medium score-high');
-        
         // Add appropriate class
         if (score < 4) {
             $indicator.addClass('score-low');
@@ -94,19 +79,16 @@ jQuery(document).ready(function($) {
             $indicator.addClass('score-high');
         }
     }
-    
     // ========================================
     // FIX 4: ENSURE BIOGRAPHY IS VISIBLE
     // ========================================
     function fixBiographyDisplay() {
         var $bioContent = $('.mt-bio-content');
-        
         if ($bioContent.length && $bioContent.text().trim() === '') {
             // Try to fetch from hidden fields or data attributes
             var bioText = $bioContent.data('biography') || 
                          $('#candidate-biography').val() ||
                          $('.mt-candidate-bio-hidden').text();
-            
             if (bioText && bioText.trim() !== '') {
                 $bioContent.html('<p>' + bioText + '</p>');
             } else {
@@ -114,32 +96,26 @@ jQuery(document).ready(function($) {
             }
         }
     }
-    
     // ========================================
     // FIX 5: FORM SUBMISSION HANDLING
     // ========================================
     function fixFormSubmission() {
         $('#mt-evaluation-form').on('submit', function(e) {
             e.preventDefault();
-            
             var $form = $(this);
             var formData = new FormData(this);
-            
             // Add action
             formData.append('action', 'mt_save_evaluation');
-            
             // Ensure all scores are included
             $('.mt-score-slider').each(function() {
                 var name = $(this).attr('name');
                 var value = $(this).val();
                 formData.set(name, value);
             });
-            
             // Show loading state
             var $submitBtn = $form.find('button[type="submit"]');
             var originalText = $submitBtn.html();
             $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Submitting...');
-            
             // Submit via AJAX
             $.ajax({
                 url: mt_ajax.ajax_url,
@@ -154,7 +130,6 @@ jQuery(document).ready(function($) {
                         
                         // Update status badge
                         updateStatusBadge('completed');
-                        
                         // Redirect after delay
                         setTimeout(function() {
                             window.location.href = response.data.redirect || window.location.href.split('?')[0];
@@ -171,28 +146,23 @@ jQuery(document).ready(function($) {
             });
         });
     }
-    
     // ========================================
     // FIX 6: NOTIFICATION SYSTEM
     // ========================================
     function showNotification(type, message) {
         // Remove existing notifications
         $('.mt-notification').remove();
-        
         // Create notification
         var $notification = $('<div class="mt-notification mt-notification-' + type + '">' +
                               '<span class="dashicons dashicons-' + 
                               (type === 'success' ? 'yes' : 'warning') + '"></span> ' +
                               message + '</div>');
-        
         // Add to page
         $('body').append($notification);
-        
         // Animate in
         setTimeout(function() {
             $notification.addClass('show');
         }, 100);
-        
         // Auto remove after 5 seconds
         setTimeout(function() {
             $notification.removeClass('show');
@@ -201,30 +171,25 @@ jQuery(document).ready(function($) {
             }, 300);
         }, 5000);
     }
-    
     // ========================================
     // FIX 7: STATUS BADGE UPDATE
     // ========================================
     function updateStatusBadge(status) {
         var $badge = $('.mt-status-badge');
-        
         if ($badge.length === 0) {
             // Create badge if doesn't exist
             $badge = $('<span class="mt-status-badge"></span>');
             $('.mt-evaluation-title').append($badge);
         }
-        
         // Update badge
         $badge.removeClass('mt-status-draft mt-status-completed')
               .addClass('mt-status-' + status);
-        
         if (status === 'draft') {
             $badge.text('Draft Saved');
         } else if (status === 'completed') {
             $badge.text('Evaluation Submitted');
         }
     }
-    
     // ========================================
     // FIX 8: CHARACTER COUNT
     // ========================================
@@ -232,22 +197,18 @@ jQuery(document).ready(function($) {
         var $textarea = $('#mt-comments');
         var $counter = $('#mt-char-current');
         var maxLength = 1000;
-        
         function updateCount() {
             var length = $textarea.val().length;
             $counter.text(length);
-            
             if (length > maxLength) {
                 $counter.parent().addClass('over-limit');
             } else {
                 $counter.parent().removeClass('over-limit');
             }
         }
-        
         $textarea.on('input keyup', updateCount);
         updateCount(); // Initial count
     }
-    
     // ========================================
     // FIX 9: ADD MISSING STYLES
     // ========================================
@@ -260,7 +221,6 @@ jQuery(document).ready(function($) {
                         position: relative;
                         margin: 20px 0;
                     }
-                    
                     .mt-score-slider {
                         width: 100%;
                         height: 6px;
@@ -270,7 +230,6 @@ jQuery(document).ready(function($) {
                         border-radius: 3px;
                         outline: none;
                     }
-                    
                     .mt-score-slider::-webkit-slider-thumb {
                         -webkit-appearance: none;
                         appearance: none;
@@ -280,7 +239,6 @@ jQuery(document).ready(function($) {
                         border-radius: 50%;
                         cursor: pointer;
                     }
-                    
                     .mt-score-slider::-moz-range-thumb {
                         width: 20px;
                         height: 20px;
@@ -289,7 +247,6 @@ jQuery(document).ready(function($) {
                         cursor: pointer;
                         border: none;
                     }
-                    
                     .mt-slider-value {
                         position: absolute;
                         top: -25px;
@@ -301,7 +258,6 @@ jQuery(document).ready(function($) {
                         border-radius: 3px;
                         font-size: 12px;
                     }
-                    
                     /* Score Display */
                     .mt-total-score-display {
                         float: right;
@@ -311,22 +267,18 @@ jQuery(document).ready(function($) {
                         border-radius: 5px;
                         background: #f0f0f0;
                     }
-                    
                     .mt-total-score-display.score-low {
                         background: #ffebee;
                         color: #c62828;
                     }
-                    
                     .mt-total-score-display.score-medium {
                         background: #fff3e0;
                         color: #ef6c00;
                     }
-                    
                     .mt-total-score-display.score-high {
                         background: #e8f5e9;
                         color: #2e7d32;
                     }
-                    
                     /* Notification Styles */
                     .mt-notification {
                         position: fixed;
@@ -340,21 +292,17 @@ jQuery(document).ready(function($) {
                         transition: right 0.3s ease;
                         max-width: 300px;
                     }
-                    
                     .mt-notification.show {
                         right: 20px;
                     }
-                    
                     .mt-notification-success {
                         border-left: 4px solid #4CAF50;
                         color: #2e7d32;
                     }
-                    
                     .mt-notification-error {
                         border-left: 4px solid #f44336;
                         color: #c62828;
                     }
-                    
                     /* Character Count */
                     .mt-char-count {
                         text-align: right;
@@ -362,64 +310,52 @@ jQuery(document).ready(function($) {
                         color: #666;
                         margin-top: 5px;
                     }
-                    
                     .mt-char-count.over-limit {
                         color: #f44336;
                         font-weight: bold;
                     }
-                    
                     /* Loading Spinner */
                     .dashicons.spin {
                         animation: spin 1s linear infinite;
                     }
-                    
                     @keyframes spin {
                         from { transform: rotate(0deg); }
                         to { transform: rotate(360deg); }
                     }
-                    
                     /* Fix Bio Content */
                     .mt-bio-content:empty::before {
                         content: "Biography information not available.";
                         color: #999;
                         font-style: italic;
                     }
-                    
                     .no-content {
                         color: #999;
                         font-style: italic;
                     }
                 </style>
             `;
-            
             $('head').append(styles);
         }
     }
-    
     // ========================================
     // INITIALIZE ALL FIXES
     // ========================================
     function initializeFixes() {
         // Initializing evaluation form fixes
-        
         // Add missing styles first
         addMissingStyles();
-        
         // Initialize components
         initializeSliders();
         updateTotalScore();
         fixBiographyDisplay();
         fixFormSubmission();
         initCharacterCount();
-        
         // Evaluation form fixes applied
     }
-    
     // Run fixes when page is ready
     if ($('.mt-evaluation-form, #mt-evaluation-form').length > 0) {
         initializeFixes();
     }
-    
     // Also run on AJAX complete in case form is loaded dynamically
     $(document).ajaxComplete(function(event, xhr, settings) {
         if (settings.url && settings.url.includes('evaluate')) {

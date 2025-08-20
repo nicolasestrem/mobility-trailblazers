@@ -4,22 +4,17 @@
  * @package MobilityTrailblazers
  * @since 2.5.29
  */
-
 jQuery(document).ready(function($) {
     'use strict';
-    
     // Media Library for Header Image
     var mediaUploader;
-    
     $('#upload_header_image').on('click', function(e) {
         e.preventDefault();
-        
         // If the uploader object has already been created, reopen it
         if (mediaUploader) {
             mediaUploader.open();
             return;
         }
-        
         // Create the media frame
         mediaUploader = wp.media({
             title: 'Choose Header Background Image',
@@ -31,21 +26,16 @@ jQuery(document).ready(function($) {
                 type: 'image'
             }
         });
-        
         // When an image is selected, run a callback
         mediaUploader.on('select', function() {
             var attachment = mediaUploader.state().get('selection').first().toJSON();
-            
             // Update the input field with the image URL
             $('#header_image_url').val(attachment.url);
-            
             // Update the preview
             var preview = $('#header_image_preview');
             var previewContainer = $('.mt-image-preview');
-            
             preview.attr('src', attachment.url);
             previewContainer.show();
-            
             // Show clear button if not already visible
             var clearBtn = previewContainer.find('.mt-clear-image');
             if (clearBtn.length === 0) {
@@ -53,15 +43,12 @@ jQuery(document).ready(function($) {
             } else {
                 clearBtn.show();
             }
-            
             // Mark form as changed
             $('input[name="submit"]').prop('disabled', false);
         });
-        
         // Open the media frame
         mediaUploader.open();
     });
-    
     // Clear header image
     $(document).on('click', '.mt-clear-image', function(e) {
         e.preventDefault();
@@ -69,15 +56,12 @@ jQuery(document).ready(function($) {
         $('#header_image_preview').attr('src', '');
         $('.mt-image-preview').hide();
         $(this).hide();
-        
         // Mark form as changed
         $('input[name="submit"]').prop('disabled', false);
     });
-    
     // Animation Effects Preview
     var animationCheckbox = $('input[name="mt_candidate_presentation[enable_animations]"]');
     var hoverCheckbox = $('input[name="mt_candidate_presentation[enable_hover_effects]"]');
-    
     // Add preview button for animations
     if (animationCheckbox.length) {
         animationCheckbox.parent().append(
@@ -85,32 +69,26 @@ jQuery(document).ready(function($) {
             'Preview Animation</button>'
         );
     }
-    
     // Preview animation on button click
     $(document).on('click', '.mt-preview-animation', function(e) {
         e.preventDefault();
         var $button = $(this);
-        
         // Add animation class
         $button.addClass('mt-animate-preview');
-        
         // Remove after animation completes
         setTimeout(function() {
             $button.removeClass('mt-animate-preview');
         }, 1000);
     });
-    
     // Live preview of color changes
     $('input[name="mt_dashboard_settings[primary_color]"]').on('change', function() {
         var color = $(this).val();
         $('.mt-color-preview-primary').css('background-color', color);
     });
-    
     $('input[name="mt_dashboard_settings[secondary_color]"]').on('change', function() {
         var color = $(this).val();
         $('.mt-color-preview-secondary').css('background-color', color);
     });
-    
     // Form validation
     $('form').on('submit', function(e) {
         var weights = {
@@ -120,7 +98,6 @@ jQuery(document).ready(function($) {
             relevance: parseFloat($('input[name="weight_relevance"]').val()),
             visibility: parseFloat($('input[name="weight_visibility"]').val())
         };
-        
         // Check if weights are valid
         for (var key in weights) {
             if (isNaN(weights[key]) || weights[key] < 0 || weights[key] > 10) {
@@ -129,7 +106,6 @@ jQuery(document).ready(function($) {
                 return false;
             }
         }
-        
         // Warn about data deletion if checked
         if ($('input[name="mt_remove_data_on_uninstall"]').is(':checked')) {
             if (!confirm('WARNING: You have enabled data deletion on uninstall. This will permanently delete all plugin data when the plugin is removed. Are you sure?')) {
@@ -138,7 +114,6 @@ jQuery(document).ready(function($) {
             }
         }
     });
-    
     // Add animation preview styles
     var animationStyles = '<style>' +
         '.mt-animate-preview {' +
@@ -159,24 +134,18 @@ jQuery(document).ready(function($) {
         '    border: 1px solid #ccc;' +
         '}' +
         '</style>';
-    
     $('head').append(animationStyles);
-    
     // Animation Speed Preview
     $(document).on('click', '.mt-preview-animation-speed', function(e) {
         e.preventDefault();
         const speed = $('#animation_speed').val();
         const $preview = $('<div class="mt-animation-preview-box">Animation Preview</div>');
-        
         // Remove any existing preview
         $('.mt-animation-preview-box').remove();
-        
         // Add preview box
         $(this).after($preview);
-        
         // Apply animation with selected speed
         $preview.addClass('mt-anim-' + speed + ' mtFadeInUp');
-        
         // Remove after animation
         setTimeout(function() {
             $preview.fadeOut(function() {
@@ -184,19 +153,15 @@ jQuery(document).ready(function($) {
             });
         }, 2000);
     });
-    
     // Animation Style Preview
     $(document).on('click', '.mt-preview-animation-style', function(e) {
         e.preventDefault();
         const style = $('#animation_style').val();
         const $preview = $('<div class="mt-animation-preview-box">Animation Preview</div>');
-        
         // Remove any existing preview
         $('.mt-animation-preview-box').remove();
-        
         // Add preview box
         $(this).after($preview);
-        
         // Map style to animation class
         const animationMap = {
             'fade': 'mtFadeIn',
@@ -206,10 +171,8 @@ jQuery(document).ready(function($) {
             'flip': 'mtFlipInY',
             'bounce': 'mtZoomInBounce'
         };
-        
         // Apply animation
         $preview.addClass(animationMap[style] || 'mtFadeIn');
-        
         // Remove after animation
         setTimeout(function() {
             $preview.fadeOut(function() {
@@ -217,7 +180,6 @@ jQuery(document).ready(function($) {
             });
         }, 2000);
     });
-    
     // Add enhanced animation preview styles
     const enhancedStyles = '<style>' +
         '.mt-animation-preview-box {' +
@@ -255,6 +217,5 @@ jQuery(document).ready(function($) {
         '.mt-anim-slow { animation-duration: 0.5s !important; }' +
         '.mt-anim-slower { animation-duration: 0.8s !important; }' +
         '</style>';
-    
     $('head').append(enhancedStyles);
 });

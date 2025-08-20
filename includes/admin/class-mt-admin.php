@@ -442,8 +442,8 @@ class MT_Admin {
      * @return void
      */
     public function render_diagnostics_page() {
-        // Deprecated - redirect to debug center
-        wp_redirect(admin_url('admin.php?page=mt-debug-center'));
+        // Deprecated - redirect to debug center with diagnostics tab
+        wp_redirect(admin_url('admin.php?page=mt-debug-center&tab=diagnostics'));
         exit;
     }
     

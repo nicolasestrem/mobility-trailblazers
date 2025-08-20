@@ -32,13 +32,13 @@ MobilityTrailblazers\Core\MT_Database_Upgrade::run();
 // Check if table exists
 global $wpdb;
 $table = $wpdb->prefix . 'mt_candidates';
-$exists = $wpdb->get_var("SHOW TABLES LIKE '$table'");
+$exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table));
 
 if ($exists) {
     echo "✅ Candidates table created successfully: $table\n";
     
-    // Show structure
-    $columns = $wpdb->get_results("SHOW COLUMNS FROM $table");
+    // Show structure - safe since we control the table name
+    $columns = $wpdb->get_results("SHOW COLUMNS FROM `{$table}`");
     echo "\nTable structure:\n";
     foreach ($columns as $column) {
         echo "  - {$column->Field} ({$column->Type})\n";

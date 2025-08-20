@@ -78,7 +78,7 @@
     background: #dc3545 !important;
 }
 
-/* Debug styles to ensure visibility */
+
 body.debug-mode .mt-button-group .mt-score-button.active::after,
 body.debug-mode .mt-button-group .mt-score-button.selected::after {
     content: "✓";

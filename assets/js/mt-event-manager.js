@@ -4,10 +4,8 @@
  * 
  * @since 2.5.34
  */
-
 (function($) {
     'use strict';
-
     /**
      * Event Manager for Mobility Trailblazers
      * Handles all event bindings with proper namespacing and cleanup
@@ -15,7 +13,6 @@
     window.MTEventManager = {
         namespace: 'mt',
         events: [],
-        
         /**
          * Initialize event manager
          */
@@ -23,7 +20,6 @@
             this.setupCleanup();
             this.trackEvents();
         },
-        
         /**
          * Register an event with automatic cleanup
          * @param {string} eventType - Event type (click, change, etc)
@@ -33,13 +29,10 @@
          */
         on: function(eventType, selector, handler, context = 'global') {
             const namespacedEvent = eventType + '.' + this.namespace + '_' + context;
-            
             // Remove any existing handler for this event/selector combo
             $(document).off(namespacedEvent, selector);
-            
             // Add new handler
             $(document).on(namespacedEvent, selector, handler);
-            
             // Track for cleanup
             this.events.push({
                 event: namespacedEvent,
@@ -47,7 +40,6 @@
                 context: context
             });
         },
-        
         /**
          * Remove events by context
          * @param {string} context - Context to clean up
@@ -61,7 +53,6 @@
                 return true;
             });
         },
-        
         /**
          * Remove all MT events
          */
@@ -73,18 +64,15 @@
             $(document).off('.' + this.namespace + '_global');
             this.events = [];
         },
-        
         /**
          * Setup automatic cleanup on page unload
          */
         setupCleanup: function() {
             const self = this;
-            
             // Clean up on page unload
             $(window).on('beforeunload.' + this.namespace, function() {
                 self.offAll();
             });
-            
             // Clean up on WordPress admin page change (if applicable)
             if (typeof wp !== 'undefined' && wp.heartbeat) {
                 $(document).on('heartbeat-tick.' + this.namespace, function() {
@@ -95,21 +83,18 @@
                 });
             }
         },
-        
         /**
          * Track memory usage for debugging
          */
         trackEvents: function() {
             if (window.MT_DEBUG) {
                 setInterval(function() {
-                    console.log('MT Events registered:', MTEventManager.events.length);
                     if (performance && performance.memory) {
-                        console.log('Memory used:', Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB');
+                         + 'MB');
                     }
                 }, 30000); // Log every 30 seconds
             }
         },
-        
         /**
          * Check if page has changed (for SPA-like behavior)
          */
@@ -122,7 +107,6 @@
             this.lastUrl = currentUrl;
             return false;
         },
-        
         /**
          * Delegate handler with automatic cleanup
          * @param {jQuery} $container - Container element
@@ -135,7 +119,6 @@
             $container.off(eventType + '.' + namespace, selector);
             $container.on(eventType + '.' + namespace, selector, handler);
         },
-        
         /**
          * One-time event with automatic cleanup
          * @param {string} eventType - Event type
@@ -145,7 +128,6 @@
         once: function(eventType, selector, handler) {
             const self = this;
             const namespacedEvent = eventType + '.' + this.namespace + '_once';
-            
             $(document).one(namespacedEvent, selector, function(e) {
                 handler.call(this, e);
                 // Remove from tracking after execution
@@ -153,14 +135,12 @@
                     return item.event !== namespacedEvent;
                 });
             });
-            
             this.events.push({
                 event: namespacedEvent,
                 selector: selector,
                 context: 'once'
             });
         },
-        
         /**
          * Throttled event handler
          * @param {string} eventType - Event type
@@ -179,7 +159,6 @@
                 }
             });
         },
-        
         /**
          * Debounced event handler
          * @param {string} eventType - Event type
@@ -199,10 +178,8 @@
             });
         }
     };
-    
     // Initialize on document ready
     $(document).ready(function() {
         MTEventManager.init();
     });
-    
 })(jQuery);

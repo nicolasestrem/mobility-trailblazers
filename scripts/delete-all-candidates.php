@@ -98,19 +98,22 @@ echo "\n=== Checking Related Data ===\n";
 
 // Check evaluations
 global $wpdb;
-$evaluation_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_evaluations WHERE candidate_id IN (" . implode(',', array_map('intval', $candidates)) . ")");
+// Create safe placeholders for candidate IDs
+$placeholders = implode(',', array_fill(0, count($candidates), '%d'));
+
+$evaluation_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}mt_evaluations WHERE candidate_id IN ($placeholders)", $candidates));
 echo "Related evaluations: $evaluation_count\n";
 
 // Check assignments
-$assignment_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_jury_assignments WHERE candidate_id IN (" . implode(',', array_map('intval', $candidates)) . ")");
+$assignment_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}mt_jury_assignments WHERE candidate_id IN ($placeholders)", $candidates));
 echo "Related assignments: $assignment_count\n";
 
 // Check scores
-$score_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores WHERE candidate_id IN (" . implode(',', array_map('intval', $candidates)) . ")");
+$score_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}mt_candidate_scores WHERE candidate_id IN ($placeholders)", $candidates));
 echo "Related scores: $score_count\n";
 
 // Check votes
-$vote_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE candidate_id IN (" . implode(',', array_map('intval', $candidates)) . ")");
+$vote_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}mt_votes WHERE candidate_id IN ($placeholders)", $candidates));
 echo "Related votes: $vote_count\n";
 
 // Step 6: Delete candidates

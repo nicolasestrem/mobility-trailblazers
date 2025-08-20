@@ -419,3 +419,4 @@ class MT_I18n {
         return $this->supported_languages;
     }
 }
+

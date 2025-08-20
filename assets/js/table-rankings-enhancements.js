@@ -5,15 +5,12 @@
  * This file contains enhancements for the table-based rankings system
  * to improve UX and add missing features.
  */
-
 (function($) {
     'use strict';
-
     $(document).ready(function() {
         // Only run if the evaluation table exists
         var $table = $('.mt-evaluation-table');
         if (!$table.length) return;
-
         // Configuration
         const CONFIG = {
             autoSaveDelay: 2000, // Auto-save after 2 seconds of inactivity
@@ -21,11 +18,9 @@
             maxScore: 10,
             scoreStep: 0.5
         };
-
         // Track unsaved changes per row
         const unsavedRows = new Map();
         let autoSaveTimers = new Map();
-
         /**
          * Enhanced score validation with step support
          */
@@ -35,7 +30,6 @@
             // Clamp to min/max
             return Math.max(CONFIG.minScore, Math.min(CONFIG.maxScore, value));
         }
-
         /**
          * Add keyboard navigation support
          */
@@ -45,7 +39,6 @@
                 const $td = $input.parent();
                 const $tr = $td.parent();
                 let $target;
-
                 switch(e.key) {
                     case 'ArrowUp':
                         e.preventDefault();
@@ -53,14 +46,12 @@
                         $target = $tr.prev().find('td').eq($td.index()).find('.mt-eval-score-input');
                         if ($target.length) $target.focus().select();
                         break;
-                    
                     case 'ArrowDown':
                         e.preventDefault();
                         // Move to same column in next row
                         $target = $tr.next().find('td').eq($td.index()).find('.mt-eval-score-input');
                         if ($target.length) $target.focus().select();
                         break;
-                    
                     case 'ArrowLeft':
                     case 'Tab':
                         if (e.shiftKey || e.key === 'ArrowLeft') {
@@ -70,27 +61,23 @@
                             if ($target.length) $target.focus().select();
                         }
                         break;
-                    
                     case 'ArrowRight':
                         e.preventDefault();
                         // Move to next score input
                         $target = $td.next().find('.mt-eval-score-input');
                         if ($target.length) $target.focus().select();
                         break;
-                    
                     case 'Enter':
                         e.preventDefault();
                         // Save the current row
                         $tr.find('.mt-btn-save-eval').click();
                         break;
-                    
                     case 'Escape':
                         // Revert changes
                         revertRowChanges($tr);
                         $input.blur();
                         break;
                 }
-
                 // Quick score adjustment with +/- keys
                 if (e.key === '+' || e.key === '=') {
                     e.preventDefault();
@@ -103,7 +90,6 @@
                 }
             });
         }
-
         /**
          * Store original values when focusing an input
          */
@@ -117,7 +103,6 @@
                 unsavedRows.set($row[0], originalValues);
             }
         }
-
         /**
          * Revert row changes to original values
          */
@@ -133,7 +118,6 @@
                 unsavedRows.delete($row[0]);
             }
         }
-
         /**
          * Auto-save functionality
          */
@@ -142,12 +126,10 @@
                 const $input = $(this);
                 const $row = $input.closest('tr');
                 const rowId = $row.data('candidate-id');
-
                 // Clear existing timer for this row
                 if (autoSaveTimers.has(rowId)) {
                     clearTimeout(autoSaveTimers.get(rowId));
                 }
-
                 // Set new timer
                 const timerId = setTimeout(() => {
                     if ($row.hasClass('unsaved')) {
@@ -155,18 +137,15 @@
                     }
                     autoSaveTimers.delete(rowId);
                 }, CONFIG.autoSaveDelay);
-
                 autoSaveTimers.set(rowId, timerId);
             });
         }
-
         /**
          * Visual feedback for score changes
          */
         function animateScoreChange($input, oldValue, newValue) {
             const diff = newValue - oldValue;
             const $indicator = $('<span class="mt-score-change-indicator"></span>');
-            
             if (diff > 0) {
                 $indicator.text('+' + diff.toFixed(1)).addClass('positive');
             } else if (diff < 0) {
@@ -174,7 +153,6 @@
             } else {
                 return; // No change
             }
-
             // Position and animate
             const offset = $input.offset();
             $indicator.css({
@@ -183,7 +161,6 @@
                 top: offset.top - 10,
                 zIndex: 1000
             }).appendTo('body');
-
             // Animate up and fade
             $indicator.animate({
                 top: offset.top - 30,
@@ -192,7 +169,6 @@
                 $(this).remove();
             });
         }
-
         /**
          * Add hover tooltips for criteria headers
          */
@@ -200,13 +176,11 @@
             $table.find('th[title]').each(function() {
                 const $th = $(this);
                 const title = $th.attr('title');
-                
                 $th.hover(
                     function() {
                         const $tooltip = $('<div class="mt-enhanced-tooltip"></div>')
                             .text(title)
                             .appendTo('body');
-                        
                         const offset = $th.offset();
                         $tooltip.css({
                             top: offset.top - $tooltip.outerHeight() - 10,
@@ -221,7 +195,6 @@
                 );
             });
         }
-
         /**
          * Batch save functionality
          */
@@ -231,9 +204,7 @@
                 '<span class="dashicons dashicons-saved"></span> ' +
                 (mt_ajax.i18n.save_all_changes || 'Save All Changes') +
                 '</button>');
-            
             $table.before($batchSaveBtn);
-
             // Show/hide based on unsaved changes
             $table.on('input', '.mt-eval-score-input', function() {
                 if ($table.find('.mt-eval-row.unsaved').length > 0) {
@@ -242,22 +213,18 @@
                     $batchSaveBtn.hide();
                 }
             });
-
             // Handle batch save
             $batchSaveBtn.on('click', function() {
                 const $unsavedRows = $table.find('.mt-eval-row.unsaved');
                 let savedCount = 0;
                 const totalRows = $unsavedRows.length;
-
                 $batchSaveBtn.prop('disabled', true).html(
                     '<span class="mt-eval-spinner"></span> ' +
                     (mt_ajax.i18n.saving_progress || 'Saving...') + ' (0/' + totalRows + ')'
                 );
-
                 $unsavedRows.each(function() {
                     const $row = $(this);
                     $row.find('.mt-btn-save-eval').click();
-                    
                     // Update progress
                     setTimeout(() => {
                         savedCount++;
@@ -266,7 +233,6 @@
                             (mt_ajax.i18n.saving_progress || 'Saving...') + 
                             ' (' + savedCount + '/' + totalRows + ')'
                         );
-
                         if (savedCount === totalRows) {
                             $batchSaveBtn.prop('disabled', false).hide().html(
                                 '<span class="dashicons dashicons-saved"></span> ' +
@@ -277,7 +243,6 @@
                 });
             });
         }
-
         /**
          * Export functionality
          */
@@ -286,28 +251,23 @@
                 '<span class="dashicons dashicons-download"></span> ' +
                 (mt_ajax.i18n.export_rankings || 'Export Rankings') +
                 '</button>');
-            
             $('.mt-rankings-header').append($exportBtn);
-
             $exportBtn.on('click', function() {
                 const csv = generateCSV();
                 downloadCSV(csv, 'jury-rankings-' + new Date().toISOString().split('T')[0] + '.csv');
             });
         }
-
         /**
          * Generate CSV from table data
          */
         function generateCSV() {
             const rows = [];
-            
             // Header
             const headers = [];
             $table.find('thead th').each(function() {
                 headers.push($(this).text().trim());
             });
             rows.push(headers.join(','));
-
             // Data
             $table.find('tbody tr').each(function() {
                 const row = [];
@@ -327,10 +287,8 @@
                 });
                 rows.push(row.join(','));
             });
-
             return rows.join('\n');
         }
-
         /**
          * Download CSV file
          */
@@ -338,23 +296,19 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
             link.style.visibility = 'hidden';
-            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
-
         /**
          * Update row total with animation
          */
         function updateRowTotal($row) {
             let total = 0;
             let count = 0;
-            
             $row.find('.mt-eval-score-input').each(function() {
                 const val = parseFloat($(this).val());
                 if (!isNaN(val)) {
@@ -362,18 +316,15 @@
                     count++;
                 }
             });
-            
             const avg = count > 0 ? (total / count) : 0;
             const $totalValue = $row.find('.mt-eval-total-value');
             const oldValue = parseFloat($totalValue.text());
-            
             // Animate if value changed
             if (oldValue !== avg) {
                 $totalValue.fadeOut(100, function() {
                     $(this).text(avg.toFixed(1)).fadeIn(100);
                 });
             }
-
             // Update color coding
             const $totalCell = $row.find('.mt-eval-total-score');
             $totalCell.removeClass('score-high score-low score-medium');
@@ -385,7 +336,6 @@
                 $totalCell.addClass('score-low');
             }
         }
-
         /**
          * Initialize all enhancements
          */
@@ -395,29 +345,24 @@
             initTooltips();
             initBatchSave();
             initExportFeature();
-
             // Track original values on focus
             $table.on('focus', '.mt-eval-score-input', function() {
                 storeOriginalValues($(this).closest('tr'));
             });
-
             // Enhanced score change animation
             $table.on('change', '.mt-eval-score-input', function() {
                 const $input = $(this);
                 const newValue = parseFloat($input.val());
                 const oldValue = parseFloat($input.data('oldValue') || $input.val());
-                
                 if (oldValue !== newValue) {
                     animateScoreChange($input, oldValue, newValue);
                     $input.data('oldValue', newValue);
                 }
             });
-
             // MT Table Rankings Enhancements loaded
         }
-
         // Initialize
         init();
     });
-
 })(jQuery);
+

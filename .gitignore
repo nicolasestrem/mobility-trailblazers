@@ -74,6 +74,27 @@ scripts/*credentials*
 scripts/*production*.sh
 scripts/fix-*.sh
 
+# Sample and test data
+sample-*.csv
+test-*.csv
+/data/templates/
+
+# Backup and deprecated files
+*.backup
+*.bak
+backup-*/
+archived/
+deprecated/
+*-deprecated.*
+
+# Scripts
+*.ps1
+*.bat
+cleanup-*.sh
+
+# Photos (keep in repo but ignore changes)
+/Photos_candidates/
+
 # Keep the main plugin files
 !mobility-trailblazers.php
 !includes/
