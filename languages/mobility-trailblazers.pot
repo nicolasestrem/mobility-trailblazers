@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mobility Trailblazers 2.3.3\n"
+"Project-Id-Version: Mobility Trailblazers 2.5.37\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mobility-trailblazers\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"

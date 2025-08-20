@@ -217,7 +217,7 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Version**: 2.5.36 (January 18, 2025)
+**Current Version**: 2.5.37 (August 20, 2025)
 **Status**: Production Ready ✅
 
 ### Recent Updates
@@ -237,4 +237,4 @@ Located in `../../Documentation/`:
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: January 18, 2025 | Version 2.5.36*
+*Last updated: August 20, 2025 | Version 2.5.37*

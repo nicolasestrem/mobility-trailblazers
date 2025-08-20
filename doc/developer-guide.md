@@ -1,6 +1,6 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.5.31 | Last Updated: August 18, 2025*
+*Version 2.5.37 | Last Updated: August 20, 2025*
 
 ## Table of Contents
 

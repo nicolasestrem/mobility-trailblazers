@@ -1,6 +1,6 @@
 # Evaluation Criteria Display Fix
 **Date:** 2025-08-20  
-**Version:** 2.5.35  
+**Version:** 2.5.37  
 **Issue:** Missing candidate evaluation criteria on jury evaluation pages
 
 ## Problem Statement
