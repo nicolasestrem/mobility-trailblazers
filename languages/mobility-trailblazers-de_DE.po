@@ -72,6 +72,21 @@ msgstr "Es konnten keine Bewertungen verarbeitet werden."
 msgid "Unknown action: %s"
 msgstr "Unbekannte Aktion: %s"
 
+msgid "EVALUATION COMPLETE"
+msgstr "BEWERTUNG ABGESCHLOSSEN"
+
+msgid "All assignments finished!"
+msgstr "Alle Aufgaben erledigt!"
+
+msgid "Congratulations!"
+msgstr "Herzlichen Glückwunsch!"
+
+msgid "You have completed all evaluations!"
+msgstr "Sie haben alle Bewertungen abgeschlossen!"
+
+msgid "Mission accomplished"
+msgstr "Mission erfüllt"
+
 msgid "Congratulations! You have completed all evaluations!"
 msgstr "Herzlichen Glückwunsch! Sie haben alle Bewertungen abgeschlossen!"
 
