@@ -101,6 +101,11 @@ add_action('plugins_loaded', function() {
     
     // Initialize migration runner
     MobilityTrailblazers\Core\MT_Migration_Runner::init();
+    
+    // TEMPORARY: URL Migration Tool (remove after successful migration)
+    if (is_admin()) {
+        require_once MT_PLUGIN_DIR . 'includes/admin/class-mt-url-migration.php';
+    }
 }, 5); // Run early with priority 5
 
 // Activation hook
