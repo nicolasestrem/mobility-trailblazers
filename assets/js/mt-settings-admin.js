@@ -17,9 +17,9 @@ jQuery(document).ready(function($) {
         }
         // Create the media frame
         mediaUploader = wp.media({
-            title: 'Choose Header Background Image',
+            title: mt_settings_i18n && mt_settings_i18n.media ? mt_settings_i18n.media.title : 'Choose Header Background Image',
             button: {
-                text: 'Use this image'
+                text: mt_settings_i18n && mt_settings_i18n.media ? mt_settings_i18n.media.button : 'Use this image'
             },
             multiple: false,
             library: {
@@ -39,7 +39,8 @@ jQuery(document).ready(function($) {
             // Show clear button if not already visible
             var clearBtn = previewContainer.find('.mt-clear-image');
             if (clearBtn.length === 0) {
-                previewContainer.append(' <button type="button" class="button mt-clear-image" style="margin-top: 10px;">Remove Image</button>');
+                var removeText = mt_settings_i18n && mt_settings_i18n.media ? mt_settings_i18n.media.remove : 'Remove Image';
+                previewContainer.append(' <button type="button" class="button mt-clear-image" style="margin-top: 10px;">' + removeText + '</button>');
             } else {
                 clearBtn.show();
             }
@@ -64,9 +65,10 @@ jQuery(document).ready(function($) {
     var hoverCheckbox = $('input[name="mt_candidate_presentation[enable_hover_effects]"]');
     // Add preview button for animations
     if (animationCheckbox.length) {
+        var previewText = mt_settings_i18n && mt_settings_i18n.media ? mt_settings_i18n.media.preview : 'Preview Animation';
         animationCheckbox.parent().append(
             ' <button type="button" class="button button-small mt-preview-animation">' +
-            'Preview Animation</button>'
+            previewText + '</button>'
         );
     }
     // Preview animation on button click
@@ -101,14 +103,16 @@ jQuery(document).ready(function($) {
         // Check if weights are valid
         for (var key in weights) {
             if (isNaN(weights[key]) || weights[key] < 0 || weights[key] > 10) {
-                alert('Please enter valid weights between 0 and 10');
+                var weightsMsg = mt_settings_i18n && mt_settings_i18n.validation ? mt_settings_i18n.validation.weights : 'Please enter valid weights between 0 and 10';
+                alert(weightsMsg);
                 e.preventDefault();
                 return false;
             }
         }
         // Warn about data deletion if checked
         if ($('input[name="mt_remove_data_on_uninstall"]').is(':checked')) {
-            if (!confirm('WARNING: You have enabled data deletion on uninstall. This will permanently delete all plugin data when the plugin is removed. Are you sure?')) {
+            var warningMsg = mt_settings_i18n && mt_settings_i18n.validation ? mt_settings_i18n.validation.data_deletion_warning : 'WARNING: You have enabled data deletion on uninstall. This will permanently delete all plugin data when the plugin is removed. Are you sure?';
+            if (!confirm(warningMsg)) {
                 e.preventDefault();
                 return false;
             }

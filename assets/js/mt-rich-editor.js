@@ -15,23 +15,29 @@
             maxHistorySize: 50,
             autosaveInterval: 30000, // 30 seconds
             supportedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a', 'blockquote'],
-            toolbarButtons: [
-                { command: 'bold', icon: 'dashicons-editor-bold', title: 'Bold (Ctrl+B)', shortcut: 'Ctrl+B' },
-                { command: 'italic', icon: 'dashicons-editor-italic', title: 'Italic (Ctrl+I)', shortcut: 'Ctrl+I' },
-                { command: 'underline', icon: 'dashicons-editor-underline', title: 'Underline (Ctrl+U)', shortcut: 'Ctrl+U' },
+            toolbarButtons: []
+        },
+        // Get localized toolbar buttons
+        getToolbarButtons: function() {
+            var i18n = window.mt_editor_i18n || {};
+            var toolbar = i18n.toolbar || {};
+            return [
+                { command: 'bold', icon: 'dashicons-editor-bold', title: toolbar.bold || 'Bold (Ctrl+B)', shortcut: 'Ctrl+B' },
+                { command: 'italic', icon: 'dashicons-editor-italic', title: toolbar.italic || 'Italic (Ctrl+I)', shortcut: 'Ctrl+I' },
+                { command: 'underline', icon: 'dashicons-editor-underline', title: toolbar.underline || 'Underline (Ctrl+U)', shortcut: 'Ctrl+U' },
                 { type: 'separator' },
-                { command: 'heading', icon: 'dashicons-heading', title: 'Heading', type: 'dropdown' },
+                { command: 'heading', icon: 'dashicons-heading', title: toolbar.headings || 'Headings', type: 'dropdown' },
                 { type: 'separator' },
-                { command: 'insertUnorderedList', icon: 'dashicons-editor-ul', title: 'Bullet List' },
-                { command: 'insertOrderedList', icon: 'dashicons-editor-ol', title: 'Numbered List' },
+                { command: 'insertUnorderedList', icon: 'dashicons-editor-ul', title: toolbar.unordered_list || 'Bullet List' },
+                { command: 'insertOrderedList', icon: 'dashicons-editor-ol', title: toolbar.ordered_list || 'Numbered List' },
                 { type: 'separator' },
-                { command: 'createLink', icon: 'dashicons-admin-links', title: 'Insert Link (Ctrl+K)', shortcut: 'Ctrl+K' },
-                { command: 'unlink', icon: 'dashicons-editor-unlink', title: 'Remove Link' },
+                { command: 'createLink', icon: 'dashicons-admin-links', title: toolbar.insert_link || 'Insert Link (Ctrl+K)', shortcut: 'Ctrl+K' },
+                { command: 'unlink', icon: 'dashicons-editor-unlink', title: toolbar.remove_link || 'Remove Link' },
                 { type: 'separator' },
-                { command: 'removeFormat', icon: 'dashicons-editor-removeformatting', title: 'Clear Formatting' },
+                { command: 'removeFormat', icon: 'dashicons-editor-removeformatting', title: toolbar.remove_format || 'Clear Formatting' },
                 { type: 'separator' },
-                { command: 'undo', icon: 'dashicons-undo', title: 'Undo (Ctrl+Z)', shortcut: 'Ctrl+Z' },
-                { command: 'redo', icon: 'dashicons-redo', title: 'Redo (Ctrl+Y)', shortcut: 'Ctrl+Y' }
+                { command: 'undo', icon: 'dashicons-undo', title: toolbar.undo || 'Undo (Ctrl+Z)', shortcut: 'Ctrl+Z' },
+                { command: 'redo', icon: 'dashicons-redo', title: toolbar.redo || 'Redo (Ctrl+Y)', shortcut: 'Ctrl+Y' }
             ]
         },
         // Editor instances
@@ -111,7 +117,9 @@
             const toolbar = document.createElement('div');
             toolbar.className = 'mt-rich-editor-toolbar';
             toolbar.setAttribute('role', 'toolbar');
-            this.config.toolbarButtons.forEach(button => {
+            // Get localized buttons
+            const toolbarButtons = this.getToolbarButtons();
+            toolbarButtons.forEach(button => {
                 if (button.type === 'separator') {
                     const separator = document.createElement('span');
                     separator.className = 'mt-toolbar-separator';
@@ -153,11 +161,13 @@
             button.appendChild(icon);
             const dropdown = document.createElement('div');
             dropdown.className = 'mt-dropdown-menu';
+            var i18n = window.mt_editor_i18n || {};
+            var dropdown_text = i18n.dropdown || {};
             dropdown.innerHTML = `
-                <button type="button" data-heading="p">Normal Text</button>
-                <button type="button" data-heading="h1">Heading 1</button>
-                <button type="button" data-heading="h2">Heading 2</button>
-                <button type="button" data-heading="h3">Heading 3</button>
+                <button type="button" data-heading="p">${dropdown_text.normal_text || 'Normal Text'}</button>
+                <button type="button" data-heading="h1">${dropdown_text.heading_1 || 'Heading 1'}</button>
+                <button type="button" data-heading="h2">${dropdown_text.heading_2 || 'Heading 2'}</button>
+                <button type="button" data-heading="h3">${dropdown_text.heading_3 || 'Heading 3'}</button>
             `;
             wrapper.appendChild(button);
             wrapper.appendChild(dropdown);
@@ -260,7 +270,9 @@
         },
         // Insert link
         insertLink: function(containerId) {
-            const url = prompt('Enter URL:', 'https://');
+            var i18n = window.mt_editor_i18n || {};
+            var prompts = i18n.prompts || {};
+            const url = prompt(prompts.enter_url || 'Enter URL:', 'https://');
             if (url && url !== 'https://') {
                 document.execCommand('createLink', false, url);
                 // Add target="_blank" to new links

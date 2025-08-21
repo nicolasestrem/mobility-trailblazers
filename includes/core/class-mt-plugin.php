@@ -283,6 +283,11 @@ class MT_Plugin {
         $roles = new MT_Roles();
         add_action('init', [$roles, 'add_capabilities']);
         
+        // Initialize i18n handler for JavaScript localization
+        if (class_exists('MobilityTrailblazers\Core\MT_I18n_Handler')) {
+            MT_I18n_Handler::get_instance();
+        }
+        
         // Initialize admin
         if (is_admin()) {
             $admin = new \MobilityTrailblazers\Admin\MT_Admin();
