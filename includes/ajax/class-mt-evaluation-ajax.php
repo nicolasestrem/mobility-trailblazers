@@ -874,6 +874,14 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         // Get updated evaluation data
         $updated_evaluation = $evaluation_repo->find_by_jury_and_candidate($jury_member->ID, $candidate_id);
         
+        // Clear transient cache for rankings to ensure fresh data
+        // Clear all possible cache variations for this jury member
+        for ($page = 1; $page <= 50; $page++) {
+            delete_transient('mt_jury_rankings_' . $jury_member->ID . '_' . $page);
+        }
+        // Also clear the general rankings cache
+        delete_transient('mt_ranked_candidates_' . $jury_member->ID);
+        
         $response_data = [
             'message' => __('Evaluation saved successfully', 'mobility-trailblazers'),
             'evaluation_id' => $result,

@@ -207,29 +207,29 @@
                     count++;
                 }
             });
-            const totalScore = total; // Use total, not average for ranking
+            // Calculate AVERAGE for display and ranking (consistent with database)
+            const avgScore = count > 0 ? (total / count) : 0;
             const $totalValue = $row.find('.mt-eval-total-value');
             const oldValue = parseFloat($totalValue.text());
             // Animate if value changed
-            if (oldValue !== totalScore) {
+            if (oldValue !== avgScore) {
                 $totalValue.fadeOut(100, function() {
-                    $(this).text(totalScore.toFixed(1)).fadeIn(100);
+                    $(this).text(avgScore.toFixed(1)).fadeIn(100);
                 });
             }
             // Update color coding based on average
-            const avg = count > 0 ? (total / count) : 0;
             const $totalCell = $row.find('.mt-eval-total-score');
             $totalCell.removeClass('score-high score-low score-medium');
-            if (avg >= 8) {
+            if (avgScore >= 8) {
                 $totalCell.addClass('score-high');
-            } else if (avg >= 5) {
+            } else if (avgScore >= 5) {
                 $totalCell.addClass('score-medium');
-            } else if (avg <= 3) {
+            } else if (avgScore <= 3) {
                 $totalCell.addClass('score-low');
             }
             
-            // Store the total score in data attribute for sorting
-            $row.data('total-score', totalScore);
+            // Store the average score in data attribute for sorting
+            $row.data('total-score', avgScore);
         }
         
         /**

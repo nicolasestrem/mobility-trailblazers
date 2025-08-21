@@ -1253,9 +1253,16 @@
                             $btn.html('<span class="dashicons dashicons-saved"></span> ' + getI18nText('save', 'Save'));
                             $row.removeClass('saved');
                         }, 1200);
-                        // Update total score if returned
+                        // Update total score if returned (this is the AVERAGE from database)
                         if (response.data && response.data.total_score !== undefined) {
-                            $row.find('.mt-eval-total-value').text(parseFloat(response.data.total_score).toFixed(1));
+                            var totalScore = parseFloat(response.data.total_score);
+                            $row.find('.mt-eval-total-value').text(totalScore.toFixed(1));
+                            // Update data attribute for sorting
+                            $row.data('total-score', totalScore);
+                            // Trigger re-ranking if available
+                            if (typeof rerankTable === 'function') {
+                                setTimeout(rerankTable, 300);
+                            }
                         }
                     } else {
                         // Log detailed error information

@@ -123,6 +123,7 @@ if (!empty($jury_members)) {
                     </td>
                     <?php 
                     $row_total = 0;
+                    $score_count = 0;
                     foreach ($criteria as $key => $criterion) : 
                         $score_field = $criterion['key'];
                         // Ensure we always show 0 when the score is 0, not blank
@@ -132,6 +133,7 @@ if (!empty($jury_members)) {
                             $current_score = 0;
                         }
                         $row_total += $current_score;
+                        if ($current_score > 0) $score_count++;
                         $score_class = $current_score >= 8 ? 'score-high' : ($current_score <= 3 ? 'score-low' : '');
                     ?>
                         <td>
@@ -142,9 +144,12 @@ if (!empty($jury_members)) {
                                 data-criterion="<?php echo esc_attr($criterion['key']); ?>"
                                 data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
                         </td>
-                    <?php endforeach; ?>
+                    <?php endforeach; 
+                    // Calculate average for display (consistent with database storage)
+                    $avg_score = count($criteria) > 0 ? ($row_total / count($criteria)) : 0;
+                    ?>
                     <td class="mt-eval-total-score">
-                        <span class="mt-eval-total-value"><?php echo number_format($row_total, 1); ?></span>
+                        <span class="mt-eval-total-value"><?php echo number_format($avg_score, 1); ?></span>
                     </td>
                     <td class="mt-eval-actions">
                         <button class="mt-btn-save-eval" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
