@@ -1335,3 +1335,19 @@ msgstr "AJAX-Erfolg:"
 
 msgid "AJAX Error:"
 msgstr "AJAX-Fehler:"
+
+# Evaluation Criteria Descriptions
+msgid "Demonstrates bold vision and willingness to take risks in advancing mobility transformation"
+msgstr "Zeigt mutige Vision und Risikobereitschaft bei der Vorantreibung der Mobilitätstransformation"
+
+msgid "Shows creative problem-solving and introduces novel approaches to mobility challenges"
+msgstr "Zeigt kreative Problemlösung und führt neuartige Ansätze für Mobilitätsherausforderungen ein"
+
+msgid "Successfully executes ideas with measurable impact on sustainable mobility"
+msgstr "Setzt Ideen erfolgreich mit messbarer Wirkung auf nachhaltige Mobilität um"
+
+msgid "Addresses critical aspects of transportation transformation and future mobility needs"
+msgstr "Behandelt kritische Aspekte der Verkehrswende und zukünftige Mobilitätsbedürfnisse"
+
+msgid "Serves as an inspiring example and actively promotes sustainable mobility solutions"
+msgstr "Dient als inspirierendes Beispiel und fördert aktiv nachhaltige Mobilitätslösungen"
