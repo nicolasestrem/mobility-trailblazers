@@ -122,23 +122,8 @@
          * Auto-save functionality
          */
         function initAutoSave() {
-            $table.on('input', '.mt-eval-score-input', function() {
-                const $input = $(this);
-                const $row = $input.closest('tr');
-                const rowId = $row.data('candidate-id');
-                // Clear existing timer for this row
-                if (autoSaveTimers.has(rowId)) {
-                    clearTimeout(autoSaveTimers.get(rowId));
-                }
-                // Set new timer
-                const timerId = setTimeout(() => {
-                    if ($row.hasClass('unsaved')) {
-                        $row.find('.mt-btn-save-eval').click();
-                    }
-                    autoSaveTimers.delete(rowId);
-                }, CONFIG.autoSaveDelay);
-                autoSaveTimers.set(rowId, timerId);
-            });
+            // Auto-save is now handled in the main input event handler
+            // This function is kept for potential future enhancements
         }
         /**
          * Visual feedback for score changes
@@ -199,110 +184,16 @@
          * Batch save functionality
          */
         function initBatchSave() {
-            // Add batch save button
-            const $batchSaveBtn = $('<button class="mt-btn-batch-save" style="display:none;">' +
-                '<span class="dashicons dashicons-saved"></span> ' +
-                (mt_ajax.i18n.save_all_changes || 'Save All Changes') +
-                '</button>');
-            $table.before($batchSaveBtn);
-            // Show/hide based on unsaved changes
-            $table.on('input', '.mt-eval-score-input', function() {
-                if ($table.find('.mt-eval-row.unsaved').length > 0) {
-                    $batchSaveBtn.show();
-                } else {
-                    $batchSaveBtn.hide();
-                }
-            });
-            // Handle batch save
-            $batchSaveBtn.on('click', function() {
-                const $unsavedRows = $table.find('.mt-eval-row.unsaved');
-                let savedCount = 0;
-                const totalRows = $unsavedRows.length;
-                $batchSaveBtn.prop('disabled', true).html(
-                    '<span class="mt-eval-spinner"></span> ' +
-                    (mt_ajax.i18n.saving_progress || 'Saving...') + ' (0/' + totalRows + ')'
-                );
-                $unsavedRows.each(function() {
-                    const $row = $(this);
-                    $row.find('.mt-btn-save-eval').click();
-                    // Update progress
-                    setTimeout(() => {
-                        savedCount++;
-                        $batchSaveBtn.html(
-                            '<span class="mt-eval-spinner"></span> ' +
-                            (mt_ajax.i18n.saving_progress || 'Saving...') + 
-                            ' (' + savedCount + '/' + totalRows + ')'
-                        );
-                        if (savedCount === totalRows) {
-                            $batchSaveBtn.prop('disabled', false).hide().html(
-                                '<span class="dashicons dashicons-saved"></span> ' +
-                                (mt_ajax.i18n.save_all_changes || 'Save All Changes')
-                            );
-                        }
-                    }, 200 * savedCount);
-                });
-            });
+            // Removed batch save button - not needed
         }
         /**
          * Export functionality
          */
         function initExportFeature() {
-            const $exportBtn = $('<button class="mt-btn-export-rankings">' +
-                '<span class="dashicons dashicons-download"></span> ' +
-                (mt_ajax.i18n.export_rankings || 'Export Rankings') +
-                '</button>');
-            $('.mt-rankings-header').append($exportBtn);
-            $exportBtn.on('click', function() {
-                const csv = generateCSV();
-                downloadCSV(csv, 'jury-rankings-' + new Date().toISOString().split('T')[0] + '.csv');
-            });
+            // Removed export button - not needed
         }
-        /**
-         * Generate CSV from table data
-         */
-        function generateCSV() {
-            const rows = [];
-            // Header
-            const headers = [];
-            $table.find('thead th').each(function() {
-                headers.push($(this).text().trim());
-            });
-            rows.push(headers.join(','));
-            // Data
-            $table.find('tbody tr').each(function() {
-                const row = [];
-                $(this).find('td').each(function(index) {
-                    const $td = $(this);
-                    if ($td.find('.mt-eval-score-input').length) {
-                        row.push($td.find('.mt-eval-score-input').val());
-                    } else if ($td.find('.mt-candidate-name').length) {
-                        row.push('"' + $td.find('.mt-candidate-name').text().trim() + '"');
-                    } else if ($td.find('.mt-eval-total-value').length) {
-                        row.push($td.find('.mt-eval-total-value').text().trim());
-                    } else if ($td.find('.position-number').length) {
-                        row.push($td.find('.position-number').text().trim());
-                    } else {
-                        row.push('');
-                    }
-                });
-                rows.push(row.join(','));
-            });
-            return rows.join('\n');
-        }
-        /**
-         * Download CSV file
-         */
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        // Removed CSV generation function - not needed
+        // Removed CSV download function - not needed
         /**
          * Update row total with animation
          */
@@ -316,16 +207,17 @@
                     count++;
                 }
             });
-            const avg = count > 0 ? (total / count) : 0;
+            const totalScore = total; // Use total, not average for ranking
             const $totalValue = $row.find('.mt-eval-total-value');
             const oldValue = parseFloat($totalValue.text());
             // Animate if value changed
-            if (oldValue !== avg) {
+            if (oldValue !== totalScore) {
                 $totalValue.fadeOut(100, function() {
-                    $(this).text(avg.toFixed(1)).fadeIn(100);
+                    $(this).text(totalScore.toFixed(1)).fadeIn(100);
                 });
             }
-            // Update color coding
+            // Update color coding based on average
+            const avg = count > 0 ? (total / count) : 0;
             const $totalCell = $row.find('.mt-eval-total-score');
             $totalCell.removeClass('score-high score-low score-medium');
             if (avg >= 8) {
@@ -335,6 +227,152 @@
             } else if (avg <= 3) {
                 $totalCell.addClass('score-low');
             }
+            
+            // Store the total score in data attribute for sorting
+            $row.data('total-score', totalScore);
+        }
+        
+        /**
+         * Re-rank table rows based on total scores
+         */
+        function rerankTable() {
+            const $tbody = $table.find('tbody');
+            const $rows = $tbody.find('tr.mt-eval-row').get();
+            
+            // Sort rows by total score (descending)
+            $rows.sort(function(a, b) {
+                const scoreA = parseFloat($(a).data('total-score') || $(a).find('.mt-eval-total-value').text()) || 0;
+                const scoreB = parseFloat($(b).data('total-score') || $(b).find('.mt-eval-total-value').text()) || 0;
+                return scoreB - scoreA; // Descending order
+            });
+            
+            // Store current positions before reordering
+            const currentPositions = {};
+            $rows.forEach((row, index) => {
+                const $row = $(row);
+                const candidateId = $row.data('candidate-id');
+                const $badge = $row.find('.mt-ranking-badge');
+                currentPositions[candidateId] = parseInt($badge.data('position') || (index + 1));
+            });
+            
+            // Update ranks and reorder rows
+            $.each($rows, function(index, row) {
+                const $row = $(row);
+                const newPosition = index + 1;
+                const candidateId = $row.data('candidate-id');
+                const oldPosition = currentPositions[candidateId];
+                const $rankCell = $row.find('.mt-eval-rank');
+                const $badge = $rankCell.find('.mt-ranking-badge');
+                
+                // Only update if position changed
+                if (oldPosition !== newPosition) {
+                    // Update the badge's data-position attribute
+                    $badge.attr('data-position', newPosition);
+                    
+                    // Update rank number in span.mt-rank-number
+                    const $rankNumber = $badge.find('.mt-rank-number');
+                    if ($rankNumber.length) {
+                        $rankNumber.fadeOut(200, function() {
+                            $(this).text(newPosition).fadeIn(200);
+                        });
+                    }
+                    
+                    // Update rank number in SVG text element
+                    const $svgText = $badge.find('svg text');
+                    if ($svgText.length) {
+                        $svgText.fadeOut(200, function() {
+                            $(this).text(newPosition).fadeIn(200);
+                        });
+                    }
+                    
+                    // Update badge classes (remove all rank classes first)
+                    $badge.removeClass('mt-rank-gold mt-rank-silver mt-rank-bronze mt-rank-standard');
+                    
+                    // Add new rank class based on position
+                    if (newPosition === 1) {
+                        $badge.addClass('mt-rank-gold');
+                    } else if (newPosition === 2) {
+                        $badge.addClass('mt-rank-silver');
+                    } else if (newPosition === 3) {
+                        $badge.addClass('mt-rank-bronze');
+                    } else {
+                        $badge.addClass('mt-rank-standard');
+                    }
+                    
+                    // Update medal icon color class if it exists
+                    const $medalIcon = $badge.find('.mt-medal-icon');
+                    if ($medalIcon.length) {
+                        $medalIcon.removeClass('mt-medal-gold mt-medal-silver mt-medal-bronze');
+                        if (newPosition === 1) {
+                            $medalIcon.addClass('mt-medal-gold');
+                        } else if (newPosition === 2) {
+                            $medalIcon.addClass('mt-medal-silver');
+                        } else if (newPosition === 3) {
+                            $medalIcon.addClass('mt-medal-bronze');
+                        }
+                    }
+                }
+                
+                // Update row classes
+                $row.removeClass('position-gold position-silver position-bronze');
+                // Remove all rank-N classes
+                for (let i = 1; i <= $rows.length; i++) {
+                    $row.removeClass('rank-' + i);
+                }
+                
+                // Add new position classes
+                if (newPosition === 1) {
+                    $row.addClass('position-gold');
+                } else if (newPosition === 2) {
+                    $row.addClass('position-silver');
+                } else if (newPosition === 3) {
+                    $row.addClass('position-bronze');
+                }
+                $row.addClass('rank-' + newPosition);
+            });
+            
+            // Reorder rows in the DOM with smooth animation
+            const rowHeight = $rows.length > 0 ? $($rows[0]).outerHeight() : 50;
+            
+            // Calculate target positions
+            const targetPositions = {};
+            $rows.forEach((row, index) => {
+                const $row = $(row);
+                targetPositions[$row.data('candidate-id')] = index * rowHeight;
+            });
+            
+            // Animate row movements
+            $rows.forEach((row) => {
+                const $row = $(row);
+                const candidateId = $row.data('candidate-id');
+                const currentTop = $row.position().top;
+                const targetTop = targetPositions[candidateId];
+                
+                if (Math.abs(currentTop - targetTop) > 5) {
+                    // Row needs to move
+                    $row.css({
+                        position: 'relative',
+                        top: 0,
+                        zIndex: 100
+                    }).animate({
+                        top: targetTop - currentTop
+                    }, 400, function() {
+                        // Reset position after animation
+                        $(this).css({
+                            position: '',
+                            top: '',
+                            zIndex: ''
+                        });
+                    });
+                }
+            });
+            
+            // After animation completes, physically reorder the DOM
+            setTimeout(function() {
+                $.each($rows, function(index, row) {
+                    $tbody.append(row);
+                });
+            }, 450);
         }
         /**
          * Initialize all enhancements
@@ -349,6 +387,39 @@
             $table.on('focus', '.mt-eval-score-input', function() {
                 storeOriginalValues($(this).closest('tr'));
             });
+            
+            // Update row total and re-rank on input change
+            $table.on('input', '.mt-eval-score-input', function() {
+                const $input = $(this);
+                const $row = $input.closest('tr');
+                const rowId = $row.data('candidate-id');
+                
+                // Update row total
+                updateRowTotal($row);
+                
+                // Mark row as unsaved
+                $row.addClass('unsaved');
+                $row.find('.mt-btn-save-eval').addClass('unsaved');
+                
+                // Auto-save functionality
+                if (autoSaveTimers.has(rowId)) {
+                    clearTimeout(autoSaveTimers.get(rowId));
+                }
+                const timerId = setTimeout(() => {
+                    if ($row.hasClass('unsaved')) {
+                        $row.find('.mt-btn-save-eval').click();
+                    }
+                    autoSaveTimers.delete(rowId);
+                }, CONFIG.autoSaveDelay);
+                autoSaveTimers.set(rowId, timerId);
+                
+                // Delay re-ranking to avoid too many animations
+                clearTimeout(window.rerankTimer);
+                window.rerankTimer = setTimeout(function() {
+                    rerankTable();
+                }, 500);
+            });
+            
             // Enhanced score change animation
             $table.on('change', '.mt-eval-score-input', function() {
                 const $input = $(this);

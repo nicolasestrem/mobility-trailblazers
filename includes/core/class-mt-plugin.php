@@ -489,6 +489,15 @@ class MT_Plugin {
             true
         );
         
+        // Table rankings enhancements JavaScript - fixes ranking updates
+        wp_enqueue_script(
+            'mt-table-rankings-enhancements',
+            MT_PLUGIN_URL . 'assets/js/table-rankings-enhancements.js',
+            ['jquery', 'mt-frontend'],
+            MT_VERSION,
+            true
+        );
+        
         // Photo adjustment fix JavaScript (Issue #13 fix)
         wp_enqueue_script(
             'mt-photo-adjustment-fix',
@@ -601,6 +610,9 @@ class MT_Plugin {
                 'characters' => __('characters', 'mobility-trailblazers'),
                 'back_to_dashboard' => __('Back to Dashboard', 'mobility-trailblazers'),
                 'evaluate_candidate' => __('Evaluate Candidate', 'mobility-trailblazers'),
+                'save_all_changes' => __('Save All Changes', 'mobility-trailblazers'),
+                'saving_progress' => __('Saving...', 'mobility-trailblazers'),
+                'export_rankings' => __('Export Rankings', 'mobility-trailblazers'),
                 'evaluation_submitted' => __('Evaluation Submitted', 'mobility-trailblazers'),
                 'draft_saved' => __('Draft Saved', 'mobility-trailblazers'),
                 'innovation_summary' => __('Innovation Summary', 'mobility-trailblazers'),
