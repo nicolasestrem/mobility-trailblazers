@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.5.37
+**Version:** 2.5.38
 **Author:** Mobility Trailblazers - Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  
@@ -33,7 +33,15 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 - **Dashboard Widgets**: Custom WordPress widgets for jury and admin interfaces
 - **Debug Center**: Comprehensive diagnostics and maintenance tools for system health monitoring
 
-### Recent Enhancements (v2.5.37 - v2.2.28)
+### Recent Enhancements (v2.5.38 - v2.2.28)
+
+#### CSS Architecture & UI Improvements (v2.5.38)
+- **Unified Container System**: Implemented 1200px max-width container for consistent dashboard widget alignment
+- **Dashboard Improvements**: Fixed negative margins on rankings header and improved element centering
+- **CSS Refactoring**: Removed excessive !important declarations following WordPress best practices
+- **Mobile-First Responsive**: Enhanced responsive design with proper breakpoints for all screen sizes
+- **Search/Filter Integration**: Added mt-search-input and mt-filter-select to unified container system
+- **Production CSS Restoration**: Recovered and restored CSS from production snapshots after corruption
 
 #### Dependency Injection Architecture (v2.5.37)
 - **Container System**: Lightweight DI container for service management

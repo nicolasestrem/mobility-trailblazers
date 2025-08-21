@@ -3,7 +3,30 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
-## [2.5.38] - 2025-08-20
+## [2.5.38] - 2025-08-21
+### CSS Architecture & UI Improvements
+- **Unified Container System**: Implemented consistent 1200px max-width container for dashboard widgets
+  - Added `.mt-jury-dashboard__container` class for centralized width management
+  - Applied unified system to mt-dashboard-header, mt-stats-grid, mt-rankings-section
+  - Ensured mt-evaluation-table-wrap follows same alignment principles
+  
+- **Dashboard Widget Alignment**: Fixed alignment issues across all jury dashboard elements
+  - Corrected negative margins on rankings header (changed from -30px to 0)
+  - Removed excessive !important declarations following WordPress coding standards
+  - Improved element centering with proper margin: 0 auto patterns
+  
+- **Responsive Design Enhancements**: Comprehensive mobile-first responsive improvements
+  - Added proper breakpoints at 1200px, 768px, and 480px
+  - Fixed search filters layout on small screens
+  - Improved mt-search-input and mt-filter-select responsiveness
+  - Enhanced evaluation table scrolling on mobile devices
+  
+- **CSS Recovery & Restoration**: Restored production CSS after corruption incident
+  - Recovered CSS from production snapshots
+  - Backed up corrupted files for reference
+  - Successfully restored all styling to production state
+
+## [2.5.37] - 2025-08-20
 ### Major Code Quality Refactoring
 - **Comprehensive Plugin Cleanup**: Major codebase consolidation and optimization initiative
   

@@ -1578,6 +1578,48 @@ function get_candidate_meta($candidate_id, $key) {
 
 ### Asset Optimization
 
+#### CSS Architecture & Unified Container System (v2.5.38)
+
+**Unified Container Pattern**:
+```css
+/* Consistent 1200px max-width container for all dashboard widgets */
+.mt-jury-dashboard__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Applied to all major dashboard elements */
+.mt-dashboard-header,
+.mt-stats-grid,
+.mt-rankings-section,
+.mt-evaluation-table-wrap,
+.mt-search-filters {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+```
+
+**CSS Best Practices**:
+- Avoid excessive use of `!important` declarations
+- Use CSS custom properties for overridable values
+- Follow BEM methodology for class naming
+- Implement mobile-first responsive design
+- Use proper CSS specificity instead of `!important`
+
+**Responsive Breakpoints**:
+```css
+/* Desktop first, then scale down */
+@media (max-width: 1200px) { /* Tablets landscape */ }
+@media (max-width: 768px) { /* Tablets portrait */ }
+@media (max-width: 480px) { /* Mobile devices */ }
+```
+
 #### CSS Loading Strategy
 
 **Conditional Loading**:
