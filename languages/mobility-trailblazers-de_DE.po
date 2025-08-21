@@ -1141,3 +1141,75 @@ msgstr "Ja"
 
 msgid "No"
 msgstr "Nein"
+
+# Evaluation Criteria Descriptions (Mouse-over Tooltips)
+msgid "Demonstrates bold vision and willingness to take risks in advancing mobility transformation"
+msgstr "Zeigt mutige Vision und Risikobereitschaft bei der Vorantreibung der Mobilitätstransformation"
+
+msgid "Shows creative problem-solving and introduces novel approaches to mobility challenges"
+msgstr "Zeigt kreative Problemlösung und führt neuartige Ansätze für Mobilitätsherausforderungen ein"
+
+msgid "Successfully executes ideas with measurable impact on sustainable mobility"
+msgstr "Setzt Ideen erfolgreich mit messbarer Wirkung auf nachhaltige Mobilität um"
+
+msgid "Addresses critical aspects of transportation transformation and future mobility needs"
+msgstr "Adressiert kritische Aspekte der Verkehrstransformation und zukünftige Mobilitätsbedürfnisse"
+
+msgid "Brings unique perspective and communicates mobility vision effectively to stakeholders"
+msgstr "Bringt einzigartige Perspektive ein und kommuniziert Mobilitätsvision effektiv an Stakeholder"
+
+# JavaScript UI Strings
+msgid "Save All Changes"
+msgstr "Alle Änderungen speichern"
+
+msgid "Export Rankings"
+msgstr "Rankings exportieren"
+
+msgid "Are you sure you want to delete this evaluation?"
+msgstr "Sind Sie sicher, dass Sie diese Bewertung löschen möchten?"
+
+msgid "Please select at least one evaluation."
+msgstr "Bitte wählen Sie mindestens eine Bewertung aus."
+
+msgid "Are you sure you want to delete the selected evaluations?"
+msgstr "Sind Sie sicher, dass Sie die ausgewählten Bewertungen löschen möchten?"
+
+msgid "Failed to load evaluation details."
+msgstr "Bewertungsdetails konnten nicht geladen werden."
+
+msgid "Error loading evaluation details."
+msgstr "Fehler beim Laden der Bewertungsdetails."
+
+msgid "Evaluation Details"
+msgstr "Bewertungsdetails"
+
+msgid "Evaluation deleted successfully"
+msgstr "Bewertung erfolgreich gelöscht"
+
+msgid "Failed to delete evaluation"
+msgstr "Bewertung konnte nicht gelöscht werden"
+
+msgid "Error deleting evaluation"
+msgstr "Fehler beim Löschen der Bewertung"
+
+msgid "Failed to perform bulk action"
+msgstr "Massenaktion konnte nicht ausgeführt werden"
+
+msgid "Error performing bulk action"
+msgstr "Fehler beim Ausführen der Massenaktion"
+
+# Status Translations for display
+msgid "draft"
+msgstr "Entwurf"
+
+msgid "submitted"
+msgstr "Eingereicht"
+
+msgid "completed"
+msgstr "Abgeschlossen"
+
+msgid "approved"
+msgstr "Genehmigt"
+
+msgid "rejected"
+msgstr "Abgelehnt"

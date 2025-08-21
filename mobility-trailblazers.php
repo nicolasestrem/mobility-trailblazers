@@ -76,6 +76,9 @@ require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';
 // Register autoloader
 MobilityTrailblazers\Core\MT_Autoloader::register();
 
+// Load utility functions
+require_once MT_PLUGIN_DIR . 'includes/functions.php';
+
 // Load emergency fixes (TEMPORARY - Remove after proper fix)
 if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
     require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';

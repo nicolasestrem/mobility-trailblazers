@@ -152,7 +152,7 @@ $candidates = get_posts([
                         </td>
                         <td>
                             <span class="status-<?php echo esc_attr($evaluation->status); ?>">
-                                <?php echo esc_html(ucfirst($evaluation->status)); ?>
+                                <?php echo esc_html(mt_get_translated_status($evaluation->status)); ?>
                             </span>
                         </td>
                         <td><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($evaluation->updated_at))); ?></td>

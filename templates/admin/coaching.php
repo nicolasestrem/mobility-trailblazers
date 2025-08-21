@@ -197,8 +197,8 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
                         <td><?php echo esc_html($activity->jury_name); ?></td>
                         <td><?php echo esc_html($activity->candidate_name); ?></td>
                         <td>
-                            <span class="status-badge status-<?php echo $activity->status; ?>">
-                                <?php echo ucfirst($activity->status); ?>
+                            <span class="status-badge status-<?php echo esc_attr($activity->status); ?>">
+                                <?php echo esc_html(mt_get_translated_status($activity->status)); ?>
                             </span>
                         </td>
                         <td>

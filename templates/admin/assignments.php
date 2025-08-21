@@ -328,7 +328,7 @@ function testAjax() {
                         </td>
                         <td>
                             <span class="mt-status mt-status-<?php echo esc_attr($status); ?>">
-                                <?php echo esc_html(ucfirst($status)); ?>
+                                <?php echo esc_html(mt_get_translated_status($status)); ?>
                             </span>
                         </td>
                         <td>

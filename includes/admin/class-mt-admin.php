@@ -677,6 +677,13 @@ class MT_Admin {
                 'updated' => __('Last Updated', 'mobility-trailblazers'),
                 'scores' => __('Evaluation Scores', 'mobility-trailblazers'),
                 'total_score' => __('Total Score', 'mobility-trailblazers'),
+                'failed_load_details' => __('Failed to load evaluation details.', 'mobility-trailblazers'),
+                'error_loading_details' => __('Error loading evaluation details.', 'mobility-trailblazers'),
+                'deleted_successfully' => __('Evaluation deleted successfully', 'mobility-trailblazers'),
+                'failed_delete' => __('Failed to delete evaluation', 'mobility-trailblazers'),
+                'error_deleting' => __('Error deleting evaluation', 'mobility-trailblazers'),
+                'failed_bulk_action' => __('Failed to perform bulk action', 'mobility-trailblazers'),
+                'error_bulk_action' => __('Error performing bulk action', 'mobility-trailblazers'),
                 'average_score' => __('Average', 'mobility-trailblazers'),
                 'comments' => __('Comments', 'mobility-trailblazers')
             ]);
