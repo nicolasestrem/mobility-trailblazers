@@ -1,6 +1,6 @@
 # Mobility Trailblazers Plugin Architecture
 
-**Version:** 2.6.0+  
+**Version:** 2.5.37+  
 **Last Updated:** 2025-08-20  
 **Author:** Development Team  
 **Architecture Version:** 2.0 (Dependency Injection Implementation)

@@ -1,6 +1,6 @@
 # API Reference - Dependency Injection Components
 
-**Version:** 2.6.0+  
+**Version:** 2.5.37+  
 **Last Updated:** 2025-01-20  
 **Author:** Development Team
 
@@ -28,7 +28,7 @@ The main dependency injection container class.
 #### Class: `MobilityTrailblazers\Core\MT_Container`
 
 **Namespace:** `MobilityTrailblazers\Core`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Static Methods
 
@@ -172,7 +172,7 @@ Abstract base class for all service providers.
 #### Class: `MobilityTrailblazers\Core\MT_Service_Provider`
 
 **Namespace:** `MobilityTrailblazers\Core`  
-**Since:** 2.6.0  
+**Since:** 2.5.37  
 **Abstract:** Yes
 
 #### Constructor
@@ -245,7 +245,7 @@ Registers all repository classes with the container.
 
 **Namespace:** `MobilityTrailblazers\Providers`  
 **Extends:** `MT_Service_Provider`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Methods
 
@@ -271,7 +271,7 @@ Registers all service classes with the container.
 
 **Namespace:** `MobilityTrailblazers\Providers`  
 **Extends:** `MT_Service_Provider`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Methods
 
@@ -332,7 +332,7 @@ Interface for evaluation service operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Service_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -377,7 +377,7 @@ Interface for assignment service operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Service_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -409,7 +409,7 @@ Interface for system diagnostic operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Service_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Methods
 
@@ -439,7 +439,7 @@ Interface for candidate import operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Service_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Methods
 
@@ -539,7 +539,7 @@ Extended interface for evaluation repository.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Repository_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -579,7 +579,7 @@ Extended interface for assignment repository.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Repository_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -619,7 +619,7 @@ Interface for candidate repository operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Repository_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -656,7 +656,7 @@ Interface for audit log repository operations.
 
 **Namespace:** `MobilityTrailblazers\Interfaces`  
 **Extends:** `MT_Repository_Interface`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Additional Methods
 
@@ -913,7 +913,7 @@ Service for handling evaluation business logic.
 **Namespace:** `MobilityTrailblazers\Services`  
 **Implements:** `MT_Service_Interface`  
 **Since:** 2.0.0  
-**Updated:** 2.6.0 (Added DI support)
+**Updated:** 2.5.37 (Added DI support)
 
 #### Constructor
 
@@ -1002,7 +1002,7 @@ Service for handling assignment business logic.
 **Namespace:** `MobilityTrailblazers\Services`  
 **Implements:** `MT_Service_Interface`  
 **Since:** 2.0.0  
-**Updated:** 2.6.0 (Added DI support)
+**Updated:** 2.5.37 (Added DI support)
 
 #### Constructor
 
@@ -1111,7 +1111,7 @@ AJAX handler for evaluation operations.
 **Namespace:** `MobilityTrailblazers\Ajax`  
 **Extends:** `MT_Base_Ajax`  
 **Since:** 2.0.0  
-**Updated:** 2.6.0 (Added DI support)
+**Updated:** 2.5.37 (Added DI support)
 
 #### Private Methods
 
@@ -1176,7 +1176,7 @@ Facade for accessing services the old way during migration.
 #### Class: `MobilityTrailblazers\Legacy\MT_Backward_Compatibility`
 
 **Namespace:** `MobilityTrailblazers\Legacy`  
-**Since:** 2.6.0
+**Since:** 2.5.37
 
 #### Static Methods
 

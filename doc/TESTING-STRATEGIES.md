@@ -1,6 +1,6 @@
 # Testing Strategies - Dependency Injection Architecture
 
-**Version:** 2.6.0+  
+**Version:** 2.5.37+  
 **Last Updated:** 2025-08-20  
 **Architecture Version:** 2.0
 

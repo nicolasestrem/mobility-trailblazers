@@ -1,6 +1,6 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.6.0 | Last Updated: August 20, 2025*
+*Version 2.5.37 | Last Updated: August 20, 2025*
 
 ## Table of Contents
 
@@ -1193,7 +1193,7 @@ WHERE status = 'submitted';
 
 ### August 20, 2025 - Major Code Quality Refactoring
 
-**Version**: 2.5.38
+**Version**: 2.5.37
 **Type**: Comprehensive Plugin Cleanup and Optimization
 
 #### Email Service Removal

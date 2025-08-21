@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.6.0
+**Version:** 2.5.37
 **Author:** Mobility Trailblazers - Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  
@@ -33,9 +33,9 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 - **Dashboard Widgets**: Custom WordPress widgets for jury and admin interfaces
 - **Debug Center**: Comprehensive diagnostics and maintenance tools for system health monitoring
 
-### Recent Enhancements (v2.6.0 - v2.2.28)
+### Recent Enhancements (v2.5.37 - v2.2.28)
 
-#### Dependency Injection Architecture (v2.6.0)
+#### Dependency Injection Architecture (v2.5.37)
 - **Container System**: Lightweight DI container for service management
 - **Service Providers**: Organized service registration and bootstrapping
 - **Interface-Based Design**: All services and repositories implement interfaces
@@ -43,7 +43,7 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 - **Improved Testability**: Easy mocking and isolation for unit testing
 - **Backward Compatibility**: Facade pattern preserves legacy code functionality
 
-#### Code Quality Refactoring (v2.5.38)
+#### Code Quality Refactoring (v2.5.37)
 - **Email Service Removal**: Complete elimination of email functionality for streamlined operation
 - **JavaScript Performance**: Fixed race conditions, memory leaks, and event handler conflicts
 - **CSS Consolidation**: Reduced from 40+ files with consolidated hotfixes and optimized loading
@@ -215,7 +215,7 @@ npm run build
 - **[Migration Guide](doc/MIGRATION-GUIDE.md)** - Step-by-step migration to DI architecture
 - **[Testing Strategies](doc/TESTING-STRATEGIES.md)** - Testing patterns with dependency injection
 - **[Import/Export Guide](doc/import-export-guide.md)** - CSV/Excel handling and German localization
-- **[Changelog](doc/changelog.md)** - Complete version history (v2.6.0 to v2.2.0)
+- **[Changelog](doc/changelog.md)** - Complete version history (v2.5.37 to v2.2.0)
 
 ### Archived Documentation
 - **[Archived](doc/archived/)** - Historical documentation and dated fix reports
@@ -248,12 +248,12 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Version**: 2.6.0 (August 20, 2025)
+**Current Version**: 2.5.37 (August 20, 2025)
 **Status**: Production Ready ✅
 
 ### Recent Updates
-- ✅ Dependency injection architecture (v2.6.0) - Container, service providers, interfaces
-- ✅ Major code quality refactoring (v2.5.38) - Email removal, performance fixes, CSS consolidation
+- ✅ Dependency injection architecture (v2.5.37) - Container, service providers, interfaces
+- ✅ Major code quality refactoring (v2.5.37) - Email removal, performance fixes, CSS consolidation
 - ✅ Testing infrastructure with PHPUnit and live diagnostics
 - ✅ German localization (1000+ strings translated)
 - ✅ Security hardening and production cleanup
@@ -270,4 +270,4 @@ Located in `../../Documentation/`:
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 20, 2025 | Version 2.6.0*
+*Last updated: August 20, 2025 | Version 2.5.37*

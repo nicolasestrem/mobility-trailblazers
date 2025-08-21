@@ -1,6 +1,6 @@
 # Migration Guide - Dependency Injection Architecture
 
-**Version:** 2.6.0+  
+**Version:** 2.5.37+  
 **Last Updated:** 2025-01-20  
 **Author:** Development Team
 
