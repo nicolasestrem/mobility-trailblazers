@@ -3490,3 +3490,66 @@ h2.mt-section-title {
     color: #495057 !important;
 }
 
+
+/* Evaluation Page - Equal Width Meta Items */
+.mt-evaluation-page .mt-candidate-showcase .mt-candidate-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+    margin-bottom: 30px !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+}
+
+.mt-evaluation-page .mt-candidate-showcase .mt-meta-item {
+    flex: 0 0 auto !important;
+    min-width: 250px !important;
+    max-width: 350px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 10px 15px !important;
+    background: var(--mt-bg-beige) !important;
+    border-radius: 25px !important;
+    font-size: 14px !important;
+    color: var(--mt-body-text) !important;
+    text-align: left !important;
+}
+
+.mt-evaluation-page .mt-candidate-showcase .mt-meta-item .dashicons {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--mt-secondary) !important;
+    flex-shrink: 0 !important;
+}
+
+.mt-evaluation-page .mt-candidate-showcase .mt-meta-item span:not(.dashicons) {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow: visible !important;
+    text-overflow: initial !important;
+    max-width: 100% !important;
+    line-height: 1.4 !important;
+}
+
+/* Responsive adjustments for evaluation page meta items */
+@media (max-width: 768px) {
+    .mt-evaluation-page .mt-candidate-showcase .mt-candidate-meta {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    .mt-evaluation-page .mt-candidate-showcase .mt-meta-item {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .mt-evaluation-page .mt-candidate-showcase .mt-meta-item {
+        min-width: 220px !important;
+        max-width: 300px !important;
+    }
+}

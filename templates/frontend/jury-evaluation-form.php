@@ -24,7 +24,8 @@ $position = get_post_meta($candidate->ID, '_mt_position', true) ?: '';
 $biography = get_post_meta($candidate->ID, '_mt_description_full', true) ?: '';
 $linkedin_url = get_post_meta($candidate->ID, '_mt_linkedin_url', true) ?: '';
 $website_url = get_post_meta($candidate->ID, '_mt_website_url', true) ?: '';
-$categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
+// Get category from new meta field system (3 categories)
+$category_type = get_post_meta($candidate->ID, '_mt_category_type', true) ?: '';
 $photo_id = get_post_thumbnail_id($candidate->ID);
 
 // Get individual evaluation criteria content
@@ -149,10 +150,10 @@ $criteria = [
                         </div>
                     <?php endif; ?>
                     
-                    <?php if ($presentation_settings['show_category'] && !empty($categories)) : ?>
+                    <?php if ($presentation_settings['show_category'] && !empty($category_type)) : ?>
                         <div class="mt-meta-item">
                             <span class="dashicons dashicons-category"></span>
-                            <span><?php echo esc_html($categories[0]->name); ?></span>
+                            <span><?php echo esc_html($category_type); ?></span>
                         </div>
                     <?php endif; ?>
                 </div>
