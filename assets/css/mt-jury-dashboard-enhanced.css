@@ -88,41 +88,53 @@
    ENHANCED DASHBOARD FIXES
    =================================== */
 
+/* Unified container system for consistent width and centering */
+.mt-jury-dashboard__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
 /* Fix the main dashboard container */
 body .mt-jury-dashboard {
-    background: var(--mt-bg-base) !important;
-    border: 1px solid var(--mt-blue-accent) !important;
-    border-radius: 12px !important;
-    padding: 30px !important;
-    margin: 20px 0 !important;
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px auto;
+    display: block;
+    max-width: 1200px;
+    box-sizing: border-box;
 }
 
-/* Fix dashboard header */
+/* Fix dashboard header - unified width and centering */
+.mt-dashboard-header,
 body .mt-jury-dashboard .mt-dashboard-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%) !important;
-    color: var(--mt-bg-base) !important;
-    padding: 30px !important;
-    border-radius: 8px !important;
-    margin-bottom: 30px !important;
-    text-align: center !important;
-    display: block !important;
+    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    color: var(--mt-bg-base);
+    padding: 30px 20px;
+    border-radius: 8px;
+    margin: 0 auto 30px auto;
+    text-align: center;
+    display: block;
+    max-width: 1200px;
+    box-sizing: border-box;
 }
 
+.mt-dashboard-header h1,
 body .mt-jury-dashboard .mt-dashboard-header h1 {
-    color: white !important;
-    margin: 0 0 10px 0 !important;
-    font-size: 28px !important;
-    font-weight: 600 !important;
+    color: white;
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 600;
 }
 
+.mt-dashboard-header p,
 body .mt-jury-dashboard .mt-dashboard-header p {
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 16px !important;
-    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    margin: 0;
 }
 
 /* ===================================
@@ -159,12 +171,16 @@ body .mt-jury-dashboard .mt-progress-text {
    STATS GRID
    =================================== */
 
-/* Fix stats grid */
+/* Fix stats grid - unified width and centering */
+.mt-stats-grid,
 body .mt-jury-dashboard .mt-stats-grid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr)) !important;
-    gap: 20px !important;
-    margin: 30px 0 !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 20px;
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 body .mt-jury-dashboard .mt-stat-card {
@@ -201,36 +217,47 @@ body .mt-jury-dashboard .mt-stat-label {
    SEARCH FILTERS
    =================================== */
 
-/* Fix search filters */
+/* Fix search filters - unified width and centering */
+.mt-search-filters,
 body .mt-jury-dashboard .mt-search-filters {
-    margin: 30px 0 !important;
-    display: block !important;
+    margin: 30px auto;
+    display: block;
+    max-width: 1200px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
+.mt-search-box,
 body .mt-jury-dashboard .mt-search-box {
-    display: flex !important;
-    gap: 15px !important;
-    align-items: center !important;
-    flex-wrap: wrap !important;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
+.mt-search-input,
 body .mt-jury-dashboard .mt-search-input {
-    flex: 1 !important;
-    min-width: 200px !important;
-    padding: 10px 15px !important;
-    border: 1px solid var(--mt-blue-accent) !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    background: var(--mt-bg-base) !important;
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 15px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--mt-bg-base);
+    box-sizing: border-box;
 }
 
+.mt-filter-select,
 body .mt-jury-dashboard .mt-filter-select {
-    padding: 10px 15px !important;
-    border: 1px solid var(--mt-blue-accent) !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    background: var(--mt-bg-base) !important;
-    min-width: 150px !important;
+    padding: 10px 15px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--mt-bg-base);
+    min-width: 150px;
+    box-sizing: border-box;
 }
 
 /* ===================================
@@ -355,29 +382,36 @@ body .mt-jury-dashboard .mt-rankings-container {
     border-radius: 0 !important;
 }
 
+.mt-rankings-section,
 body .mt-jury-dashboard .mt-rankings-section {
-    background: var(--mt-bg-beige) !important;
-    border-radius: 16px !important;
-    padding: 30px !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
-    display: block !important;
-    width: 100% !important;
+    background: var(--mt-bg-beige);
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: block;
+    max-width: 1200px;
+    margin: 30px auto;
+    box-sizing: border-box;
 }
 
+.mt-rankings-header,
 body .mt-jury-dashboard .mt-rankings-header {
-    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%) !important;
-    color: white !important;
-    padding: 25px !important;
-    border-radius: 12px !important;
-    margin: -30px -30px 30px -30px !important;
-    text-align: center !important;
+    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin: 0 0 30px 0;
+    text-align: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
+.mt-rankings-header h2,
 body .mt-jury-dashboard .mt-rankings-header h2 {
-    color: white !important;
-    font-size: 28px !important;
-    margin: 0 0 8px 0 !important;
-    font-weight: 700 !important;
+    color: white;
+    font-size: 28px;
+    margin: 0 0 8px 0;
+    font-weight: 700;
 }
 
 body .mt-jury-dashboard .mt-rankings-subtitle {
@@ -675,10 +709,12 @@ body .mt-jury-dashboard .mt-no-rankings {
     background: #ffffff;
     border-radius: 14px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    padding: 0 0 24px 0;
+    padding: 0 20px 24px 20px;
     overflow-x: auto;
-    margin-bottom: 30px;
+    margin: 30px auto;
     border: 1px solid #dee2e6;
+    max-width: 1200px;
+    box-sizing: border-box;
 }
 
 .mt-evaluation-table {
@@ -1086,6 +1122,17 @@ body .mt-jury-dashboard .mt-no-rankings {
         padding: 20px !important;
     }
     
+    /* Ensure search filters have consistent padding on mobile */
+    .mt-search-filters,
+    body .mt-jury-dashboard .mt-search-filters {
+        padding: 0 15px;
+    }
+    
+    .mt-search-input,
+    body .mt-jury-dashboard .mt-search-input {
+        min-width: 150px;
+    }
+    
     body .mt-jury-dashboard .mt-candidates-list {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(250px,1fr)) !important;
@@ -1111,12 +1158,12 @@ body .mt-jury-dashboard .mt-no-rankings {
     }
     
     body .mt-jury-dashboard .mt-rankings-section {
-        padding: 15px !important;
+        padding: 15px;
     }
     
     body .mt-jury-dashboard .mt-rankings-header {
-        margin: -15px -15px 20px -15px !important;
-        padding: 15px !important;
+        margin: 0 0 20px 0;
+        padding: 15px;
     }
     
     body .mt-jury-dashboard .mt-criterion-inline {
@@ -1132,13 +1179,37 @@ body .mt-jury-dashboard .mt-no-rankings {
     }
     
     .mt-evaluation-table-wrap {
-        margin: 0 -15px !important;
-        border-radius: 0 !important;
-        padding: 0 0 15px 0 !important;
+        padding: 0 15px 15px 15px;
+        border-radius: 0;
     }
 }
 
 @media (max-width: 480px) {
+    /* Consistent small screen padding for all unified elements */
+    .mt-dashboard-header,
+    .mt-stats-grid,
+    .mt-rankings-section,
+    .mt-evaluation-table-wrap,
+    .mt-search-filters {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    /* Search box adjustments for small screens */
+    .mt-search-box,
+    body .mt-jury-dashboard .mt-search-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .mt-search-input,
+    .mt-filter-select,
+    body .mt-jury-dashboard .mt-search-input,
+    body .mt-jury-dashboard .mt-filter-select {
+        width: 100%;
+        min-width: 100%;
+    }
+    
     body .mt-jury-dashboard .mt-candidates-list {
         display: grid !important;
         grid-template-columns: 1fr !important;
