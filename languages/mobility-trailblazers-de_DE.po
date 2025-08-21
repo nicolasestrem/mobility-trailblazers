@@ -993,6 +993,10 @@ msgstr "Änderungen"
 msgid "Full View"
 msgstr "Details anzeigen"
 
+#: templates/frontend/partials/jury-rankings.php:16
+msgid "No rankings available yet."
+msgstr "Noch keine Rankings verfügbar."
+
 # JavaScript Translations
 msgid "Error loading candidate information."
 msgstr "Fehler beim Laden der Kandidateninformationen."
