@@ -720,8 +720,8 @@ body .mt-jury-dashboard .mt-no-rankings {
 }
 
 .mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
-    min-width: 80px;
-    width: 80px;
+    min-width: 90px;
+    width: 90px;
 }
 
 .mt-evaluation-table th:nth-last-child(2) {
@@ -880,20 +880,22 @@ body .mt-jury-dashboard .mt-no-rankings {
 
 /* Score input color coding */
 .mt-eval-score-input {
-    width: 65px;
-    min-width: 65px;
+    width: 80px;
+    min-width: 80px;
     text-align: center;
     border: 2px solid var(--mt-secondary);
-    border-radius: 4px;
-    padding: 8px 6px;
-    font-size: 14px;
-    font-weight: 600;
+    border-radius: 6px;
+    padding: 12px 8px;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--mt-primary);
     background: var(--mt-bg-base);
     margin: 0 auto;
     display: block;
     box-sizing: border-box;
     transition: all 0.2s ease;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
 }
 
 .mt-eval-score-input:focus {
@@ -908,17 +910,19 @@ body .mt-jury-dashboard .mt-no-rankings {
 }
 
 .mt-eval-score-input.score-high {
-    background-color: rgba(40, 167, 69, 0.1);
+    background-color: rgba(40, 167, 69, 0.15);
     border-color: #28a745;
     color: #1e7e34;
-    font-weight: 700;
+    font-weight: 800;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
 }
 
 .mt-eval-score-input.score-low {
-    background-color: rgba(220, 53, 69, 0.1);
+    background-color: rgba(220, 53, 69, 0.15);
     border-color: #dc3545;
     color: #bd2130;
-    font-weight: 700;
+    font-weight: 800;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
 }
 
 .mt-eval-total-score {
@@ -926,13 +930,17 @@ body .mt-jury-dashboard .mt-no-rankings {
 }
 
 .mt-eval-total-value {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
     color: #212529;
-    background: rgba(255, 193, 7, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
+    background: rgba(255, 193, 7, 0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
     border: 2px solid #ffc107;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+    display: inline-block;
+    min-width: 50px;
+    letter-spacing: 0.5px;
 }
 
 /* Table action buttons */
