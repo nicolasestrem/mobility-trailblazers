@@ -72,7 +72,9 @@
       "Bash(git checkout:*)",
       "Bash(C:/xampp/php/php.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\compile-mo.php\")",
       "Bash(C:/xampp/php/php.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\test-translations.php\")",
-      "mcp__kapture__back"
+      "mcp__kapture__back",
+      "Bash(dir:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
