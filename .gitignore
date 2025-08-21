@@ -93,3 +93,5 @@ doc/*USERNAME_FIX_GUIDE*
 !templates/
 !languages/
 mobility-trailblazers2.zip
+
+.internal/
