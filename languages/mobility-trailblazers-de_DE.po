@@ -1129,3 +1129,199 @@ msgstr "Ja"
 
 msgid "No"
 msgstr "Nein"
+
+# Rankings page translations - From emergency fixes
+msgid "Top Ranked Candidates"
+msgstr "Rangliste der bewerteten Kandidaten"
+
+msgid "Real-time ranking based on evaluation scores"
+msgstr "Sie können die Werte direkt in der Rangliste ändern."
+
+msgid "Rank"
+msgstr "Rang"
+
+msgid "Candidate"
+msgstr "Kandidat/in"
+
+msgid "Actions"
+msgstr "Änderungen"
+
+msgid "Full View"
+msgstr "Details anzeigen"
+
+msgid "Average Score"
+msgstr "Durchschnittliche Bewertung"
+
+msgid "Average Score:"
+msgstr "Durchschnittliche Bewertung:"
+
+msgid "criteria evaluated"
+msgstr "Kriterien bewertet"
+
+# Evaluation criteria descriptions - CRITICAL from emergency fixes
+msgid "Mut & Pioniergeist"
+msgstr "Mut & Pioniergeist"
+
+msgid "Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten"
+msgstr "Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten"
+
+msgid "Innovationsgrad"
+msgstr "Innovationsgrad"
+
+msgid "Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen"
+msgstr "Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen"
+
+msgid "Umsetzungskraft & Wirkung"
+msgstr "Umsetzungskraft & Wirkung"
+
+msgid "Fähigkeit zur Umsetzung und realer Einfluss der Initiativen"
+msgstr "Fähigkeit zur Umsetzung und realer Einfluss der Initiativen"
+
+msgid "Relevanz für die Mobilitätswende"
+msgstr "Relevanz für die Mobilitätswende"
+
+msgid "Bedeutung und Beitrag zur Transformation der Mobilität"
+msgstr "Bedeutung und Beitrag zur Transformation der Mobilität"
+
+msgid "Vorbildfunktion & Sichtbarkeit"
+msgstr "Vorbildfunktion & Sichtbarkeit"
+
+msgid "Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor"
+msgstr "Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor"
+
+# Additional evaluation form translations
+msgid "Back to Dashboard"
+msgstr "Zurück zum Dashboard"
+
+msgid "Evaluation Submitted"
+msgstr "Bewertung eingereicht"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+# JavaScript strings from mt-settings-admin.js
+msgid "Choose Header Background Image"
+msgstr "Header-Hintergrundbild auswählen"
+
+msgid "Use this image"
+msgstr "Dieses Bild verwenden"
+
+msgid "Remove Image"
+msgstr "Bild entfernen"
+
+msgid "Preview Animation"
+msgstr "Animation vorschauen"
+
+msgid "Please enter valid weights between 0 and 10"
+msgstr "Bitte geben Sie gültige Gewichtungen zwischen 0 und 10 ein"
+
+msgid "WARNING: You have enabled data deletion on uninstall. This will permanently delete all plugin data when the plugin is removed. Are you sure?"
+msgstr "WARNUNG: Sie haben die Datenlöschung bei der Deinstallation aktiviert. Dies wird alle Plugin-Daten dauerhaft löschen, wenn das Plugin entfernt wird. Sind Sie sicher?"
+
+# JavaScript strings from mt-rich-editor.js
+msgid "Normal Text"
+msgstr "Normaler Text"
+
+msgid "Heading 1"
+msgstr "Überschrift 1"
+
+msgid "Heading 2"
+msgstr "Überschrift 2"
+
+msgid "Heading 3"
+msgstr "Überschrift 3"
+
+msgid "Enter URL:"
+msgstr "URL eingeben:"
+
+msgid "Bold"
+msgstr "Fett"
+
+msgid "Italic"
+msgstr "Kursiv"
+
+msgid "Underline"
+msgstr "Unterstrichen"
+
+msgid "Strikethrough"
+msgstr "Durchgestrichen"
+
+msgid "Ordered List"
+msgstr "Nummerierte Liste"
+
+msgid "Unordered List"
+msgstr "Aufzählungsliste"
+
+msgid "Insert Link"
+msgstr "Link einfügen"
+
+msgid "Remove Format"
+msgstr "Formatierung entfernen"
+
+msgid "Undo"
+msgstr "Rückgängig"
+
+msgid "Redo"
+msgstr "Wiederholen"
+
+msgid "Headings"
+msgstr "Überschriften"
+
+msgid "Press Ctrl+Enter to submit"
+msgstr "Drücken Sie Strg+Enter zum Absenden"
+
+# JavaScript strings from evaluation-details-emergency-fix.js
+msgid "Evaluation Details"
+msgstr "Bewertungsdetails"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "View Candidate"
+msgstr "Kandidat anzeigen"
+
+msgid "Delete Evaluation"
+msgstr "Bewertung löschen"
+
+msgid "Are you sure you want to delete this evaluation? This action cannot be undone."
+msgstr "Sind Sie sicher, dass Sie diese Bewertung löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+
+msgid "Security token not found. Please refresh the page and try again."
+msgstr "Sicherheitstoken nicht gefunden. Bitte aktualisieren Sie die Seite und versuchen Sie es erneut."
+
+msgid "Please select at least one evaluation to delete."
+msgstr "Bitte wählen Sie mindestens eine Bewertung zum Löschen aus."
+
+msgid "Are you sure you want to delete %s evaluation(s)? This action cannot be undone."
+msgstr "Sind Sie sicher, dass Sie %s Bewertung(en) löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+
+msgid "Note:"
+msgstr "Hinweis:"
+
+msgid "Full evaluation details with individual criteria scores would normally appear here. This is a temporary fix while the full AJAX functionality is being restored."
+msgstr "Vollständige Bewertungsdetails mit einzelnen Kriterienbewertungen würden normalerweise hier angezeigt. Dies ist eine vorübergehende Lösung, während die vollständige AJAX-Funktionalität wiederhergestellt wird."
+
+# JavaScript strings from assignments.php inline script
+msgid "This will run a test distribution simulation. Continue?"
+msgstr "Dies wird eine Test-Verteilungssimulation ausführen. Fortfahren?"
+
+msgid "Enter distribution method (balanced/random):"
+msgstr "Verteilungsmethode eingeben (balanced/random):"
+
+msgid "Enter candidates per jury member:"
+msgstr "Kandidaten pro Jurymitglied eingeben:"
+
+msgid "Distribution test seed:"
+msgstr "Verteilungstest-Seed:"
+
+msgid "Check console for results after running auto-assignment."
+msgstr "Überprüfen Sie die Konsole auf Ergebnisse nach der automatischen Zuweisung."
+
+msgid "This is a debug function. Continue?"
+msgstr "Dies ist eine Debug-Funktion. Fortfahren?"
+
+msgid "AJAX Success:"
+msgstr "AJAX-Erfolg:"
+
+msgid "AJAX Error:"
+msgstr "AJAX-Fehler:"

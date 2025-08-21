@@ -72,7 +72,7 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
 <div style="background: #f0f0f0; padding: 10px; margin: 20px 0; border: 1px solid #ccc;">
     <h3><?php _e('Debug Information', 'mobility-trailblazers'); ?></h3>
     <p>Page: <?php echo esc_html($_GET['page'] ?? 'unknown'); ?></p>
-    <p>Current User Can Manage: <?php echo current_user_can('manage_options') ? 'Yes' : 'No'; ?></p>
+    <p>Current User Can Manage: <?php echo current_user_can('manage_options') ? __('Yes', 'mobility-trailblazers') : __('No', 'mobility-trailblazers'); ?></p>
     <p>AJAX URL: <?php echo esc_url(admin_url('admin-ajax.php')); ?></p>
     <p>Nonce: <?php echo esc_attr(wp_create_nonce('mt_admin_nonce')); ?></p>
     
@@ -111,11 +111,15 @@ if (isset($_POST['action']) && isset($_POST['_wpnonce']) && wp_verify_nonce($_PO
 <?php endif; ?>
 
 <script>
+// Get localized strings
+var mt_assignments_i18n = window.mt_assignments_i18n || {};
+var debug_strings = mt_assignments_i18n.debug || {};
+
 function testDistribution() {
-    if (!confirm('This will run a test distribution simulation. Continue?')) return;
+    if (!confirm(debug_strings.test_distribution || 'This will run a test distribution simulation. Continue?')) return;
     
-    const method = prompt('Enter distribution method (balanced/random):', 'balanced');
-    const candidatesPerJury = prompt('Enter candidates per jury member:', '10');
+    const method = prompt(debug_strings.enter_method || 'Enter distribution method (balanced/random):', 'balanced');
+    const candidatesPerJury = prompt(debug_strings.enter_candidates || 'Enter candidates per jury member:', '10');
     const seed = Math.floor(Math.random() * 10000);
     
     console.log('Testing distribution with:', {
@@ -124,11 +128,12 @@ function testDistribution() {
         seed: seed
     });
     
-    alert('Distribution test seed: ' + seed + '\nCheck console for results after running auto-assignment.');
+    var seedMsg = (debug_strings.test_seed || 'Distribution test seed:') + ' ' + seed + '\n' + (debug_strings.check_console || 'Check console for results after running auto-assignment.');
+    alert(seedMsg);
 }
 
 function testAjax() {
-    if (!confirm('This is a debug function. Continue?')) return;
+    if (!confirm(debug_strings.debug_function || 'This is a debug function. Continue?')) return;
     console.log('Testing AJAX...');
     jQuery.ajax({
         url: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>',
@@ -141,11 +146,11 @@ function testAjax() {
         },
         success: function(response) {
             console.log('AJAX Success:', response);
-            alert('AJAX Success: ' + JSON.stringify(response));
+            alert((debug_strings.ajax_success || 'AJAX Success:') + ' ' + JSON.stringify(response));
         },
         error: function(xhr, status, error) {
             console.log('AJAX Error:', {xhr, status, error});
-            alert('AJAX Error: ' + xhr.responseText);
+            alert((debug_strings.ajax_error || 'AJAX Error:') + ' ' + xhr.responseText);
         }
     });
 }

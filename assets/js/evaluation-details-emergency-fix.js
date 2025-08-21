@@ -10,6 +10,9 @@
 jQuery(document).ready(function($) {
     'use strict';
     
+    // Get i18n object
+    var mt_eval_details_i18n = window.mt_eval_details_i18n || {};
+    
     // Check if we're on the evaluations page
     if (!$('body').hasClass('toplevel_page_mt-evaluations') && !window.location.href.includes('page=mt-evaluations')) {
         // Try to detect by presence of evaluation table
@@ -53,7 +56,7 @@ jQuery(document).ready(function($) {
                 <div id="mt-evaluation-modal-overlay" class="mt-modal-overlay">
                     <div id="mt-evaluation-modal" class="mt-modal">
                         <div class="mt-modal-header">
-                            <h2>Evaluation Details #${evaluationId}</h2>
+                            <h2>${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.title : 'Evaluation Details'} #${evaluationId}</h2>
                             <button class="mt-modal-close" aria-label="Close">&times;</button>
                         </div>
                         <div class="mt-modal-body">
@@ -83,13 +86,13 @@ jQuery(document).ready(function($) {
                             </table>
                             
                             <div class="mt-modal-notice">
-                                <p><strong>Note:</strong> Full evaluation details with individual criteria scores would normally appear here. This is a temporary fix while the full AJAX functionality is being restored.</p>
+                                <p><strong>${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.note : 'Note'}:</strong> ${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.temp_message : 'Full evaluation details with individual criteria scores would normally appear here. This is a temporary fix while the full AJAX functionality is being restored.'}</p>
                             </div>
                         </div>
                         <div class="mt-modal-footer">
-                            <button class="button button-primary mt-modal-close">Close</button>
-                            ${candidateLink !== '#' ? `<a href="${candidateLink}" class="button" target="_blank">View Candidate</a>` : ''}
-                            <button class="button button-link-delete mt-delete-evaluation" data-id="${evaluationId}">Delete Evaluation</button>
+                            <button class="button button-primary mt-modal-close">${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.close : 'Close'}</button>
+                            ${candidateLink !== '#' ? `<a href="${candidateLink}" class="button" target="_blank">${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.view_candidate : 'View Candidate'}</a>` : ''}
+                            <button class="button button-link-delete mt-delete-evaluation" data-id="${evaluationId}">${mt_eval_details_i18n && mt_eval_details_i18n.modal ? mt_eval_details_i18n.modal.delete : 'Delete Evaluation'}</button>
                         </div>
                     </div>
                 </div>
@@ -237,7 +240,8 @@ jQuery(document).ready(function($) {
             // Handle delete button
             $('.mt-delete-evaluation').on('click', function() {
                 var deleteId = $(this).data('id');
-                if (confirm('Are you sure you want to delete this evaluation? This action cannot be undone.')) {
+                var deleteMsg = mt_eval_details_i18n && mt_eval_details_i18n.confirmations ? mt_eval_details_i18n.confirmations.delete_single : 'Are you sure you want to delete this evaluation? This action cannot be undone.';
+                if (confirm(deleteMsg)) {
                     // Try to get nonce if available
                     var nonce = '';
                     if (window.MTEvaluations && window.MTEvaluations.nonce) {
@@ -249,7 +253,8 @@ jQuery(document).ready(function($) {
                     if (nonce) {
                         window.location.href = `admin.php?page=mt-evaluations&action=delete&id=${deleteId}&_wpnonce=${nonce}`;
                     } else {
-                        alert('Security token not found. Please refresh the page and try again.');
+                        var tokenMsg = mt_eval_details_i18n && mt_eval_details_i18n.errors ? mt_eval_details_i18n.errors.token_missing : 'Security token not found. Please refresh the page and try again.';
+                        alert(tokenMsg);
                     }
                 }
             });
@@ -279,12 +284,16 @@ jQuery(document).ready(function($) {
                 });
                 
                 if (selected.length === 0) {
-                    alert('Please select at least one evaluation to delete.');
+                    var selectMsg = mt_eval_details_i18n && mt_eval_details_i18n.confirmations ? mt_eval_details_i18n.confirmations.select_evaluation : 'Please select at least one evaluation to delete.';
+                    alert(selectMsg);
                     e.preventDefault();
                     return false;
                 }
                 
-                if (!confirm(`Are you sure you want to delete ${selected.length} evaluation(s)? This action cannot be undone.`)) {
+                var deleteMultipleMsg = mt_eval_details_i18n && mt_eval_details_i18n.confirmations && mt_eval_details_i18n.confirmations.delete_multiple ? 
+                    mt_eval_details_i18n.confirmations.delete_multiple.replace('%s', selected.length) : 
+                    `Are you sure you want to delete ${selected.length} evaluation(s)? This action cannot be undone.`;
+                if (!confirm(deleteMultipleMsg)) {
                     e.preventDefault();
                     return false;
                 }

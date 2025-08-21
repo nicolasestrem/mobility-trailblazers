@@ -67,7 +67,12 @@
       "Bash(gh issue view:*)",
       "mcp__kapture__fill",
       "Bash(mysql:*)",
-      "Bash(mariadb:*)"
+      "Bash(mariadb:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout:*)",
+      "Bash(C:/xampp/php/php.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\compile-mo.php\")",
+      "Bash(C:/xampp/php/php.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\test-translations.php\")",
+      "mcp__kapture__back"
     ],
     "deny": []
   }
