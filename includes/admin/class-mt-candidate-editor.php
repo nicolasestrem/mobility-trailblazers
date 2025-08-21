@@ -65,6 +65,16 @@ class MT_Candidate_Editor {
             'normal',
             'high'
         );
+        
+        // Category meta box - added to sidebar for easy access
+        add_meta_box(
+            'mt_candidate_category',
+            __('Category', 'mobility-trailblazers'),
+            [$this, 'render_category_meta_box'],
+            'mt_candidate',
+            'side',
+            'high'
+        );
     }
     
     /**
@@ -170,6 +180,59 @@ class MT_Candidate_Editor {
     }
     
     /**
+     * Render Category meta box
+     */
+    public function render_category_meta_box($post) {
+        // Get current category
+        $current_category = get_post_meta($post->ID, '_mt_category_type', true);
+        
+        // Define available categories (matching the production categories from documentation)
+        $categories = [
+            'Etablierte Unternehmen' => __('Etablierte Unternehmen', 'mobility-trailblazers'),
+            'Governance & Verwaltungen, Politik, öffentliche Unternehmen' => __('Governance & Verwaltungen, Politik, öffentliche Unternehmen', 'mobility-trailblazers'),
+            'Start-ups, Scale-ups & Katalysatoren' => __('Start-ups, Scale-ups & Katalysatoren', 'mobility-trailblazers')
+        ];
+        ?>
+        <div class="mt-category-wrapper">
+            <p>
+                <label for="mt_category_type" class="screen-reader-text">
+                    <?php _e('Select Category', 'mobility-trailblazers'); ?>
+                </label>
+                <select name="mt_category_type" id="mt_category_type" class="widefat">
+                    <option value=""><?php _e('— No Category —', 'mobility-trailblazers'); ?></option>
+                    <?php foreach ($categories as $value => $label) : ?>
+                        <option value="<?php echo esc_attr($value); ?>" <?php selected($current_category, $value); ?>>
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+            <p class="description">
+                <?php _e('Select the category for this candidate. This categorization is used for display and filtering purposes.', 'mobility-trailblazers'); ?>
+            </p>
+            <?php if ($current_category) : ?>
+                <p class="description" style="color: #00736C; font-weight: bold;">
+                    <?php _e('Current:', 'mobility-trailblazers'); ?> <?php echo esc_html($current_category); ?>
+                </p>
+            <?php endif; ?>
+        </div>
+        <style>
+            .mt-category-wrapper {
+                padding: 10px 0;
+            }
+            .mt-category-wrapper select {
+                margin-top: 5px;
+            }
+            .mt-category-wrapper .description {
+                margin-top: 8px;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+        </style>
+        <?php
+    }
+    
+    /**
      * Save meta data
      */
     public function save_meta_data($post_id, $post) {
@@ -197,6 +260,17 @@ class MT_Candidate_Editor {
         // Save Evaluation Criteria
         if (isset($_POST['mt_evaluation_criteria'])) {
             update_post_meta($post_id, '_mt_evaluation_criteria', wp_kses_post($_POST['mt_evaluation_criteria']));
+        }
+        
+        // Save Category
+        if (isset($_POST['mt_category_type'])) {
+            $category = sanitize_text_field($_POST['mt_category_type']);
+            if (!empty($category)) {
+                update_post_meta($post_id, '_mt_category_type', $category);
+            } else {
+                // If empty category selected, remove the meta
+                delete_post_meta($post_id, '_mt_category_type');
+            }
         }
     }
     
