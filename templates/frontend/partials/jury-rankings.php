@@ -125,7 +125,12 @@ if (!empty($jury_members)) {
                     $row_total = 0;
                     foreach ($criteria as $key => $criterion) : 
                         $score_field = $criterion['key'];
-                        $current_score = $evaluation && isset($evaluation->$score_field) ? floatval($evaluation->$score_field) : 0;
+                        // Ensure we always show 0 when the score is 0, not blank
+                        if ($evaluation && property_exists($evaluation, $score_field)) {
+                            $current_score = floatval($evaluation->$score_field);
+                        } else {
+                            $current_score = 0;
+                        }
                         $row_total += $current_score;
                         $score_class = $current_score >= 8 ? 'score-high' : ($current_score <= 3 ? 'score-low' : '');
                     ?>
@@ -133,7 +138,7 @@ if (!empty($jury_members)) {
                             <input type="number" min="0" max="10" step="0.5" 
                                 class="mt-eval-score-input <?php echo $score_class; ?>" 
                                 name="<?php echo esc_attr($criterion['key']); ?>"
-                                value="<?php echo esc_attr($current_score); ?>"
+                                value="<?php echo esc_attr(number_format($current_score, 1, '.', '')); ?>"
                                 data-criterion="<?php echo esc_attr($criterion['key']); ?>"
                                 data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
                         </td>

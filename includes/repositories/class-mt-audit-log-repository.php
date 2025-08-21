@@ -98,42 +98,44 @@ class MT_Audit_Log_Repository implements MT_Audit_Log_Repository_Interface {
         
         $where_clause = implode(' AND ', $where_conditions);
         
-        // Build ORDER BY clause
-        $allowed_orderby = ['id', 'user_id', 'action', 'object_type', 'object_id', 'created_at'];
-        $orderby = in_array($args['orderby'], $allowed_orderby) ? $args['orderby'] : 'created_at';
+        // Build ORDER BY clause - Security: Use prepared statements for field names
+        $allowed_orderby = [
+            'id' => 'al.id',
+            'user_id' => 'al.user_id', 
+            'action' => 'al.action',
+            'object_type' => 'al.object_type',
+            'object_id' => 'al.object_id',
+            'created_at' => 'al.created_at'
+        ];
+        
+        // Security: Validate orderby against exact field mappings
+        $orderby_field = isset($allowed_orderby[$args['orderby']]) ? $allowed_orderby[$args['orderby']] : 'al.created_at';
         $order = strtoupper($args['order']) === 'ASC' ? 'ASC' : 'DESC';
         
         // Calculate pagination
         $offset = ($args['page'] - 1) * $args['per_page'];
         
-        // Build the main query
-        $query = "SELECT al.*, u.display_name as user_name, u.user_email
-                  FROM {$this->table_name} al
-                  LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
-                  WHERE {$where_clause}
-                  ORDER BY al.{$orderby} {$order}
-                  LIMIT %d OFFSET %d";
+        // Security: Execute query using prepared statement parameters
+        $all_prepare_values = array_merge($prepare_values, [$args['per_page'], $offset]);
         
-        $prepare_values[] = $args['per_page'];
-        $prepare_values[] = $offset;
+        $base_query = "SELECT al.*, u.display_name as user_name, u.user_email
+                       FROM {$this->table_name} al
+                       LEFT JOIN {$wpdb->users} u ON al.user_id = u.ID
+                       WHERE {$where_clause}
+                       ORDER BY {$orderby_field} {$order}
+                       LIMIT %d OFFSET %d";
         
         // Execute query
-        if (!empty($prepare_values)) {
-            $results = $wpdb->get_results($wpdb->prepare($query, $prepare_values));
+        if (!empty($all_prepare_values)) {
+            $results = $wpdb->get_results($wpdb->prepare($base_query, $all_prepare_values));
         } else {
-            $results = $wpdb->get_results($query);
+            $results = $wpdb->get_results($base_query);
         }
         
-        // Get total count for pagination
+        // Get total count for pagination (exclude LIMIT/OFFSET parameters)
         $count_query = "SELECT COUNT(*) FROM {$this->table_name} WHERE {$where_clause}";
         if (!empty($prepare_values)) {
-            // Remove LIMIT and OFFSET values for count query
-            $count_prepare_values = array_slice($prepare_values, 0, -2);
-            if (!empty($count_prepare_values)) {
-                $total_items = $wpdb->get_var($wpdb->prepare($count_query, $count_prepare_values));
-            } else {
-                $total_items = $wpdb->get_var($count_query);
-            }
+            $total_items = $wpdb->get_var($wpdb->prepare($count_query, $prepare_values));
         } else {
             $total_items = $wpdb->get_var($count_query);
         }

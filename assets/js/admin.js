@@ -860,9 +860,9 @@ if (typeof mt_admin.i18n === 'undefined') {
                         <h3>Scores</h3>
                         ${scoresHtml}
                         <div class="mt-score-summary">
-                            <strong>Total Score:</strong> ${data.total_score.toFixed(1)}/50
+                            <strong>${mt_evaluations_i18n.total_score_label || 'Total Score:'}</strong> ${data.total_score.toFixed(1)}/50
                             <br>
-                            <strong>Average Score:</strong> ${data.average_score.toFixed(1)}/10
+                            <strong>${mt_evaluations_i18n.average_score_label || 'Average Score:'}</strong> ${data.average_score.toFixed(1)}/10
                         </div>
                     </div>
                     ${data.comments ? `

@@ -141,11 +141,14 @@ $completion_rate = $coaching_data['completion_rate'] ?? 0;
             <h2><?php _e('Coaching Actions', 'mobility-trailblazers'); ?></h2>
             
             <div class="mt-button-group">
-                <a href="<?php echo wp_nonce_url(admin_url('admin-ajax.php?action=mt_export_coaching_report'), 'mt_coaching_nonce', 'nonce'); ?>" 
-                   class="mt-button-secondary" id="export-coaching-report">
-                    <span class="dashicons dashicons-download"></span>
-                    <?php _e('Export Coaching Report', 'mobility-trailblazers'); ?>
-                </a>
+                <form method="post" action="<?php echo admin_url('admin-ajax.php'); ?>" style="display: inline;">
+                    <input type="hidden" name="action" value="mt_export_coaching_report">
+                    <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('mt_coaching_nonce'); ?>">
+                    <button type="submit" class="mt-button-secondary" id="export-coaching-report">
+                        <span class="dashicons dashicons-download"></span>
+                        <?php _e('Export Coaching Report', 'mobility-trailblazers'); ?>
+                    </button>
+                </form>
                 
                 <button class="mt-button-secondary" id="refresh-stats">
                     <span class="dashicons dashicons-update"></span>

@@ -403,13 +403,13 @@
                     <form id="mt-evaluation-form" class="mt-evaluation-form">
                         <input type="hidden" name="candidate_id" value="${candidate.id}">
                         <div class="mt-criteria-section">
-                            <h3>Evaluation Criteria</h3>
+                            <h3>${mt_frontend.i18n.evaluation_criteria || 'Evaluation Criteria'}</h3>
                             <div class="mt-criterion-card" data-criterion="courage">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-superhero"></span>
-                                    <h4 class="mt-criterion-label">Mut & Pioniergeist</h4>
+                                    <h4 class="mt-criterion-label">${mt_frontend.i18n.mut_pioniergeist || 'Mut & Pioniergeist'}</h4>
                                 </div>
-                                <p class="mt-criterion-description">Courage & Pioneer Spirit</p>
+                                <p class="mt-criterion-description">${mt_frontend.i18n.mut_description || 'Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten'}</p>
                                 <div class="mt-score-slider-wrapper">
                                     <input type="range" name="courage_score" class="mt-score-slider" min="0" max="10" value="5">
                                     <div class="mt-score-marks">
@@ -433,9 +433,9 @@
                             <div class="mt-criterion-card" data-criterion="innovation">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-lightbulb"></span>
-                                    <h4 class="mt-criterion-label">Innovationsgrad</h4>
+                                    <h4 class="mt-criterion-label">${mt_frontend.i18n.innovationsgrad || 'Innovationsgrad'}</h4>
                                 </div>
-                                <p class="mt-criterion-description">Innovation Degree</p>
+                                <p class="mt-criterion-description">${mt_frontend.i18n.innovation_description || 'Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen'}</p>
                                 <div class="mt-score-slider-wrapper">
                                     <input type="range" name="innovation_score" class="mt-score-slider" min="0" max="10" value="5">
                                     <div class="mt-score-marks">
@@ -459,9 +459,9 @@
                             <div class="mt-criterion-card" data-criterion="implementation">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-hammer"></span>
-                                    <h4 class="mt-criterion-label">Umsetzungskraft & Wirkung</h4>
+                                    <h4 class="mt-criterion-label">${mt_frontend.i18n.umsetzungskraft || 'Umsetzungskraft & Wirkung'}</h4>
                                 </div>
-                                <p class="mt-criterion-description">Implementation & Impact</p>
+                                <p class="mt-criterion-description">${mt_frontend.i18n.umsetzung_description || 'Fähigkeit zur Umsetzung und realer Einfluss der Initiativen'}</p>
                                 <div class="mt-score-slider-wrapper">
                                     <input type="range" name="implementation_score" class="mt-score-slider" min="0" max="10" value="5">
                                     <div class="mt-score-marks">
@@ -485,9 +485,9 @@
                             <div class="mt-criterion-card" data-criterion="relevance">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-location-alt"></span>
-                                    <h4 class="mt-criterion-label">Relevanz für Mobilitätswende</h4>
+                                    <h4 class="mt-criterion-label">${mt_frontend.i18n.relevanz || 'Relevanz für die Mobilitätswende'}</h4>
                                 </div>
-                                <p class="mt-criterion-description">Mobility Transformation Relevance</p>
+                                <p class="mt-criterion-description">${mt_frontend.i18n.relevanz_description || 'Bedeutung und Beitrag zur Transformation der Mobilität'}</p>
                                 <div class="mt-score-slider-wrapper">
                                     <input type="range" name="relevance_score" class="mt-score-slider" min="0" max="10" value="5">
                                     <div class="mt-score-marks">
@@ -511,9 +511,9 @@
                             <div class="mt-criterion-card" data-criterion="visibility">
                                 <div class="mt-criterion-header">
                                     <span class="mt-criterion-icon dashicons dashicons-visibility"></span>
-                                    <h4 class="mt-criterion-label">Vorbildfunktion & Sichtbarkeit</h4>
+                                    <h4 class="mt-criterion-label">${mt_frontend.i18n.vorbildfunktion || 'Vorbildfunktion & Sichtbarkeit'}</h4>
                                 </div>
-                                <p class="mt-criterion-description">Role Model & Visibility</p>
+                                <p class="mt-criterion-description">${mt_frontend.i18n.vorbild_description || 'Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor'}</p>
                                 <div class="mt-score-slider-wrapper">
                                     <input type="range" name="visibility_score" class="mt-score-slider" min="0" max="10" value="5">
                                     <div class="mt-score-marks">

@@ -142,7 +142,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <input type="number" name="weight_courage" id="weight_courage" 
                            value="<?php echo esc_attr($weights['courage']); ?>" 
-                           min="0" max="10" step="0.1" class="small-text">
+                           min="0" max="10" step="0.5" class="small-text">
                     <p class="description"><?php _e('Weight for Courage & Pioneer Spirit criterion', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
@@ -153,7 +153,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <input type="number" name="weight_innovation" id="weight_innovation" 
                            value="<?php echo esc_attr($weights['innovation']); ?>" 
-                           min="0" max="10" step="0.1" class="small-text">
+                           min="0" max="10" step="0.5" class="small-text">
                     <p class="description"><?php _e('Weight for Innovation Degree criterion', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
@@ -164,7 +164,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <input type="number" name="weight_implementation" id="weight_implementation" 
                            value="<?php echo esc_attr($weights['implementation']); ?>" 
-                           min="0" max="10" step="0.1" class="small-text">
+                           min="0" max="10" step="0.5" class="small-text">
                     <p class="description"><?php _e('Weight for Implementation & Impact criterion', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
@@ -175,7 +175,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <input type="number" name="weight_relevance" id="weight_relevance" 
                            value="<?php echo esc_attr($weights['relevance']); ?>" 
-                           min="0" max="10" step="0.1" class="small-text">
+                           min="0" max="10" step="0.5" class="small-text">
                     <p class="description"><?php _e('Weight for Mobility Transformation Relevance criterion', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>
@@ -186,7 +186,7 @@ $evaluations_per_page = get_option('mt_evaluations_per_page', 10);
                 <td>
                     <input type="number" name="weight_visibility" id="weight_visibility" 
                            value="<?php echo esc_attr($weights['visibility']); ?>" 
-                           min="0" max="10" step="0.1" class="small-text">
+                           min="0" max="10" step="0.5" class="small-text">
                     <p class="description"><?php _e('Weight for Role Model & Visibility criterion', 'mobility-trailblazers'); ?></p>
                 </td>
             </tr>

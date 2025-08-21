@@ -31,6 +31,11 @@ class MT_Coaching {
         
         // AJAX handlers
         add_action('wp_ajax_mt_export_coaching_report', [$this, 'export_coaching_report']);
+        
+        // Clear cache when evaluations or assignments change
+        add_action('mt_evaluation_updated', [$this, 'clear_statistics_cache']);
+        add_action('mt_assignment_updated', [$this, 'clear_statistics_cache']);
+        add_action('save_post', [$this, 'clear_cache_on_jury_update']);
     }
     
     /**
@@ -84,9 +89,17 @@ class MT_Coaching {
     }
     
     /**
-     * Get coaching statistics
+     * Get coaching statistics with caching
      */
     public function get_coaching_statistics() {
+        // Check for cached data first (5 minute cache)
+        $cache_key = 'mt_coaching_statistics';
+        $cached_data = get_transient($cache_key);
+        
+        if ($cached_data !== false) {
+            return $cached_data;
+        }
+        
         global $wpdb;
         
         // First get all jury members from the custom post type
@@ -205,27 +218,37 @@ class MT_Coaching {
             $total_drafts += $stat->drafts;
         }
         
-        return [
+        $statistics = [
             'jury_stats' => $final_stats,
             'total_assigned' => $total_assigned,
             'total_completed' => $total_completed,
             'total_drafts' => $total_drafts,
             'completion_rate' => $total_assigned > 0 ? round(($total_completed / $total_assigned) * 100, 1) : 0
         ];
+        
+        // Cache the results for 5 minutes (300 seconds)
+        set_transient($cache_key, $statistics, 300);
+        
+        return $statistics;
     }
     
     /**
      * AJAX handler for exporting coaching report
      */
     public function export_coaching_report() {
+        // Security: Use POST method for state-changing operations
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_die(__('Invalid request method', 'mobility-trailblazers'), 405);
+        }
+        
         // Verify nonce
-        if (!isset($_GET['nonce']) || !wp_verify_nonce($_GET['nonce'], 'mt_coaching_nonce')) {
-            wp_die(__('Security check failed', 'mobility-trailblazers'));
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_coaching_nonce')) {
+            wp_die(__('Security check failed', 'mobility-trailblazers'), 403);
         }
         
         // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_die(__('Permission denied', 'mobility-trailblazers'));
+            wp_die(__('Permission denied', 'mobility-trailblazers'), 403);
         }
         
         $coaching_data = $this->get_coaching_statistics();
@@ -295,5 +318,22 @@ class MT_Coaching {
         ]);
         
         exit;
+    }
+    
+    /**
+     * Clear coaching statistics cache
+     */
+    public function clear_statistics_cache() {
+        delete_transient('mt_coaching_statistics');
+    }
+    
+    /**
+     * Clear cache when jury member posts are updated
+     */
+    public function clear_cache_on_jury_update($post_id) {
+        $post_type = get_post_type($post_id);
+        if ($post_type === 'mt_jury_member') {
+            $this->clear_statistics_cache();
+        }
     }
 }

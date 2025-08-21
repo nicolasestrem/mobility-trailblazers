@@ -16,7 +16,7 @@
             autoSaveDelay: 2000, // Auto-save after 2 seconds of inactivity
             minScore: 0,
             maxScore: 10,
-            scoreStep: 0.5
+            scoreStep: 0.5  // Changed from 0.1 to 0.5 for consistency
         };
         // Track unsaved changes per row
         const unsavedRows = new Map();

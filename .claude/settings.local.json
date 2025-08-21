@@ -62,7 +62,9 @@
       "mcp__docker-mcp__docker_restart",
       "Bash(.scriptscompile-mo-local.ps1)",
       "Bash(git fetch:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)"
     ],
     "deny": []
   }

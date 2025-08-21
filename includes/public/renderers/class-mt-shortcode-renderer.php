@@ -240,6 +240,17 @@ class MT_Shortcode_Renderer {
                 'evaluation_submitted' => __('Evaluation submitted successfully!', 'mobility-trailblazers'),
                 'error_try_again' => __('An error occurred. Please try again.', 'mobility-trailblazers'),
                 'network_error' => __('Network error. Please check your connection and try again.', 'mobility-trailblazers'),
+                'evaluation_criteria' => __('Evaluation Criteria', 'mobility-trailblazers'),
+                'mut_pioniergeist' => __('Mut & Pioniergeist', 'mobility-trailblazers'),
+                'mut_description' => __('Mut, Konventionen herauszufordern und neue Wege in der Mobilität zu beschreiten', 'mobility-trailblazers'),
+                'innovationsgrad' => __('Innovationsgrad', 'mobility-trailblazers'),
+                'innovation_description' => __('Grad an Innovation und Kreativität bei der Lösung von Mobilitätsherausforderungen', 'mobility-trailblazers'),
+                'umsetzungskraft' => __('Umsetzungskraft & Wirkung', 'mobility-trailblazers'),
+                'umsetzung_description' => __('Fähigkeit zur Umsetzung und realer Einfluss der Initiativen', 'mobility-trailblazers'),
+                'relevanz' => __('Relevanz für die Mobilitätswende', 'mobility-trailblazers'),
+                'relevanz_description' => __('Bedeutung und Beitrag zur Transformation der Mobilität', 'mobility-trailblazers'),
+                'vorbildfunktion' => __('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'),
+                'vorbild_description' => __('Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor', 'mobility-trailblazers')
             ]
         ]);
     }

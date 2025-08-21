@@ -76,10 +76,11 @@ require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';
 // Register autoloader
 MobilityTrailblazers\Core\MT_Autoloader::register();
 
-// Load emergency fixes (TEMPORARY - Remove after proper fix)
-if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
-    require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
-}
+// Emergency German fixes - DISABLED as proper localization has been implemented
+// Kept for reference - can be removed after testing confirms all translations work
+// if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
+//     require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
+// }
 
 // Bootstrap container early for AJAX requests
 // This ensures the container is ready before any AJAX handlers try to use it

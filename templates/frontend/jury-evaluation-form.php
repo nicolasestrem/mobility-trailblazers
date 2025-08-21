@@ -371,6 +371,7 @@ $criteria = [
                                            name="<?php echo esc_attr($key); ?>_score" 
                                            min="0" 
                                            max="10" 
+                                           step="0.5"
                                            value="<?php echo esc_attr($score_value); ?>"
                                            class="mt-score-input" />
                                     <span class="mt-score-label">/ 10</span>

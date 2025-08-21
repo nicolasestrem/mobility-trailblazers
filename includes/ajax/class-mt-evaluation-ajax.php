@@ -822,6 +822,7 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
         if ($existing_evaluation) {
             $evaluation_data['id'] = $existing_evaluation->id;
             $evaluation_data['comments'] = $existing_evaluation->comments;
+            // Initialize with existing scores
             $evaluation_data['courage_score'] = floatval($existing_evaluation->courage_score);
             $evaluation_data['innovation_score'] = floatval($existing_evaluation->innovation_score);
             $evaluation_data['implementation_score'] = floatval($existing_evaluation->implementation_score);
@@ -837,10 +838,23 @@ class MT_Evaluation_Ajax extends MT_Base_Ajax {
             $evaluation_data['visibility_score'] = 0;
         }
         
+        // Map score field names to ensure correct database column names
+        $score_field_mapping = [
+            'courage' => 'courage_score',
+            'innovation' => 'innovation_score',
+            'implementation' => 'implementation_score',
+            'relevance' => 'relevance_score',
+            'visibility' => 'visibility_score'
+        ];
+        
         // Update with new scores from the form
         foreach ($scores as $criterion => $score) {
-            if (!empty($criterion) && is_numeric($score)) {
-                $evaluation_data[$criterion] = floatval($score);
+            // Handle both full names (courage_score) and short names (courage)
+            $field_name = isset($score_field_mapping[$criterion]) ? $score_field_mapping[$criterion] : $criterion;
+            
+            // Only update if it's a valid score field and has a numeric value
+            if (in_array($field_name, array_values($score_field_mapping)) && is_numeric($score)) {
+                $evaluation_data[$field_name] = floatval($score);
             }
         }
         

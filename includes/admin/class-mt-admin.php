@@ -678,7 +678,10 @@ class MT_Admin {
                 'scores' => __('Evaluation Scores', 'mobility-trailblazers'),
                 'total_score' => __('Total Score', 'mobility-trailblazers'),
                 'average_score' => __('Average', 'mobility-trailblazers'),
-                'comments' => __('Comments', 'mobility-trailblazers')
+                'comments' => __('Comments', 'mobility-trailblazers'),
+                'total_score_label' => __('Total Score:', 'mobility-trailblazers'),
+                'average_score_label' => __('Average Score:', 'mobility-trailblazers'),
+                'evaluation_criteria' => __('Evaluation Criteria', 'mobility-trailblazers')
             ]);
         }
         
