@@ -54,6 +54,24 @@ msgstr "Bewertung erfolgreich eingereicht!"
 msgid "Draft saved successfully!"
 msgstr "Entwurf erfolgreich gespeichert!"
 
+msgid "Evaluation saved successfully"
+msgstr "Bewertung erfolgreich gespeichert"
+
+msgid "Evaluation deleted successfully"
+msgstr "Bewertung erfolgreich gelöscht"
+
+msgid "Failed to delete evaluation"
+msgstr "Bewertung konnte nicht gelöscht werden"
+
+msgid "Failed to save evaluation."
+msgstr "Bewertung konnte nicht gespeichert werden."
+
+msgid "No evaluations could be processed."
+msgstr "Es konnten keine Bewertungen verarbeitet werden."
+
+msgid "Unknown action: %s"
+msgstr "Unbekannte Aktion: %s"
+
 msgid "Congratulations! You have completed all evaluations!"
 msgstr "Herzlichen Glückwunsch! Sie haben alle Bewertungen abgeschlossen!"
 
