@@ -190,8 +190,8 @@ class MT_Post_Types {
         
         $organization = get_post_meta($post->ID, '_mt_organization', true);
         $position = get_post_meta($post->ID, '_mt_position', true);
-        $linkedin = get_post_meta($post->ID, '_mt_linkedin', true);
-        $website = get_post_meta($post->ID, '_mt_website', true);
+        $linkedin = get_post_meta($post->ID, '_mt_linkedin_url', true);
+        $website = get_post_meta($post->ID, '_mt_website_url', true);
         ?>
         <div class="mt-meta-box">
             <p>
@@ -288,10 +288,10 @@ class MT_Post_Types {
                 update_post_meta($post_id, '_mt_position', sanitize_text_field($_POST['mt_position']));
             }
             if (isset($_POST['mt_linkedin'])) {
-                update_post_meta($post_id, '_mt_linkedin', esc_url_raw($_POST['mt_linkedin']));
+                update_post_meta($post_id, '_mt_linkedin_url', esc_url_raw($_POST['mt_linkedin']));
             }
             if (isset($_POST['mt_website'])) {
-                update_post_meta($post_id, '_mt_website', esc_url_raw($_POST['mt_website']));
+                update_post_meta($post_id, '_mt_website_url', esc_url_raw($_POST['mt_website']));
             }
             
             // Log candidate update
