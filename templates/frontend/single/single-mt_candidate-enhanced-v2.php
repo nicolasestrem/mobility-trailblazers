@@ -45,7 +45,10 @@ if (have_posts()) :
     $display_name = get_the_title();
     $linkedin = $candidate_data ? $candidate_data->linkedin_url : get_post_meta($candidate_id, '_mt_linkedin_url', true);
     $website = $candidate_data ? $candidate_data->website_url : get_post_meta($candidate_id, '_mt_website_url', true);
-    $categories = wp_get_post_terms($candidate_id, 'mt_candidate_category');
+    
+    // Get category from meta field instead of taxonomy
+    $category_meta = get_post_meta($candidate_id, '_mt_category_type', true);
+    $categories = $category_meta ? array((object)array('name' => $category_meta)) : array();
     
     // Get overview (Überblick) - prioritize meta field (from editor) over database table
     $overview = get_post_meta($candidate_id, '_mt_overview', true);

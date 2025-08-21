@@ -24,7 +24,10 @@ while (have_posts()) : the_post();
     $eval_criteria = get_post_meta($candidate_id, '_mt_evaluation_criteria', true);
     $linkedin = get_post_meta($candidate_id, '_mt_linkedin', true);
     $website = get_post_meta($candidate_id, '_mt_website', true);
-    $categories = wp_get_post_terms($candidate_id, 'mt_award_category');
+    
+    // Get category from meta field instead of taxonomy
+    $category_meta = get_post_meta($candidate_id, '_mt_category_type', true);
+    $categories = $category_meta ? array((object)array('name' => $category_meta)) : array();
     
     // Parse evaluation criteria into structured format
     $parsed_criteria = [];

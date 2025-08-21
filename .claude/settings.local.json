@@ -65,7 +65,9 @@
       "Bash(git pull:*)",
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
-      "mcp__kapture__fill"
+      "mcp__kapture__fill",
+      "Bash(mysql:*)",
+      "Bash(mariadb:*)"
     ],
     "deny": []
   }
