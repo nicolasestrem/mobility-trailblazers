@@ -882,6 +882,7 @@ body .mt-jury-dashboard .mt-no-rankings {
 .mt-eval-score-input {
     width: 80px;
     min-width: 80px;
+    max-width: 80px;
     text-align: center;
     border: 2px solid var(--mt-secondary);
     border-radius: 6px;
@@ -896,6 +897,8 @@ body .mt-jury-dashboard .mt-no-rankings {
     transition: all 0.2s ease;
     line-height: 1.2;
     letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
 }
 
 .mt-eval-score-input:focus {
@@ -943,6 +946,15 @@ body .mt-jury-dashboard .mt-no-rankings {
     letter-spacing: 0.5px;
 }
 
+/* Table action buttons container */
+.mt-eval-actions {
+    text-align: center;
+    padding: 8px 6px;
+    white-space: nowrap;
+    min-width: 140px;
+    vertical-align: middle;
+}
+
 /* Table action buttons */
 .mt-btn-save-eval,
 .mt-btn-full-evaluation {
@@ -956,7 +968,8 @@ body .mt-jury-dashboard .mt-no-rankings {
     transition: all 0.2s;
     cursor: pointer;
     border: none;
-    margin: 0 2px;
+    margin: 2px 1px;
+    vertical-align: middle;
 }
 
 .mt-btn-save-eval {
@@ -1135,6 +1148,20 @@ body .mt-jury-dashboard .mt-no-rankings {
         margin: 0 -15px !important;
         border-radius: 0 !important;
         padding: 0 0 15px 0 !important;
+    }
+    
+    /* Stack action buttons vertically on mobile */
+    .mt-eval-actions {
+        min-width: 120px;
+    }
+    
+    .mt-btn-save-eval,
+    .mt-btn-full-evaluation {
+        display: block;
+        margin: 2px auto;
+        width: 90%;
+        min-width: 100px;
+        text-align: center;
     }
 }
 
