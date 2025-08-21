@@ -2,7 +2,7 @@
 
 **Date**: January 19, 2025  
 **Version**: 2.5.26  
-**Author**: Claude Code
+**Author**: Mobility Trailblazers - Nicolas Estrem
 
 ## Overview
 

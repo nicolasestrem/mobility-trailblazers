@@ -2,7 +2,7 @@
 
 **Version:** 2.5.37+  
 **Last Updated:** 2025-08-20  
-**Author:** Development Team  
+**Author:** Mobility Trailblazers - Nicolas Estrem  
 **Architecture Version:** 2.0 (Dependency Injection Implementation)
 
 ## Table of Contents

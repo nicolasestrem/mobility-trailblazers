@@ -180,5 +180,5 @@ None required - all settings use existing option keys
 - Media library loads only on settings page
 
 ---
-*Report compiled by: MT Development Team*  
+*Report compiled by: Mobility Trailblazers - Nicolas Estrem*  
 *Review conducted: August 18, 2025*

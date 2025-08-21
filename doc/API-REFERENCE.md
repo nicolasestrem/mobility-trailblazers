@@ -2,7 +2,7 @@
 
 **Version:** 2.5.37+  
 **Last Updated:** 2025-01-20  
-**Author:** Development Team
+**Author:** Mobility Trailblazers - Nicolas Estrem
 
 ## Table of Contents
 
