@@ -87,10 +87,10 @@ add_filter('gettext', function($translated, $text, $domain) {
     $emergency_translations = [
         // Rankings page
         'Top Ranked Candidates' => 'Rangliste der bewerteten Kandidaten',
-        'Real-time ranking based on evaluation scores' => 'Echtzeit-Ranking basierend auf Bewertungsergebnissen',
+        'Real-time ranking based on evaluation scores' => 'Sie können die Werte direkt in der Rangliste ändern.',
         'Rank' => 'Rang',
         'Candidate' => 'Kandidat/in',
-        'Actions' => 'Aktionen',
+        'Actions' => 'Änderungen',
         'Full View' => 'Details anzeigen',
         'Average Score' => 'Durchschnittliche Bewertung',
         'Average Score:' => 'Durchschnittliche Bewertung:',
