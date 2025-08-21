@@ -283,6 +283,11 @@ class MT_Plugin {
         $roles = new MT_Roles();
         add_action('init', [$roles, 'add_capabilities']);
         
+        // Initialize i18n handler for JavaScript localization
+        if (class_exists('MobilityTrailblazers\Core\MT_I18n_Handler')) {
+            MT_I18n_Handler::get_instance();
+        }
+        
         // Initialize admin
         if (is_admin()) {
             $admin = new \MobilityTrailblazers\Admin\MT_Admin();
@@ -652,6 +657,9 @@ class MT_Plugin {
                 'network_error' => __('Network error. Please try again.', 'mobility-trailblazers'),
                 'invalid_scores' => __('Please ensure all scores are between 0 and 10.', 'mobility-trailblazers'),
                 'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
+                'error_loading_content' => __('Error loading content', 'mobility-trailblazers'),
+                'error_saving_content' => __('Error saving content', 'mobility-trailblazers'),
+                'unsaved_changes_warning' => __('You have unsaved changes. Are you sure you want to close?', 'mobility-trailblazers'),
                 'courage_description' => __('Demonstrates bold vision and willingness to take risks in advancing mobility transformation', 'mobility-trailblazers'),
                 'innovation_description' => __('Shows creative problem-solving and introduces novel approaches to mobility challenges', 'mobility-trailblazers'),
                 'implementation_description' => __('Successfully executes ideas with measurable impact on sustainable mobility', 'mobility-trailblazers'),

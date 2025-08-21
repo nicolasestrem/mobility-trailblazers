@@ -81,12 +81,12 @@
                     if (response.success) {
                         self.populateModal(response.data);
                     } else {
-                        alert(response.data.message || 'Error loading content');
+                        alert(response.data.message || (mt_ajax && mt_ajax.i18n && mt_ajax.i18n.error_loading_content ? mt_ajax.i18n.error_loading_content : 'Error loading content'));
                         self.closeModal();
                     }
                 },
                 error: function() {
-                    alert('Error loading content');
+                    alert(mt_ajax && mt_ajax.i18n && mt_ajax.i18n.error_loading_content ? mt_ajax.i18n.error_loading_content : 'Error loading content');
                     self.closeModal();
                 }
             });
@@ -401,12 +401,12 @@
                             $saveBtn.prop('disabled', false).text('Save Changes');
                         }, 2000);
                     } else {
-                        alert(response.data.message || 'Error saving content');
+                        alert(response.data.message || (mt_ajax && mt_ajax.i18n && mt_ajax.i18n.error_saving_content ? mt_ajax.i18n.error_saving_content : 'Error saving content'));
                         $saveBtn.prop('disabled', false).text('Save Changes');
                     }
                 },
                 error: function() {
-                    alert('Error saving content');
+                    alert(mt_ajax && mt_ajax.i18n && mt_ajax.i18n.error_saving_content ? mt_ajax.i18n.error_saving_content : 'Error saving content');
                     $saveBtn.prop('disabled', false).text('Save Changes');
                 }
             });
@@ -415,7 +415,7 @@
         closeModal: function() {
             // Check for unsaved changes
             if (this.hasUnsavedChanges) {
-                if (!confirm('You have unsaved changes. Are you sure you want to close?')) {
+                if (!confirm(mt_ajax && mt_ajax.i18n && mt_ajax.i18n.unsaved_changes_warning ? mt_ajax.i18n.unsaved_changes_warning : 'You have unsaved changes. Are you sure you want to close?')) {
                     return;
                 }
             }
