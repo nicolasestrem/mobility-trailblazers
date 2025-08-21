@@ -1239,6 +1239,9 @@ msgstr "Zurück zum Dashboard"
 msgid "Evaluation Submitted"
 msgstr "Bewertung eingereicht"
 
+msgid "Evaluation Submitted"
+msgstr "Bewertung eingereicht"
+
 msgid "Description"
 msgstr "Beschreibung"
 

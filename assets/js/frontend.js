@@ -751,9 +751,9 @@
                         // Update status badge
                         var $statusBadge = $('.mt-evaluation-title .mt-status-badge');
                         if ($statusBadge.length) {
-                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text(getI18nText('evaluation_submitted', 'Evaluation Submitted'));
+                            $statusBadge.removeClass('mt-status-draft').addClass('mt-status-completed').text(getI18nText('evaluation_submitted_status', 'Evaluation Submitted'));
                         } else {
-                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">' + getI18nText('evaluation_submitted', 'Evaluation Submitted') + '</span>');
+                            $('.mt-evaluation-title').append('<span class="mt-status-badge mt-status-completed">' + getI18nText('evaluation_submitted_status', 'Evaluation Submitted') + '</span>');
                         }
                         // Scroll to top
                         $('html, body').animate({ scrollTop: 0 }, 300);

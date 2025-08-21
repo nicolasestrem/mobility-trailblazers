@@ -439,14 +439,13 @@ class MT_CSV_Import_Ajax extends MT_Base_Ajax {
 
 ## Field Mapping & Validation
 
-### System Architecture (v2.2.25)
+### System Architecture (v2.5.38)
 
-The import system has been consolidated into 4 main classes:
+The import system has been consolidated into 3 main classes:
 
-1. **MT_Import_Handler** - Core import engine
-2. **MT_Import_Export** - Admin UI
-3. **MT_CSV_Import_Ajax** - AJAX with progress
-4. **MT_Import_Ajax** - Quick import
+1. **MT_Import_Handler** - Core import engine (handles all CSV processing)
+2. **MT_CSV_Import_Ajax** - AJAX handler with progress tracking
+3. **MT_Import_Export** - Admin UI and export functionality (no longer handles AJAX imports)
 
 ### Field Mapping
 
@@ -775,22 +774,21 @@ wp cache flush
 
 ```
 MT_Base_Ajax (Abstract)
-├── MT_Import_Ajax (Quick import)
-├── MT_CSV_Import_Ajax (Progress import)
-└── MT_Admin_Ajax (Export operations)
+├── MT_CSV_Import_Ajax (AJAX import with progress tracking)
+└── Other AJAX handlers (evaluations, assignments)
 
 MT_Import_Handler (Core engine)
 ├── process_csv_import()
-├── parse_csv_file()
 ├── import_candidates()
 ├── import_jury_members()
-└── parse_evaluation_criteria()
+├── parse_evaluation_criteria()
+└── sanitize_csv_value() (security)
 
-MT_Import_Export (Admin UI)
+MT_Import_Export (Admin UI & Export only)
 ├── render_page()
-├── handle_form_submission()
 ├── download_template()
 └── export_data()
+Note: AJAX import removed in v2.5.38 (handled by MT_CSV_Import_Ajax)
 ```
 
 ### Data Flow

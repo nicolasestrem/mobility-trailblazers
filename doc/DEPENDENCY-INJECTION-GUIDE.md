@@ -148,14 +148,16 @@ $container->singleton(
 
 ```php
 // Complex initialization with factory
-$container->singleton('MobilityTrailblazers\Services\MT_Email_Service', function($container) {
-    $mailer = $container->make('MobilityTrailblazers\Services\MT_Mailer_Service');
-    $template_engine = $container->make('MobilityTrailblazers\Services\MT_Template_Service');
+// Note: Email service removed in v2.5.38
+// Example using Assignment Service instead
+$container->singleton('MobilityTrailblazers\Services\MT_Assignment_Service', function($container) {
+    $repository = $container->make('MobilityTrailblazers\Repositories\MT_Assignment_Repository');
+    $evaluation_service = $container->make('MobilityTrailblazers\Services\MT_Evaluation_Service');
     
-    $service = new MT_Email_Service($mailer, $template_engine);
+    $service = new MT_Assignment_Service($repository, $evaluation_service);
     $service->configure([
-        'from_email' => get_option('admin_email'),
-        'from_name' => get_option('blogname')
+        'auto_assign' => get_option('mt_auto_assign_candidates', false),
+        'max_assignments' => get_option('mt_max_assignments_per_jury', 20)
     ]);
     
     return $service;

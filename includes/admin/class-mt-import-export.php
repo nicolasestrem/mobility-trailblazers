@@ -33,8 +33,7 @@ class MT_Import_Export {
         add_action('admin_post_mt_export_assignments', [__CLASS__, 'export_assignments']);
         add_action('admin_post_mt_download_template', [__CLASS__, 'download_template']);
         
-        // AJAX handlers
-        add_action('wp_ajax_mt_import_csv', [__CLASS__, 'ajax_import_csv']);
+        // AJAX handlers removed - handled by MT_CSV_Import_Ajax class
     }
     
     /**
@@ -97,7 +96,9 @@ class MT_Import_Export {
     
     /**
      * AJAX handler for CSV import
+     * @deprecated 2.5.38 Use MT_CSV_Import_Ajax::handle_csv_import() instead
      */
+    /*
     public static function ajax_import_csv() {
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'mt_ajax_nonce')) {
@@ -143,6 +144,7 @@ class MT_Import_Export {
             ]);
         }
     }
+    */
     
     /**
      * Process CSV import

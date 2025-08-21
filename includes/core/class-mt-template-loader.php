@@ -101,6 +101,8 @@ class MT_Template_Loader {
         );
         
         // Enqueue hotfix for single candidate pages
+        // TODO: Remove in v2.5.39 - All fixes have been merged into enhanced-candidate-profile.css
+        // Keeping for now to ensure no visual regression
         if (is_singular('mt_candidate')) {
             wp_enqueue_style(
                 'mt-candidate-single-hotfix',

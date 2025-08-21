@@ -73,6 +73,23 @@ class MT_Import_Handler {
             'messages' => []
         ];
         
+        // Validate file path to prevent directory traversal
+        $file = realpath($file);
+        if (!$file) {
+            $results['messages'][] = __('Invalid file path', 'mobility-trailblazers');
+            MT_Logger::error('Invalid import file path');
+            return $results;
+        }
+        
+        // Ensure file is within uploads directory for security
+        $upload_dir = wp_upload_dir();
+        $upload_basedir = realpath($upload_dir['basedir']);
+        if (strpos($file, $upload_basedir) !== 0) {
+            $results['messages'][] = __('File must be within the uploads directory', 'mobility-trailblazers');
+            MT_Logger::error('Import file outside uploads directory', ['file' => $file]);
+            return $results;
+        }
+        
         // Validate file exists and is readable
         if (!file_exists($file) || !is_readable($file)) {
             $results['messages'][] = __('File not found or not readable', 'mobility-trailblazers');
@@ -508,14 +525,14 @@ class MT_Import_Handler {
         foreach ($mapping as $csv_field => $internal_field) {
             // Try exact match first
             if (isset($row[$csv_field])) {
-                $mapped[$internal_field] = trim($row[$csv_field]);
+                $mapped[$internal_field] = $this->sanitize_csv_value(trim($row[$csv_field]));
                 continue;
             }
             
             // Try case-insensitive match
             foreach ($row as $key => $value) {
                 if (strcasecmp($key, $csv_field) === 0) {
-                    $mapped[$internal_field] = trim($value);
+                    $mapped[$internal_field] = $this->sanitize_csv_value(trim($value));
                     break;
                 }
             }
@@ -527,6 +544,38 @@ class MT_Import_Handler {
         }
         
         return $mapped;
+    }
+    
+    /**
+     * Sanitize CSV value to prevent formula injection
+     *
+     * @param string $value The value to sanitize
+     * @return string Sanitized value
+     * @since 2.5.38
+     */
+    private function sanitize_csv_value($value) {
+        if (empty($value)) {
+            return $value;
+        }
+        
+        // Prevent formula injection by escaping potentially dangerous characters
+        // Check if the value starts with =, +, -, @, tab, or carriage return
+        if (preg_match('/^[\=\+\-\@\t\r]/', $value)) {
+            // Prefix with single quote to neutralize formula execution
+            $value = "'" . $value;
+            
+            // Log potential formula injection attempt
+            MT_Logger::warning('Potential CSV formula injection detected and neutralized', [
+                'original_value' => substr($value, 0, 50) // Log only first 50 chars for security
+            ]);
+        }
+        
+        // Also escape if it starts with a pipe character (used in DDE attacks)
+        if (strpos($value, '|') === 0) {
+            $value = "'" . $value;
+        }
+        
+        return $value;
     }
     
     /**
@@ -700,17 +749,23 @@ class MT_Import_Handler {
      */
     private function generate_username($name) {
         // Convert to lowercase and replace spaces with underscores
-        $username = sanitize_user(strtolower(str_replace(' ', '_', $name)));
+        $base = sanitize_user(strtolower(str_replace(' ', '_', $name)));
         
         // Remove special characters
-        $username = preg_replace('/[^a-z0-9_]/', '', $username);
+        $base = preg_replace('/[^a-z0-9_]/', '', $base);
+        
+        // Add random suffix for security (prevents username enumeration)
+        $random = wp_generate_password(4, false, false);
+        $username = $base . '_' . strtolower($random);
         
         // Ensure uniqueness
         $original = $username;
         $counter = 1;
         
         while (username_exists($username)) {
-            $username = $original . '_' . $counter;
+            // Generate new random suffix if collision occurs
+            $random = wp_generate_password(4, false, false);
+            $username = $original . '_' . strtolower($random) . '_' . $counter;
             $counter++;
         }
         
