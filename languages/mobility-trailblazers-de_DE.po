@@ -136,6 +136,9 @@ msgstr "Zeichen"
 msgid "Welcome to Jury Dashboard"
 msgstr "Willkommen im Jury-Dashboard"
 
+msgid "Welcome, %s"
+msgstr "Willkommen, %s"
+
 msgid "Review and evaluate your assigned candidates for the Mobility Trailblazers Awards"
 msgstr "Überprüfen und bewerten Sie Ihre zugewiesenen Kandidaten für die Mobility Trailblazers Awards"
 

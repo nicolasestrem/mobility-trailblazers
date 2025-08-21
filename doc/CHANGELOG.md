@@ -26,6 +26,18 @@
   - Backed up corrupted files for reference
   - Successfully restored all styling to production state
 
+### Header Background Image & Localization Fixes
+- **Header Background Implementation**: Fixed jury dashboard header background image functionality
+  - Hardcoded Background.webp URL in CSS generation (class-mt-shortcode-renderer.php:339)
+  - Updated header_style setting from 'gradient' to 'image' in database options
+  - Added !important declarations to override conflicting CSS styles
+  - Background image now displays correctly on jury dashboard
+  
+- **German Translation Fix**: Resolved English text appearing in German interface
+  - Added missing translation for "Welcome, %s" → "Willkommen, %s" in de_DE.po
+  - Compiled updated translations to mobility-trailblazers-de_DE.mo
+  - Jury dashboard header now displays "Willkommen im Jury-Dashboard" instead of "Welcome, Nicolas"
+
 ## [2.5.37] - 2025-08-20
 ### Major Code Quality Refactoring
 - **Comprehensive Plugin Cleanup**: Major codebase consolidation and optimization initiative

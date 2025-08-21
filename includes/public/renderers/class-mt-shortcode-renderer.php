@@ -336,10 +336,10 @@ class MT_Shortcode_Renderer {
         }
         
         .mt-dashboard-header.mt-header-image {
-            background-image: url('" . esc_url($settings['header_image_url'] ?? '') . "');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-image: url('https://mobilitytrailblazers.de/vote/wp-content/uploads/2025/08/Background.webp') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
             position: relative;
         }
         
