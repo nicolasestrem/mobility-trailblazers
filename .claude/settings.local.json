@@ -75,7 +75,10 @@
       "mcp__kapture__back",
       "Bash(dir:*)",
       "Bash(git commit:*)",
-      "Bash(C:xamppphpphp.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\compile-mo.php\")"
+      "Bash(C:xamppphpphp.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\compile-mo.php\")",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "mcp__kapture__show"
     ],
     "deny": []
   }

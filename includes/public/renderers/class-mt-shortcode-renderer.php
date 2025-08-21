@@ -330,12 +330,16 @@ class MT_Shortcode_Renderer {
         $primary_color = $settings['primary_color'] ?? '#667eea';
         $secondary_color = $settings['secondary_color'] ?? '#764ba2';
         
+        // DEBUG: Log what settings we're getting
+        error_log('MT DEBUG: Dashboard settings: ' . print_r($settings, true));
+        
         $css = "
         .mt-dashboard-header.mt-header-gradient {
             background: linear-gradient(135deg, {$primary_color} 0%, {$secondary_color} 100%);
         }
         
-        .mt-dashboard-header.mt-header-image {
+        .mt-dashboard-header.mt-header-image,
+        .mt-rankings-header {
             background-image: url('https://mobilitytrailblazers.de/vote/wp-content/uploads/2025/08/Background.webp') !important;
             background-size: cover !important;
             background-position: center !important;
@@ -343,7 +347,8 @@ class MT_Shortcode_Renderer {
             position: relative;
         }
         
-        .mt-dashboard-header.mt-header-image::before {
+        .mt-dashboard-header.mt-header-image::before,
+        .mt-rankings-header::before {
             content: '';
             position: absolute;
             top: 0;
@@ -354,7 +359,8 @@ class MT_Shortcode_Renderer {
             z-index: 1;
         }
         
-        .mt-dashboard-header.mt-header-image > * {
+        .mt-dashboard-header.mt-header-image > *,
+        .mt-rankings-header > * {
             position: relative;
             z-index: 2;
         }
