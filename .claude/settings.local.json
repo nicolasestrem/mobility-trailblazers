@@ -59,7 +59,10 @@
       "mcp__filesystem-mcp__write_file",
       "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\includes\\repositories\\class-mt-assignment-repository.php\")",
       "mcp__wordpress-mcp__wp_cache_flush",
-      "mcp__docker-mcp__docker_restart"
+      "mcp__docker-mcp__docker_restart",
+      "Bash(.scriptscompile-mo-local.ps1)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }
