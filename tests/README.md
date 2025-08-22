@@ -104,7 +104,7 @@ Create a `.env` file in the project root:
 ```env
 # Admin credentials
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_admin_password
+ADMIN_PASSWORD=AdminPlaywright2025AdminPlaywright2025
 
 # Jury member credentials
 JURY_USERNAME=jury1

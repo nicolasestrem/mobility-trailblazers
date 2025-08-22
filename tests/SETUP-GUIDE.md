@@ -33,7 +33,7 @@ If you have WP-CLI access:
 
 ```bash
 # Create admin user
-wp user create testadmin admin@test.local --role=administrator --user_pass=TestAdmin123!
+wp user create testadmin admin@test.local --role=administrator --user_pass=AdminPlaywright2025AdminPlaywright2025
 
 # Create jury member user
 wp user create jurymember1 jury1@test.local --role=mt_jury_member --user_pass=JuryTest123!
@@ -49,7 +49,7 @@ Direct database method:
 ```sql
 -- Insert admin user
 INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_status)
-VALUES ('testadmin', MD5('TestAdmin123!'), 'testadmin', 'admin@test.local', 0);
+VALUES ('testadmin', MD5('AdminPlaywright2025AdminPlaywright2025'), 'testadmin', 'admin@test.local', 0);
 
 -- Get the user ID
 SET @user_id = LAST_INSERT_ID();
@@ -71,7 +71,7 @@ If this is a fresh install:
 cd /path/to/wordpress
 
 # Run WordPress installation
-wp core install --url="http://localhost" --title="MT Test Site" --admin_user="testadmin" --admin_password="TestAdmin123!" --admin_email="admin@test.local"
+wp core install --url="http://localhost" --title="MT Test Site" --admin_user="testadmin" --admin_password="AdminPlaywright2025AdminPlaywright2025" --admin_email="admin@test.local"
 ```
 
 ### Option 4: Manual WordPress Setup
@@ -80,7 +80,7 @@ wp core install --url="http://localhost" --title="MT Test Site" --admin_user="te
 2. Follow WordPress setup wizard
 3. Create admin account:
    - Username: `testadmin`
-   - Password: `TestAdmin123!`
+   - Password: `AdminPlaywright2025AdminPlaywright2025`
    - Email: `admin@test.local`
 
 ## Environment Configuration
@@ -92,7 +92,7 @@ Create `.env` in the project root:
 ```env
 # WordPress Admin (you'll create this)
 ADMIN_USERNAME=testadmin
-ADMIN_PASSWORD=TestAdmin123!
+ADMIN_PASSWORD=AdminPlaywright2025AdminPlaywright2025
 
 # Jury Member (optional - tests can create this)
 JURY_USERNAME=jurymember1
@@ -146,7 +146,7 @@ curl -I http://localhost
 ```bash
 # Test admin credentials work
 curl -X POST http://localhost/wp-login.php \
-  -d "log=testadmin&pwd=TestAdmin123!" \
+  -d "log=testadmin&pwd=AdminPlaywright2025AdminPlaywright2025" \
   -c cookies.txt
 
 # Check if logged in successfully
