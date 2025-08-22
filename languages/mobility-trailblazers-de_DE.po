@@ -504,6 +504,9 @@ msgstr "Ihre qualitativen Einblicke helfen uns, über die numerischen Bewertunge
 msgid "Submitting..."
 msgstr "Wird eingereicht..."
 
+msgid "Thank you for submitting your evaluation!"
+msgstr "Vielen Dank für die Einreichung Ihrer Bewertung!"
+
 msgid "This evaluation has been submitted. You can still edit and resubmit."
 msgstr "Diese Bewertung wurde eingereicht. Sie können sie immer noch bearbeiten und erneut einreichen."
 
