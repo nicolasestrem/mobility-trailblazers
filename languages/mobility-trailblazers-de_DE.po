@@ -164,7 +164,7 @@ msgid "Draft Saved"
 msgstr "Entwurf gespeichert"
 
 msgid "View/Edit Evaluation"
-msgstr "Bewertung ansehen/bearbeiten"
+msgstr "Ansehen"
 
 msgid "Continue Evaluation"
 msgstr "Bewertung fortsetzen"
