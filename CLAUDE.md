@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v2.5.37) manages 490+ candidates, 24 jury members, evaluations, and the complete award selection process.
+**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v2.5.40) manages 490+ candidates, 24 jury members, evaluations, and the complete award selection process.
 
 **Key URLs:**
 - **Production:** https://mobilitytrailblazers.de/vote/

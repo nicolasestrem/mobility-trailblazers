@@ -1,6 +1,6 @@
 # Mobility Trailblazers WordPress Plugin
 
-**Version:** 2.5.38
+**Version:** 2.5.40
 **Author:** Mobility Trailblazers - Nicolas Estrem  
 **License:** GPL v2 or later  
 **WordPress Version:** 5.8+  
@@ -33,7 +33,22 @@ To create a transparent, efficient, and engaging platform that identifies and ce
 - **Dashboard Widgets**: Custom WordPress widgets for jury and admin interfaces
 - **Debug Center**: Comprehensive diagnostics and maintenance tools for system health monitoring
 
-### Recent Enhancements (v2.5.38 - v2.2.28)
+### Recent Enhancements (v2.5.40 - v2.2.28)
+
+#### Medal Display & Score Centering Fixes (v2.5.40)
+- **Medal Display Issues**: Fixed medal visibility with explicit SVG fill colors for gold, silver, and bronze medals
+- **Score Display Centering**: Replaced absolute positioning with flexbox centering for proper score alignment
+- **CSS v4 Framework**: Restored v4 CSS loading that had been inadvertently removed
+- **Component Cleanup**: Removed unnecessary evaluation progress tracking functionality
+- **Technical**: BEM methodology implementation with :has() pseudo-class fallbacks
+
+#### Critical Security & System Refactoring (v2.5.39)
+- **SQL Injection Prevention**: Fixed critical vulnerabilities with prepared statements in export functions
+- **Path Traversal Protection**: Eliminated hardcoded paths and added file validation against directory traversal
+- **Access Control**: Enhanced permission requirements - all import/export now requires administrator access
+- **Database Fixes**: Corrected table references (`mt_assignments` → `mt_jury_assignments`)
+- **Export System**: Fixed assignment and evaluation exports with proper jury member name retrieval
+- **Infrastructure**: Made composer autoload optional, started unified data exchange service architecture
 
 #### CSS Architecture & UI Improvements (v2.5.38)
 - **Unified Container System**: Implemented 1200px max-width container for consistent dashboard widget alignment
@@ -223,7 +238,7 @@ npm run build
 - **[API Reference](doc/API-REFERENCE.md)** - Complete API documentation for all components
 - **[Dependency Injection Guide](doc/DEPENDENCY-INJECTION-GUIDE.md)** - DI container usage and patterns
 - **[Testing Strategies](doc/TESTING-STRATEGIES.md)** - Testing patterns with dependency injection
-- **[Changelog](CHANGELOG.md)** - Complete version history (v2.5.39 to v2.2.0)
+- **[Changelog](CHANGELOG.md)** - Complete version history (v2.5.40 to v2.2.0)
 
 ### Archived Documentation
 - **[Archived](doc/archived/)** - Historical documentation and dated fix reports
@@ -256,7 +271,7 @@ Located in `../../Documentation/`:
 
 ## 📈 Platform Status
 
-**Current Version**: 2.5.37 (August 20, 2025)
+**Current Version**: 2.5.40 (August 22, 2025)
 **Status**: Production Ready ✅
 
 ### Recent Updates
@@ -278,4 +293,4 @@ Located in `../../Documentation/`:
 
 **Developed for the Mobility Trailblazers initiative** - Recognizing pioneers in mobility transformation across the DACH region.
 
-*Last updated: August 20, 2025 | Version 2.5.37*
+*Last updated: August 22, 2025 | Version 2.5.40*

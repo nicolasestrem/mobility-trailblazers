@@ -1,0 +1,41 @@
+{
+  "name": "mobility-trailblazers-tests",
+  "version": "2.5.40",
+  "description": "End-to-end tests for Mobility Trailblazers WordPress plugin",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen",
+    "test:install": "playwright install",
+    "test:local": "playwright test --config=playwright.config.local.ts",
+    "test:staging": "playwright test --config=playwright.config.staging.ts",
+    "test:production": "playwright test --config=playwright.config.production.ts",
+    "lint": "eslint tests/",
+    "format": "prettier --write tests/"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-playwright": "^1.6.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "testing",
+    "playwright",
+    "e2e",
+    "mobility",
+    "awards"
+  ],
+  "author": "Mobility Trailblazers Team",
+  "license": "GPL-2.0-or-later",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
