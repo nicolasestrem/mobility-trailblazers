@@ -1,9 +1,18 @@
 # CSS Architecture Documentation
 
-## Version 2.5.38 - Unified Container System
+## Version 4.0.0 - CSS v4 Framework
 
 ### Overview
-This document outlines the CSS architecture improvements implemented in version 2.5.38, focusing on the unified container system that ensures consistent alignment and responsiveness across all dashboard widgets.
+This document outlines the CSS v4 framework implemented to replace the legacy CSS system with a modern, token-based architecture that loads conditionally only on plugin routes.
+
+## Migration Status
+**⚠️ IMPORTANT**: As of version 4.0.0, this plugin uses the new v4 CSS framework. Legacy CSS documentation has been moved to `/doc/archive/` for reference.
+
+**Current System**: CSS v4 Framework (Conditional Loading)  
+**Previous System**: v3 CSS (Elementor-scoped) - *deprecated*  
+**Legacy System**: v2.5.38 Unified Container System - *obsolete*
+
+For current v4 documentation, see: [`CSS-V4-ROLLOUT.md`](CSS-V4-ROLLOUT.md)
 
 ## Unified Container System
 

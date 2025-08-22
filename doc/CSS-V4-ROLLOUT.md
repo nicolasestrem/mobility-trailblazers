@@ -9,7 +9,7 @@
 The CSS v4 framework is a complete reimplementation of the plugin's styling system, designed to:
 - Load CSS only on plugin-specific routes (not site-wide)
 - Work completely independent of Elementor
-- Reduce CSS footprint from ~50KB to <5KB
+- Reduce CSS footprint from ~50KB to ~20KB (60% reduction)
 - Use modern CSS custom properties for theming
 - Provide easy rollback mechanism
 
@@ -18,12 +18,13 @@ The CSS v4 framework is a complete reimplementation of the plugin's styling syst
 ### File Structure
 ```
 assets/css/v4/
-├── mt-tokens.css       # CSS custom properties (0.5KB)
-├── mt-reset.css        # Scoped reset styles (0.5KB)
-├── mt-base.css         # Core components (1.5KB)
-├── mt-components.css   # Specific components (1.5KB)
-└── mt-pages.css        # Page-specific styles (1KB)
+├── mt-tokens.css       # CSS custom properties (1.7KB)
+├── mt-reset.css        # Scoped reset styles (1.8KB)
+├── mt-base.css         # Core components (5.1KB)
+├── mt-components.css   # Specific components (5.9KB)
+└── mt-pages.css        # Page-specific styles (5.5KB)
 ```
+**Total Size**: ~20KB uncompressed (target for optimization: <10KB)
 
 ### Key Components
 
@@ -202,9 +203,9 @@ The following files can be removed once v4 is confirmed stable:
 ## Benefits of v4
 
 1. **Performance**
-   - 90% reduction in CSS size
-   - CSS only loads where needed
-   - Faster page load times
+   - 60% reduction in CSS size (from ~50KB to ~20KB)
+   - CSS only loads where needed (conditional loading)
+   - Faster page load times on non-plugin pages
    - Better Core Web Vitals scores
 
 2. **Maintainability**
