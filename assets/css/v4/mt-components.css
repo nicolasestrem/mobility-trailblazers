@@ -1,0 +1,279 @@
+/**
+ * Mobility Trailblazers v4 CSS Framework
+ * Specific Components
+ * Version: 4.0.0
+ */
+
+/* Candidate Card Component */
+.mt-candidate-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-candidate-card__image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 aspect ratio */
+  overflow: hidden;
+  background: var(--mt-color-gray-light);
+}
+
+.mt-candidate-card__image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Image positioning utilities */
+.mt-img-cover { object-fit: cover; }
+.mt-img-contain { 
+  object-fit: contain; 
+  background: var(--mt-color-white);
+}
+.mt-img-pos-top { object-position: 50% 10%; }
+.mt-img-pos-center { object-position: center; }
+.mt-img-pos-bottom { object-position: 50% 90%; }
+
+.mt-candidate-card__content {
+  flex: 1;
+  padding: var(--mt-space);
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-candidate-card__name {
+  font-size: var(--mt-font-size-large);
+  font-weight: 600;
+  margin-bottom: var(--mt-space-xs);
+  color: var(--mt-text);
+}
+
+.mt-candidate-card__role {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+  margin-bottom: var(--mt-space-xs);
+}
+
+.mt-candidate-card__org {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-primary);
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-candidate-card__category {
+  margin-top: auto;
+  padding-top: var(--mt-space-sm);
+}
+
+/* Login/Auth Card */
+.mt-login {
+  max-width: 460px;
+  margin: 30px auto;
+  background: var(--mt-color-bg);
+  border: 2px solid var(--mt-color-primary-light);
+  border-radius: var(--mt-radius);
+  padding: var(--mt-space-lg) var(--mt-space);
+  box-shadow: var(--mt-shadow);
+}
+
+.mt-login h3 {
+  margin: 0 0 var(--mt-space-md);
+  font-family: var(--mt-font-headings);
+  color: var(--mt-text);
+}
+
+.mt-login .form-group {
+  margin-bottom: var(--mt-space);
+}
+
+.mt-login label {
+  display: block;
+  margin-bottom: var(--mt-space-xs);
+  font-weight: 500;
+  color: var(--mt-text);
+}
+
+.mt-login input[type="text"],
+.mt-login input[type="email"],
+.mt-login input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+  transition: var(--mt-transition-fast);
+}
+
+.mt-login input:focus {
+  border-color: var(--mt-color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.mt-login .button,
+.mt-login button[type="submit"] {
+  background: var(--mt-color-primary-dark);
+  color: var(--mt-color-white);
+  border: none;
+  border-radius: var(--mt-radius-sm);
+  padding: 10px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  width: 100%;
+}
+
+.mt-login .button:hover,
+.mt-login button[type="submit"]:hover {
+  background: var(--mt-color-primary);
+}
+
+/* Evaluation Form Components */
+.mt-evaluation-form {
+  background: var(--mt-color-white);
+  border-radius: var(--mt-radius);
+  padding: var(--mt-space-lg);
+  box-shadow: var(--mt-shadow);
+}
+
+.mt-criterion {
+  margin-bottom: var(--mt-space-lg);
+  padding-bottom: var(--mt-space-lg);
+  border-bottom: var(--mt-border-width) solid var(--mt-border);
+}
+
+.mt-criterion:last-child {
+  border-bottom: none;
+}
+
+.mt-criterion__header {
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-criterion__title {
+  font-size: var(--mt-font-size-large);
+  font-weight: 600;
+  color: var(--mt-text);
+  margin-bottom: var(--mt-space-xs);
+}
+
+.mt-criterion__description {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+}
+
+/* Rating Buttons */
+.mt-rating-group {
+  display: flex;
+  gap: var(--mt-space-sm);
+  flex-wrap: wrap;
+}
+
+.mt-rating-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mt-radius-sm);
+  border: 2px solid var(--mt-border);
+  background: var(--mt-color-white);
+  color: var(--mt-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-rating-btn:hover {
+  border-color: var(--mt-color-primary);
+  background: rgba(38, 166, 154, 0.1);
+}
+
+.mt-rating-btn.selected,
+.mt-rating-btn[data-selected="true"] {
+  background: var(--mt-color-primary);
+  border-color: var(--mt-color-primary);
+  color: var(--mt-color-white);
+}
+
+/* Stats Component */
+.mt-stat-card {
+  text-align: center;
+  padding: var(--mt-space-lg);
+}
+
+.mt-stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--mt-color-primary);
+  line-height: 1;
+  margin-bottom: var(--mt-space-sm);
+}
+
+.mt-stat-label {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Dashboard Header */
+.mt-dashboard-header {
+  background: linear-gradient(135deg, var(--mt-color-primary) 0%, var(--mt-color-primary-dark) 100%);
+  color: var(--mt-color-white);
+  padding: var(--mt-space-2xl) var(--mt-space-lg);
+  border-radius: var(--mt-radius);
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-dashboard-header h1 {
+  color: var(--mt-color-white);
+  margin-bottom: var(--mt-space-sm);
+}
+
+.mt-dashboard-header p {
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+/* Search and Filter Bar */
+.mt-search-bar {
+  display: flex;
+  gap: var(--mt-space-md);
+  margin-bottom: var(--mt-space-lg);
+  flex-wrap: wrap;
+}
+
+.mt-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+}
+
+.mt-filter-select {
+  padding: 10px 12px;
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .mt-search-bar {
+    flex-direction: column;
+  }
+  
+  .mt-search-input,
+  .mt-filter-select {
+    width: 100%;
+  }
+}

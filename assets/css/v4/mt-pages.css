@@ -1,0 +1,260 @@
+/**
+ * Mobility Trailblazers v4 CSS Framework
+ * Page-Specific Styles
+ * Version: 4.0.0
+ */
+
+/* Vote Page */
+.mt-vote-page .mt-card {
+  border-color: var(--mt-color-primary-light);
+}
+
+.mt-vote-page .mt-candidate-card:hover {
+  border-color: var(--mt-color-primary);
+}
+
+.mt-vote-page .mt-grid {
+  margin-top: var(--mt-space-xl);
+}
+
+/* Jury Dashboard Page */
+.mt-jury-dashboard {
+  min-height: 80vh;
+}
+
+.mt-jury-dashboard .mt-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--mt-space);
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-jury-dashboard .mt-evaluation-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mt-space-xs);
+}
+
+.mt-jury-dashboard .mt-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mt-color-gray-medium);
+}
+
+.mt-jury-dashboard .mt-status-dot--completed {
+  background: var(--mt-color-success);
+}
+
+.mt-jury-dashboard .mt-status-dot--draft {
+  background: var(--mt-color-warning);
+}
+
+.mt-jury-dashboard .mt-status-dot--pending {
+  background: var(--mt-color-gray-medium);
+}
+
+/* Rankings Page */
+.mt-rankings-page .mt-ranking-table {
+  margin-top: var(--mt-space-xl);
+}
+
+.mt-rankings-page .mt-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  background: var(--mt-color-gray-light);
+}
+
+.mt-rankings-page .mt-rank-badge--gold {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #6b5b00;
+}
+
+.mt-rankings-page .mt-rank-badge--silver {
+  background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+  color: #545454;
+}
+
+.mt-rankings-page .mt-rank-badge--bronze {
+  background: linear-gradient(135deg, #cd7f32, #e4a853);
+  color: #5c3a1a;
+}
+
+/* Single Candidate Page */
+.mt-candidate-single {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mt-candidate-single .mt-candidate-header {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--mt-space-xl);
+  margin-bottom: var(--mt-space-xl);
+  padding: var(--mt-space-xl);
+  background: var(--mt-color-white);
+  border-radius: var(--mt-radius);
+  box-shadow: var(--mt-shadow);
+}
+
+@media (max-width: 768px) {
+  .mt-candidate-single .mt-candidate-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.mt-candidate-single .mt-candidate-photo {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--mt-radius);
+  object-fit: cover;
+  box-shadow: var(--mt-shadow);
+}
+
+@media (max-width: 768px) {
+  .mt-candidate-single .mt-candidate-photo {
+    margin: 0 auto;
+  }
+}
+
+.mt-candidate-single .mt-candidate-info h1 {
+  color: var(--mt-color-primary-dark);
+  margin-bottom: var(--mt-space-sm);
+}
+
+.mt-candidate-single .mt-candidate-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mt-space-sm);
+  margin-bottom: var(--mt-space-lg);
+}
+
+.mt-candidate-single .mt-meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--mt-space-sm);
+  color: var(--mt-color-gray-dark);
+}
+
+.mt-candidate-single .mt-content-section {
+  background: var(--mt-color-white);
+  padding: var(--mt-space-xl);
+  border-radius: var(--mt-radius);
+  box-shadow: var(--mt-shadow);
+  margin-bottom: var(--mt-space-lg);
+}
+
+/* Evaluation Form Page */
+.mt-evaluation-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mt-evaluation-page .mt-candidate-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--mt-space);
+  padding: var(--mt-space);
+  background: var(--mt-color-gray-light);
+  border-radius: var(--mt-radius);
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-evaluation-page .mt-candidate-summary img {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--mt-radius-sm);
+  object-fit: cover;
+}
+
+.mt-evaluation-page .mt-form-actions {
+  display: flex;
+  gap: var(--mt-space);
+  justify-content: space-between;
+  margin-top: var(--mt-space-xl);
+  padding-top: var(--mt-space-lg);
+  border-top: var(--mt-border-width) solid var(--mt-border);
+}
+
+@media (max-width: 768px) {
+  .mt-evaluation-page .mt-form-actions {
+    flex-direction: column;
+  }
+  
+  .mt-evaluation-page .mt-form-actions .mt-btn {
+    width: 100%;
+  }
+}
+
+/* Archive Page */
+.mt-candidates-archive {
+  padding: var(--mt-space-xl) 0;
+}
+
+.mt-candidates-archive .mt-archive-header {
+  text-align: center;
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-candidates-archive .mt-category-filters {
+  display: flex;
+  justify-content: center;
+  gap: var(--mt-space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-candidates-archive .mt-category-filter {
+  padding: 8px 16px;
+  border-radius: var(--mt-radius-full);
+  background: var(--mt-color-white);
+  border: var(--mt-border-width) solid var(--mt-border);
+  color: var(--mt-text);
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+}
+
+.mt-candidates-archive .mt-category-filter:hover,
+.mt-candidates-archive .mt-category-filter.active {
+  background: var(--mt-color-primary);
+  border-color: var(--mt-color-primary);
+  color: var(--mt-color-white);
+}
+
+/* Responsive Utilities */
+@media print {
+  .mt-no-print {
+    display: none !important;
+  }
+}
+
+/* Loading States */
+.mt-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.mt-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--mt-color-primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: mt-spin 0.6s linear infinite;
+}
+
+@keyframes mt-spin {
+  to { transform: rotate(360deg); }
+}

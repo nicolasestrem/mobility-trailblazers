@@ -316,6 +316,15 @@ class MT_Plugin {
         $shortcodes = new MT_Shortcodes();
         $shortcodes->init();
         
+        // Initialize v4 CSS framework for public assets (conditional loading)
+        if (!is_admin()) {
+            if (file_exists(MT_PLUGIN_DIR . 'includes/public/class-mt-public-assets.php')) {
+                require_once MT_PLUGIN_DIR . 'includes/public/class-mt-public-assets.php';
+                $public_assets = new \MobilityTrailblazers\Public\MT_Public_Assets();
+                $public_assets->init();
+            }
+        }
+        
         // Initialize Elementor integration
         if (did_action('elementor/loaded')) {
             require_once MT_PLUGIN_DIR . 'includes/elementor/class-mt-elementor-bootstrap.php';

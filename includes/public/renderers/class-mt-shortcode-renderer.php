@@ -216,18 +216,24 @@ class MT_Shortcode_Renderer {
      * Enqueue dashboard assets
      */
     private function enqueue_dashboard_assets() {
-        // Enqueue v3 CSS files
-        $base = MT_PLUGIN_URL . 'assets/css/v3/';
-        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
-        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
-        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
-        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
-        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
-        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
-        wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
-        
-        // Enqueue new candidate cards v3 CSS
-        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        // Check if v4 CSS framework is active
+        if (apply_filters('mt_enable_css_v4', true)) {
+            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
+            // Only enqueue JavaScript and localization
+        } else {
+            // Enqueue v3 CSS files (legacy)
+            $base = MT_PLUGIN_URL . 'assets/css/v3/';
+            wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
+            wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
+            wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
+            wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
+            wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
+            wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
+            wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
+            
+            // Enqueue new candidate cards v3 CSS
+            wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        }
         
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
@@ -265,7 +271,13 @@ class MT_Shortcode_Renderer {
      * Enqueue grid assets
      */
     private function enqueue_grid_assets() {
-        // Enqueue v3 CSS files
+        // Check if v4 CSS framework is active
+        if (apply_filters('mt_enable_css_v4', true)) {
+            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
+            return;
+        }
+        
+        // Enqueue v3 CSS files (legacy)
         $base = MT_PLUGIN_URL . 'assets/css/v3/';
         wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
         wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
@@ -283,7 +295,13 @@ class MT_Shortcode_Renderer {
      * Enqueue stats assets
      */
     private function enqueue_stats_assets() {
-        // Enqueue v3 CSS files
+        // Check if v4 CSS framework is active
+        if (apply_filters('mt_enable_css_v4', true)) {
+            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
+            return;
+        }
+        
+        // Enqueue v3 CSS files (legacy)
         $base = MT_PLUGIN_URL . 'assets/css/v3/';
         wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
         wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
@@ -301,7 +319,13 @@ class MT_Shortcode_Renderer {
      * Enqueue winners assets
      */
     private function enqueue_winners_assets() {
-        // Enqueue v3 CSS files
+        // Check if v4 CSS framework is active
+        if (apply_filters('mt_enable_css_v4', true)) {
+            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
+            return;
+        }
+        
+        // Enqueue v3 CSS files (legacy)
         $base = MT_PLUGIN_URL . 'assets/css/v3/';
         wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
         wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);

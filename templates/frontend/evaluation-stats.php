@@ -16,6 +16,7 @@ $type = $atts['type'];
 $show_chart = $atts['show_chart'] === 'yes';
 ?>
 
+<div class="mt-root">
 <div class="mt-evaluation-stats">
     <?php if ($type === 'summary') : ?>
         <div class="mt-stats-summary">
@@ -135,4 +136,5 @@ $show_chart = $atts['show_chart'] === 'yes';
             <?php endif; ?>
         </div>
     <?php endif; ?>
-</div> 
+</div>
+</div><!-- .mt-root --> 

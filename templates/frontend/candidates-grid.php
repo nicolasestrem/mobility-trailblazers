@@ -58,6 +58,7 @@ if ($show_category && !empty($candidate_ids)) {
 }
 ?>
 
+<div class="mt-root">
 <div class="mt-candidates-grid columns-<?php echo esc_attr($columns); ?>">
     <?php while ($candidates->have_posts()) : $candidates->the_post(); 
         $candidate_id = get_the_ID();
@@ -126,4 +127,5 @@ if ($show_category && !empty($candidate_ids)) {
             </a>
         </div>
     <?php endwhile; ?>
-</div> 
+</div>
+</div><!-- .mt-root --> 

@@ -16,6 +16,7 @@ $show_scores = $atts['show_scores'] === 'yes';
 $year = $atts['year'];
 ?>
 
+<div class="mt-root">
 <div class="mt-winners-display">
     <div class="mt-winners-header">
         <h2><?php printf(__('Mobility Trailblazers %s Winners', 'mobility-trailblazers'), esc_html($year)); ?></h2>
@@ -90,4 +91,5 @@ $year = $atts['year'];
         endforeach; 
         ?>
     </div>
-</div> 
+</div>
+</div><!-- .mt-root --> 

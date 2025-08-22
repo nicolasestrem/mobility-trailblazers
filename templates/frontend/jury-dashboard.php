@@ -82,6 +82,7 @@ $progress_class = 'mt-progress-bar mt-progress-' . (isset($dashboard_settings['p
 $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid');
 ?>
 
+<div class="mt-root">
 <div class="mt-jury-dashboard mt-dashboard-v3">
     <?php if ($progress['completion_rate'] == 100) : ?>
         <div class="mt-completion-status-banner">
@@ -438,5 +439,6 @@ jQuery(document).ready(function($) {
     console.log('MT Jury Filters - Event handlers attached');
 });
 </script>
+</div><!-- .mt-root -->
 
  
