@@ -42,7 +42,15 @@ async function globalSetup(config: FullConfig) {
     
     // Setup test data if needed
     console.log('📊 Setting up test data...');
-    await createTestData(page, baseURL);
+    try {
+      await createTestData(page, baseURL);
+    } catch (dataError) {
+      console.log('⚠️  Test data setup had issues, continuing anyway...');
+      console.log('📝 Please ensure test users exist manually:');
+      console.log('   - Admin user: admin/admin');
+      console.log('   - Jury member: jurytester1');
+      console.log('   - Some test candidates in the system');
+    }
     
     console.log('✅ Global setup completed successfully');
     

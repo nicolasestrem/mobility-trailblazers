@@ -116,8 +116,13 @@ export async function createTestData(page: Page, baseURL: string) {
     if (!isLoggedIn) {
       console.log('Not logged in, attempting to login with admin credentials...');
       
-      await page.fill('#user_login', process.env.ADMIN_USERNAME || 'admin');
-      await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'admin');
+      await page.fill('#user_login', process.env.ADMIN_USERNAME || 'testadmin');
+      
+      // Clear password field and type password slowly
+      await page.locator('#user_pass').clear();
+      await page.waitForTimeout(500);
+      await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'AdminPlaywright2025', { delay: 50 });
+      await page.waitForTimeout(500);
       await page.click('#wp-submit');
       
       // Wait for login success
@@ -188,6 +193,15 @@ async function createTestCandidates(page: Page, baseURL: string) {
 async function createTestJuryMembers(page: Page, baseURL: string) {
   for (const juryMember of testJuryMembers) {
     try {
+      // First check if user already exists
+      await page.goto(`${baseURL}/wp-admin/users.php`);
+      const userExists = await page.locator(`tr:has-text("${juryMember.username}")`).isVisible({ timeout: 2000 }).catch(() => false);
+      
+      if (userExists) {
+        console.log(`✅ Jury member already exists: ${juryMember.username}`);
+        continue;
+      }
+      
       // Go to new user page
       await page.goto(`${baseURL}/wp-admin/user-new.php`);
       
@@ -198,9 +212,26 @@ async function createTestJuryMembers(page: Page, baseURL: string) {
         await page.fill('#first_name', juryMember.firstName);
         await page.fill('#last_name', juryMember.lastName);
         
-        // Set password
-        await page.fill('#pass1', 'test123!@#');
-        await page.fill('#pass2', 'test123!@#');
+        // Handle password generation button if present
+        const generateButton = page.locator('button:has-text("Generate password"), button:has-text("Passwort generieren")');
+        if (await generateButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await generateButton.click();
+          await page.waitForTimeout(500);
+        }
+        
+        // Now set our custom password
+        const passwordField = page.locator('#pass1, #pass1-text').first();
+        if (await passwordField.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await passwordField.clear();
+          await passwordField.fill('Test123!@#Pass');
+          await page.waitForTimeout(500);
+        }
+        
+        // Confirm weak password if checkbox appears
+        const weakPasswordCheckbox = page.locator('input[name="pw_weak"], #pw-weak');
+        if (await weakPasswordCheckbox.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await weakPasswordCheckbox.check();
+        }
         
         // Set role
         await page.selectOption('#role', juryMember.role);

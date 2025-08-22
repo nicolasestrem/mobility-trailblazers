@@ -93,8 +93,13 @@ add_filter('gettext', function($translated, $text, $domain) {
  * Debug helper to verify translations are working
  * Only active for administrators in debug mode
  */
-if (defined('WP_DEBUG') && WP_DEBUG && current_user_can('administrator')) {
+if (defined('WP_DEBUG') && WP_DEBUG) {
     add_action('wp_footer', function() {
+        // Check user capability inside the hook when WordPress is fully loaded
+        if (!current_user_can('administrator')) {
+            return;
+        }
+        
         if (strpos($_SERVER['REQUEST_URI'], 'evaluate') !== false || 
             strpos($_SERVER['REQUEST_URI'], 'jury') !== false) {
             ?>
