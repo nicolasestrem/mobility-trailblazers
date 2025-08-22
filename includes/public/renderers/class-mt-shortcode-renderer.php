@@ -62,6 +62,7 @@ class MT_Shortcode_Renderer {
             echo '<div class="mt-error">' . esc_html__('Jury dashboard template not found.', 'mobility-trailblazers') . '</div>';
         }
         
+        
         return ob_get_clean();
     }
     
@@ -227,6 +228,8 @@ class MT_Shortcode_Renderer {
         
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
+        
+        // Note: Not enqueueing mt-jury-filters.js as we're using inline JavaScript
         
         // Localize script
         wp_localize_script('mt-frontend', 'mt_ajax', [

@@ -529,13 +529,18 @@ body.debug-mode .mt-button-group .mt-score-button.selected::after {
 }
 
 /* Fix card height and overflow issues */
-.mt-candidate-card {
+.mt-candidate-card:not(.hidden) {
     min-height: auto !important;
     height: auto !important;
     overflow: visible !important;
     display: flex;
     flex-direction: column;
     box-sizing: border-box !important;
+}
+
+/* Ensure hidden cards are actually hidden */
+.mt-candidate-card.hidden {
+    display: none !important;
 }
 
 .mt-candidate-header {
@@ -678,8 +683,8 @@ body .mt-jury-dashboard * {
         padding: 10px 0 !important;
     }
     
-    /* Force candidate cards to be visible */
-    .mt-jury-dashboard .mt-candidate-card {
+    /* Force candidate cards to be visible - COMMENTED OUT as it interferes with filtering */
+    /* .mt-jury-dashboard .mt-candidate-card {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -687,9 +692,9 @@ body .mt-jury-dashboard * {
         transform: none !important;
         margin: 0 !important;
         width: 100% !important;
-    }
+    } */
     
-    /* Only hide cards explicitly marked as hidden by JavaScript */
+    /* Allow cards to be hidden by JavaScript filters */
     .mt-jury-dashboard .mt-candidate-card.hidden {
         display: none !important;
     }
