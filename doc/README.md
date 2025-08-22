@@ -1,6 +1,6 @@
 # Documentation Hub - Mobility Trailblazers Plugin
 
-Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin (v2.5.37). This directory contains all technical documentation for developers, administrators, and contributors.
+Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin (v2.5.39+). This directory contains all technical documentation for developers, administrators, and contributors.
 
 ## Quick Navigation
 
@@ -8,29 +8,61 @@ Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin 
 
 | Document | Description | Last Updated |
 |----------|-------------|--------------|
-| [Developer Guide](developer-guide.md) | Comprehensive technical reference for plugin development | August 20, 2025 |
-| [Import/Export Guide](IMPORT-EXPORT-GUIDE.md) | Complete guide for data import, export, and migration | August 20, 2025 |
-| [Candidate Import System](candidate-import-system.md) | Technical architecture of the candidate import system | August 2025 |
-| [Changelog](CHANGELOG.md) | Version history and release notes | August 20, 2025 |
+| [Architecture Guide](architecture.md) | Complete system architecture and design patterns | August 22, 2025 |
+| [Developer Guide](developer-guide.md) | Development environment setup and coding patterns | August 22, 2025 |
+| [CSS Guide](css-guide.md) | Frontend styling system and component architecture | August 22, 2025 |
+| [Import/Export Guide](import-export.md) | Data management, import/export, and migration procedures | August 22, 2025 |
+
+### 📋 Reference Documentation
+
+| Document | Description | Last Updated |
+|----------|-------------|--------------|
+| [API Reference](API-REFERENCE.md) | Complete API documentation | August 20, 2025 |
+| [Dependency Injection Guide](DEPENDENCY-INJECTION-GUIDE.md) | DI container usage and patterns | August 20, 2025 |
+| [Testing Strategies](TESTING-STRATEGIES.md) | Testing patterns and best practices | August 20, 2025 |
+| [Migration Guide](MIGRATION-GUIDE.md) | Version migration procedures | August 20, 2025 |
+
+### 📖 Specialized Guides
+
+| Document | Description | Last Updated |
+|----------|-------------|--------------|
+| [Email Guide](EMAIL-GUIDE.md) | Email system documentation | August 20, 2025 |
+| [Jury Handbook 2025](jury-handbook-2025.md) | Jury member documentation | August 20, 2025 |
+| [Localization Fix Summary](localization-fix-summary.md) | Translation fixes | August 20, 2025 |
 
 ### 🗂️ Archives
 
 | Directory | Contents |
 |-----------|----------|
 | [Fixes Archive](archive/fixes-archive-index.md) | Historical documentation of implemented fixes organized by category |
+| [Implementation Archive](archive/implementations/) | Past implementation documentation |
 | [Reports](report/) | Production reports and deployment documentation |
 
-## Documentation Structure
+### 📋 Specifications (Technical Reference)
+
+The `specs/` directory contains detailed technical specifications (30+ documents) covering every aspect of the system. See [specs/README.md](specs/README.md) for the complete index.
+
+## Optimized Documentation Structure
 
 ```
 doc/
 ├── README.md                       # This file - navigation hub
-├── developer-guide.md              # Technical development guide
-├── IMPORT-EXPORT-GUIDE.md         # Import/export procedures
-├── candidate-import-system.md     # Import system architecture
-├── CHANGELOG.md                   # Version history
-├── archive/                       # Historical fixes documentation
+├── architecture.md                 # System architecture (consolidated)
+├── developer-guide.md              # Development guide (streamlined)
+├── css-guide.md                    # CSS system guide (consolidated)
+├── import-export.md                # Import/export guide (consolidated)
+├── API-REFERENCE.md               # API documentation
+├── DEPENDENCY-INJECTION-GUIDE.md # DI container guide
+├── TESTING-STRATEGIES.md         # Testing documentation
+├── MIGRATION-GUIDE.md             # Migration procedures
+├── EMAIL-GUIDE.md                 # Email system
+├── jury-handbook-2025.md          # Jury documentation
+├── localization-fix-summary.md    # Translation fixes
+├── specs/                         # Technical specifications (30+ files)
+│   └── README.md                  # Specs navigation
+├── archive/                       # Historical documentation
 │   ├── fixes-archive-index.md    # Archive navigation
+│   ├── implementations/          # Past implementations
 │   ├── css-fixes/                # CSS-related fixes
 │   ├── performance-fixes/        # Performance optimizations
 │   ├── ui-fixes/                 # UI improvements
@@ -40,10 +72,12 @@ doc/
 
 ## Quick Start for Developers
 
-1. **New to the project?** Start with the [Developer Guide](developer-guide.md)
-2. **Working with imports?** See the [Import/Export Guide](IMPORT-EXPORT-GUIDE.md)
-3. **Troubleshooting issues?** Check the [Developer Guide Troubleshooting](developer-guide.md#troubleshooting) section
-4. **Looking for historical fixes?** Browse the [Fixes Archive](archive/fixes-archive-index.md)
+1. **New to the project?** Start with the [Architecture Guide](architecture.md)
+2. **Setting up development?** See the [Developer Guide](developer-guide.md#development-environment-setup)
+3. **Working with styles?** Check the [CSS Guide](css-guide.md)
+4. **Working with data?** See the [Import/Export Guide](import-export.md)
+5. **Troubleshooting issues?** Check the [Developer Guide Troubleshooting](developer-guide.md#troubleshooting)
+6. **Looking for historical fixes?** Browse the [Fixes Archive](archive/fixes-archive-index.md)
 
 ## Key Resources
 

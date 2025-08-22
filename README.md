@@ -216,14 +216,14 @@ npm run build
 ## 📚 Documentation
 
 ### Core Documentation
-- **[Developer Guide](doc/developer-guide.md)** - Complete technical reference, architecture, testing, and troubleshooting
-- **[Architecture Overview](doc/ARCHITECTURE.md)** - System architecture and design patterns
-- **[Dependency Injection Guide](doc/DEPENDENCY-INJECTION-GUIDE.md)** - DI container usage and patterns
+- **[Architecture Guide](doc/architecture.md)** - Complete system architecture and design patterns
+- **[Developer Guide](doc/developer-guide.md)** - Development environment setup and coding patterns  
+- **[CSS Guide](doc/css-guide.md)** - Frontend styling system and component architecture
+- **[Import/Export Guide](doc/import-export.md)** - Data management, import/export, and migration procedures
 - **[API Reference](doc/API-REFERENCE.md)** - Complete API documentation for all components
-- **[Migration Guide](doc/MIGRATION-GUIDE.md)** - Step-by-step migration to DI architecture
+- **[Dependency Injection Guide](doc/DEPENDENCY-INJECTION-GUIDE.md)** - DI container usage and patterns
 - **[Testing Strategies](doc/TESTING-STRATEGIES.md)** - Testing patterns with dependency injection
-- **[Import/Export Guide](doc/import-export-guide.md)** - CSV/Excel handling and German localization
-- **[Changelog](doc/changelog.md)** - Complete version history (v2.5.37 to v2.2.0)
+- **[Changelog](CHANGELOG.md)** - Complete version history (v2.5.39 to v2.2.0)
 
 ### Archived Documentation
 - **[Archived](doc/archived/)** - Historical documentation and dated fix reports

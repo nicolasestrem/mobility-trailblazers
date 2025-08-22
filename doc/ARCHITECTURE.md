@@ -1,7 +1,7 @@
 # Mobility Trailblazers Plugin Architecture
 
-**Version:** 2.5.37+  
-**Last Updated:** 2025-08-20  
+**Version:** 2.5.39+  
+**Last Updated:** 2025-08-22  
 **Author:** Mobility Trailblazers - Nicolas Estrem  
 **Architecture Version:** 2.0 (Dependency Injection Implementation)
 
@@ -17,8 +17,9 @@
 8. [Service Layer](#service-layer)
 9. [Repository Layer](#repository-layer)
 10. [AJAX Layer](#ajax-layer)
-11. [Legacy Compatibility](#legacy-compatibility)
-12. [Best Practices](#best-practices)
+11. [Database Schema](#database-schema)
+12. [Legacy Compatibility](#legacy-compatibility)
+13. [Best Practices](#best-practices)
 
 ## Overview
 
@@ -62,6 +63,29 @@ Container → Service Providers → Services → Repositories → Database
 Interfaces ← Implementation Classes ← Constructor Injection
 ```
 
+### 3. Modern Modular Structure
+
+```
+mobility-trailblazers/
+├── includes/
+│   ├── core/              # MT_Plugin, Container, Service Provider
+│   ├── providers/         # Service provider implementations
+│   ├── interfaces/        # Service and repository interfaces
+│   ├── admin/             # Admin interfaces and columns
+│   ├── ajax/              # AJAX handlers with base class
+│   ├── repositories/      # Data access layer (interface-based)
+│   ├── services/          # Business logic (DI-enabled)
+│   ├── widgets/           # Dashboard widgets
+│   ├── legacy/            # Backward compatibility layer
+│   └── utilities/         # Helper functions
+├── templates/             # Frontend templates
+├── assets/               
+│   ├── css/              # Stylesheets
+│   └── js/               # JavaScript files
+├── languages/            # i18n support (German/English)
+└── docs/                 # Comprehensive documentation
+```
+
 ## Dependency Injection Container
 
 The `MT_Container` class provides a lightweight, WordPress-compatible dependency injection container.
@@ -101,417 +125,487 @@ $container->bind(
 
 #### Singleton Binding
 ```php
-// Register as singleton (shared instance)
+// Register as singleton
 $container->singleton(
-    'MobilityTrailblazers\Services\MT_Evaluation_Service',
+    'MobilityTrailblazers\Services\MT_Cache_Service',
     function($container) {
-        return new MT_Evaluation_Service(
-            $container->make('MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface'),
-            $container->make('MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface')
-        );
+        return new MT_Cache_Service();
     }
 );
 ```
 
+#### Factory Binding
+```php
+// Complex factory function
+$container->bind('database_connection', function($container) {
+    return new MT_Database_Connection(
+        $container->make('config'),
+        $container->make('logger')
+    );
+});
+```
+
 ## Service Provider Pattern
 
-Service providers encapsulate dependency registration logic and bootstrap services.
+Service providers organize the registration and bootstrapping of related services.
 
-### Provider Hierarchy
+### Core Service Providers
 
-```
-MT_Service_Provider (Abstract Base)
-    ├── MT_Repository_Provider
-    ├── MT_Services_Provider
-    └── [Future Providers]
-```
+- **MT_Repository_Provider**: Registers all repository implementations
+- **MT_Services_Provider**: Registers business logic services
+- **MT_Admin_Provider**: Registers admin-specific services
+- **MT_Ajax_Provider**: Registers AJAX handlers
 
-### Provider Lifecycle
-
-1. **Registration Phase**: Services are bound to the container
-2. **Boot Phase**: Additional initialization after all services are registered
-
-### Example Provider
+### Provider Implementation
 
 ```php
-class MT_Repository_Provider extends MT_Service_Provider {
-    public function register() {
-        // Bind repositories as singletons
-        $this->singleton(
+class MT_Repository_Provider implements MT_Service_Provider_Interface {
+    
+    public function register(MT_Container $container): void {
+        // Register evaluation repository
+        $container->singleton(
             'MobilityTrailblazers\Interfaces\MT_Evaluation_Repository_Interface',
-            function($container) {
-                return new MT_Evaluation_Repository();
-            }
+            'MobilityTrailblazers\Repositories\MT_Evaluation_Repository'
+        );
+        
+        // Register assignment repository
+        $container->singleton(
+            'MobilityTrailblazers\Interfaces\MT_Assignment_Repository_Interface',
+            'MobilityTrailblazers\Repositories\MT_Assignment_Repository'
         );
     }
     
-    public function boot() {
-        // Post-registration initialization
+    public function boot(MT_Container $container): void {
+        // Perform any post-registration setup
     }
 }
 ```
 
 ## Interface-Based Design
 
-All major components implement interfaces to ensure loose coupling and testability.
+All major components implement interfaces to ensure flexibility and testability.
 
-### Interface Hierarchy
+### Repository Interfaces
 
-```
-MT_Service_Interface
-    ├── MT_Evaluation_Service_Interface
-    ├── MT_Assignment_Service_Interface
-    └── MT_Diagnostic_Service_Interface
-
-MT_Repository_Interface
-    ├── MT_Evaluation_Repository_Interface
-    ├── MT_Assignment_Repository_Interface
-    ├── MT_Candidate_Repository_Interface
-    └── MT_Audit_Log_Repository_Interface
+```php
+interface MT_Evaluation_Repository_Interface {
+    public function find_by_id(int $id): ?MT_Evaluation;
+    public function save(MT_Evaluation $evaluation): bool;
+    public function find_by_jury_and_candidate(int $jury_id, int $candidate_id): ?MT_Evaluation;
+    public function get_evaluations_by_status(string $status): array;
+}
 ```
 
-### Benefits of Interface-Based Design
+### Service Interfaces
 
-- **Testability**: Easy to mock dependencies for unit testing
-- **Flexibility**: Swap implementations without changing dependent code
-- **Documentation**: Interfaces serve as contracts documenting expected behavior
-- **IDE Support**: Better autocompletion and type checking
+```php
+interface MT_Evaluation_Service_Interface {
+    public function create_evaluation(int $jury_id, int $candidate_id): MT_Evaluation;
+    public function submit_evaluation(int $evaluation_id): bool;
+    public function calculate_total_score(MT_Evaluation $evaluation): float;
+}
+```
 
 ## Directory Structure
 
-```
-includes/
-├── core/                           # Core framework components
-│   ├── class-mt-container.php      # Dependency injection container
-│   ├── class-mt-service-provider.php # Base service provider
-│   ├── class-mt-plugin.php         # Main plugin class
-│   └── class-mt-autoloader.php     # PSR-4 autoloader
-├── providers/                      # Service providers
-│   ├── class-mt-repository-provider.php
-│   └── class-mt-services-provider.php
-├── interfaces/                     # Interface definitions
-│   ├── interface-mt-service.php
-│   ├── interface-mt-repository.php
-│   ├── interface-mt-evaluation-repository.php
-│   └── interface-mt-assignment-repository.php
-├── services/                       # Business logic layer
-│   ├── class-mt-evaluation-service.php
-│   ├── class-mt-assignment-service.php
-│   └── class-mt-diagnostic-service.php
-├── repositories/                   # Data access layer
-│   ├── class-mt-evaluation-repository.php
-│   ├── class-mt-assignment-repository.php
-│   └── class-mt-candidate-repository.php
-├── ajax/                          # AJAX handlers
-│   ├── class-mt-base-ajax.php
-│   ├── class-mt-evaluation-ajax.php
-│   └── class-mt-assignment-ajax.php
-├── legacy/                        # Backward compatibility
-│   └── class-mt-backward-compatibility.php
-└── [other directories...]
-```
+### Core Components
+
+- **includes/core/**: Plugin initialization, container, and core services
+- **includes/providers/**: Service provider implementations for DI registration
+- **includes/interfaces/**: Interface definitions for all major components
+- **includes/services/**: Business logic layer with dependency injection
+- **includes/repositories/**: Data access layer implementing repository pattern
+- **includes/admin/**: WordPress admin integration and interfaces
+- **includes/ajax/**: AJAX handlers extending base security class
+- **includes/widgets/**: WordPress dashboard widgets
+- **includes/legacy/**: Backward compatibility facade for legacy code
+
+### Frontend Components
+
+- **templates/**: PHP templates for frontend rendering
+- **assets/css/**: Stylesheets organized by component and version
+- **assets/js/**: JavaScript files with proper dependency management
+- **languages/**: Internationalization files (German primary)
 
 ## Component Lifecycle
 
-### 1. Plugin Initialization
+### Plugin Initialization
 
 ```php
-// mobility-trailblazers.php
-function mt_init_plugin() {
-    // 1. Initialize container
-    $container = MT_Container::get_instance();
-    
-    // 2. Register service providers
-    $container->register_provider(new MT_Repository_Provider($container));
-    $container->register_provider(new MT_Services_Provider($container));
-    
-    // 3. Initialize plugin
-    $plugin = new MT_Plugin($container);
-    $plugin->init();
-}
+// 1. Plugin bootstrap (mobility-trailblazers.php)
+register_activation_hook(__FILE__, ['MT_Activator', 'activate']);
+register_deactivation_hook(__FILE__, ['MT_Deactivator', 'deactivate']);
+
+// 2. Main plugin class initialization
+add_action('plugins_loaded', function() {
+    MT_Plugin::get_instance()->run();
+});
+
+// 3. Service container setup
+$container = MT_Container::get_instance();
+$container->register_providers();
+$container->boot_providers();
 ```
 
-### 2. Service Resolution
+### Request Lifecycle
 
 ```php
-// In any part of the application
-$container = MT_Plugin::container();
-$evaluation_service = $container->make('MobilityTrailblazers\Services\MT_Evaluation_Service');
-```
-
-### 3. Automatic Dependency Injection
-
-```php
-class MT_Evaluation_Service {
-    public function __construct(
-        MT_Evaluation_Repository_Interface $evaluation_repository,
-        MT_Assignment_Repository_Interface $assignment_repository
-    ) {
-        // Dependencies automatically injected by container
-        $this->repository = $evaluation_repository;
-        $this->assignment_repository = $assignment_repository;
-    }
-}
+// 1. WordPress loads plugin
+// 2. Container resolves dependencies
+// 3. Service providers register services
+// 4. AJAX/Admin handlers are registered
+// 5. Templates are rendered with injected services
 ```
 
 ## Service Layer
 
-Services contain business logic and orchestrate operations across repositories.
+The service layer contains business logic and orchestrates repository interactions.
 
-### Service Characteristics
-
-- **Stateless**: Services don't maintain state between operations
-- **Transactional**: Each method represents a complete business operation
-- **Validated**: Input validation and business rule enforcement
-- **Audited**: All operations are logged for audit trails
-
-### Service Example
+### Service Implementation Example
 
 ```php
-class MT_Evaluation_Service implements MT_Service_Interface {
-    private $repository;
-    private $assignment_repository;
-    private $errors = [];
+class MT_Evaluation_Service implements MT_Evaluation_Service_Interface {
+    
+    private MT_Evaluation_Repository_Interface $evaluation_repository;
+    private MT_Assignment_Repository_Interface $assignment_repository;
     
     public function __construct(
         MT_Evaluation_Repository_Interface $evaluation_repository,
         MT_Assignment_Repository_Interface $assignment_repository
     ) {
-        $this->repository = $evaluation_repository;
+        $this->evaluation_repository = $evaluation_repository;
         $this->assignment_repository = $assignment_repository;
     }
     
-    public function process($data) {
-        // 1. Validate input
-        if (!$this->validate($data)) {
-            return false;
+    public function create_evaluation(int $jury_id, int $candidate_id): MT_Evaluation {
+        // Business logic for evaluation creation
+        $assignment = $this->assignment_repository->find_by_jury_and_candidate($jury_id, $candidate_id);
+        
+        if (!$assignment) {
+            throw new MT_Assignment_Not_Found_Exception();
         }
         
-        // 2. Check business rules
-        if (!$this->check_permission($data['jury_member_id'], $data['candidate_id'])) {
-            return false;
-        }
-        
-        // 3. Process data
-        $result = $this->repository->save($this->prepare_data($data));
-        
-        // 4. Log audit trail
-        MT_Audit_Logger::log('evaluation_saved', 'evaluation', $result, $data);
-        
-        return $result;
+        return $this->evaluation_repository->create([
+            'jury_member_id' => $jury_id,
+            'candidate_id' => $candidate_id,
+            'status' => 'draft'
+        ]);
     }
 }
 ```
 
 ## Repository Layer
 
-Repositories handle all data access and persistence operations.
+The repository layer handles all data access and database operations.
 
-### Repository Characteristics
-
-- **Data-Focused**: Exclusively handle data operations
-- **Technology-Agnostic**: Abstract underlying storage implementation
-- **Cacheable**: Can implement caching strategies transparently
-- **Queryable**: Provide flexible query interfaces
-
-### Repository Example
+### Repository Implementation
 
 ```php
 class MT_Evaluation_Repository implements MT_Evaluation_Repository_Interface {
-    public function find($id) {
+    
+    private $wpdb;
+    private string $table_name;
+    
+    public function __construct() {
         global $wpdb;
-        $table = $wpdb->prefix . 'mt_evaluations';
-        
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$table} WHERE id = %d",
-            $id
-        ));
+        $this->wpdb = $wpdb;
+        $this->table_name = $wpdb->prefix . 'mt_evaluations';
     }
     
-    public function create($data) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'mt_evaluations';
+    public function find_by_id(int $id): ?MT_Evaluation {
+        $query = $this->wpdb->prepare(
+            "SELECT * FROM {$this->table_name} WHERE id = %d",
+            $id
+        );
         
-        $result = $wpdb->insert($table, $this->sanitize_data($data));
-        return $result ? $wpdb->insert_id : false;
+        $result = $this->wpdb->get_row($query);
+        
+        return $result ? MT_Evaluation::from_array((array) $result) : null;
+    }
+    
+    public function save(MT_Evaluation $evaluation): bool {
+        if ($evaluation->get_id()) {
+            return $this->update($evaluation);
+        }
+        
+        return $this->insert($evaluation);
     }
 }
 ```
 
 ## AJAX Layer
 
-AJAX handlers have been updated to use the container for service resolution.
+All AJAX handlers extend the base `MT_Base_Ajax` class for security and consistency.
 
-### Before (Legacy)
-```php
-class MT_Evaluation_Ajax {
-    public function submit_evaluation() {
-        // Direct instantiation
-        $service = new MT_Evaluation_Service();
-        $repository = new MT_Evaluation_Repository();
-    }
-}
-```
+### Base AJAX Security
 
-### After (DI-Enabled)
 ```php
-class MT_Evaluation_Ajax extends MT_Base_Ajax {
-    private function get_evaluation_service() {
-        $container = MT_Plugin::container();
-        return $container->make('MobilityTrailblazers\Services\MT_Evaluation_Service');
+abstract class MT_Base_Ajax {
+    
+    public function __construct() {
+        $this->register_hooks();
     }
     
-    public function submit_evaluation() {
-        $service = $this->get_evaluation_service();
-        // Service already has all dependencies injected
+    protected function verify_nonce(): bool {
+        return wp_verify_nonce($_POST['nonce'], 'mt_ajax_nonce');
+    }
+    
+    protected function check_capabilities(): bool {
+        return current_user_can($this->get_required_capability());
+    }
+    
+    protected function handle_request(): void {
+        if (!$this->verify_nonce() || !$this->check_capabilities()) {
+            wp_die('Security check failed', 'Security Error', ['response' => 403]);
+        }
+        
+        $this->process_request();
+    }
+    
+    abstract protected function process_request(): void;
+    abstract protected function get_required_capability(): string;
+}
+```
+
+### AJAX Handler Implementation
+
+```php
+class MT_Evaluation_Ajax extends MT_Base_Ajax {
+    
+    private MT_Evaluation_Service_Interface $evaluation_service;
+    
+    public function __construct(MT_Evaluation_Service_Interface $evaluation_service) {
+        $this->evaluation_service = $evaluation_service;
+        parent::__construct();
+    }
+    
+    protected function process_request(): void {
+        $action = sanitize_text_field($_POST['mt_action']);
+        
+        switch ($action) {
+            case 'save_evaluation':
+                $this->save_evaluation();
+                break;
+            case 'submit_evaluation':
+                $this->submit_evaluation();
+                break;
+        }
+    }
+    
+    protected function get_required_capability(): string {
+        return 'mt_submit_evaluations';
     }
 }
 ```
+
+## Database Schema
+
+### Core WordPress Tables (Extended)
+
+```sql
+-- Extended WordPress posts table
+wp_posts (
+    -- Standard WordPress fields
+    ID, post_title, post_content, post_status, post_type, post_date
+    
+    -- Custom post types used:
+    -- post_type = 'mt_candidate' (candidate profiles)
+    -- post_type = 'mt_jury_member' (jury member profiles)
+)
+
+-- Extended WordPress postmeta table
+wp_postmeta (
+    -- Standard WordPress fields
+    meta_id, post_id, meta_key, meta_value
+    
+    -- Custom meta keys used:
+    -- mt_candidate_category, mt_candidate_company, mt_candidate_description
+    -- mt_jury_member_expertise, mt_jury_member_bio
+)
+```
+
+### Custom Plugin Tables
+
+```sql
+-- Evaluation storage with 5 criteria scoring
+wp_mt_evaluations (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    jury_member_id BIGINT NOT NULL,           -- References mt_jury_member post
+    candidate_id BIGINT NOT NULL,             -- References mt_candidate post
+    criterion_1 DECIMAL(3,1) DEFAULT NULL,   -- Mut & Pioniergeist (0-10, 0.5 increments)
+    criterion_2 DECIMAL(3,1) DEFAULT NULL,   -- Innovationsgrad (0-10, 0.5 increments)
+    criterion_3 DECIMAL(3,1) DEFAULT NULL,   -- Umsetzungskraft & Wirkung (0-10, 0.5 increments)
+    criterion_4 DECIMAL(3,1) DEFAULT NULL,   -- Relevanz für Mobilitätswende (0-10, 0.5 increments)
+    criterion_5 DECIMAL(3,1) DEFAULT NULL,   -- Vorbildfunktion & Sichtbarkeit (0-10, 0.5 increments)
+    total_score DECIMAL(4,1) GENERATED ALWAYS AS (
+        COALESCE(criterion_1, 0) + COALESCE(criterion_2, 0) + 
+        COALESCE(criterion_3, 0) + COALESCE(criterion_4, 0) + 
+        COALESCE(criterion_5, 0)
+    ) STORED,
+    comments LONGTEXT,                        -- Optional feedback comments
+    status VARCHAR(20) DEFAULT 'draft',      -- draft, submitted, approved, rejected
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    submitted_at DATETIME DEFAULT NULL,       -- Timestamp when evaluation was submitted
+    
+    UNIQUE KEY unique_evaluation (jury_member_id, candidate_id),
+    INDEX idx_status (status),
+    INDEX idx_total_score (total_score),
+    INDEX idx_updated_at (updated_at),
+    
+    FOREIGN KEY (jury_member_id) REFERENCES wp_posts(ID) ON DELETE CASCADE,
+    FOREIGN KEY (candidate_id) REFERENCES wp_posts(ID) ON DELETE CASCADE
+);
+
+-- Jury assignment management
+wp_mt_jury_assignments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    jury_member_id BIGINT NOT NULL,           -- References mt_jury_member post
+    candidate_id BIGINT NOT NULL,             -- References mt_candidate post
+    assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    assigned_by BIGINT NOT NULL,              -- References user who made assignment
+    
+    UNIQUE KEY unique_assignment (jury_member_id, candidate_id),
+    INDEX idx_jury_member (jury_member_id),
+    INDEX idx_candidate (candidate_id),
+    INDEX idx_assignment_date (assigned_at),
+    
+    FOREIGN KEY (jury_member_id) REFERENCES wp_posts(ID) ON DELETE CASCADE,
+    FOREIGN KEY (candidate_id) REFERENCES wp_posts(ID) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_by) REFERENCES wp_users(ID) ON DELETE CASCADE
+);
+
+-- Comprehensive activity tracking
+wp_mt_audit_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,                           -- User who performed action (nullable for system actions)
+    action VARCHAR(100) NOT NULL,             -- Action type (evaluation_created, assignment_made, etc.)
+    object_type VARCHAR(50) NOT NULL,         -- Object affected (evaluation, assignment, candidate, etc.)
+    object_id BIGINT NOT NULL,                -- ID of affected object
+    old_values JSON,                          -- Previous state (for updates)
+    new_values JSON,                          -- New state
+    ip_address VARCHAR(45),                   -- User IP address
+    user_agent TEXT,                          -- User agent string
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_user_id (user_id),
+    INDEX idx_action (action),
+    INDEX idx_object (object_type, object_id),
+    INDEX idx_created_at (created_at),
+    
+    FOREIGN KEY (user_id) REFERENCES wp_users(ID) ON DELETE SET NULL
+);
+
+-- Centralized error logging
+wp_mt_error_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    level VARCHAR(10) NOT NULL,               -- error, warning, info, debug
+    message TEXT NOT NULL,                    -- Error message
+    context JSON,                             -- Additional context data
+    file VARCHAR(255),                        -- File where error occurred
+    line INT,                                 -- Line number
+    user_id BIGINT,                          -- User associated with error (nullable)
+    request_id VARCHAR(32),                   -- Unique request identifier
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_level (level),
+    INDEX idx_created_at (created_at),
+    INDEX idx_user_id (user_id),
+    INDEX idx_request_id (request_id),
+    
+    FOREIGN KEY (user_id) REFERENCES wp_users(ID) ON DELETE SET NULL
+);
+```
+
+### Database Indexes and Performance
+
+The schema includes strategic indexes for optimal performance:
+
+- **Primary Keys**: All tables have auto-incrementing primary keys
+- **Unique Constraints**: Prevent duplicate evaluations and assignments
+- **Foreign Key Constraints**: Maintain referential integrity
+- **Performance Indexes**: Optimized for common query patterns
+- **Generated Columns**: Automatic total score calculation
 
 ## Legacy Compatibility
 
-The `MT_Backward_Compatibility` facade provides static methods for legacy code.
+The plugin maintains backward compatibility through facade patterns.
 
-### Facade Pattern
+### Legacy Facade Example
 
 ```php
-class MT_Backward_Compatibility {
-    public static function get_evaluation_service() {
-        $container = MT_Plugin::container();
-        return $container->make('MobilityTrailblazers\Services\MT_Evaluation_Service');
+class MT_Legacy_Evaluation {
+    
+    private static MT_Evaluation_Service_Interface $service;
+    
+    public static function init(): void {
+        self::$service = MT_Container::get_instance()->make(
+            'MobilityTrailblazers\Services\MT_Evaluation_Service'
+        );
+    }
+    
+    // Legacy method maintained for backward compatibility
+    public static function save_evaluation($data) {
+        return self::$service->save_evaluation_from_array($data);
     }
 }
-
-// Legacy code can still use:
-$service = MT_Backward_Compatibility::get_evaluation_service();
 ```
-
-### Migration Strategy
-
-1. **Phase 1**: New code uses DI container
-2. **Phase 2**: Legacy code uses facade for gradual migration
-3. **Phase 3**: Legacy facade deprecated and removed
 
 ## Best Practices
 
-### 1. Service Design
+### Development Guidelines
 
-- Keep services focused on a single domain
-- Use dependency injection for all dependencies
-- Implement interfaces for all public services
-- Validate inputs at service boundaries
-- Log all significant operations
+1. **Always use dependency injection** for services and repositories
+2. **Implement interfaces** for all major components
+3. **Follow SOLID principles** in class design
+4. **Use prepared statements** for all database queries
+5. **Validate and sanitize** all input data
+6. **Escape all output** to prevent XSS
+7. **Check capabilities** before performing actions
+8. **Use nonces** for AJAX security
+9. **Write unit tests** for business logic
+10. **Document complex algorithms** and business rules
 
-### 2. Repository Design
+### Code Examples
 
-- One repository per aggregate root
-- Use prepared statements for all queries
-- Implement proper error handling
-- Cache frequently accessed data
-- Abstract database-specific logic
-
-### 3. Container Usage
-
-- Register services as singletons when stateless
-- Use factory functions for complex initialization
-- Prefer interface bindings over concrete classes
-- Keep container configuration in service providers
-
-### 4. Testing
-
-- Mock all dependencies using interfaces
-- Test services in isolation
-- Use dependency injection for test doubles
-- Verify audit logging in integration tests
-
-### 5. Error Handling
-
-- Use exceptions for exceptional circumstances
-- Return WP_Error objects for expected failures
-- Log all errors with appropriate context
-- Provide user-friendly error messages
-
-## Performance Considerations
-
-### Container Overhead
-
-- Minimal overhead for service resolution
-- Singleton pattern prevents duplicate instantiation
-- Reflection only used during first resolution
-
-### Memory Usage
-
-- Services are instantiated only when needed
-- Shared instances reduce memory footprint
-- Container itself is lightweight
-
-### Caching Strategy
-
+#### Service Registration
 ```php
-// Repository-level caching
-class MT_Evaluation_Repository {
-    private $cache = [];
-    
-    public function find($id) {
-        if (isset($this->cache[$id])) {
-            return $this->cache[$id];
-        }
-        
-        $result = $this->query_database($id);
-        $this->cache[$id] = $result;
-        return $result;
-    }
-}
+// In service provider
+$container->singleton(
+    'MobilityTrailblazers\Interfaces\MT_Evaluation_Service_Interface',
+    'MobilityTrailblazers\Services\MT_Evaluation_Service'
+);
 ```
 
-## Future Architecture Considerations
-
-### 1. Event System
-
+#### Service Usage
 ```php
-// Future event-driven architecture
-$container->singleton('EventDispatcher', function() {
-    return new MT_Event_Dispatcher();
-});
-
-// Services can dispatch domain events
-$this->eventDispatcher->dispatch(new EvaluationSubmitted($evaluation));
+// In controller or template
+$evaluation_service = MT_Container::get_instance()->make(
+    'MobilityTrailblazers\Interfaces\MT_Evaluation_Service_Interface'
+);
 ```
 
-### 2. Command/Query Separation
-
+#### Repository Query
 ```php
-// Separate read and write operations
-interface MT_Evaluation_Command_Interface {
-    public function save($data);
-    public function delete($id);
-}
-
-interface MT_Evaluation_Query_Interface {
-    public function find($id);
-    public function search($criteria);
-}
+// Always use prepared statements
+$query = $wpdb->prepare(
+    "SELECT * FROM {$table_name} WHERE jury_member_id = %d AND candidate_id = %d",
+    $jury_id,
+    $candidate_id
+);
 ```
 
-### 3. Background Processing
+### Security Checklist
 
-```php
-// Queue support for long-running operations
-$container->singleton('QueueManager', function() {
-    return new MT_Queue_Manager();
-});
-```
+- ✅ Nonce verification on all AJAX endpoints
+- ✅ Capability checks before operations
+- ✅ Input sanitization with appropriate WordPress functions
+- ✅ Output escaping in templates
+- ✅ Prepared statements for database queries
+- ✅ File upload validation and restrictions
+- ✅ Rate limiting on sensitive operations
+- ✅ Audit logging for security events
 
-## Conclusion
+---
 
-The new dependency injection architecture provides a solid foundation for maintaining and extending the Mobility Trailblazers plugin while preserving WordPress compatibility and ensuring backward compatibility with existing code.
-
-Key benefits:
-
-- **Maintainability**: Clear separation of concerns and dependency management
-- **Testability**: Easy mocking and isolated testing
-- **Extensibility**: New features can be added without modifying existing code
-- **Performance**: Efficient service resolution and caching
-- **Documentation**: Self-documenting through interfaces and type hints
-
-This architecture positions the plugin for long-term success and easy adaptation to changing requirements.
+*This architecture documentation provides the foundation for understanding and extending the Mobility Trailblazers plugin. For implementation details, see the [Developer Guide](developer-guide.md) and [API Reference](api-reference.md).*

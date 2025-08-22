@@ -1,106 +1,115 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.5.37 | Last Updated: August 20, 2025*
+*Version 2.5.39+ | Last Updated: August 22, 2025*
+
+> **📋 Architecture Reference**: For comprehensive system architecture documentation, see [Architecture Guide](architecture.md).
 
 ## Table of Contents
 
-1. [Architecture Overview](#architecture-overview)
-2. [File Structure](#file-structure)
-3. [JavaScript Architecture](#javascript-architecture)
-4. [PHP Architecture](#php-architecture)
-5. [Dependency Injection Architecture](#dependency-injection-architecture)
-6. [AJAX System](#ajax-system)
-7. [Database Schema](#database-schema)
-8. [Security Implementation](#security-implementation)
-9. [Frontend Assets](#frontend-assets)
-10. [UI Templates & Components](#ui-templates--components)
-11. [Photo Management System](#photo-management-system)
-12. [Auto-Assignment System](#auto-assignment-system)
-13. [Rich Text Editor](#rich-text-editor)
-14. [Testing Infrastructure](#testing-infrastructure)
-15. [Debug Center](#debug-center)
-16. [Troubleshooting](#troubleshooting)
-17. [Best Practices](#best-practices)
+1. [Development Environment Setup](#development-environment-setup)
+2. [JavaScript Architecture](#javascript-architecture)
+3. [PHP Development Patterns](#php-development-patterns)
+4. [Frontend Assets & Styling](#frontend-assets--styling)
+5. [UI Templates & Components](#ui-templates--components)
+6. [Photo Management System](#photo-management-system)
+7. [Auto-Assignment System](#auto-assignment-system)
+8. [Rich Text Editor](#rich-text-editor)
+9. [Testing Infrastructure](#testing-infrastructure)
+10. [Debug Center](#debug-center)
+11. [Development Workflow](#development-workflow)
+12. [Troubleshooting](#troubleshooting)
+13. [Best Practices](#best-practices)
 
-## Architecture Overview
+## Development Environment Setup
 
-The Mobility Trailblazers plugin follows a modern MVC architecture with clear separation of concerns.
+### Requirements
 
-### Core Design Patterns
+- **PHP**: 7.4+ (8.2+ recommended)
+- **WordPress**: 5.8+
+- **Database**: MySQL 5.7+ / MariaDB 10.3+
+- **Memory**: 256MB minimum
+- **Node.js**: 16+ (for asset building)
+- **Composer**: For PHP dependencies
 
-- **Repository-Service-Controller**: Clean data access and business logic separation
-- **Dependency Injection Container**: Modern IoC container for service management
-- **Service Provider Pattern**: Modular service registration and bootstrapping
-- **Interface-Based Design**: SOLID principles implementation with clear contracts
-- **WordPress Integration**: Leverages WordPress APIs while maintaining modularity
-- **AJAX-First**: Real-time updates without page refreshes
-- **Security-First**: Comprehensive nonce verification and capability checks
+### Local Development Setup
 
-### Key Integration Points
+#### 1. Docker Environment (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/nicolasestrem/mobility-trailblazers.git
+cd mobility-trailblazers
+
+# Start Docker containers
+docker-compose up -d
+
+# Install PHP dependencies
+composer install
+
+# Install Node dependencies
+npm install
+
+# Build assets
+npm run build
+```
+
+#### 2. Traditional LAMP/XAMPP Setup
+
+```bash
+# Navigate to WordPress plugins directory
+cd /wp-content/plugins/
+
+# Clone or extract plugin
+git clone https://github.com/nicolasestrem/mobility-trailblazers.git
+
+# Install dependencies
+cd mobility-trailblazers
+composer install
+npm install
+```
+
+#### 3. Environment Configuration
+
+Create `wp-config-local.php` with development settings:
 
 ```php
-// WordPress Hooks
-add_action('init', [$this, 'register_post_types']);
-add_action('admin_menu', [$this, 'add_admin_menus']);
-add_action('wp_ajax_mt_*', [$this, 'handle_ajax']);
+// Development constants
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false);
+define('SCRIPT_DEBUG', true);
 
-// Custom Tables
-global $wpdb;
-$wpdb->mt_evaluations
-$wpdb->mt_assignments
+// Plugin-specific settings
+define('MT_ENVIRONMENT', 'development');
+define('MT_DEBUG_MODE', true);
+define('MT_DISABLE_CACHE', true);
 ```
 
-## File Structure
+### Development URLs
 
-```
-mobility-trailblazers/
-├── mobility-trailblazers.php      # Main plugin file
-├── includes/
-│   ├── core/
-│   │   ├── class-mt-plugin.php          # Core plugin class
-│   │   ├── class-mt-activator.php       # Activation hooks
-│   │   ├── class-mt-database.php        # Database operations
-│   │   └── class-mt-deactivator.php     # Deactivation cleanup
-│   ├── admin/
-│   │   ├── class-mt-admin.php           # Admin interface
-│   │   ├── class-mt-admin-columns.php   # Custom columns
-│   │   └── class-mt-admin-menus.php     # Menu registration
-│   ├── ajax/
-│   │   ├── class-mt-ajax-base.php       # Base AJAX handler
-│   │   ├── class-mt-ajax-evaluation.php # Evaluation AJAX
-│   │   └── class-mt-ajax-assignment.php # Assignment AJAX
-│   ├── repositories/
-│   │   ├── class-mt-candidate-repository.php
-│   │   ├── class-mt-evaluation-repository.php
-│   │   └── class-mt-assignment-repository.php
-│   ├── services/
-│   │   ├── class-mt-assignment-service.php
-│   │   ├── class-mt-evaluation-service.php
-│   │   └── class-mt-import-service.php
-│   ├── widgets/
-│   │   ├── class-mt-widget-evaluation-progress.php
-│   │   └── class-mt-widget-jury-assignments.php
-│   └── utilities/
-│       ├── class-mt-import-handler.php
-│       └── class-mt-export-handler.php
-├── templates/
-│   ├── admin/
-│   │   ├── dashboard-jury.php
-│   │   └── assignments-manager.php
-│   └── public/
-│       ├── candidate-single.php
-│       └── candidate-archive.php
-├── assets/
-│   ├── css/
-│   │   ├── mt-admin.css
-│   │   └── mt-public.css
-│   └── js/
-│       ├── mt-evaluation.js
-│       ├── mt-assignments.js
-│       └── mt-import.js
-└── languages/
-    ├── mobility-trailblazers-de_DE.po
-    └── mobility-trailblazers-de_DE.mo
+- **Local Development**: http://localhost/
+- **Docker Environment**: http://localhost:8080/
+- **Staging**: http://localhost:8080/ (Docker staging)
+- **Production**: https://mobilitytrailblazers.de/vote/
+
+### Essential Commands
+
+```bash
+# Database operations
+wp eval "MobilityTrailblazers\Utilities\MT_Database_Health::check_health();"
+wp cache flush
+
+# Asset building
+npm run dev          # Development build with watch
+npm run build        # Production build
+npm run lint         # Code linting
+
+# Translation compilation
+.\scripts\compile-mo-local.ps1
+
+# Import/export operations
+wp mt import-candidates --dry-run --file=test.csv
+php scripts/debug-db-create.php
 ```
 
 ## JavaScript Architecture
@@ -181,94 +190,95 @@ function saveEvaluation(e) {
 }
 ```
 
-## PHP Architecture
+## PHP Development Patterns
 
-### Modern Service Layer with Dependency Injection
+> **📋 Architecture Details**: For comprehensive PHP architecture documentation, see [Architecture Guide](architecture.md).
+
+### Coding Standards
+
+The plugin follows WordPress Coding Standards with modern PHP practices:
 
 ```php
-class MT_Assignment_Service implements MT_Assignment_Service_Interface {
-    private $repository;
-    private $logger;
-    private $validator;
-    
-    public function __construct(
-        MT_Assignment_Repository_Interface $repository,
-        MT_Logger_Interface $logger,
-        MT_Validator_Interface $validator
-    ) {
-        $this->repository = $repository;
-        $this->logger = $logger;
-        $this->validator = $validator;
-    }
-    
-    public function auto_assign_candidates($jury_member_id, $count = 10) {
-        // Validate input
-        $this->validator->validate_jury_member($jury_member_id);
-        
-        // Business logic
-        $available = $this->repository->get_unassigned_candidates();
-        $conflicts = $this->check_conflicts($jury_member_id);
-        
-        // Filter and assign
-        $filtered = array_diff($available, $conflicts);
-        $selected = array_slice($filtered, 0, $count);
-        
-        $result = $this->repository->create_assignments($jury_member_id, $selected);
-        
-        // Log operation
-        $this->logger->info('Auto-assignment completed', [
-            'jury_member_id' => $jury_member_id,
-            'assignments_created' => count($result)
-        ]);
-        
-        return $result;
-    }
+// Use type declarations
+public function save_evaluation(int $jury_id, int $candidate_id, array $scores): bool
+
+// Use strict comparison
+if ($status === 'submitted') {
+    // Process submission
 }
 
-// Getting service from container
+// Use null coalescing operator
+$comments = $data['comments'] ?? '';
+
+// Use array destructuring
+[$created, $updated] = $this->get_timestamps();
+```
+
+### Service Usage Patterns
+
+```php
+// Get service from container
 $container = MT_Container::get_instance();
-$assignment_service = $container->get('MT_Assignment_Service');
+$evaluation_service = $container->make('MobilityTrailblazers\Services\MT_Evaluation_Service');
+
+// Use service in WordPress hooks
+add_action('wp_ajax_mt_save_evaluation', function() use ($evaluation_service) {
+    $result = $evaluation_service->save_evaluation($_POST['data']);
+    wp_send_json($result);
+});
+
+// Service method chaining
+$result = $evaluation_service
+    ->validate($data)
+    ->process()
+    ->save()
+    ->getResult();
 ```
 
-### Repository Pattern
+### WordPress Integration Patterns
 
 ```php
-class MT_Evaluation_Repository {
-    private $wpdb;
-    private $table_name;
+// Custom post type registration
+add_action('init', function() {
+    register_post_type('mt_candidate', [
+        'public' => true,
+        'show_in_rest' => true,
+        'supports' => ['title', 'editor', 'thumbnail'],
+        'capability_type' => 'mt_candidate',
+        'map_meta_cap' => true
+    ]);
+});
+
+// Meta box registration
+add_action('add_meta_boxes', function() {
+    add_meta_box(
+        'mt_candidate_details',
+        __('Candidate Details', 'mobility-trailblazers'),
+        'mt_render_candidate_meta_box',
+        'mt_candidate',
+        'normal',
+        'high'
+    );
+});
+
+// AJAX handler pattern
+add_action('wp_ajax_mt_get_candidates', function() {
+    check_ajax_referer('mt_ajax_nonce');
     
-    public function __construct() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_name = $wpdb->prefix . 'mt_evaluations';
+    if (!current_user_can('mt_view_candidates')) {
+        wp_die(__('Insufficient permissions', 'mobility-trailblazers'));
     }
     
-    public function find($id) {
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table_name} WHERE id = %d",
-                $id
-            )
-        );
-    }
+    $service = MT_Container::get_instance()->make('MT_Candidate_Service');
+    $candidates = $service->get_candidates($_GET['filters']);
     
-    public function update($id, $data) {
-        return $this->wpdb->update(
-            $this->table_name,
-            $data,
-            ['id' => $id],
-            ['%s', '%d', '%d', '%d', '%d', '%d', '%s'],
-            ['%d']
-        );
-    }
-}
+    wp_send_json_success($candidates);
+});
 ```
 
-## Dependency Injection Architecture
+## Frontend Assets & Styling
 
-### Overview
-
-The plugin now implements a modern dependency injection container system that follows SOLID principles and provides clean separation of concerns. This architecture improves testability, maintainability, and modularity.
+> **🎨 CSS Guide**: For comprehensive styling documentation, see [CSS Guide](css-guide.md).
 
 ### Container Implementation
 
