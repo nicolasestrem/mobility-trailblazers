@@ -81,7 +81,8 @@
       "mcp__kapture__show",
       "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\templates\\frontend\\jury-dashboard.php\")",
       "mcp__kapture__select",
-      "Bash(docker-compose up:*)"
+      "Bash(docker-compose up:*)",
+      "Bash(C:/xampp/php/php.exe compile-translation.php:*)"
     ],
     "deny": []
   }
