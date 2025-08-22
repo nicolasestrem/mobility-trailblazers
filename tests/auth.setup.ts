@@ -21,13 +21,42 @@ setup('authenticate as admin', async ({ page }) => {
   // Clear password field and type password slowly to ensure it's entered correctly
   await page.locator('#user_pass').clear();
   await page.waitForTimeout(500);
-  await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'AdminPlaywright2025AdminPlaywright2025', { delay: 50 });
+  await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'testadmin123', { delay: 50 });
   await page.waitForTimeout(500);
   await page.click('#wp-submit');
   
-  // Wait for successful login - WordPress may redirect to different admin pages
-  await page.waitForURL('**/wp-admin/**');
-  await expect(page.locator('#wpadminbar')).toBeVisible();
+  // Wait for successful login - handle both German and English interfaces
+  // The login might redirect to different pages or show an error
+  await page.waitForLoadState('networkidle');
+  
+  // Check if we have an error message (German: "Fehler" or English: "Error")
+  const errorElement = page.locator('#login_error');
+  if (await errorElement.isVisible({ timeout: 1000 }).catch(() => false)) {
+    const errorText = await errorElement.textContent();
+    throw new Error(`Login failed: ${errorText}`);
+  }
+  
+  // Wait for either redirect to admin or the admin bar to appear
+  await Promise.race([
+    page.waitForURL('**/wp-admin/**', { timeout: 10000 }),
+    page.locator('#wpadminbar').waitFor({ state: 'visible', timeout: 10000 })
+  ]).catch(async () => {
+    // If neither worked, check if we're still on login page
+    const currentUrl = page.url();
+    if (currentUrl.includes('wp-login.php')) {
+      // Try to submit again as sometimes the form needs a second submission
+      await page.click('#wp-submit');
+      await page.waitForLoadState('networkidle');
+    }
+  });
+  
+  // Final check - ensure we're logged in
+  const isLoggedIn = await page.locator('#wpadminbar').isVisible({ timeout: 5000 }).catch(() => false) ||
+                     page.url().includes('/wp-admin/');
+  
+  if (!isLoggedIn) {
+    throw new Error('Failed to authenticate as admin');
+  }
   
   console.log('✅ Admin authentication successful');
   
@@ -74,9 +103,27 @@ setup('authenticate as jury admin', async ({ page }) => {
   await page.fill('#user_pass', process.env.JURY_ADMIN_PASSWORD || 'Test123!@#Pass');
   await page.click('#wp-submit');
   
-  // Wait for successful login
-  await page.waitForURL('/wp-admin/**');
-  await expect(page.locator('#wpadminbar')).toBeVisible();
+  // Wait for successful login - handle German locale
+  await page.waitForLoadState('networkidle');
+  
+  // Check for login error
+  const errorElement = page.locator('#login_error');
+  if (await errorElement.isVisible({ timeout: 1000 }).catch(() => false)) {
+    const errorText = await errorElement.textContent();
+    throw new Error(`Login failed: ${errorText}`);
+  }
+  
+  // Wait for redirect or admin bar
+  await Promise.race([
+    page.waitForURL('**/wp-admin/**', { timeout: 10000 }),
+    page.locator('#wpadminbar').waitFor({ state: 'visible', timeout: 10000 })
+  ]);
+  
+  // Verify we're logged in
+  const isLoggedIn = await page.locator('#wpadminbar').isVisible({ timeout: 5000 }).catch(() => false);
+  if (!isLoggedIn && !page.url().includes('/wp-admin/')) {
+    throw new Error('Failed to authenticate as jury admin');
+  }
   
   // Verify jury admin has access to MT plugin
   await page.goto('/wp-admin/admin.php?page=mt-assignments');
