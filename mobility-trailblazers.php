@@ -82,6 +82,12 @@ MobilityTrailblazers\Core\MT_Autoloader::register();
 //     require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
 // }
 
+// Load username dot fix to prevent dots in usernames
+if (file_exists(MT_PLUGIN_DIR . 'includes/fixes/class-mt-username-dot-fix.php')) {
+    require_once MT_PLUGIN_DIR . 'includes/fixes/class-mt-username-dot-fix.php';
+    add_action('init', ['MobilityTrailblazers\Fixes\MT_Username_Dot_Fix', 'init']);
+}
+
 // Bootstrap container early for AJAX requests
 // This ensures the container is ready before any AJAX handlers try to use it
 if (defined('DOING_AJAX') && DOING_AJAX) {
