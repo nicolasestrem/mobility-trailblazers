@@ -512,13 +512,23 @@ class MT_Plugin {
             true
         );
         
+        // New Candidate Cards v3 CSS - Modern redesign following CSS v3 specifications  
+        // IMPORTANT: Load v3 CSS BEFORE hotfixes to establish base styles first
+        wp_enqueue_style(
+            'mt-candidate-cards-v3',
+            MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css',
+            ['mt-frontend', 'mt-candidate-grid', 'mt-evaluation-fixes'],
+            MT_VERSION
+        );
+        
         // Consolidated Hotfixes CSS - Combines multiple small hotfix files for better performance
         // Includes: photo-adjustments.css, candidate-image-adjustments.css, evaluation-fix.css, 
         // language-switcher-enhanced.css, mt-jury-dashboard-fix.css, emergency-fixes.css
+        // IMPORTANT: Loaded after v3 CSS to provide targeted fixes without breaking v3 design
         wp_enqueue_style(
             'mt-hotfixes-consolidated',
             MT_PLUGIN_URL . 'assets/css/mt-hotfixes-consolidated.css',
-            ['mt-frontend', 'mt-candidate-grid', 'mt-evaluation-fixes'],
+            ['mt-candidate-cards-v3'],
             MT_VERSION
         );
         

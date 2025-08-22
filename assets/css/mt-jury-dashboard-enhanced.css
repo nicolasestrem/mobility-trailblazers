@@ -227,20 +227,20 @@ body .mt-jury-dashboard .mt-search-filters {
     box-sizing: border-box;
 }
 
+/* Three-element layout for search box - search gets more space */
 .mt-search-box,
 body .mt-jury-dashboard .mt-search-box {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr; /* Search 50%, Status 25%, Category 25% */
     gap: 15px;
     align-items: center;
-    flex-wrap: wrap;
     max-width: 100%;
     box-sizing: border-box;
 }
 
 .mt-search-input,
 body .mt-jury-dashboard .mt-search-input {
-    flex: 1;
-    min-width: 200px;
+    width: 100%;
     padding: 10px 15px;
     border: 1px solid var(--mt-blue-accent);
     border-radius: 8px;
@@ -250,14 +250,53 @@ body .mt-jury-dashboard .mt-search-input {
 }
 
 .mt-filter-select,
-body .mt-jury-dashboard .mt-filter-select {
+body .mt-jury-dashboard .mt-filter-select,
+#mt-category-filter,
+body .mt-jury-dashboard #mt-category-filter {
+    width: 100%;
     padding: 10px 15px;
     border: 1px solid var(--mt-blue-accent);
     border-radius: 8px;
     font-size: 14px;
     background: var(--mt-bg-base);
-    min-width: 150px;
     box-sizing: border-box;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.mt-filter-select:hover,
+body .mt-jury-dashboard .mt-filter-select:hover,
+#mt-category-filter:hover,
+body .mt-jury-dashboard #mt-category-filter:hover {
+    border-color: var(--mt-accent);
+}
+
+.mt-filter-select:focus,
+body .mt-jury-dashboard .mt-filter-select:focus,
+#mt-category-filter:focus,
+body .mt-jury-dashboard #mt-category-filter:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+}
+
+/* Screen reader text for accessibility */
+.screen-reader-text {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    word-wrap: normal !important;
 }
 
 /* ===================================
@@ -271,7 +310,7 @@ body .mt-jury-dashboard .mt-candidates-list {
     gap: 20px !important;
 }
 
-body .mt-jury-dashboard .mt-candidate-card {
+body .mt-jury-dashboard .mt-candidate-card:not(.hidden) {
     background: var(--mt-bg-base) !important;
     border: 2px solid var(--mt-blue-accent) !important;
     border-radius: 12px !important;
@@ -281,6 +320,10 @@ body .mt-jury-dashboard .mt-candidate-card {
     display: block !important;
     padding: 0 !important;
     overflow: hidden !important;
+}
+
+body .mt-jury-dashboard .mt-candidate-card.hidden {
+    display: none !important;
 }
 
 body .mt-jury-dashboard .mt-candidate-header {
@@ -1151,9 +1194,21 @@ body .mt-jury-dashboard .mt-no-rankings {
         padding: 0 15px;
     }
     
+    /* Stack all filters vertically on tablets */
+    .mt-search-box,
+    body .mt-jury-dashboard .mt-search-box {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
     .mt-search-input,
-    body .mt-jury-dashboard .mt-search-input {
-        min-width: 150px;
+    .mt-filter-select,
+    #mt-category-filter,
+    body .mt-jury-dashboard .mt-search-input,
+    body .mt-jury-dashboard .mt-filter-select,
+    body .mt-jury-dashboard #mt-category-filter {
+        width: 100%;
+        min-width: 100%;
     }
     
     body .mt-jury-dashboard .mt-candidates-list {
@@ -1164,8 +1219,8 @@ body .mt-jury-dashboard .mt-no-rankings {
         opacity: 1 !important;
     }
     
-    /* Ensure candidate cards are always visible on mobile */
-    body .mt-jury-dashboard .mt-candidate-card {
+    /* Ensure candidate cards are visible on mobile (except hidden ones) */
+    body .mt-jury-dashboard .mt-candidate-card:not(.hidden) {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -1221,16 +1276,21 @@ body .mt-jury-dashboard .mt-no-rankings {
     /* Search box adjustments for small screens */
     .mt-search-box,
     body .mt-jury-dashboard .mt-search-box {
-        flex-direction: column;
-        align-items: stretch;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
     
     .mt-search-input,
     .mt-filter-select,
+    #mt-category-filter,
     body .mt-jury-dashboard .mt-search-input,
-    body .mt-jury-dashboard .mt-filter-select {
+    body .mt-jury-dashboard .mt-filter-select,
+    body .mt-jury-dashboard #mt-category-filter {
         width: 100%;
         min-width: 100%;
+        font-size: 14px;
+        padding: 12px 15px;
+        padding-right: 40px;
     }
     
     body .mt-jury-dashboard .mt-candidates-list {
@@ -1241,8 +1301,8 @@ body .mt-jury-dashboard .mt-no-rankings {
         opacity: 1 !important;
     }
     
-    /* Force cards to be visible on small screens */
-    body .mt-jury-dashboard .mt-candidate-card {
+    /* Force cards to be visible on small screens (except hidden ones) */
+    body .mt-jury-dashboard .mt-candidate-card:not(.hidden) {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;

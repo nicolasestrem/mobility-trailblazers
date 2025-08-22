@@ -1,0 +1,502 @@
+/**
+ * Mobility Trailblazers - Candidate Cards v3
+ * 
+ * Modern responsive card design following CSS v3 specifications
+ * Features elegant display of Name, Company, and Category
+ * 
+ * @version 3.0.0
+ * @since 2.5.38
+ * @package MobilityTrailblazers
+ */
+
+/* ===================================
+   CSS VARIABLES / DESIGN TOKENS
+   =================================== */
+:root {
+    /* Color Palette */
+    --mt-v3-bg-beige: #F8F0E3;
+    --mt-v3-card-bg: #FFFFFF;
+    --mt-v3-border-soft: #E8DCC9;
+    --mt-v3-primary: #003C3D;
+    --mt-v3-secondary: #004C5F;
+    --mt-v3-text: #302C37;
+    --mt-v3-text-secondary: #6C757D;
+    --mt-v3-accent: #C1693C;
+    --mt-v3-kupfer-soft: #BB6F52;
+    
+    /* Category Colors */
+    --mt-v3-cat-startups: #28a745;
+    --mt-v3-cat-etablierte: #007bff;
+    --mt-v3-cat-governance: #6f42c1;
+    
+    /* Status Colors */
+    --mt-v3-status-draft: #ffc107;
+    --mt-v3-status-completed: #28a745;
+    --mt-v3-status-pending: #6c757d;
+    
+    /* Spacing */
+    --mt-v3-space-xs: 4px;
+    --mt-v3-space-sm: 8px;
+    --mt-v3-space-md: 16px;
+    --mt-v3-space-lg: 24px;
+    --mt-v3-space-xl: 32px;
+    --mt-v3-space-xxl: 48px;  /* Increased for more breathing room */
+    
+    /* Effects */
+    --mt-v3-radius: 16px;
+    --mt-v3-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+    --mt-v3-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+    --mt-v3-transition: all 0.3s ease;
+}
+
+/* ===================================
+   CONTAINER & GRID LAYOUT
+   =================================== */
+.mt-dashboard-v3 {
+    background-color: var(--mt-v3-bg-beige);
+    min-height: 100vh;
+    padding: var(--mt-v3-space-lg);
+}
+
+.mt-candidates-v3 {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    gap: var(--mt-v3-space-lg);
+    padding: var(--mt-v3-space-lg) 0;
+}
+
+/* Mobile: 1 column */
+@media (max-width: 767px) {
+    .mt-candidates-v3 {
+        grid-template-columns: 1fr;
+        padding: var(--mt-v3-space-md);
+    }
+    
+    /* Reduce height on mobile but allow expansion for long names */
+    .mt-candidates-v3 .mt-candidate-card,
+    .mt-dashboard-v3 .mt-candidate-card {
+        padding: var(--mt-v3-space-lg) !important;
+        min-height: 380px !important; /* Minimum height for mobile, can expand */
+    }
+    
+    /* Adjust category container for mobile - smaller but still fixed */
+    .mt-candidates-v3 .mt-candidate-card .mt-candidate-category-container,
+    .mt-dashboard-v3 .mt-candidate-card .mt-candidate-category-container {
+        height: 55px !important; /* Smaller fixed height for mobile */
+    }
+    
+    /* Reduce font size further on mobile for better fit */
+    .mt-candidates-v3 .mt-candidate-card .mt-candidate-category,
+    .mt-dashboard-v3 .mt-candidate-card .mt-candidate-category {
+        font-size: 10px !important;
+        padding: 6px 10px !important;
+    }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .mt-candidates-v3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+    .mt-candidates-v3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ===================================
+   CANDIDATE CARD v3
+   =================================== */
+.mt-candidates-v3 .mt-candidate-card,
+.mt-dashboard-v3 .mt-candidate-card {
+    background: var(--mt-v3-card-bg) !important;
+    border: 1px solid var(--mt-v3-border-soft) !important;
+    border-radius: var(--mt-v3-radius) !important;
+    box-shadow: var(--mt-v3-shadow) !important;
+    padding: var(--mt-v3-space-xxl) !important;
+    min-height: 440px !important; /* Minimum height, can expand for longer names */
+    display: flex !important;
+    flex-direction: column !important;
+    transition: var(--mt-v3-transition) !important;
+    position: relative !important;
+    overflow: visible !important; /* Allow content to expand */
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.mt-candidates-v3 .mt-candidate-card:hover,
+.mt-dashboard-v3 .mt-candidate-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--mt-v3-shadow-hover) !important;
+    border-color: var(--mt-v3-accent) !important;
+}
+
+/* Card Header Section - Expandable for Full Names */
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-header,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-header {
+    border-bottom: 2px solid var(--mt-v3-border-soft) !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 20px !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    min-height: auto !important;
+    display: block !important;  /* Ensure vertical stacking */
+    /* Allow header to expand as needed for longer names */
+}
+
+/* Candidate Name - Prominent Display (Full Name Always Visible) */
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-name,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-name {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: var(--mt-v3-primary) !important;
+    margin: 0 0 8px 0 !important;  /* Small gap before company name */
+    line-height: 1.3 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    overflow: visible !important;
+    display: block !important;  /* Force block display */
+    width: 100% !important;  /* Full width */
+    /* Removed line-clamp to show full names */
+}
+
+/* Organization/Company - Below Name, Subdued but Clear */
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-org,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-org {
+    font-size: 13px !important;  /* Smaller for hierarchy */
+    color: var(--mt-v3-text-secondary) !important;
+    margin: 0 !important;
+    padding-left: 2px !important;  /* Slight indent */
+    line-height: 1.4 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;  /* Italic for distinction */
+    display: block !important;  /* Force block display */
+    width: 100% !important;  /* Full width */
+    opacity: 0.85 !important;  /* Slightly subdued */
+    /* Allow full company name to show */
+    overflow: visible !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
+}
+
+/* Card Body */
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-body,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-body {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important; /* Distribute content evenly */
+    min-height: 0 !important; /* Allow flex item to shrink */
+    overflow: visible !important;
+    padding: 0 !important;  /* Ensure no extra padding */
+}
+
+/* ===================================
+   CATEGORY BADGE STYLING
+   =================================== */
+
+/* Category Container - Fixed height to accommodate longest German categories */
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-category-container,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-category-container {
+    height: 68px !important; /* Fixed height for longest category text */
+    display: flex !important;
+    align-items: center !important; /* Center badge vertically */
+    justify-content: center !important; /* Center badge horizontally */
+    flex-shrink: 0 !important; /* Don't allow this to shrink */
+    overflow: hidden !important; /* Prevent overflow */
+}
+
+.mt-candidates-v3 .mt-candidate-card .mt-candidate-category,
+.mt-dashboard-v3 .mt-candidate-card .mt-candidate-category {
+    display: inline-block;
+    padding: var(--mt-v3-space-sm) var(--mt-v3-space-md);
+    border-radius: 8px;
+    font-size: 11px !important; /* Consistent smaller font size */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--mt-v3-accent), var(--mt-v3-kupfer-soft));
+    color: white;
+    box-shadow: 0 2px 4px rgba(193, 105, 60, 0.2);
+    line-height: 1.3 !important; /* Optimal line height for 2 lines */
+    max-width: 100% !important; /* Don't exceed container width */
+    word-wrap: break-word !important;
+    hyphens: auto !important; /* Enable hyphenation for German words */
+    
+    /* Allow text wrapping to 2 lines maximum */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Category-specific colors */
+.mt-candidates-v3 .mt-candidate-card[data-category="startups"] .mt-candidate-category,
+.mt-dashboard-v3 .mt-candidate-card[data-category="startups"] .mt-candidate-category {
+    background: linear-gradient(135deg, var(--mt-v3-cat-startups), #20c997);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.mt-candidates-v3 .mt-candidate-card[data-category="etablierte"] .mt-candidate-category,
+.mt-dashboard-v3 .mt-candidate-card[data-category="etablierte"] .mt-candidate-category {
+    background: linear-gradient(135deg, var(--mt-v3-cat-etablierte), #0056b3);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.mt-candidates-v3 .mt-candidate-card[data-category="governance"] .mt-candidate-category,
+.mt-dashboard-v3 .mt-candidate-card[data-category="governance"] .mt-candidate-category {
+    background: linear-gradient(135deg, var(--mt-v3-cat-governance), #5a32a3);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
+}
+
+/* ===================================
+   EVALUATION STATUS STYLING
+   =================================== */
+.mt-candidates-v3 .mt-candidate-card .mt-evaluation-status,
+.mt-dashboard-v3 .mt-candidate-card .mt-evaluation-status {
+    margin-top: auto !important; /* Push to bottom of available space */
+    margin-bottom: var(--mt-v3-space-lg) !important;
+    text-align: center !important;
+    flex-shrink: 0 !important; /* Don't allow to shrink */
+}
+
+.mt-candidates-v3 .mt-candidate-card .mt-status-badge,
+.mt-dashboard-v3 .mt-candidate-card .mt-status-badge {
+    display: inline-block;
+    padding: var(--mt-v3-space-sm) var(--mt-v3-space-md);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--mt-v3-transition);
+}
+
+/* Status-specific colors */
+.mt-status-badge.mt-status-draft {
+    background-color: var(--mt-v3-status-draft);
+    color: #856404;
+}
+
+.mt-status-badge.mt-status-completed {
+    background-color: var(--mt-v3-status-completed);
+    color: white;
+}
+
+.mt-status-badge.mt-status-pending {
+    background-color: var(--mt-v3-status-pending);
+    color: white;
+}
+
+/* ===================================
+   ACTION BUTTON STYLING
+   =================================== */
+.mt-candidates-v3 .mt-candidate-card .mt-evaluate-btn,
+.mt-dashboard-v3 .mt-candidate-card .mt-evaluate-btn {
+    display: inline-block !important;
+    width: 100% !important;
+    padding: var(--mt-v3-space-md) !important;
+    background: linear-gradient(135deg, var(--mt-v3-primary), var(--mt-v3-secondary)) !important;
+    color: white !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: var(--mt-v3-transition) !important;
+    box-shadow: 0 2px 4px rgba(0, 60, 61, 0.2) !important;
+    margin-top: auto !important; /* Push to absolute bottom */
+    flex-shrink: 0 !important; /* Don't allow to shrink */
+}
+
+.mt-candidates-v3 .mt-candidate-card .mt-evaluate-btn:hover,
+.mt-dashboard-v3 .mt-candidate-card .mt-evaluate-btn:hover {
+    background: linear-gradient(135deg, var(--mt-v3-secondary), var(--mt-v3-primary));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 60, 61, 0.3);
+}
+
+.mt-candidates-v3 .mt-candidate-card .mt-evaluate-btn:active,
+.mt-dashboard-v3 .mt-candidate-card .mt-evaluate-btn:active {
+    transform: translateY(0);
+}
+
+/* ===================================
+   HIDDEN STATE FOR FILTERS
+   =================================== */
+.mt-candidates-v3 .mt-candidate-card.hidden,
+.mt-dashboard-v3 .mt-candidate-card.hidden {
+    display: none !important;
+}
+
+/* ===================================
+   LOADING & EMPTY STATES
+   =================================== */
+.mt-no-results-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: var(--mt-v3-space-xl);
+    background: var(--mt-v3-card-bg);
+    border-radius: var(--mt-v3-radius);
+    border: 1px solid var(--mt-v3-border-soft);
+    color: var(--mt-v3-text-secondary);
+}
+
+/* ===================================
+   ACCESSIBILITY ENHANCEMENTS
+   =================================== */
+.mt-candidate-card:focus-within {
+    outline: 3px solid var(--mt-v3-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mt-candidate-card,
+    .mt-candidates-v3 .mt-candidate-card .mt-evaluate-btn,
+.mt-dashboard-v3 .mt-candidate-card .mt-evaluate-btn {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .mt-candidate-card {
+        border-width: 2px;
+    }
+    
+    .mt-candidate-card .mt-candidate-name {
+        font-weight: 900 !important;
+    }
+}
+
+/* ===================================
+   PRINT STYLES
+   =================================== */
+@media print {
+    .mt-candidate-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .mt-evaluate-btn {
+        display: none;
+    }
+}
+
+/* ===================================
+   RTL SUPPORT
+   =================================== */
+[dir="rtl"] .mt-candidate-card {
+    text-align: right;
+}
+
+[dir="rtl"] .mt-candidate-category {
+    align-self: flex-end;
+}
+
+/* ===================================
+   ANIMATION KEYFRAMES
+   =================================== */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mt-candidates-v3.animate-in .mt-candidate-card {
+    animation: cardEntrance 0.4s ease-out backwards;
+}
+
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(1) { animation-delay: 0.05s; }
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(2) { animation-delay: 0.1s; }
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(3) { animation-delay: 0.15s; }
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(4) { animation-delay: 0.2s; }
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(5) { animation-delay: 0.25s; }
+.mt-candidates-v3.animate-in .mt-candidate-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* ===================================
+   AGGRESSIVE SPACING OVERRIDES
+   Flexible card heights with full candidate name display
+   =================================== */
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card {
+    min-height: 440px !important; /* Minimum height, can expand for long names */
+    padding: 45px !important;  /* Large internal padding */
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-header,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-header {
+    padding: 0 0 28px 0 !important;  /* Space below header content */
+    margin: 0 0 28px 0 !important;  /* Space after border */
+    flex-shrink: 0 !important; /* Don't allow header to shrink */
+    overflow: visible !important; /* Allow header to expand for long names */
+    min-height: auto !important; /* Allow dynamic height */
+}
+
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-body,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-body {
+    flex: 1 !important; /* Take remaining space */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important; /* Distribute content evenly */
+}
+
+/* Ensure category container maintains fixed space */
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-category-container,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-category-container {
+    height: 68px !important; /* Fixed height for uniform layout */
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* Center badges horizontally */
+    overflow: hidden !important;
+}
+
+/* Push evaluation status and button to bottom */
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-evaluation-status,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-evaluation-status {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+}
+
+body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-evaluate-btn,
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-evaluate-btn {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+}
+
+/* Mobile adjustments - smaller minimum height, can expand */
+@media (max-width: 768px) {
+    body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card,
+    body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card {
+        min-height: 380px !important; /* Minimum height for mobile, can expand */
+        padding: 32px !important;
+    }
+    
+    body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-category-container,
+    body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-category-container {
+        height: 55px !important; /* Fixed height for mobile uniformity */
+    }
+    
+    /* Apply mobile category badge styling */
+    body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-category,
+    body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-category {
+        font-size: 10px !important;
+        padding: 6px 10px !important;
+    }
+}

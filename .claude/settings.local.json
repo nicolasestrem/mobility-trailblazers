@@ -78,7 +78,9 @@
       "Bash(C:xamppphpphp.exe \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\scripts\\compile-mo.php\")",
       "Bash(mkdir:*)",
       "Bash(cp:*)",
-      "mcp__kapture__show"
+      "mcp__kapture__show",
+      "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\templates\\frontend\\jury-dashboard.php\")",
+      "mcp__kapture__select"
     ],
     "deny": []
   }

@@ -82,7 +82,7 @@ $progress_class = 'mt-progress-bar mt-progress-' . (isset($dashboard_settings['p
 $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid');
 ?>
 
-<div class="mt-jury-dashboard">
+<div class="mt-jury-dashboard mt-dashboard-v3">
     <?php if ($progress['completion_rate'] == 100) : ?>
         <div class="mt-completion-status-banner">
             <div class="mt-completion-status-content">
@@ -158,22 +158,40 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
     </div>
     <?php endif; ?>
     
-    <?php if (isset($dashboard_settings['show_search_filter']) ? $dashboard_settings['show_search_filter'] : true) : ?>
+    <?php 
+    // Always show search filters
+    $show_search = isset($dashboard_settings['show_search_filter']) ? $dashboard_settings['show_search_filter'] : true;
+    if ($show_search) : 
+    ?>
     <div class="mt-search-filters">
         <div class="mt-search-box">
+            <!-- Search Input -->
             <input type="text" 
                    class="mt-search-input" 
                    id="mt-candidate-search" 
                    placeholder="<?php esc_attr_e('Search candidates...', 'mobility-trailblazers'); ?>">
             
+            <!-- Status Filter -->
             <select class="mt-filter-select" id="mt-status-filter">
-                <option value=""><?php _e('All Statuses', 'mobility-trailblazers'); ?></option>
-                <option value="draft"><?php _e('Draft', 'mobility-trailblazers'); ?></option>
-                <option value="completed"><?php _e('Completed', 'mobility-trailblazers'); ?></option>
+                <option value="">Alle Status</option>
+                <option value="draft">Entwurf</option>
+                <option value="completed">Abgeschlossen</option>
+            </select>
+            
+            <!-- Category Filter -->
+            <label for="mt-category-filter" class="screen-reader-text">
+                Nach Kategorie filtern
+            </label>
+            <select class="mt-filter-select" id="mt-category-filter" aria-label="Kandidaten nach Kategorie filtern">
+                <option value="all">Alle Kategorien</option>
+                <option value="startups">Start-ups, Scale-ups & Katalysatoren</option>
+                <option value="etablierte">Etablierte Unternehmen</option>
+                <option value="governance">Governance & Verwaltungen, Politik, öffentliche Unternehmen</option>
             </select>
         </div>
     </div>
     <?php endif; ?>
+
 
     <!-- Add Rankings Section -->
     <?php if (isset($dashboard_settings['show_rankings']) ? $dashboard_settings['show_rankings'] : true) : ?>
@@ -188,7 +206,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
     <?php endif; ?>
 
     <?php if (!empty($assignments)) : ?>
-        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?>" id="mt-candidates-list">
+        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?> mt-candidates-v3" id="mt-candidates-list">
             <?php foreach ($assignments as $assignment) : 
                 $candidate = get_post($assignment->candidate_id);
                 if (!$candidate) continue;
@@ -205,8 +223,23 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                 $status = $evaluation ? $evaluation['status'] : 'draft';
                 $organization = get_post_meta($candidate->ID, '_mt_organization', true);
                 $categories = wp_get_post_terms($candidate->ID, 'mt_award_category');
+                
+                // Get the category from post meta
+                $category_type = get_post_meta($candidate->ID, '_mt_category_type', true);
+                $category_slug = '';
+                if ($category_type) {
+                    // Map category names to slugs - exact matching for German categories
+                    $category_lower = strtolower($category_type);
+                    if (strpos($category_lower, 'start') !== false || strpos($category_lower, 'scale') !== false || strpos($category_lower, 'katalysator') !== false) {
+                        $category_slug = 'startups';
+                    } elseif (strpos($category_lower, 'etablierte') !== false) {
+                        $category_slug = 'etablierte';
+                    } elseif (strpos($category_lower, 'governance') !== false || strpos($category_lower, 'verwaltung') !== false || strpos($category_lower, 'politik') !== false || strpos($category_lower, 'öffentlich') !== false) {
+                        $category_slug = 'governance';
+                    }
+                }
             ?>
-                <div class="mt-candidate-card" data-status="<?php echo esc_attr($status); ?>" data-name="<?php echo esc_attr(strtolower($candidate->post_title)); ?>">
+                <div class="mt-candidate-card" data-status="<?php echo esc_attr($status); ?>" data-name="<?php echo esc_attr(strtolower($candidate->post_title)); ?>" data-category="<?php echo esc_attr($category_slug); ?>">
                     <div class="mt-candidate-header">
                         <h3 class="mt-candidate-name"><?php echo esc_html($candidate->post_title); ?></h3>
                         <?php if ($organization) : ?>
@@ -215,11 +248,23 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                     </div>
                     
                     <div class="mt-candidate-body">
-                        <?php if (!empty($categories)) : ?>
-                            <div class="mt-candidate-category">
-                                <?php echo esc_html($categories[0]->name); ?>
-                            </div>
-                        <?php endif; ?>
+                        <?php 
+                        // Display category badge - prioritize category_type from meta, fallback to taxonomy
+                        $category_display_name = '';
+                        if ($category_type) {
+                            $category_display_name = $category_type;
+                        } elseif (!empty($categories)) {
+                            $category_display_name = $categories[0]->name;
+                        }
+                        ?>
+                        <!-- Category container maintains consistent space whether category exists or not -->
+                        <div class="mt-candidate-category-container">
+                            <?php if ($category_display_name) : ?>
+                                <div class="mt-candidate-category">
+                                    <?php echo esc_html($category_display_name); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                         
                         <div class="mt-evaluation-status">
                             <?php
@@ -272,99 +317,29 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
     </div>
 </div>
 
-<script>
+<!-- MT JURY DASHBOARD FILTERS SCRIPT START -->
+<script type="text/javascript">
 jQuery(document).ready(function($) {
     'use strict';
+    console.log('MT Jury Filters - Inline Script Loaded');
     
-    // Initialize dashboard filtering
-    initDashboardFiltering();
-    
-    /**
-     * Initialize dashboard filtering functionality
-     */
-    function initDashboardFiltering() {
-        // Detect if on mobile device
-        var isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Search functionality with debounce
-        let searchTimer;
-        $('#mt-candidate-search').on('input', function() {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(function() {
-                filterDashboardCandidates();
-            }, 300);
-        });
-        
-        // Status filter
-        $('#mt-status-filter').on('change', function(e) {
-            e.preventDefault();
-            console.log('Status filter changed to:', $(this).val());
-            filterDashboardCandidates();
-        });
-        
-        // Only run initial filter if search or status filter has a value
-        // This prevents hiding all candidates on initial load on mobile
-        var hasSearchValue = $('#mt-candidate-search').val() !== '';
-        var hasStatusFilter = $('#mt-status-filter').val() !== '';
-        
-        if (hasSearchValue || hasStatusFilter) {
-            filterDashboardCandidates();
-        } else {
-            // Ensure all cards are visible on initial load
-            $('.mt-candidate-card').show().removeClass('hidden');
-            hideNoResults();
-        }
-        
-        // Debug: Log all card data attributes on load
-        if (isMobile || window.location.hash === '#debug') {
-            console.log('=== Mobile Debug Info ===');
-            console.log('Device is mobile:', isMobile);
-            console.log('Window width:', window.innerWidth);
-            console.log('User Agent:', navigator.userAgent);
-            $('.mt-candidate-card').each(function(index) {
-                var $card = $(this);
-                console.log('Card ' + index + ':', {
-                    name: $card.data('name'),
-                    status: $card.data('status'),
-                    title: $card.find('.mt-candidate-name').text(),
-                    statusBadge: $card.find('.mt-status-badge').text(),
-                    isVisible: $card.is(':visible')
-                });
-            });
-            console.log('Total cards found:', $('.mt-candidate-card').length);
-            console.log('=== End Debug ===');
-        }
-    }
-    
-    /**
-     * Filter candidates based on search and status
-     */
+    // Filter candidates based on search, status, and category
     function filterDashboardCandidates() {
         var searchTerm = $('#mt-candidate-search').val().toLowerCase().trim();
         var statusFilter = $('#mt-status-filter').val();
+        var categoryFilter = $('#mt-category-filter').val() || 'all';
         var visibleCount = 0;
         var totalCandidates = $('.mt-candidate-card').length;
-        var isMobile = window.innerWidth <= 768;
         
-        // If no candidates found, don't filter
-        if (totalCandidates === 0) {
-            console.log('No candidate cards found to filter');
-            return;
-        }
-        
-        console.log('Starting filter - Search:', searchTerm, 'Status:', statusFilter, 'Total cards:', totalCandidates, 'Mobile:', isMobile);
+        console.log('Filter called - Search:', searchTerm, 'Status:', statusFilter, 'Category:', categoryFilter, 'Total cards:', totalCandidates);
         
         $('.mt-candidate-card').each(function() {
             var $card = $(this);
             var name = ($card.data('name') || '').toString().toLowerCase();
-            var status = ($card.data('status') || 'draft').toString(); // Default to 'draft' if no status
+            var status = ($card.data('status') || 'pending').toString();
+            var category = ($card.data('category') || '').toString();
             
-            // Debug individual card data on mobile
-            if (isMobile && window.console && window.console.log) {
-                console.log('Card data - Name:', name, 'Status:', status);
-            }
-            
-            // Check search match - search in both data-name and the actual text content
+            // Check search match
             var cardTitle = $card.find('.mt-candidate-name').text().toLowerCase();
             var cardOrg = $card.find('.mt-candidate-org').text().toLowerCase();
             var matchesSearch = searchTerm === '' || 
@@ -372,60 +347,82 @@ jQuery(document).ready(function($) {
                               cardTitle.indexOf(searchTerm) !== -1 ||
                               cardOrg.indexOf(searchTerm) !== -1;
             
-            // Check status match - normalize status values
+            // Check status match - handle both German and English status values
             var normalizedStatus = status.toLowerCase().trim();
             var normalizedFilter = statusFilter.toLowerCase().trim();
+            
+            // Map status values
+            if (normalizedStatus === 'pending' || normalizedStatus === 'nicht begonnen') {
+                normalizedStatus = 'pending';
+            } else if (normalizedStatus === 'draft' || normalizedStatus === 'entwurf') {
+                normalizedStatus = 'draft';
+            } else if (normalizedStatus === 'completed' || normalizedStatus === 'abgeschlossen') {
+                normalizedStatus = 'completed';
+            }
+            
             var matchesStatus = statusFilter === '' || normalizedStatus === normalizedFilter;
             
-            // Special handling for draft status (default when empty)
-            if (normalizedStatus === '' && normalizedFilter === 'draft') {
-                matchesStatus = true;
-            }
+            // Check category match
+            var matchesCategory = categoryFilter === 'all' || category === categoryFilter;
             
-            // On mobile, be more lenient with filtering if no filters are active
-            if (isMobile && searchTerm === '' && statusFilter === '') {
-                matchesSearch = true;
-                matchesStatus = true;
-            }
-            
-            if (matchesSearch && matchesStatus) {
-                $card.show().removeClass('hidden').css('display', ''); // Ensure display is not forced to none
+            if (matchesSearch && matchesStatus && matchesCategory) {
+                $card.show().removeClass('hidden');
                 visibleCount++;
             } else {
                 $card.hide().addClass('hidden');
             }
         });
         
+        console.log('Filter complete - Visible:', visibleCount);
+        
         // Show/hide no results message
-        if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '')) {
+        if (visibleCount === 0 && (searchTerm !== '' || statusFilter !== '' || categoryFilter !== 'all')) {
             showNoResults();
         } else {
             hideNoResults();
         }
-        
-        console.log('Filter complete - Visible:', visibleCount, 'of', totalCandidates);
     }
     
-    /**
-     * Show no results message
-     */
+    // Show no results message
     function showNoResults() {
         if (!$('.mt-no-results-message').length) {
             $('.mt-candidates-list').append(
                 '<div class="mt-no-results-message mt-notice">' +
-                '<p><?php _e("No candidates match your search criteria.", "mobility-trailblazers"); ?></p>' +
+                '<p>Keine Kandidaten entsprechen Ihren Suchkriterien.</p>' +
                 '</div>'
             );
         }
         $('.mt-no-results-message').show();
     }
     
-    /**
-     * Hide no results message
-     */
+    // Hide no results message
     function hideNoResults() {
         $('.mt-no-results-message').hide();
     }
+    
+    // Search functionality with debounce
+    let searchTimer;
+    $('#mt-candidate-search').on('input', function() {
+        console.log('Search input changed:', $(this).val());
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            filterDashboardCandidates();
+        }, 300);
+    });
+    
+    // Status filter
+    $('#mt-status-filter').on('change', function(e) {
+        e.preventDefault();
+        console.log('Status filter changed to:', $(this).val());
+        filterDashboardCandidates();
+    });
+    
+    // Category filter dropdown
+    $('#mt-category-filter').on('change', function(e) {
+        e.preventDefault();
+        console.log('Category filter changed to:', $(this).val());
+        filterDashboardCandidates();
+    });
     
     // Evaluation button click
     $('.mt-evaluate-btn').on('click', function(e) {
@@ -433,5 +430,13 @@ jQuery(document).ready(function($) {
         var candidateId = $(this).data('candidate-id');
         window.location.href = '?evaluate=' + candidateId;
     });
+    
+    // Ensure all cards are visible on initial load
+    $('.mt-candidate-card').show().removeClass('hidden');
+    hideNoResults();
+    
+    console.log('MT Jury Filters - Event handlers attached');
 });
-</script> 
+</script>
+
+ 
