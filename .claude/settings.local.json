@@ -87,7 +87,8 @@
       "Bash(npm install:*)",
       "Bash(npx msgfmt:*)",
       "Bash(del compile-mo.php simple-compile-mo.php)",
-      "Bash(msgfmt:*)"
+      "Bash(msgfmt:*)",
+      "Bash(npm test)"
     ],
     "deny": []
   }

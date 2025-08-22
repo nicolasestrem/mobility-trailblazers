@@ -121,7 +121,7 @@ export async function createTestData(page: Page, baseURL: string) {
       // Clear password field and type password slowly
       await page.locator('#user_pass').clear();
       await page.waitForTimeout(500);
-      await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'AdminPlaywright2025', { delay: 50 });
+      await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'AdminPlaywright2025AdminPlaywright2025', { delay: 50 });
       await page.waitForTimeout(500);
       await page.click('#wp-submit');
       
