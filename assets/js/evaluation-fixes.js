@@ -125,7 +125,8 @@ jQuery(document).ready(function($) {
             // Show loading state
             var $submitBtn = $form.find('button[type="submit"]');
             var originalText = $submitBtn.html();
-            var submittingText = (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.submitting) 
+            var submittingText = window.getI18nText ? window.getI18nText('submitting', 'Submitting...') 
+                                : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.submitting) 
                                 ? mt_frontend.i18n.submitting 
                                 : 'Submitting...';
             $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> ' + submittingText);
@@ -140,11 +141,12 @@ jQuery(document).ready(function($) {
                     if (response.success) {
                         // Show success message
                         var successMessage = response.data.message 
-                                           || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted_full) 
+                                           || (window.getI18nText ? window.getI18nText('evaluation_submitted', 'Thank you for submitting your evaluation!') 
+                                           : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted_full) 
                                            ? mt_frontend.i18n.evaluation_submitted_full 
                                            : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted) 
                                            ? mt_frontend.i18n.evaluation_submitted
-                                           : 'Bewertung erfolgreich abgeschickt!';
+                                           : 'Thank you for submitting your evaluation!');
                         showNotification('success', successMessage);
                         
                         // Update status badge
@@ -154,13 +156,13 @@ jQuery(document).ready(function($) {
                             window.location.href = response.data.redirect || window.location.href.split('?')[0];
                         }, 2000);
                     } else {
-                        showNotification('error', response.data || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.error_try_again ? mt_frontend.i18n.error_try_again : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'));
+                        showNotification('error', response.data || (window.getI18nText ? window.getI18nText('error', 'An error occurred. Please try again.') : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.error_try_again ? mt_frontend.i18n.error_try_again : 'An error occurred. Please try again.')));
                         $submitBtn.prop('disabled', false).html(originalText);
                         isSubmitting = false; // Reset submission flag
                     }
                 },
                 error: function() {
-                    showNotification('error', mt_frontend && mt_frontend.i18n && mt_frontend.i18n.network_error ? mt_frontend.i18n.network_error : 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.');
+                    showNotification('error', window.getI18nText ? window.getI18nText('network_error', 'Network error. Please check your connection and try again.') : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.network_error ? mt_frontend.i18n.network_error : 'Network error. Please check your connection and try again.'));
                     $submitBtn.prop('disabled', false).html(originalText);
                     isSubmitting = false; // Reset submission flag
                 }

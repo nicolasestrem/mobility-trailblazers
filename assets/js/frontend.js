@@ -30,18 +30,35 @@
     // Helper function to safely access i18n values from multiple sources
     // Make it globally accessible for all sections
     window.getI18nText = function(key, defaultValue) {
-        // First try mt_frontend_i18n (from i18n handler)
+        var result = '';
+        
+        // First try mt_frontend_i18n.ui (from i18n handler)
         if (typeof mt_frontend_i18n !== 'undefined' && mt_frontend_i18n && mt_frontend_i18n.ui && mt_frontend_i18n.ui[key]) {
-            return mt_frontend_i18n.ui[key];
+            result = mt_frontend_i18n.ui[key];
+            return result;
         }
+        
         // Then try mt_ajax.i18n
         if (typeof mt_ajax !== 'undefined' && mt_ajax && mt_ajax.i18n && mt_ajax.i18n[key]) {
-            return mt_ajax.i18n[key];
+            result = mt_ajax.i18n[key];
+            return result;
         }
+        
         // Then try mt_frontend.i18n
         if (typeof mt_frontend !== 'undefined' && mt_frontend && mt_frontend.i18n && mt_frontend.i18n[key]) {
-            return mt_frontend.i18n[key];
+            result = mt_frontend.i18n[key];
+            return result;
         }
+        
+        // Fallback with special key mappings for backwards compatibility
+        var keyMap = {
+            'evaluation_submitted_full': 'evaluation_submitted'
+        };
+        
+        if (keyMap[key]) {
+            return window.getI18nText(keyMap[key], defaultValue);
+        }
+        
         return defaultValue || '';
     };
     // Create local reference for convenience
@@ -770,7 +787,7 @@
                         // Scroll to top
                         $('html, body').animate({ scrollTop: 0 }, 300);
                         // Re-enable button
-                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation_btn', getI18nText('submit_evaluation', 'Submit Evaluation')));
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
                         // Redirect after 3 seconds (tracked)
                         if (window.mtTimeouts.evaluationRedirect) {
                             clearTimeout(window.mtTimeouts.evaluationRedirect);
@@ -783,7 +800,7 @@
                         // Error message is in response.data.message
                         var errorMessage = response.data && response.data.message ? response.data.message : getI18nText('error', 'An error occurred. Please try again.');
                         MTJuryDashboard.showError(errorMessage);
-                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation_btn', getI18nText('submit_evaluation', 'Submit Evaluation')));
+                        $submitBtn.prop('disabled', false).html('<span class="dashicons dashicons-yes-alt"></span> ' + getI18nText('submit_evaluation', 'Submit Evaluation'));
                         self.isSubmittingEvaluation = false; // Reset submission flag
                     }
                 })
