@@ -540,11 +540,17 @@ class MT_Import_Export {
         // Optimize meta data fetching - get all meta at once
         $candidate_ids = wp_list_pluck($candidates, 'ID');
         if (!empty($candidate_ids)) {
-            $meta_query = "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} 
-                           WHERE post_id IN (" . implode(',', array_map('intval', $candidate_ids)) . ") 
-                           AND meta_key IN ('_mt_candidate_name', '_mt_organization', '_mt_category_type', 
-                                            '_mt_description_full', '_mt_innovation', '_mt_website_url', 
-                                            '_mt_linkedin_url', '_mt_email')";
+            // Create placeholders for prepared statement
+            $placeholders = implode(',', array_fill(0, count($candidate_ids), '%d'));
+            
+            $meta_query = $wpdb->prepare(
+                "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} 
+                 WHERE post_id IN ($placeholders) 
+                 AND meta_key IN ('_mt_candidate_name', '_mt_organization', '_mt_category_type', 
+                                  '_mt_description_full', '_mt_innovation', '_mt_website_url', 
+                                  '_mt_linkedin_url', '_mt_email')",
+                ...$candidate_ids
+            );
             $all_meta = $wpdb->get_results($meta_query);
             
             // Organize meta by post ID
