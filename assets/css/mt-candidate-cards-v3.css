@@ -73,11 +73,11 @@
         padding: var(--mt-v3-space-md);
     }
     
-    /* Reduce height on mobile but keep consistent heights */
+    /* Reduce height on mobile but allow expansion for long names */
     .mt-candidates-v3 .mt-candidate-card,
     .mt-dashboard-v3 .mt-candidate-card {
         padding: var(--mt-v3-space-lg) !important;
-        height: 380px !important; /* Smaller fixed height for mobile */
+        min-height: 380px !important; /* Minimum height for mobile, can expand */
     }
     
     /* Adjust category container for mobile - smaller but still fixed */
@@ -118,12 +118,12 @@
     border-radius: var(--mt-v3-radius) !important;
     box-shadow: var(--mt-v3-shadow) !important;
     padding: var(--mt-v3-space-xxl) !important;
-    height: 440px !important; /* Fixed height for uniform cards */
+    min-height: 440px !important; /* Minimum height, can expand for longer names */
     display: flex !important;
     flex-direction: column !important;
     transition: var(--mt-v3-transition) !important;
     position: relative !important;
-    overflow: hidden !important;
+    overflow: visible !important; /* Allow content to expand */
     width: 100% !important;
     box-sizing: border-box !important;
 }
@@ -135,43 +135,53 @@
     border-color: var(--mt-v3-accent) !important;
 }
 
-/* Card Header Section */
+/* Card Header Section - Expandable for Full Names */
 .mt-candidates-v3 .mt-candidate-card .mt-candidate-header,
 .mt-dashboard-v3 .mt-candidate-card .mt-candidate-header {
     border-bottom: 2px solid var(--mt-v3-border-soft) !important;
-    padding-bottom: var(--mt-v3-space-lg) !important;
-    margin-bottom: var(--mt-v3-space-lg) !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 20px !important;
     flex-shrink: 0 !important;
     overflow: visible !important;
+    min-height: auto !important;
+    display: block !important;  /* Ensure vertical stacking */
+    /* Allow header to expand as needed for longer names */
 }
 
-/* Candidate Name - Prominent Display */
+/* Candidate Name - Prominent Display (Full Name Always Visible) */
 .mt-candidates-v3 .mt-candidate-card .mt-candidate-name,
 .mt-dashboard-v3 .mt-candidate-card .mt-candidate-name {
     font-size: 20px !important;
     font-weight: 700 !important;
     color: var(--mt-v3-primary) !important;
-    margin: 0 0 var(--mt-v3-space-md) 0 !important;
+    margin: 0 0 8px 0 !important;  /* Small gap before company name */
     line-height: 1.3 !important;
     word-wrap: break-word !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    overflow: visible !important;
+    display: block !important;  /* Force block display */
+    width: 100% !important;  /* Full width */
+    /* Removed line-clamp to show full names */
 }
 
-/* Organization/Company - Subdued but Clear */
+/* Organization/Company - Below Name, Subdued but Clear */
 .mt-candidates-v3 .mt-candidate-card .mt-candidate-org,
 .mt-dashboard-v3 .mt-candidate-card .mt-candidate-org {
-    font-size: 15px !important;
+    font-size: 13px !important;  /* Smaller for hierarchy */
     color: var(--mt-v3-text-secondary) !important;
     margin: 0 !important;
+    padding-left: 2px !important;  /* Slight indent */
     line-height: 1.4 !important;
     font-weight: 400 !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden !important;
+    font-style: italic !important;  /* Italic for distinction */
+    display: block !important;  /* Force block display */
+    width: 100% !important;  /* Full width */
+    opacity: 0.85 !important;  /* Slightly subdued */
+    /* Allow full company name to show */
+    overflow: visible !important;
+    word-wrap: break-word !important;
+    hyphens: auto !important;
 }
 
 /* Card Body */
@@ -196,7 +206,7 @@
     height: 68px !important; /* Fixed height for longest category text */
     display: flex !important;
     align-items: center !important; /* Center badge vertically */
-    justify-content: flex-start !important;
+    justify-content: center !important; /* Center badge horizontally */
     flex-shrink: 0 !important; /* Don't allow this to shrink */
     overflow: hidden !important; /* Prevent overflow */
 }
@@ -418,11 +428,11 @@
 
 /* ===================================
    AGGRESSIVE SPACING OVERRIDES
-   Force uniform card heights and proper layout
+   Flexible card heights with full candidate name display
    =================================== */
 body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card,
 body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card {
-    height: 440px !important; /* Uniform height for all contexts */
+    min-height: 440px !important; /* Minimum height, can expand for long names */
     padding: 45px !important;  /* Large internal padding */
     box-sizing: border-box !important;
     display: flex !important;
@@ -434,6 +444,8 @@ body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-hea
     padding: 0 0 28px 0 !important;  /* Space below header content */
     margin: 0 0 28px 0 !important;  /* Space after border */
     flex-shrink: 0 !important; /* Don't allow header to shrink */
+    overflow: visible !important; /* Allow header to expand for long names */
+    min-height: auto !important; /* Allow dynamic height */
 }
 
 body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card .mt-candidate-body,
@@ -451,7 +463,7 @@ body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-candidate-cat
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: center !important; /* Center badges horizontally */
     overflow: hidden !important;
 }
 
@@ -468,11 +480,11 @@ body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card .mt-evaluate-btn 
     flex-shrink: 0 !important;
 }
 
-/* Mobile adjustments - smaller but still uniform height */
+/* Mobile adjustments - smaller minimum height, can expand */
 @media (max-width: 768px) {
     body .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card,
     body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card {
-        height: 380px !important; /* Smaller uniform height for mobile */
+        min-height: 380px !important; /* Minimum height for mobile, can expand */
         padding: 32px !important;
     }
     
