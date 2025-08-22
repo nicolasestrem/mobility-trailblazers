@@ -58,7 +58,7 @@ Always deploy one or several agent most relevant to the task
 - `mcp__github` - Repository management and pull requests
 
 **think**
-- sequential-thinking - Think better
+- `sequential-thinking` - Think better
 
 ### Example Usage Patterns
 
@@ -191,13 +191,6 @@ wp cache flush
 3. **Test imports:** Always use `--dry-run` first
 4. **Check browser console** for JavaScript errors
 5. **Use appropriate agents** for code review and security checks
-
-### Before Committing
-```powershell
-.\scripts\production-cleanup.ps1    # Remove debug code
-.\scripts\minify-assets.ps1         # Minify assets
-.\scripts\compile-mo-local.ps1      # Compile translations
-```
 
 ## Critical Files & Their Purpose
 
@@ -354,7 +347,7 @@ Before deploying to production:
 1. **Never remove features without confirmation** - Plugin is in production
 2. **Always check existing code** before implementing new features
 3. **Emergency fixes** are temporarily in `includes/emergency-german-fixes.php`
-4. **Use Repository-Service pattern** for new features
+4. **Use Repository-Service pattern** for new features`
 5. **AJAX handlers must extend** `MT_Base_Ajax` class
 6. **All database operations** through repositories
 7. **Follow WordPress coding standards**
