@@ -40,6 +40,18 @@ add_filter('gettext', function($translated, $text, $domain) {
         // Make sure critical evaluation criteria are translated
         'Evaluation Criteria' => 'Bewertungskriterien',
         'Description' => 'Beschreibung',
+        
+        // Button and status translations (reported issue)
+        'View/Edit Evaluation' => 'Ansehen',
+        'Full View' => 'Details anzeigen',
+        'Completed' => 'Abgeschlossen',
+        'Start Evaluation' => 'Bewertung starten',
+        'Submit Evaluation' => 'Bewertung abschicken',
+        'Save Draft' => 'Entwurf speichern',
+        'In Progress' => 'In Bearbeitung',
+        'Draft' => 'Entwurf',
+        'Pending' => 'Ausstehend',
+        'Not Started' => 'Nicht begonnen',
     ];
     
     // Apply fallback translation only if current translation is the same as original

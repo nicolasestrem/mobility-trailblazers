@@ -163,13 +163,13 @@ $criteria = [
                         <?php if ($linkedin_url) : ?>
                             <a href="<?php echo esc_url($linkedin_url); ?>" target="_blank" class="mt-link-button">
                                 <span class="dashicons dashicons-linkedin"></span>
-                                LinkedIn Profile
+                                <?php _e('LinkedIn Profile', 'mobility-trailblazers'); ?>
                             </a>
                         <?php endif; ?>
                         <?php if ($website_url) : ?>
                             <a href="<?php echo esc_url($website_url); ?>" target="_blank" class="mt-link-button">
                                 <span class="dashicons dashicons-admin-site"></span>
-                                Website
+                                <?php _e('Website', 'mobility-trailblazers'); ?>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -389,7 +389,19 @@ $criteria = [
                                 </div>
                             <?php endif; ?>
                             
-                            <div class="mt-score-display" style="background-color: <?php echo esc_attr($criterion['color']); ?>">
+                            <?php 
+                            // Determine score state class for v4 CSS
+                            $score_state_class = '';
+                            $numeric_score = floatval($score_value);
+                            if ($numeric_score >= 8) {
+                                $score_state_class = 'mt-score-display--high';
+                            } elseif ($numeric_score >= 5) {
+                                $score_state_class = 'mt-score-display--medium';
+                            } elseif ($numeric_score > 0) {
+                                $score_state_class = 'mt-score-display--low';
+                            }
+                            ?>
+                            <div class="mt-score-display <?php echo esc_attr($score_state_class); ?>">
                                 <span class="mt-score-value"><?php echo esc_html($score_value); ?></span>
                             </div>
                         </div>

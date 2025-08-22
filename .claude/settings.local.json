@@ -82,7 +82,12 @@
       "Bash(C:/xampp/php/php.exe -l \"E:\\OneDrive\\CoWorkSpace\\Tech Stack\\Platform\\plugin\\mobility-trailblazers\\templates\\frontend\\jury-dashboard.php\")",
       "mcp__kapture__select",
       "Bash(docker-compose up:*)",
-      "Bash(C:/xampp/php/php.exe compile-translation.php:*)"
+      "Bash(C:/xampp/php/php.exe compile-translation.php:*)",
+      "Bash(where wp)",
+      "Bash(npm install:*)",
+      "Bash(npx msgfmt:*)",
+      "Bash(del compile-mo.php simple-compile-mo.php)",
+      "Bash(msgfmt:*)"
     ],
     "deny": []
   }

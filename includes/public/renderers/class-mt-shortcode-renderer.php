@@ -236,7 +236,9 @@ class MT_Shortcode_Renderer {
         }
         
         wp_enqueue_style('dashicons');
-        wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
+        // Add locale-based cache busting to ensure fresh translations
+        $script_version = MT_VERSION . '-' . get_locale();
+        wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], $script_version, true);
         
         // Note: Not enqueueing mt-jury-filters.js as we're using inline JavaScript
         
@@ -262,7 +264,17 @@ class MT_Shortcode_Renderer {
                 'relevanz' => __('Relevanz für die Mobilitätswende', 'mobility-trailblazers'),
                 'relevanz_description' => __('Bedeutung und Beitrag zur Transformation der Mobilität', 'mobility-trailblazers'),
                 'vorbildfunktion' => __('Vorbildfunktion & Sichtbarkeit', 'mobility-trailblazers'),
-                'vorbild_description' => __('Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor', 'mobility-trailblazers')
+                'vorbild_description' => __('Rolle als Vorbild und öffentliche Wahrnehmbarkeit im Mobilitätssektor', 'mobility-trailblazers'),
+                // Additional UI strings for JavaScript
+                'submitting' => __('Submitting...', 'mobility-trailblazers'),
+                'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
+                'evaluation_submitted_full' => __('Thank you for submitting your evaluation!', 'mobility-trailblazers'),
+                'evaluation_submitted_status' => __('Evaluation Submitted', 'mobility-trailblazers'),
+                'back_to_dashboard' => __('Back to Dashboard', 'mobility-trailblazers'),
+                'additional_comments' => __('Additional Comments (Optional)', 'mobility-trailblazers'),
+                'characters' => __('characters', 'mobility-trailblazers'),
+                'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
+                'evaluation_submitted_editable' => __('This evaluation has been submitted. You can still edit and resubmit.', 'mobility-trailblazers')
             ]
         ]);
     }

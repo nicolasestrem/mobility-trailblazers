@@ -59,30 +59,79 @@
   margin-top: var(--mt-space-xl);
 }
 
-.mt-rankings-page .mt-rank-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-weight: 700;
+/* Evaluation Table Specific Styles */
+.mt-evaluation-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.mt-evaluation-table thead th {
+  padding: 12px;
   background: var(--mt-color-gray-light);
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 2px solid var(--mt-border);
 }
 
-.mt-rankings-page .mt-rank-badge--gold {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #6b5b00;
+.mt-evaluation-table tbody tr {
+  background: var(--mt-color-white);
+  transition: var(--mt-transition-fast);
 }
 
-.mt-rankings-page .mt-rank-badge--silver {
-  background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
-  color: #545454;
+.mt-evaluation-table tbody tr:hover {
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.mt-rankings-page .mt-rank-badge--bronze {
-  background: linear-gradient(135deg, #cd7f32, #e4a853);
-  color: #5c3a1a;
+.mt-evaluation-table td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+/* Rank cell specific styling */
+.mt-evaluation-table .mt-eval-rank {
+  width: 60px;
+  text-align: center;
+}
+
+/* Position-specific row highlights */
+.mt-evaluation-table .position-gold {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, transparent 100%);
+}
+
+.mt-evaluation-table .position-silver {
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.08) 0%, transparent 100%);
+}
+
+.mt-evaluation-table .position-bronze {
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.08) 0%, transparent 100%);
+}
+
+/* Use the ranking badge component in table context */
+.mt-evaluation-table .mt-ranking-badge {
+  margin: 0 auto;
+  display: flex;
+}
+
+/* Jury Dashboard Page Ranking Adjustments */
+.mt-jury-dashboard .mt-evaluation-table .mt-ranking-badge {
+  border-radius: var(--mt-radius-sm);
+}
+
+.mt-jury-dashboard .mt-rankings-section {
+  margin-top: var(--mt-space-xl);
+}
+
+/* Evaluation Form Page Score Display */
+.mt-evaluation-page .mt-score-display {
+  margin: var(--mt-space-sm) auto;
+  display: flex;
+}
+
+.mt-evaluation-page .mt-criterion-card .mt-score-display {
+  float: right;
+  margin: 0;
 }
 
 /* Single Candidate Page */

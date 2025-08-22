@@ -397,6 +397,49 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
+        // Check if v4 CSS is enabled (can be disabled via filter)
+        $use_v4_css = apply_filters('mt_enable_css_v4', true);
+        
+        if ($use_v4_css) {
+            // Load v4 CSS framework
+            $v4_base_url = MT_PLUGIN_URL . 'assets/css/v4/';
+            
+            wp_enqueue_style(
+                'mt-v4-tokens',
+                $v4_base_url . 'mt-tokens.css',
+                [],
+                MT_VERSION
+            );
+            
+            wp_enqueue_style(
+                'mt-v4-reset',
+                $v4_base_url . 'mt-reset.css',
+                ['mt-v4-tokens'],
+                MT_VERSION
+            );
+            
+            wp_enqueue_style(
+                'mt-v4-base',
+                $v4_base_url . 'mt-base.css',
+                ['mt-v4-reset'],
+                MT_VERSION
+            );
+            
+            wp_enqueue_style(
+                'mt-v4-components',
+                $v4_base_url . 'mt-components.css',
+                ['mt-v4-base'],
+                MT_VERSION
+            );
+            
+            wp_enqueue_style(
+                'mt-v4-pages',
+                $v4_base_url . 'mt-pages.css',
+                ['mt-v4-components'],
+                MT_VERSION
+            );
+        }
+        
         // Core CSS Variables (loaded first)
         wp_enqueue_style(
             'mt-variables',
@@ -594,12 +637,13 @@ class MT_Plugin {
             // );
         }
         
-        // Scripts
+        // Scripts with locale-based cache busting
+        $script_version = MT_VERSION . '-' . get_locale();
         wp_enqueue_script(
             'mt-frontend',
             MT_PLUGIN_URL . 'assets/js/frontend.js',
             ['jquery'],
-            MT_VERSION,
+            $script_version,
             true
         );
         
@@ -646,6 +690,10 @@ class MT_Plugin {
                 'comments_placeholder' => __('Share your thoughts about this candidate\'s contributions to mobility innovation...', 'mobility-trailblazers'),
                 'save_as_draft' => __('Save as Draft', 'mobility-trailblazers'),
                 'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
+                'submitting' => __('Submitting...', 'mobility-trailblazers'),
+                'evaluation_submitted_full' => __('Thank you for submitting your evaluation!', 'mobility-trailblazers'),
+                'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
+                'evaluation_submitted_editable' => __('This evaluation has been submitted. You can still edit and resubmit.', 'mobility-trailblazers'),
                 'evaluation_guidelines' => __('Evaluation Guidelines', 'mobility-trailblazers'),
                 'guideline_1' => __('Score each criterion from 0 (lowest) to 10 (highest) based on your assessment', 'mobility-trailblazers'),
                 'guideline_2' => __('Consider the candidate\'s overall impact on mobility transformation', 'mobility-trailblazers'),

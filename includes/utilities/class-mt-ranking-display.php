@@ -34,31 +34,38 @@ class MT_Ranking_Display {
         $args = wp_parse_args($args, $defaults);
         $position = intval($position);
         
-        // Determine position class
+        // Determine position class using v4 BEM naming
         $position_class = '';
         if ($position === 1) {
-            $position_class = 'mt-rank-gold';
+            $position_class = 'mt-ranking-badge--gold';
         } elseif ($position === 2) {
-            $position_class = 'mt-rank-silver';
+            $position_class = 'mt-ranking-badge--silver';
         } elseif ($position === 3) {
-            $position_class = 'mt-rank-bronze';
+            $position_class = 'mt-ranking-badge--bronze';
         } else {
-            $position_class = 'mt-rank-standard';
+            $position_class = 'mt-ranking-badge--standard';
         }
         
-        // Size class
-        $size_class = 'mt-badge-' . $args['size'];
+        // Size class with BEM modifier
+        $size_class = 'mt-ranking-badge--' . $args['size'];
         
-        // Context class
-        $context_class = 'mt-badge-context-' . $args['context'];
+        // Context class with BEM modifier
+        $context_class = 'mt-ranking-badge--' . $args['context'];
         
-        // Build the HTML
+        // Build the HTML with proper ARIA labels
+        $aria_label = sprintf(
+            /* translators: %d: ranking position */
+            __('Rank %d', 'mobility-trailblazers'),
+            $position
+        );
+        
         $html = sprintf(
-            '<div class="mt-ranking-badge %s %s %s" data-position="%d">',
+            '<div class="mt-ranking-badge %s %s %s" data-position="%d" aria-label="%s" role="img">',
             esc_attr($position_class),
             esc_attr($size_class),
             esc_attr($context_class),
-            $position
+            $position,
+            esc_attr($aria_label)
         );
         
         // Add medal icon for top 3
@@ -95,9 +102,9 @@ class MT_Ranking_Display {
             $color_class = 'mt-medal-bronze';
         }
         
-        // Return a proper medal SVG
+        // Return a proper medal SVG with accessibility
         return sprintf(
-            '<svg class="mt-medal-icon %s" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            '<svg class="mt-medal-icon %s" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <g class="mt-medal-ribbon">
                     <path d="M7 2L9 7L12 3L15 7L17 2L17 10L12 13L7 10Z" fill="currentColor" opacity="0.3"/>
                 </g>

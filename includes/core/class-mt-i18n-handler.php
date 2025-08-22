@@ -233,7 +233,17 @@ class MT_I18n_Handler {
             'ui' => [
                 'loading' => __('Loading...', 'mobility-trailblazers'),
                 'processing' => __('Processing...', 'mobility-trailblazers'),
-                'please_wait' => __('Please wait...', 'mobility-trailblazers')
+                'please_wait' => __('Please wait...', 'mobility-trailblazers'),
+                'submitting' => __('Submitting...', 'mobility-trailblazers'),
+                'submit_evaluation' => __('Submit Evaluation', 'mobility-trailblazers'),
+                'evaluation_submitted' => __('Thank you for submitting your evaluation!', 'mobility-trailblazers'),
+                'evaluation_submitted_status' => __('Evaluation Submitted', 'mobility-trailblazers'),
+                'submit_evaluation_btn' => __('Submit Evaluation', 'mobility-trailblazers'),
+                'back_to_dashboard' => __('Back to Dashboard', 'mobility-trailblazers'),
+                'additional_comments' => __('Additional Comments (Optional)', 'mobility-trailblazers'),
+                'characters' => __('characters', 'mobility-trailblazers'),
+                'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
+                'evaluation_submitted_editable' => __('This evaluation has been submitted. You can still edit and resubmit.', 'mobility-trailblazers')
             ]
         ];
     }

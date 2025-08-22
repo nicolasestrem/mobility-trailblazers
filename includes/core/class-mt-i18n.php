@@ -147,8 +147,9 @@ class MT_I18n {
      * @return string Modified locale
      */
     public function set_locale($locale) {
-        // Only modify locale for our plugin pages
-        if ($this->is_plugin_context()) {
+        // Apply locale for plugin context OR when a language preference is set
+        if ($this->is_plugin_context() || $this->current_language !== $locale) {
+            // Always prefer the detected/selected language for plugin strings
             return $this->current_language;
         }
         

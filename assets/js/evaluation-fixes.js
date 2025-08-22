@@ -125,7 +125,10 @@ jQuery(document).ready(function($) {
             // Show loading state
             var $submitBtn = $form.find('button[type="submit"]');
             var originalText = $submitBtn.html();
-            $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Submitting...');
+            var submittingText = (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.submitting) 
+                                ? mt_frontend.i18n.submitting 
+                                : 'Submitting...';
+            $submitBtn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> ' + submittingText);
             // Submit via AJAX
             $.ajax({
                 url: mt_ajax.ajax_url,
@@ -136,7 +139,13 @@ jQuery(document).ready(function($) {
                 success: function(response) {
                     if (response.success) {
                         // Show success message
-                        showNotification('success', response.data.message || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted ? mt_frontend.i18n.evaluation_submitted : 'Bewertung erfolgreich abgeschickt!'));
+                        var successMessage = response.data.message 
+                                           || (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted_full) 
+                                           ? mt_frontend.i18n.evaluation_submitted_full 
+                                           : (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted) 
+                                           ? mt_frontend.i18n.evaluation_submitted
+                                           : 'Bewertung erfolgreich abgeschickt!';
+                        showNotification('success', successMessage);
                         
                         // Update status badge
                         updateStatusBadge('completed');
@@ -199,7 +208,10 @@ jQuery(document).ready(function($) {
         if (status === 'draft') {
             $badge.text('Draft Saved');
         } else if (status === 'completed') {
-            $badge.text('Evaluation Submitted');
+            var submittedText = (mt_frontend && mt_frontend.i18n && mt_frontend.i18n.evaluation_submitted_status) 
+                              ? mt_frontend.i18n.evaluation_submitted_status 
+                              : 'Evaluation Submitted';
+            $badge.text(submittedText);
         }
     }
     // ========================================

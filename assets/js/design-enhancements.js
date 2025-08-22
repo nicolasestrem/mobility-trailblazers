@@ -55,42 +55,6 @@ jQuery(document).ready(function($) {
         });
     }
     // ========================================
-    // Progress indicator for evaluation form
-    // ========================================
-    if ($('.mt-evaluation-form').length) {
-        var totalCriteria = $('.mt-criterion-evaluation').length;
-        var completedCriteria = 0;
-        // Check for completed evaluations
-        function updateProgress() {
-            completedCriteria = 0;
-            $('.mt-criterion-evaluation').each(function() {
-                var slider = $(this).find('.mt-score-slider');
-                if (slider.length && parseInt(slider.val()) > 0) {
-                    completedCriteria++;
-                }
-            });
-            var progressPercent = (completedCriteria / totalCriteria) * 100;
-            updateProgressBar(progressPercent);
-        }
-        // Create progress bar if it doesn't exist
-        if (!$('.mt-evaluation-progress').length) {
-            var progressHTML = '<div class="mt-evaluation-progress">' +
-                '<div class="mt-progress-bar">' +
-                '<div class="mt-progress-fill" style="width: 0%"></div>' +
-                '</div>' +
-                '<span class="mt-progress-text">0 / ' + totalCriteria + ' criteria evaluated</span>' +
-                '</div>';
-            $('.mt-evaluation-form').prepend(progressHTML);
-        }
-        function updateProgressBar(percent) {
-            $('.mt-progress-fill').css('width', percent + '%');
-            $('.mt-progress-text').text(completedCriteria + ' / ' + totalCriteria + ' criteria evaluated');
-        }
-        // Update progress on slider change
-        $('.mt-score-slider').on('change input', updateProgress);
-        updateProgress(); // Initial check
-    }
-    // ========================================
     // Enhance social links with ripple effect
     // ========================================
     $('.mt-social-link').on('click', function(e) {
@@ -262,29 +226,6 @@ jQuery(document).ready(function($) {
 (function() {
     var style = document.createElement('style');
     style.textContent = `
-        /* Progress Bar Styles */
-        .mt-evaluation-progress {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .mt-progress-bar {
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        .mt-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-        }
-        .mt-progress-text {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
         /* Save Indicator */
         .mt-save-indicator {
             position: fixed;

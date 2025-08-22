@@ -903,6 +903,12 @@ msgstr "LinkedIn"
 msgid "Website"
 msgstr "Webseite"
 
+msgid "LinkedIn Profile"
+msgstr "LinkedIn-Profil"
+
+msgid "Bewertungskriterien Details"
+msgstr "Bewertungskriterien Details"
+
 # Candidate Editor Messages
 msgid "Error loading content"
 msgstr "Fehler beim Laden des Inhalts"

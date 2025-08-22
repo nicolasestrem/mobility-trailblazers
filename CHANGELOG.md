@@ -3,6 +3,40 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.40] - 2025-08-22
+### Fixed - Medal Display & Score Centering Issues
+- **Medal Display Issues**: Fixed medal visibility problems in evaluation table
+  - Added explicit SVG fill colors for gold (#FFD700), silver (#C0C0C0), and bronze (#CD7F32) medals
+  - Fixed transparent backgrounds when medal SVG is present
+  - Maintained backwards compatibility for both old and new CSS class names
+  - Enhanced shadow effects for better medal visibility
+  
+- **Score Display Centering**: Fixed misaligned score text in evaluation circles
+  - Replaced absolute positioning with pure flexbox centering
+  - Fixed score value appearing at top of circle instead of center
+  - Improved responsive behavior on mobile devices
+  - Score circles now properly display with gradient backgrounds based on value
+  
+- **CSS v4 Framework Restoration**: Fixed v4 CSS not loading
+  - Restored v4 CSS enqueuing in `class-mt-plugin.php` that had been inadvertently removed
+  - Fixed conditional loading logic to properly include v4 framework files
+  - Ensured token-based architecture loads correctly
+  
+- **Component Cleanup**: Removed mt-evaluation-progress functionality
+  - Removed JavaScript progress tracking from `design-enhancements.js` (lines 57-91)
+  - Removed associated CSS styles for progress bars (lines 230-251)
+  - Simplified evaluation form by removing unnecessary progress indicators
+
+### Technical Details
+- Used BEM methodology for CSS naming conventions
+- Implemented :has() pseudo-class with fallback for older browsers
+- Files modified:
+  - `assets/css/v4/mt-components.css` - Medal and score display components
+  - `includes/utilities/class-mt-ranking-display.php` - Updated to v4 BEM naming
+  - `includes/core/class-mt-plugin.php` - Restored v4 CSS loading
+  - `templates/frontend/jury-evaluation-form.php` - Fixed score state classes
+  - `assets/js/design-enhancements.js` - Removed progress tracking
+
 ## [2.5.39] - 2025-08-22
 ### Critical Security Fixes & Import/Export System Refactoring
 

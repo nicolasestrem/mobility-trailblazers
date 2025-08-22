@@ -277,3 +277,344 @@
     width: 100%;
   }
 }
+
+/* Ranking Badge Component */
+.mt-ranking-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-weight: 700;
+  transition: var(--mt-transition-fast);
+}
+
+/* Badge Size Variants - Support both old and new class names */
+.mt-ranking-badge--small,
+.mt-ranking-badge.mt-badge-small {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.mt-ranking-badge--medium,
+.mt-ranking-badge.mt-badge-medium {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.mt-ranking-badge--large,
+.mt-ranking-badge.mt-badge-large {
+  width: 64px;
+  height: 64px;
+  font-size: 24px;
+}
+
+/* Badge Context Variants - Support both old and new class names */
+.mt-ranking-badge--table,
+.mt-ranking-badge.mt-badge-context-table {
+  border-radius: var(--mt-radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mt-ranking-badge--card,
+.mt-ranking-badge.mt-badge-context-card {
+  border-radius: 50%;
+  box-shadow: var(--mt-shadow);
+}
+
+/* Medal Colors - Only show backgrounds when no SVG medal */
+.mt-ranking-badge--gold:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-gold:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #333;
+  border: 2px solid #B8860B;
+}
+
+.mt-ranking-badge--silver:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-silver:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #E5E5E5, #B8B8B8);
+  color: #333;
+  border: 2px solid #999;
+}
+
+.mt-ranking-badge--bronze:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-bronze:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #CD7F32, #A0522D);
+  color: #fff;
+  border: 2px solid #8B4513;
+}
+
+/* Always transparent background when medal is present */
+.mt-ranking-badge--gold:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-gold:has(.mt-medal-icon),
+.mt-ranking-badge--silver:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-silver:has(.mt-medal-icon),
+.mt-ranking-badge--bronze:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-bronze:has(.mt-medal-icon) {
+  background: transparent;
+  border: none;
+}
+
+.mt-ranking-badge--standard,
+.mt-ranking-badge.mt-rank-standard {
+  background: var(--mt-color-gray-light);
+  color: var(--mt-text);
+  border: 2px solid var(--mt-border);
+}
+
+/* Hide background when medal SVG is present for top 3 positions */
+.mt-ranking-badge--gold.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-gold:has(.mt-medal-icon),
+.mt-ranking-badge--silver.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-silver:has(.mt-medal-icon),
+.mt-ranking-badge--bronze.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-bronze:has(.mt-medal-icon) {
+  background: transparent;
+  border: none;
+}
+
+/* Fallback for browsers without :has() support */
+@supports not selector(:has(*)) {
+  .mt-ranking-badge--gold .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-gold .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge--silver .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-silver .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge--bronze .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-bronze .mt-medal-icon ~ .mt-rank-number {
+    opacity: 0;
+  }
+}
+
+/* Medal SVG Icon */
+.mt-ranking-badge .mt-medal-icon {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Medal-specific colors for proper display */
+.mt-ranking-badge.mt-rank-gold .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--gold .mt-medal-icon .mt-medal-circle {
+  fill: #FFD700;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-gold .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--gold .mt-medal-icon .mt-medal-ribbon {
+  fill: #B8860B;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge.mt-rank-silver .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--silver .mt-medal-icon .mt-medal-circle {
+  fill: #C0C0C0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-silver .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--silver .mt-medal-icon .mt-medal-ribbon {
+  fill: #999999;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge.mt-rank-bronze .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--bronze .mt-medal-icon .mt-medal-circle {
+  fill: #CD7F32;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-bronze .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--bronze .mt-medal-icon .mt-medal-ribbon {
+  fill: #A0522D;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge .mt-medal-icon .mt-medal-text {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: bold;
+  fill: white;
+  dominant-baseline: central;
+  text-anchor: middle;
+}
+
+/* Ensure medal colors are visible and properly styled */
+.mt-medal-gold {
+  color: #FFD700;
+}
+
+.mt-medal-gold .mt-medal-circle {
+  fill: #FFD700;
+}
+
+.mt-medal-gold .mt-medal-ribbon {
+  fill: #B8860B;
+}
+
+.mt-medal-silver {
+  color: #C0C0C0;
+}
+
+.mt-medal-silver .mt-medal-circle {
+  fill: #C0C0C0;
+}
+
+.mt-medal-silver .mt-medal-ribbon {
+  fill: #999999;
+}
+
+.mt-medal-bronze {
+  color: #CD7F32;
+}
+
+.mt-medal-bronze .mt-medal-circle {
+  fill: #CD7F32;
+}
+
+.mt-medal-bronze .mt-medal-ribbon {
+  fill: #A0522D;
+}
+
+/* Rank Number */
+.mt-ranking-badge .mt-rank-number {
+  position: relative;
+  z-index: 2;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* Medal icon with number positioning - hide number when medal is shown */
+.mt-ranking-badge .mt-medal-icon + .mt-rank-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Score Display Component - Fixed centering */
+.mt-score-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--mt-color-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: var(--mt-transition-fast);
+  position: relative;
+  margin: 0 auto;
+  text-align: center;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.mt-score-display:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Score size variants */
+.mt-score-display--small {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.mt-score-display--large {
+  width: 80px;
+  height: 80px;
+  font-size: 28px;
+}
+
+/* Score value - properly centered */
+.mt-score-display .mt-score-value {
+  display: block;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+
+/* Score color states based on value */
+.mt-score-display--high {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.mt-score-display--medium {
+  background: linear-gradient(135deg, #f39c12, #f1c40f);
+}
+
+.mt-score-display--low {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* Default score color if no state class */
+.mt-score-display:not([class*="--high"]):not([class*="--medium"]):not([class*="--low"]) {
+  background: var(--mt-color-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mt-ranking-badge--small,
+  .mt-ranking-badge.mt-badge-small {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .mt-ranking-badge--medium,
+  .mt-ranking-badge.mt-badge-medium {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .mt-ranking-badge--large,
+  .mt-ranking-badge.mt-badge-large {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  /* Ensure medal SVG scales properly on mobile */
+  .mt-ranking-badge .mt-medal-icon .mt-medal-text {
+    font-size: 6px;
+  }
+  
+  .mt-score-display {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  .mt-score-display--small {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .mt-score-display--large {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+  
+  /* Ensure score text remains centered on mobile */
+  .mt-score-display .mt-score-value {
+    font-size: inherit;
+  }
+}

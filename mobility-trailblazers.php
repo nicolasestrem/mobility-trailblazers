@@ -76,11 +76,11 @@ require_once MT_PLUGIN_DIR . 'includes/core/class-mt-autoloader.php';
 // Register autoloader
 MobilityTrailblazers\Core\MT_Autoloader::register();
 
-// Emergency German fixes - DISABLED as proper localization has been implemented
-// Kept for reference - can be removed after testing confirms all translations work
-// if (file_exists(MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php')) {
-//     require_once MT_PLUGIN_DIR . 'includes/emergency-german-fixes.php';
-// }
+// German translation compatibility fallback
+// Provides fallback translations in case the .mo file fails to load
+if (file_exists(MT_PLUGIN_DIR . 'includes/german-translation-compatibility.php')) {
+    require_once MT_PLUGIN_DIR . 'includes/german-translation-compatibility.php';
+}
 
 // Load username dot fix to prevent dots in usernames
 if (file_exists(MT_PLUGIN_DIR . 'includes/fixes/class-mt-username-dot-fix.php')) {
@@ -98,8 +98,7 @@ if (defined('DOING_AJAX') && DOING_AJAX) {
 
 // Initialize the plugin
 add_action('plugins_loaded', function() {
-    // Load text domain
-    load_plugin_textdomain('mobility-trailblazers', false, dirname(MT_PLUGIN_BASENAME) . '/languages');
+    // Text domain is loaded in MT_I18n class to avoid duplication
     
     // Initialize core
     $plugin = MobilityTrailblazers\Core\MT_Plugin::get_instance();
