@@ -101,3 +101,21 @@ doc/jury-handbook-2025.md
 DEPLOYMENT-PLAN.md
 /doc/specs
 /doc/report
+
+# ===== Playwright Test Files =====
+test-results/
+playwright-report/
+tests/.auth/
+tests/debug-login.js
+*.webm
+*.png
+*.json
+tests/**/*.webm
+tests/**/*.png
+
+# ===== Node.js Dependencies =====
+node_modules/
+package-lock.json
+
+# ===== Local Settings =====
+.claude/settings.local.json
