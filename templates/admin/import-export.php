@@ -138,13 +138,6 @@ if (isset($_GET['message'])) {
                             <span class="dashicons dashicons-download"></span>
                             <?php _e('Candidates Template', 'mobility-trailblazers'); ?>
                         </a>
-                        <?php if (file_exists(MT_PLUGIN_DIR . 'data/templates/candidates.csv')): ?>
-                            <small>
-                                (<a href="<?php echo MT_PLUGIN_URL . 'data/templates/candidates.csv'; ?>" download="candidates-template.csv">
-                                    <?php _e('Direct download', 'mobility-trailblazers'); ?>
-                                </a>)
-                            </small>
-                        <?php endif; ?>
                     </li>
                     <li>
                         <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=mt_download_template&type=jury_members'), 'mt_download_template'); ?>" 
@@ -152,13 +145,6 @@ if (isset($_GET['message'])) {
                             <span class="dashicons dashicons-download"></span>
                             <?php _e('Jury Members Template', 'mobility-trailblazers'); ?>
                         </a>
-                        <?php if (file_exists(MT_PLUGIN_DIR . 'data/templates/jury_members.csv')): ?>
-                            <small>
-                                (<a href="<?php echo MT_PLUGIN_URL . 'data/templates/jury_members.csv'; ?>" download="jury_members-template.csv">
-                                    <?php _e('Direct download', 'mobility-trailblazers'); ?>
-                                </a>)
-                            </small>
-                        <?php endif; ?>
                     </li>
                 </ul>
             </div>

@@ -595,10 +595,10 @@ class MT_Import_Export {
         // Get evaluations
         $table_name = $wpdb->prefix . 'mt_evaluations';
         $evaluations = $wpdb->get_results("
-            SELECT e.*, c.post_title as candidate_name, u.display_name as jury_member
+            SELECT e.*, c.post_title as candidate_name, j.post_title as jury_member
             FROM {$table_name} e
             LEFT JOIN {$wpdb->posts} c ON e.candidate_id = c.ID
-            LEFT JOIN {$wpdb->users} u ON e.jury_member_id = u.ID
+            LEFT JOIN {$wpdb->posts} j ON e.jury_member_id = j.ID AND j.post_type = 'mt_jury_member'
             ORDER BY e.created_at DESC
         ");
         
@@ -665,13 +665,13 @@ class MT_Import_Export {
         }
         
         // Get assignments
-        $table_name = $wpdb->prefix . 'mt_assignments';
+        $table_name = $wpdb->prefix . 'mt_jury_assignments';
         $assignments = $wpdb->get_results("
-            SELECT a.*, c.post_title as candidate_name, u.display_name as jury_member
+            SELECT a.*, c.post_title as candidate_name, j.post_title as jury_member
             FROM {$table_name} a
             LEFT JOIN {$wpdb->posts} c ON a.candidate_id = c.ID
-            LEFT JOIN {$wpdb->users} u ON a.jury_member_id = u.ID
-            ORDER BY a.created_at DESC
+            LEFT JOIN {$wpdb->posts} j ON a.jury_member_id = j.ID
+            ORDER BY a.assigned_at DESC
         ");
         
         // Set headers for download

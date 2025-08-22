@@ -403,7 +403,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
      */
     public function rebalance_assignments() {
         global $wpdb;
-        $table = $wpdb->prefix . 'mt_assignments';
+        $table = $wpdb->prefix . 'mt_jury_assignments';
         
         // Get current distribution
         $distribution = $wpdb->get_results("
@@ -531,7 +531,7 @@ class MT_Assignment_Service implements MT_Service_Interface {
      */
     public function get_distribution_statistics() {
         global $wpdb;
-        $table = $wpdb->prefix . 'mt_assignments';
+        $table = $wpdb->prefix . 'mt_jury_assignments';
         
         // Get distribution data
         $distribution = $wpdb->get_results("

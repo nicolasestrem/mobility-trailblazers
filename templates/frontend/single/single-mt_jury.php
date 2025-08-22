@@ -41,10 +41,10 @@ while (have_posts()) : the_post();
     ", $jury_id));
     
     // Get assigned candidates count
-    $table_assignments = $wpdb->prefix . 'mt_assignments';
+    $table_assignments = $wpdb->prefix . 'mt_jury_assignments';
     $assigned_count = $wpdb->get_var($wpdb->prepare("
         SELECT COUNT(*) FROM $table_assignments 
-        WHERE jury_member_id = %d AND status = 'active'
+        WHERE jury_member_id = %d
     ", $jury_id));
 ?>
 
