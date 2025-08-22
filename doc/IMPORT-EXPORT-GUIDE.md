@@ -1,5 +1,7 @@
 # Mobility Trailblazers - Import/Export & Localization Guide
-*Last Updated: August 20, 2025 | Version 2.5.37*
+*Last Updated: August 22, 2025 | Version 2.5.39*
+
+> **⚠️ SECURITY UPDATE**: Critical security vulnerabilities have been fixed in v2.5.39. All import/export operations now require administrator-level permissions and use prepared SQL statements.
 
 ## Table of Contents
 1. [Quick Start](#quick-start)
@@ -1231,6 +1233,74 @@ foreach ($test_data as $row) {
     assert($result['success'] === true);
 }
 ```
+
+---
+
+## Security Updates (v2.5.39)
+
+### Critical Security Fixes Applied
+
+#### 1. SQL Injection Prevention
+All database queries now use prepared statements:
+```php
+// Before (VULNERABLE):
+$wpdb->get_results("SELECT * FROM {$table} WHERE id IN (" . implode(',', $ids) . ")");
+
+// After (SECURE):
+$placeholders = array_fill(0, count($ids), '%d');
+$wpdb->get_results($wpdb->prepare(
+    "SELECT * FROM %i WHERE id IN (" . implode(',', $placeholders) . ")",
+    array_merge([$table], $ids)
+));
+```
+
+#### 2. Path Traversal Protection
+File paths are now validated against allowed directories:
+```php
+private function validate_file_path($path) {
+    $real_path = realpath($path);
+    $allowed_dirs = [
+        wp_normalize_path(ABSPATH),
+        wp_normalize_path(wp_upload_dir()['basedir']),
+        wp_normalize_path(WP_CONTENT_DIR)
+    ];
+    
+    foreach ($allowed_dirs as $allowed_dir) {
+        if (strpos($real_path, realpath($allowed_dir)) === 0) {
+            return $real_path;
+        }
+    }
+    return false;
+}
+```
+
+#### 3. Permission Requirements
+All import/export operations now require administrator access:
+```php
+// All operations now check:
+if (!current_user_can('manage_options')) {
+    wp_die(__('Administrator access required', 'mobility-trailblazers'));
+}
+```
+
+### New Data Exchange Architecture
+
+#### Unified Service Layer
+A new `MT_Data_Exchange_Service` provides centralized import/export:
+- Strategy pattern for different data types
+- Consistent validation and sanitization
+- Transaction support with rollback capability
+- Import history tracking
+
+#### Available Export Types
+- **Candidates**: Full metadata with photos
+- **Jury Members**: User data and roles
+- **Assignments**: Jury-candidate mappings
+- **Evaluations**: All scores and comments
+- **Audit Log**: System activity tracking
+- **Error Log**: Application errors
+- **Coaching**: Progress and statistics
+- **Settings**: Plugin configuration backup
 
 ---
 

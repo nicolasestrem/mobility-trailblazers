@@ -3,7 +3,7 @@
  * Plugin Name: Mobility Trailblazers
  * Plugin URI: https://mobility-trailblazers.com
  * Description: Award management platform for recognizing mobility innovators in the DACH region
- * Version: 2.5.38
+ * Version: 2.5.39
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Mobility Trailblazers - Nicolas Estrem
@@ -123,11 +123,19 @@ register_uninstall_hook(__FILE__, ['MobilityTrailblazers\Core\MT_Uninstaller', '
 
 // Register WP-CLI commands
 if (defined('WP_CLI') && WP_CLI) {
-    require_once MT_PLUGIN_DIR . 'vendor/autoload.php';
-    require_once MT_PLUGIN_DIR . 'includes/cli/class-mt-cli-commands.php';
+    // Only load vendor autoload if it exists (for composer dependencies)
+    $vendor_autoload = MT_PLUGIN_DIR . 'vendor/autoload.php';
+    if (file_exists($vendor_autoload)) {
+        require_once $vendor_autoload;
+    }
     
-    $cli_commands = new MobilityTrailblazers\CLI\MT_CLI_Commands();
-    WP_CLI::add_command('mt import-candidates', [$cli_commands, 'import_candidates']);
-    WP_CLI::add_command('mt db-upgrade', [$cli_commands, 'db_upgrade']);
-    WP_CLI::add_command('mt list-candidates', [$cli_commands, 'list_candidates']);
+    $cli_commands_file = MT_PLUGIN_DIR . 'includes/cli/class-mt-cli-commands.php';
+    if (file_exists($cli_commands_file)) {
+        require_once $cli_commands_file;
+        
+        $cli_commands = new MobilityTrailblazers\CLI\MT_CLI_Commands();
+        WP_CLI::add_command('mt import-candidates', [$cli_commands, 'import_candidates']);
+        WP_CLI::add_command('mt db-upgrade', [$cli_commands, 'db_upgrade']);
+        WP_CLI::add_command('mt list-candidates', [$cli_commands, 'list_candidates']);
+    }
 } 
