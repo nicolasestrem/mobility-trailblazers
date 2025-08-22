@@ -827,3 +827,149 @@ html[lang="de-DE"] .mt-criterion-description {
     display: block !important;
     visibility: visible !important;
 }
+
+/* ===================================
+   7. V3 COMPATIBILITY FIXES
+   From: v3-compatibility-overrides
+   =================================== */
+
+/**
+ * V3 Compatibility Overrides
+ * Purpose: Ensure v3 CSS takes priority over conflicting hotfixes
+ * Created: 2025-08-22
+ */
+
+/* Preserve v3 card styles - override conflicting hotfixes */
+.mt-candidates-v3 .mt-candidate-card:not(.hidden),
+.mt-dashboard-v3 .mt-candidate-card:not(.hidden) {
+    /* Preserve v3 variables */
+    background: var(--mt-v3-card-bg, #FFFFFF) !important;
+    border: 1px solid var(--mt-v3-border-soft, #E8DCC9) !important;
+    border-radius: var(--mt-v3-radius, 16px) !important;
+    box-shadow: var(--mt-v3-shadow, 0 2px 10px rgba(0, 0, 0, 0.07)) !important;
+    padding: var(--mt-v3-space-lg, 24px) !important;
+    
+    /* Override hotfix display properties */
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 280px !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure v3 grid layout is preserved */
+.mt-candidates-v3.mt-candidates-grid,
+.mt-candidates-v3.mt-candidates-list {
+    display: grid !important;
+    gap: var(--mt-v3-space-lg, 24px) !important;
+}
+
+/* Override specific mobile fixes that break v3 */
+@media screen and (max-width: 768px) {
+    .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card:not(.hidden) {
+        /* Preserve v3 mobile styling */
+        display: flex !important;
+        width: 100% !important;
+    }
+}
+
+/* ===================================
+   7. V3 COMPATIBILITY FIXES
+   =================================== */
+
+/**
+ * V3 Candidate Cards Compatibility 
+ * Purpose: Ensure hotfixes don't break v3 card design
+ * Priority: Preserve v3 styling while allowing necessary hotfixes
+ */
+
+/* OVERRIDE CONFLICTING HOTFIX RULES FOR V3 CARDS */
+
+/* Reset conflicting jury dashboard fixes for v3 containers */
+.mt-dashboard-v3 .mt-candidate-card:not(.hidden),
+.mt-candidates-v3 .mt-candidate-card:not(.hidden) {
+    /* Let v3 CSS handle the card styling completely */
+    min-height: 280px !important; /* Match v3 spec */
+    height: auto !important;
+    overflow: hidden !important; /* Match v3 spec */
+    display: flex !important; /* Match v3 spec */
+    flex-direction: column !important; /* Match v3 spec */
+    background: var(--mt-v3-card-bg) !important; /* Use v3 variables */
+    border: 1px solid var(--mt-v3-border-soft) !important;
+    border-radius: var(--mt-v3-radius) !important;
+    box-shadow: var(--mt-v3-shadow) !important;
+    padding: var(--mt-v3-space-lg) !important;
+}
+
+/* Ensure v3 grid layout is preserved */
+.mt-candidates-v3 {
+    /* Override any conflicting grid rules */
+    display: grid !important;
+    gap: var(--mt-v3-space-lg) !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+}
+
+/* Reset header styling for v3 */
+.mt-dashboard-v3 .mt-candidate-header,
+.mt-candidates-v3 .mt-candidate-header {
+    border-bottom: 2px solid var(--mt-v3-border-soft) !important;
+    padding-bottom: var(--mt-v3-space-md) !important;
+    margin-bottom: var(--mt-v3-space-md) !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+}
+
+/* Reset body styling for v3 */
+.mt-dashboard-v3 .mt-candidate-body,
+.mt-candidates-v3 .mt-candidate-body {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--mt-v3-space-md) !important;
+    min-height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure evaluation status styling is preserved in v3 */
+.mt-dashboard-v3 .mt-evaluation-status,
+.mt-candidates-v3 .mt-evaluation-status {
+    margin: auto 0 var(--mt-v3-space-md) 0 !important;
+    text-align: center !important;
+    overflow: visible !important;
+    min-height: 45px !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Preserve v3 button styling */
+.mt-dashboard-v3 .mt-evaluate-btn,
+.mt-candidates-v3 .mt-evaluate-btn {
+    display: inline-block !important;
+    width: 100% !important;
+    padding: var(--mt-v3-space-md) !important;
+    background: linear-gradient(135deg, var(--mt-v3-primary), var(--mt-v3-secondary)) !important;
+    color: white !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: var(--mt-v3-transition) !important;
+    box-shadow: 0 2px 4px rgba(0, 60, 61, 0.2) !important;
+    margin-top: auto !important;
+    white-space: nowrap !important;
+}
+
+/* Responsive grid adjustments for v3 that don't conflict with hotfixes */
+@media screen and (max-width: 1023px) {
+    .mt-candidates-v3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .mt-candidates-v3 {
+        grid-template-columns: 1fr !important;
+        padding: var(--mt-v3-space-md) !important;
+    }
+}

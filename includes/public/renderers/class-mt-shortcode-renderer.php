@@ -226,6 +226,9 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
         wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
         
+        // Enqueue new candidate cards v3 CSS
+        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        
         wp_enqueue_style('dashicons');
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], MT_VERSION, true);
         
@@ -271,6 +274,9 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
         wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
         wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
+        
+        // Enqueue new candidate cards v3 CSS
+        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
     }
     
     /**
@@ -286,6 +292,9 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
         wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
         wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
+        
+        // Enqueue new candidate cards v3 CSS
+        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
     }
     
     /**
@@ -301,6 +310,9 @@ class MT_Shortcode_Renderer {
         wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
         wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
         wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
+        
+        // Enqueue new candidate cards v3 CSS
+        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
     }
     
     /**

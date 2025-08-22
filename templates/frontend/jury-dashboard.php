@@ -82,7 +82,7 @@ $progress_class = 'mt-progress-bar mt-progress-' . (isset($dashboard_settings['p
 $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? $dashboard_settings['card_layout'] : 'grid');
 ?>
 
-<div class="mt-jury-dashboard">
+<div class="mt-jury-dashboard mt-dashboard-v3">
     <?php if ($progress['completion_rate'] == 100) : ?>
         <div class="mt-completion-status-banner">
             <div class="mt-completion-status-content">
@@ -206,7 +206,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
     <?php endif; ?>
 
     <?php if (!empty($assignments)) : ?>
-        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?>" id="mt-candidates-list">
+        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?> mt-candidates-v3" id="mt-candidates-list">
             <?php foreach ($assignments as $assignment) : 
                 $candidate = get_post($assignment->candidate_id);
                 if (!$candidate) continue;
@@ -248,11 +248,23 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                     </div>
                     
                     <div class="mt-candidate-body">
-                        <?php if (!empty($categories)) : ?>
-                            <div class="mt-candidate-category">
-                                <?php echo esc_html($categories[0]->name); ?>
-                            </div>
-                        <?php endif; ?>
+                        <?php 
+                        // Display category badge - prioritize category_type from meta, fallback to taxonomy
+                        $category_display_name = '';
+                        if ($category_type) {
+                            $category_display_name = $category_type;
+                        } elseif (!empty($categories)) {
+                            $category_display_name = $categories[0]->name;
+                        }
+                        ?>
+                        <!-- Category container maintains consistent space whether category exists or not -->
+                        <div class="mt-candidate-category-container">
+                            <?php if ($category_display_name) : ?>
+                                <div class="mt-candidate-category">
+                                    <?php echo esc_html($category_display_name); ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                         
                         <div class="mt-evaluation-status">
                             <?php
