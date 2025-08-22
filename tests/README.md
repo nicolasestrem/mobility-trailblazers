@@ -10,10 +10,11 @@ This test suite provides comprehensive coverage for the Mobility Trailblazers pl
 
 ### Test Categories
 
-1. **Authentication & Login** (`auth-login.spec.ts`)
+1. **Authentication & Login** (`auth-login.spec.ts`, `auth.setup.ts`)
    - WordPress admin login
    - User role access control
    - Session management
+   - Stored authentication states for reuse
    - AJAX authentication
 
 2. **Navigation** (`navigation.spec.ts`)
@@ -21,12 +22,14 @@ This test suite provides comprehensive coverage for the Mobility Trailblazers pl
    - Breadcrumb navigation
    - Mobile navigation
    - Error page handling
+   - Multi-language support (English/German)
 
 3. **Jury Evaluation Workflow** (`jury-evaluation.spec.ts`)
    - Evaluation form access
    - Score input and validation
    - Form submission workflow
    - Error handling and recovery
+   - Comments removed per Issue #25
 
 4. **Candidate Management** (`candidate-management.spec.ts`)
    - Candidate CRUD operations
@@ -34,11 +37,12 @@ This test suite provides comprehensive coverage for the Mobility Trailblazers pl
    - Category assignment
    - Frontend display
 
-5. **Assignment Management** (`assignment-management.spec.ts`)
+5. **Assignment Management** (`assignment-management.spec.ts`, `assignment-management-simple.spec.ts`)
    - Auto-assignment system
    - Manual assignment interface
    - Assignment table management
    - Bulk operations
+   - Statistics dashboard
 
 6. **Import/Export** (`import-export.spec.ts`)
    - CSV/Excel import functionality
@@ -51,6 +55,47 @@ This test suite provides comprehensive coverage for the Mobility Trailblazers pl
    - WCAG compliance
    - Screen reader support
    - Cross-browser compatibility
+
+8. **Database Tests** (`database-tables.spec.ts`) ✅ NEW
+   - Custom table structure verification
+   - wp_mt_evaluations table integrity
+   - wp_mt_jury_assignments constraints
+   - wp_mt_audit_log functionality
+   - wp_mt_error_log verification
+   - Index performance checks
+
+9. **Translation Tests** (`german-translations.spec.ts`) ✅ NEW
+   - German .po/.mo file verification
+   - UI translation testing
+   - Label consistency checks
+   - Multi-language support validation
+
+10. **Performance Tests** (`performance-load.spec.ts`) ✅ NEW
+    - Load testing for 490+ candidates
+    - Page load time benchmarks
+    - Concurrent user simulation
+    - Resource usage monitoring
+    - AJAX response time testing
+
+11. **Security Tests** (`security-vulnerabilities.spec.ts`) ✅ NEW
+    - SQL injection prevention
+    - XSS vulnerability checks
+    - CSRF token validation
+    - Nonce verification testing
+    - Input sanitization validation
+
+12. **Elementor Widget Tests** (`elementor-widgets.spec.ts`) ✅ NEW
+    - Widget registration verification
+    - Shortcode functionality
+    - Preview rendering tests
+    - Widget settings validation
+
+13. **Debug Center Tests** (`debug-center-admin.spec.ts`) ✅ NEW
+    - Debug Center accessibility
+    - System information display
+    - Error log viewing
+    - Database health checks
+    - Activity monitoring
 
 ## Test Environments
 
@@ -99,20 +144,20 @@ npm test
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Test credentials are configured in `tests/.env.test`:
 
 ```env
 # Admin credentials
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=AdminPlaywright2025AdminPlaywright2025
+ADMIN_USERNAME=testadmin
+ADMIN_PASSWORD=testadmin123
 
 # Jury member credentials
-JURY_USERNAME=jury1
-JURY_PASSWORD=jury_member_password
+JURY_USERNAME=jurymember1
+JURY_PASSWORD=JuryTest123!
 
 # Jury admin credentials
 JURY_ADMIN_USERNAME=juryadmin
-JURY_ADMIN_PASSWORD=jury_admin_password
+JURY_ADMIN_PASSWORD=JuryAdmin123!
 ```
 
 ## Test Configuration
@@ -253,9 +298,10 @@ npm run test:staging
 ### Common Issues
 
 1. **Authentication Failures**
-   - Verify credentials in `.env` file
+   - Verify credentials in `tests/.env.test` file
    - Check WordPress user roles and capabilities
    - Ensure nonce verification is working
+   - Run `npx playwright test auth.setup.ts` to regenerate auth states
 
 2. **Test Data Issues**
    - Run test data creation manually
@@ -268,9 +314,15 @@ npm run test:staging
    - Verify WordPress is responding
 
 4. **Mobile Test Failures**
-   - Verify responsive design implementation
+   - Note: WordPress admin is not fully responsive
+   - Tests use stored authentication to avoid login issues
    - Check viewport configuration
    - Test touch interactions manually
+
+5. **Language Issues**
+   - Tests support both English and German interfaces
+   - Check WordPress locale settings
+   - Verify .mo files are compiled from .po files
 
 ### Debug Information
 
@@ -348,12 +400,20 @@ Tests are designed to work with:
 - WordPress 5.8+
 - Mobility Trailblazers plugin v2.5.40+
 - Standard WordPress admin interface
-- Custom post types and meta fields
+- Custom post types (mt_candidate, mt_jury_member)
+- Custom database tables:
+  - wp_mt_evaluations (evaluation scores and comments)
+  - wp_mt_jury_assignments (jury-candidate mappings)
+  - wp_mt_audit_log (activity tracking)
+  - wp_mt_error_log (error logging)
+- German localization (de_DE)
 
 ### Database Testing
 - Tests use WordPress test database
 - Automatic table creation and cleanup
 - Transaction-based test isolation where possible
+- Custom table structure verification
+- Data integrity and constraint testing
 
 ## Performance Benchmarks
 
@@ -367,6 +427,22 @@ Tests are designed to work with:
 - Memory: < 512MB during test execution
 - Network: Minimal external requests
 - Storage: < 100MB for test artifacts
+
+## Test Coverage Status
+
+### ✅ Completed (All 7 requested tasks)
+1. ✅ Authentication Setup - Updated with correct credentials
+2. ✅ Database Tests - Custom tables verification
+3. ✅ Translation Tests - German .po/.mo validation
+4. ✅ Performance Tests - 490+ candidates load testing
+5. ✅ Security Tests - SQL injection, XSS prevention
+6. ✅ Elementor Widget Tests - Shortcode integration
+7. ✅ Debug Center Tests - Admin debugging tools
+
+### Known Limitations
+- Mobile/tablet tests may have issues with WordPress admin interface (not fully responsive)
+- Tests use stored authentication states to avoid repeated login issues
+- Language support includes both English and German interfaces
 
 ## Future Enhancements
 

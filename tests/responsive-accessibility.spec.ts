@@ -2,15 +2,8 @@ import { test, expect } from '@playwright/test';
 import { ResponsiveHelper, AccessibilityHelper } from './utils/test-helpers';
 
 test.describe('Responsive Design and Accessibility', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login as admin for most tests
-    await page.goto('/wp-admin');
-    await page.fill('#user_login', process.env.ADMIN_USERNAME || 'admin');
-    await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'admin');
-    await page.click('#wp-submit');
-    
-    await page.waitForURL('**/wp-admin/**');
-  });
+  // Use the stored admin authentication state
+  test.use({ storageState: 'tests/.auth/admin.json' });
 
   test.describe('Responsive Design - Admin Interface', () => {
     test('admin interface adapts to mobile viewport', async ({ page }) => {

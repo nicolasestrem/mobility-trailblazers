@@ -9,8 +9,8 @@ test.describe('Authentication and Login', () => {
       await expect(page.locator('#loginform')).toBeVisible();
       
       // Fill login credentials
-      await page.fill('#user_login', process.env.ADMIN_USERNAME || 'admin');
-      await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'admin');
+      await page.fill('#user_login', process.env.ADMIN_USERNAME || 'testadmin');
+      await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'testadmin123');
       
       // Submit login form
       await page.click('#wp-submit');
@@ -28,8 +28,8 @@ test.describe('Authentication and Login', () => {
       await page.goto('/wp-admin');
       
       // Fill jury member credentials
-      await page.fill('#user_login', process.env.JURY_USERNAME || 'jury1');
-      await page.fill('#user_pass', process.env.JURY_PASSWORD || 'jury123');
+      await page.fill('#user_login', process.env.JURY_USERNAME || 'jurymember1');
+      await page.fill('#user_pass', process.env.JURY_PASSWORD || 'JuryTest123!');
       
       await page.click('#wp-submit');
       

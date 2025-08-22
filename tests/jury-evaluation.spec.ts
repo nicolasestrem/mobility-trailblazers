@@ -2,25 +2,8 @@ import { test, expect } from '@playwright/test';
 import { JuryDashboard, EvaluationForm, AjaxHelper, ErrorHelper } from './utils/test-helpers';
 
 test.describe('Jury Evaluation Workflow', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login as jury member before each test
-    try {
-      await page.goto('/wp-admin');
-      await page.fill('#user_login', process.env.JURY_USERNAME || 'jury1');
-      await page.fill('#user_pass', process.env.JURY_PASSWORD || 'jury123');
-      await page.click('#wp-submit');
-      
-      // Handle different login scenarios
-      try {
-        await page.waitForURL('**/wp-admin/**', { timeout: 5000 });
-      } catch {
-        // If redirected elsewhere, try to navigate to jury dashboard
-        await page.goto('/jury-dashboard/');
-      }
-    } catch (error) {
-      console.warn('⚠️  Could not login as jury member - tests may use mock data');
-    }
-  });
+  // Use the stored jury member authentication state
+  test.use({ storageState: 'tests/.auth/jury.json' });
 
   test.describe('Evaluation Form Access and Display', () => {
     test('can access evaluation form for assigned candidate', async ({ page }) => {

@@ -16,12 +16,17 @@ setup('authenticate as admin', async ({ page }) => {
   await page.goto('/wp-admin');
   
   // Fill login form
-  await page.fill('#user_login', process.env.ADMIN_USERNAME || 'testadmin');
+  const username = process.env.ADMIN_USERNAME || 'testadmin';
+  const password = process.env.ADMIN_PASSWORD || 'testadmin123';
+  
+  console.log(`🔐 Using credentials: ${username} / ${password.replace(/./g, '*')}`);
+  
+  await page.fill('#user_login', username);
   
   // Clear password field and type password slowly to ensure it's entered correctly
   await page.locator('#user_pass').clear();
   await page.waitForTimeout(500);
-  await page.locator('#user_pass').type(process.env.ADMIN_PASSWORD || 'testadmin123', { delay: 50 });
+  await page.locator('#user_pass').type(password, { delay: 50 });
   await page.waitForTimeout(500);
   await page.click('#wp-submit');
   
@@ -71,8 +76,8 @@ setup('authenticate as jury member', async ({ page }) => {
   await page.goto('/wp-admin');
   
   // Fill login form with jury member credentials
-  await page.fill('#user_login', process.env.JURY_USERNAME || 'jurytester1');
-  await page.fill('#user_pass', process.env.JURY_PASSWORD || 'Test123!@#Pass');
+  await page.fill('#user_login', process.env.JURY_USERNAME || 'jurymember1');
+  await page.fill('#user_pass', process.env.JURY_PASSWORD || 'JuryTest123!');
   await page.click('#wp-submit');
   
   // For jury members, they might be redirected to a different page
@@ -99,8 +104,8 @@ setup('authenticate as jury admin', async ({ page }) => {
   await page.goto('/wp-admin');
   
   // Fill login form with jury admin credentials
-  await page.fill('#user_login', process.env.JURY_ADMIN_USERNAME || 'juryadmintester');
-  await page.fill('#user_pass', process.env.JURY_ADMIN_PASSWORD || 'Test123!@#Pass');
+  await page.fill('#user_login', process.env.JURY_ADMIN_USERNAME || 'juryadmin');
+  await page.fill('#user_pass', process.env.JURY_ADMIN_PASSWORD || 'JuryAdmin123!');
   await page.click('#wp-submit');
   
   // Wait for successful login - handle German locale

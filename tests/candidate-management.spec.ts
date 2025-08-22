@@ -2,15 +2,8 @@ import { test, expect } from '@playwright/test';
 import { testCandidates } from './fixtures/test-data';
 
 test.describe('Candidate Management', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login as admin before each test
-    await page.goto('/wp-admin');
-    await page.fill('#user_login', process.env.ADMIN_USERNAME || 'admin');
-    await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'admin');
-    await page.click('#wp-submit');
-    
-    await page.waitForURL('**/wp-admin/**');
-  });
+  // Use the stored admin authentication state
+  test.use({ storageState: 'tests/.auth/admin.json' });
 
   test.describe('Candidate List Management', () => {
     test('can view candidate list', async ({ page }) => {

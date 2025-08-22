@@ -2,15 +2,8 @@ import { test, expect } from '@playwright/test';
 import { AssignmentManager, AjaxHelper } from './utils/test-helpers';
 
 test.describe('Assignment Management', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login as admin before each test
-    await page.goto('/wp-admin');
-    await page.fill('#user_login', process.env.ADMIN_USERNAME || 'admin');
-    await page.fill('#user_pass', process.env.ADMIN_PASSWORD || 'admin');
-    await page.click('#wp-submit');
-    
-    await page.waitForURL('**/wp-admin/**');
-  });
+  // Use the stored admin authentication state
+  test.use({ storageState: 'tests/.auth/admin.json' });
 
   test.describe('Assignment Interface Access', () => {
     test('can access assignment management page', async ({ page }) => {
@@ -19,8 +12,10 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Verify page loaded correctly - using actual class from template
-        await expect(page.locator('.wrap h1')).toContainText('Assignment Management');
+        // Verify page loaded correctly - support both English and German
+        await expect(page.locator('.wrap h1')).toBeVisible();
+        const titleText = await page.locator('.wrap h1').textContent();
+        expect(titleText).toMatch(/(Assignment|Zuweisung)/);
         
         // Check for main assignment components - using actual classes from template
         const expectedComponents = [
@@ -50,14 +45,16 @@ test.describe('Assignment Management', () => {
         const stats = await assignmentManager.getAssignmentStatistics();
         
         // Verify statistics are reasonable numbers
-        expect(stats.total).toBeGreaterThanOrEqual(0);
-        expect(stats.juryMembers).toBeGreaterThanOrEqual(0);
+        expect(stats.totalCandidates).toBeGreaterThanOrEqual(0);
+        expect(stats.totalJuryMembers).toBeGreaterThanOrEqual(0);
+        expect(stats.totalAssignments).toBeGreaterThanOrEqual(0);
         expect(stats.averagePerJury).toBeGreaterThanOrEqual(0);
         
         // Log statistics
         console.log(`📊 Assignment Statistics:
-          Total Assignments: ${stats.total}
-          Active Jury Members: ${stats.juryMembers}
+          Total Candidates: ${stats.totalCandidates}
+          Total Jury Members: ${stats.totalJuryMembers}
+          Total Assignments: ${stats.totalAssignments}
           Average per Jury: ${stats.averagePerJury}`);
         
       } catch (error) {

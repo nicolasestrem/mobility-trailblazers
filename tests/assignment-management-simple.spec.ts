@@ -6,8 +6,11 @@ test.describe('Assignment Management - Simple Tests', () => {
     // Navigate directly to assignments page
     await page.goto('/wp-admin/admin.php?page=mt-assignments');
     
-    // Check if we're on the right page
-    await expect(page.locator('.wrap h1')).toContainText('Assignment Management');
+    // Check if we're on the right page (handle both German and English)
+    const pageTitle = page.locator('.wrap h1');
+    const titleText = await pageTitle.textContent();
+    console.log('Page title text:', titleText);
+    expect(titleText).toMatch(/(Assignment|Zuweisung)/);
     
     // Check for statistics dashboard
     await expect(page.locator('.mt-stats-dashboard')).toBeVisible();
