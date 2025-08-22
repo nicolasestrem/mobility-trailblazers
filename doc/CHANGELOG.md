@@ -3,6 +3,64 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.39] - 2025-08-22
+### Critical Security Fixes & Import/Export System Refactoring
+
+#### Security Vulnerabilities Fixed
+- **SQL Injection Prevention**: Fixed critical SQL injection vulnerabilities in export functions
+  - Updated `class-mt-import-export.php` lines 543-548, 605-611, 682-688
+  - Implemented prepared statements using `$wpdb->prepare()` for all database queries
+  - Added proper placeholder arrays for IN clauses with dynamic values
+  
+- **Path Traversal Protection**: Eliminated hardcoded file paths and directory traversal risks
+  - Fixed `class-mt-candidate-importer.php` removing hardcoded Docker paths
+  - Replaced `/var/www/html/` paths with `wp_upload_dir()` based paths
+  - Added `validate_file_path()` method to prevent directory traversal attacks
+  - Validates all file paths against allowed directories (ABSPATH, uploads, content)
+  
+- **Access Control Strengthening**: Enhanced permission requirements
+  - Changed all `current_user_can('edit_posts')` to `current_user_can('manage_options')`
+  - Requires administrator-level access for all import/export operations
+  - Consistent security checks across all data exchange functions
+
+#### Database Table Fixes
+- **Corrected Table Names**: Fixed incorrect table references throughout plugin
+  - Changed `mt_assignments` to `mt_jury_assignments` in multiple files
+  - Fixed join queries to properly reference jury member posts instead of users
+  - Updated export queries to use correct `assigned_at` field instead of `created_at`
+
+#### Export System Improvements
+- **Fixed Assignment Export**: Resolved empty export issue
+  - Corrected table name from `mt_assignments` to `mt_jury_assignments`
+  - Fixed jury member name retrieval using posts table with post_type filter
+  
+- **Fixed Evaluation Export**: Added missing jury member names
+  - Changed from joining users table to posts table for jury member data
+  - Added proper post_type='mt_jury_member' filter in JOIN clause
+
+#### Feature Removals
+- **URL Migration Tool Removed**: Deleted temporary migration feature
+  - Removed `class-mt-url-migration.php` and all associated code
+  - Cleaned up admin menu registration in main plugin file
+  - Removed database migration functions marked as temporary
+
+- **Template Downloads Cleaned**: Removed non-functional template download links
+  - Removed direct file download links for non-existent templates
+  - Kept functional template generation buttons
+  - Fixed missing `data/templates/` directory references
+
+#### Infrastructure Updates
+- **Vendor Autoload Fix**: Made composer autoload optional
+  - Added file existence check before requiring vendor/autoload.php
+  - Prevents fatal errors when composer dependencies not installed
+  - WP-CLI commands now work without vendor directory
+
+- **New Architecture Foundation**: Started unified data exchange service
+  - Created `MT_Data_Exchange_Service` as main orchestrator
+  - Implemented Strategy pattern with `MT_Import_Strategy_Interface`
+  - Added `MT_Candidate_Import_Strategy` as first implementation
+  - Prepared for jury member, assignment, and evaluation strategies
+
 ## [2.5.38] - 2025-08-21
 ### CSS Architecture & UI Improvements
 - **Unified Container System**: Implemented consistent 1200px max-width container for dashboard widgets
