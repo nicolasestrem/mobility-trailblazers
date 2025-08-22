@@ -52,6 +52,32 @@ add_filter('gettext', function($translated, $text, $domain) {
         'Draft' => 'Entwurf',
         'Pending' => 'Ausstehend',
         'Not Started' => 'Nicht begonnen',
+        
+        // Dashboard translations
+        'Total Assigned' => 'Gesamt zugewiesen',
+        'TOTAL ASSIGNED' => 'GESAMT ZUGEWIESEN',
+        'COMPLETED' => 'ABGESCHLOSSEN',
+        'PENDING' => 'AUSSTEHEND',
+        'Your Rankings' => 'Ihre Rangliste',
+        'YOUR RANKINGS' => 'IHRE RANGLISTE',
+        'Search candidates...' => 'Kandidaten suchen...',
+        'Back to Dashboard' => 'Zurück zum Dashboard',
+        'LinkedIn Profile' => 'LinkedIn-Profil',
+        'Website' => 'Webseite',
+        'Evaluate Candidate' => 'Kandidat bewerten',
+        'EVALUATE CANDIDATE' => 'KANDIDAT BEWERTEN',
+        'EVALUATION SUBMITTED' => 'BEWERTUNG EINGEREICHT',
+        
+        // Table headers
+        'Rank' => 'Rang',
+        'Candidate' => 'Kandidat',
+        'Total' => 'Gesamt',
+        'Actions' => 'Aktionen',
+        'Save' => 'Speichern',
+        
+        // Additional strings
+        'Real-time ranking based on evaluation scores' => 'Echtzeit-Rangliste basierend auf Bewertungspunkten',
+        'Thank you for submitting your evaluation!' => 'Vielen Dank für die Einreichung Ihrer Bewertung!',
     ];
     
     // Apply fallback translation only if current translation is the same as original
