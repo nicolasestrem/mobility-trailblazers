@@ -19,16 +19,16 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Verify page loaded correctly
-        await expect(page.locator('.mt-assignments-page')).toBeVisible();
+        // Verify page loaded correctly - using actual class from template
+        await expect(page.locator('.wrap h1')).toContainText('Assignment Management');
         
-        // Check for main assignment components
+        // Check for main assignment components - using actual classes from template
         const expectedComponents = [
-          '.mt-assignment-controls',
-          '.mt-auto-assignment',
-          '.mt-manual-assignment',
-          '.mt-assignment-statistics',
-          '.mt-assignment-table'
+          '.mt-action-bar',  // Action buttons container
+          '#mt-auto-assign-btn',  // Auto-assign button
+          '#mt-manual-assign-btn',  // Manual assignment button
+          '.mt-stats-dashboard',  // Statistics dashboard
+          '.mt-assignments-table'  // Assignment table
         ];
         
         for (const component of expectedComponents) {
@@ -73,12 +73,16 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Check auto assignment controls
-        const autoAssignmentSection = page.locator('.mt-auto-assignment');
-        if (await autoAssignmentSection.isVisible()) {
+        // Open auto-assign modal
+        const autoAssignBtn = page.locator('#mt-auto-assign-btn');
+        if (await autoAssignBtn.isVisible()) {
+          await autoAssignBtn.click();
           
-          // Verify assignment method options
-          const methodSelector = page.locator('.mt-assignment-method');
+          // Wait for modal to open
+          await page.waitForSelector('#mt-auto-assign-modal', { state: 'visible' });
+          
+          // Verify assignment method options in modal
+          const methodSelector = page.locator('#assignment_method');
           if (await methodSelector.isVisible()) {
             await expect(methodSelector).toBeVisible();
             
@@ -94,8 +98,8 @@ test.describe('Assignment Management', () => {
             }
           }
           
-          // Check candidates per jury input
-          const candidatesPerJury = page.locator('.mt-candidates-per-jury');
+          // Check candidates per jury input in modal
+          const candidatesPerJury = page.locator('#candidates_per_jury');
           if (await candidatesPerJury.isVisible()) {
             await expect(candidatesPerJury).toBeVisible();
             
@@ -105,11 +109,17 @@ test.describe('Assignment Management', () => {
             expect(parseInt(value)).toBe(25);
           }
           
-          // Check for assignment button
-          const autoAssignButton = page.locator('.mt-auto-assign-btn');
-          if (await autoAssignButton.isVisible()) {
-            await expect(autoAssignButton).toBeVisible();
-            await expect(autoAssignButton).not.toBeDisabled();
+          // Check for submit button in modal
+          const submitButton = page.locator('#mt-auto-assign-modal button[type="submit"]');
+          if (await submitButton.isVisible()) {
+            await expect(submitButton).toBeVisible();
+            await expect(submitButton).not.toBeDisabled();
+          }
+          
+          // Close modal
+          const closeButton = page.locator('#mt-auto-assign-modal .mt-modal-close');
+          if (await closeButton.isVisible()) {
+            await closeButton.click();
           }
         }
         
@@ -124,8 +134,15 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Test different assignment methods
-        const methodSelector = page.locator('.mt-assignment-method');
+        // Open auto-assign modal first
+        const autoAssignBtn = page.locator('#mt-auto-assign-btn');
+        if (await autoAssignBtn.isVisible()) {
+          await autoAssignBtn.click();
+          await page.waitForSelector('#mt-auto-assign-modal', { state: 'visible' });
+        }
+        
+        // Test different assignment methods in modal
+        const methodSelector = page.locator('#assignment_method');
         if (await methodSelector.isVisible()) {
           
           // Test balanced method
@@ -139,8 +156,8 @@ test.describe('Assignment Management', () => {
           expect(randomValue).toBe('random');
         }
         
-        // Test candidates per jury configuration
-        const candidatesInput = page.locator('.mt-candidates-per-jury');
+        // Test candidates per jury configuration in modal
+        const candidatesInput = page.locator('#candidates_per_jury');
         if (await candidatesInput.isVisible()) {
           
           // Test different values
@@ -173,34 +190,42 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Look for dry run option
-        const dryRunCheckbox = page.locator('.mt-dry-run, input[name="dry_run"]');
-        if (await dryRunCheckbox.isVisible()) {
+        // Open auto-assign modal first
+        const autoAssignBtn = page.locator('#mt-auto-assign-btn');
+        if (await autoAssignBtn.isVisible()) {
+          await autoAssignBtn.click();
+          await page.waitForSelector('#mt-auto-assign-modal', { state: 'visible' });
+        }
+        
+        // Look for clear existing option (no dry run in template)
+        const clearExistingCheckbox = page.locator('#clear_existing');
+        if (await clearExistingCheckbox.isVisible()) {
           
-          // Enable dry run
-          await dryRunCheckbox.check();
+          // Note: No dry run option in current template, using clear existing instead
+          await clearExistingCheckbox.check();
           
-          // Configure assignment
-          const methodSelector = page.locator('.mt-assignment-method');
+          // Configure assignment in modal
+          const methodSelector = page.locator('#assignment_method');
           if (await methodSelector.isVisible()) {
             await methodSelector.selectOption('balanced');
           }
           
-          const candidatesInput = page.locator('.mt-candidates-per-jury');
+          const candidatesInput = page.locator('#candidates_per_jury');
           if (await candidatesInput.isVisible()) {
             await candidatesInput.fill('20');
           }
           
-          // Click assign button
-          const assignButton = page.locator('.mt-auto-assign-btn');
-          if (await assignButton.isVisible()) {
-            await assignButton.click();
+          // Click submit button in modal
+          const submitButton = page.locator('#mt-auto-assign-modal button[type="submit"]');
+          if (await submitButton.isVisible()) {
+            // Note: We're not actually clicking to avoid modifying data
+            await expect(submitButton).toBeVisible();
+            console.log('✅ Auto-assignment configuration works');
             
-            // Should show dry run results without making actual assignments
-            const dryRunResults = page.locator('.mt-dry-run-results');
-            if (await dryRunResults.isVisible()) {
-              await expect(dryRunResults).toBeVisible();
-              console.log('✅ Dry run functionality works');
+            // Close modal
+            const closeButton = page.locator('#mt-auto-assign-modal .mt-modal-close');
+            if (await closeButton.isVisible()) {
+              await closeButton.click();
             }
           }
         }
@@ -216,11 +241,16 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Check for conflict resolution options
+        // Open auto-assign modal first
+        const autoAssignBtn = page.locator('#mt-auto-assign-btn');
+        if (await autoAssignBtn.isVisible()) {
+          await autoAssignBtn.click();
+          await page.waitForSelector('#mt-auto-assign-modal', { state: 'visible' });
+        }
+        
+        // Check for conflict resolution options in modal
         const conflictOptions = [
-          '.mt-clear-existing', // Clear existing assignments
-          '.mt-skip-assigned', // Skip already assigned
-          '.mt-merge-assignments' // Merge with existing
+          '#clear_existing'  // Clear existing assignments checkbox
         ];
         
         for (const option of conflictOptions) {
@@ -230,16 +260,22 @@ test.describe('Assignment Management', () => {
           }
         }
         
-        // Test clear existing functionality
-        const clearExisting = page.locator('.mt-clear-existing');
+        // Test clear existing functionality in modal
+        const clearExisting = page.locator('#clear_existing');
         if (await clearExisting.isVisible()) {
           await clearExisting.check();
           
-          // Should show confirmation warning
-          const warningMessage = page.locator('.mt-warning, .notice-warning');
+          // Should show warning message in description
+          const warningMessage = page.locator('#mt-auto-assign-modal .description:has-text("Warning")');
           if (await warningMessage.isVisible()) {
             await expect(warningMessage).toBeVisible();
           }
+        }
+        
+        // Close modal
+        const closeButton = page.locator('#mt-auto-assign-modal .mt-modal-close');
+        if (await closeButton.isVisible()) {
+          await closeButton.click();
         }
         
       } catch (error) {
@@ -255,12 +291,14 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // Check manual assignment section
-        const manualSection = page.locator('.mt-manual-assignment');
-        if (await manualSection.isVisible()) {
+        // Open manual assignment modal
+        const manualAssignBtn = page.locator('#mt-manual-assign-btn');
+        if (await manualAssignBtn.isVisible()) {
+          await manualAssignBtn.click();
+          await page.waitForSelector('#mt-manual-assign-modal', { state: 'visible' });
           
-          // Verify jury member selector
-          const jurySelector = page.locator('.mt-jury-member-select');
+          // Verify jury member selector in modal
+          const jurySelector = page.locator('#manual_jury_member');
           if (await jurySelector.isVisible()) {
             await expect(jurySelector).toBeVisible();
             
@@ -270,11 +308,10 @@ test.describe('Assignment Management', () => {
             expect(optionCount).toBeGreaterThan(1); // Should have at least default + jury members
           }
           
-          // Verify candidate selection interface
+          // Verify candidate selection interface in modal
           const candidateSelection = [
-            '.mt-candidate-list',
-            '.mt-candidate-checkboxes',
-            '.mt-candidate-multiselect'
+            '.mt-candidates-checklist',  // Container for candidate checkboxes
+            '.mt-candidate-checkbox'  // Individual candidate checkboxes
           ];
           
           for (const selector of candidateSelection) {
@@ -285,10 +322,16 @@ test.describe('Assignment Management', () => {
             }
           }
           
-          // Check assignment button
-          const assignButton = page.locator('.mt-assign-selected-btn');
+          // Check assignment button in modal
+          const assignButton = page.locator('#mt-manual-assign-modal button[type="submit"]');
           if (await assignButton.isVisible()) {
             await expect(assignButton).toBeVisible();
+          }
+          
+          // Close modal
+          const closeButton = page.locator('#mt-manual-assign-modal .mt-modal-close');
+          if (await closeButton.isVisible()) {
+            await closeButton.click();
           }
         }
         
@@ -303,7 +346,14 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        const jurySelector = page.locator('.mt-jury-member-select');
+        // Open manual assignment modal first
+        const manualAssignBtn = page.locator('#mt-manual-assign-btn');
+        if (await manualAssignBtn.isVisible()) {
+          await manualAssignBtn.click();
+          await page.waitForSelector('#mt-manual-assign-modal', { state: 'visible' });
+        }
+        
+        const jurySelector = page.locator('#manual_jury_member');
         if (await jurySelector.isVisible()) {
           
           // Get available jury members
@@ -324,13 +374,19 @@ test.describe('Assignment Management', () => {
               
               console.log(`✅ Selected jury member: ${juryId}`);
               
-              // Check if candidate list updates based on jury selection
-              await page.waitForTimeout(1000); // Wait for any AJAX updates
+              // Check if candidate list is visible
+              await page.waitForTimeout(1000); // Wait for any updates
               
-              const candidateList = page.locator('.mt-candidate-list');
+              const candidateList = page.locator('.mt-candidates-checklist');
               if (await candidateList.isVisible()) {
                 // Should show available candidates for assignment
                 await expect(candidateList).toBeVisible();
+              }
+              
+              // Close modal
+              const closeButton = page.locator('#mt-manual-assign-modal .mt-modal-close');
+              if (await closeButton.isVisible()) {
+                await closeButton.click();
               }
             }
           }
@@ -347,8 +403,15 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
-        // First select a jury member
-        const jurySelector = page.locator('.mt-jury-member-select');
+        // Open manual assignment modal first
+        const manualAssignBtn = page.locator('#mt-manual-assign-btn');
+        if (await manualAssignBtn.isVisible()) {
+          await manualAssignBtn.click();
+          await page.waitForSelector('#mt-manual-assign-modal', { state: 'visible' });
+        }
+        
+        // First select a jury member in modal
+        const jurySelector = page.locator('#manual_jury_member');
         if (await jurySelector.isVisible()) {
           const firstOption = jurySelector.locator('option:not([value=""])').first();
           const juryId = await firstOption.getAttribute('value');
@@ -357,8 +420,8 @@ test.describe('Assignment Management', () => {
             await jurySelector.selectOption(juryId);
             await page.waitForTimeout(1000);
             
-            // Now select candidates
-            const candidateCheckboxes = page.locator('.mt-candidate-checkbox');
+            // Now select candidates in modal
+            const candidateCheckboxes = page.locator('.mt-candidate-checkbox input[type="checkbox"]');
             const checkboxCount = await candidateCheckboxes.count();
             
             if (checkboxCount > 0) {
@@ -376,10 +439,16 @@ test.describe('Assignment Management', () => {
               
               console.log(`✅ Selected ${selectCount} candidates for assignment`);
               
-              // Check if assign button becomes enabled
-              const assignButton = page.locator('.mt-assign-selected-btn');
+              // Check if assign button becomes enabled in modal
+              const assignButton = page.locator('#mt-manual-assign-modal button[type="submit"]');
               if (await assignButton.isVisible()) {
                 await expect(assignButton).not.toBeDisabled();
+              }
+              
+              // Close modal
+              const closeButton = page.locator('#mt-manual-assign-modal .mt-modal-close');
+              if (await closeButton.isVisible()) {
+                await closeButton.click();
               }
             }
           }
@@ -396,8 +465,15 @@ test.describe('Assignment Management', () => {
       try {
         await assignmentManager.navigateToAssignments();
         
+        // Open manual assignment modal first
+        const manualAssignBtn = page.locator('#mt-manual-assign-btn');
+        if (await manualAssignBtn.isVisible()) {
+          await manualAssignBtn.click();
+          await page.waitForSelector('#mt-manual-assign-modal', { state: 'visible' });
+        }
+        
         // Try to assign without selecting jury member
-        const assignButton = page.locator('.mt-assign-selected-btn');
+        const assignButton = page.locator('#mt-manual-assign-modal button[type="submit"]');
         if (await assignButton.isVisible()) {
           await assignButton.click();
           
@@ -409,8 +485,8 @@ test.describe('Assignment Management', () => {
           }
         }
         
-        // Select jury member but no candidates
-        const jurySelector = page.locator('.mt-jury-member-select');
+        // Select jury member but no candidates in modal
+        const jurySelector = page.locator('#manual_jury_member');
         if (await jurySelector.isVisible()) {
           const firstOption = jurySelector.locator('option:not([value=""])').first();
           const juryId = await firstOption.getAttribute('value');
