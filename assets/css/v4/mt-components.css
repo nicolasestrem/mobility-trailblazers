@@ -101,13 +101,18 @@
 
 .mt-login input[type="text"],
 .mt-login input[type="email"],
-.mt-login input[type="password"] {
-  width: 40%;
+.mt-login input[type="password"],
+.mt-login .input,
+.mt-login #user_login,
+.mt-login #user_pass {
+  width: 100% !important; /* Full width - override size attribute */
+  max-width: 100% !important;
   padding: 10px 12px;
   border: var(--mt-border-width) solid var(--mt-border);
   border-radius: var(--mt-radius-sm);
   background: var(--mt-color-white);
   transition: var(--mt-transition-fast);
+  box-sizing: border-box; /* Include padding and border in width */
 }
 
 .mt-login input:focus {
@@ -133,6 +138,9 @@
 .mt-login button[type="submit"]:hover {
   background: var(--mt-color-primary);
 }
+
+/* Login fields stay full width since parent container is already constrained */
+/* Parent .mt-login has max-width: 380px, so inputs can use full width */
 
 /* Evaluation Form Components */
 .mt-evaluation-form {
