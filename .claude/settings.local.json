@@ -83,6 +83,7 @@
       "mcp__kapture__select",
       "Bash(docker-compose up:*)",
       "Bash(C:/xampp/php/php.exe compile-translation.php:*)",
+<<<<<<< Updated upstream
       "Bash(where wp)",
       "Bash(npm install:*)",
       "Bash(npx msgfmt:*)",
@@ -90,6 +91,8 @@
       "Bash(msgfmt:*)",
       "Bash(npm test)",
       "Bash(npx playwright test:*)",
+=======
+>>>>>>> Stashed changes
       "Bash(for:*)",
       "Bash(done)",
       "Bash(mv:*)"
