@@ -1,0 +1,951 @@
+/**
+ * Mobility Trailblazers - Mobile-First Jury Dashboard Styles
+ * Version: 1.0.0
+ * Created: 2025-01-23
+ * 
+ * Description: Mobile-first responsive styles for Jury Dashboard
+ * Dependencies: mt-variables.css
+ * 
+ * Breakpoints:
+ * - Base: 320px+ (mobile-first)
+ * - Small: 480px+ (large phones)
+ * - Medium: 768px+ (tablets)
+ * - Large: 1024px+ (small desktops)
+ * - XL: 1200px+ (desktops)
+ */
+
+/* ===================================
+   MOBILE-FIRST BASE STYLES (320px+)
+   =================================== */
+
+/* Root container adjustments for mobile */
+.mt-root {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Main dashboard container - mobile first */
+.mt-jury-dashboard {
+    background: var(--mt-bg-base);
+    border: none;
+    border-radius: 0;
+    padding: 15px;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Dashboard header - mobile optimized */
+.mt-dashboard-header {
+    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    color: var(--mt-bg-base);
+    padding: 20px 15px;
+    border-radius: 8px;
+    margin: 0 0 20px 0;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-dashboard-header h1 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.mt-dashboard-header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Progress bar - touch optimized */
+.mt-progress-bar {
+    background: rgba(255, 255, 255, 0.3);
+    height: 40px; /* Larger for touch */
+    border-radius: 20px;
+    margin-top: 15px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mt-progress-fill {
+    background: white;
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mt-progress-text {
+    color: var(--mt-primary);
+    font-weight: bold;
+    font-size: 14px;
+    padding: 0 10px;
+}
+
+/* Completion status banner - mobile */
+.mt-completion-status-banner {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 12px 15px;
+    margin: -15px -15px 15px -15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.mt-completion-status-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mt-completion-status-content strong {
+    font-size: 14px;
+}
+
+.mt-completion-subtitle {
+    font-size: 12px;
+    opacity: 0.95;
+}
+
+/* Stats grid - single column mobile */
+.mt-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-stat-card {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mt-stat-card:active {
+    transform: scale(0.98);
+    background: var(--mt-bg-beige);
+}
+
+.mt-stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--mt-primary);
+    margin: 0;
+    display: block;
+}
+
+.mt-stat-label {
+    font-size: 12px;
+    color: var(--mt-body-text);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Search filters - stacked mobile layout */
+.mt-search-filters {
+    margin: 20px 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-search-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-search-input,
+.mt-filter-select,
+#mt-category-filter {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    background: var(--mt-bg-base);
+    box-sizing: border-box;
+    min-height: 44px; /* Touch target minimum */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Custom dropdown arrow for selects */
+.mt-filter-select,
+#mt-category-filter {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 45px;
+    cursor: pointer;
+}
+
+.mt-search-input:focus,
+.mt-filter-select:focus,
+#mt-category-filter:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.15);
+}
+
+/* Candidates list - single column mobile */
+.mt-candidates-list,
+.mt-candidates-grid,
+.mt-candidates-v3 {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Candidate cards - mobile optimized */
+.mt-candidate-card {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mt-candidate-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.mt-candidate-card.hidden {
+    display: none !important;
+}
+
+.mt-candidate-header {
+    background: #f8f9fa;
+    padding: 15px;
+    text-align: center;
+    color: #212529;
+    border-bottom: 3px solid var(--mt-accent);
+}
+
+.mt-candidate-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.mt-candidate-org {
+    font-size: 13px;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.mt-candidate-body {
+    padding: 15px;
+    text-align: center;
+}
+
+/* Category container - consistent height */
+.mt-candidate-category-container {
+    min-height: 32px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mt-candidate-category {
+    background: var(--mt-bg-beige);
+    color: var(--mt-secondary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Evaluation status */
+.mt-evaluation-status {
+    margin: 12px 0;
+}
+
+.mt-status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.mt-status-pending,
+.mt-status-draft {
+    background: var(--mt-bg-beige);
+    color: var(--mt-kupfer-bold);
+}
+
+.mt-status-completed {
+    background: var(--mt-primary);
+    color: var(--mt-bg-base);
+}
+
+/* Evaluate button - touch optimized */
+.mt-evaluate-btn {
+    display: inline-block;
+    background: var(--mt-accent);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    margin-top: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    font-size: 14px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mt-evaluate-btn:active {
+    background: var(--mt-kupfer-bold);
+    transform: scale(0.95);
+}
+
+/* Rankings section - mobile layout */
+.mt-rankings-container {
+    margin: 20px 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+}
+
+.mt-rankings-section {
+    background: var(--mt-bg-beige);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-rankings-header {
+    background-image: url('https://mobilitytrailblazers.de/vote/wp-content/uploads/2025/08/Background.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 20px 15px;
+    border-radius: 8px;
+    margin: 0 0 15px 0;
+    text-align: center;
+    position: relative;
+}
+
+.mt-rankings-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 60, 61, 0.7);
+    border-radius: 8px;
+    z-index: 1;
+}
+
+.mt-rankings-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+.mt-rankings-header h2 {
+    color: white;
+    font-size: 20px;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+}
+
+.mt-rankings-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Rankings grid - single column mobile */
+.mt-rankings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Ranking items - mobile optimized */
+.mt-ranking-item {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.mt-ranking-item:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Position badges - mobile size */
+.mt-position-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 40px;
+    height: 40px;
+    background: var(--mt-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+    font-size: 16px;
+}
+
+.position-number {
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Candidate info in rankings */
+.mt-candidate-info {
+    flex: 1;
+    padding-left: 25px;
+    border-bottom: 1px solid var(--mt-blue-accent);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.mt-ranking-item .mt-candidate-name {
+    font-size: 16px;
+    color: var(--mt-primary);
+    margin: 0 0 4px 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.mt-candidate-meta {
+    font-size: 12px;
+    color: var(--mt-body-text);
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Score display - mobile */
+.mt-total-score-display {
+    text-align: center;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-blue-accent));
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 6px;
+}
+
+.score-label {
+    display: block;
+    font-size: 11px;
+    color: var(--mt-body-text);
+    margin-bottom: 4px;
+}
+
+.score-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--mt-primary), var(--mt-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Evaluation table wrapper - mobile */
+.mt-evaluation-table-wrap {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 0;
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table scroll indicator */
+.mt-evaluation-table-wrap::after {
+    content: '→ Scroll for more';
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: var(--mt-accent);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Table - mobile optimized */
+.mt-evaluation-table {
+    width: 100%;
+    min-width: 600px; /* Force horizontal scroll */
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+}
+
+/* Sticky first column for mobile */
+.mt-evaluation-table td:first-child,
+.mt-evaluation-table th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 10;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+}
+
+/* Table inputs - touch optimized */
+.mt-eval-score-input {
+    width: 60px;
+    min-width: 60px;
+    text-align: center;
+    border: 2px solid var(--mt-secondary);
+    border-radius: 6px;
+    padding: 10px 6px;
+    font-size: 16px; /* Prevent zoom on iOS */
+    font-weight: 700;
+    color: var(--mt-primary);
+    background: var(--mt-bg-base);
+    margin: 0 auto;
+    display: block;
+    box-sizing: border-box;
+    min-height: 44px;
+}
+
+/* No results message */
+.mt-no-results-message {
+    text-align: center;
+    padding: 30px 15px;
+    color: var(--mt-body-text);
+    font-style: italic;
+}
+
+/* Modal - mobile optimized */
+.mt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 15px;
+}
+
+.mt-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.mt-modal-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--mt-blue-accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mt-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mt-body-text);
+}
+
+.mt-modal-body {
+    padding: 15px;
+}
+
+/* ===================================
+   SMALL PHONES (480px+)
+   =================================== */
+@media (min-width: 480px) {
+    .mt-jury-dashboard {
+        padding: 20px;
+    }
+    
+    .mt-dashboard-header {
+        padding: 25px 20px;
+    }
+    
+    .mt-dashboard-header h1 {
+        font-size: 22px;
+    }
+    
+    .mt-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .mt-candidate-name {
+        font-size: 17px;
+    }
+    
+    .mt-rankings-grid {
+        gap: 18px;
+    }
+}
+
+/* ===================================
+   TABLETS (768px+)
+   =================================== */
+@media (min-width: 768px) {
+    .mt-jury-dashboard {
+        padding: 25px;
+        border: 1px solid var(--mt-blue-accent);
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+    
+    .mt-dashboard-header {
+        padding: 30px 25px;
+        margin: 0 0 25px 0;
+    }
+    
+    .mt-dashboard-header h1 {
+        font-size: 26px;
+        margin: 0 0 10px 0;
+    }
+    
+    .mt-dashboard-header p {
+        font-size: 15px;
+    }
+    
+    .mt-progress-bar {
+        height: 35px;
+    }
+    
+    .mt-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    
+    .mt-stat-number {
+        font-size: 32px;
+    }
+    
+    .mt-stat-label {
+        font-size: 13px;
+    }
+    
+    /* Search filters - horizontal on tablet */
+    .mt-search-box {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 15px;
+    }
+    
+    /* Candidates grid - 2 columns */
+    .mt-candidates-list,
+    .mt-candidates-grid,
+    .mt-candidates-v3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+    }
+    
+    .mt-candidate-header {
+        padding: 18px;
+    }
+    
+    .mt-candidate-body {
+        padding: 18px;
+    }
+    
+    /* Rankings - 2 columns */
+    .mt-rankings-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .mt-rankings-section {
+        padding: 25px 20px;
+    }
+    
+    .mt-position-badge {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    /* Table wrapper */
+    .mt-evaluation-table-wrap {
+        padding: 15px;
+        border-radius: 12px;
+    }
+    
+    .mt-evaluation-table-wrap::after {
+        display: none; /* Hide scroll indicator on larger screens */
+    }
+}
+
+/* ===================================
+   SMALL DESKTOPS (1024px+)
+   =================================== */
+@media (min-width: 1024px) {
+    .mt-jury-dashboard {
+        padding: 30px;
+        max-width: 1200px;
+        margin: 20px auto;
+    }
+    
+    .mt-dashboard-header {
+        padding: 30px;
+    }
+    
+    .mt-dashboard-header h1 {
+        font-size: 28px;
+    }
+    
+    .mt-dashboard-header p {
+        font-size: 16px;
+    }
+    
+    .mt-progress-bar {
+        height: 30px;
+        margin-top: 20px;
+    }
+    
+    /* Candidates grid - 3 columns */
+    .mt-candidates-list,
+    .mt-candidates-grid,
+    .mt-candidates-v3 {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    
+    .mt-candidate-header {
+        padding: 20px;
+    }
+    
+    .mt-candidate-body {
+        padding: 20px;
+    }
+    
+    .mt-candidate-name {
+        font-size: 18px;
+    }
+    
+    .mt-candidate-org {
+        font-size: 14px;
+    }
+    
+    /* Rankings remain 2 columns */
+    .mt-rankings-header {
+        padding: 25px;
+    }
+    
+    .mt-rankings-header h2 {
+        font-size: 24px;
+    }
+    
+    .mt-position-badge {
+        width: 50px;
+        height: 50px;
+        top: -10px;
+        left: -10px;
+        font-size: 20px;
+    }
+    
+    .mt-ranking-item {
+        padding: 24px;
+    }
+    
+    /* Table optimization */
+    .mt-evaluation-table-wrap {
+        padding: 20px;
+    }
+    
+    .mt-eval-score-input {
+        width: 80px;
+        min-width: 80px;
+        padding: 12px 8px;
+    }
+}
+
+/* ===================================
+   LARGE DESKTOPS (1200px+)
+   =================================== */
+@media (min-width: 1200px) {
+    /* Candidates grid - 4 columns option */
+    .mt-candidates-list.mt-layout-4-col,
+    .mt-candidates-grid.mt-layout-4-col {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .mt-stat-number {
+        font-size: 36px;
+    }
+    
+    .mt-stat-label {
+        font-size: 14px;
+    }
+    
+    .mt-rankings-section {
+        padding: 30px 20px;
+    }
+    
+    .mt-evaluation-table-wrap {
+        padding: 0 20px 24px 20px;
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY & INTERACTIONS
+   =================================== */
+
+/* Focus styles for keyboard navigation */
+.mt-evaluate-btn:focus,
+.mt-search-input:focus,
+.mt-filter-select:focus,
+#mt-category-filter:focus,
+.mt-modal-close:focus,
+.mt-eval-score-input:focus {
+    outline: 3px solid var(--mt-accent);
+    outline-offset: 2px;
+}
+
+/* Disabled states */
+.mt-evaluate-btn:disabled,
+.mt-evaluate-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Loading states */
+.mt-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.mt-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 50%;
+    border-top-color: var(--mt-accent);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Print styles */
+@media print {
+    .mt-search-filters,
+    .mt-modal,
+    .mt-evaluate-btn {
+        display: none !important;
+    }
+    
+    .mt-jury-dashboard {
+        border: none;
+        box-shadow: none;
+    }
+    
+    .mt-candidates-list {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mt-candidate-card,
+    .mt-stat-card,
+    .mt-ranking-item {
+        border-width: 3px;
+    }
+    
+    .mt-evaluate-btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

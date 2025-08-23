@@ -235,10 +235,16 @@ class MT_Shortcode_Renderer {
             wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
         }
         
+        // Enqueue mobile-specific styles with higher priority
+        wp_enqueue_style('mt-jury-dashboard-mobile', MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-mobile.css', [], MT_VERSION);
+        
         wp_enqueue_style('dashicons');
         // Add locale-based cache busting to ensure fresh translations
         $script_version = MT_VERSION . '-' . get_locale();
         wp_enqueue_script('mt-frontend', MT_PLUGIN_URL . 'assets/js/frontend.js', ['jquery'], $script_version, true);
+        
+        // Enqueue mobile-specific JavaScript
+        wp_enqueue_script('mt-jury-dashboard-mobile', MT_PLUGIN_URL . 'assets/js/mt-jury-dashboard-mobile.js', ['jquery', 'mt-frontend'], $script_version, true);
         
         // Note: Not enqueueing mt-jury-filters.js as we're using inline JavaScript
         
@@ -274,7 +280,13 @@ class MT_Shortcode_Renderer {
                 'additional_comments' => __('Additional Comments (Optional)', 'mobility-trailblazers'),
                 'characters' => __('characters', 'mobility-trailblazers'),
                 'criteria_evaluated' => __('criteria evaluated', 'mobility-trailblazers'),
-                'evaluation_submitted_editable' => __('This evaluation has been submitted. You can still edit and resubmit.', 'mobility-trailblazers')
+                'evaluation_submitted_editable' => __('This evaluation has been submitted. You can still edit and resubmit.', 'mobility-trailblazers'),
+                // Mobile-specific strings
+                'filter_candidates' => __('Filter Candidates', 'mobility-trailblazers'),
+                'hide_filters' => __('Hide Filters', 'mobility-trailblazers'),
+                'clear_filters' => __('Clear Filters', 'mobility-trailblazers'),
+                'scroll_for_more' => __('Scroll for more', 'mobility-trailblazers'),
+                'close' => __('Close', 'mobility-trailblazers')
             ]
         ]);
     }
