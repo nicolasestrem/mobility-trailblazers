@@ -102,7 +102,7 @@
 .mt-login input[type="text"],
 .mt-login input[type="email"],
 .mt-login input[type="password"] {
-  width: 100%;
+  width: 40%;
   padding: 10px 12px;
   border: var(--mt-border-width) solid var(--mt-border);
   border-radius: var(--mt-radius-sm);
