@@ -3,6 +3,49 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [4.1.0] - 2025-08-23
+### Added - CSS v4 Mobile-First Jury Dashboard
+- **Mobile-First Responsive Design**: Complete redesign of jury dashboard for mobile devices
+  - Implemented table-to-card transformation for evaluation tables on mobile (<768px)
+  - Added touch-optimized interfaces with 44px minimum tap targets
+  - Created responsive breakpoints: 320px → 375px → 414px → 768px → 1024px → 1200px
+  - Mobile cards display with proper shadows, borders, and spacing
+  
+- **New CSS v4 Mobile Framework**: 
+  - Created `mt-mobile-jury-dashboard.css` with comprehensive mobile styles
+  - Added `MT_Mobile_Styles` PHP class for critical CSS injection
+  - Integrated mobile CSS with v4 token-based architecture
+  - Added JavaScript enhancements in `mt-mobile-jury.js`
+  
+- **Touch-Friendly Components**:
+  - Full-width score input fields with proper touch targets
+  - Stacked action buttons (Save/View Details) for easy access
+  - Rank badges positioned in top-right corner of cards
+  - Prominent total score display with brand colors
+  
+- **Performance Optimizations**:
+  - Inline critical CSS for immediate rendering
+  - Conditional loading based on page detection
+  - Mobile-specific JavaScript enhancements only load on mobile
+  
+### Technical Implementation
+- **New Files**:
+  - `assets/css/v4/mt-mobile-jury-dashboard.css` - Mobile-specific styles (445 lines)
+  - `assets/js/mt-mobile-jury.js` - Mobile JavaScript enhancements (180 lines)
+  - `includes/public/class-mt-mobile-styles.php` - PHP class for CSS injection (366 lines)
+  
+- **Modified Files**:
+  - `includes/public/class-mt-public-assets.php` - Added mobile CSS registration
+  - `templates/frontend/partials/jury-rankings.php` - Added inline critical CSS
+  - `includes/core/class-mt-plugin.php` - Initialized mobile styles class
+  
+- **Key Features**:
+  - BEM naming convention with `.mt-` prefix
+  - CSS custom properties for design tokens
+  - Mobile-first approach with progressive enhancement
+  - Full WordPress coding standards compliance
+
+
 ## [2.5.41] - 2025-08-23
 ### Fixed - Login Form Input Field Width
 - **Login Form Styling**: Fixed login input fields overflowing container

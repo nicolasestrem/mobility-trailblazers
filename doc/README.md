@@ -1,6 +1,6 @@
 # Documentation Hub - Mobility Trailblazers Plugin
 
-Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin (v2.5.39+). This directory contains all technical documentation for developers, administrators, and contributors.
+Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin (v4.1.0+). This directory contains all technical documentation for developers, administrators, and contributors.
 
 ## Quick Navigation
 
@@ -9,8 +9,9 @@ Welcome to the documentation hub for the Mobility Trailblazers WordPress Plugin 
 | Document | Description | Last Updated |
 |----------|-------------|--------------|
 | [Architecture Guide](architecture.md) | Complete system architecture and design patterns | August 22, 2025 |
-| [Developer Guide](developer-guide.md) | Development environment setup and coding patterns | August 22, 2025 |
+| [Developer Guide](developer-guide.md) | Development environment setup and coding patterns | August 23, 2025 |
 | [CSS Guide](css-guide.md) | Frontend styling system and component architecture | August 22, 2025 |
+| [CSS v4 Framework Guide](CSS-V4-GUIDE.md) | Modern token-based CSS architecture with mobile-first design | August 23, 2025 |
 | [Import/Export Guide](import-export.md) | Data management, import/export, and migration procedures | August 22, 2025 |
 
 ### 📋 Reference Documentation
@@ -91,10 +92,11 @@ doc/
 - **Award Ceremony:** October 30, 2025
 
 ### Version Information
-- **Current Version:** 2.5.37
+- **Current Version:** 4.1.0
 - **PHP Requirement:** 7.4+
 - **WordPress:** 5.8+
 - **Database:** MySQL 5.7+ / MariaDB 10.3+
+- **CSS Framework:** v4.1.0 (Mobile-First)
 
 ## Documentation Guidelines
 
@@ -158,5 +160,5 @@ When contributing documentation:
 
 ---
 
-*Last Updated: August 20, 2025*  
-*Plugin Version: 2.5.37*
+*Last Updated: August 23, 2025*  
+*Plugin Version: 4.1.0*

@@ -28,7 +28,7 @@ class MT_Public_Assets {
      *
      * @var string
      */
-    const V4_VERSION = '4.0.0';
+    const V4_VERSION = '4.1.0';
     
     /**
      * Whether v4 framework is enabled
