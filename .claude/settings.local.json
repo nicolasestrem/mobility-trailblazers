@@ -89,7 +89,10 @@
       "Bash(del compile-mo.php simple-compile-mo.php)",
       "Bash(msgfmt:*)",
       "Bash(npm test)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(for:*)",
+      "Bash(done)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
