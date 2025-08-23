@@ -206,6 +206,7 @@ class MT_Public_Assets {
         wp_enqueue_style('mt-v4-base');
         wp_enqueue_style('mt-v4-components');
         wp_enqueue_style('mt-v4-pages');
+        wp_enqueue_style('mt-v4-mobile-jury');
         
         // Optionally optimize third-party CSS
         $this->maybe_optimize_third_party_css();
@@ -261,6 +262,15 @@ class MT_Public_Assets {
             $base_url . 'mt-pages.css',
             ['mt-v4-components'],
             $version
+        );
+        
+        // Register mobile-specific jury dashboard styles with high priority
+        wp_register_style(
+            'mt-v4-mobile-jury',
+            $base_url . 'mt-mobile-jury-dashboard.css',
+            ['mt-v4-pages'],
+            $version,
+            'all'
         );
     }
     
