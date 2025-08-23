@@ -3,6 +3,20 @@
 > **Note**: Version 2.2.7b represents a hotfix that was deployed on the same day as 2.2.7. The duplicate version number has been corrected with the 'b' suffix to maintain chronological accuracy.
 
 
+## [2.5.41] - 2025-08-23
+### Fixed - Login Form Input Field Width
+- **Login Form Styling**: Fixed login input fields overflowing container
+  - Updated `.mt-login` input field CSS to use 100% width with `!important` to override HTML size attribute
+  - Added specific selectors for WordPress login form elements (`#user_login`, `#user_pass`, `.input`)
+  - Included `box-sizing: border-box` to ensure padding is included in width calculation
+  - Input fields now properly fit within the 380px constrained login block container
+  - Removed unnecessary media query for desktop as parent container already constrains width
+
+### Technical Details
+- Modified: `assets/css/v4/mt-components.css` - Fixed input field width overflow
+- Plugin version bumped to 2.5.41 to force CSS cache refresh
+
+
 ## [2.5.40] - 2025-08-22
 ### Fixed - Medal Display & Score Centering Issues
 - **Medal Display Issues**: Fixed medal visibility problems in evaluation table
