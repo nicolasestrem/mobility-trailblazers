@@ -17,29 +17,66 @@
   margin-top: var(--mt-space-xl);
 }
 
-/* Jury Dashboard Page */
+/* Mobile-First Jury Dashboard Page */
 .mt-jury-dashboard {
   min-height: 80vh;
+  padding: var(--mt-space);
 }
 
+/* Enhance padding for tablets and larger screens */
+@media (min-width: 768px) {
+  .mt-jury-dashboard {
+    padding: var(--mt-space-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mt-jury-dashboard {
+    padding: var(--mt-space-xl);
+  }
+}
+
+/* Mobile-first stats grid */
 .mt-jury-dashboard .mt-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--mt-space);
   margin-bottom: var(--mt-space-xl);
 }
 
+@media (min-width: 768px) {
+  .mt-jury-dashboard .mt-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mt-jury-dashboard .mt-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Mobile-friendly evaluation status */
 .mt-jury-dashboard .mt-evaluation-status {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: var(--mt-space-xs);
+  gap: var(--mt-space-sm);
+  justify-content: center;
+  padding: var(--mt-space-sm) var(--mt-space);
+  background: var(--mt-color-gray-light);
+  border-radius: var(--mt-radius-sm);
+  margin: var(--mt-space-sm) 0;
+  min-height: var(--mt-touch-target);
+  font-size: var(--mt-font-size-small);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mt-jury-dashboard .mt-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--mt-color-gray-medium);
+  flex-shrink: 0;
 }
 
 .mt-jury-dashboard .mt-status-dot--completed {
@@ -59,59 +96,242 @@
   margin-top: var(--mt-space-xl);
 }
 
-/* Evaluation Table Specific Styles */
+/* Mobile-First Evaluation Table - Card Pattern */
+.mt-evaluation-table-wrap {
+  background: var(--mt-color-white);
+  border-radius: var(--mt-radius);
+  overflow: hidden;
+  box-shadow: var(--mt-shadow-sm);
+  margin: var(--mt-space-lg) 0;
+}
+
+/* Mobile: Card-based layout */
+.mt-evaluation-cards {
+  display: grid;
+  gap: var(--mt-space);
+  padding: var(--mt-space-sm);
+}
+
+/* Increase padding on larger mobile screens */
+@media (min-width: 414px) {
+  .mt-evaluation-cards {
+    padding: var(--mt-space);
+  }
+}
+
+.mt-evaluation-card {
+  background: var(--mt-color-white);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  padding: var(--mt-space);
+  box-shadow: var(--mt-shadow-sm);
+  transition: var(--mt-transition);
+  position: relative;
+}
+
+.mt-evaluation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mt-shadow-lg);
+}
+
+.mt-evaluation-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--mt-space);
+  margin-bottom: var(--mt-space);
+  padding-bottom: var(--mt-space);
+  border-bottom: var(--mt-border-width) solid var(--mt-border);
+}
+
+.mt-evaluation-card__rank {
+  flex-shrink: 0;
+}
+
+.mt-evaluation-card__name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--mt-color-primary-dark);
+  font-size: var(--mt-font-size-large);
+}
+
+.mt-evaluation-card__scores {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--mt-space-sm);
+  margin-bottom: var(--mt-space);
+}
+
+@media (min-width: 414px) {
+  .mt-evaluation-card__scores {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.mt-evaluation-card__score {
+  text-align: center;
+  padding: var(--mt-space-sm);
+  background: var(--mt-color-gray-light);
+  border-radius: var(--mt-radius-sm);
+}
+
+.mt-evaluation-card__score-label {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+  font-weight: 500;
+  margin-bottom: var(--mt-space-xs);
+  display: block;
+}
+
+.mt-evaluation-card__score-input {
+  width: 100%;
+  min-height: var(--mt-touch-target);
+  padding: var(--mt-space-sm);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  text-align: center;
+  font-size: var(--mt-font-size-base);
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+
+.mt-evaluation-card__score-input:focus {
+  outline: none;
+  border-color: var(--mt-color-primary);
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.mt-evaluation-card__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--mt-space);
+  background: var(--mt-color-primary);
+  color: var(--mt-color-white);
+  border-radius: var(--mt-radius-sm);
+  margin-bottom: var(--mt-space);
+}
+
+.mt-evaluation-card__total-label {
+  font-weight: 600;
+  font-size: var(--mt-font-size-base);
+}
+
+.mt-evaluation-card__total-value {
+  font-size: var(--mt-font-size-h3);
+  font-weight: 700;
+}
+
+.mt-evaluation-card__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mt-space-sm);
+}
+
+/* Two columns on wider mobile screens */
+@media (min-width: 375px) {
+  .mt-evaluation-card__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mt-evaluation-card__action {
+  min-height: var(--mt-touch-target);
+  padding: var(--mt-touch-padding);
+  border-radius: var(--mt-radius-sm);
+  font-size: var(--mt-font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  border: var(--mt-border-width) solid var(--mt-color-primary);
+  background: transparent;
+  color: var(--mt-color-primary);
+}
+
+.mt-evaluation-card__action:hover,
+.mt-evaluation-card__action:active {
+  background: var(--mt-color-primary);
+  color: var(--mt-color-white);
+  transform: translateY(-1px);
+}
+
+.mt-evaluation-card__action--primary {
+  background: var(--mt-color-primary);
+  color: var(--mt-color-white);
+}
+
+.mt-evaluation-card__action--primary:hover,
+.mt-evaluation-card__action--primary:active {
+  background: var(--mt-color-primary-dark);
+}
+
+/* Desktop: Traditional table layout */
 .mt-evaluation-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 8px;
+  display: none;
 }
 
-.mt-evaluation-table thead th {
-  padding: 12px;
-  background: var(--mt-color-gray-light);
-  font-weight: 600;
-  text-align: left;
-  border-bottom: 2px solid var(--mt-border);
-}
+@media (min-width: 768px) {
+  .mt-evaluation-cards {
+    display: none;
+  }
+  
+  .mt-evaluation-table {
+    display: table;
+  }
+  
+  .mt-evaluation-table thead th {
+    padding: 12px;
+    background: var(--mt-color-gray-light);
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid var(--mt-border);
+  }
 
-.mt-evaluation-table tbody tr {
-  background: var(--mt-color-white);
-  transition: var(--mt-transition-fast);
-}
+  .mt-evaluation-table tbody tr {
+    background: var(--mt-color-white);
+    transition: var(--mt-transition-fast);
+  }
 
-.mt-evaluation-table tbody tr:hover {
-  transform: translateX(2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+  .mt-evaluation-table tbody tr:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 
-.mt-evaluation-table td {
-  padding: 12px;
-  vertical-align: middle;
-}
+  .mt-evaluation-table td {
+    padding: 12px;
+    vertical-align: middle;
+  }
 
-/* Rank cell specific styling */
-.mt-evaluation-table .mt-eval-rank {
-  width: 60px;
-  text-align: center;
-}
+  /* Rank cell specific styling */
+  .mt-evaluation-table .mt-eval-rank {
+    width: 60px;
+    text-align: center;
+  }
 
-/* Position-specific row highlights */
-.mt-evaluation-table .position-gold {
-  background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, transparent 100%);
-}
+  /* Position-specific row highlights */
+  .mt-evaluation-table .position-gold {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, transparent 100%);
+  }
 
-.mt-evaluation-table .position-silver {
-  background: linear-gradient(90deg, rgba(192, 192, 192, 0.08) 0%, transparent 100%);
-}
+  .mt-evaluation-table .position-silver {
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.08) 0%, transparent 100%);
+  }
 
-.mt-evaluation-table .position-bronze {
-  background: linear-gradient(90deg, rgba(205, 127, 50, 0.08) 0%, transparent 100%);
-}
+  .mt-evaluation-table .position-bronze {
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.08) 0%, transparent 100%);
+  }
 
-/* Use the ranking badge component in table context */
-.mt-evaluation-table .mt-ranking-badge {
-  margin: 0 auto;
-  display: flex;
+  /* Use the ranking badge component in table context */
+  .mt-evaluation-table .mt-ranking-badge {
+    margin: 0 auto;
+    display: flex;
+  }
 }
 
 /* Jury Dashboard Page Ranking Adjustments */
@@ -274,6 +494,78 @@
   background: var(--mt-color-primary);
   border-color: var(--mt-color-primary);
   color: var(--mt-color-white);
+}
+
+/* ========================================
+   MOBILE-FIRST CANDIDATES COMPONENTS
+   ======================================== */
+
+/* Mobile-first candidate list */
+.mt-candidates-list {
+  display: grid;
+  gap: var(--mt-space);
+  padding: var(--mt-space-sm);
+}
+
+.mt-candidates-list .mt-candidate-item {
+  background: var(--mt-color-white);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  padding: var(--mt-space);
+  display: flex;
+  align-items: center;
+  gap: var(--mt-space);
+  transition: var(--mt-transition-fast);
+  min-height: var(--mt-touch-target-large);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mt-candidates-list .mt-candidate-item:active {
+  transform: scale(0.98);
+  background: var(--mt-color-gray-light);
+}
+
+/* Mobile-first candidate grid */
+.mt-candidates-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mt-space);
+  padding: var(--mt-space-sm);
+}
+
+/* 2 columns on larger phones */
+@media (min-width: 414px) {
+  .mt-candidates-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--mt-space);
+  }
+}
+
+/* 3 columns on tablets */
+@media (min-width: 768px) {
+  .mt-candidates-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--mt-gap);
+    padding: var(--mt-space-lg);
+  }
+}
+
+/* 4 columns on desktop */
+@media (min-width: 1200px) {
+  .mt-candidates-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Enhanced mobile touch targets for candidate cards */
+.mt-candidates-v3 .mt-candidate-card-link,
+.mt-candidates-grid .mt-candidate-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  min-height: var(--mt-touch-target-large);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* Responsive Utilities */
