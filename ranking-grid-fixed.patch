@@ -1,0 +1,136 @@
+diff --git a/templates/frontend/partials/jury-rankings.php b/templates/frontend/partials/jury-rankings.php
+index 1234567..89abcde 100644
+--- a/templates/frontend/partials/jury-rankings.php
++++ b/templates/frontend/partials/jury-rankings.php
+@@ -100,7 +100,7 @@
+-<div class="mt-evaluation-table-wrap">
++<div class="mt-evaluation-table-wrap" style="display:none;">
+@@ -200,2 +200,125 @@
+         </table>
+     </div>
++
++    <!-- Begin new responsive ranking grid -->
++    <?php
++    // Determine number of criteria for dynamic column count
++    $criteria_count = count($criteria);
++
++    // Enqueue the new grid assets. These files should be created in your plugin:
++    // - assets/css/v4/mt-ranking-grid.css
++    // - assets/js/mt-ranking-grid.js
++    wp_enqueue_style(
++        'mt-ranking-grid',
++        MT_PLUGIN_URL . 'assets/css/v4/mt-ranking-grid.css',
++        [],
++        MT_VERSION
++    );
++    wp_enqueue_script(
++        'mt-ranking-grid',
++        MT_PLUGIN_URL . 'assets/js/mt-ranking-grid.js',
++        ['jquery'],
++        MT_VERSION,
++        true
++    );
++    ?>
++    <div class="mt-ranking" style="--mt-col-count:<?php echo esc_attr($criteria_count); ?>;">
++      <div class="mt-ranking__toolbar">
++        <input type="text" class="mt-ranking__search" placeholder="<?php esc_attr_e('Search candidate...', 'mobility-trailblazers'); ?>" />
++        <label class="mt-autosort-toggle">
++          <input type="checkbox" id="mt-autosort" checked /> <?php esc_html_e('Auto sort', 'mobility-trailblazers'); ?>
++        </label>
++        <button type="button" class="mt-btn mt-btn--primary mt-save-all"><?php esc_html_e('Save all', 'mobility-trailblazers'); ?></button>
++      </div>
++      <div class="mt-header-row">
++        <div class="mt-hcell mt-hcell--candidate"><?php esc_html_e('Candidate', 'mobility-trailblazers'); ?></div>
++        <?php foreach ($criteria as $criterion) : ?>
++          <div class="mt-hcell" title="<?php echo esc_attr($criterion['description']); ?>">
++            <?php echo esc_html(mb_substr($criterion['label'], 0, 3)); ?>
++          </div>
++        <?php endforeach; ?>
++        <div class="mt-hcell mt-hcell--total"><?php esc_html_e('Total', 'mobility-trailblazers'); ?></div>
++      </div>
++      <div id="mt-ranking-grid" class="mt-grid">
++        <?php
++        $position = 1;
++        foreach ($rankings as $ranking) :
++          $candidate_id   = isset($ranking->candidate_id) ? $ranking->candidate_id : $ranking->ID;
++          $candidate_name = $ranking->candidate_name ?? $ranking->post_title ?? '';
++          $organization   = $ranking->organization ?? '';
++          $position_title = $ranking->position ?? '';
++          $evaluation = null;
++          if ($jury_member) {
++              $evaluations = $evaluation_repo->find_all([
++                  'jury_member_id' => $jury_member->ID,
++                  'candidate_id' => $candidate_id,
++                  'limit' => 1
++              ]);
++              $evaluation = !empty($evaluations) ? $evaluations[0] : null;
++          }
++          $row_scores = [];
++          $row_total  = 0;
++          foreach ($criteria as $criterion) {
++              $key = $criterion['key'];
++              if ($evaluation && property_exists($evaluation, $key)) {
++                  $val = floatval($evaluation->$key);
++              } else {
++                  $val = 0;
++              }
++              $row_scores[$key] = $val;
++              $row_total += $val;
++          }
++          $avg_score = $criteria_count > 0 ? $row_total / $criteria_count : 0;
++        ?>
++        <div class="mt-row" data-candidate-id="<?php echo esc_attr($candidate_id); ?>">
++          <div class="mt-cell mt-cell--candidate">
++            <span class="mt-rank"><?php echo esc_html($position); ?></span>
++            <?php
++            $avatar = get_the_post_thumbnail_url($candidate_id, 'thumbnail');
++            if ($avatar) : ?>
++              <img class="mt-avatar" src="<?php echo esc_url($avatar); ?>" alt="<?php echo esc_attr($candidate_name); ?>" />
++            <?php else : ?>
++              <img class="mt-avatar" src="<?php echo esc_url(plugins_url('assets/img/default-avatar.png', MT_PLUGIN_FILE)); ?>" alt="" />
++            <?php endif; ?>
++            <div>
++              <h3 class="mt-name"><?php echo esc_html($candidate_name); ?></h3>
++              <p class="mt-meta">
++                <?php if ($position_title) echo esc_html($position_title); ?>
++                <?php if ($organization && $position_title) echo ' @ '; ?>
++                <?php if ($organization) echo esc_html($organization); ?>
++              </p>
++            </div>
++          </div>
++          <?php foreach ($criteria as $criterion) :
++              $key   = $criterion['key'];
++              $val   = isset($row_scores[$key]) ? $row_scores[$key] : 0;
++              $heat  = $val <= 3.5 ? 'low' : ($val >= 7.5 ? 'high' : 'mid');
++          ?>
++            <div class="mt-cell mt-cell--score" data-key="<?php echo esc_attr($key); ?>">
++              <input type="number" min="0" max="10" step="0.5" class="mt-score" value="<?php echo esc_attr(number_format($val, 1, '.', '')); ?>" data-heat="<?php echo esc_attr($heat); ?>" />
++            </div>
++          <?php endforeach; ?>
++          <div class="mt-cell mt-cell--total">
++            <span class="mt-total"><?php echo number_format($avg_score, 1); ?></span>
++            <button type="button" class="mt-btn mt-btn--ghost mt-save"><?php esc_html_e('Speichern', 'mobility-trailblazers'); ?></button>
++          </div>
++        </div>
++        <?php
++          $position++;
++        endforeach;
++        ?>
++      </div>
++    </div>
++    <!-- End new responsive ranking grid -->
++
+diff --git a/assets/css/v4/mt-ranking-grid.css b/assets/css/v4/mt-ranking-grid.css
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/assets/css/v4/mt-ranking-grid.css
+@@ -0,0 +1 @@
++/* Responsive grid CSS copied from the prototype. Place the CSS definitions here. */
+diff --git a/assets/js/mt-ranking-grid.js b/assets/js/mt-ranking-grid.js
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/assets/js/mt-ranking-grid.js
+@@ -0,0 +1 @@
++/* Interactive ranking script copied from the prototype. Place the JavaScript here. */
