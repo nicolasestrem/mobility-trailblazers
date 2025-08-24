@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mobility Trailblazers – Ranking Prototype</title>
+<style>
+/* =============================
+   TOKENS
+   ============================= */
+:root{
+  --mt-primary: #26a69a;
+  --mt-primary-dark: #00897b;
+  --mt-primary-light: #4db6ac;
+  --mt-bg: #f8f0e3;
+  --mt-text: #302c37;
+  --mt-white: #ffffff;
+  --mt-border: #d9d4c8;
+  --mt-shadow: 0 2px 12px rgba(0,0,0,.06);
+  --mt-radius: 14px;
+  --mt-gap: 12px;
+
+  --mt-col-candidate-min: 320px; /* desktop first column min width */
+  --mt-col-score: 112px; /* desktop score column */
+  --mt-col-total: 128px; /* desktop total column */
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--mt-bg);color:var(--mt-text);font:15px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial}
+
+/* =============================
+   WRAPPER + TOOLBAR
+   ============================= */
+.mt-ranking{max-width:1200px;margin:0 auto;padding:16px 16px 40px}
+.mt-toolbar{position:sticky;top:0;z-index:30;display:flex;gap:10px;align-items:center;padding:10px 12px;background:linear-gradient(180deg, rgba(248,240,227,0.98), rgba(248,240,227,0.92));backdrop-filter:saturate(1.1) blur(4px);border-bottom:1px solid var(--mt-border)}
+.mt-toolbar .mt-title{font-size:18px;font-weight:700;margin-right:auto}
+.mt-search{flex:1;min-width:160px;border:1px solid var(--mt-border);border-radius:10px;padding:10px 12px;background:var(--mt-white)}
+.mt-btn{border:1px solid var(--mt-primary-dark);background:var(--mt-primary);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:var(--mt-shadow)}
+.mt-btn:hover{background:var(--mt-primary-dark)}
+.mt-btn--ghost{border:1px solid var(--mt-border);background:#fff;color:var(--mt-text)}
+.mt-btn--ghost:hover{border-color:var(--mt-primary);color:var(--mt-primary-dark)}
+.mt-toggle{display:flex;align-items:center;gap:8px}
+.mt-toggle input{accent-color:var(--mt-primary)}
+
+/* =============================
+   GRID SHEET (Desktop)
+   ============================= */
+.mt-grid{--cols: minmax(var(--mt-col-candidate-min), 1.2fr) repeat(5, var(--mt-col-score)) var(--mt-col-total); display:grid; row-gap:10px; }
+.mt-header{position:sticky;top:52px;z-index:20;display:grid;grid-template-columns:var(--cols);align-items:center;background:rgba(255,255,255,.96);border:1px solid var(--mt-border);border-radius:12px;padding:8px 6px 8px 0;backdrop-filter: blur(3px)}
+.mt-hcell{padding:6px 8px;font-size:13px;font-weight:700;opacity:.8}
+.mt-hcell--candidate{position:sticky;left:0;background:rgba(255,255,255,.96);z-index:22;padding-left:12px;border-right:1px solid var(--mt-border)}
+
+.mt-row{display:grid;grid-template-columns:var(--cols);align-items:center;background:#fff;border:1px solid var(--mt-border);border-radius:14px;box-shadow:var(--mt-shadow)}
+.mt-cell{padding:10px 8px}
+.mt-cell--candidate{position:sticky;left:0;background:#fff;z-index:10;display:flex;gap:12px;align-items:center;border-right:1px solid var(--mt-border);padding-left:12px;border-top-left-radius:14px;border-bottom-left-radius:14px;}
+.mt-rank{width:28px;height:28px;border-radius:50%;background:var(--mt-primary);color:#fff;display:grid;place-items:center;font-weight:700}
+.mt-avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 0 2px var(--mt-border)}
+.mt-name{margin:0;font-weight:800}
+.mt-meta{margin:2px 0 0 0;font-size:13px;opacity:.7}
+
+.mt-score{width:100%; text-align:center;border:1px solid var(--mt-border);border-radius:12px;padding:9px 8px;font-weight:700}
+.mt-score:focus{outline:2px solid var(--mt-primary-light);border-color:var(--mt-primary)}
+
+.mt-total{font-weight:900;font-size:18px}
+.mt-cell--total{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-right:14px}
+
+/* Value coloring */
+.mt-score[data-heat="low"]{background:#ffe8e8;border-color:#f2b7b7}
+.mt-score[data-heat="mid"]{background:#fff9e6;border-color:#f2d8a6}
+.mt-score[data-heat="high"]{background:#e9faef;border-color:#c6e9d1}
+
+/* Row state */
+.mt-row.mt-row--dirty{box-shadow:0 0 0 2px rgba(38,166,154,.2), var(--mt-shadow)}
+.mt-row.mt-row--saving{opacity:.6}
+
+/* =============================
+   CARDS (Tablet & Mobile)
+   ============================= */
+@media (max-width: 1023px){
+  .mt-header{display:none}
+  .mt-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--mt-gap)}
+  .mt-row{display:flex;flex-direction:column;padding:12px}
+  .mt-cell--candidate{position:static;border-right:0;padding:0 0 6px 0}
+  .mt-criteria{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:10px;width:100%;}
+  .mt-cell--score{padding:0}
+  .mt-cell--total{padding:8px 0 0 0;justify-content:space-between}
+}
+
+@media (max-width: 639px){
+  .mt-grid{grid-template-columns:1fr}
+  .mt-criteria{grid-template-columns:1fr}
+  .mt-score{padding:12px;font-size:16px;border-radius:14px}
+}
+
+/* Tiny helpers */
+.mt-tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef2f1;font-weight:700;font-size:11px}
+.mt-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--mt-border);background:#fff}
+</style>
+</head>
+<body>
+  <section class="mt-ranking" id="app">
+    <div class="mt-toolbar">
+      <div class="mt-title">Ranking – Jury Edit</div>
+      <input class="mt-search" id="search" placeholder="Search candidate or org" />
+      <label class="mt-toggle"><input type="checkbox" id="autosort" checked> Auto sort</label>
+      <button class="mt-btn" id="saveAll">Save all</button>
+      <button class="mt-btn mt-btn--ghost" id="reset">Reset</button>
+    </div>
+
+    <!-- Desktop header -->
+    <div class="mt-header">
+      <div class="mt-hcell mt-hcell--candidate">Kandidat/in</div>
+      <div class="mt-hcell">Mut</div>
+      <div class="mt-hcell">Inn</div>
+      <div class="mt-hcell">Ums</div>
+      <div class="mt-hcell">Rel</div>
+      <div class="mt-hcell">Vor</div>
+      <div class="mt-hcell" style="text-align:right;padding-right:16px">Gesamt</div>
+    </div>
+
+    <div class="mt-grid" id="grid">
+      <!-- rows injected by JS for easier demo -->
+    </div>
+  </section>
+
+<script>
+// Minimal demo data
+const candidates = [
+  {id:1, name:'Prof. Dr. Uwe Schneidewind', meta:'Oberbürgermeister @ Stadt Wuppertal', avatar:'https://i.pravatar.cc/100?img=12', scores:{courage:5, innovation:5, implementation:5, relevance:10, visibility:6}},
+  {id:2, name:'Michael Klasa', meta:'Head of Mobility @ Swisscom', avatar:'https://i.pravatar.cc/100?img=16', scores:{courage:5, innovation:5, implementation:5, relevance:5, visibility:5}},
+  {id:3, name:'Nic Knapp', meta:'Managing Director @ TUM Venture Labs', avatar:'https://i.pravatar.cc/100?img=22', scores:{courage:5, innovation:5, implementation:5, relevance:5, visibility:5}},
+  {id:4, name:'Oliver Zipse', meta:'CEO @ BMW', avatar:'https://i.pravatar.cc/100?img=31', scores:{courage:5, innovation:5, implementation:5, relevance:5, visibility:5}},
+  {id:5, name:'Rönke von der Heide', meta:'COO @ Zukunft Nahverkehr', avatar:'https://i.pravatar.cc/100?img=45', scores:{courage:0, innovation:10, implementation:0, relevance:10, visibility:5}},
+];
+
+const weights = {courage:1, innovation:1, implementation:1, relevance:1, visibility:1};
+const keys = ['courage','innovation','implementation','relevance','visibility'];
+const keyShort = {courage:'Mut', innovation:'Inn', implementation:'Ums', relevance:'Rel', visibility:'Vor'}
+
+const grid = document.getElementById('grid');
+
+function heat(value){
+  if(value <= 3.5) return 'low';
+  if(value >= 7.5) return 'high';
+  return 'mid';
+}
+
+function computeTotal(scores){
+  let sum = 0, w = 0;
+  for(const k of keys){
+    const weight = weights[k]||1;
+    sum += (scores[k]||0)*weight; w += weight;
+  }
+  return +(sum/w).toFixed(1);
+}
+
+function rowTemplate(c, idx){
+  const total = computeTotal(c.scores);
+  return `
+  <article class="mt-row" data-id="${c.id}">
+    <div class="mt-cell mt-cell--candidate">
+      <div class="mt-rank" data-rank>${idx+1}</div>
+      <img class="mt-avatar" src="${c.avatar}" alt="">
+      <div>
+        <h3 class="mt-name">${c.name}</h3>
+        <p class="mt-meta">${c.meta}</p>
+      </div>
+    </div>
+    ${keys.map(k=>`
+      <div class="mt-cell mt-cell--score" data-key="${k}">
+        <input type="number" class="mt-score" min="0" max="10" step="0.5" value="${c.scores[k]}" data-heat="${heat(c.scores[k])}">
+      </div>`).join('')}
+    <div class="mt-cell mt-cell--total">
+      <span class="mt-total">${total}</span>
+      <button class="mt-btn mt-btn--ghost mt-save">Speichern</button>
+    </div>
+    <!-- Card-only criteria wrapper (shown by CSS) -->
+    <div class="mt-criteria" hidden>
+      ${keys.map(k=>`
+        <label class="mt-chip">${keyShort[k]} <input type="number" class="mt-score" min="0" max="10" step="0.5" value="${c.scores[k]}" data-heat="${heat(c.scores[k])}" style="width:68px;text-align:center"> </label>`).join('')}
+    </div>
+  </article>`
+}
+
+function render(list){
+  grid.innerHTML = '';
+  list.forEach((c, i)=>{
+    grid.insertAdjacentHTML('beforeend', rowTemplate(c, i));
+  });
+}
+
+function refreshRanks(){
+  [...grid.querySelectorAll('.mt-row')].forEach((row, i)=>{
+    row.querySelector('[data-rank]').textContent = i+1;
+  });
+}
+
+function attachEvents(){
+  grid.addEventListener('input', e=>{
+    const input = e.target.closest('.mt-score');
+    if(!input) return;
+    const row = e.target.closest('.mt-row');
+    const scores = {};
+    row.querySelectorAll('.mt-cell--score').forEach(cell=>{
+      const key = cell.dataset.key; const v = parseFloat(cell.querySelector('.mt-score').value)||0;
+      scores[key] = v; cell.querySelector('.mt-score').setAttribute('data-heat', heat(v));
+    });
+    const total = computeTotal(scores);
+    row.querySelector('.mt-total').textContent = total;
+    row.classList.add('mt-row--dirty');
+    if(document.getElementById('autosort').checked){
+      sortRows();
+    }
+  });
+
+  grid.addEventListener('click', e=>{
+    const btn = e.target.closest('.mt-save');
+    if(!btn) return;
+    const row = btn.closest('.mt-row');
+    row.classList.add('mt-row--saving');
+    setTimeout(()=>{ // simulate AJAX
+      row.classList.remove('mt-row--saving');
+      row.classList.remove('mt-row--dirty');
+      btn.textContent = 'Gespeichert';
+      setTimeout(()=>btn.textContent='Speichern', 1500);
+    }, 600);
+  });
+
+  document.getElementById('saveAll').addEventListener('click', ()=>{
+    grid.querySelectorAll('.mt-row').forEach(row=>{
+      row.classList.add('mt-row--saving');
+      setTimeout(()=>{row.classList.remove('mt-row--saving');row.classList.remove('mt-row--dirty');}, 500);
+    });
+  });
+
+  document.getElementById('reset').addEventListener('click', ()=>{
+    render(candidates); attachEvents(); sortRows();
+  });
+
+  document.getElementById('search').addEventListener('input', e=>{
+    const q = e.target.value.trim().toLowerCase();
+    grid.querySelectorAll('.mt-row').forEach(row=>{
+      const text = row.querySelector('.mt-name').textContent.toLowerCase() + ' ' + row.querySelector('.mt-meta').textContent.toLowerCase();
+      row.style.display = text.includes(q) ? '' : 'none';
+    });
+  });
+}
+
+function sortRows(){
+  const rows = [...grid.querySelectorAll('.mt-row')];
+  rows.sort((a,b)=> parseFloat(b.querySelector('.mt-total').textContent) - parseFloat(a.querySelector('.mt-total').textContent));
+  rows.forEach(r=>grid.appendChild(r));
+  refreshRanks();
+}
+
+// Initial render
+render(candidates);
+attachEvents();
+sortRows();
+</script>
+</body>
+</html>
