@@ -216,6 +216,14 @@ class MT_Public_Assets {
             MT_VERSION . '-hotfix-filter'
         );
         
+        // HOTFIX: Jury dashboard filter fix - Critical for category filtering
+        wp_enqueue_style(
+            'mt-jury-filter-hotfix',
+            MT_PLUGIN_URL . 'assets/css/mt-jury-filter-hotfix.css',
+            [],
+            MT_VERSION . '-hotfix-filter'
+        );
+        
         // Optionally optimize third-party CSS
         $this->maybe_optimize_third_party_css();
         
