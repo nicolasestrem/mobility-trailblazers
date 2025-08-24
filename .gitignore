@@ -119,3 +119,6 @@ package-lock.json
 
 # ===== Local Settings =====
 .claude/settings.local.json
+/backup_production
+/css backup
+/v4
