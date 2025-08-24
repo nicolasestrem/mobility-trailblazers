@@ -1,6 +1,6 @@
 # Mobility Trailblazers Developer Guide
 
-*Version 2.5.39+ | Last Updated: August 22, 2025*
+*Version 4.1.0+ | Last Updated: August 23, 2025*
 
 > **📋 Architecture Reference**: For comprehensive system architecture documentation, see [Architecture Guide](architecture.md).
 
@@ -737,7 +737,50 @@ $results = $wpdb->get_results(
 
 ## Frontend Assets
 
-### CSS Architecture
+### CSS v4 Framework (New in 4.1.0)
+
+> **📚 CSS v4 Guide**: For comprehensive CSS v4 documentation, see [CSS v4 Framework Guide](CSS-V4-GUIDE.md).
+
+The plugin now uses a modern, token-based CSS architecture with mobile-first design:
+
+```css
+/* CSS v4 Token System */
+:root {
+    --mt-color-primary: #26a69a;
+    --mt-space: 16px;
+    --mt-touch-target: 44px;
+    --mt-radius: 8px;
+}
+
+/* Mobile-First Responsive Design (v4.1.0) */
+@media (max-width: 767px) {
+    .mt-evaluation-table {
+        display: block;
+    }
+    
+    .mt-evaluation-table tr {
+        display: block;
+        background: var(--mt-color-white);
+        border-radius: var(--mt-radius);
+        padding: var(--mt-space);
+        margin-bottom: var(--mt-space);
+    }
+}
+```
+
+#### CSS v4 File Structure
+
+```
+assets/css/v4/
+├── mt-tokens.css              # Design tokens
+├── mt-reset.css               # CSS reset
+├── mt-base.css                # Base styles
+├── mt-components.css          # Components
+├── mt-pages.css               # Page styles
+└── mt-mobile-jury-dashboard.css # Mobile styles (v4.1.0)
+```
+
+### Legacy CSS Architecture (Pre-v4)
 
 ```css
 /* Component Structure */
@@ -2187,6 +2230,76 @@ wp_enqueue_style(
     ['mt-frontend'],
     MT_VERSION
 );
+```
+
+## Mobile Development (v4.1.0)
+
+### Mobile-First Approach
+
+The v4.1.0 release introduces comprehensive mobile-first design patterns:
+
+```php
+// PHP Mobile Detection
+class MT_Mobile_Styles {
+    public function inject_critical_mobile_css() {
+        // Critical CSS injection for mobile
+        if ($this->is_mobile_view()) {
+            echo '<style id="mt-mobile-critical-css">';
+            include MT_PLUGIN_DIR . 'assets/css/critical-mobile.css';
+            echo '</style>';
+        }
+    }
+}
+```
+
+### Touch Optimization
+
+All interactive elements follow touch-friendly guidelines:
+
+```css
+/* Minimum touch target sizes */
+button, input, select, a {
+    min-height: 44px;  /* iOS recommendation */
+    min-width: 44px;
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+    font-size: 16px;
+}
+```
+
+### Responsive Breakpoints
+
+```scss
+// Mobile-first breakpoints
+$breakpoints: (
+    'xs': 320px,   // Small phones
+    'sm': 375px,   // Standard phones
+    'md': 414px,   // Large phones
+    'lg': 768px,   // Tablets
+    'xl': 1024px,  // Desktop
+    'xxl': 1200px  // Wide screens
+);
+```
+
+### Table-to-Card Pattern
+
+Transform tables into cards on mobile:
+
+```javascript
+// JavaScript enhancement
+function transformTableToCards() {
+    if (window.innerWidth <= 767) {
+        $('.mt-evaluation-table tr').each(function() {
+            $(this).addClass('mt-mobile-card');
+            // Add data labels for accessibility
+            $(this).find('td').each(function(index) {
+                $(this).attr('data-label', headers[index]);
+            });
+        });
+    }
+}
 ```
 
 ## Best Practices

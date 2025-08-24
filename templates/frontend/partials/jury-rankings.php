@@ -40,6 +40,105 @@ if (!empty($jury_members)) {
 }
 ?>
 
+<style id="mt-mobile-critical-inline">
+/* Critical Mobile Styles for Evaluation Table */
+@media (max-width: 767px) {
+    .mt-evaluation-table-wrap {
+        overflow: visible !important;
+        width: 100% !important;
+    }
+    
+    .mt-evaluation-table {
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    .mt-evaluation-table thead {
+        display: none !important;
+    }
+    
+    .mt-evaluation-table tbody {
+        display: block !important;
+    }
+    
+    .mt-evaluation-table tr {
+        display: block !important;
+        margin-bottom: 16px !important;
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        padding: 16px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    
+    .mt-evaluation-table td {
+        display: block !important;
+        text-align: left !important;
+        padding: 8px 0 !important;
+        border: none !important;
+    }
+    
+    /* Rank positioning */
+    .mt-evaluation-table .mt-eval-rank {
+        position: absolute !important;
+        top: 16px !important;
+        right: 16px !important;
+        width: auto !important;
+    }
+    
+    /* Candidate info styling */
+    .mt-evaluation-table .mt-eval-candidate {
+        padding-right: 60px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        border-bottom: 1px solid #eee !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    /* Score inputs */
+    .mt-evaluation-table .mt-eval-score-input {
+        width: 100% !important;
+        padding: 10px !important;
+        font-size: 16px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        min-height: 44px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* Total score */
+    .mt-evaluation-table .mt-eval-total-score {
+        background: #26a69a !important;
+        color: white !important;
+        padding: 10px !important;
+        border-radius: 6px !important;
+        text-align: center !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        margin: 10px 0 !important;
+    }
+    
+    /* Action buttons */
+    .mt-evaluation-table .mt-eval-actions {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+    }
+    
+    .mt-evaluation-table .mt-eval-actions button,
+    .mt-evaluation-table .mt-eval-actions a {
+        width: 100% !important;
+        padding: 12px !important;
+        text-align: center !important;
+        border-radius: 6px !important;
+        min-height: 44px !important;
+        font-size: 14px !important;
+    }
+}
+</style>
+
 <div class="mt-rankings-section">
     <div class="mt-rankings-header">
         <h2><?php _e('Your Rankings', 'mobility-trailblazers'); ?></h2>

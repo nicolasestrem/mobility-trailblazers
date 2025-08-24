@@ -28,7 +28,7 @@ class MT_Public_Assets {
      *
      * @var string
      */
-    const V4_VERSION = '4.0.0';
+    const V4_VERSION = '4.1.0';
     
     /**
      * Whether v4 framework is enabled
@@ -206,6 +206,15 @@ class MT_Public_Assets {
         wp_enqueue_style('mt-v4-base');
         wp_enqueue_style('mt-v4-components');
         wp_enqueue_style('mt-v4-pages');
+        wp_enqueue_style('mt-v4-mobile-jury');
+        
+        // HOTFIX: Jury dashboard filter fix - Critical for category filtering
+        wp_enqueue_style(
+            'mt-jury-filter-hotfix',
+            MT_PLUGIN_URL . 'assets/css/mt-jury-filter-hotfix.css',
+            ['mt-v4-mobile-jury'],
+            MT_VERSION . '-hotfix-filter'
+        );
         
         // HOTFIX: Jury dashboard filter fix - Critical for category filtering
         wp_enqueue_style(
@@ -269,6 +278,15 @@ class MT_Public_Assets {
             $base_url . 'mt-pages.css',
             ['mt-v4-components'],
             $version
+        );
+        
+        // Register mobile-specific jury dashboard styles with high priority
+        wp_register_style(
+            'mt-v4-mobile-jury',
+            $base_url . 'mt-mobile-jury-dashboard.css',
+            ['mt-v4-pages'],
+            $version,
+            'all'
         );
     }
     

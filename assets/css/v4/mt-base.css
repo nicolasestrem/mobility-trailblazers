@@ -1,49 +1,72 @@
 /**
  * Mobility Trailblazers v4 CSS Framework
- * Base Components
+ * Mobile-First Base Components
  * Version: 4.0.0
  */
 
-/* Container */
+/* Mobile-First Container */
 .mt-container {
   max-width: var(--mt-container-max);
   margin: 0 auto;
-  padding: var(--mt-space-lg);
+  padding: var(--mt-space-md);
 }
 
-@media (max-width: 768px) {
+/* Enhance for larger screens */
+@media (min-width: 768px) {
   .mt-container {
-    padding: var(--mt-space-md);
+    padding: var(--mt-space-lg);
   }
 }
 
-/* Grid System */
+@media (min-width: 1024px) {
+  .mt-container {
+    padding: var(--mt-space-xl);
+  }
+}
+
+/* Mobile-First Grid System */
 .mt-grid {
   display: grid;
-  gap: var(--mt-gap);
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--mt-space-md);
+  grid-template-columns: 1fr;
 }
 
-.mt-grid-2 { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
-.mt-grid-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-.mt-grid-4 { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
-
-@media (min-width: 769px) {
-  .mt-grid-md-2 { grid-template-columns: repeat(2, 1fr); }
-  .mt-grid-md-3 { grid-template-columns: repeat(3, 1fr); }
-  .mt-grid-md-4 { grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (max-width: 768px) {
-  .mt-grid,
-  .mt-grid-2,
-  .mt-grid-3,
-  .mt-grid-4 {
-    grid-template-columns: 1fr;
+/* Progressive Enhancement for Tablets */
+@media (min-width: 768px) {
+  .mt-grid {
+    gap: var(--mt-gap);
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .mt-grid-2 { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .mt-grid-3 { 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
   }
 }
 
-/* Card Component */
+/* Desktop Enhancement */
+@media (min-width: 1024px) {
+  .mt-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .mt-grid-2 { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .mt-grid-3 { 
+    grid-template-columns: repeat(3, 1fr); 
+  }
+  
+  .mt-grid-4 { 
+    grid-template-columns: repeat(4, 1fr); 
+  }
+}
+
+/* Mobile-First Card Component */
 .mt-card {
   background: var(--mt-color-white);
   border: var(--mt-border-width) solid var(--mt-border);
@@ -73,21 +96,26 @@
   background: var(--mt-color-gray-light);
 }
 
-/* Button Component */
+/* Mobile-First Touch-Friendly Button Component */
 .mt-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--mt-space-sm);
-  padding: 10px 16px;
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target);
+  min-width: var(--mt-touch-target);
   border-radius: var(--mt-radius-sm);
   border: var(--mt-border-width) solid transparent;
   font-weight: 500;
+  font-size: var(--mt-font-size-base);
   cursor: pointer;
   transition: var(--mt-transition-fast);
   text-decoration: none;
   background: var(--mt-color-gray-light);
   color: var(--mt-text);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .mt-btn:hover {
@@ -123,12 +151,14 @@
 }
 
 .mt-btn--large {
-  padding: 14px 24px;
+  padding: var(--mt-space) var(--mt-space-xl);
+  min-height: var(--mt-touch-target-large);
   font-size: var(--mt-font-size-large);
 }
 
 .mt-btn--small {
-  padding: 6px 12px;
+  padding: var(--mt-space-sm) var(--mt-space-md);
+  min-height: var(--mt-touch-target);
   font-size: var(--mt-font-size-small);
 }
 
@@ -158,36 +188,90 @@
   color: var(--mt-color-white);
 }
 
-/* Table Component */
-.mt-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+/* Mobile-First Table Component - Responsive Card Pattern */
+.mt-table-wrapper {
   background: var(--mt-color-white);
   border-radius: var(--mt-radius-sm);
   overflow: hidden;
   box-shadow: var(--mt-shadow-sm);
 }
 
-.mt-table th,
-.mt-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: var(--mt-border-width) solid var(--mt-border);
+.mt-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--mt-color-white);
+  display: none; /* Hidden on mobile by default */
 }
 
-.mt-table th {
-  background: var(--mt-color-gray-light);
+/* Mobile Card-Based Table */
+.mt-table-cards {
+  display: grid;
+  gap: var(--mt-space);
+  padding: var(--mt-space);
+}
+
+.mt-table-card {
+  background: var(--mt-color-white);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  padding: var(--mt-space);
+  box-shadow: var(--mt-shadow-sm);
+}
+
+.mt-table-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--mt-space-sm) 0;
+  border-bottom: 1px solid var(--mt-color-gray-light);
+}
+
+.mt-table-card__row:last-child {
+  border-bottom: none;
+}
+
+.mt-table-card__label {
   font-weight: 600;
+  color: var(--mt-color-gray-dark);
+  font-size: var(--mt-font-size-small);
+}
+
+.mt-table-card__value {
+  font-weight: 500;
   color: var(--mt-text);
 }
 
-.mt-table tbody tr:hover {
-  background: rgba(var(--mt-color-primary), 0.05);
-}
+/* Show table on larger screens */
+@media (min-width: 768px) {
+  .mt-table-cards {
+    display: none;
+  }
+  
+  .mt-table {
+    display: table;
+  }
+  
+  .mt-table th,
+  .mt-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: var(--mt-border-width) solid var(--mt-border);
+  }
 
-.mt-table tbody tr:last-child td {
-  border-bottom: none;
+  .mt-table th {
+    background: var(--mt-color-gray-light);
+    font-weight: 600;
+    color: var(--mt-text);
+  }
+
+  .mt-table tbody tr:hover {
+    background: rgba(38, 166, 154, 0.05);
+  }
+
+  .mt-table tbody tr:last-child td {
+    border-bottom: none;
+  }
 }
 
 /* Progress Bar */
@@ -208,7 +292,7 @@
 
 /* Alert Component */
 .mt-alert {
-  padding: var(--mt-space-md);
+  padding: var(--mt-space);
   border-radius: var(--mt-radius-sm);
   border: var(--mt-border-width) solid;
   margin-bottom: var(--mt-space);
@@ -236,4 +320,43 @@
   background: rgba(244, 67, 54, 0.1);
   border-color: var(--mt-color-error);
   color: #c62828;
+}
+
+/* Mobile Form Controls */
+.mt-input,
+.mt-select,
+.mt-textarea {
+  width: 100%;
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  font-size: var(--mt-font-size-base);
+  background: var(--mt-color-white);
+  transition: var(--mt-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.mt-input:focus,
+.mt-select:focus,
+.mt-textarea:focus {
+  outline: none;
+  border-color: var(--mt-color-primary);
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+/* Mobile Search Bar */
+.mt-search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mt-space);
+  margin-bottom: var(--mt-space-lg);
+}
+
+@media (min-width: 768px) {
+  .mt-search-bar {
+    flex-direction: row;
+    align-items: center;
+  }
 }

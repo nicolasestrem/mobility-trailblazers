@@ -26,25 +26,38 @@
   --mt-color-gray-medium: #9e9e9e;
   --mt-color-gray-dark: #616161;
   
-  /* Typography */
+  /* Typography - Mobile-First Fluid Scaling */
   --mt-font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --mt-font-headings: "Poppins", var(--mt-font-family);
-  --mt-font-size-base: 16px;
-  --mt-font-size-small: 0.875rem;
-  --mt-font-size-large: 1.125rem;
-  --mt-font-size-h1: 2rem;
-  --mt-font-size-h2: 1.5rem;
-  --mt-font-size-h3: 1.25rem;
+  --mt-font-size-base: clamp(14px, 3.5vw, 16px);
+  --mt-font-size-small: clamp(12px, 3vw, 14px);
+  --mt-font-size-large: clamp(16px, 4vw, 18px);
+  --mt-font-size-h1: clamp(24px, 6vw, 32px);
+  --mt-font-size-h2: clamp(20px, 5vw, 24px);
+  --mt-font-size-h3: clamp(18px, 4.5vw, 20px);
   --mt-line-height: 1.5;
   
-  /* Spacing */
-  --mt-space-xs: 4px;
-  --mt-space-sm: 8px;
-  --mt-space-md: 16px;
-  --mt-space: 20px;
-  --mt-space-lg: 24px;
-  --mt-space-xl: 32px;
-  --mt-space-2xl: 48px;
+  /* Mobile-First Spacing System */
+  --mt-space-xs: clamp(4px, 1vw, 6px);
+  --mt-space-sm: clamp(8px, 2vw, 12px);
+  --mt-space-md: clamp(12px, 3vw, 16px);
+  --mt-space: clamp(16px, 4vw, 20px);
+  --mt-space-lg: clamp(20px, 5vw, 24px);
+  --mt-space-xl: clamp(24px, 6vw, 32px);
+  --mt-space-2xl: clamp(32px, 8vw, 48px);
+  
+  /* Mobile Breakpoints */
+  --mt-mobile-xs: 320px;
+  --mt-mobile-sm: 375px;
+  --mt-mobile-md: 414px;
+  --mt-tablet: 768px;
+  --mt-desktop-sm: 1024px;
+  --mt-desktop: 1200px;
+  
+  /* Touch-Friendly Sizing */
+  --mt-touch-target: 44px;
+  --mt-touch-target-large: 48px;
+  --mt-touch-padding: 12px;
   
   /* Layout */
   --mt-container-max: 1200px;

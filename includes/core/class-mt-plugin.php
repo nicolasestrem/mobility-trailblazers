@@ -323,6 +323,12 @@ class MT_Plugin {
                 $public_assets = new \MobilityTrailblazers\Public\MT_Public_Assets();
                 $public_assets->init();
             }
+            
+            // Load mobile-specific styles injector
+            if (file_exists(MT_PLUGIN_DIR . 'includes/public/class-mt-mobile-styles.php')) {
+                require_once MT_PLUGIN_DIR . 'includes/public/class-mt-mobile-styles.php';
+                // The class self-initializes via the init hook
+            }
         }
         
         // Initialize Elementor integration
