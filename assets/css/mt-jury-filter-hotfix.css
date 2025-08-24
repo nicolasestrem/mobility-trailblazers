@@ -1,0 +1,30 @@
+/**
+ * Jury Dashboard Filter Hotfix
+ * Fixes the visibility issue with candidate card filtering
+ * 
+ * @package MobilityTrailblazers
+ * @version 2.5.41
+ * @date 2025-08-24
+ */
+
+/* Override the display: block !important that's preventing jQuery hide() from working */
+/* This selector matches when jQuery adds inline style="display: none" */
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card[style*="display: none"] {
+    display: none !important;
+}
+
+/* Also handle the hidden class that jQuery adds */
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card.hidden {
+    display: none !important;
+}
+
+/* Ensure visible cards are shown when not hidden */
+body .mt-jury-dashboard .mt-candidates-list .mt-candidate-card:not(.hidden):not([style*="display: none"]) {
+    display: block !important;
+}
+
+/* Extra specificity for filter states */
+body .mt-jury-dashboard .mt-candidates-v3 .mt-candidate-card[style*="display: none"],
+body .mt-jury-dashboard .mt-candidates-grid .mt-candidate-card[style*="display: none"] {
+    display: none !important;
+}
