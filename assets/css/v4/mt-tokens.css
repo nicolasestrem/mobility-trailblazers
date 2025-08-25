@@ -195,6 +195,25 @@
   --mt-color-gray-light: var(--mt-gray-100);
   --mt-color-gray-medium: var(--mt-gray-500);
   --mt-color-gray-dark: var(--mt-gray-700);
+  
+  /* Container and layout tokens for responsive design */
+  --mt-container-fluid: min(90vw, var(--mt-container-max));
+  --mt-container-padding: clamp(var(--mt-space-4), 5vw, var(--mt-space-8));
+  
+  /* Enhanced accessibility tokens */
+  --mt-focus-width: 2px;
+  --mt-focus-offset: 2px;
+  --mt-focus-ring-enhanced: 0 0 0 var(--mt-focus-width) var(--mt-color-secondary), 0 0 0 calc(var(--mt-focus-width) + var(--mt-focus-offset)) var(--mt-white);
+  
+  /* Print media tokens */
+  --mt-print-bg: var(--mt-white);
+  --mt-print-text: var(--mt-black);
+  --mt-print-border: var(--mt-gray-400);
+  
+  /* High contrast mode support */
+  --mt-high-contrast-bg: Canvas;
+  --mt-high-contrast-text: CanvasText;
+  --mt-high-contrast-link: LinkText;
 }
 
 /* Optional dark theme hook (disabled by default) */
@@ -214,5 +233,58 @@
 html { background: var(--mt-color-bg); }
 body { color: var(--mt-color-text); font-family: var(--mt-font-sans); }
 
-/* Focus ring utility */
-.mt-focus-ring:focus { outline: none; box-shadow: var(--mt-focus-ring); }
+/* Focus ring utilities */
+.mt-focus-ring:focus { 
+  outline: none; 
+  box-shadow: var(--mt-focus-ring); 
+}
+
+.mt-focus-ring-enhanced:focus { 
+  outline: none; 
+  box-shadow: var(--mt-focus-ring-enhanced); 
+}
+
+/* Token-based utility classes */
+.mt-surface { background: var(--mt-color-surface); }
+.mt-bg { background: var(--mt-color-bg); }
+.mt-text { color: var(--mt-color-text); }
+.mt-text-muted { color: var(--mt-color-muted); }
+
+.mt-radius { border-radius: var(--mt-radius-md); }
+.mt-radius-sm { border-radius: var(--mt-radius-sm); }
+.mt-radius-lg { border-radius: var(--mt-radius-lg); }
+
+.mt-shadow { box-shadow: var(--mt-shadow-md); }
+.mt-shadow-sm { box-shadow: var(--mt-shadow-sm); }
+.mt-shadow-lg { box-shadow: var(--mt-shadow-lg); }
+
+.mt-transition { transition: var(--mt-transition); }
+.mt-transition-fast { transition: var(--mt-transition-fast); }
+
+/* Responsive container utilities */
+.mt-container { 
+  max-width: var(--mt-container-max); 
+  margin: 0 auto; 
+  padding: 0 var(--mt-container-padding); 
+}
+
+.mt-container-fluid { 
+  width: var(--mt-container-fluid); 
+  margin: 0 auto; 
+}
+
+/* Print styles */
+@media print {
+  .mt-print-hide { display: none; }
+  .mt-print-bg { background: var(--mt-print-bg); }
+  .mt-print-text { color: var(--mt-print-text); }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  :root {
+    --mt-color-bg: var(--mt-high-contrast-bg);
+    --mt-color-text: var(--mt-high-contrast-text);
+    --mt-link-color: var(--mt-high-contrast-link);
+  }
+}

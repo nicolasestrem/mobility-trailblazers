@@ -1,7 +1,5 @@
 /* Mobility Trailblazers Jury Dashboard - CSS v4 Token Implementation */
-
-/* Import CSS v4 tokens */
-@import url('v4/mt-tokens.css');
+/* Note: CSS v4 tokens are now imported globally via mt-core.css */
 
 /* ========================================
    JURY DASHBOARD MAIN CONTAINER

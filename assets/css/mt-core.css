@@ -2,13 +2,18 @@
    MOBILITY TRAILBLAZERS CSS v3.0
    CONSOLIDATED FROM 57 FILES â†’ 5 FILES
    ============================================ */
+/* Import comprehensive v4 token system */
+@import url('v4/mt-tokens.css');
+
 /**
  * Mobility Trailblazers v4 CSS Framework
- * Unified Token System - CSS Custom Properties
+ * Core Framework Styles
  * Version: 4.1.0
  * Updated: Phase 2 Framework Migration
+ * Note: Tokens are now imported from v4/mt-tokens.css
  */
 
+/* Legacy token definitions below are kept for compatibility but will be overridden by v4 imports */
 :root {
   /* ==========================================
      COLORS - Single source of truth
