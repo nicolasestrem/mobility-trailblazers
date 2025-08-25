@@ -95,7 +95,7 @@
 .mt-candidate-hero-photo,
 .mt-candidate-photo,
 .mt-candidate-image img {
-    object-position: center 30% !important; /* Move focus point up to show faces better */
+    object-position: center 30%; /* Move focus point up to show faces better */
 }
 
 /* ===================================
@@ -106,14 +106,14 @@
 body.postid-4627 .mt-candidate-hero-photo,
 body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
 .candidate-friedrich-draexlmaier .mt-candidate-hero-photo {
-    object-position: center 25% !important; /* Adjust to show face properly */
+    object-position: center 25%; /* Adjust to show face properly */
 }
 
 /* Alternative selector for candidate grid - targeting the img directly */
 [data-candidate-id="4627"] .mt-candidate-photo,
 [data-candidate-id="4627"] .mt-candidate-image img,
 [data-candidate-id="4627"] img.mt-candidate-photo {
-    object-position: center 25% !important;
+    object-position: center 25%;
 }
 
 /* Candidate cards on grid view - all possible selectors */
@@ -123,7 +123,7 @@ body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
 .mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-photo,
 .mt-candidate-grid-item a[href*="friedrich-draexlmaier"] .mt-candidate-image img,
 .mt-candidate-grid-item a[href*="friedrich-draexlmaier"] img.mt-candidate-photo {
-    object-position: center 25% !important;
+    object-position: center 25%;
 }
 
 /* ===================================
@@ -135,13 +135,13 @@ body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
     .mt-candidate-hero-photo,
     .mt-candidate-photo,
     .mt-candidate-image img {
-        object-position: center 35% !important;
+        object-position: center 35%;
     }
     
     body.postid-4627 .mt-candidate-hero-photo,
     body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
     .candidate-friedrich-draexlmaier .mt-candidate-hero-photo {
-        object-position: center 30% !important;
+        object-position: center 30%;
     }
 }
 
@@ -154,7 +154,7 @@ body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
 .mt-candidates-grid .mt-candidate-image img,
 .mt-candidate-card .mt-candidate-photo,
 .mt-candidate-card .mt-candidate-image img {
-    object-position: center 30% !important; /* Better default for face visibility */
+    object-position: center 30%; /* Better default for face visibility */
 }
 
 /* Specific fix for Friedrich Dräxlmaier on candidate grid - more specific selectors */
@@ -164,8 +164,8 @@ body[class*="friedrich-draexlmaier"] .mt-candidate-hero-photo,
 article.post-4627 .mt-candidate-image img,
 article.post-4627 img.mt-candidate-photo,
 .type-mt_candidate.post-4627 img {
-    object-position: center 20% !important; /* Show face properly */
-    object-fit: cover !important;
+    object-position: center 20%; /* Show face properly */
+    object-fit: cover;
 }
 
 /* ===================================
@@ -177,8 +177,8 @@ article.post-4627 img.mt-candidate-photo,
 .elementor-widget-mt_candidates_grid .mt-candidate-image img,
 .elementor-widget .mt-candidates-grid .mt-candidate-photo,
 .elementor-widget .mt-candidates-grid .mt-candidate-image img {
-    object-position: center 30% !important;
-    object-fit: cover !important;
+    object-position: center 30%;
+    object-fit: cover;
 }
 
 /* Friedrich Dräxlmaier fix for Elementor widget - Issue #13 */
@@ -190,8 +190,8 @@ article.post-4627 img.mt-candidate-photo,
 .elementor-widget .mt-candidate-grid-item[data-candidate-id="4627"] img,
 .elementor .mt-candidate-grid-item[data-candidate-id="4627"] img,
 .elementor .mt-candidates-grid [data-candidate-id="4627"] img {
-    object-position: center 20% !important;
-    object-fit: cover !important;
+    object-position: center 20%;
+    object-fit: cover;
 }
 
 /* ===================================
@@ -204,31 +204,31 @@ article.post-4627 img.mt-candidate-photo,
 [data-candidate-id="4627"] .mt-candidate-image img,
 .mt-candidate-grid-item[data-candidate-id="4627"] img.mt-candidate-photo,
 .mt-candidate-grid-item[data-candidate-id="4627"] img.wp-post-image {
-    object-position: center 15% !important;
-    object-fit: cover !important;
-    width: 100% !important;
-    height: 100% !important;
+    object-position: center 15%;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
 /* Container fix for the image wrapper */
 [data-candidate-id="4627"] .mt-candidate-image,
 .mt-candidate-grid-item[data-candidate-id="4627"] .mt-candidate-image {
-    overflow: hidden !important;
-    position: relative !important;
-    width: 100% !important;
-    padding-bottom: 75% !important; /* 4:3 aspect ratio */
-    height: 0 !important;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    padding-bottom: 75%; /* 4:3 aspect ratio */
+    height: 0;
 }
 
 [data-candidate-id="4627"] .mt-candidate-image img,
 .mt-candidate-grid-item[data-candidate-id="4627"] .mt-candidate-image img {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-position: center 15% !important;
-    object-fit: cover !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-position: center 15%;
+    object-fit: cover;
 }
 
 /* ===================================
@@ -239,7 +239,7 @@ article.post-4627 img.mt-candidate-photo,
     .mt-candidate-hero-photo,
     .mt-candidate-photo,
     .mt-candidate-image img {
-        object-position: center center !important; /* Reset for print */
+        object-position: center center; /* Reset for print */
     }
 }
 
@@ -275,19 +275,19 @@ article.post-4627 img.mt-candidate-photo,
 /* CRITICAL: Make sure active/selected buttons are visually distinct */
 .mt-button-group .mt-score-button.active,
 .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
-    color: white !important;
-    border-color: #dc3545 !important;
-    font-weight: bold !important;
-    transform: scale(1.1) !important;
-    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+    font-weight: bold;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 /* Ensure the selected state persists */
 .mt-criterion-card .mt-button-group .mt-score-button.active,
 .mt-criterion-card .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
-    color: white !important;
+    background: #dc3545;
+    color: white;
     position: relative;
     z-index: 10;
 }
@@ -305,27 +305,27 @@ article.post-4627 img.mt-candidate-photo,
 /* Make sure each criterion's buttons are independent */
 .mt-criterion-card:nth-child(1) .mt-button-group .mt-score-button.active,
 .mt-criterion-card:nth-child(1) .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
+    background: #dc3545;
 }
 
 .mt-criterion-card:nth-child(2) .mt-button-group .mt-score-button.active,
 .mt-criterion-card:nth-child(2) .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
+    background: #dc3545;
 }
 
 .mt-criterion-card:nth-child(3) .mt-button-group .mt-score-button.active,
 .mt-criterion-card:nth-child(3) .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
+    background: #dc3545;
 }
 
 .mt-criterion-card:nth-child(4) .mt-button-group .mt-score-button.active,
 .mt-criterion-card:nth-child(4) .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
+    background: #dc3545;
 }
 
 .mt-criterion-card:nth-child(5) .mt-button-group .mt-score-button.active,
 .mt-criterion-card:nth-child(5) .mt-button-group .mt-score-button.selected {
-    background: #dc3545 !important;
+    background: #dc3545;
 }
 
 
@@ -364,146 +364,146 @@ body.debug-mode .mt-button-group .mt-score-button.selected::after {
 
 /* Position language switcher in a less intrusive spot */
 .mt-language-switcher {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    z-index: 999 !important;
-    margin: 0 !important;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    margin: 0;
 }
 
 /* Subtle but visible toggle button */
 .mt-language-switcher-toggle {
-    background: rgba(255, 255, 255, 0.95) !important;
-    color: #004C5F !important;
-    border: 2px solid #004C5F !important;
-    padding: 10px 16px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 2px 8px rgba(0, 76, 95, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    transition: all 0.3s ease !important;
+    background: rgba(255, 255, 255, 0.95);
+    color: #004C5F;
+    border: 2px solid #004C5F;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 76, 95, 0.15);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 /* Remove pulse animation - too distracting */
 .mt-language-switcher-toggle {
-    animation: none !important;
+    animation: none;
 }
 
 /* Subtle hover state */
 .mt-language-switcher-toggle:hover {
-    background: #004C5F !important;
-    color: white !important;
-    border-color: #004C5F !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(0, 76, 95, 0.25) !important;
+    background: #004C5F;
+    color: white;
+    border-color: #004C5F;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 76, 95, 0.25);
 }
 
 /* Normal-sized flag icons */
 .mt-language-switcher-flag {
-    font-size: 18px !important;
-    filter: none !important;
+    font-size: 18px;
+    filter: none;
 }
 
 /* Arrow indicator subtle */
 .mt-language-switcher-arrow {
-    color: inherit !important;
-    font-size: 10px !important;
-    font-weight: normal !important;
+    color: inherit;
+    font-size: 10px;
+    font-weight: normal;
 }
 
 /* Enhanced dropdown styling */
 .mt-language-switcher-dropdown {
-    background: white !important;
-    border: 1px solid #e0e0e0 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-    min-width: 180px !important;
+    background: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
 }
 
 /* Option hover state enhancement */
 .mt-language-switcher-option:hover {
-    background: #f5f5f5 !important;
-    padding-left: 22px !important;
-    font-weight: normal !important;
+    background: #f5f5f5;
+    padding-left: 22px;
+    font-weight: normal;
 }
 
 /* Active language indication */
 .mt-language-switcher-option.active {
-    background: #f8f8f8 !important;
-    border-left: 3px solid #004C5F !important;
-    font-weight: 600 !important;
+    background: #f8f8f8;
+    border-left: 3px solid #004C5F;
+    font-weight: 600;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     .mt-language-switcher {
-        top: 10px !important;
-        right: 10px !important;
+        top: 10px;
+        right: 10px;
     }
     
     .mt-language-switcher-toggle {
-        padding: 8px 14px !important;
-        font-size: 13px !important;
+        padding: 8px 14px;
+        font-size: 13px;
     }
     
     .mt-language-switcher-flag {
-        font-size: 16px !important;
+        font-size: 16px;
     }
 }
 
 /* Inline switcher - keep it simple */
 .mt-language-switcher-inline {
-    padding: 12px !important;
-    background: #f9f9f9 !important;
-    border-radius: 8px !important;
-    border: 1px solid #e0e0e0 !important;
-    box-shadow: none !important;
-    margin: 15px 0 !important;
+    padding: 12px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: none;
+    margin: 15px 0;
 }
 
 .mt-language-switcher-inline .mt-language-option {
-    background: white !important;
-    border: 1px solid #d0d0d0 !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    padding: 8px 14px !important;
+    background: white;
+    border: 1px solid #d0d0d0;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 8px 14px;
 }
 
 .mt-language-switcher-inline .mt-language-option:hover {
-    background: #004C5F !important;
-    color: white !important;
-    border-color: #004C5F !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 6px rgba(0, 76, 95, 0.2) !important;
+    background: #004C5F;
+    color: white;
+    border-color: #004C5F;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 76, 95, 0.2);
 }
 
 .mt-language-switcher-inline .mt-language-option.current {
-    background: #004C5F !important;
-    color: white !important;
-    border-color: #004C5F !important;
+    background: #004C5F;
+    color: white;
+    border-color: #004C5F;
 }
 
 /* Remove distracting decorative elements */
 .mt-language-switcher::before {
-    display: none !important;
+    display: none;
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .mt-language-switcher-toggle {
-        border-width: 4px !important;
-        font-weight: 900 !important;
+        border-width: 4px;
+        font-weight: 900;
     }
     
     .mt-language-switcher-dropdown {
-        border-width: 4px !important;
+        border-width: 4px;
     }
 }
 
 /* Print styles - hide on print */
 @media print {
     .mt-language-switcher {
-        display: none !important;
+        display: none;
     }
 }
 
@@ -522,31 +522,31 @@ body.debug-mode .mt-button-group .mt-score-button.selected::after {
 
 /* Fix viewport and zoom issues */
 .mt-jury-dashboard {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* Fix card height and overflow issues */
 .mt-candidate-card:not(.hidden) {
-    min-height: auto !important;
-    height: auto !important;
-    overflow: visible !important;
+    min-height: auto;
+    height: auto;
+    overflow: visible;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
 }
 
 /* Ensure hidden cards are actually hidden */
 .mt-candidate-card.hidden {
-    display: none !important;
+    display: none;
 }
 
 .mt-candidate-header {
     flex-shrink: 0;
-    overflow: visible !important;
-    min-height: auto !important;
+    overflow: visible;
+    min-height: auto;
 }
 
 .mt-candidate-body {
@@ -554,30 +554,30 @@ body.debug-mode .mt-button-group .mt-score-button.selected::after {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-height: auto !important;
-    overflow: visible !important;
+    min-height: auto;
+    overflow: visible;
 }
 
 /* Ensure evaluation status is visible */
 .mt-evaluation-status {
-    margin: 15px 0 !important;
-    overflow: visible !important;
-    min-height: 45px !important;
-    display: block !important;
-    width: 100% !important;
+    margin: 15px 0;
+    overflow: visible;
+    min-height: 45px;
+    display: block;
+    width: 100%;
     text-align: center;
 }
 
 .mt-status-badge {
-    display: inline-block !important;
+    display: inline-block;
     white-space: nowrap;
-    padding: 8px 18px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    line-height: 1.4 !important;
-    vertical-align: middle !important;
+    line-height: 1.4;
+    vertical-align: middle;
 }
 
 /* Ensure evaluate button is visible */
@@ -595,172 +595,172 @@ body.debug-mode .mt-button-group .mt-score-button.selected::after {
 
 /* Ensure proper spacing */
 .mt-candidate-name {
-    margin-bottom: 5px !important;
-    overflow: visible !important;
+    margin-bottom: 5px;
+    overflow: visible;
 }
 
 .mt-candidate-org {
-    margin-bottom: 0 !important;
-    overflow: visible !important;
+    margin-bottom: 0;
+    overflow: visible;
 }
 
 /* Grid adjustments to prevent overlap */
 .mt-candidates-grid {
-    gap: 30px !important;
+    gap: 30px;
 }
 
 /* Ensure cards expand to content */
 .mt-candidates-grid .mt-candidate-card {
-    height: auto !important;
+    height: auto;
     min-height: 320px;
 }
 
 /* Responsive viewport fixes */
 @media screen and (max-width: 1920px) {
     .mt-jury-dashboard {
-        padding: 30px !important;
+        padding: 30px;
     }
     
     .mt-dashboard-header {
-        padding: 30px !important;
+        padding: 30px;
     }
     
     .mt-stats-grid {
-        grid-template-columns: repeat(3, minmax(150px, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
     }
     
     .mt-candidates-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 }
 
 /* Fix for standard desktop viewports */
 @media screen and (min-width: 1024px) and (max-width: 1440px) {
     .mt-jury-dashboard {
-        padding: 25px !important;
-        margin: 15px auto !important;
+        padding: 25px;
+        margin: 15px auto;
     }
     
     .mt-candidates-list {
-        gap: 20px !important;
+        gap: 20px;
     }
     
     .mt-stat-card {
-        padding: 20px !important;
+        padding: 20px;
     }
 }
 
 /* Ensure content fits at 100% zoom */
 html {
-    overflow-x: hidden !important;
+    overflow-x: hidden;
 }
 
 body .mt-jury-dashboard * {
-    max-width: 100% !important;
-    word-wrap: break-word !important;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 /* Fix table overflow at 100% zoom */
 .mt-evaluation-table-wrap {
-    overflow-x: auto !important;
-    max-width: 100% !important;
+    overflow-x: auto;
+    max-width: 100%;
 }
 
 .mt-evaluation-table {
-    min-width: auto !important;
-    width: 100% !important;
+    min-width: auto;
+    width: 100%;
 }
 
 /* Mobile-specific fixes for candidate display */
 @media screen and (max-width: 768px) {
     /* Ensure candidates list is always visible on mobile */
     .mt-jury-dashboard .mt-candidates-list {
-        display: grid !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
-        gap: 15px !important;
-        padding: 10px 0 !important;
+        display: grid;
+        visibility: visible;
+        opacity: 1;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 15px;
+        padding: 10px 0;
     }
     
     /* Force candidate cards to be visible - COMMENTED OUT as it interferes with filtering */
     /* .mt-jury-dashboard .mt-candidate-card {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: relative !important;
-        transform: none !important;
-        margin: 0 !important;
-        width: 100% !important;
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        position: relative;
+        transform: none;
+        margin: 0;
+        width: 100%;
     } */
     
     /* Allow cards to be hidden by JavaScript filters */
     .mt-jury-dashboard .mt-candidate-card.hidden {
-        display: none !important;
+        display: none;
     }
     
     /* Ensure cards content is visible */
     .mt-candidate-header,
     .mt-candidate-body {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
+        visibility: visible;
+        opacity: 1;
+        display: block;
     }
     
     /* Fix search and filter controls */
     .mt-search-filters {
-        margin-bottom: 20px !important;
+        margin-bottom: 20px;
     }
     
     .mt-search-box {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 10px !important;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
     
     .mt-search-input,
     .mt-filter-select {
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 100%;
+        max-width: 100%;
     }
 }
 
 /* Small mobile devices */
 @media screen and (max-width: 480px) {
     .mt-jury-dashboard .mt-candidates-list {
-        grid-template-columns: 1fr !important;
-        padding: 10px 0 !important;
+        grid-template-columns: 1fr;
+        padding: 10px 0;
     }
     
     .mt-jury-dashboard .mt-candidate-card {
-        margin-bottom: 10px !important;
+        margin-bottom: 10px;
     }
     
     /* Ensure stats grid is responsive */
     .mt-stats-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
     
     /* Optimize card spacing on small screens */
     .mt-candidate-header {
-        padding: 12px !important;
+        padding: 12px;
     }
     
     .mt-candidate-body {
-        padding: 12px !important;
+        padding: 12px;
     }
 }
 
 /* Fix for iOS Safari specific issues */
 @supports (-webkit-overflow-scrolling: touch) {
     .mt-jury-dashboard {
-        -webkit-overflow-scrolling: touch !important;
+        -webkit-overflow-scrolling: touch;
     }
     
     .mt-candidates-list {
-        -webkit-transform: translateZ(0) !important;
-        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
     }
 }
 
@@ -779,53 +779,53 @@ body .mt-jury-dashboard * {
 .mt-criterion-description,
 body .mt-criterion-description,
 .mt-criteria-grid .mt-criterion-description {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    font-size: 14px !important;
-    color: #6c757d !important;
-    margin-top: 5px !important;
-    line-height: 1.5 !important;
-    font-weight: normal !important;
-    font-style: normal !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-    min-height: 0 !important;
-    position: static !important;
-    z-index: auto !important;
-    clip: auto !important;
-    clip-path: none !important;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 5px;
+    line-height: 1.5;
+    font-weight: normal;
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    overflow: visible;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    position: static;
+    z-index: auto;
+    clip: auto;
+    clip-path: none;
 }
 
 /* Ensure parent containers don't hide children */
 .mt-criterion-info,
 .mt-criterion-header,
 .mt-criterion-card {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 /* Additional specificity to override any conflicting styles */
 #mt-evaluation-form .mt-criterion-description,
 .mt-evaluation-page .mt-criterion-description,
 .mt-form-cards .mt-criterion-description {
-    display: block !important;
-    visibility: visible !important;
+    display: block;
+    visibility: visible;
 }
 
 /* Ensure the text is readable */
 .mt-criterion-description::before,
 .mt-criterion-description::after {
-    content: none !important;
+    content: none;
 }
 
 /* CRITICAL FIX 2: Ensure German text is properly displayed */
 body[lang="de-DE"] .mt-criterion-description,
 html[lang="de-DE"] .mt-criterion-description {
-    display: block !important;
-    visibility: visible !important;
+    display: block;
+    visibility: visible;
 }
 
 /* ===================================
@@ -843,33 +843,33 @@ html[lang="de-DE"] .mt-criterion-description {
 .mt-candidates-v3 .mt-candidate-card:not(.hidden),
 .mt-dashboard-v3 .mt-candidate-card:not(.hidden) {
     /* Preserve v3 variables */
-    background: var(--mt-v3-card-bg, #FFFFFF) !important;
-    border: 1px solid var(--mt-v3-border-soft, #E8DCC9) !important;
-    border-radius: var(--mt-v3-radius, 16px) !important;
-    box-shadow: var(--mt-v3-shadow, 0 2px 10px rgba(0, 0, 0, 0.07)) !important;
-    padding: var(--mt-v3-space-lg, 24px) !important;
+    background: var(--mt-v3-card-bg, #FFFFFF);
+    border: 1px solid var(--mt-v3-border-soft, #E8DCC9);
+    border-radius: var(--mt-v3-radius, 16px);
+    box-shadow: var(--mt-v3-shadow, 0 2px 10px rgba(0, 0, 0, 0.07));
+    padding: var(--mt-v3-space-lg, 24px);
     
     /* Override hotfix display properties */
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 280px !important;
-    height: auto !important;
-    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    height: auto;
+    overflow: visible;
 }
 
 /* Ensure v3 grid layout is preserved */
 .mt-candidates-v3.mt-candidates-grid,
 .mt-candidates-v3.mt-candidates-list {
-    display: grid !important;
-    gap: var(--mt-v3-space-lg, 24px) !important;
+    display: grid;
+    gap: var(--mt-v3-space-lg, 24px);
 }
 
 /* Override specific mobile fixes that break v3 */
 @media screen and (max-width: 768px) {
     .mt-dashboard-v3 .mt-candidates-v3 .mt-candidate-card:not(.hidden) {
         /* Preserve v3 mobile styling */
-        display: flex !important;
-        width: 100% !important;
+        display: flex;
+        width: 100%;
     }
 }
 
@@ -889,87 +889,87 @@ html[lang="de-DE"] .mt-criterion-description {
 .mt-dashboard-v3 .mt-candidate-card:not(.hidden),
 .mt-candidates-v3 .mt-candidate-card:not(.hidden) {
     /* Let v3 CSS handle the card styling completely */
-    min-height: 280px !important; /* Match v3 spec */
-    height: auto !important;
-    overflow: hidden !important; /* Match v3 spec */
-    display: flex !important; /* Match v3 spec */
-    flex-direction: column !important; /* Match v3 spec */
-    background: var(--mt-v3-card-bg) !important; /* Use v3 variables */
-    border: 1px solid var(--mt-v3-border-soft) !important;
-    border-radius: var(--mt-v3-radius) !important;
-    box-shadow: var(--mt-v3-shadow) !important;
-    padding: var(--mt-v3-space-lg) !important;
+    min-height: 280px; /* Match v3 spec */
+    height: auto;
+    overflow: hidden; /* Match v3 spec */
+    display: flex; /* Match v3 spec */
+    flex-direction: column; /* Match v3 spec */
+    background: var(--mt-v3-card-bg); /* Use v3 variables */
+    border: 1px solid var(--mt-v3-border-soft);
+    border-radius: var(--mt-v3-radius);
+    box-shadow: var(--mt-v3-shadow);
+    padding: var(--mt-v3-space-lg);
 }
 
 /* Ensure v3 grid layout is preserved */
 .mt-candidates-v3 {
     /* Override any conflicting grid rules */
-    display: grid !important;
-    gap: var(--mt-v3-space-lg) !important;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    display: grid;
+    gap: var(--mt-v3-space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 /* Reset header styling for v3 */
 .mt-dashboard-v3 .mt-candidate-header,
 .mt-candidates-v3 .mt-candidate-header {
-    border-bottom: 2px solid var(--mt-v3-border-soft) !important;
-    padding-bottom: var(--mt-v3-space-md) !important;
-    margin-bottom: var(--mt-v3-space-md) !important;
-    flex-shrink: 0 !important;
-    overflow: visible !important;
+    border-bottom: 2px solid var(--mt-v3-border-soft);
+    padding-bottom: var(--mt-v3-space-md);
+    margin-bottom: var(--mt-v3-space-md);
+    flex-shrink: 0;
+    overflow: visible;
 }
 
 /* Reset body styling for v3 */
 .mt-dashboard-v3 .mt-candidate-body,
 .mt-candidates-v3 .mt-candidate-body {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: var(--mt-v3-space-md) !important;
-    min-height: auto !important;
-    overflow: visible !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--mt-v3-space-md);
+    min-height: auto;
+    overflow: visible;
 }
 
 /* Ensure evaluation status styling is preserved in v3 */
 .mt-dashboard-v3 .mt-evaluation-status,
 .mt-candidates-v3 .mt-evaluation-status {
-    margin: auto 0 var(--mt-v3-space-md) 0 !important;
-    text-align: center !important;
-    overflow: visible !important;
-    min-height: 45px !important;
-    display: block !important;
-    width: 100% !important;
+    margin: auto 0 var(--mt-v3-space-md) 0;
+    text-align: center;
+    overflow: visible;
+    min-height: 45px;
+    display: block;
+    width: 100%;
 }
 
 /* Preserve v3 button styling */
 .mt-dashboard-v3 .mt-evaluate-btn,
 .mt-candidates-v3 .mt-evaluate-btn {
-    display: inline-block !important;
-    width: 100% !important;
-    padding: var(--mt-v3-space-md) !important;
-    background: linear-gradient(135deg, var(--mt-v3-primary), var(--mt-v3-secondary)) !important;
-    color: white !important;
-    text-align: center !important;
-    text-decoration: none !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    transition: var(--mt-v3-transition) !important;
-    box-shadow: 0 2px 4px rgba(0, 60, 61, 0.2) !important;
-    margin-top: auto !important;
-    white-space: nowrap !important;
+    display: inline-block;
+    width: 100%;
+    padding: var(--mt-v3-space-md);
+    background: linear-gradient(135deg, var(--mt-v3-primary), var(--mt-v3-secondary));
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: var(--mt-v3-transition);
+    box-shadow: 0 2px 4px rgba(0, 60, 61, 0.2);
+    margin-top: auto;
+    white-space: nowrap;
 }
 
 /* Responsive grid adjustments for v3 that don't conflict with hotfixes */
 @media screen and (max-width: 1023px) {
     .mt-candidates-v3 {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media screen and (max-width: 767px) {
     .mt-candidates-v3 {
-        grid-template-columns: 1fr !important;
-        padding: var(--mt-v3-space-md) !important;
+        grid-template-columns: 1fr;
+        padding: var(--mt-v3-space-md);
     }
 }
