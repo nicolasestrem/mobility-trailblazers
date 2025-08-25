@@ -55,20 +55,63 @@
   --mt-color-error: #d32f2f;
 
   /* 3) Typography */
-  --mt-font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  /* Font families for different levels */
+  --mt-font-primary: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mt-font-secondary: "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+  --mt-font-body: Roboto, Arial, Helvetica, sans-serif;
+  --mt-font-heading-alt: Cabin, "Helvetica Neue", Arial, sans-serif;
   --mt-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  
+  /* Legacy alias */
+  --mt-font-sans: var(--mt-font-primary);
 
-  /* Type scale (fluid) */
+  /* Desktop typography sizes (exact from JSON) */
+  --mt-fs-body: 18px;
+  --mt-fs-h1: 4em;        /* 64px at base 16px */
+  --mt-fs-h2: 3.2em;      /* 51.2px at base 16px */
+  --mt-fs-h3: 132px;      /* Exact from JSON */
+  --mt-fs-h4: 22px;
+  --mt-fs-h5: 137px;      /* Exact from JSON */
+  --mt-fs-h6: 121px;      /* Exact from JSON */
+  --mt-fs-accent: 28px;   /* Accent text style */
+  
+  /* Tablet typography (max-width: 1025px) */
+  --mt-fs-body-tablet: 14px;
+  --mt-fs-h1-tablet: 7vw;
+  --mt-fs-h2-tablet: 5vw;
+  
+  /* Mobile typography (max-width: 768px) */
+  --mt-fs-body-mobile: 18px;
+  --mt-fs-h1-mobile: 28px;
+  --mt-fs-h2-mobile: 40px;
+  --mt-fs-h4-mobile: 18px;
+  
+  /* Font weights */
+  --mt-fw-regular: 400;
+  --mt-fw-semibold: 600;
+  
+  /* Text transforms */
+  --mt-text-transform-h1: uppercase;
+  --mt-text-transform-h4: capitalize;
+  --mt-text-transform-accent: capitalize;
+  
+  /* Letter spacing */
+  --mt-letter-spacing-h1: -0.02em;
+  
+  /* Line heights */
+  --mt-leading-tight: 1.1;
+  --mt-leading-headings: 1.2;
+  --mt-leading-normal: 1.5;
+  --mt-leading-loose: 1.75;
+  --mt-leading-accent: 1;
+  
+  /* Legacy type scale (keep for backward compatibility) */
   --mt-fs-xs: clamp(0.78rem, 0.72rem + 0.20vw, 0.88rem);
   --mt-fs-sm: clamp(0.90rem, 0.84rem + 0.20vw, 1.00rem);
-  --mt-fs-base: clamp(1.00rem, 0.95rem + 0.25vw, 1.10rem);
+  --mt-fs-base: var(--mt-fs-body);
   --mt-fs-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.35rem);
   --mt-fs-xl: clamp(1.35rem, 1.20rem + 0.80vw, 1.90rem);
   --mt-fs-2xl: clamp(1.60rem, 1.40rem + 1.20vw, 2.40rem);
-
-  --mt-leading-tight: 1.2;
-  --mt-leading-normal: 1.5;
-  --mt-leading-loose: 1.75;
 
   /* 4) Spacing scale (4px baseline) */
   --mt-space-0: 0;
@@ -108,10 +151,10 @@
   --mt-animate: 220ms;
   --mt-animate-slow: 400ms;
 
-  /* 9) Breakpoints */
+  /* 9) Breakpoints (exact from requirements) */
   --mt-bp-sm: 480px;
-  --mt-bp-md: 768px;
-  --mt-bp-lg: 1024px;
+  --mt-bp-md: 768px;       /* Mobile breakpoint */
+  --mt-bp-lg: 1025px;      /* Tablet breakpoint (note: 1025px not 1024px) */
   --mt-bp-xl: 1280px;
 
   /* 10) Component defaults */
@@ -123,15 +166,28 @@
   --mt-card-shadow: var(--mt-shadow-md);
   --mt-card-padding: var(--mt-space-6);
 
-  /* Buttons */
-  --mt-button-radius: var(--mt-radius-2xl);
-  --mt-button-primary-bg: var(--mt-color-secondary);
-  --mt-button-primary-text: var(--mt-color-secondary-contrast);
-  --mt-button-primary-hover: #003b57; /* slightly darker than blue-800 */
-
-  --mt-button-accent-bg: var(--mt-color-accent);
-  --mt-button-accent-text: var(--mt-color-accent-contrast);
-  --mt-button-accent-hover: #a95530; /* darker copper */
+  /* Buttons (exact from requirements) */
+  --mt-button-radius: 10px;
+  --mt-button-text-color: var(--mt-teal-900);           /* #003C3D */
+  --mt-button-gradient-start: var(--mt-copper-600);     /* #C1693C */
+  --mt-button-gradient-end: rgba(0, 76, 95, 0.8);       /* #004C5FCC */
+  --mt-button-gradient-angle: 90deg;
+  --mt-button-gradient: linear-gradient(var(--mt-button-gradient-angle), var(--mt-button-gradient-start), var(--mt-button-gradient-end));
+  --mt-button-border: 1px solid rgba(2, 1, 1, 0);       /* Full transparency */
+  --mt-button-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  
+  /* Button hover states */
+  --mt-button-hover-bg: #B86F52;
+  --mt-button-hover-text: var(--mt-teal-900);           /* #003C3D */
+  --mt-button-hover-border: var(--mt-copper-600);       /* #C1693C */
+  
+  /* Legacy button tokens for backward compatibility */
+  --mt-button-primary-bg: var(--mt-button-gradient);
+  --mt-button-primary-text: var(--mt-button-text-color);
+  --mt-button-primary-hover: var(--mt-button-hover-bg);
+  --mt-button-accent-bg: var(--mt-button-gradient);
+  --mt-button-accent-text: var(--mt-button-text-color);
+  --mt-button-accent-hover: var(--mt-button-hover-bg);
 
   /* Inputs */
   --mt-input-bg: var(--mt-white);
@@ -229,9 +285,154 @@
 }
 */
 
-/* Minimal base application (safe to keep) */
-html { background: var(--mt-color-bg); }
-body { color: var(--mt-color-text); font-family: var(--mt-font-sans); }
+/* ============================================
+   Global Base Styles - Applied Everywhere
+   ============================================ */
+
+/* HTML & Body Foundation */
+html { 
+  background: var(--mt-color-bg);  /* #F8F0E3 */
+}
+
+body {
+  color: var(--mt-color-text);     /* #302C37 */
+  background-color: var(--mt-color-bg);  /* #F8F0E3 */
+  font-family: var(--mt-font-body);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-body);
+  line-height: var(--mt-leading-normal);
+}
+
+/* Typography - Global Heading Styles */
+h1, .h1 {
+  font-family: var(--mt-font-primary);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-h1);
+  text-transform: var(--mt-text-transform-h1);
+  line-height: var(--mt-leading-headings);
+  letter-spacing: var(--mt-letter-spacing-h1);
+}
+
+h2, .h2 {
+  font-family: var(--mt-font-secondary);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-h2);
+  line-height: var(--mt-leading-headings);
+}
+
+h3, .h3 {
+  font-family: var(--mt-font-secondary);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-h3);
+  line-height: var(--mt-leading-headings);
+}
+
+h4, .h4 {
+  font-family: var(--mt-font-heading-alt);
+  font-weight: var(--mt-fw-semibold);
+  font-size: var(--mt-fs-h4);
+  text-transform: var(--mt-text-transform-h4);
+  line-height: var(--mt-leading-headings);
+}
+
+h5, .h5 {
+  font-family: var(--mt-font-heading-alt);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-h5);
+  line-height: var(--mt-leading-headings);
+}
+
+h6, .h6 {
+  font-family: var(--mt-font-heading-alt);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-h6);
+  line-height: var(--mt-leading-headings);
+}
+
+/* Links - Global Styles */
+a {
+  color: var(--mt-copper-600);  /* #C1693C */
+  text-decoration: underline;
+  transition: var(--mt-transition);
+}
+
+a:hover,
+a:focus {
+  color: var(--mt-teal-900);    /* #003C3D */
+  text-decoration: none;
+}
+
+/* Buttons - Global Styles for ALL Button Elements */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.button,
+.mt-button,
+.wp-element-button,
+.wp-block-button__link,
+.elementor-button,
+.btn {
+  /* Typography */
+  color: var(--mt-button-text-color);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: var(--mt-leading-headings);
+  text-decoration: none;
+  
+  /* Background */
+  background: var(--mt-button-gradient);
+  
+  /* Border & Shape */
+  border: var(--mt-button-border);
+  border-radius: var(--mt-button-radius);
+  
+  /* Effects */
+  box-shadow: var(--mt-button-shadow);
+  transition: var(--mt-transition);
+  
+  /* Layout */
+  display: inline-block;
+  padding: 0.75em 1.5em;
+  cursor: pointer;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+.button:hover,
+.mt-button:hover,
+.wp-element-button:hover,
+.wp-block-button__link:hover,
+.elementor-button:hover,
+.btn:hover,
+button:focus,
+input[type="button"]:focus,
+input[type="submit"]:focus,
+input[type="reset"]:focus,
+.button:focus,
+.mt-button:focus,
+.wp-element-button:focus,
+.wp-block-button__link:focus,
+.elementor-button:focus,
+.btn:focus {
+  color: var(--mt-button-hover-text);
+  background: var(--mt-button-hover-bg);
+  border-color: var(--mt-button-hover-border);
+  box-shadow: var(--mt-shadow-md);
+}
+
+/* Accent Text Utility Class */
+.accent-text,
+.mt-accent-text {
+  font-family: var(--mt-font-body);
+  font-weight: var(--mt-fw-regular);
+  font-size: var(--mt-fs-accent);
+  text-transform: var(--mt-text-transform-accent);
+  line-height: var(--mt-leading-accent);
+}
 
 /* Focus ring utilities */
 .mt-focus-ring:focus { 
@@ -278,6 +479,59 @@ body { color: var(--mt-color-text); font-family: var(--mt-font-sans); }
   .mt-print-hide { display: none; }
   .mt-print-bg { background: var(--mt-print-bg); }
   .mt-print-text { color: var(--mt-print-text); }
+}
+
+/* ============================================
+   Media Queries - Responsive Typography
+   ============================================ */
+
+/* Tablet: max-width 1025px */
+@media (max-width: 1025px) {
+  body {
+    font-size: var(--mt-fs-body-tablet);
+  }
+  
+  h1, .h1 {
+    font-size: var(--mt-fs-h1-tablet);
+  }
+  
+  h2, .h2 {
+    font-size: var(--mt-fs-h2-tablet);
+  }
+}
+
+/* Mobile: max-width 768px */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--mt-fs-body-mobile);
+  }
+  
+  h1, .h1 {
+    font-size: var(--mt-fs-h1-mobile);
+    line-height: var(--mt-leading-tight);
+  }
+  
+  h2, .h2 {
+    font-size: var(--mt-fs-h2-mobile);
+  }
+  
+  h4, .h4 {
+    font-size: var(--mt-fs-h4-mobile);
+  }
+  
+  /* Adjust button padding for mobile */
+  button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  .button,
+  .mt-button,
+  .wp-element-button,
+  .wp-block-button__link,
+  .elementor-button,
+  .btn {
+    padding: 0.625em 1.25em;
+  }
 }
 
 /* High contrast support */

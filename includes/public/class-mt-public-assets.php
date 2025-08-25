@@ -4,6 +4,15 @@
  *
  * Handles conditional loading of CSS assets only on plugin-specific routes.
  * This class implements the v4 CSS framework that replaces the legacy CSS system.
+ * 
+ * CSS LOADING ORDER (Critical for v4 Token System):
+ * 1. mt-v4-tokens.css - Design tokens (MUST load first as single source of truth)
+ * 2. mt-critical.css - Critical above-fold styles
+ * 3. mt-core.css - Core framework styles  
+ * 4. mt-components.css - Component library
+ * 5. mt-brand-fixes.css - Brand-specific fixes
+ * 6. mt-mobile.css - Mobile-responsive styles
+ * 7. mt-specificity-layer.css - Cascade management
  *
  * @package MobilityTrailblazers
  * @since 4.0.0
@@ -200,20 +209,21 @@ class MT_Public_Assets {
         // Register all v4 styles first (WordPress best practice)
         $this->register_v4_styles();
         
-        // Enqueue styles in dependency order
-        wp_enqueue_style('mt-critical');
-        wp_enqueue_style('mt-core');
-        wp_enqueue_style('mt-components');
-        wp_enqueue_style('mt-brand-fixes');
+        // Enqueue styles in dependency order - v4 tokens MUST load first
+        wp_enqueue_style('mt-v4-tokens');      // FIRST: Design token system
+        wp_enqueue_style('mt-critical');       // Critical above-fold styles
+        wp_enqueue_style('mt-core');          // Core framework styles
+        wp_enqueue_style('mt-components');    // Component library
+        wp_enqueue_style('mt-brand-fixes');   // Brand-specific fixes
         // mt-header-gradient-fix removed - file deleted
-        wp_enqueue_style('mt-mobile');
-        wp_enqueue_style('mt-specificity-layer');
+        wp_enqueue_style('mt-mobile');        // Mobile-responsive styles
+        wp_enqueue_style('mt-specificity-layer'); // Cascade management
         
         // Enqueue progress bar fix CSS
         wp_enqueue_style(
             'mt-progress-bar-fix',
             MT_PLUGIN_URL . 'assets/css/mt-progress-bar-fix.css',
-            ['mt-core'],
+            ['mt-v4-tokens', 'mt-core'],
             self::V4_VERSION,
             'all'
         );
@@ -244,27 +254,35 @@ class MT_Public_Assets {
         // Use minified files in production
         $suffix = $this->get_asset_suffix();
         
-        // Register critical above-fold styles
+        // FIRST: Register v4 tokens as the foundation - MUST load first
         wp_register_style(
-            'mt-critical',
-            $base_url . 'mt-critical' . $suffix . '.css',
+            'mt-v4-tokens',
+            $base_url . 'v4/mt-tokens.css',
             [],
             $version
         );
         
-        // Register core consolidated styles
+        // Register critical above-fold styles (now depends on tokens)
         wp_register_style(
-            'mt-core',
-            $base_url . 'mt-core' . $suffix . '.css',
-            ['mt-critical'],
+            'mt-critical',
+            $base_url . 'mt-critical' . $suffix . '.css',
+            ['mt-v4-tokens'],
             $version
         );
         
-        // Register component styles
+        // Register core consolidated styles (depends on both tokens and critical)
+        wp_register_style(
+            'mt-core',
+            $base_url . 'mt-core' . $suffix . '.css',
+            ['mt-v4-tokens', 'mt-critical'],
+            $version
+        );
+        
+        // Register component styles (depends on tokens and core)
         wp_register_style(
             'mt-components',
             $base_url . 'mt-components' . $suffix . '.css',
-            ['mt-core'],
+            ['mt-v4-tokens', 'mt-core'],
             $version
         );
         
@@ -276,7 +294,7 @@ class MT_Public_Assets {
         wp_register_style(
             'mt-brand-fixes',
             $base_url . 'mt-brand-fixes.css',
-            ['mt-core'],
+            ['mt-v4-tokens', 'mt-core'],
             $version
         );
         
@@ -285,7 +303,7 @@ class MT_Public_Assets {
             wp_register_style(
                 'mt-admin',
                 $base_url . 'mt-admin' . $suffix . '.css',
-                ['mt-core'],
+                ['mt-v4-tokens', 'mt-core'],
                 $version
             );
         }
@@ -294,7 +312,7 @@ class MT_Public_Assets {
         wp_register_style(
             'mt-mobile',
             $base_url . 'mt-mobile' . $suffix . '.css',
-            ['mt-core'],
+            ['mt-v4-tokens', 'mt-core'],
             $version,
             'screen and (max-width: 768px)' // Add media query for mobile
         );
@@ -303,7 +321,7 @@ class MT_Public_Assets {
         wp_register_style(
             'mt-specificity-layer',
             $base_url . 'mt-specificity-layer' . $suffix . '.css',
-            ['mt-core'],
+            ['mt-v4-tokens', 'mt-core'],
             $version,
             'all'
         );

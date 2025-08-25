@@ -1,0 +1,394 @@
+/*
+ * Mobility Trailblazers — Global CSS Integration
+ * Date: 2025-08-25
+ * Purpose: Ensures v4 tokens are applied globally across all plugin pages
+ * 
+ * This file imports the token system and applies overrides to ensure
+ * complete uniformization across all plugin pages and components.
+ */
+
+/* Import the single source of truth */
+/* mt-tokens.css loaded separately as 'mt-v4-tokens' stylesheet */
+
+/* ============================================
+   Global Overrides for Complete Uniformization
+   ============================================ */
+
+/* Override any legacy styles that might conflict */
+* {
+  /* Ensure no legacy colors are used */
+  --mt-primary: var(--mt-teal-900);
+  --mt-secondary: var(--mt-blue-800);
+  --mt-accent: var(--mt-copper-600);
+}
+
+/* Force all plugin-specific classes to use tokens */
+.mt-plugin-wrapper,
+.mobility-trailblazers,
+.mt-container,
+.mt-content,
+.mt-page,
+[class*="mt-"],
+[class*="mobility-"] {
+  /* Ensure background and text colors */
+  background-color: inherit;
+  color: inherit;
+}
+
+/* Ensure all candidate cards use consistent styles */
+.mt-candidate-card,
+.candidate-card,
+.mt-jury-card,
+.jury-member-card,
+.evaluation-card,
+.mt-card {
+  background: var(--mt-card-bg);
+  color: var(--mt-card-text);
+  border: 1px solid var(--mt-card-border);
+  border-radius: var(--mt-card-radius);
+  box-shadow: var(--mt-card-shadow);
+  padding: var(--mt-card-padding);
+  margin-bottom: var(--mt-space-6);
+}
+
+/* Force all form elements to use consistent styles */
+.mt-form,
+.evaluation-form,
+.assignment-form,
+.import-form,
+form[class*="mt-"] {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    background: var(--mt-input-bg);
+    color: var(--mt-input-text);
+    border: 1px solid var(--mt-input-border);
+    border-radius: var(--mt-input-radius);
+    padding: var(--mt-input-padding-y) var(--mt-input-padding-x);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: var(--mt-leading-normal);
+    transition: var(--mt-transition);
+  }
+  
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    box-shadow: var(--mt-focus-ring);
+    border-color: var(--mt-color-secondary);
+  }
+}
+
+/* Ensure all tables use consistent styles */
+.mt-table,
+.wp-list-table,
+table[class*="mt-"] {
+  background: var(--mt-color-surface);
+  border: 1px solid var(--mt-color-border);
+  border-radius: var(--mt-radius-md);
+  
+  th {
+    background: var(--mt-gray-50);
+    color: var(--mt-color-text);
+    font-weight: var(--mt-fw-semibold);
+    padding: var(--mt-space-3) var(--mt-space-4);
+    border-bottom: 2px solid var(--mt-color-border);
+  }
+  
+  td {
+    padding: var(--mt-space-3) var(--mt-space-4);
+    border-bottom: 1px solid var(--mt-gray-100);
+  }
+  
+  tr:hover {
+    background: var(--mt-gray-25);
+  }
+}
+
+/* Dashboard-specific overrides */
+.mt-jury-dashboard,
+.jury-dashboard,
+.mt-admin-dashboard,
+.admin-dashboard {
+  background: var(--mt-color-bg);
+  
+  .dashboard-header {
+    background: var(--mt-color-surface);
+    border-bottom: 2px solid var(--mt-color-border);
+    padding: var(--mt-space-6) 0;
+    margin-bottom: var(--mt-space-8);
+  }
+  
+  .dashboard-content {
+    max-width: var(--mt-container-max);
+    margin: 0 auto;
+    padding: 0 var(--mt-container-padding);
+  }
+}
+
+/* Navigation and menu overrides */
+.mt-navigation,
+.mt-menu,
+.mt-tabs,
+nav[class*="mt-"] {
+  background: var(--mt-color-surface);
+  border: 1px solid var(--mt-color-border);
+  border-radius: var(--mt-radius-md);
+  
+  a,
+  .nav-link,
+  .tab-link {
+    color: var(--mt-color-text);
+    padding: var(--mt-space-3) var(--mt-space-4);
+    transition: var(--mt-transition);
+    
+    &:hover,
+    &:focus {
+      background: var(--mt-gray-50);
+      color: var(--mt-color-primary);
+    }
+    
+    &.active,
+    &.current {
+      background: var(--mt-color-primary);
+      color: var(--mt-color-primary-contrast);
+    }
+  }
+}
+
+/* Modal and overlay overrides */
+.mt-modal,
+.mt-overlay,
+.modal[class*="mt-"] {
+  background: var(--mt-color-surface);
+  border-radius: var(--mt-radius-lg);
+  box-shadow: var(--mt-shadow-lg);
+  
+  .modal-header {
+    border-bottom: 1px solid var(--mt-color-border);
+    padding: var(--mt-space-5);
+  }
+  
+  .modal-body {
+    padding: var(--mt-space-6);
+  }
+  
+  .modal-footer {
+    border-top: 1px solid var(--mt-color-border);
+    padding: var(--mt-space-5);
+    background: var(--mt-gray-25);
+  }
+}
+
+/* Status and badge overrides */
+.mt-status,
+.mt-badge,
+.status[class*="mt-"],
+.badge[class*="mt-"] {
+  display: inline-block;
+  padding: var(--mt-space-1) var(--mt-space-3);
+  border-radius: var(--mt-radius-pill);
+  font-size: var(--mt-fs-sm);
+  font-weight: var(--mt-fw-semibold);
+  
+  &.success {
+    background: var(--mt-color-success);
+    color: var(--mt-white);
+  }
+  
+  &.warning {
+    background: var(--mt-color-warning);
+    color: var(--mt-white);
+  }
+  
+  &.error {
+    background: var(--mt-color-error);
+    color: var(--mt-white);
+  }
+  
+  &.info {
+    background: var(--mt-color-secondary);
+    color: var(--mt-white);
+  }
+}
+
+/* Pagination overrides */
+.mt-pagination,
+.pagination[class*="mt-"] {
+  display: flex;
+  gap: var(--mt-space-2);
+  margin: var(--mt-space-8) 0;
+  
+  a,
+  span {
+    padding: var(--mt-space-2) var(--mt-space-3);
+    border: 1px solid var(--mt-color-border);
+    border-radius: var(--mt-radius-sm);
+    color: var(--mt-color-text);
+    transition: var(--mt-transition);
+    
+    &:hover {
+      background: var(--mt-color-primary);
+      color: var(--mt-color-primary-contrast);
+      border-color: var(--mt-color-primary);
+    }
+    
+    &.current {
+      background: var(--mt-color-primary);
+      color: var(--mt-color-primary-contrast);
+      border-color: var(--mt-color-primary);
+    }
+  }
+}
+
+/* Loading states */
+.mt-loading,
+.loading[class*="mt-"] {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(248, 240, 227, 0.8); /* Using cream with opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Utility classes for consistent spacing */
+.mt-section {
+  padding: var(--mt-section-gap) 0;
+}
+
+.mt-content-wrapper {
+  max-width: var(--mt-container-max);
+  margin: 0 auto;
+  padding: 0 var(--mt-container-padding);
+}
+
+/* Ensure WordPress admin bar doesn't conflict */
+.admin-bar {
+  .mt-fixed-header,
+  .fixed-header[class*="mt-"] {
+    top: 32px;
+  }
+}
+
+@media (max-width: 782px) {
+  .admin-bar {
+    .mt-fixed-header,
+    .fixed-header[class*="mt-"] {
+      top: 46px;
+    }
+  }
+}
+
+/* ============================================
+   Responsive Overrides
+   ============================================ */
+
+/* Tablet breakpoint (1025px) */
+@media (max-width: 1025px) {
+  /* Container adjustments */
+  .mt-content-wrapper {
+    padding: 0 var(--mt-space-4);
+  }
+  
+  /* Card adjustments */
+  .mt-card,
+  [class*="-card"] {
+    padding: var(--mt-space-4);
+  }
+  
+  /* Table responsive */
+  .mt-table,
+  table[class*="mt-"] {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Mobile breakpoint (768px) */
+@media (max-width: 768px) {
+  /* Stack navigation items */
+  .mt-navigation,
+  .mt-menu {
+    flex-direction: column;
+    
+    a {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  
+  /* Full-width buttons on mobile */
+  .mt-actions {
+    button,
+    .button {
+      width: 100%;
+      margin-bottom: var(--mt-space-2);
+    }
+  }
+  
+  /* Card adjustments */
+  .mt-card,
+  [class*="-card"] {
+    padding: var(--mt-space-3);
+    margin-bottom: var(--mt-space-4);
+  }
+  
+  /* Modal full screen on mobile */
+  .mt-modal {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+  
+  /* Form adjustments */
+  .mt-form {
+    input,
+    textarea,
+    select {
+      width: 100%;
+    }
+  }
+}
+
+/* Print styles */
+@media print {
+  /* Hide non-essential elements */
+  .mt-navigation,
+  .mt-actions,
+  .mt-pagination,
+  button,
+  .button {
+    display: none;
+  }
+  
+  /* Ensure readable text */
+  body {
+    font-size: 12pt;
+    color: var(--mt-black);
+    background: var(--mt-white);
+  }
+  
+  /* Remove shadows and borders */
+  .mt-card {
+    box-shadow: none;
+    border: 1px solid var(--mt-gray-300);
+  }
+}

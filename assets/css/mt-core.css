@@ -2,99 +2,119 @@
    MOBILITY TRAILBLAZERS CSS v3.0
    CONSOLIDATED FROM 57 FILES â†’ 5 FILES
    ============================================ */
-/* Import comprehensive v4 token system */
-@import url('v4/mt-tokens.css');
+/* v4 tokens loaded separately as 'mt-v4-tokens' stylesheet dependency */
 
 /**
  * Mobility Trailblazers v4 CSS Framework
  * Core Framework Styles
  * Version: 4.1.0
- * Updated: Phase 2 Framework Migration
- * Note: Tokens are now imported from v4/mt-tokens.css
+ * Updated: v4 Token Integration (2025-08-25)
+ * 
+ * IMPORTANT: This file now uses v4/mt-tokens.css as single source of truth
+ * - All legacy color definitions (#26a69a teal) have been removed/commented
+ * - Buttons now use gradient tokens from v4 system
+ * - Typography uses exact v4 font families and sizes
+ * - Media queries updated to 1025px and 768px breakpoints
+ * - BEM structure maintained but powered by v4 tokens
+ * 
+ * Color scheme: #F8F0E3 (bg) + #003C3D (primary) + #C1693C (accent)
+ * Button gradients: Copper to Deep Blue (90deg)
  */
 
-/* Legacy token definitions below are kept for compatibility but will be overridden by v4 imports */
+/* 
+ * Legacy token definitions below are DISABLED - v4 tokens imported above provide all values
+ * Keeping this section commented for reference during transition period
+ */
+/* DISABLED - Using v4 tokens instead
 :root {
   /* ==========================================
-     COLORS - Single source of truth
+     COLORS - Single source of truth (REPLACED BY V4)
      ========================================== */
   
-  /* Primary Brand Colors */
-  --mt-primary: #26a69a;
-  --mt-primary-dark: #00897b;
-  --mt-primary-light: #4db6ac;
-  --mt-bg-cream: #f8f0e3;
-  --mt-text-dark: #302c37;
-  --mt-text-light: #666666;
-  --mt-border: #e0e0e0;
-  --mt-white: #ffffff;
-  --mt-error: #f44336;
-  --mt-success: #4caf50;
+  /* Primary Brand Colors (REPLACED BY V4) */
+  /* --mt-primary: #26a69a; */            /* CONFLICTED - Now uses #003C3D from v4 */
+  /* --mt-primary-dark: #00897b; */       /* REPLACED BY V4 */
+  /* --mt-primary-light: #4db6ac; */      /* REPLACED BY V4 */
+  /* --mt-bg-cream: #f8f0e3; */           /* Now handled by --mt-color-bg in v4 */
+  /* --mt-text-dark: #302c37; */          /* Now handled by --mt-color-text in v4 */
+  /* --mt-text-light: #666666; */         /* REPLACED BY V4 */
+  /* --mt-border: #e0e0e0; */             /* Now handled by --mt-color-border in v4 */
+  /* --mt-white: #ffffff; */              /* Available in v4 as --mt-white */
+  /* --mt-error: #f44336; */              /* Available in v4 as --mt-color-error */
+  /* --mt-success: #4caf50; */            /* Available in v4 as --mt-color-success */
   
-  /* Legacy mappings for backward compatibility */
-  --mt-color-primary: var(--mt-primary);
-  --mt-color-primary-dark: var(--mt-primary-dark);
-  --mt-color-primary-light: var(--mt-primary-light);
-  --mt-color-bg: var(--mt-bg-cream);
-  --mt-text: var(--mt-text-dark);
+  /* Legacy mappings for backward compatibility (HANDLED BY V4) */
+  /* --mt-color-primary: var(--mt-primary); */      /* Available in v4 */
+  /* --mt-color-primary-dark: var(--mt-primary-dark); */ /* Available in v4 */
+  /* --mt-color-primary-light: var(--mt-primary-light); */ /* Available in v4 */
+  /* --mt-color-bg: var(--mt-bg-cream); */          /* Available in v4 */
+  /* --mt-text: var(--mt-text-dark); */             /* Available in v4 */
   
-  /* Secondary Colors */
-  --mt-secondary: #004c5f;
-  --mt-accent: #c1693c;
-  --mt-warning: #ff9800;
-  --mt-info: #2196f3;
+  /* Secondary Colors (AVAILABLE IN V4) */
+  /* --mt-secondary: #004c5f; */          /* Available in v4 as --mt-color-secondary */
+  /* --mt-accent: #c1693c; */             /* Available in v4 as --mt-color-accent */
+  /* --mt-warning: #ff9800; */            /* Available in v4 as --mt-color-warning */
+  /* --mt-info: #2196f3; */               /* REPLACED BY V4 */
+*/
+
+/* ============================================
+   V4 TOKENS NOW PROVIDE ALL VALUES
+   Legacy definitions below DISABLED for migration
+   ============================================ */
+   
+/* DISABLED LEGACY SECTION - All values now provided by v4/mt-tokens.css
   
-  /* Neutral Palette */
-  --mt-gray-50: #fafafa;
-  --mt-gray-100: #f5f5f5;
-  --mt-gray-200: #eeeeee;
-  --mt-gray-300: #e0e0e0;
-  --mt-gray-400: #bdbdbd;
-  --mt-gray-500: #9e9e9e;
-  --mt-gray-600: #757575;
-  --mt-gray-700: #616161;
-  --mt-gray-800: #424242;
-  --mt-gray-900: #212121;
+  /* Neutral Palette (REPLACED BY V4 --mt-gray-* tokens) */
+  /* --mt-gray-50: #fafafa; */
+  /* --mt-gray-100: #f5f5f5; */
+  /* --mt-gray-200: #eeeeee; */
+  /* --mt-gray-300: #e0e0e0; */
+  /* --mt-gray-400: #bdbdbd; */
+  /* --mt-gray-500: #9e9e9e; */
+  /* --mt-gray-600: #757575; */
+  /* --mt-gray-700: #616161; */
+  /* --mt-gray-800: #424242; */
+  /* --mt-gray-900: #212121; */
   
   /* ==========================================
-     SPACING - Responsive with clamp()
+     SPACING - Responsive with clamp() (REPLACED BY V4)
      ========================================== */
   
-  --mt-space-xs: clamp(0.25rem, 1vw, 0.5rem);
-  --mt-space-sm: clamp(0.5rem, 2vw, 0.75rem);
-  --mt-space-md: clamp(0.75rem, 3vw, 1rem);
-  --mt-space-lg: clamp(1rem, 4vw, 1.5rem);
-  --mt-space-xl: clamp(1.5rem, 5vw, 2rem);
-  --mt-space-2xl: clamp(2rem, 6vw, 3rem);
-  --mt-space-3xl: clamp(3rem, 8vw, 4rem);
+  /* --mt-space-xs: clamp(0.25rem, 1vw, 0.5rem); */      /* Now --mt-space-1 to --mt-space-16 in v4 */
+  /* --mt-space-sm: clamp(0.5rem, 2vw, 0.75rem); */      /* Now --mt-space-2 in v4 */
+  /* --mt-space-md: clamp(0.75rem, 3vw, 1rem); */        /* Now --mt-space-3 in v4 */
+  /* --mt-space-lg: clamp(1rem, 4vw, 1.5rem); */         /* Now --mt-space-4 to --mt-space-6 in v4 */
+  /* --mt-space-xl: clamp(1.5rem, 5vw, 2rem); */         /* Now --mt-space-8 in v4 */
+  /* --mt-space-2xl: clamp(2rem, 6vw, 3rem); */          /* Now --mt-space-12 in v4 */
+  /* --mt-space-3xl: clamp(3rem, 8vw, 4rem); */          /* Now --mt-space-16 in v4 */
   
-  /* Grid and Layout Spacing */
-  --mt-gap-xs: var(--mt-space-xs);
-  --mt-gap-sm: var(--mt-space-sm);
-  --mt-gap-md: var(--mt-space-md);
-  --mt-gap-lg: var(--mt-space-lg);
-  --mt-gap-xl: var(--mt-space-xl);
+  /* Grid and Layout Spacing (HANDLED BY V4) */
+  /* --mt-gap-xs: var(--mt-space-xs); */      /* Use --mt-space-* directly in v4 */
+  /* --mt-gap-sm: var(--mt-space-sm); */      /* Use --mt-space-* directly in v4 */
+  /* --mt-gap-md: var(--mt-space-md); */      /* Use --mt-space-* directly in v4 */
+  /* --mt-gap-lg: var(--mt-space-lg); */      /* Use --mt-space-* directly in v4 */
+  /* --mt-gap-xl: var(--mt-space-xl); */      /* Use --mt-space-* directly in v4 */
   
-  /* Container Padding */
-  --mt-container-padding: clamp(1rem, 5vw, 2rem);
-  --mt-section-padding: clamp(2rem, 8vw, 4rem);
+  /* Container Padding (HANDLED BY V4) */
+  /* --mt-container-padding: clamp(1rem, 5vw, 2rem); */  /* Now --mt-container-padding in v4 */
+  /* --mt-section-padding: clamp(2rem, 8vw, 4rem); */    /* Now --mt-section-gap in v4 */
   
   /* ==========================================
-     TYPOGRAPHY
+     TYPOGRAPHY (REPLACED BY V4)
      ========================================== */
   
-  --mt-font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mt-font-heading: "Poppins", var(--mt-font-base);
-  --mt-font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  /* --mt-font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; */ /* Now --mt-font-body in v4 */
+  /* --mt-font-heading: "Poppins", var(--mt-font-base); */ /* Now --mt-font-primary in v4 */
+  /* --mt-font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace; */ /* Now --mt-font-mono in v4 */
   
-  /* Font Sizes - Mobile-first with clamp() */
-  --mt-font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
-  --mt-font-size-sm: clamp(0.875rem, 2.5vw, 0.9rem);
-  --mt-font-size-base: clamp(1rem, 2.5vw, 1.1rem);
-  --mt-font-size-lg: clamp(1.125rem, 3vw, 1.25rem);
-  --mt-font-size-xl: clamp(1.5rem, 4vw, 2rem);
-  --mt-font-size-2xl: clamp(2rem, 5vw, 2.5rem);
-  --mt-font-size-3xl: clamp(2.5rem, 6vw, 3rem);
+  /* Font Sizes - Mobile-first with clamp() (REPLACED BY V4) */
+  /* --mt-font-size-xs: clamp(0.75rem, 2vw, 0.875rem); */    /* Now --mt-fs-xs in v4 */
+  /* --mt-font-size-sm: clamp(0.875rem, 2.5vw, 0.9rem); */   /* Now --mt-fs-sm in v4 */
+  /* --mt-font-size-base: clamp(1rem, 2.5vw, 1.1rem); */     /* Now --mt-fs-base in v4 */
+  /* --mt-font-size-lg: clamp(1.125rem, 3vw, 1.25rem); */    /* Now --mt-fs-lg in v4 */
+  /* --mt-font-size-xl: clamp(1.5rem, 4vw, 2rem); */         /* Now --mt-fs-xl in v4 */
+  /* --mt-font-size-2xl: clamp(2rem, 5vw, 2.5rem); */        /* Now --mt-fs-2xl in v4 */
+  /* --mt-font-size-3xl: clamp(2.5rem, 6vw, 3rem); */        /* Use --mt-fs-h1 in v4 */
   
   /* Heading Sizes */
   --mt-h1: clamp(2rem, 5vw, 3rem);
@@ -255,19 +275,19 @@
   --mt-opacity-0: 0;
   --mt-opacity-5: 0.05;
   --mt-opacity-10: 0.1;
-  --mt-opacity-20: 0.2;
-  --mt-opacity-25: 0.25;
-  --mt-opacity-30: 0.3;
-  --mt-opacity-40: 0.4;
-  --mt-opacity-50: 0.5;
-  --mt-opacity-60: 0.6;
-  --mt-opacity-70: 0.7;
-  --mt-opacity-75: 0.75;
-  --mt-opacity-80: 0.8;
-  --mt-opacity-90: 0.9;
-  --mt-opacity-95: 0.95;
-  --mt-opacity-100: 1;
-}
+  /* --mt-opacity-20: 0.2; */     /* Available in v4 */
+  /* --mt-opacity-25: 0.25; */   /* Available in v4 */
+  /* --mt-opacity-30: 0.3; */    /* Available in v4 */
+  /* --mt-opacity-40: 0.4; */    /* Available in v4 */
+  /* --mt-opacity-50: 0.5; */    /* Available in v4 */
+  /* --mt-opacity-60: 0.6; */    /* Available in v4 */
+  /* --mt-opacity-70: 0.7; */    /* Available in v4 */
+  /* --mt-opacity-75: 0.75; */   /* Available in v4 */
+  /* --mt-opacity-80: 0.8; */    /* Available in v4 */
+  /* --mt-opacity-90: 0.9; */    /* Available in v4 */
+  /* --mt-opacity-95: 0.95; */   /* Available in v4 */
+  /* --mt-opacity-100: 1; */     /* Available in v4 */
+/* END DISABLED LEGACY SECTION */
 
 /* ==========================================
    DARK MODE SUPPORT (Future Enhancement)
@@ -792,13 +812,14 @@
  * - critical-fixes-2025.css (grid sections)
  */
 
-/* Note: CSS variables moved to mt-variables.css - remove duplicates */
+/* REMOVED: CSS variables now provided by v4/mt-tokens.css import - duplicates removed */
+/* DISABLED DUPLICATE :root - v4 tokens imported above provide these values
 :root {
-    /* System Colors (Primary Palette) */
-    --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
-    --mt-secondary: #004C5F;         /* Dark Indigo - Links, Secondary Elements */
-    --mt-body-text: #302C37;         /* Dark Gray - Body Text */
-    --mt-accent: #C1693C;            /* Copper - CTAs, Highlights */
+    /* System Colors (Primary Palette) - NOW PROVIDED BY V4 */
+    /* --mt-primary: #003C3D; */          /* Available as --mt-color-primary in v4 */
+    /* --mt-secondary: #004C5F; */        /* Available as --mt-color-secondary in v4 */
+    /* --mt-body-text: #302C37; */        /* Available as --mt-color-text in v4 */
+    /* --mt-accent: #C1693C; */           /* Available as --mt-color-accent in v4 */
     
     /* Custom Colors (Extended Palette) */
     --mt-kupfer-soft: #B86F52;       /* Soft Copper - Hover States */
@@ -820,13 +841,13 @@
     --mt-shadow-md: 0 4px 12px rgba(48, 44, 55, 0.15);
     --mt-shadow-lg: 0 8px 24px rgba(0, 60, 61, 0.2);
     
-    /* Transitions */
-    --mt-transition: all 0.3s ease;
-}
+    /* Transitions (AVAILABLE IN V4) */
+    /* --mt-transition: all 0.3s ease; */     /* Available as --mt-transition in v4 */
+/* END DISABLED DUPLICATE :root SECTION */
 
 /* General Frontend Styles */
 .mt-container {
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     padding: 30px;
     border-radius: 12px;
     color: var(--mt-body-text);
@@ -891,7 +912,7 @@
 .mt-candidate-card,
 .mt-candidate-grid-item {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 12px ;
     overflow: hidden;
     transition: var(--mt-transition) ;
@@ -994,7 +1015,7 @@
 /* Jury Dashboard */
 .mt-jury-dashboard {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px 0;
@@ -1031,7 +1052,7 @@
 
 .mt-jury-stat-card {
     background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 20px;
     text-align: center;
@@ -1059,14 +1080,14 @@
 /* Evaluation Form */
 .mt-evaluation-form {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px 0;
 }
 
 .mt-evaluation-header {
-    border-bottom: 2px solid var(--mt-blue-accent);
+    border-bottom: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     padding-bottom: 20px;
     margin-bottom: 30px;
 }
@@ -1077,7 +1098,7 @@
 }
 
 .mt-candidate-info {
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 30px;
@@ -1088,8 +1109,8 @@
 }
 
 .mt-criterion {
-    background: var(--mt-bg-beige);
-    border: 1px solid var(--mt-blue-accent);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
@@ -1128,7 +1149,7 @@
     padding: 15px;
     text-align: center;
     background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -1177,7 +1198,7 @@
     width: 100%;
     min-height: 100px;
     padding: 12px;
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.3s ease;
@@ -1212,7 +1233,7 @@
 }
 
 .mt-submit-evaluation:disabled {
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     cursor: not-allowed;
     transform: none;
     opacity: 0.6;
@@ -1221,7 +1242,7 @@
 /* Winners Display */
 .mt-winners-display {
     background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 40px;
     margin: 20px 0;
@@ -1285,7 +1306,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     color: var(--mt-primary);
     display: flex;
     align-items: center;
@@ -1310,7 +1331,7 @@
     position: absolute;
     width: 80px;
     height: 2px;
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     left: 100%;
     top: 50%;
     transform: translateY(-50%);
@@ -1344,7 +1365,7 @@
 
 .mt-notification-info {
     background: rgba(164, 220, 213, 0.2);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     color: var(--mt-secondary);
 }
 
@@ -1510,7 +1531,7 @@ body .mt-jury-dashboard .mt-candidates-list {
 
 body .mt-jury-dashboard .mt-candidate-card {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 12px ;
     min-width: 0 ;
     min-height: 0 ;
@@ -1523,7 +1544,7 @@ body .mt-jury-dashboard .mt-candidate-card {
 /* Fix the main dashboard container */
 body .mt-jury-dashboard {
     background: var(--mt-bg-base) ;
-    border: 1px solid var(--mt-blue-accent) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 12px ;
     padding: 30px ;
     margin: 20px 0 ;
@@ -1595,7 +1616,7 @@ body .mt-jury-dashboard .mt-stats-grid {
 
 body .mt-jury-dashboard .mt-stat-card {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     padding: 20px ;
     text-align: center ;
@@ -1640,7 +1661,7 @@ body .mt-jury-dashboard .mt-search-input {
     flex: 1 ;
     min-width: 200px ;
     padding: 10px 15px ;
-    border: 1px solid var(--mt-blue-accent) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     font-size: 14px ;
     background: var(--mt-bg-base) ;
@@ -1648,7 +1669,7 @@ body .mt-jury-dashboard .mt-search-input {
 
 body .mt-jury-dashboard .mt-filter-select {
     padding: 10px 15px ;
-    border: 1px solid var(--mt-blue-accent) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     font-size: 14px ;
     background: var(--mt-bg-base) ;
@@ -1688,7 +1709,7 @@ body .mt-jury-dashboard .mt-candidate-body {
 }
 
 body .mt-jury-dashboard .mt-candidate-category {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-secondary) ;
     padding: 5px 15px ;
     border-radius: 20px ;
@@ -1710,12 +1731,12 @@ body .mt-jury-dashboard .mt-status-badge {
 }
 
 body .mt-jury-dashboard .mt-status-pending {
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
     color: var(--mt-primary) ;
 }
 
 body .mt-jury-dashboard .mt-status-draft {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-kupfer-bold) ;
 }
 
@@ -1748,7 +1769,7 @@ body .mt-jury-dashboard .mt-evaluate-btn:hover {
 body .mt-jury-dashboard .mt-rankings-container {
     margin: 30px 0 ;
     padding: 20px ;
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 12px ;
 }
 
@@ -1798,7 +1819,7 @@ body .mt-jury-dashboard .mt-rankings-grid {
 
 body .mt-jury-dashboard .mt-ranking-item {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 12px ;
     padding: 20px ;
     position: relative ;
@@ -1833,7 +1854,7 @@ body .mt-jury-dashboard .position-gold .mt-position-badge {
 }
 
 body .mt-jury-dashboard .position-silver .mt-position-badge {
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 body .mt-jury-dashboard .position-bronze .mt-position-badge {
@@ -1869,7 +1890,7 @@ body .mt-jury-dashboard .mt-candidate-meta {
 body .mt-jury-dashboard .mt-total-score-display {
     text-align: center ;
     padding: 10px ;
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 8px ;
 }
 
@@ -1889,7 +1910,7 @@ body .mt-jury-dashboard .score-value {
 
 /* Inline evaluation controls */
 body .mt-jury-dashboard .mt-inline-evaluation-controls {
-    border-top: 1px solid var(--mt-blue-accent) ;
+    border-top: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     padding-top: 15px ;
     margin-top: 15px ;
 }
@@ -1929,8 +1950,8 @@ body .mt-jury-dashboard .mt-score-control {
 }
 
 body .mt-jury-dashboard .mt-score-adjust {
-    background: var(--mt-bg-beige) ;
-    border: 1px solid var(--mt-blue-accent) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 4px ;
     width: 24px ;
     height: 24px ;
@@ -1956,7 +1977,7 @@ body .mt-jury-dashboard .mt-score-adjust .dashicons {
 body .mt-jury-dashboard .mt-score-input {
     width: 45px ;
     text-align: center ;
-    border: 1px solid var(--mt-blue-accent) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 4px ;
     padding: 2px ;
     font-size: 14px ;
@@ -1975,7 +1996,7 @@ body .mt-jury-dashboard .mt-score-svg {
 
 body .mt-jury-dashboard .mt-ring-bg {
     fill: none ;
-    stroke: var(--mt-blue-accent) ;
+    stroke: var(--mt-color-border) /* Updated to use v4 token */ ;
     stroke-width: 3 ;
 }
 
@@ -2052,7 +2073,7 @@ body .mt-jury-dashboard .mt-rankings-container {
 }
 
 body .mt-jury-dashboard .mt-rankings-section {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 16px ;
     padding: 30px ;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) ;
@@ -2105,7 +2126,7 @@ body .mt-jury-dashboard .position-gold .mt-position-badge {
 }
 
 body .mt-jury-dashboard .position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary)) ;
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary)) ;
 }
 
 body .mt-jury-dashboard .position-bronze .mt-position-badge {
@@ -2114,7 +2135,7 @@ body .mt-jury-dashboard .position-bronze .mt-position-badge {
 
 /* Improved candidate info section */
 body .mt-jury-dashboard .mt-candidate-info {
-    border-bottom: 1px solid var(--mt-blue-accent) ;
+    border-bottom: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     padding-bottom: 15px ;
     margin-bottom: 15px ;
 }
@@ -2126,8 +2147,8 @@ body .mt-jury-dashboard .mt-ranking-item .mt-candidate-name {
 
 /* Better score display */
 body .mt-jury-dashboard .mt-total-score-display {
-    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-blue-accent)) ;
-    border: 1px solid var(--mt-blue-accent) ;
+    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-color-border) /* Updated to use v4 token */) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     padding: 15px ;
 }
 
@@ -2141,11 +2162,11 @@ body .mt-jury-dashboard .score-value {
 
 /* Cleaner evaluation controls */
 body .mt-jury-dashboard .mt-inline-evaluation-controls {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 8px ;
     padding: 20px 15px 15px ;
     margin: 15px -15px -15px -15px ;
-    border-top: 2px solid var(--mt-blue-accent) ;
+    border-top: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 body .mt-jury-dashboard .mt-criteria-grid-inline {
@@ -2172,7 +2193,7 @@ body .mt-jury-dashboard .mt-score-control {
 
 body .mt-jury-dashboard .mt-score-adjust {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 50% ;
     width: 28px ;
     height: 28px ;
@@ -2189,7 +2210,7 @@ body .mt-jury-dashboard .mt-score-input {
     width: 50px ;
     padding: 4px ;
     font-weight: 600 ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     background: var(--mt-bg-base) ;
 }
 
@@ -2207,7 +2228,7 @@ body .mt-jury-dashboard .mt-score-ring-mini {
 body .mt-jury-dashboard .mt-inline-actions {
     margin-top: 15px ;
     padding-top: 15px ;
-    border-top: 1px solid var(--mt-blue-accent) ;
+    border-top: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 body .mt-jury-dashboard .mt-btn-save-inline,
@@ -2377,7 +2398,7 @@ body .mt-candidate-showcase .mt-meta-item {
     align-items: center ;
     gap: 8px ;
     padding: 8px 16px ;
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 25px ;
     font-size: 14px ;
     color: var(--mt-body-text) ;
@@ -2392,7 +2413,7 @@ body .mt-candidate-showcase .mt-meta-item .dashicons {
 
 /* Innovation Summary */
 body .mt-candidate-showcase .mt-innovation-summary {
-    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-blue-accent)) ;
+    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-color-border) /* Updated to use v4 token */) ;
     border-left: 4px solid var(--mt-accent) ;
     padding: 20px ;
     border-radius: 8px ;
@@ -2434,7 +2455,7 @@ body .mt-candidate-showcase .mt-candidate-bio h3 {
     color: #212529 ;
     margin: 0 0 15px 0 ;
     padding-bottom: 10px ;
-    border-bottom: 2px solid var(--mt-blue-accent) ;
+    border-bottom: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 .mt-bio-content,
@@ -2497,11 +2518,11 @@ body .mt-candidate-showcase .mt-bio-content p:last-child,
 }
 
 .mt-link-button:nth-child(2) {
-    background: #26a69a ;
+    background: var(--mt-color-primary); /* Now uses #003C3D from v4 tokens */
 }
 
 .mt-link-button:nth-child(2):hover {
-    background: #1e8278 ;
+    background: var(--mt-color-primary-dark); /* Updated to use v4 token */
 }
 
 /* Animation Effects */
@@ -2560,7 +2581,7 @@ body .mt-candidate-showcase.mt-layout-minimal .mt-candidate-meta {
 
 body .mt-candidate-showcase.mt-layout-minimal .mt-meta-item {
     background: white ;
-    border: 1px solid var(--mt-blue-accent) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 /* Language Switcher Styles */
@@ -2824,7 +2845,7 @@ body .mt-evaluation-header .mt-status-completed {
 }
 
 body .mt-evaluation-header .mt-status-draft {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-kupfer-bold) ;
 }
 
@@ -2868,7 +2889,7 @@ body .mt-criteria-grid {
 }
 
 body .mt-criterion-card {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 12px ;
     padding: 25px ;
     transition: all 0.3s ease ;
@@ -2930,7 +2951,7 @@ body .mt-score-slider {
     height: 8px ;
     -webkit-appearance: none ;
     appearance: none ;
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 4px ;
     outline: none ;
 }
@@ -3009,7 +3030,7 @@ body .mt-comments-textarea {
     width: 100% ;
     min-height: 150px ;
     padding: 15px ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     font-size: 16px ;
     line-height: 1.6 ;
@@ -3076,7 +3097,7 @@ body .mt-form-actions .mt-btn-secondary:hover {
 
 /* Submission Guidelines */
 body .mt-submission-guidelines {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 12px ;
     padding: 30px ;
     margin: 30px 0 ;
@@ -3163,7 +3184,7 @@ body .mt-submission-guidelines li {
     align-items: center;
     gap: 16px;
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     padding: 10px 16px;
@@ -3194,7 +3215,7 @@ body .mt-submission-guidelines li {
     color: var(--mt-bg-base);
 }
 .mt-rankings-list .position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary));
     color: var(--mt-primary);
 }
 .mt-rankings-list .position-bronze .mt-position-badge {
@@ -3223,7 +3244,7 @@ body .mt-submission-guidelines li {
     min-width: 80px;
     text-align: center;
     align-self: center;
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 6px;
     padding: 4px 0;
     margin: 0 8px;
@@ -3374,7 +3395,7 @@ body .mt-submission-guidelines li {
     font-size: 16px;
     font-weight: bold;
     color: var(--mt-primary);
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     margin: 0 auto;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     border: 2px solid var(--mt-bg-base);
@@ -3385,7 +3406,7 @@ body .mt-submission-guidelines li {
     border: 2px solid var(--mt-accent);
 }
 .mt-eval-row.position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary));
     color: var(--mt-primary);
     border: 2px solid var(--mt-secondary);
 }
@@ -3410,7 +3431,7 @@ body .mt-submission-guidelines li {
     fill: var(--mt-accent);
 }
 .mt-medal-silver {
-    fill: var(--mt-blue-accent);
+    fill: var(--mt-color-border) /* Updated to use v4 token */;
 }
 .mt-medal-bronze {
     fill: var(--mt-kupfer-soft);
@@ -3585,7 +3606,7 @@ body .mt-submission-guidelines li {
 /* Evaluation Statistics Styles */
 .mt-evaluation-stats {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px 0;
@@ -3614,8 +3635,8 @@ body .mt-submission-guidelines li {
 }
 
 .mt-stat-box {
-    background: var(--mt-bg-beige);
-    border: 1px solid var(--mt-blue-accent);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 25px;
     text-align: center;
@@ -3647,7 +3668,7 @@ body .mt-submission-guidelines li {
 .mt-criteria-stats {
     margin-top: 30px;
     padding-top: 30px;
-    border-top: 1px solid var(--mt-blue-accent);
+    border-top: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
 }
 
 .mt-criteria-bars {
@@ -3666,7 +3687,7 @@ body .mt-submission-guidelines li {
 }
 
 .mt-bar-container {
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 20px;
     height: 30px;
     overflow: hidden;
@@ -3699,8 +3720,8 @@ body .mt-submission-guidelines li {
 }
 
 .mt-category-stat-item {
-    background: var(--mt-bg-beige);
-    border: 1px solid var(--mt-blue-accent);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 20px;
 }
@@ -3746,7 +3767,7 @@ body .mt-submission-guidelines li {
 
 .mt-jury-stats-table td {
     padding: 12px;
-    border-bottom: 1px solid var(--mt-blue-accent);
+    border-bottom: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     color: var(--mt-body-text);
 }
 
@@ -3760,7 +3781,7 @@ body .mt-submission-guidelines li {
 
 /* Mini Progress Bar */
 .mt-progress-mini {
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 10px;
     height: 20px;
     overflow: hidden;
@@ -3830,7 +3851,7 @@ body .mt-submission-guidelines li {
 .mt-candidate-grid-item:hover {
     transform: translateY(-5px) ;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) ;
-    border-color: var(--mt-blue-accent) ;
+    border-color: var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 /* Image Container - Fixed Square Size */
@@ -3928,7 +3949,7 @@ body .mt-submission-guidelines li {
 
 .mt-category-tag {
     display: inline-block ;
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
     color: var(--mt-primary) ;
     padding: 4px 12px ;
     border-radius: 15px ;
@@ -4293,7 +4314,7 @@ h2.mt-section-title {
     justify-content: flex-start ;
     gap: 8px ;
     padding: 10px 15px ;
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 25px ;
     font-size: 14px ;
     color: var(--mt-body-text) ;
@@ -4330,7 +4351,7 @@ h2.mt-section-title {
     }
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1025px) {
     .mt-evaluation-page .mt-candidate-showcase .mt-meta-item {
         min-width: 220px ;
         max-width: 300px ;
@@ -7556,8 +7577,8 @@ div[style*='color: white'] {
     margin: calc(-1 * var(--mt-card-padding));
     margin-bottom: var(--mt-card-padding);
     padding: var(--mt-spacing-md) var(--mt-card-padding);
-    background: var(--mt-bg-beige);
-    border-bottom: 1px solid var(--mt-blue-accent);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border-bottom: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: var(--mt-card-border-radius) var(--mt-card-border-radius) 0 0;
 }
 
@@ -8489,14 +8510,14 @@ button.mt-save-draft:hover,
 /* Evaluation Form */
 .mt-evaluation-form {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px 0;
 }
 
 .mt-evaluation-header {
-    border-bottom: 2px solid var(--mt-blue-accent);
+    border-bottom: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     padding-bottom: 20px;
     margin-bottom: 30px;
 }
@@ -8507,7 +8528,7 @@ button.mt-save-draft:hover,
 }
 
 .mt-candidate-info {
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 30px;
@@ -8522,8 +8543,8 @@ button.mt-save-draft:hover,
 }
 
 .mt-criterion {
-    background: var(--mt-bg-beige);
-    border: 1px solid var(--mt-blue-accent);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
@@ -8566,7 +8587,7 @@ button.mt-save-draft:hover,
     padding: 15px;
     text-align: center;
     background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -8619,7 +8640,7 @@ button.mt-save-draft:hover,
     width: 100%;
     min-height: 100px;
     padding: 12px;
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.3s ease;
@@ -8658,7 +8679,7 @@ button.mt-save-draft:hover,
 }
 
 .mt-submit-evaluation:disabled {
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     cursor: not-allowed;
     transform: none;
     opacity: 0.6;
@@ -8731,7 +8752,7 @@ body .mt-evaluation-header .mt-status-completed {
 }
 
 body .mt-evaluation-header .mt-status-draft {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-kupfer-bold) ;
 }
 
@@ -8783,7 +8804,7 @@ body .mt-criteria-grid {
 }
 
 body .mt-criterion-card {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 12px ;
     padding: 25px ;
     transition: all 0.3s ease ;
@@ -8895,7 +8916,7 @@ body .mt-score-slider {
     height: 8px ;
     -webkit-appearance: none ;
     appearance: none ;
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 4px ;
     outline: none ;
 }
@@ -8978,7 +8999,7 @@ body .mt-comments-textarea {
     width: 100% ;
     min-height: 150px ;
     padding: 15px ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     font-size: 16px ;
     line-height: 1.6 ;
@@ -9053,7 +9074,7 @@ body .mt-form-actions .mt-btn-secondary:hover {
 
 /* Submission Guidelines */
 body .mt-submission-guidelines {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 12px ;
     padding: 30px ;
     margin: 30px 0 ;
@@ -9098,7 +9119,7 @@ body .mt-submission-guidelines li {
     align-items: center;
     gap: 16px;
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     padding: 10px 16px;
@@ -9133,7 +9154,7 @@ body .mt-submission-guidelines li {
 }
 
 .mt-rankings-list .position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary));
     color: var(--mt-primary);
 }
 
@@ -9167,7 +9188,7 @@ body .mt-submission-guidelines li {
     min-width: 80px;
     text-align: center;
     align-self: center;
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 6px;
     padding: 4px 0;
     margin: 0 8px;
@@ -10735,7 +10756,7 @@ html[lang="de-DE"] .mt-criterion-description {
 /* Jury Dashboard */
 .mt-jury-dashboard {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px 0;
@@ -10772,7 +10793,7 @@ html[lang="de-DE"] .mt-criterion-description {
 
 .mt-jury-stat-card {
     background: var(--mt-bg-base);
-    border: 2px solid var(--mt-blue-accent);
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     padding: 20px;
     text-align: center;
@@ -10812,7 +10833,7 @@ html[lang="de-DE"] .mt-criterion-description {
 /* Fix the main dashboard container */
 body .mt-jury-dashboard {
     background: var(--mt-bg-base);
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 12px;
     padding: 30px;
     margin: 20px auto;
@@ -10900,7 +10921,7 @@ body .mt-jury-dashboard .mt-stats-grid {
 
 body .mt-jury-dashboard .mt-stat-card {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
     padding: 20px ;
     text-align: center ;
@@ -10957,7 +10978,7 @@ body .mt-jury-dashboard .mt-search-box {
 body .mt-jury-dashboard .mt-search-input {
     width: 100%;
     padding: 10px 15px;
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     font-size: 14px;
     background: var(--mt-bg-base);
@@ -10970,7 +10991,7 @@ body .mt-jury-dashboard .mt-filter-select,
 body .mt-jury-dashboard #mt-category-filter {
     width: 100%;
     padding: 10px 15px;
-    border: 1px solid var(--mt-blue-accent);
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */;
     border-radius: 8px;
     font-size: 14px;
     background: var(--mt-bg-base);
@@ -11027,7 +11048,7 @@ body .mt-jury-dashboard .mt-candidates-list {
 
 body .mt-jury-dashboard .mt-candidate-card:not(.hidden) {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 12px ;
     min-width: 0 ;
     min-height: 0 ;
@@ -11068,7 +11089,7 @@ body .mt-jury-dashboard .mt-candidate-body {
 }
 
 body .mt-jury-dashboard .mt-candidate-category {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-secondary) ;
     padding: 5px 15px ;
     border-radius: 20px ;
@@ -11094,12 +11115,12 @@ body .mt-jury-dashboard .mt-status-badge {
 }
 
 body .mt-jury-dashboard .mt-status-pending {
-    background: var(--mt-blue-accent) ;
+    background: var(--mt-color-border) /* Updated to use v4 token */ ;
     color: var(--mt-primary) ;
 }
 
 body .mt-jury-dashboard .mt-status-draft {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     color: var(--mt-kupfer-bold) ;
 }
 
@@ -11142,7 +11163,7 @@ body .mt-jury-dashboard .mt-rankings-container {
 
 .mt-rankings-section,
 body .mt-jury-dashboard .mt-rankings-section {
-    background: var(--mt-bg-beige);
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 16px;
     padding: 30px 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -11251,7 +11272,7 @@ body .mt-jury-dashboard .position-gold .mt-position-badge {
 }
 
 body .mt-jury-dashboard .position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary)) ;
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary)) ;
 }
 
 body .mt-jury-dashboard .position-bronze .mt-position-badge {
@@ -11268,7 +11289,7 @@ body .mt-jury-dashboard .position-number {
 body .mt-jury-dashboard .mt-candidate-info {
     flex: 1 ;
     padding-left: 30px ;
-    border-bottom: 1px solid var(--mt-blue-accent) ;
+    border-bottom: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     padding-bottom: 15px ;
     margin-bottom: 15px ;
 }
@@ -11291,8 +11312,8 @@ body .mt-jury-dashboard .mt-candidate-meta {
 body .mt-jury-dashboard .mt-total-score-display {
     text-align: center ;
     padding: 15px ;
-    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-blue-accent)) ;
-    border: 1px solid var(--mt-blue-accent) ;
+    background: linear-gradient(135deg, var(--mt-bg-beige), var(--mt-color-border) /* Updated to use v4 token */) ;
+    border: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 8px ;
 }
 
@@ -11319,11 +11340,11 @@ body .mt-jury-dashboard .score-value {
 
 /* Cleaner evaluation controls */
 body .mt-jury-dashboard .mt-inline-evaluation-controls {
-    background: var(--mt-bg-beige) ;
+    background: var(--mt-color-bg); /* Updated to use v4 token */
     border-radius: 8px ;
     padding: 20px 15px 15px ;
     margin: 15px -15px -15px -15px ;
-    border-top: 2px solid var(--mt-blue-accent) ;
+    border-top: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 body .mt-jury-dashboard .mt-criteria-grid-inline {
@@ -11367,7 +11388,7 @@ body .mt-jury-dashboard .mt-score-control {
 
 body .mt-jury-dashboard .mt-score-adjust {
     background: var(--mt-bg-base) ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 50% ;
     width: 28px ;
     height: 28px ;
@@ -11395,7 +11416,7 @@ body .mt-jury-dashboard .mt-score-adjust .dashicons {
 body .mt-jury-dashboard .mt-score-input {
     width: 50px ;
     text-align: center ;
-    border: 2px solid var(--mt-blue-accent) ;
+    border: 2px solid var(--mt-color-border) /* Updated to use v4 token */ ;
     border-radius: 4px ;
     padding: 4px ;
     font-size: 14px ;
@@ -11424,7 +11445,7 @@ body .mt-jury-dashboard .mt-inline-actions {
     justify-content: center ;
     margin-top: 15px ;
     padding-top: 15px ;
-    border-top: 1px solid var(--mt-blue-accent) ;
+    border-top: 1px solid var(--mt-color-border) /* Updated to use v4 token */ ;
 }
 
 body .mt-jury-dashboard .mt-btn-save-inline,
@@ -11633,7 +11654,7 @@ body .mt-jury-dashboard .mt-no-rankings {
     font-size: 16px;
     font-weight: bold;
     color: var(--mt-primary);
-    background: var(--mt-blue-accent);
+    background: var(--mt-color-border) /* Updated to use v4 token */;
     margin: 0 auto;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     border: 2px solid var(--mt-bg-base);
@@ -11646,7 +11667,7 @@ body .mt-jury-dashboard .mt-no-rankings {
 }
 
 .mt-eval-row.position-silver .mt-position-badge {
-    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    background: linear-gradient(135deg, var(--mt-color-border) /* Updated to use v4 token */, var(--mt-secondary));
     color: var(--mt-primary);
     border: 2px solid var(--mt-secondary);
 }
@@ -13402,16 +13423,17 @@ body.admin-bar .mt-modal {
  * @since 2025-08-17
  */
 
+/* DISABLED DUPLICATE :root SECTION - v4 tokens imported above provide all these values
 :root {
     /* ===================================
-       BRAND COLORS - Primary Palette
+       BRAND COLORS - Primary Palette (NOW PROVIDED BY V4)
     =================================== */
     
-    /* System Colors */
-    --mt-primary: #003C3D;          /* Dark Petrol - Headers, Primary Text */
-    --mt-secondary: #004C5F;         /* Dark Indigo - Links, Secondary Elements */
-    --mt-body-text: #302C37;         /* Dark Gray - Body Text */
-    --mt-accent: #C1693C;            /* Copper - CTAs, Highlights */
+    /* System Colors (AVAILABLE IN V4) */
+    /* --mt-primary: #003C3D; */          /* Available as --mt-color-primary in v4 */
+    /* --mt-secondary: #004C5F; */        /* Available as --mt-color-secondary in v4 */
+    /* --mt-body-text: #302C37; */        /* Available as --mt-color-text in v4 */
+    /* --mt-accent: #C1693C; */           /* Available as --mt-color-accent in v4 */
     
     /* Extended Palette */
     --mt-kupfer-soft: #B86F52;       /* Soft Copper - Hover States */
@@ -13496,7 +13518,7 @@ body.admin-bar .mt-modal {
     /* Borders */
     --mt-border-width: 1px;
     --mt-border-style: solid;
-    --mt-border-color: var(--mt-blue-accent);
+    --mt-border-color: var(--mt-color-border) /* Updated to use v4 token */;
     --mt-border: var(--mt-border-width) var(--mt-border-style) var(--mt-border-color);
     
     /* Z-Index Scale */
@@ -13588,12 +13610,12 @@ body.admin-bar .mt-modal {
     --mt-table-striped-bg: var(--mt-gray-50);
     
     /* Badges */
-    --mt-badge-padding-x: 0.5rem;
-    --mt-badge-padding-y: 0.25rem;
-    --mt-badge-font-size: var(--mt-font-size-sm);
-    --mt-badge-font-weight: var(--mt-font-weight-semibold);
-    --mt-badge-border-radius: var(--mt-radius-sm);
-}
+    /* --mt-badge-padding-x: 0.5rem; */        /* Available in v4 */
+    /* --mt-badge-padding-y: 0.25rem; */       /* Available in v4 */
+    /* --mt-badge-font-size: var(--mt-font-size-sm); */  /* Available in v4 */
+    /* --mt-badge-font-weight: var(--mt-font-weight-semibold); */ /* Available in v4 */
+    /* --mt-badge-border-radius: var(--mt-radius-sm); */ /* Available in v4 */
+/* END DISABLED DUPLICATE :root SECTION */
 
 /* Dark mode support (future enhancement) */
 @media (prefers-color-scheme: dark) {

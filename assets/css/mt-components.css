@@ -2,35 +2,37 @@
  * Mobility Trailblazers - Component Library
  * Reusable UI components for consistent design across the platform
  * 
- * Dependencies: mt-variables.css (must be loaded first)
+ * Dependencies: v4/mt-tokens.css (CSS v4 token system)
  * 
- * @version 1.0.0
- * @since 2025-08-17
+ * @version 2.0.0
+ * @since 2025-08-25
  */
+
+/* v4 tokens loaded separately as 'mt-v4-tokens' stylesheet dependency */
 
 /* ===================================
    BUTTONS
    =================================== */
 
-/* Base Button Styles */
+/* Base Button Styles - Using v4 Tokens */
 .mt-btn,
 .mt-button,
 .button.mt-action {
     display: inline-block;
-    background: var(--mt-accent);
-    color: #ffffff;
-    border: none;
-    padding: var(--mt-btn-padding-y) var(--mt-btn-padding-x);
-    border-radius: var(--mt-btn-border-radius);
+    background: var(--mt-button-gradient);
+    color: var(--mt-button-text-color);
+    border: var(--mt-button-border);
+    padding: 0.75em 1.5em;
+    border-radius: var(--mt-button-radius);
     cursor: pointer;
-    font-size: var(--mt-btn-font-size);
-    font-weight: var(--mt-btn-font-weight);
+    font-size: inherit;
+    font-weight: inherit;
     text-decoration: none;
-    transition: var(--mt-btn-transition);
+    transition: var(--mt-transition);
     position: relative;
     overflow: hidden;
-    font-family: var(--mt-font-primary);
-    line-height: var(--mt-line-height-normal);
+    font-family: inherit;
+    line-height: var(--mt-leading-headings);
     text-align: center;
     vertical-align: middle;
     white-space: nowrap;
@@ -38,15 +40,17 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    box-shadow: var(--mt-button-shadow);
 }
 
 .mt-btn:hover,
 .mt-button:hover,
 .button.mt-action:hover {
-    background: var(--mt-kupfer-bold);
+    background: var(--mt-button-hover-bg);
     transform: translateY(-2px);
     box-shadow: var(--mt-shadow-md);
-    color: #ffffff;
+    color: var(--mt-button-hover-text);
+    border-color: var(--mt-button-hover-border);
     text-decoration: none;
 }
 
