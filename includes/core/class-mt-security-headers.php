@@ -40,13 +40,8 @@ class MT_Security_Headers {
         add_action('send_headers', [__CLASS__, 'add_security_headers'], 1);
         add_action('admin_init', [__CLASS__, 'add_admin_security_headers'], 1);
         
-        // Add CSP nonce to script tags
-        add_filter('script_loader_tag', [__CLASS__, 'add_nonce_to_scripts'], 10, 3);
-        add_filter('style_loader_tag', [__CLASS__, 'add_nonce_to_styles'], 10, 3);
-        
-        // Make nonce available to JavaScript
-        add_action('wp_head', [__CLASS__, 'print_csp_nonce'], 1);
-        add_action('admin_head', [__CLASS__, 'print_csp_nonce'], 1);
+        // Removed nonce filters as we're using 'unsafe-inline' for compatibility
+        // with WordPress, Elementor, and third-party plugins
     }
     
     /**
@@ -77,12 +72,10 @@ class MT_Security_Headers {
             return;
         }
         
-        $nonce = self::get_csp_nonce();
-        
         // Content Security Policy
         $csp_directives = [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$nonce}' 'unsafe-inline' https://ajax.googleapis.com https://cdnjs.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.googleapis.com https://cdnjs.cloudflare.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
             "img-src 'self' data: https: http:",
             "font-src 'self' data: https://fonts.gstatic.com",
@@ -93,11 +86,6 @@ class MT_Security_Headers {
             "object-src 'none'",
             "frame-src 'none'"
         ];
-        
-        // Allow for development environment
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $csp_directives[] = "script-src-elem 'self' 'nonce-{$nonce}' 'unsafe-inline'";
-        }
         
         $csp = implode('; ', $csp_directives);
         
@@ -132,7 +120,6 @@ class MT_Security_Headers {
         }
         
         // Less restrictive CSP for admin (WordPress admin needs inline scripts)
-        $nonce = self::get_csp_nonce();
         
         $csp_directives = [
             "default-src 'self'",
