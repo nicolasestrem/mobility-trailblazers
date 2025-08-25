@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Background Image Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .header-preview {
+            margin-bottom: 30px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .header-preview h2 {
+            background: #f5f5f5;
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .mt-dashboard-header {
+            padding: 40px 30px;
+            color: white;
+            position: relative;
+            min-height: 200px;
+        }
+        
+        .mt-dashboard-header h1 {
+            color: white;
+            font-size: 28px;
+            margin: 0 0 10px 0;
+        }
+        
+        .mt-dashboard-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        /* Test 1: With background image */
+        .test-with-image {
+            background-image: url('http://localhost:8080/wp-content/uploads/2025/08/Background.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* Test 2: Fallback gradient */
+        .test-gradient {
+            background: linear-gradient(135deg, #003C3D 0%, #004C5F 100%);
+        }
+        
+        .code-preview {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Jury Dashboard Header Background Test</h1>
+        
+        <div class="status success">
+            ✅ <strong>Fix Applied:</strong> The hardcoded inline style with !important has been removed from the jury dashboard template.
+        </div>
+        
+        <div class="status info">
+            ℹ️ <strong>Expected Behavior:</strong> The header should display the background image from mt_dashboard_settings if set, otherwise fall back to gradient.
+        </div>
+        
+        <div class="header-preview">
+            <h2>Preview 1: With Background Image (Expected on localhost:8080)</h2>
+            <div class="mt-dashboard-header test-with-image">
+                <h1>Welcome, Jury Member</h1>
+                <p>Review and evaluate your assigned candidates for the Mobility Trailblazers Awards</p>
+            </div>
+        </div>
+        
+        <div class="header-preview">
+            <h2>Preview 2: Fallback Gradient (When no image is set)</h2>
+            <div class="mt-dashboard-header test-gradient">
+                <h1>Welcome, Jury Member</h1>
+                <p>Review and evaluate your assigned candidates for the Mobility Trailblazers Awards</p>
+            </div>
+        </div>
+        
+        <h2>Implementation Details</h2>
+        
+        <div class="code-preview">
+<strong>PHP Code in jury-dashboard.php (Lines 97-108):</strong>
+
+&lt;?php 
+// Build header style with background image if available
+$header_style = '';
+if (!empty($dashboard_settings['header_image_url'])) {
+    // Use the background image from settings
+    $header_style = 'background-image: url(' . esc_url($dashboard_settings['header_image_url']) . '); 
+                     background-size: cover; background-position: center; background-repeat: no-repeat;';
+} else {
+    // Fallback to gradient if no image is set
+    $header_style = 'background: linear-gradient(135deg, #003C3D 0%, #004C5F 100%);';
+}
+?&gt;
+&lt;div class="&lt;?php echo esc_attr($header_class); ?&gt; mt-header-image" style="&lt;?php echo esc_attr($header_style); ?&gt;"&gt;
+        </div>
+        
+        <h2>Settings Configuration</h2>
+        
+        <div class="code-preview">
+<strong>Expected mt_dashboard_settings values:</strong>
+
+array(
+    'header_style' => 'gradient',
+    'primary_color' => '#667eea',
+    'secondary_color' => '#764ba2',
+    'header_image_url' => 'http://localhost:8080/wp-content/uploads/2025/08/Background.webp',
+    // ... other settings
+)
+        </div>
+        
+        <h2>Next Steps</h2>
+        
+        <ol>
+            <li>Navigate to <strong>Admin → MT Award System → Settings</strong></li>
+            <li>In the <strong>Jury Dashboard Customization</strong> section, find <strong>Header Background Image</strong></li>
+            <li>Set the URL to: <code>http://localhost:8080/wp-content/uploads/2025/08/Background.webp</code></li>
+            <li>Or use the "Choose Image" button to select from Media Library</li>
+            <li>Save the settings</li>
+            <li>Visit the jury dashboard to verify the background image is displayed</li>
+        </ol>
+        
+        <div class="status info">
+            💡 <strong>Note:</strong> If the image still doesn't appear after setting it in the admin, clear your browser cache and any WordPress caching plugins.
+        </div>
+    </div>
+</body>
+</html>

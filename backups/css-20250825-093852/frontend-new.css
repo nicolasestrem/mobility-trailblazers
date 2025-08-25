@@ -1,0 +1,631 @@
+/**
+ * Mobility Trailblazers Frontend Core Styles
+ * Version: 3.0.0
+ * Updated: 2025-08-17
+ * 
+ * Dependencies: mt-variables.css, mt-components.css
+ * 
+ * This file contains core frontend styles ONLY:
+ * - General containers
+ * - Winners display
+ * - Progress indicators
+ * - Notifications
+ * - Loading states
+ * - Statistics
+ * - Language switcher
+ * 
+ * Split into modules:
+ * - mt-candidate-grid.css (grid system)
+ * - mt-evaluation-forms.css (evaluation interfaces)
+ * - mt-jury-dashboard-enhanced.css (jury features)
+ */
+
+/* ===================================
+   GENERAL FRONTEND STYLES
+   =================================== */
+
+/* General Frontend Styles */
+.mt-container {
+    background: var(--mt-bg-beige);
+    padding: 30px;
+    border-radius: 12px;
+    color: var(--mt-body-text);
+    margin: 20px 0;
+}
+
+.mt-container h1,
+.mt-container h2,
+.mt-container h3,
+.mt-container h4 {
+    color: var(--mt-primary);
+    font-weight: 600;
+}
+
+.mt-container a {
+    color: var(--mt-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.mt-container a:hover {
+    color: var(--mt-accent);
+    text-decoration: underline;
+}
+
+/* ===================================
+   WINNERS DISPLAY
+   =================================== */
+
+/* Winners Display */
+.mt-winners-display {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 40px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.mt-winners-header {
+    margin-bottom: 40px;
+}
+
+.mt-winners-header h2 {
+    font-size: 36px;
+    color: var(--mt-primary);
+    margin: 0 0 10px 0;
+}
+
+.mt-winner-category {
+    margin: 40px 0;
+}
+
+.mt-category-title {
+    font-size: 24px;
+    color: var(--mt-secondary);
+    margin-bottom: 20px;
+}
+
+.mt-winner-card {
+    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 8px 24px rgba(0, 60, 61, 0.2);
+}
+
+.mt-winner-rank {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+}
+
+.mt-winner-name {
+    font-size: 28px;
+    margin: 0 0 10px 0;
+}
+
+.mt-winner-score {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+/* ===================================
+   PROGRESS INDICATOR
+   =================================== */
+
+/* Progress Indicator */
+.mt-progress-indicator {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.mt-progress-step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--mt-blue-accent);
+    color: var(--mt-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 10px;
+    position: relative;
+}
+
+.mt-progress-step.active {
+    background: var(--mt-primary);
+    color: white;
+}
+
+.mt-progress-step.completed {
+    background: var(--mt-accent);
+    color: white;
+}
+
+.mt-progress-step::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 2px;
+    background: var(--mt-blue-accent);
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.mt-progress-step:last-child::after {
+    display: none;
+}
+
+/* ===================================
+   NOTIFICATIONS
+   =================================== */
+
+/* Notifications */
+.mt-notification {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mt-notification-success {
+    background: rgba(0, 60, 61, 0.1);
+    border: 1px solid var(--mt-primary);
+    color: var(--mt-primary);
+}
+
+.mt-notification-error {
+    background: rgba(193, 105, 60, 0.1);
+    border: 1px solid var(--mt-accent);
+    color: var(--mt-accent);
+}
+
+.mt-notification-info {
+    background: rgba(164, 220, 213, 0.2);
+    border: 1px solid var(--mt-blue-accent);
+    color: var(--mt-secondary);
+}
+
+/* ===================================
+   LOADING STATES
+   =================================== */
+
+/* Loading States */
+.mt-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--mt-overlay-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.mt-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: mt-spin 1s linear infinite;
+}
+
+@keyframes mt-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===================================
+   EVALUATION STATISTICS
+   =================================== */
+
+/* Evaluation Statistics Styles */
+.mt-evaluation-stats {
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+}
+
+.mt-evaluation-stats h3 {
+    color: var(--mt-primary);
+    font-size: 24px;
+    margin: 0 0 20px 0;
+    font-weight: 600;
+}
+
+.mt-evaluation-stats h4 {
+    color: var(--mt-secondary);
+    font-size: 18px;
+    margin: 20px 0 15px 0;
+    font-weight: 600;
+}
+
+/* Stats Grid */
+.mt-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mt-stat-box {
+    background: var(--mt-bg-beige);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.mt-stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--mt-secondary);
+}
+
+.mt-stat-box .mt-stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--mt-primary);
+    margin: 0;
+    display: block;
+}
+
+.mt-stat-box .mt-stat-label {
+    font-size: 14px;
+    color: var(--mt-body-text);
+    margin-top: 5px;
+    display: block;
+}
+
+/* Criteria Stats */
+.mt-criteria-stats {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid var(--mt-blue-accent);
+}
+
+.mt-criteria-bars {
+    margin-top: 20px;
+}
+
+.mt-criterion-bar {
+    margin-bottom: 15px;
+}
+
+.mt-bar-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mt-primary);
+    margin-bottom: 5px;
+}
+
+.mt-bar-container {
+    background: var(--mt-blue-accent);
+    border-radius: 20px;
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mt-bar-fill {
+    background: linear-gradient(90deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    transition: width 0.5s ease;
+}
+
+.mt-bar-value {
+    color: var(--mt-bg-base);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Category Stats */
+.mt-category-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mt-category-stat-item {
+    background: var(--mt-bg-beige);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.mt-category-stat-item h4 {
+    margin: 0 0 15px 0;
+    color: var(--mt-primary);
+    font-size: 16px;
+}
+
+.mt-category-metrics {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.mt-metric {
+    font-size: 14px;
+    color: var(--mt-body-text);
+}
+
+.mt-metric strong {
+    display: block;
+    font-size: 24px;
+    color: var(--mt-secondary);
+    margin-bottom: 5px;
+}
+
+/* Jury Stats Table */
+.mt-jury-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.mt-jury-stats-table th {
+    background: var(--mt-primary);
+    color: var(--mt-bg-base);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.mt-jury-stats-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--mt-blue-accent);
+    color: var(--mt-body-text);
+}
+
+.mt-jury-stats-table tr:last-child td {
+    border-bottom: none;
+}
+
+.mt-jury-stats-table tr:hover {
+    background: rgba(164, 220, 213, 0.1);
+}
+
+/* Mini Progress Bar */
+.mt-progress-mini {
+    background: var(--mt-blue-accent);
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mt-progress-mini-fill {
+    background: linear-gradient(90deg, var(--mt-primary) 0%, var(--mt-secondary) 100%);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.mt-progress-mini-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mt-primary);
+}
+
+/* ===================================
+   LANGUAGE SWITCHER
+   =================================== */
+
+/* Language Switcher */
+.mt-language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 20px;
+    padding: 5px;
+}
+
+.mt-language-switcher .mt-lang-option {
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.mt-language-switcher .mt-lang-option:hover {
+    background: var(--mt-bg-beige);
+}
+
+.mt-language-switcher .mt-lang-option.active {
+    background: var(--mt-primary);
+    color: white;
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+/* Text Utilities */
+.mt-text-center {
+    text-align: center !important;
+}
+
+.mt-text-left {
+    text-align: left !important;
+}
+
+.mt-text-right {
+    text-align: right !important;
+}
+
+/* Spacing Utilities */
+.mt-mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mt-mb-1 {
+    margin-bottom: 10px !important;
+}
+
+.mt-mb-2 {
+    margin-bottom: 20px !important;
+}
+
+.mt-mb-3 {
+    margin-bottom: 30px !important;
+}
+
+.mt-mt-0 {
+    margin-top: 0 !important;
+}
+
+.mt-mt-1 {
+    margin-top: 10px !important;
+}
+
+.mt-mt-2 {
+    margin-top: 20px !important;
+}
+
+.mt-mt-3 {
+    margin-top: 30px !important;
+}
+
+/* Display Utilities */
+.mt-d-none {
+    display: none !important;
+}
+
+.mt-d-block {
+    display: block !important;
+}
+
+.mt-d-flex {
+    display: flex !important;
+}
+
+.mt-d-grid {
+    display: grid !important;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* General Responsive Adjustments */
+@media (max-width: 768px) {
+    .mt-container {
+        padding: 20px;
+    }
+    
+    .mt-winners-display {
+        padding: 30px 20px;
+    }
+    
+    .mt-winner-card {
+        padding: 20px;
+    }
+    
+    .mt-winner-rank {
+        font-size: 36px;
+    }
+    
+    .mt-winner-name {
+        font-size: 24px;
+    }
+    
+    .mt-evaluation-stats {
+        padding: 20px;
+    }
+    
+    .mt-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .mt-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-category-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-progress-step {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        margin: 0 5px;
+    }
+    
+    .mt-progress-step::after {
+        width: 40px;
+    }
+}
+
+/* ===================================
+   CRITICAL FIXES
+   =================================== */
+
+/* Hero Pattern Fix - Added 2025-08-17 */
+.mt-hero-pattern {
+    max-height: 400px !important;
+    overflow: hidden !important;
+}
+
+/* Force Evaluation Criteria title to be visible - Priority fix */
+body .mt-evaluation-page .mt-section-title,
+body .mt-scoring-section h2 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: var(--mt-primary, #212529) !important;
+    margin: 0 0 20px 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    display: block !important;
+    visibility: visible !important;
+    text-align: center !important;
+}
+
+/* Center Evaluation Criteria - Added 2025-08-17 */
+.mt-scoring-section {
+    text-align: center !important;
+}
+
+.mt-scoring-section h2 {
+    text-align: center !important;
+    width: 100% !important;
+    display: block !important;
+}
+
+/* Evaluation Header Layout */
+.mt-scoring-section .mt-evaluation-header {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}

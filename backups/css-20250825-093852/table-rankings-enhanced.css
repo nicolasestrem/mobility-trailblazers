@@ -1,0 +1,412 @@
+/**
+ * Mobility Trailblazers - Table Rankings Enhanced Styles
+ * Version: 1.0.0
+ * 
+ * Additional styles for the enhanced table-based rankings system
+ */
+
+/* Enhanced Tooltip Styles */
+.mt-enhanced-tooltip {
+    position: absolute;
+    background: var(--mt-primary);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    display: none;
+}
+
+.mt-enhanced-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--mt-primary);
+}
+
+/* Score Change Indicator Animation */
+.mt-score-change-indicator {
+    position: absolute;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 1;
+}
+
+.mt-score-change-indicator.positive {
+    color: #22c55e;
+}
+
+.mt-score-change-indicator.negative {
+    color: #ef4444;
+}
+
+/* Batch Save Button */
+.mt-btn-batch-save {
+    background: var(--mt-accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mt-btn-batch-save:hover {
+    background: var(--mt-kupfer-bold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(193, 105, 60, 0.3);
+}
+
+.mt-btn-batch-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Export Button */
+.mt-btn-export-rankings {
+    background: var(--mt-secondary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    float: right;
+    margin-top: -35px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mt-btn-export-rankings:hover {
+    background: var(--mt-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 60, 61, 0.2);
+}
+
+/* Enhanced Score Input Focus States */
+.mt-eval-score-input:focus {
+    outline: none;
+    border: 2px solid var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+    background: white;
+}
+
+.mt-eval-score-input:hover {
+    border-color: var(--mt-secondary);
+}
+
+/* Keyboard Navigation Indicators */
+.mt-eval-score-input.keyboard-focus {
+    outline: 2px solid var(--mt-accent);
+    outline-offset: 2px;
+}
+
+/* Score Medium Color */
+.mt-eval-score-input.score-medium,
+.mt-eval-total-score.score-medium {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #d97706;
+}
+
+/* Row Animation States */
+.mt-eval-row.saving {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.mt-eval-row.saved {
+    animation: savedFlash 0.6s ease;
+}
+
+@keyframes savedFlash {
+    0% {
+        background-color: rgba(164, 220, 213, 0.4);
+    }
+    100% {
+        background-color: rgba(164, 220, 213, 0.1);
+    }
+}
+
+/* Revert Changes Indicator */
+.mt-eval-row.reverting .mt-eval-score-input {
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+/* Improved Table Scrollbar */
+.mt-evaluation-table-wrap::-webkit-scrollbar {
+    height: 8px;
+}
+
+.mt-evaluation-table-wrap::-webkit-scrollbar-track {
+    background: var(--mt-bg-beige);
+    border-radius: 4px;
+}
+
+.mt-evaluation-table-wrap::-webkit-scrollbar-thumb {
+    background: var(--mt-blue-accent);
+    border-radius: 4px;
+}
+
+.mt-evaluation-table-wrap::-webkit-scrollbar-thumb:hover {
+    background: var(--mt-secondary);
+}
+
+/* Table Sort Indicators */
+.mt-evaluation-table th.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px;
+}
+
+.mt-evaluation-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 12px;
+}
+
+.mt-evaluation-table th.sortable:hover::after {
+    opacity: 0.7;
+}
+
+.mt-evaluation-table th.sortable.sorted-asc::after {
+    content: '▲';
+    opacity: 1;
+}
+
+.mt-evaluation-table th.sortable.sorted-desc::after {
+    content: '▼';
+    opacity: 1;
+}
+
+/* Quick Actions Menu */
+.mt-quick-actions {
+    position: absolute;
+    background: white;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 8px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: none;
+}
+
+.mt-quick-actions button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--mt-body-text);
+    transition: background 0.2s;
+}
+
+.mt-quick-actions button:hover {
+    background: var(--mt-bg-beige);
+    color: var(--mt-primary);
+}
+
+/* Responsive Enhancements */
+@media (max-width: 1200px) {
+    .mt-evaluation-table {
+        font-size: 14px;
+        min-width: 700px;
+    }
+    
+    .mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
+        min-width: 70px;
+        width: 70px;
+    }
+    
+    .mt-eval-score-input {
+        width: 55px;
+        min-width: 55px;
+        font-size: 13px;
+        padding: 6px 4px;
+    }
+    
+    .mt-btn-save-eval,
+    .mt-btn-full-evaluation {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mt-btn-export-rankings {
+        float: none;
+        margin-top: 10px;
+        margin-left: auto;
+        display: block;
+    }
+    
+    .mt-evaluation-table {
+        font-size: 13px;
+        min-width: 650px;
+    }
+    
+    .mt-evaluation-table th:nth-child(n+3):nth-child(-n+7) {
+        min-width: 60px;
+        width: 60px;
+    }
+    
+    .mt-evaluation-table th:nth-child(2) {
+        min-width: 160px;
+    }
+    
+    .mt-eval-score-input {
+        width: 50px;
+        min-width: 50px;
+        padding: 4px 2px;
+        font-size: 12px;
+    }
+    
+    .mt-evaluation-table-wrap {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .mt-btn-save-eval,
+    .mt-btn-full-evaluation,
+    .mt-btn-batch-save,
+    .mt-btn-export-rankings {
+        display: none !important;
+    }
+    
+    .mt-evaluation-table {
+        border: 1px solid #000;
+    }
+    
+    .mt-evaluation-table th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .mt-eval-score-input {
+        border: none;
+        background: none;
+    }
+}
+
+/* Accessibility Improvements */
+.mt-eval-score-input[aria-invalid="true"] {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.mt-eval-score-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Screen Reader Only Text */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Loading State for Table */
+.mt-evaluation-table.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.mt-evaluation-table.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--mt-blue-accent);
+    border-top-color: var(--mt-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Success Message Animation */
+.mt-success-message {
+    position: fixed;
+    top: 50px;
+    right: -300px;
+    background: var(--mt-primary);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10000;
+    animation: slideIn 0.3s forwards, slideOut 0.3s 2s forwards;
+}
+
+@keyframes slideIn {
+    to {
+        right: 20px;
+    }
+}
+
+@keyframes slideOut {
+    to {
+        right: -300px;
+    }
+}
+

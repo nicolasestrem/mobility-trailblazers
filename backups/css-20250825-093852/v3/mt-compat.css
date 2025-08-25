@@ -1,0 +1,12 @@
+/**
+ * Mobility Trailblazers v3 - Compatibility
+ * Ensures beige background on common wrappers
+ */
+
+/* Beige hard lock on common wrappers, tiny and safe */
+.site,
+.mt-wrapper,
+.elementor-location-archive,
+.elementor-location-single {
+  background: var(--mt-bg-beige);
+}

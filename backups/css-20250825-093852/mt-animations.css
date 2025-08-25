@@ -1,0 +1,320 @@
+/**
+ * Mobility Trailblazers Animation Effects
+ * 
+ * @package MobilityTrailblazers
+ * @since 2.5.27
+ */
+
+/* Base Animation Classes */
+.mt-animations-enabled {
+    --mt-transition-speed: 0.3s;
+    --mt-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth Transitions for all interactive elements */
+.mt-animations-enabled * {
+    transition: opacity var(--mt-transition-speed) var(--mt-transition-easing),
+                transform var(--mt-transition-speed) var(--mt-transition-easing),
+                box-shadow var(--mt-transition-speed) var(--mt-transition-easing),
+                background-color var(--mt-transition-speed) var(--mt-transition-easing),
+                border-color var(--mt-transition-speed) var(--mt-transition-easing),
+                color var(--mt-transition-speed) var(--mt-transition-easing);
+}
+
+/* Fade In Animation */
+@keyframes mtFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scale Animation */
+@keyframes mtScale {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Slide In From Left */
+@keyframes mtSlideInLeft {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Slide In From Right */
+@keyframes mtSlideInRight {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Pulse Animation */
+@keyframes mtPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Apply animations to specific elements */
+.mt-animations-enabled .mt-candidate-card {
+    animation: mtFadeIn 0.5s var(--mt-transition-easing) forwards;
+    animation-fill-mode: both;
+}
+
+.mt-animations-enabled .mt-candidate-card:nth-child(1) { animation-delay: 0.1s; }
+.mt-animations-enabled .mt-candidate-card:nth-child(2) { animation-delay: 0.15s; }
+.mt-animations-enabled .mt-candidate-card:nth-child(3) { animation-delay: 0.2s; }
+.mt-animations-enabled .mt-candidate-card:nth-child(4) { animation-delay: 0.25s; }
+.mt-animations-enabled .mt-candidate-card:nth-child(5) { animation-delay: 0.3s; }
+.mt-animations-enabled .mt-candidate-card:nth-child(6) { animation-delay: 0.35s; }
+
+/* Evaluation Form Animations */
+.mt-animations-enabled .mt-evaluation-criterion {
+    animation: mtSlideInLeft 0.4s var(--mt-transition-easing) forwards;
+    animation-fill-mode: both;
+}
+
+.mt-animations-enabled .mt-evaluation-criterion:nth-child(1) { animation-delay: 0.1s; }
+.mt-animations-enabled .mt-evaluation-criterion:nth-child(2) { animation-delay: 0.2s; }
+.mt-animations-enabled .mt-evaluation-criterion:nth-child(3) { animation-delay: 0.3s; }
+.mt-animations-enabled .mt-evaluation-criterion:nth-child(4) { animation-delay: 0.4s; }
+.mt-animations-enabled .mt-evaluation-criterion:nth-child(5) { animation-delay: 0.5s; }
+
+/* Button Animations */
+.mt-animations-enabled .mt-button,
+.mt-animations-enabled button[type="submit"],
+.mt-animations-enabled .button {
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+}
+
+.mt-animations-enabled .mt-button::before,
+.mt-animations-enabled button[type="submit"]::before,
+.mt-animations-enabled .button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.mt-animations-enabled .mt-button:active::before,
+.mt-animations-enabled button[type="submit"]:active::before,
+.mt-animations-enabled .button:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Hover Effects (when enabled) */
+.mt-hover-effects .mt-candidate-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mt-hover-effects .mt-candidate-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.mt-hover-effects .mt-button,
+.mt-hover-effects button,
+.mt-hover-effects .button,
+.mt-hover-effects a.button {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.mt-hover-effects .mt-button:hover,
+.mt-hover-effects button:hover,
+.mt-hover-effects .button:hover,
+.mt-hover-effects a.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Score Button Hover Effects */
+.mt-hover-effects .mt-score-button {
+    transition: all 0.2s ease;
+}
+
+.mt-hover-effects .mt-score-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.2);
+}
+
+.mt-hover-effects .mt-score-button.selected {
+    animation: mtPulse 0.5s ease;
+}
+
+/* Image Hover Effects */
+.mt-hover-effects .mt-candidate-photo,
+.mt-hover-effects .wp-post-image {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.mt-hover-effects .mt-candidate-card:hover .mt-candidate-photo,
+.mt-hover-effects .mt-candidate-card:hover .wp-post-image {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Link Hover Effects */
+.mt-hover-effects a {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.mt-hover-effects a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--mt-accent, #C1693C);
+    transition: width 0.3s ease;
+}
+
+.mt-hover-effects a:hover::after {
+    width: 100%;
+}
+
+/* Loading Animation */
+@keyframes mtLoading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.mt-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--mt-accent, #C1693C);
+    border-radius: 50%;
+    animation: mtLoading 1s linear infinite;
+}
+
+/* Success Animation */
+@keyframes mtSuccess {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.mt-success-indicator {
+    animation: mtSuccess 0.5s ease forwards;
+}
+
+/* Skeleton Loading for Cards */
+@keyframes mtShimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.mt-skeleton {
+    background: linear-gradient(90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 1000px 100%;
+    animation: mtShimmer 2s infinite;
+}
+
+/* Page Transition Effects */
+.mt-animations-enabled .mt-page-content {
+    animation: mtFadeIn 0.6s ease forwards;
+}
+
+/* Modal Animations */
+.mt-animations-enabled .mt-modal {
+    animation: mtScale 0.3s ease forwards;
+}
+
+.mt-animations-enabled .mt-modal-overlay {
+    animation: mtFadeIn 0.3s ease forwards;
+}
+
+/* Notification Animations */
+@keyframes mtSlideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.mt-animations-enabled .mt-notification,
+.mt-animations-enabled .notice {
+    animation: mtSlideDown 0.4s ease forwards;
+}
+
+/* Responsive Animations */
+@media (prefers-reduced-motion: reduce) {
+    .mt-animations-enabled *,
+    .mt-hover-effects * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Performance Optimization */
+.mt-animations-enabled .mt-candidate-card,
+.mt-animations-enabled .mt-button,
+.mt-animations-enabled .mt-modal {
+    will-change: transform, opacity;
+}
+
+/* Clean up after animations */
+.mt-animations-enabled [class*="mt-"]:not(:hover) {
+    will-change: auto;
+}

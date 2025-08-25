@@ -1,0 +1,84 @@
+﻿CSS Performance Test Report
+Generated: 2025-08-24 20:01:52
+==========================================
+
+## CSS FILE SIZE ANALYSIS
+==========================
+
+Total CSS Files: 57
+Total Size: 689.1 KB
+
+### By Directory:
+v4/: 6 files, 61.39 KB
+components/: 3 files, 36.72 KB
+refactored/: 2 files, 45.63 KB
+
+## !IMPORTANT USAGE ANALYSIS
+============================
+
+Total !important declarations: 4179
+
+Files with !important:
+  - frontend.css: 1106
+  - refactored\consolidated-fixes.css: 314
+  - mt-jury-dashboard-enhanced.css: 297
+  - mt-evaluation-forms.css: 278
+  - mt-hotfixes-consolidated.css: 272
+
+## PAGE LOAD PERFORMANCE
+========================
+
+Jury Dashboard: 449.6ms
+Candidate Profile: 144.05ms
+Homepage: 276.94ms
+
+Average Load Time: 290.2ms
+
+## CSS TOKEN SYSTEM
+==================
+
+CSS Custom Properties defined: 176
+
+Key Tokens Verified:
+  [OK] --mt-primary
+  [OK] --mt-space-md
+  [OK] --mt-font-base
+  [OK] --mt-shadow-md
+
+## BEM COMPONENT VERIFICATION
+=============================
+
+mt-candidate-card:
+  - Blocks: 64
+  - Elements: 41
+  - Modifiers: 19
+
+mt-evaluation-form:
+  - Blocks: 112
+  - Elements: 100
+  - Modifiers: 28
+
+mt-jury-dashboard:
+  - Blocks: 62
+  - Elements: 56
+  - Modifiers: 4
+
+
+## SUMMARY
+==========
+
+Performance Score: 70/100
+
+Recommendations:
+  - Consider further CSS consolidation (currently 57 files)
+  - High number of !important declarations (4179)
+
+## SUCCESS CRITERIA
+==================
+
+[FAIL] - CSS Files Consolidated: 57 (target: â‰¤20)
+[FAIL] - !important Removed: 4179 (target: â‰¤100)
+[PASS] - Average Load Time: 290.2ms (target: â‰¤2000ms)
+[PASS] - Token System Implemented: 176 (target: â‰¥50)
+[PASS] - BEM Components Created: 3 (target: â‰¥3)
+

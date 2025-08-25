@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Header Image - Admin Instructions</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #0073aa;
+            padding-bottom: 10px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #0073aa;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .step h3 {
+            margin-top: 0;
+            color: #0073aa;
+        }
+        
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .important {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .url-box {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        ul {
+            line-height: 2;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #0073aa;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 5px 0;
+        }
+        
+        .button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Fix Jury Dashboard Header Background Image</h1>
+        
+        <div class="success">
+            <strong>✅ Code Fix Applied:</strong> The hardcoded inline style with !important has been removed from the jury dashboard template. The header will now use the image from settings.
+        </div>
+        
+        <h2>📋 Admin Instructions</h2>
+        
+        <div class="step">
+            <h3>Step 1: Access WordPress Admin</h3>
+            <p>Log in to your WordPress admin panel at:</p>
+            <div class="url-box">http://localhost:8080/wp-admin/</div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Navigate to Settings</h3>
+            <p>Go to: <strong>MT Award System → Settings</strong></p>
+            <p>Or directly visit:</p>
+            <div class="url-box">http://localhost:8080/wp-admin/admin.php?page=mt-settings</div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Find Jury Dashboard Customization</h3>
+            <p>Scroll down to the <strong>"Jury Dashboard Customization"</strong> section.</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Set Header Background Image</h3>
+            <p>In the <strong>"Header Background Image"</strong> field, enter this URL:</p>
+            <div class="url-box">http://localhost:8080/wp-content/uploads/2025/08/Background.webp</div>
+            <p><strong>OR</strong> click the "Choose Image" button to select from the Media Library.</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 5: Save Settings</h3>
+            <p>Click the <strong>"Save Changes"</strong> button at the bottom of the page.</p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 6: Verify the Change</h3>
+            <p>Visit the jury dashboard to confirm the background image is displayed:</p>
+            <div class="url-box">http://localhost:8080/jury-dashboard/</div>
+        </div>
+        
+        <div class="important">
+            <strong>⚠️ Important Notes:</strong>
+            <ul>
+                <li>Clear your browser cache if the image doesn't appear immediately</li>
+                <li>Clear any WordPress caching plugins (WP Super Cache, W3 Total Cache, etc.)</li>
+                <li>The image should cover the entire header with proper scaling</li>
+                <li>If no image is set, the header will show a gradient fallback</li>
+            </ul>
+        </div>
+        
+        <h2>🔧 Technical Details</h2>
+        
+        <div class="step">
+            <h3>Files Modified</h3>
+            <ul>
+                <li><code>templates/frontend/jury-dashboard.php</code> (Lines 64-108)</li>
+                <li>Removed hardcoded inline style with !important</li>
+                <li>Added dynamic background image logic from settings</li>
+                <li>Added fallback gradient when no image is set</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3>Settings Structure</h3>
+            <p>The setting is stored in the WordPress options table as part of <code>mt_dashboard_settings</code>:</p>
+            <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;">
+$dashboard_settings = [
+    'header_image_url' => 'http://localhost:8080/wp-content/uploads/2025/08/Background.webp',
+    // ... other settings
+];
+            </pre>
+        </div>
+        
+        <h2>🐛 Troubleshooting</h2>
+        
+        <div class="step">
+            <h3>If the image still doesn't appear:</h3>
+            <ol>
+                <li>Check if the image URL is accessible in your browser</li>
+                <li>Inspect the element to see if CSS is being overridden</li>
+                <li>Check for any JavaScript console errors</li>
+                <li>Verify the image file exists in the uploads folder</li>
+                <li>Try using a different image format (jpg, png)</li>
+                <li>Check file permissions on the uploads directory</li>
+            </ol>
+        </div>
+        
+        <div class="success">
+            <strong>📧 Need Help?</strong> If you continue to experience issues, please provide:
+            <ul>
+                <li>Screenshot of the Settings page</li>
+                <li>Screenshot of the jury dashboard</li>
+                <li>Browser console errors (F12 → Console tab)</li>
+                <li>The URL you're using for the background image</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Debug Center - Unified Interface
  *
@@ -40,7 +40,7 @@ $is_production = $debug_manager->is_production();
     <?php if ($is_production): ?>
     <div class="notice notice-warning">
         <p>
-            <strong><?php _e('⚠️ Production Environment', 'mobility-trailblazers'); ?></strong><br>
+            <strong><?php _e('âš ï¸ Production Environment', 'mobility-trailblazers'); ?></strong><br>
             <?php _e('Debug features are limited and dangerous operations require additional confirmation.', 'mobility-trailblazers'); ?>
         </p>
     </div>

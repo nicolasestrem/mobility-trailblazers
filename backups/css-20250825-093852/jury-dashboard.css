@@ -1,0 +1,1006 @@
+/* Mobility Trailblazers Jury Dashboard - Brand Consistent Styles */
+
+/* Import brand colors from main CSS */
+@import url('frontend.css');
+
+/* ========================================
+   JURY DASHBOARD MAIN CONTAINER
+   ======================================== */
+.mt-jury-dashboard {
+    background: var(--mt-bg-base);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 20px 0;
+    box-shadow: var(--mt-shadow-md);
+}
+
+/* ========================================
+   DASHBOARD HEADER
+   ======================================== */
+.mt-dashboard-header {
+    background: #f8f9fa;
+    color: #212529;
+    padding: 40px;
+    border-radius: 12px;
+    margin: 0 0 30px 0;
+    text-align: center;
+    border: 2px solid #dee2e6;
+}
+
+.mt-dashboard-header h1 {
+    color: #212529;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.mt-dashboard-header p {
+    color: #6c757d;
+    font-size: 18px;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Progress Bar in Header */
+.mt-progress-bar {
+    background: rgba(255, 255, 255, 0.2);
+    height: 40px;
+    border-radius: 20px;
+    margin-top: 25px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mt-progress-bar.mt-progress-complete {
+    background: rgba(0, 163, 42, 0.1);
+    border: 2px solid #00a32a;
+}
+
+.mt-progress-fill {
+    background: white;
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+.mt-progress-complete .mt-progress-fill {
+    background: linear-gradient(90deg, #00a32a, #00c436);
+}
+
+.mt-progress-text {
+    color: var(--mt-primary);
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.mt-progress-complete .mt-progress-text {
+    color: white;
+}
+
+/* Completion Status Banner */
+.mt-completion-status-banner {
+    background: linear-gradient(135deg, #00a32a, #00c436);
+    color: white;
+    padding: 15px 20px;
+    margin: -40px -40px 20px -40px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 163, 42, 0.3);
+    animation: completionSlideDown 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-completion-status-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.mt-completion-status-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+
+.mt-completion-status-content .dashicons {
+    font-size: 24px;
+    animation: bounceIcon 1s ease-in-out infinite alternate;
+}
+
+.mt-completion-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-left: 10px;
+}
+
+/* Header when completed */
+.mt-header-completed {
+    border: 3px solid #00a32a;
+    position: relative;
+}
+
+.mt-completion-icon-header {
+    color: #ffd700;
+    margin-left: 10px;
+    display: inline-block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.mt-completion-icon-header .dashicons {
+    font-size: 32px;
+}
+
+/* Enhanced Completion Badge */
+.mt-completion-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    border: 3px solid #ffc107;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    animation: celebrateAnimation 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-completion-enhanced {
+    background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
+    background-size: 200% 200%;
+    animation: celebrateAnimation 0.8s ease-out, gradientShift 3s ease-in-out infinite;
+    transform: scale(1.02);
+    border: 3px solid #ff6b35;
+}
+
+.mt-completion-enhanced::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff6b35, #ffd700, #00a32a, #ffd700);
+    background-size: 400% 400%;
+    border-radius: 16px;
+    z-index: -1;
+    animation: gradientBorder 2s linear infinite;
+}
+
+.mt-completion-icon-large {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6b35, #ffc107);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.mt-completion-icon-large .dashicons {
+    font-size: 40px;
+    color: white;
+    animation: spin 3s linear infinite;
+}
+
+.mt-completion-text strong {
+    color: #664800;
+    font-size: 24px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.mt-completion-text p {
+    color: #664800;
+    font-size: 16px;
+    margin: 5px 0;
+    font-weight: 600;
+}
+
+.mt-completion-timestamp {
+    background: rgba(255, 255, 255, 0.8);
+    color: #00a32a;
+    padding: 8px 15px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-block;
+    border: 2px solid #00a32a;
+}
+
+@keyframes celebrateAnimation {
+    0% {
+        transform: scale(0.9) rotate(-5deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.08) rotate(2deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes completionSlideDown {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes bounceIcon {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes gradientBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   STATISTICS GRID
+   ======================================== */
+.mt-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 25px;
+    margin: 40px 0;
+}
+
+.mt-stat-card {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    transition: var(--mt-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.mt-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--mt-primary), var(--mt-secondary));
+}
+
+.mt-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--mt-shadow-lg);
+    border-color: var(--mt-secondary);
+}
+
+.mt-stat-icon {
+    font-size: 36px;
+    color: var(--mt-accent);
+    margin-bottom: 15px;
+}
+
+.mt-stat-number {
+    font-size: 42px;
+    font-weight: bold;
+    color: var(--mt-primary);
+    margin: 0;
+    line-height: 1;
+}
+
+.mt-stat-label {
+    font-size: 14px;
+    color: var(--mt-body-text);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   SEARCH AND FILTERS
+   ======================================== */
+.mt-search-filters {
+    background: var(--mt-bg-beige);
+    padding: 25px;
+    border-radius: 12px;
+    margin: 40px 0;
+}
+
+.mt-search-box {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mt-search-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 20px;
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 25px;
+    font-size: 16px;
+    background: var(--mt-bg-base);
+    transition: var(--mt-transition);
+}
+
+.mt-search-input:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+}
+
+.mt-filter-select {
+    padding: 12px 20px;
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 25px;
+    font-size: 16px;
+    background: var(--mt-bg-base);
+    min-width: 180px;
+    cursor: pointer;
+    transition: var(--mt-transition);
+}
+
+.mt-filter-select:hover {
+    border-color: var(--mt-secondary);
+}
+
+.mt-filter-select:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+}
+
+/* ========================================
+   CANDIDATES LIST
+   ======================================== */
+.mt-candidates-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+    gap: 25px;
+    margin: 40px 0;
+}
+
+.mt-candidate-card {
+    background: var(--mt-bg-base);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--mt-shadow-sm);
+    transition: var(--mt-transition);
+    position: relative;
+}
+
+.mt-candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--mt-shadow-lg);
+}
+
+.mt-candidate-header {
+    background: #f8f9fa;
+    padding: 20px;
+    text-align: center;
+    color: #212529;
+    border-bottom: 3px solid var(--mt-accent);
+}
+
+.mt-candidate-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 5px 0;
+}
+
+.mt-candidate-org {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.mt-candidate-body {
+    padding: 25px;
+    text-align: center;
+}
+
+.mt-candidate-category {
+    background: var(--mt-bg-beige);
+    color: var(--mt-secondary);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Evaluation Status Badges */
+.mt-evaluation-status {
+    margin: 20px 0;
+}
+
+.mt-status-badge {
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mt-status-pending {
+    background: rgba(164, 220, 213, 0.2);
+    color: var(--mt-secondary);
+    border: 2px solid var(--mt-blue-accent);
+}
+
+.mt-status-draft {
+    background: rgba(193, 105, 60, 0.1);
+    color: var(--mt-accent);
+    border: 2px solid var(--mt-accent);
+}
+
+.mt-status-completed {
+    background: var(--mt-primary);
+    color: var(--mt-bg-base);
+    border: 2px solid var(--mt-primary);
+}
+
+/* Evaluate Button */
+.mt-evaluate-btn {
+    display: inline-block;
+    background: var(--mt-accent);
+    color: white;
+    padding: 10px 25px;
+    border-radius: 25px;
+    margin-top: 20px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--mt-transition);
+}
+
+.mt-evaluate-btn:hover {
+    background: var(--mt-kupfer-soft);
+    transform: scale(1.05);
+    box-shadow: var(--mt-shadow-md);
+}
+
+/* ========================================
+   RANKINGS SECTION
+   ======================================== */
+.mt-rankings-section {
+    background: var(--mt-bg-beige);
+    border-radius: 16px;
+    padding: 40px;
+    margin: 40px 0;
+    box-shadow: var(--mt-shadow-sm);
+}
+
+.mt-rankings-header {
+    background: #ffffff;
+    color: #212529;
+    padding: 30px;
+    border-radius: 12px;
+    margin: 0 0 30px 0;
+    text-align: center;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.mt-rankings-header h2 {
+    color: #212529;
+    font-size: 32px;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.mt-rankings-subtitle {
+    color: #6c757d;
+    font-size: 18px;
+    font-weight: 400;
+}
+
+/* Rankings Grid */
+.mt-rankings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.mt-ranking-item {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    position: relative;
+    box-shadow: var(--mt-shadow-sm);
+    transition: var(--mt-transition);
+}
+
+.mt-ranking-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--mt-shadow-lg);
+}
+
+/* Position Badges */
+.mt-position-badge {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+    border: 3px solid white;
+    box-shadow: var(--mt-shadow-md);
+}
+
+.position-gold .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-accent), var(--mt-kupfer-bold));
+}
+
+.position-silver .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    color: var(--mt-primary);
+}
+
+.position-bronze .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-kupfer-soft), var(--mt-kupfer-bold));
+}
+
+/* Candidate Info in Rankings */
+.mt-ranking-item .mt-candidate-info {
+    padding-left: 40px;
+    border-bottom: 2px solid var(--mt-blue-accent);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-ranking-item .mt-candidate-name {
+    font-size: 20px;
+    color: var(--mt-primary);
+    margin: 0 0 8px 0;
+    font-weight: 700;
+}
+
+.mt-ranking-item .mt-candidate-meta {
+    font-size: 14px;
+    color: var(--mt-body-text);
+}
+
+/* Total Score Display */
+.mt-total-score-display {
+    background: linear-gradient(135deg, rgba(245, 230, 211, 0.5), rgba(164, 220, 213, 0.3));
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.score-label {
+    display: block;
+    font-size: 12px;
+    color: var(--mt-body-text);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    display: block;
+    font-size: 36px;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--mt-primary), var(--mt-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Inline Evaluation Controls */
+.mt-inline-evaluation-controls {
+    background: var(--mt-bg-beige);
+    border-radius: 12px;
+    padding: 25px 20px 20px;
+    margin: 20px -20px -20px -20px;
+    border-top: 3px solid var(--mt-blue-accent);
+}
+
+.mt-criteria-grid-inline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.mt-criterion-inline {
+    background: var(--mt-bg-base);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: var(--mt-shadow-sm);
+}
+
+.mt-criterion-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mt-secondary);
+    margin-bottom: 10px;
+}
+
+.mt-score-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.mt-score-adjust {
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--mt-secondary);
+    transition: var(--mt-transition);
+}
+
+.mt-score-adjust:hover {
+    background: var(--mt-accent);
+    border-color: var(--mt-accent);
+    color: white;
+    transform: scale(1.1);
+}
+
+.mt-score-input {
+    width: 55px;
+    padding: 5px;
+    text-align: center;
+    font-weight: 600;
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 6px;
+    background: var(--mt-bg-base);
+    font-size: 16px;
+}
+
+.mt-score-input:focus {
+    outline: none;
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(193, 105, 60, 0.1);
+}
+
+/* Inline Action Buttons */
+.mt-inline-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 2px solid var(--mt-blue-accent);
+}
+
+.mt-btn-save-inline,
+.mt-btn-full-evaluation {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: var(--mt-transition);
+    cursor: pointer;
+    border: none;
+}
+
+.mt-btn-save-inline {
+    background: var(--mt-accent);
+    color: white;
+    box-shadow: var(--mt-shadow-sm);
+}
+
+.mt-btn-save-inline:hover {
+    background: var(--mt-kupfer-soft);
+    transform: translateY(-2px);
+    box-shadow: var(--mt-shadow-md);
+}
+
+.mt-btn-full-evaluation {
+    background: var(--mt-secondary);
+    color: white;
+    box-shadow: var(--mt-shadow-sm);
+}
+
+.mt-btn-full-evaluation:hover {
+    background: var(--mt-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--mt-shadow-md);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 1200px) {
+    .mt-rankings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-criteria-grid-inline {
+        grid-template-columns: repeat(auto-fit, minmax(80px,1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .mt-jury-dashboard {
+        padding: 25px;
+    }
+    
+    .mt-completion-status-banner {
+        margin: -25px -25px 20px -25px;
+        padding: 12px 15px;
+    }
+    
+    .mt-completion-status-content {
+        font-size: 16px;
+    }
+    
+    .mt-completion-status-content .dashicons {
+        font-size: 20px;
+    }
+    
+    .mt-dashboard-header {
+        margin: -25px -25px 25px -25px;
+        padding: 25px;
+    }
+    
+    .mt-completion-icon-large {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .mt-completion-icon-large .dashicons {
+        font-size: 30px;
+    }
+    
+    .mt-completion-text strong {
+        font-size: 20px;
+    }
+    
+    .mt-dashboard-header h1 {
+        font-size: 26px;
+    }
+    
+    .mt-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .mt-candidates-list {
+        grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+        gap: 20px;
+    }
+    
+    .mt-rankings-section {
+        padding: 25px;
+    }
+    
+    .mt-rankings-header {
+        margin: -25px -25px 25px -25px;
+        padding: 25px;
+    }
+    
+    .mt-search-box {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .mt-search-input,
+    .mt-filter-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .mt-jury-dashboard {
+        padding: 20px;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .mt-completion-status-banner {
+        margin: -20px -20px 15px -20px;
+        padding: 10px;
+    }
+    
+    .mt-completion-status-content {
+        font-size: 14px;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .mt-completion-subtitle {
+        margin-left: 0;
+    }
+    
+    .mt-completion-icon-large {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .mt-completion-icon-large .dashicons {
+        font-size: 25px;
+    }
+    
+    .mt-completion-text strong {
+        font-size: 18px;
+    }
+    
+    .mt-completion-timestamp {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .mt-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-candidates-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-criteria-grid-inline {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .mt-inline-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mt-btn-save-inline,
+    .mt-btn-full-evaluation {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ========================================
+   ANIMATION EFFECTS
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mt-candidate-card {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.mt-ranking-item {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Loading States */
+.mt-loading {
+    position: relative;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.mt-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid var(--mt-blue-accent);
+    border-top-color: var(--mt-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+

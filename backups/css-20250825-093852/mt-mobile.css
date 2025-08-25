@@ -1,0 +1,658 @@
+/**
+ * Mobile-First Responsive Styles - Mobility Trailblazers v4
+ * 
+ * Mobile-optimized overrides and responsive design patterns
+ * Optimized for 70% mobile traffic expected for jury evaluation interface
+ * 
+ * @package MobilityTrailblazers
+ * @since 4.1.0
+ */
+
+/* ========================================================================
+   MOBILE-FIRST BASE STYLES
+   ========================================================================= */
+
+/* Touch-friendly base sizing for mobile */
+@media (max-width: 768px) {
+  .mt-root {
+    font-size: 16px; /* Ensure minimum readable font size */
+    line-height: 1.6;
+  }
+
+  /* Touch-friendly interactive elements - minimum 44x44px */
+  .mt-btn,
+  .mt-button,
+  .mt-score-button,
+  .mt-link-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--mt-space-3) var(--mt-space-4);
+    font-size: var(--mt-font-size-base);
+  }
+
+  /* Larger tap targets for sliders */
+  .mt-score-slider::-webkit-slider-thumb {
+    width: 32px;
+    height: 32px;
+    border: 4px solid white;
+  }
+
+  .mt-score-slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    border: 4px solid white;
+  }
+}
+
+/* ========================================================================
+   MOBILE NAVIGATION & HEADER
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-evaluation-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--mt-space-4);
+    padding: var(--mt-space-4);
+    margin-bottom: var(--mt-space-6);
+  }
+
+  .mt-back-link {
+    align-self: flex-start;
+    font-size: var(--mt-font-size-lg);
+    padding: var(--mt-space-2);
+  }
+
+  .mt-evaluation-title {
+    text-align: center;
+  }
+
+  .mt-evaluation-title h1 {
+    font-size: var(--mt-font-size-2xl);
+    line-height: 1.2;
+  }
+}
+
+/* ========================================================================
+   MOBILE CANDIDATE SHOWCASE
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-candidate-showcase {
+    padding: var(--mt-space-4);
+    margin-bottom: var(--mt-space-6);
+  }
+
+  .mt-candidate-showcase.mt-layout-side-by-side {
+    grid-template-columns: 1fr;
+    gap: var(--mt-space-4);
+    text-align: center;
+  }
+
+  .mt-candidate-photo-wrap {
+    grid-column: 1;
+    justify-self: center;
+    max-width: 160px;
+  }
+
+  .mt-candidate-details {
+    grid-column: 1;
+    text-align: center;
+  }
+
+  .mt-candidate-name {
+    font-size: var(--mt-font-size-2xl);
+    margin-bottom: var(--mt-space-3);
+  }
+
+  .mt-candidate-meta {
+    align-items: center;
+    text-align: center;
+  }
+
+  .mt-candidate-links {
+    flex-direction: column;
+    gap: var(--mt-space-2);
+  }
+
+  .mt-link-button {
+    justify-content: center;
+    padding: var(--mt-space-3) var(--mt-space-6);
+  }
+}
+
+/* ========================================================================
+   MOBILE EVALUATION FORMS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-evaluation-form {
+    padding: var(--mt-space-4);
+    margin: 0 -var(--mt-space-2);
+  }
+
+  .mt-criteria-grid {
+    grid-template-columns: 1fr;
+    gap: var(--mt-space-4);
+  }
+
+  .mt-criterion-card {
+    margin-bottom: var(--mt-space-4);
+  }
+
+  .mt-evaluation-form__criterion-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--mt-space-3);
+    padding: var(--mt-space-4);
+    text-align: left;
+  }
+
+  .mt-evaluation-form__criterion-icon {
+    align-self: center;
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+  }
+
+  .mt-criterion-info {
+    text-align: center;
+  }
+
+  .mt-criterion-label {
+    font-size: var(--mt-font-size-lg);
+    text-align: center;
+  }
+
+  .mt-criterion-description {
+    text-align: center;
+    font-size: var(--mt-font-size-base);
+  }
+
+  /* Mobile scoring controls */
+  .mt-scoring-control {
+    padding: var(--mt-space-4);
+  }
+
+  .mt-score-display {
+    position: static;
+    margin: var(--mt-space-4) auto 0;
+    width: 60px;
+    height: 60px;
+    font-size: var(--mt-font-size-2xl);
+  }
+}
+
+/* ========================================================================
+   MOBILE SLIDER IMPROVEMENTS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-score-slider-wrapper {
+    margin-bottom: var(--mt-space-6);
+    padding: 0 var(--mt-space-2);
+  }
+
+  .mt-score-slider {
+    height: 12px;
+    margin: var(--mt-space-4) 0;
+  }
+
+  .mt-score-marks {
+    flex-wrap: wrap;
+    gap: var(--mt-space-1);
+    margin-top: var(--mt-space-3);
+  }
+
+  .mt-score-mark {
+    flex: 1;
+    text-align: center;
+    min-width: 32px;
+    padding: var(--mt-space-2);
+    font-size: var(--mt-font-size-sm);
+    font-weight: 600;
+  }
+
+  /* Improve score mark visibility */
+  .mt-score-mark:nth-child(odd) {
+    margin-top: var(--mt-space-1);
+  }
+}
+
+/* ========================================================================
+   MOBILE BUTTON GROUPS & ACTIONS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-button-group {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--mt-space-1);
+  }
+
+  .mt-score-button {
+    padding: var(--mt-space-3);
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mt-form-actions {
+    flex-direction: column;
+    gap: var(--mt-space-3);
+    padding: var(--mt-space-4);
+    position: sticky;
+    bottom: 0;
+    background: var(--mt-bg-white);
+    border-top: 2px solid var(--mt-border-light);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    margin: var(--mt-space-6) -var(--mt-space-4) -var(--mt-space-4);
+  }
+
+  .mt-btn--primary {
+    padding: var(--mt-space-4) var(--mt-space-8);
+    font-size: var(--mt-font-size-lg);
+    font-weight: 600;
+  }
+}
+
+/* ========================================================================
+   MOBILE CANDIDATE GRID
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-candidates-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--mt-space-4);
+    padding: 0 var(--mt-space-2);
+  }
+
+  .mt-candidate-card {
+    margin-bottom: var(--mt-space-4);
+  }
+
+  .mt-candidate-card__info {
+    padding: var(--mt-space-4);
+  }
+
+  .mt-candidate-card__title {
+    font-size: var(--mt-font-size-lg);
+    line-height: 1.3;
+  }
+
+  .mt-candidate-card__meta {
+    font-size: var(--mt-font-size-base);
+    line-height: 1.4;
+  }
+
+  .mt-candidate-card__description {
+    font-size: var(--mt-font-size-base);
+    line-height: 1.5;
+  }
+}
+
+/* ========================================================================
+   MOBILE DASHBOARD
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-jury-dashboard {
+    padding: var(--mt-space-4);
+  }
+
+  .mt-dashboard-header {
+    margin-bottom: var(--mt-space-6);
+    padding: 0;
+  }
+
+  .mt-dashboard-title {
+    font-size: var(--mt-font-size-2xl);
+    margin-bottom: var(--mt-space-3);
+  }
+
+  .mt-dashboard-subtitle {
+    font-size: var(--mt-font-size-base);
+  }
+
+  .mt-dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: var(--mt-space-4);
+  }
+
+  .mt-stat-card {
+    padding: var(--mt-space-4);
+    text-align: center;
+  }
+
+  .mt-stat-value {
+    font-size: var(--mt-font-size-2xl);
+  }
+
+  .mt-candidate-list {
+    margin: 0 -var(--mt-space-2);
+  }
+
+  .mt-candidate-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--mt-space-3);
+    padding: var(--mt-space-4);
+  }
+
+  .mt-candidate-item__photo {
+    align-self: center;
+    width: 80px;
+    height: 80px;
+  }
+
+  .mt-candidate-item__info {
+    text-align: center;
+    width: 100%;
+  }
+
+  .mt-candidate-item__actions {
+    width: 100%;
+    justify-content: center;
+    gap: var(--mt-space-3);
+  }
+}
+
+/* ========================================================================
+   MOBILE MODAL OPTIMIZATIONS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-modal-content {
+    width: 95%;
+    max-width: none;
+    margin: var(--mt-space-4);
+    padding: var(--mt-space-4);
+    max-height: 90vh;
+  }
+
+  .mt-modal-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--mt-space-3);
+  }
+
+  .mt-modal-title {
+    font-size: var(--mt-font-size-xl);
+    text-align: center;
+  }
+
+  .mt-modal-close {
+    position: absolute;
+    top: var(--mt-space-3);
+    right: var(--mt-space-3);
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+
+  .mt-modal-footer {
+    flex-direction: column;
+    gap: var(--mt-space-3);
+  }
+}
+
+/* ========================================================================
+   MOBILE TYPOGRAPHY ENHANCEMENTS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-section-title {
+    font-size: var(--mt-font-size-xl);
+    text-align: center;
+    margin-bottom: var(--mt-space-4);
+  }
+
+  .mt-submission-guidelines {
+    padding: var(--mt-space-4);
+    margin-top: var(--mt-space-6);
+    margin-left: -var(--mt-space-2);
+    margin-right: -var(--mt-space-2);
+  }
+
+  .mt-submission-guidelines h3 {
+    font-size: var(--mt-font-size-base);
+    text-align: center;
+  }
+
+  .mt-submission-guidelines ul {
+    padding-left: var(--mt-space-4);
+  }
+
+  .mt-submission-guidelines li {
+    font-size: var(--mt-font-size-sm);
+    line-height: 1.5;
+    margin-bottom: var(--mt-space-2);
+  }
+}
+
+/* ========================================================================
+   MOBILE LOADING STATES
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .mt-loading-overlay {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .mt-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+  }
+
+  .mt-btn.loading::after,
+  .mt-button.loading::after {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: -0.75rem;
+    margin-top: -0.75rem;
+  }
+}
+
+/* ========================================================================
+   MOBILE ACCESSIBILITY ENHANCEMENTS
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  /* Focus states more visible on mobile */
+  .mt-btn:focus,
+  .mt-button:focus,
+  .mt-score-button:focus,
+  .mt-score-slider:focus {
+    outline: 3px solid var(--mt-primary);
+    outline-offset: 3px;
+  }
+
+  /* Better contrast for mobile viewing */
+  .mt-candidate-card__meta,
+  .mt-criterion-description {
+    color: var(--mt-text);
+    font-weight: 400;
+  }
+
+  /* Larger text for German language content */
+  .mt-criterion-label,
+  .mt-candidate-name {
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
+
+/* ========================================================================
+   MOBILE-ONLY UTILITIES
+   ========================================================================= */
+
+.mt-mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mt-mobile-only {
+    display: block !important;
+  }
+
+  .mt-desktop-only {
+    display: none !important;
+  }
+
+  /* Mobile-specific spacing */
+  .mt-mobile-stack > * + * {
+    margin-top: var(--mt-space-4);
+  }
+
+  .mt-mobile-center {
+    text-align: center !important;
+  }
+
+  .mt-mobile-full {
+    width: 100% !important;
+  }
+}
+
+/* ========================================================================
+   LANDSCAPE MOBILE OPTIMIZATIONS
+   ========================================================================= */
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .mt-evaluation-page {
+    padding: var(--mt-space-2) var(--mt-space-4);
+  }
+
+  .mt-candidate-showcase {
+    padding: var(--mt-space-3);
+  }
+
+  .mt-candidate-showcase.mt-layout-side-by-side {
+    grid-template-columns: 200px 1fr;
+    gap: var(--mt-space-4);
+    text-align: left;
+  }
+
+  .mt-candidate-details {
+    text-align: left;
+  }
+
+  .mt-candidate-photo-wrap {
+    justify-self: start;
+  }
+
+  .mt-form-actions {
+    position: static;
+    flex-direction: row;
+    justify-content: center;
+    margin: var(--mt-space-6) 0 0;
+    box-shadow: none;
+    border-top: 1px solid var(--mt-border-light);
+  }
+}
+
+/* ========================================================================
+   VERY SMALL MOBILE (< 480px)
+   ========================================================================= */
+
+@media (max-width: 480px) {
+  .mt-evaluation-page {
+    padding: var(--mt-space-3);
+  }
+
+  .mt-candidate-showcase,
+  .mt-evaluation-form {
+    padding: var(--mt-space-3);
+    margin-left: -var(--mt-space-1);
+    margin-right: -var(--mt-space-1);
+  }
+
+  .mt-evaluation-title h1 {
+    font-size: var(--mt-font-size-xl);
+  }
+
+  .mt-candidate-name {
+    font-size: var(--mt-font-size-xl);
+  }
+
+  .mt-button-group {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .mt-score-marks {
+    gap: 2px;
+  }
+
+  .mt-score-mark {
+    min-width: 28px;
+    padding: var(--mt-space-1);
+    font-size: 0.75rem;
+  }
+
+  /* Stack score marks on very small screens */
+  .mt-score-marks {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--mt-space-1);
+  }
+}
+
+/* ========================================================================
+   TOUCH GESTURE SUPPORT
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  /* Improve touch scrolling */
+  .mt-modal-content,
+  .mt-evaluation-page {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+    .mt-candidate-card:hover,
+    .mt-btn:hover,
+    .mt-score-button:hover {
+      transform: none;
+      box-shadow: var(--mt-shadow);
+    }
+
+    .mt-candidate-card:hover .mt-candidate-card__overlay {
+      opacity: 0;
+    }
+  }
+
+  /* Enable active states for better touch feedback */
+  .mt-btn:active,
+  .mt-score-button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* ========================================================================
+   PRINT STYLES FOR MOBILE
+   ========================================================================= */
+
+@media print {
+  .mt-mobile-only,
+  .mt-form-actions,
+  .mt-back-link {
+    display: none !important;
+  }
+
+  .mt-evaluation-page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .mt-candidate-showcase,
+  .mt-evaluation-form {
+    box-shadow: none;
+    border: 1px solid var(--mt-border-light);
+    break-inside: avoid;
+  }
+}

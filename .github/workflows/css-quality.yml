@@ -1,0 +1,50 @@
+name: CSS Quality Enforcement
+
+on: [push, pull_request]
+
+jobs:
+  css-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Count CSS Files
+        run: |
+          count=$(find assets/css -name "*.css" | wc -l)
+          if [ $count -gt 20 ]; then
+            echo "❌ Too many CSS files: $count (max 20)"
+            exit 1
+          fi
+          echo "✅ CSS files: $count"
+      
+      - name: Check for !important
+        run: |
+          if grep -r "!important" assets/css --include="*.css"; then
+            echo "❌ !important detected in CSS"
+            exit 1
+          fi
+          echo "✅ No !important found"
+      
+      - name: Check German Translations
+        run: |
+          if ! grep -q "data-i18n-class" templates/frontend/*.php; then
+            echo "⚠️ Warning: No German CSS class mappings in frontend templates"
+          else
+            echo "✅ German CSS mappings present"
+          fi
+      
+      - name: CSS File Size Check
+        run: |
+          total_size=$(find assets/css -name "*.css" -exec du -cb {} + | grep total | cut -f1)
+          total_mb=$(echo "scale=2; $total_size / 1048576" | bc)
+          echo "Total CSS size: ${total_mb}MB"
+          if (( $(echo "$total_mb > 2" | bc -l) )); then
+            echo "⚠️ Warning: CSS exceeds 2MB"
+          fi
+      
+      - name: Summary
+        run: |
+          echo "✅ CSS Quality Check Complete"
+          echo "- Files within limit"
+          echo "- Zero !important declarations"
+          echo "- Ready for deployment"

@@ -1,0 +1,693 @@
+/**
+ * Mobility Trailblazers v4 CSS Framework
+ * Specific Components
+ * Version: 4.0.0
+ */
+
+/* Candidate Card Component */
+.mt-candidate-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-candidate-card__image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 75%; /* 4:3 aspect ratio */
+  overflow: hidden;
+  background: var(--mt-color-gray-light);
+}
+
+.mt-candidate-card__image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Image positioning utilities */
+.mt-img-cover { object-fit: cover; }
+.mt-img-contain { 
+  object-fit: contain; 
+  background: var(--mt-color-white);
+}
+.mt-img-pos-top { object-position: 50% 10%; }
+.mt-img-pos-center { object-position: center; }
+.mt-img-pos-bottom { object-position: 50% 90%; }
+
+.mt-candidate-card__content {
+  flex: 1;
+  padding: var(--mt-space);
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-candidate-card__name {
+  font-size: var(--mt-font-size-large);
+  font-weight: 600;
+  margin-bottom: var(--mt-space-xs);
+  color: var(--mt-text);
+}
+
+.mt-candidate-card__role {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+  margin-bottom: var(--mt-space-xs);
+}
+
+.mt-candidate-card__org {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-primary);
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-candidate-card__category {
+  margin-top: auto;
+  padding-top: var(--mt-space-sm);
+}
+
+/* Mobile-First Login/Auth Card */
+.mt-login {
+  max-width: 460px;
+  margin: var(--mt-space) auto;
+  background: var(--mt-color-bg);
+  border: 2px solid var(--mt-color-primary-light);
+  border-radius: var(--mt-radius);
+  padding: var(--mt-space-lg) var(--mt-space);
+  box-shadow: var(--mt-shadow);
+}
+
+.mt-login h3 {
+  margin: 0 0 var(--mt-space-lg);
+  font-family: var(--mt-font-headings);
+  color: var(--mt-text);
+  text-align: center;
+}
+
+.mt-login .form-group {
+  margin-bottom: var(--mt-space-lg);
+}
+
+.mt-login label {
+  display: block;
+  margin-bottom: var(--mt-space-sm);
+  font-weight: 500;
+  color: var(--mt-text);
+  font-size: var(--mt-font-size-base);
+}
+
+.mt-login input[type="text"],
+.mt-login input[type="email"],
+.mt-login input[type="password"],
+.mt-login .input,
+.mt-login #user_login,
+.mt-login #user_pass {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+  transition: var(--mt-transition-fast);
+  box-sizing: border-box;
+  font-size: var(--mt-font-size-base);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mt-login input:focus {
+  border-color: var(--mt-color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.mt-login .button,
+.mt-login button[type="submit"] {
+  background: var(--mt-color-primary-dark);
+  color: var(--mt-color-white);
+  border: none;
+  border-radius: var(--mt-radius-sm);
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target-large);
+  font-weight: 500;
+  font-size: var(--mt-font-size-base);
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mt-login .button:hover,
+.mt-login button[type="submit"]:hover {
+  background: var(--mt-color-primary);
+  transform: translateY(-1px);
+}
+
+/* Login fields stay full width since parent container is already constrained */
+/* Parent .mt-login has max-width: 380px, so inputs can use full width */
+
+/* Evaluation Form Components */
+.mt-evaluation-form {
+  background: var(--mt-color-white);
+  border-radius: var(--mt-radius);
+  padding: var(--mt-space-lg);
+  box-shadow: var(--mt-shadow);
+}
+
+.mt-criterion {
+  margin-bottom: var(--mt-space-lg);
+  padding-bottom: var(--mt-space-lg);
+  border-bottom: var(--mt-border-width) solid var(--mt-border);
+}
+
+.mt-criterion:last-child {
+  border-bottom: none;
+}
+
+.mt-criterion__header {
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-criterion__title {
+  font-size: var(--mt-font-size-large);
+  font-weight: 600;
+  color: var(--mt-text);
+  margin-bottom: var(--mt-space-xs);
+}
+
+.mt-criterion__description {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+}
+
+/* Mobile-First Touch-Friendly Rating Buttons */
+.mt-rating-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--mt-touch-target), 1fr));
+  gap: var(--mt-space-sm);
+  max-width: 100%;
+  margin: var(--mt-space) 0;
+}
+
+/* Ensure proper sizing for mobile devices */
+@media (max-width: 414px) {
+  .mt-rating-group {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--mt-space-xs);
+  }
+}
+
+.mt-rating-btn {
+  min-width: var(--mt-touch-target);
+  min-height: var(--mt-touch-target);
+  border-radius: var(--mt-radius-sm);
+  border: 2px solid var(--mt-border);
+  background: var(--mt-color-white);
+  color: var(--mt-text);
+  font-weight: 600;
+  font-size: var(--mt-font-size-base);
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  position: relative;
+}
+
+.mt-rating-btn:hover {
+  border-color: var(--mt-color-primary);
+  background: rgba(38, 166, 154, 0.1);
+  transform: scale(1.05);
+}
+
+.mt-rating-btn.selected,
+.mt-rating-btn[data-selected="true"] {
+  background: var(--mt-color-primary);
+  border-color: var(--mt-color-primary);
+  color: var(--mt-color-white);
+  transform: scale(1.1);
+}
+
+/* Add visual feedback for touch */
+.mt-rating-btn:active {
+  transform: scale(0.95);
+}
+
+.mt-rating-btn.selected:active,
+.mt-rating-btn[data-selected="true"]:active {
+  transform: scale(1.05);
+}
+
+/* Stats Component */
+.mt-stat-card {
+  text-align: center;
+  padding: var(--mt-space-lg);
+}
+
+.mt-stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--mt-color-primary);
+  line-height: 1;
+  margin-bottom: var(--mt-space-sm);
+}
+
+.mt-stat-label {
+  font-size: var(--mt-font-size-small);
+  color: var(--mt-color-gray-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Dashboard Header */
+.mt-dashboard-header {
+  background: linear-gradient(135deg, var(--mt-color-primary) 0%, var(--mt-color-primary-dark) 100%);
+  color: var(--mt-color-white);
+  padding: var(--mt-space-2xl) var(--mt-space-lg);
+  border-radius: var(--mt-radius);
+  margin-bottom: var(--mt-space-xl);
+}
+
+.mt-dashboard-header h1 {
+  color: var(--mt-color-white);
+  margin-bottom: var(--mt-space-sm);
+}
+
+.mt-dashboard-header p {
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+/* Mobile-First Search and Filter Bar */
+.mt-search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mt-space);
+  margin-bottom: var(--mt-space-lg);
+}
+
+.mt-search-input {
+  width: 100%;
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+  font-size: var(--mt-font-size-base);
+  transition: var(--mt-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.mt-search-input:focus {
+  border-color: var(--mt-color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.mt-filter-select {
+  width: 100%;
+  padding: var(--mt-touch-padding);
+  min-height: var(--mt-touch-target);
+  border: var(--mt-border-width) solid var(--mt-border);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-color-white);
+  font-size: var(--mt-font-size-base);
+  cursor: pointer;
+  transition: var(--mt-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+.mt-filter-select:focus {
+  border-color: var(--mt-color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+/* Progressive enhancement for tablets and desktop */
+@media (min-width: 768px) {
+  .mt-search-bar {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .mt-search-input {
+    flex: 1;
+    min-width: 250px;
+  }
+  
+  .mt-filter-select {
+    min-width: 180px;
+    width: auto;
+  }
+}
+
+/* Ranking Badge Component */
+.mt-ranking-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-weight: 700;
+  transition: var(--mt-transition-fast);
+}
+
+/* Badge Size Variants - Support both old and new class names */
+.mt-ranking-badge--small,
+.mt-ranking-badge.mt-badge-small {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.mt-ranking-badge--medium,
+.mt-ranking-badge.mt-badge-medium {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.mt-ranking-badge--large,
+.mt-ranking-badge.mt-badge-large {
+  width: 64px;
+  height: 64px;
+  font-size: 24px;
+}
+
+/* Badge Context Variants - Support both old and new class names */
+.mt-ranking-badge--table,
+.mt-ranking-badge.mt-badge-context-table {
+  border-radius: var(--mt-radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mt-ranking-badge--card,
+.mt-ranking-badge.mt-badge-context-card {
+  border-radius: 50%;
+  box-shadow: var(--mt-shadow);
+}
+
+/* Medal Colors - Only show backgrounds when no SVG medal */
+.mt-ranking-badge--gold:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-gold:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #333;
+  border: 2px solid #B8860B;
+}
+
+.mt-ranking-badge--silver:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-silver:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #E5E5E5, #B8B8B8);
+  color: #333;
+  border: 2px solid #999;
+}
+
+.mt-ranking-badge--bronze:not(:has(.mt-medal-icon)),
+.mt-ranking-badge.mt-rank-bronze:not(:has(.mt-medal-icon)) {
+  background: linear-gradient(135deg, #CD7F32, #A0522D);
+  color: #fff;
+  border: 2px solid #8B4513;
+}
+
+/* Always transparent background when medal is present */
+.mt-ranking-badge--gold:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-gold:has(.mt-medal-icon),
+.mt-ranking-badge--silver:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-silver:has(.mt-medal-icon),
+.mt-ranking-badge--bronze:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-bronze:has(.mt-medal-icon) {
+  background: transparent;
+  border: none;
+}
+
+.mt-ranking-badge--standard,
+.mt-ranking-badge.mt-rank-standard {
+  background: var(--mt-color-gray-light);
+  color: var(--mt-text);
+  border: 2px solid var(--mt-border);
+}
+
+/* Hide background when medal SVG is present for top 3 positions */
+.mt-ranking-badge--gold.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-gold:has(.mt-medal-icon),
+.mt-ranking-badge--silver.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-silver:has(.mt-medal-icon),
+.mt-ranking-badge--bronze.mt-ranking-badge:has(.mt-medal-icon),
+.mt-ranking-badge.mt-rank-bronze:has(.mt-medal-icon) {
+  background: transparent;
+  border: none;
+}
+
+/* Fallback for browsers without :has() support */
+@supports not selector(:has(*)) {
+  .mt-ranking-badge--gold .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-gold .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge--silver .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-silver .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge--bronze .mt-medal-icon ~ .mt-rank-number,
+  .mt-ranking-badge.mt-rank-bronze .mt-medal-icon ~ .mt-rank-number {
+    opacity: 0;
+  }
+}
+
+/* Medal SVG Icon */
+.mt-ranking-badge .mt-medal-icon {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Medal-specific colors for proper display */
+.mt-ranking-badge.mt-rank-gold .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--gold .mt-medal-icon .mt-medal-circle {
+  fill: #FFD700;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-gold .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--gold .mt-medal-icon .mt-medal-ribbon {
+  fill: #B8860B;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge.mt-rank-silver .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--silver .mt-medal-icon .mt-medal-circle {
+  fill: #C0C0C0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-silver .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--silver .mt-medal-icon .mt-medal-ribbon {
+  fill: #999999;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge.mt-rank-bronze .mt-medal-icon .mt-medal-circle,
+.mt-ranking-badge--bronze .mt-medal-icon .mt-medal-circle {
+  fill: #CD7F32;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mt-ranking-badge.mt-rank-bronze .mt-medal-icon .mt-medal-ribbon,
+.mt-ranking-badge--bronze .mt-medal-icon .mt-medal-ribbon {
+  fill: #A0522D;
+  opacity: 0.8;
+}
+
+.mt-ranking-badge .mt-medal-icon .mt-medal-text {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: bold;
+  fill: white;
+  dominant-baseline: central;
+  text-anchor: middle;
+}
+
+/* Ensure medal colors are visible and properly styled */
+.mt-medal-gold {
+  color: #FFD700;
+}
+
+.mt-medal-gold .mt-medal-circle {
+  fill: #FFD700;
+}
+
+.mt-medal-gold .mt-medal-ribbon {
+  fill: #B8860B;
+}
+
+.mt-medal-silver {
+  color: #C0C0C0;
+}
+
+.mt-medal-silver .mt-medal-circle {
+  fill: #C0C0C0;
+}
+
+.mt-medal-silver .mt-medal-ribbon {
+  fill: #999999;
+}
+
+.mt-medal-bronze {
+  color: #CD7F32;
+}
+
+.mt-medal-bronze .mt-medal-circle {
+  fill: #CD7F32;
+}
+
+.mt-medal-bronze .mt-medal-ribbon {
+  fill: #A0522D;
+}
+
+/* Rank Number */
+.mt-ranking-badge .mt-rank-number {
+  position: relative;
+  z-index: 2;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* Medal icon with number positioning - hide number when medal is shown */
+.mt-ranking-badge .mt-medal-icon + .mt-rank-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Score Display Component - Fixed centering */
+.mt-score-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--mt-color-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: var(--mt-transition-fast);
+  position: relative;
+  margin: 0 auto;
+  text-align: center;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.mt-score-display:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Score size variants */
+.mt-score-display--small {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.mt-score-display--large {
+  width: 80px;
+  height: 80px;
+  font-size: 28px;
+}
+
+/* Score value - properly centered */
+.mt-score-display .mt-score-value {
+  display: block;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+
+/* Score color states based on value */
+.mt-score-display--high {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.mt-score-display--medium {
+  background: linear-gradient(135deg, #f39c12, #f1c40f);
+}
+
+.mt-score-display--low {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* Default score color if no state class */
+.mt-score-display:not([class*="--high"]):not([class*="--medium"]):not([class*="--low"]) {
+  background: var(--mt-color-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mt-ranking-badge--small,
+  .mt-ranking-badge.mt-badge-small {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .mt-ranking-badge--medium,
+  .mt-ranking-badge.mt-badge-medium {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .mt-ranking-badge--large,
+  .mt-ranking-badge.mt-badge-large {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  /* Ensure medal SVG scales properly on mobile */
+  .mt-ranking-badge .mt-medal-icon .mt-medal-text {
+    font-size: 6px;
+  }
+  
+  .mt-score-display {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  
+  .mt-score-display--small {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .mt-score-display--large {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+  
+  /* Ensure score text remains centered on mobile */
+  .mt-score-display .mt-score-value {
+    font-size: inherit;
+  }
+}

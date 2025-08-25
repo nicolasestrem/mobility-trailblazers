@@ -497,3 +497,4 @@ mcp__wordpress__wp_debug_log        # View debug log
 - **Error Logs:** `wp-content/debug.log` and Debug Center
 - **Test Reports:** `npm run test:report`
 - **Use appropriate agents** for specialized help
+- Adding !important in css should be avoided at any cost and will not pass github checks.

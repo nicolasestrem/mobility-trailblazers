@@ -1,0 +1,98 @@
+/**
+ * Mobility Trailblazers v4 CSS Framework
+ * Reset & Base Styles
+ * Version: 4.0.0
+ */
+
+/* Scoped Reset - Only affects plugin areas */
+.mt-root,
+.mt-root * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.mt-root {
+  line-height: var(--mt-line-height);
+  color: var(--mt-text);
+  font-family: var(--mt-font-family);
+  font-size: var(--mt-font-size-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Reset */
+.mt-root h1,
+.mt-root h2,
+.mt-root h3,
+.mt-root h4,
+.mt-root h5,
+.mt-root h6 {
+  font-family: var(--mt-font-headings);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-root h1 { font-size: var(--mt-font-size-h1); }
+.mt-root h2 { font-size: var(--mt-font-size-h2); }
+.mt-root h3 { font-size: var(--mt-font-size-h3); }
+
+.mt-root p {
+  margin-bottom: var(--mt-space-md);
+}
+
+.mt-root a {
+  color: var(--mt-color-primary);
+  text-decoration: none;
+  transition: var(--mt-transition-fast);
+}
+
+.mt-root a:hover {
+  color: var(--mt-color-primary-dark);
+  text-decoration: underline;
+}
+
+/* Image Reset */
+.mt-root img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* List Reset */
+.mt-root ul,
+.mt-root ol {
+  list-style: none;
+}
+
+/* Form Reset */
+.mt-root input,
+.mt-root textarea,
+.mt-root select,
+.mt-root button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* Utility Classes */
+.mt-hidden { display: none !important; }
+.mt-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus Styles */
+.mt-root *:focus-visible {
+  outline: 2px solid var(--mt-color-primary);
+  outline-offset: 2px;
+}

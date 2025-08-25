@@ -1,0 +1,436 @@
+/**
+ * Candidate Layout Rollback CSS
+ * Version: 2.0.0
+ * Created: 2025-08-19
+ * Purpose: Restore EXACT staging layout for individual candidate pages
+ * Based on: https://staging.mobilitytrailblazers.de styles
+ */
+
+/* ===================================
+   RESET CURRENT BROKEN STYLES
+   =================================== */
+
+/* Remove all the excessive spacing and sizing from current version */
+body.single-mt_candidate .mt-enhanced-candidate-profile {
+    /* Reset any global overrides */
+}
+
+/* ===================================
+   HERO SECTION - STAGING VALUES
+   =================================== */
+
+/* Compact hero section like staging */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-candidate-hero,
+.mt-enhanced-candidate-profile .mt-candidate-hero {
+    padding: 40px 0 30px !important; /* Staging values - much more compact */
+    min-height: auto !important;
+    max-height: 400px !important; /* Prevent excessive height */
+    overflow: hidden !important;
+}
+
+/* Hero pattern - subtle */
+body.single-mt_candidate .mt-hero-pattern,
+.mt-enhanced-candidate-profile .mt-hero-pattern {
+    opacity: 0.05 !important; /* Very subtle pattern */
+    height: 100% !important;
+    max-height: 400px !important;
+}
+
+/* Hero container */
+.mt-enhanced-candidate-profile .mt-hero-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+/* Hero content grid - staging layout */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-content,
+.mt-enhanced-candidate-profile .mt-hero-content {
+    display: grid !important;
+    grid-template-columns: 280px 1fr !important; /* Staging: 280px for photo area */
+    gap: 30px !important; /* Staging: 30px gap */
+    align-items: center !important;
+    padding: 15px 0 !important;
+}
+
+/* ===================================
+   PHOTO FRAME - STAGING VALUES
+   =================================== */
+
+/* Photo frame container */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-photo-frame,
+.mt-enhanced-candidate-profile .mt-photo-frame {
+    width: 220px !important; /* Staging: 220px */
+    height: 220px !important;
+    position: relative !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Photo border styling */
+.mt-enhanced-candidate-profile .mt-photo-border {
+    width: 220px !important;
+    height: 220px !important;
+    border-radius: 20px !important;
+    padding: 8px !important;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Hero photo */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-photo {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+/* Photo image */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-photo img,
+.mt-enhanced-candidate-profile .mt-candidate-hero-photo {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 12px !important;
+    display: block !important;
+}
+
+/* ===================================
+   TYPOGRAPHY - STAGING VALUES
+   =================================== */
+
+/* Hero name - smaller, cleaner */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-name,
+.mt-enhanced-candidate-profile .mt-hero-name {
+    font-size: 2.8rem !important; /* Staging: 2.8rem */
+    font-weight: 700 !important;
+    margin: 0 0 10px 0 !important;
+    line-height: 1.1 !important;
+    color: white !important;
+}
+
+/* Hero title */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-hero-title,
+.mt-enhanced-candidate-profile .mt-hero-title {
+    font-size: 1.4rem !important; /* Staging: 1.4rem */
+    margin-bottom: 25px !important;
+    opacity: 0.95 !important;
+    font-weight: 500 !important;
+    color: white !important;
+}
+
+/* Position and organization */
+.mt-enhanced-candidate-profile .mt-position {
+    font-weight: 600 !important;
+}
+
+.mt-enhanced-candidate-profile .mt-separator {
+    margin: 0 8px !important;
+    opacity: 0.7 !important;
+}
+
+/* ===================================
+   CATEGORY BADGES - STAGING VALUES
+   =================================== */
+
+.mt-enhanced-candidate-profile .mt-hero-categories {
+    display: flex !important;
+    gap: 12px !important;
+    margin-bottom: 30px !important;
+    flex-wrap: wrap !important;
+}
+
+.mt-enhanced-candidate-profile .mt-category-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 20px !important; /* Staging: compact padding */
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 25px !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: white !important;
+}
+
+/* ===================================
+   SOCIAL LINKS - STAGING VALUES
+   =================================== */
+
+.mt-enhanced-candidate-profile .mt-hero-social {
+    display: flex !important;
+    gap: 15px !important;
+}
+
+.mt-enhanced-candidate-profile .mt-social-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 30px !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+.mt-enhanced-candidate-profile .mt-social-link:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px) !important;
+    color: white !important;
+}
+
+/* ===================================
+   CONTENT SECTIONS - STAGING VALUES
+   =================================== */
+
+/* Main content area */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-candidate-content,
+.mt-enhanced-candidate-profile .mt-candidate-content {
+    padding: 80px 0 !important; /* Staging: 80px */
+    background: #f5f7fa !important;
+}
+
+/* Content container */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-content-container,
+.mt-enhanced-candidate-profile .mt-content-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+    display: grid !important;
+    grid-template-columns: 1fr 350px !important;
+    gap: 60px !important; /* Staging: reasonable gap */
+}
+
+/* Content sections */
+body.single-mt_candidate .mt-enhanced-candidate-profile .mt-content-section,
+.mt-enhanced-candidate-profile .mt-content-section {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 40px !important; /* Staging: 40px */
+    margin-bottom: 40px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+/* Section headers */
+.mt-enhanced-candidate-profile .mt-section-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin-bottom: 30px !important;
+    padding-bottom: 20px !important;
+    border-bottom: 2px solid #e5e7eb !important;
+}
+
+.mt-enhanced-candidate-profile .mt-section-header i {
+    font-size: 28px !important;
+    color: var(--mt-accent, #C1693C) !important;
+    background: #f8f9fa !important;
+    padding: 12px !important;
+    border-radius: 50% !important;
+    width: 52px !important;
+    height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mt-enhanced-candidate-profile .mt-section-header h2 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+    margin: 0 !important;
+}
+
+/* Section content */
+.mt-enhanced-candidate-profile .mt-section-content {
+    font-size: 16px !important;
+    line-height: 1.8 !important;
+    color: #4b5563 !important;
+}
+
+/* ===================================
+   CRITERIA GRID - STAGING VALUES
+   =================================== */
+
+.mt-enhanced-candidate-profile .mt-criteria-grid {
+    display: grid !important;
+    gap: 25px !important;
+}
+
+.mt-enhanced-candidate-profile .mt-criterion-card {
+    background: #f8f9fa !important;
+    border-radius: 12px !important;
+    padding: 25px !important;
+    border-left: 6px solid #e5e7eb !important;
+    transition: all 0.3s ease !important;
+}
+
+.mt-enhanced-candidate-profile .mt-criterion-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin-bottom: 15px !important;
+}
+
+.mt-enhanced-candidate-profile .mt-criterion-icon {
+    font-size: 24px !important;
+    width: 48px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: white !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mt-enhanced-candidate-profile .mt-criterion-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin: 0 !important;
+}
+
+.mt-enhanced-candidate-profile .mt-criterion-content {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+    color: #4b5563 !important;
+}
+
+/* ===================================
+   SIDEBAR - STAGING VALUES
+   =================================== */
+
+.mt-enhanced-candidate-profile .mt-content-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 30px !important;
+}
+
+.mt-enhanced-candidate-profile .mt-sidebar-widget {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 30px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.mt-enhanced-candidate-profile .mt-widget-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    margin: 0 0 20px 0 !important;
+    padding-bottom: 15px !important;
+    border-bottom: 2px solid #e5e7eb !important;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 1024px) {
+    .mt-enhanced-candidate-profile .mt-content-container {
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-content-sidebar {
+        order: -1 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .mt-enhanced-candidate-profile .mt-candidate-hero {
+        padding: 30px 0 !important;
+        min-height: auto !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-content {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+        text-align: center !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-photo-frame {
+        margin: 0 auto !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-name {
+        font-size: 2.2rem !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-title {
+        font-size: 1.2rem !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-categories,
+    .mt-enhanced-candidate-profile .mt-hero-social {
+        justify-content: center !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-candidate-content {
+        padding: 60px 0 !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-content-section {
+        padding: 30px 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .mt-enhanced-candidate-profile .mt-hero-photo-frame {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-photo-border {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-name {
+        font-size: 1.8rem !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-hero-title {
+        font-size: 1rem !important;
+    }
+    
+    .mt-enhanced-candidate-profile .mt-content-section {
+        padding: 25px 15px !important;
+    }
+}
+
+/* ===================================
+   CRITICAL FIXES
+   =================================== */
+
+/* Remove any pull-up effects */
+.mt-enhanced-candidate-profile .mt-content-section:first-child {
+    margin-top: 0 !important;
+}
+
+/* Ensure white background for content */
+.mt-enhanced-candidate-profile .mt-content-main {
+    background: transparent !important;
+}
+
+/* Fix evaluation criteria text */
+.mt-enhanced-candidate-profile .mt-criterion-content {
+    white-space: pre-line !important;
+    word-wrap: break-word !important;
+}

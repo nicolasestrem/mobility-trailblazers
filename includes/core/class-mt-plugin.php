@@ -279,6 +279,11 @@ class MT_Plugin {
             MT_Performance_Optimizer::init();
         }
         
+        // Initialize Security Headers for CSP and XSS protection
+        if (class_exists('MobilityTrailblazers\Core\MT_Security_Headers')) {
+            MT_Security_Headers::init();
+        }
+        
         // Setup roles and capabilities
         $roles = new MT_Roles();
         add_action('init', [$roles, 'add_capabilities']);
@@ -286,6 +291,11 @@ class MT_Plugin {
         // Initialize i18n handler for JavaScript localization
         if (class_exists('MobilityTrailblazers\Core\MT_I18n_Handler')) {
             MT_I18n_Handler::get_instance();
+        }
+        
+        // Initialize UTF-8 handler for proper character encoding
+        if (class_exists('MobilityTrailblazers\Core\MT_UTF8_Handler')) {
+            MT_UTF8_Handler::init();
         }
         
         // Initialize admin
@@ -316,7 +326,7 @@ class MT_Plugin {
         $shortcodes = new MT_Shortcodes();
         $shortcodes->init();
         
-        // Initialize v4 CSS framework for public assets (conditional loading)
+        // Initialize v4 CSS framework for public assets
         if (!is_admin()) {
             if (file_exists(MT_PLUGIN_DIR . 'includes/public/class-mt-public-assets.php')) {
                 require_once MT_PLUGIN_DIR . 'includes/public/class-mt-public-assets.php';
@@ -403,136 +413,11 @@ class MT_Plugin {
      * @return void
      */
     public function enqueue_frontend_assets() {
-        // Check if v4 CSS is enabled (can be disabled via filter)
-        $use_v4_css = apply_filters('mt_enable_css_v4', true);
+        // CSS loading is now handled by MT_Public_Assets class
+        // which implements the new consolidated CSS architecture with only 6 files
+        // All legacy CSS files have been merged into the optimized structure
         
-        if ($use_v4_css) {
-            // Load v4 CSS framework
-            $v4_base_url = MT_PLUGIN_URL . 'assets/css/v4/';
-            
-            wp_enqueue_style(
-                'mt-v4-tokens',
-                $v4_base_url . 'mt-tokens.css',
-                [],
-                MT_VERSION
-            );
-            
-            wp_enqueue_style(
-                'mt-v4-reset',
-                $v4_base_url . 'mt-reset.css',
-                ['mt-v4-tokens'],
-                MT_VERSION
-            );
-            
-            wp_enqueue_style(
-                'mt-v4-base',
-                $v4_base_url . 'mt-base.css',
-                ['mt-v4-reset'],
-                MT_VERSION
-            );
-            
-            wp_enqueue_style(
-                'mt-v4-components',
-                $v4_base_url . 'mt-components.css',
-                ['mt-v4-base'],
-                MT_VERSION
-            );
-            
-            wp_enqueue_style(
-                'mt-v4-pages',
-                $v4_base_url . 'mt-pages.css',
-                ['mt-v4-components'],
-                MT_VERSION
-            );
-        }
-        
-        // Core CSS Variables (loaded first)
-        wp_enqueue_style(
-            'mt-variables',
-            MT_PLUGIN_URL . 'assets/css/mt-variables.css',
-            [],
-            MT_VERSION
-        );
-        
-        // Component Library (loaded second)
-        wp_enqueue_style(
-            'mt-components',
-            MT_PLUGIN_URL . 'assets/css/mt-components.css',
-            ['mt-variables'],
-            MT_VERSION
-        );
-        
-        // Main Frontend Styles (core styles only)
-        wp_enqueue_style(
-            'mt-frontend',
-            MT_PLUGIN_URL . 'assets/css/frontend-new.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Candidate Grid Module
-        wp_enqueue_style(
-            'mt-candidate-grid',
-            MT_PLUGIN_URL . 'assets/css/mt-candidate-grid.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Evaluation Forms Module
-        wp_enqueue_style(
-            'mt-evaluation-forms',
-            MT_PLUGIN_URL . 'assets/css/mt-evaluation-forms.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Jury Dashboard Enhanced Module
-        wp_enqueue_style(
-            'mt-jury-dashboard-enhanced',
-            MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-enhanced.css',
-            ['mt-variables', 'mt-components'],
-            MT_VERSION
-        );
-        
-        // Enhanced candidate profile styles (includes all fixes)
-        wp_enqueue_style(
-            'mt-enhanced-candidate-profile',
-            MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
-            ['mt-variables', 'mt-components', 'mt-frontend', 'mt-candidate-grid'],
-            MT_VERSION
-        );
-        
-        // Brand alignment styles to match main website (v2.5.11)
-        wp_enqueue_style(
-            'mt-brand-alignment',
-            MT_PLUGIN_URL . 'assets/css/mt-brand-alignment.css',
-            ['mt-variables', 'mt-components', 'mt-frontend', 'mt-jury-dashboard-enhanced'],
-            MT_VERSION
-        );
-        
-        // Brand fixes for alignment, padding, and colors (v2.5.12)
-        wp_enqueue_style(
-            'mt-brand-fixes',
-            MT_PLUGIN_URL . 'assets/css/mt-brand-fixes.css',
-            ['mt-brand-alignment'],
-            MT_VERSION
-        );
-        
-        // New Ranking System v2 (v2.5.19)
-        wp_enqueue_style(
-            'mt-rankings-v2',
-            MT_PLUGIN_URL . 'assets/css/mt-rankings-v2.css',
-            ['mt-frontend', 'mt-jury-dashboard-enhanced'],
-            MT_VERSION
-        );
-        
-        // Evaluation form fixes (v2.5.20.1)
-        wp_enqueue_style(
-            'mt-evaluation-fixes',
-            MT_PLUGIN_URL . 'assets/css/mt-evaluation-fixes.css',
-            ['mt-frontend', 'mt-evaluation-forms'],
-            MT_VERSION
-        );
+        // JavaScript files continue to work as before
         
         // Design enhancements JavaScript (v1.0.0)
         wp_enqueue_script(
@@ -570,78 +455,15 @@ class MT_Plugin {
             true
         );
         
-        // New Candidate Cards v3 CSS - Modern redesign following CSS v3 specifications  
-        // IMPORTANT: Load v3 CSS BEFORE hotfixes to establish base styles first
-        wp_enqueue_style(
-            'mt-candidate-cards-v3',
-            MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css',
-            ['mt-frontend', 'mt-candidate-grid', 'mt-evaluation-fixes'],
-            MT_VERSION
-        );
         
-        // Consolidated Hotfixes CSS - Combines multiple small hotfix files for better performance
-        // Includes: photo-adjustments.css, candidate-image-adjustments.css, evaluation-fix.css, 
-        // language-switcher-enhanced.css, mt-jury-dashboard-fix.css, emergency-fixes.css
-        // IMPORTANT: Loaded after v3 CSS to provide targeted fixes without breaking v3 design
-        wp_enqueue_style(
-            'mt-hotfixes-consolidated',
-            MT_PLUGIN_URL . 'assets/css/mt-hotfixes-consolidated.css',
-            ['mt-candidate-cards-v3'],
-            MT_VERSION
-        );
+        // NOTE: Individual hotfix files have been consolidated into consolidated-clean.css
+        // for better performance and maintainability. The consolidated file includes:
+        // - photo-adjustments.css, candidate-image-adjustments.css, evaluation-fix.css
+        // - language-switcher-enhanced.css, mt-jury-dashboard-fix.css, emergency-fixes.css
+        // - frontend-critical-fixes.css, mt-modal-fix.css, mt-medal-fix.css
         
-        // BACKUP: Individual hotfix files (kept as backup, uncomment if needed)
-        /*
-        // Photo adjustments CSS (Issue #13 fix)
-        wp_enqueue_style(
-            'mt-photo-adjustments',
-            MT_PLUGIN_URL . 'assets/css/photo-adjustments.css',
-            ['mt-frontend'],
-            MT_VERSION
-        );
-        
-        // Candidate image adjustments CSS (Issue #13 fix for grid view)
-        wp_enqueue_style(
-            'mt-candidate-image-adjustments',
-            MT_PLUGIN_URL . 'assets/css/candidate-image-adjustments.css',
-            ['mt-frontend', 'mt-candidate-grid'],
-            MT_VERSION
-        );
-        
-        // Evaluation fix CSS (Issue #21 visual fix - ensures multiple buttons can appear selected)
-        wp_enqueue_style(
-            'mt-evaluation-fix',
-            MT_PLUGIN_URL . 'assets/css/evaluation-fix.css',
-            ['mt-frontend'],
-            MT_VERSION
-        );
-        
-        // Language switcher enhanced CSS (Issue #24 - enhanced visibility)
-        wp_enqueue_style(
-            'mt-language-switcher-enhanced',
-            MT_PLUGIN_URL . 'assets/css/language-switcher-enhanced.css',
-            ['mt-frontend'],
-            MT_VERSION
-        );
-        */
-        
-        // Legacy jury dashboard styles (for backward compatibility)
-        if (is_page('jury-dashboard') || (isset($_GET['evaluate']) && !empty($_GET['evaluate']))) {
-            wp_enqueue_style(
-                'mt-jury-dashboard',
-                MT_PLUGIN_URL . 'assets/css/jury-dashboard.css',
-                ['mt-frontend', 'mt-jury-dashboard-enhanced'],
-                MT_VERSION
-            );
-            
-            // Fix for evaluation card content cutoff (now included in mt-hotfixes-consolidated.css)
-            // wp_enqueue_style(
-            //     'mt-jury-dashboard-fix',
-            //     MT_PLUGIN_URL . 'assets/css/mt-jury-dashboard-fix.css',
-            //     ['mt-jury-dashboard'],
-            //     MT_VERSION
-            // );
-        }
+        // Jury dashboard styles are now included in the consolidated CSS architecture
+        // No additional styles needed - MT_Public_Assets handles conditional loading
         
         // Scripts with locale-based cache busting
         $script_version = MT_VERSION . '-' . get_locale();
@@ -764,27 +586,11 @@ class MT_Plugin {
             return;
         }
         
-        // Core CSS Variables (loaded first)
-        wp_enqueue_style(
-            'mt-variables',
-            MT_PLUGIN_URL . 'assets/css/mt-variables.css',
-            [],
-            MT_VERSION
-        );
-        
-        // Component Library (loaded second)
-        wp_enqueue_style(
-            'mt-components',
-            MT_PLUGIN_URL . 'assets/css/mt-components.css',
-            ['mt-variables'],
-            MT_VERSION
-        );
-        
-        // Admin Styles (includes debug center)
+        // Admin styles from the new consolidated CSS architecture
         wp_enqueue_style(
             'mt-admin',
-            MT_PLUGIN_URL . 'assets/css/admin.css',
-            ['mt-variables', 'mt-components'],
+            MT_PLUGIN_URL . 'assets/css/mt-admin.css',
+            [],
             MT_VERSION
         );
         
@@ -808,13 +614,7 @@ class MT_Plugin {
         
         // CSV Import script (on import/export page)
         if (isset($_GET['page']) && $_GET['page'] === 'mt-import-export') {
-            // Enqueue CSV import styles
-            wp_enqueue_style(
-                'mt-csv-import',
-                MT_PLUGIN_URL . 'assets/css/csv-import.css',
-                ['mt-admin'],
-                MT_VERSION
-            );
+            // CSV import styles are now included in mt-admin.css
             
             // Enqueue CSV import script
             wp_enqueue_script(

@@ -1,0 +1,356 @@
+/**
+ * Critical Above-the-Fold Styles - Mobility Trailblazers v4
+ * 
+ * Performance-optimized critical CSS for immediate page rendering
+ * Contains essential layout, typography, and above-fold component styles
+ * 
+ * @package MobilityTrailblazers
+ * @since 4.1.0
+ */
+
+/* ========================================================================
+   CSS RESET & BASE STYLES
+   ========================================================================= */
+   
+/* Import design tokens inline for critical path */
+:root {
+  /* Primary Brand Colors - WCAG AA Compliant */
+  --mt-primary: #003C3D;
+  --mt-primary-hover: #004C4F;
+  --mt-primary-light: #E6F3F3;
+  --mt-secondary: #004C5F;
+  --mt-accent: #C1693C;
+  --mt-kupfer-soft: #BB6F52;
+  
+  /* Background System */
+  --mt-bg-beige: #F8F0E3;
+  --mt-bg-white: #FFFFFF;
+  --mt-bg-neutral: #F8F9FA;
+  
+  /* Text Colors */
+  --mt-text: #302C37;
+  --mt-text-light: #6C757D;
+  --mt-text-muted: #868E96;
+  
+  /* Border & Card System */
+  --mt-border-soft: #E8DCC9;
+  --mt-border-light: #DEE2E6;
+  --mt-card-bg: #FFFFFF;
+  
+  /* Spacing Scale - 8px base unit */
+  --mt-space-1: 4px;
+  --mt-space-2: 8px;
+  --mt-space-3: 12px;
+  --mt-space-4: 16px;
+  --mt-space-5: 20px;
+  --mt-space-6: 24px;
+  --mt-space-8: 32px;
+  --mt-space-10: 40px;
+  --mt-space-12: 48px;
+  --mt-space-16: 64px;
+  
+  /* Border Radius */
+  --mt-radius-sm: 8px;
+  --mt-radius: 16px;
+  --mt-radius-lg: 24px;
+  --mt-radius-full: 9999px;
+  
+  /* Shadows */
+  --mt-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --mt-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  --mt-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.1);
+  
+  /* Typography Scale */
+  --mt-font-size-sm: 0.875rem; /* 14px */
+  --mt-font-size-base: 1rem;    /* 16px */
+  --mt-font-size-lg: 1.125rem;  /* 18px */
+  --mt-font-size-xl: 1.25rem;   /* 20px */
+  --mt-font-size-2xl: 1.5rem;   /* 24px */
+  --mt-font-size-3xl: 1.875rem; /* 30px */
+  
+  /* Line Heights */
+  --mt-leading-tight: 1.25;
+  --mt-leading-normal: 1.5;
+  --mt-leading-relaxed: 1.625;
+  
+  /* Z-Index Scale */
+  --mt-z-dropdown: 1000;
+  --mt-z-sticky: 1020;
+  --mt-z-fixed: 1030;
+  --mt-z-modal: 1040;
+  --mt-z-popover: 1050;
+  --mt-z-tooltip: 1060;
+}
+
+/* Minimal Reset for Critical Elements */
+.mt-root,
+.mt-root * {
+  box-sizing: border-box;
+}
+
+.mt-root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--mt-font-size-base);
+  line-height: var(--mt-leading-normal);
+  color: var(--mt-text);
+  background-color: var(--mt-bg-beige);
+}
+
+/* ========================================================================
+   CRITICAL LAYOUT FOUNDATION
+   ========================================================================= */
+
+/* Container System */
+.mt-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--mt-space-4);
+}
+
+/* Grid System - Critical Above-fold */
+.mt-grid {
+  display: grid;
+  gap: var(--mt-space-6);
+}
+
+.mt-grid--2-cols {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.mt-grid--3-cols {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.mt-grid--4-cols {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive Grid - Mobile First */
+@media (max-width: 768px) {
+  .mt-grid--2-cols,
+  .mt-grid--3-cols,
+  .mt-grid--4-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mt-grid--3-cols,
+  .mt-grid--4-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================================================
+   CRITICAL TYPOGRAPHY
+   ========================================================================= */
+
+.mt-heading-1,
+.mt-heading-2,
+.mt-heading-3 {
+  margin: 0 0 var(--mt-space-4) 0;
+  font-weight: 600;
+  line-height: var(--mt-leading-tight);
+  color: var(--mt-primary);
+}
+
+.mt-heading-1 {
+  font-size: var(--mt-font-size-3xl);
+}
+
+.mt-heading-2 {
+  font-size: var(--mt-font-size-2xl);
+}
+
+.mt-heading-3 {
+  font-size: var(--mt-font-size-xl);
+}
+
+/* ========================================================================
+   CRITICAL CARD COMPONENT
+   ========================================================================= */
+
+.mt-card {
+  background: var(--mt-card-bg);
+  border: 1px solid var(--mt-border-soft);
+  border-radius: var(--mt-radius);
+  box-shadow: var(--mt-shadow);
+  overflow: hidden;
+}
+
+.mt-card__header,
+.mt-card__body,
+.mt-card__footer {
+  padding: var(--mt-space-6);
+}
+
+.mt-card__header {
+  border-bottom: 1px solid var(--mt-border-light);
+  background: var(--mt-bg-neutral);
+}
+
+.mt-card__footer {
+  border-top: 1px solid var(--mt-border-light);
+  background: var(--mt-bg-neutral);
+}
+
+/* ========================================================================
+   CRITICAL BUTTON STYLES
+   ========================================================================= */
+
+.mt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mt-space-2);
+  padding: var(--mt-space-3) var(--mt-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--mt-radius-sm);
+  background: none;
+  font-family: inherit;
+  font-size: var(--mt-font-size-base);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.mt-btn:focus {
+  outline: 2px solid var(--mt-primary);
+  outline-offset: 2px;
+}
+
+.mt-btn--primary {
+  background: var(--mt-primary);
+  color: white;
+}
+
+.mt-btn--primary:hover {
+  background: var(--mt-primary-hover);
+}
+
+.mt-btn--secondary {
+  background: var(--mt-card-bg);
+  border-color: var(--mt-border-soft);
+  color: var(--mt-text);
+}
+
+.mt-btn--secondary:hover {
+  border-color: var(--mt-primary);
+  color: var(--mt-primary);
+}
+
+/* ========================================================================
+   CRITICAL FORM ELEMENTS
+   ========================================================================= */
+
+.mt-input,
+.mt-select,
+.mt-textarea {
+  width: 100%;
+  padding: var(--mt-space-3) var(--mt-space-4);
+  border: 1px solid var(--mt-border-light);
+  border-radius: var(--mt-radius-sm);
+  background: var(--mt-card-bg);
+  font-family: inherit;
+  font-size: var(--mt-font-size-base);
+  transition: border-color 0.2s ease;
+}
+
+.mt-input:focus,
+.mt-select:focus,
+.mt-textarea:focus {
+  outline: none;
+  border-color: var(--mt-primary);
+  box-shadow: 0 0 0 3px var(--mt-primary-light);
+}
+
+/* ========================================================================
+   UTILITY CLASSES - CRITICAL ONLY
+   ========================================================================= */
+
+/* Display */
+.mt-hidden { display: none !important; }
+.mt-block { display: block !important; }
+.mt-flex { display: flex !important; }
+.mt-grid { display: grid !important; }
+
+/* Flexbox */
+.mt-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Spacing - Critical margins/padding */
+.mt-mb-4 { margin-bottom: var(--mt-space-4) !important; }
+.mt-mb-6 { margin-bottom: var(--mt-space-6) !important; }
+.mt-mt-4 { margin-top: var(--mt-space-4) !important; }
+.mt-p-4 { padding: var(--mt-space-4) !important; }
+.mt-p-6 { padding: var(--mt-space-6) !important; }
+
+/* Text Alignment */
+.mt-text-center { text-align: center !important; }
+.mt-text-left { text-align: left !important; }
+.mt-text-right { text-align: right !important; }
+
+/* Colors */
+.mt-text-primary { color: var(--mt-primary) !important; }
+.mt-text-muted { color: var(--mt-text-muted) !important; }
+.mt-bg-white { background-color: var(--mt-bg-white) !important; }
+
+/* ========================================================================
+   CRITICAL RESPONSIVE HELPERS
+   ========================================================================= */
+
+/* Mobile-only visibility */
+.mt-mobile-only {
+  display: block;
+}
+
+.mt-desktop-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mt-mobile-only {
+    display: none;
+  }
+  
+  .mt-desktop-only {
+    display: block;
+  }
+}
+
+/* Loading States - Critical for UX */
+.mt-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.mt-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--mt-border-light);
+  border-top-color: var(--mt-primary);
+  border-radius: 50%;
+  animation: mt-spin 0.8s linear infinite;
+}
+
+@keyframes mt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

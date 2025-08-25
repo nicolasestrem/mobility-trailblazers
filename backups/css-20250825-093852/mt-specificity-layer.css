@@ -1,0 +1,23 @@
+﻿/* Specificity Boost Layer - Auto-generated */
+/* These rules ensure proper cascade without */
+
+/* Admin overrides */
+body.wp-admin .mt-component { }
+
+/* Frontend overrides */  
+body:not(.wp-admin) .mt-component { }
+
+/* Mobile overrides */
+@media (max-width: 768px) {
+    html body .mt-component { }
+}
+
+/* Elementor compatibility */
+.elementor-widget .mt-component { }
+
+/* Theme compatibility */
+#page .mt-component,
+#content .mt-component,
+.site-content .mt-component,
+.entry-content .mt-component { }
+

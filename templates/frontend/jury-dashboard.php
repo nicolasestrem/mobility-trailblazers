@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Jury Dashboard Template
  *
@@ -73,7 +73,8 @@ $dashboard_settings = get_option('mt_dashboard_settings', [
     'show_search_filter' => 1,
     'show_rankings' => 1,
     'card_layout' => 'grid',
-    'intro_text' => ''
+    'intro_text' => '',
+    'header_image_url' => 'http://localhost:8080/wp-content/uploads/2025/08/Background.webp'
 ]);
 
 // Apply custom styles
@@ -83,7 +84,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
 ?>
 
 <div class="mt-root">
-<div class="mt-jury-dashboard mt-dashboard-v3">
+<div class="mt-jury-dashboard mt-dashboard-v4">
     <?php if ($progress['completion_rate'] == 100) : ?>
         <div class="mt-completion-status-banner">
             <div class="mt-completion-status-content">
@@ -94,8 +95,18 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
         </div>
     <?php endif; ?>
     
-    <div class="<?php echo esc_attr($header_class); ?> <?php echo $progress['completion_rate'] == 100 ? 'mt-header-completed' : ''; ?>" 
-         style="<?php echo (isset($dashboard_settings['header_style']) ? $dashboard_settings['header_style'] : 'gradient') === 'solid' ? 'background-color: ' . esc_attr(isset($dashboard_settings['primary_color']) ? $dashboard_settings['primary_color'] : '#0073aa') : ''; ?>">
+    <?php 
+    // Build header style with background image if available
+    $header_style = '';
+    if (!empty($dashboard_settings['header_image_url'])) {
+        // Use the background image from settings
+        $header_style = 'background-image: url(' . esc_url($dashboard_settings['header_image_url']) . '); background-size: cover; background-position: center; background-repeat: no-repeat;';
+    } else {
+        // Fallback to gradient if no image is set
+        $header_style = 'background: linear-gradient(135deg, #003C3D 0%, #004C5F 100%);';
+    }
+    ?>
+    <div class="<?php echo esc_attr($header_class); ?> mt-header-image <?php echo $progress['completion_rate'] == 100 ? 'mt-header-completed' : ''; ?>" style="<?php echo esc_attr($header_style); ?>">
         
         <?php if (isset($dashboard_settings['show_welcome_message']) ? $dashboard_settings['show_welcome_message'] : true) : ?>
             <h1>
@@ -114,32 +125,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             <p><?php _e('Review and evaluate your assigned candidates for the Mobility Trailblazers Awards', 'mobility-trailblazers'); ?></p>
         <?php endif; ?>
         
-        <?php if ((isset($dashboard_settings['show_progress_bar']) ? $dashboard_settings['show_progress_bar'] : true) && $progress['total'] > 0) : ?>
-        <div class="<?php echo esc_attr($progress_class); ?> <?php echo $progress['completion_rate'] == 100 ? 'mt-progress-complete' : ''; ?>">
-            <div class="mt-progress-fill" style="width: <?php echo esc_attr($progress['completion_rate']); ?>%">
-                <span class="mt-progress-text">
-                    <?php if ($progress['completion_rate'] == 100) : ?>
-                        <span class="dashicons dashicons-yes-alt" style="color: #00a32a; margin-right: 5px;"></span>
-                    <?php endif; ?>
-                    <?php echo esc_html($progress['completion_rate']); ?>%
-                </span>
-            </div>
-        </div>
-        <?php if ($progress['completion_rate'] == 100) : ?>
-            <div class="mt-completion-badge mt-completion-enhanced">
-                <div class="mt-completion-icon-large">
-                    <span class="dashicons dashicons-awards"></span>
-                </div>
-                <div class="mt-completion-text">
-                    <strong><?php _e('Congratulations!', 'mobility-trailblazers'); ?></strong>
-                    <p><?php _e('You have completed all evaluations!', 'mobility-trailblazers'); ?></p>
-                    <div class="mt-completion-timestamp">
-                        <?php _e('Mission accomplished', 'mobility-trailblazers'); ?> ✓
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-        <?php endif; ?>
+        <?php /* Progress bar feature removed */ ?>
     </div>
     
     <?php if (isset($dashboard_settings['show_stats_cards']) ? $dashboard_settings['show_stats_cards'] : true) : ?>
@@ -207,7 +193,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
     <?php endif; ?>
 
     <?php if (!empty($assignments)) : ?>
-        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?> mt-candidates-v3" id="mt-candidates-list">
+        <div class="mt-candidates-list <?php echo esc_attr($layout_class); ?> mt-candidates-v4" id="mt-candidates-list">
             <?php foreach ($assignments as $assignment) : 
                 $candidate = get_post($assignment->candidate_id);
                 if (!$candidate) continue;
@@ -240,7 +226,7 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
                     }
                 }
             ?>
-                <div class="mt-candidate-card" data-status="<?php echo esc_attr($status); ?>" data-name="<?php echo esc_attr(strtolower($candidate->post_title)); ?>" data-category="<?php echo esc_attr($category_slug); ?>">
+                <div class="mt-candidate-card" data-i18n-class="mt-kandidaten-karte" data-status="<?php echo esc_attr($status); ?>" data-name="<?php echo esc_attr(strtolower($candidate->post_title)); ?>" data-category="<?php echo esc_attr($category_slug); ?>">
                     <div class="mt-candidate-header">
                         <h3 class="mt-candidate-name"><?php echo esc_html($candidate->post_title); ?></h3>
                         <?php if ($organization) : ?>
@@ -323,6 +309,8 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
 jQuery(document).ready(function($) {
     'use strict';
     console.log('MT Jury Filters - Inline Script Loaded');
+    
+    // Progress bar feature removed
     
     // Filter candidates based on search, status, and category
     function filterDashboardCandidates() {
@@ -442,3 +430,4 @@ jQuery(document).ready(function($) {
 </div><!-- .mt-root -->
 
  
+

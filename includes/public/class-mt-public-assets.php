@@ -62,8 +62,8 @@ class MT_Public_Assets {
      */
     private function is_enabled() {
         if (is_null($this->is_enabled)) {
-            // Allow filtering to enable/disable v4 CSS
-            $this->is_enabled = (bool) apply_filters('mt_enable_css_v4', true);
+            // v4 CSS framework is always enabled
+            $this->is_enabled = true;
         }
         return $this->is_enabled;
     }
@@ -201,28 +201,18 @@ class MT_Public_Assets {
         $this->register_v4_styles();
         
         // Enqueue styles in dependency order
-        wp_enqueue_style('mt-v4-tokens');
-        wp_enqueue_style('mt-v4-reset');
-        wp_enqueue_style('mt-v4-base');
-        wp_enqueue_style('mt-v4-components');
-        wp_enqueue_style('mt-v4-pages');
-        wp_enqueue_style('mt-v4-mobile-jury');
+        wp_enqueue_style('mt-critical');
+        wp_enqueue_style('mt-core');
+        wp_enqueue_style('mt-components');
+        wp_enqueue_style('mt-brand-fixes');
+        // mt-header-gradient-fix removed - file deleted
+        wp_enqueue_style('mt-mobile');
+        wp_enqueue_style('mt-specificity-layer');
+        // Progress bar styles removed - feature deleted
         
-        // HOTFIX: Jury dashboard filter fix - Critical for category filtering
-        wp_enqueue_style(
-            'mt-jury-filter-hotfix',
-            MT_PLUGIN_URL . 'assets/css/mt-jury-filter-hotfix.css',
-            ['mt-v4-mobile-jury'],
-            MT_VERSION . '-hotfix-filter'
-        );
-        
-        // HOTFIX: Jury dashboard filter fix - Critical for category filtering
-        wp_enqueue_style(
-            'mt-jury-filter-hotfix',
-            MT_PLUGIN_URL . 'assets/css/mt-jury-filter-hotfix.css',
-            [],
-            MT_VERSION . '-hotfix-filter'
-        );
+        // Consolidated CSS fixes are now included in mt-core.css and mt-components.css
+        // All emergency fixes, frontend critical fixes, hotfixes, modal fixes, and medal fixes
+        // have been merged into the new consolidated CSS architecture
         
         // Optionally optimize third-party CSS
         $this->maybe_optimize_third_party_css();
@@ -237,54 +227,74 @@ class MT_Public_Assets {
      * @return void
      */
     private function register_v4_styles() {
-        $base_url = MT_PLUGIN_URL . 'assets/css/v4/';
-        $version = self::V4_VERSION;
+        $base_url = MT_PLUGIN_URL . 'assets/css/';
         
-        // Register design tokens
+        // Use cache busting version with file modification time
+        $version = $this->get_asset_version();
+        
+        // Use minified files in production
+        $suffix = $this->get_asset_suffix();
+        
+        // Register critical above-fold styles
         wp_register_style(
-            'mt-v4-tokens',
-            $base_url . 'mt-tokens.css',
+            'mt-critical',
+            $base_url . 'mt-critical' . $suffix . '.css',
             [],
             $version
         );
         
-        // Register reset styles
+        // Register core consolidated styles
         wp_register_style(
-            'mt-v4-reset',
-            $base_url . 'mt-reset.css',
-            ['mt-v4-tokens'],
+            'mt-core',
+            $base_url . 'mt-core' . $suffix . '.css',
+            ['mt-critical'],
             $version
         );
         
-        // Register base components
+        // Register component styles
         wp_register_style(
-            'mt-v4-base',
-            $base_url . 'mt-base.css',
-            ['mt-v4-reset'],
+            'mt-components',
+            $base_url . 'mt-components' . $suffix . '.css',
+            ['mt-core'],
             $version
         );
         
-        // Register specific components
+        // Progress bar CSS removed - feature deleted
+        
+        // Header gradient fix removed - using mt-brand-fixes.css instead
+        
+        // Register brand fixes for header gradient and styling
         wp_register_style(
-            'mt-v4-components',
-            $base_url . 'mt-components.css',
-            ['mt-v4-base'],
+            'mt-brand-fixes',
+            $base_url . 'mt-brand-fixes.css',
+            ['mt-core'],
             $version
         );
         
-        // Register page-specific styles
+        // Register admin-specific styles (only for admin pages)
+        if (is_admin()) {
+            wp_register_style(
+                'mt-admin',
+                $base_url . 'mt-admin' . $suffix . '.css',
+                ['mt-core'],
+                $version
+            );
+        }
+        
+        // Register mobile-specific styles
         wp_register_style(
-            'mt-v4-pages',
-            $base_url . 'mt-pages.css',
-            ['mt-v4-components'],
-            $version
+            'mt-mobile',
+            $base_url . 'mt-mobile' . $suffix . '.css',
+            ['mt-core'],
+            $version,
+            'screen and (max-width: 768px)' // Add media query for mobile
         );
         
-        // Register mobile-specific jury dashboard styles with high priority
+        // Register specificity layer for cascade management
         wp_register_style(
-            'mt-v4-mobile-jury',
-            $base_url . 'mt-mobile-jury-dashboard.css',
-            ['mt-v4-pages'],
+            'mt-specificity-layer',
+            $base_url . 'mt-specificity-layer' . $suffix . '.css',
+            ['mt-core'],
             $version,
             'all'
         );
@@ -368,8 +378,10 @@ class MT_Public_Assets {
         
         // Add inline styles if any
         if (!empty($inline_css)) {
-            wp_add_inline_style('mt-v4-components', $inline_css);
+            wp_add_inline_style('mt-components', $inline_css);
         }
+        
+        // Progress bar inline styles removed - feature deleted
     }
     
     /**
@@ -396,7 +408,7 @@ class MT_Public_Assets {
                 }
             ';
             
-            wp_add_inline_style('mt-v4-base', $override_css);
+            wp_add_inline_style('mt-core', $override_css);
         }, 100);
     }
     
@@ -451,42 +463,41 @@ class MT_Public_Assets {
     }
     
     /**
-     * Get list of legacy CSS handles to dequeue when v4 is active
+     * Get asset version for cache busting
      *
-     * @return array
+     * @return string Version string
+     * @since 4.1.0
      */
-    public function get_legacy_css_handles() {
-        return [
-            // v3 CSS files
-            'mt-v3-tokens',
-            'mt-v3-reset',
-            'mt-v3-grid',
-            'mt-v3-jury',
-            'mt-v3-compat',
-            'mt-v3-visual-tune',
-            'mt-v3-evaluation-cards',
-            
-            // Legacy main files
-            'mt-variables',
-            'mt-components',
-            'mt-frontend',
-            'mt-frontend-new',
-            'mt-candidate-grid',
-            'mt-evaluation-forms',
-            'mt-jury-dashboard-enhanced',
-            'mt-enhanced-candidate-profile',
-            'mt-brand-alignment',
-            'mt-brand-fixes',
-            'mt-rankings-v2',
-            'mt-evaluation-fixes',
-            'mt-candidate-cards-v3',
-            'mt-hotfixes-consolidated',
-            'mt-jury-dashboard',
-            'mt-photo-adjustments',
-            'mt-candidate-image-adjustments',
-            'mt-evaluation-fix',
-            'mt-language-switcher-enhanced',
-            'mt-jury-dashboard-fix'
-        ];
+    private function get_asset_version() {
+        // In development, use file modification time for instant cache busting
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $css_file = MT_PLUGIN_DIR . 'assets/css/mt-core.css';
+            if (file_exists($css_file)) {
+                return self::V4_VERSION . '.' . filemtime($css_file);
+            }
+        }
+        
+        // In production, use plugin version
+        return self::V4_VERSION;
+    }
+    
+    /**
+     * Get asset suffix for minified files
+     *
+     * @return string File suffix
+     * @since 4.1.0
+     */
+    private function get_asset_suffix() {
+        // Use minified files in production
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            // Check if minified version exists
+            $test_file = MT_PLUGIN_DIR . 'assets/css/mt-core.min.css';
+            if (file_exists($test_file)) {
+                return '.min';
+            }
+        }
+        
+        // Use non-minified in development or if minified doesn't exist
+        return '';
     }
 }

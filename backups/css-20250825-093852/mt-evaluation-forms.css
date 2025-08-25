@@ -1,0 +1,966 @@
+/**
+ * Mobility Trailblazers - Evaluation Forms Styles
+ * Version: 1.0.0
+ * Created: 2025-08-17
+ * 
+ * Description: All evaluation form and scoring-related styles
+ * Dependencies: mt-variables.css
+ * 
+ * This file contains:
+ * - Evaluation form base styles
+ * - Scoring criteria interface
+ * - Score sliders and controls
+ * - Comments sections
+ * - Submission buttons
+ * - Evaluation page layouts
+ * - Rankings list styles
+ */
+
+/* ===================================
+   EVALUATION CRITERIA INFO SECTION
+   =================================== */
+
+.mt-criteria-info-section {
+    background: #ffffff;
+    padding: 30px;
+    margin: 30px auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.mt-criteria-info-section .mt-section-title {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.mt-criteria-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mt-criterion-info-card {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mt-criterion-info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mt-criterion-info-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.mt-criterion-info-title {
+    color: #1f2937;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.mt-criterion-info-content {
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.mt-criterion-info-content p {
+    margin: 0;
+    color: #4b5563;
+}
+
+/* Ensure evaluation page has proper width */
+.mt-evaluation-page {
+    width: 100%;
+    max-width: 100%;
+}
+
+.mt-evaluation-page .mt-criteria-info-section {
+    clear: both;
+    display: block;
+    width: calc(100% + 60px);
+    margin-left: -30px;
+    margin-right: -30px;
+}
+
+/* Mobile responsiveness for criteria info */
+@media (max-width: 768px) {
+    .mt-criteria-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mt-criteria-info-section {
+        padding: 20px;
+        margin: 20px -10px;
+        width: calc(100% + 20px);
+    }
+    
+    .mt-criterion-info-card {
+        padding: 15px;
+    }
+}
+
+/* ===================================
+   BASE EVALUATION FORM
+   =================================== */
+
+/* Evaluation Form */
+.mt-evaluation-form {
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px 0;
+}
+
+.mt-evaluation-header {
+    border-bottom: 2px solid var(--mt-blue-accent);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.mt-evaluation-header h2 {
+    margin: 0 0 10px 0;
+    color: var(--mt-primary);
+}
+
+.mt-candidate-info {
+    background: var(--mt-bg-beige);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+/* ===================================
+   CRITERIA SECTION
+   =================================== */
+
+.mt-criteria-section {
+    margin-bottom: 30px;
+}
+
+.mt-criterion {
+    background: var(--mt-bg-beige);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.mt-criterion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.mt-criterion-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mt-primary);
+}
+
+.mt-criterion-weight {
+    background: var(--mt-secondary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+/* ===================================
+   SCORE SELECTOR
+   =================================== */
+
+/* Score Selector */
+.mt-score-selector {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.mt-score-option {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    background: var(--mt-bg-base);
+    border: 2px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mt-score-option:hover {
+    border-color: var(--mt-secondary);
+    transform: translateY(-2px);
+}
+
+.mt-score-option.selected {
+    background: var(--mt-primary);
+    color: white;
+    border-color: var(--mt-primary);
+}
+
+.mt-score-option input[type="radio"] {
+    display: none;
+}
+
+.mt-score-value {
+    font-size: 24px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.mt-score-label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ===================================
+   COMMENTS FIELD
+   =================================== */
+
+/* Comments Field */
+.mt-comments-field {
+    margin-top: 20px;
+}
+
+.mt-comments-field label {
+    display: block;
+    font-weight: 600;
+    color: var(--mt-primary);
+    margin-bottom: 10px;
+}
+
+.mt-comments-field textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: var(--mt-bg-base);
+    color: var(--mt-body-text);
+}
+
+.mt-comments-field textarea:focus {
+    outline: none;
+    border-color: var(--mt-secondary);
+    box-shadow: 0 0 0 2px rgba(0, 76, 95, 0.1);
+}
+
+/* ===================================
+   SUBMIT BUTTON
+   =================================== */
+
+/* Submit Button */
+.mt-submit-evaluation {
+    background: var(--mt-accent);
+    color: white;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+}
+
+.mt-submit-evaluation:hover {
+    background: var(--mt-kupfer-bold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(193, 105, 60, 0.3);
+}
+
+.mt-submit-evaluation:disabled {
+    background: var(--mt-blue-accent);
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.6;
+}
+
+/* ===================================
+   EVALUATION PAGE SPECIFIC
+   =================================== */
+
+/* Evaluation Page Styles */
+body .mt-evaluation-page {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+}
+
+/* Evaluation Header */
+body .mt-evaluation-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 30px !important;
+    padding: 20px !important;
+    background: linear-gradient(135deg, var(--mt-primary) 0%, var(--mt-secondary) 100%) !important;
+    border-radius: 12px !important;
+    color: white !important;
+}
+
+body .mt-evaluation-header .mt-back-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 25px !important;
+    transition: all 0.3s ease !important;
+}
+
+body .mt-evaluation-header .mt-back-link:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: translateX(-4px) !important;
+}
+
+body .mt-evaluation-title {
+    text-align: center !important;
+    flex: 1 !important;
+}
+
+body .mt-evaluation-title h1 {
+    font-size: 28px !important;
+    margin: 0 !important;
+    font-weight: 700 !important;
+}
+
+body .mt-evaluation-header .mt-status-badge {
+    display: inline-block !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-left: 15px !important;
+}
+
+body .mt-evaluation-header .mt-status-completed {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--mt-primary) !important;
+}
+
+body .mt-evaluation-header .mt-status-draft {
+    background: var(--mt-bg-beige) !important;
+    color: var(--mt-kupfer-bold) !important;
+}
+
+/* ===================================
+   SCORING SECTION
+   =================================== */
+
+/* Scoring Section */
+body .mt-scoring-section {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 40px !important;
+    margin: 30px 0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+body .mt-section-title {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    gap: 30px !important;
+    color: #212529 !important;
+    margin: 0 0 30px 0 !important;
+    padding-bottom: 15px !important;
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+body .mt-total-score-display {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: var(--mt-accent) !important;
+}
+
+body #mt-total-score {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+}
+
+/* ===================================
+   CRITERIA GRID
+   =================================== */
+
+/* Criteria Grid */
+body .mt-criteria-grid {
+    display: grid !important;
+    gap: 25px !important;
+}
+
+body .mt-criterion-card {
+    background: var(--mt-bg-beige) !important;
+    border-radius: 12px !important;
+    padding: 25px !important;
+    transition: all 0.3s ease !important;
+}
+
+body .mt-criterion-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+body .mt-criterion-header {
+    display: flex !important;
+    gap: 15px !important;
+    margin-bottom: 20px !important;
+    padding-left: 15px !important;
+    border-left: 4px solid !important;
+}
+
+body .mt-criterion-icon {
+    font-size: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+body .mt-criterion-info {
+    flex: 1 !important;
+}
+
+body .mt-criterion-label {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--mt-primary) !important;
+    margin: 0 0 5px 0 !important;
+}
+
+/* Criterion Description - Enhanced visibility fixes */
+body .mt-criterion-description,
+.mt-criterion-description,
+.mt-criteria-grid .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 14px !important;
+    color: var(--mt-body-text, #6c757d) !important;
+    margin: 5px 0 0 0 !important;
+    line-height: 1.5 !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    position: static !important;
+    z-index: auto !important;
+    clip: auto !important;
+    clip-path: none !important;
+}
+
+/* Additional specificity for evaluation forms */
+#mt-evaluation-form .mt-criterion-description,
+.mt-evaluation-page .mt-criterion-description,
+.mt-form-cards .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Prevent pseudo-elements from hiding content */
+.mt-criterion-description::before,
+.mt-criterion-description::after {
+    content: none !important;
+}
+
+/* German language specific display */
+body[lang="de-DE"] .mt-criterion-description,
+html[lang="de-DE"] .mt-criterion-description {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure parent containers don't hide children */
+.mt-criterion-info,
+.mt-criterion-header,
+.mt-criterion-card {
+    overflow: visible !important;
+}
+
+/* ===================================
+   SCORING CONTROLS
+   =================================== */
+
+/* Scoring Controls */
+body .mt-scoring-control {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+}
+
+/* Slider Style */
+body .mt-score-slider-wrapper {
+    flex: 1 !important;
+    position: relative !important;
+    padding: 10px 0 30px 0 !important;
+}
+
+body .mt-score-slider {
+    width: 100% !important;
+    height: 8px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: var(--mt-blue-accent) !important;
+    border-radius: 4px !important;
+    outline: none !important;
+}
+
+body .mt-score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 24px !important;
+    height: 24px !important;
+    background: var(--mt-accent) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+body .mt-score-slider::-moz-range-thumb {
+    width: 24px !important;
+    height: 24px !important;
+    background: var(--mt-accent) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    border: none !important;
+}
+
+body .mt-score-marks {
+    display: flex !important;
+    justify-content: space-between !important;
+    position: absolute !important;
+    width: 100% !important;
+    bottom: 0 !important;
+}
+
+body .mt-score-mark {
+    font-size: 12px !important;
+    color: var(--mt-body-text) !important;
+    cursor: pointer !important;
+    padding: 2px 4px !important;
+}
+
+body .mt-score-mark:hover {
+    color: var(--mt-accent) !important;
+    font-weight: 600 !important;
+}
+
+/* Score Display */
+body .mt-score-display {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===================================
+   COMMENTS SECTION
+   =================================== */
+
+/* Comments Section */
+body .mt-comments-section {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 40px !important;
+    margin: 30px 0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+body .mt-section-description {
+    font-size: 16px !important;
+    color: var(--mt-body-text) !important;
+    margin: -10px 0 20px 0 !important;
+}
+
+body .mt-comments-textarea {
+    width: 100% !important;
+    min-height: 150px !important;
+    padding: 15px !important;
+    border: 2px solid var(--mt-blue-accent) !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    resize: vertical !important;
+    transition: border-color 0.3s ease !important;
+}
+
+body .mt-comments-textarea:focus {
+    outline: none !important;
+    border-color: var(--mt-accent) !important;
+}
+
+body .mt-char-count {
+    text-align: right !important;
+    font-size: 13px !important;
+    color: var(--mt-body-text) !important;
+    margin-top: 8px !important;
+}
+
+/* ===================================
+   FORM ACTIONS
+   =================================== */
+
+/* Form Actions */
+body .mt-form-actions {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 20px !important;
+    margin: 40px 0 !important;
+}
+
+body .mt-form-actions .mt-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 12px 30px !important;
+    border: none !important;
+    border-radius: 30px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+}
+
+body .mt-form-actions .mt-btn-primary {
+    background: var(--mt-accent) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(193, 105, 60, 0.3) !important;
+}
+
+body .mt-form-actions .mt-btn-primary:hover {
+    background: var(--mt-kupfer-bold) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(193, 105, 60, 0.4) !important;
+}
+
+body .mt-form-actions .mt-btn-secondary {
+    background: white !important;
+    color: var(--mt-secondary) !important;
+    border: 2px solid var(--mt-secondary) !important;
+}
+
+body .mt-form-actions .mt-btn-secondary:hover {
+    background: var(--mt-secondary) !important;
+    color: white !important;
+}
+
+/* ===================================
+   SUBMISSION GUIDELINES
+   =================================== */
+
+/* Submission Guidelines */
+body .mt-submission-guidelines {
+    background: var(--mt-bg-beige) !important;
+    border-radius: 12px !important;
+    padding: 30px !important;
+    margin: 30px 0 !important;
+}
+
+body .mt-submission-guidelines h3 {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--mt-primary) !important;
+    margin: 0 0 15px 0 !important;
+}
+
+body .mt-submission-guidelines ul {
+    margin: 0 !important;
+    padding-left: 20px !important;
+}
+
+body .mt-submission-guidelines li {
+    font-size: 15px !important;
+    color: var(--mt-body-text) !important;
+    margin-bottom: 10px !important;
+    line-height: 1.6 !important;
+}
+
+/* ===================================
+   RANKINGS LIST
+   =================================== */
+
+.mt-rankings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mt-rankings-list .mt-ranking-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    background: var(--mt-bg-base);
+    border: 1px solid var(--mt-blue-accent);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    padding: 10px 16px;
+    position: relative;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    min-height: 0;
+}
+
+.mt-rankings-list .mt-ranking-item:hover {
+    border-color: var(--mt-secondary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.mt-rankings-list .mt-position-badge {
+    position: static;
+    min-width: 32px;
+    min-height: 32px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 15px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.mt-rankings-list .position-gold .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-accent), var(--mt-kupfer-bold));
+    color: var(--mt-bg-base);
+}
+
+.mt-rankings-list .position-silver .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-blue-accent), var(--mt-secondary));
+    color: var(--mt-primary);
+}
+
+.mt-rankings-list .position-bronze .mt-position-badge {
+    background: linear-gradient(135deg, var(--mt-kupfer-soft), var(--mt-kupfer-bold));
+    color: var(--mt-bg-base);
+}
+
+.mt-rankings-list .mt-candidate-info {
+    flex: 2;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.mt-rankings-list .mt-candidate-name {
+    font-size: 15px !important;
+    margin: 0 0 2px 0 !important;
+    font-weight: 600 !important;
+    color: var(--mt-primary) !important;
+}
+
+.mt-rankings-list .mt-candidate-meta {
+    font-size: 12px !important;
+    color: var(--mt-body-text) !important;
+    margin: 0 !important;
+}
+
+.mt-rankings-list .mt-total-score-display {
+    flex: 0 0 80px;
+    min-width: 80px;
+    text-align: center;
+    align-self: center;
+    background: var(--mt-bg-beige);
+    border-radius: 6px;
+    padding: 4px 0;
+    margin: 0 8px;
+}
+
+.mt-rankings-list .score-label {
+    font-size: 10px !important;
+    margin-bottom: 0 !important;
+}
+
+.mt-rankings-list .score-value {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+/* Inline evaluation controls in rankings */
+.mt-rankings-list .mt-inline-evaluation-controls {
+    flex: 3;
+    min-width: 160px;
+    margin-left: 8px;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.mt-rankings-list .mt-criteria-grid-inline {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
+}
+
+.mt-rankings-list .mt-criterion-inline {
+    background: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    min-width: 0;
+}
+
+.mt-rankings-list .mt-criterion-label {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+    gap: 2px !important;
+}
+
+.mt-rankings-list .mt-score-control {
+    gap: 2px !important;
+}
+
+.mt-rankings-list .mt-score-adjust {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    border-radius: 3px !important;
+}
+
+.mt-rankings-list .mt-score-input {
+    width: 28px !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+}
+
+.mt-rankings-list .mt-inline-actions {
+    gap: 4px !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border: none !important;
+}
+
+.mt-rankings-list .mt-btn-save-inline,
+.mt-rankings-list .mt-btn-full-evaluation {
+    padding: 3px 10px !important;
+    font-size: 11px !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Responsive Design for Evaluation Page */
+@media (max-width: 768px) {
+    body .mt-evaluation-header {
+        flex-direction: column !important;
+        gap: 15px !important;
+        text-align: center !important;
+    }
+    
+    body .mt-evaluation-header .mt-back-link {
+        align-self: flex-start !important;
+    }
+    
+    body .mt-scoring-section,
+    body .mt-comments-section {
+        padding: 25px !important;
+    }
+    
+    body .mt-section-title {
+        flex-direction: column !important;
+        gap: 10px !important;
+        text-align: center !important;
+    }
+    
+    body .mt-criterion-header {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding-left: 0 !important;
+        border-left: none !important;
+        border-top: 4px solid !important;
+        padding-top: 15px !important;
+    }
+    
+    body .mt-scoring-control {
+        flex-direction: column !important;
+    }
+    
+    body .mt-form-actions {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+    
+    body .mt-form-actions .mt-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    .mt-score-selector {
+        flex-wrap: wrap;
+    }
+    
+    .mt-score-option {
+        min-width: calc(33.333% - 10px);
+    }
+    
+    .mt-evaluation-form {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 900px) {
+    .mt-rankings-list .mt-ranking-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px 6px;
+    }
+    
+    .mt-rankings-list .mt-inline-evaluation-controls {
+        margin-left: 0;
+    }
+}
+
+/* Evaluation Header Layout fixes */
+.mt-scoring-section .mt-evaluation-header {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}

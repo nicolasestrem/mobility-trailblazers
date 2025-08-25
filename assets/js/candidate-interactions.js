@@ -172,17 +172,22 @@
         $('.mt-criterion-card').each(function() {
             observer.observe(this);
         });
-        // Progress bars animation
-        $('.mt-progress-bar').each(function() {
+        // Progress bars animation (skip mt-no-animate class)
+        $('.mt-progress-bar').not('.mt-no-animate').each(function() {
             const $bar = $(this);
             const value = $bar.data('value');
-            const progressObserver = new IntersectionObserver(function(entries) {
-                if (entries[0].isIntersecting) {
-                    $bar.css('width', value + '%');
-                    progressObserver.unobserve($bar[0]);
-                }
-            });
-            progressObserver.observe(this);
+            // Only animate if data-value exists
+            if (value !== undefined) {
+                const $fill = $bar.find('.mt-progress-fill');
+                const progressObserver = new IntersectionObserver(function(entries) {
+                    if (entries[0].isIntersecting) {
+                        // Set width on the fill element, not the container
+                        $fill.css('width', value + '%');
+                        progressObserver.unobserve($bar[0]);
+                    }
+                });
+                progressObserver.observe(this);
+            }
         });
     }
     /**

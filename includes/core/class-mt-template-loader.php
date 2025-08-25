@@ -92,29 +92,15 @@ class MT_Template_Loader {
             return;
         }
         
-        // Enqueue enhanced styles
-        wp_enqueue_style(
-            'mt-enhanced-candidate-profile',
-            MT_PLUGIN_URL . 'assets/css/enhanced-candidate-profile.css',
-            ['mt-frontend'],
-            MT_VERSION
-        );
-        
-        // Enqueue hotfix for single candidate pages
-        // TODO: Remove in v2.5.39 - All fixes have been merged into enhanced-candidate-profile.css
-        // Keeping for now to ensure no visual regression
-        if (is_singular('mt_candidate')) {
-            wp_enqueue_style(
-                'mt-candidate-single-hotfix',
-                MT_PLUGIN_URL . 'assets/css/candidate-single-hotfix.css',
-                [],
-                '2025-08-19'
-            );
-        }
+        // Enhanced styles are now part of the new CSS architecture
+        // All enhanced candidate profile styles have been merged into mt-components.css
+        // No need to enqueue separate files as the main public assets manager handles this
         
         // Add custom CSS for criterion colors and animations
         $custom_css = self::generate_custom_css();
-        wp_add_inline_style('mt-enhanced-candidate-profile', $custom_css);
+        if (wp_style_is('mt-components', 'registered')) {
+            wp_add_inline_style('mt-components', $custom_css);
+        }
     }
     
     /**

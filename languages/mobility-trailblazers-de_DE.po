@@ -1403,3 +1403,22 @@ msgstr "Behandelt kritische Aspekte der Verkehrswende und zukünftige Mobilität
 
 msgid "Serves as an inspiring example and actively promotes sustainable mobility solutions"
 msgstr "Dient als inspirierendes Beispiel und fördert aktiv nachhaltige Mobilitätslösungen"
+
+# CSS Class Names
+msgid "candidate-card"
+msgstr "Kandidatenkarte"
+
+msgid "evaluation-form"  
+msgstr "Bewertungsformular"
+
+msgid "jury-dashboard"
+msgstr "Jury-Übersicht"
+
+msgid "loading"
+msgstr "Lädt"
+
+msgid "error"
+msgstr "Fehler"
+
+msgid "success"
+msgstr "Erfolg"

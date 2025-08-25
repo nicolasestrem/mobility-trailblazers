@@ -216,24 +216,8 @@ class MT_Shortcode_Renderer {
      * Enqueue dashboard assets
      */
     private function enqueue_dashboard_assets() {
-        // Check if v4 CSS framework is active
-        if (apply_filters('mt_enable_css_v4', true)) {
-            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
-            // Only enqueue JavaScript and localization
-        } else {
-            // Enqueue v3 CSS files (legacy)
-            $base = MT_PLUGIN_URL . 'assets/css/v3/';
-            wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
-            wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
-            wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
-            wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
-            wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
-            wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
-            wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
-            
-            // Enqueue new candidate cards v3 CSS
-            wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
-        }
+        // v4 CSS is already loaded by MT_Public_Assets
+        // Only enqueue JavaScript and localization
         
         wp_enqueue_style('dashicons');
         // Add locale-based cache busting to ensure fresh translations
@@ -283,72 +267,24 @@ class MT_Shortcode_Renderer {
      * Enqueue grid assets
      */
     private function enqueue_grid_assets() {
-        // Check if v4 CSS framework is active
-        if (apply_filters('mt_enable_css_v4', true)) {
-            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
-            return;
-        }
-        
-        // Enqueue v3 CSS files (legacy)
-        $base = MT_PLUGIN_URL . 'assets/css/v3/';
-        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
-        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
-        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
-        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
-        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
-        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
-        wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
-        
-        // Enqueue new candidate cards v3 CSS
-        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        // v4 CSS is already loaded by MT_Public_Assets
+        // No additional styles needed
     }
     
     /**
      * Enqueue stats assets
      */
     private function enqueue_stats_assets() {
-        // Check if v4 CSS framework is active
-        if (apply_filters('mt_enable_css_v4', true)) {
-            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
-            return;
-        }
-        
-        // Enqueue v3 CSS files (legacy)
-        $base = MT_PLUGIN_URL . 'assets/css/v3/';
-        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
-        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
-        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
-        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
-        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
-        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
-        wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
-        
-        // Enqueue new candidate cards v3 CSS
-        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        // v4 CSS is already loaded by MT_Public_Assets
+        // No additional styles needed
     }
     
     /**
      * Enqueue winners assets
      */
     private function enqueue_winners_assets() {
-        // Check if v4 CSS framework is active
-        if (apply_filters('mt_enable_css_v4', true)) {
-            // v4 CSS is already loaded by MT_Public_Assets, skip legacy CSS
-            return;
-        }
-        
-        // Enqueue v3 CSS files (legacy)
-        $base = MT_PLUGIN_URL . 'assets/css/v3/';
-        wp_enqueue_style('mt-v3-tokens', $base . 'mt-tokens.css', [], MT_VERSION);
-        wp_enqueue_style('mt-v3-reset', $base . 'mt-reset.css', ['mt-v3-tokens'], MT_VERSION);
-        wp_enqueue_style('mt-v3-grid', $base . 'mt-widget-candidates-grid.css', ['mt-v3-reset'], MT_VERSION);
-        wp_enqueue_style('mt-v3-jury', $base . 'mt-widget-jury-dashboard.css', ['mt-v3-grid'], MT_VERSION);
-        wp_enqueue_style('mt-v3-compat', $base . 'mt-compat.css', ['mt-v3-jury'], MT_VERSION);
-        wp_enqueue_style('mt-v3-visual-tune', $base . 'mt-visual-tune.css', ['mt-v3-compat'], MT_VERSION);
-        wp_enqueue_style('mt-v3-evaluation-cards', $base . 'mt-jury-evaluation-cards.css', ['mt-v3-visual-tune'], MT_VERSION);
-        
-        // Enqueue new candidate cards v3 CSS
-        wp_enqueue_style('mt-candidate-cards-v3', MT_PLUGIN_URL . 'assets/css/mt-candidate-cards-v3.css', ['mt-v3-evaluation-cards'], MT_VERSION);
+        // v4 CSS is already loaded by MT_Public_Assets
+        // No additional styles needed
     }
     
     /**
@@ -378,11 +314,13 @@ class MT_Shortcode_Renderer {
      */
     private function generate_dashboard_custom_css() {
         $settings = get_option('mt_dashboard_settings', []);
-        $primary_color = $settings['primary_color'] ?? '#667eea';
-        $secondary_color = $settings['secondary_color'] ?? '#764ba2';
         
-        // DEBUG: Log what settings we're getting
-        error_log('MT DEBUG: Dashboard settings: ' . print_r($settings, true));
+        // SECURITY FIX: Sanitize color inputs to prevent CSS injection
+        $primary_color = $this->sanitize_css_color($settings['primary_color'] ?? '#667eea');
+        $secondary_color = $this->sanitize_css_color($settings['secondary_color'] ?? '#764ba2');
+        
+        // SECURITY FIX: Use local background image URL
+        $background_url = $this->get_local_background_url();
         
         $css = "
         .mt-dashboard-header.mt-header-gradient {
@@ -391,7 +329,7 @@ class MT_Shortcode_Renderer {
         
         .mt-dashboard-header.mt-header-image,
         .mt-rankings-header {
-            background-image: url('https://mobilitytrailblazers.de/vote/wp-content/uploads/2025/08/Background.webp') !important;
+            background-image: url('{$background_url}') !important;
             background-size: cover !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
@@ -523,8 +461,10 @@ class MT_Shortcode_Renderer {
      */
     private function generate_stats_custom_css() {
         $settings = get_option('mt_dashboard_settings', []);
-        $primary_color = $settings['primary_color'] ?? '#667eea';
-        $secondary_color = $settings['secondary_color'] ?? '#764ba2';
+        
+        // SECURITY FIX: Sanitize color inputs
+        $primary_color = $this->sanitize_css_color($settings['primary_color'] ?? '#667eea');
+        $secondary_color = $this->sanitize_css_color($settings['secondary_color'] ?? '#764ba2');
         
         $css = "
         .mt-stat-number {
@@ -539,5 +479,55 @@ class MT_Shortcode_Renderer {
         ";
         
         return $css;
+    }
+    
+    /**
+     * Sanitize CSS color values to prevent injection attacks
+     *
+     * @param string $color Raw color input
+     * @return string Sanitized color or default
+     * @since 4.1.0
+     */
+    private function sanitize_css_color($color) {
+        // Remove any characters that aren't valid in hex colors
+        $color = preg_replace('/[^#a-fA-F0-9]/', '', $color);
+        
+        // Validate hex color format (#RGB or #RRGGBB)
+        if (preg_match('/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/', $color)) {
+            return esc_attr($color);
+        }
+        
+        // Return safe default color
+        return '#667eea';
+    }
+    
+    /**
+     * Get local background image URL securely
+     *
+     * @return string Local image URL or empty string
+     * @since 4.1.0
+     */
+    private function get_local_background_url() {
+        // Check if custom background is set
+        $custom_bg = get_option('mt_dashboard_background', '');
+        
+        if (!empty($custom_bg) && is_numeric($custom_bg)) {
+            // Use attachment ID to get URL
+            $url = wp_get_attachment_url($custom_bg);
+            if ($url) {
+                return esc_url($url);
+            }
+        }
+        
+        // Use default local background if exists
+        $upload_dir = wp_upload_dir();
+        $default_bg = $upload_dir['basedir'] . '/mobility-trailblazers/background.webp';
+        
+        if (file_exists($default_bg)) {
+            return esc_url($upload_dir['baseurl'] . '/mobility-trailblazers/background.webp');
+        }
+        
+        // Return empty string if no background available
+        return '';
     }
 }
