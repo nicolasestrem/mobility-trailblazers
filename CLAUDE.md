@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v4.1.0) manages 50+ candidates, 24 jury members, evaluations, and the complete award selection process using modern dependency injection architecture.
+**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v4.1.0) manages 100+ candidates, 24 jury members, evaluations, and the complete award selection process using modern dependency injection architecture.
 
 **Key URLs:**
 - **Production:** https://mobilitytrailblazers.de/vote/
@@ -66,11 +66,11 @@ Always deploy one or several agents most relevant to the task
 ### Most Used Commands
 ```bash
 # Testing
-npm test                                             # Run Playwright E2E tests
-npm run test:headed                                  # Run tests with browser visible
-npm run test:debug                                   # Debug mode for tests
-npm run test:local                                   # Test local environment
-npm run test:staging                                 # Test staging environment
+npx playwright test --config=dev/tests/playwright.config.ts       # Run E2E tests (default)
+npx playwright test --config=dev/tests/playwright.config.local.ts # Run local tests  
+npx playwright test --config=dev/tests/playwright.config.staging.ts # Run staging tests
+npx playwright test --headed --config=dev/tests/playwright.config.ts # Run tests with browser visible
+npx playwright test --debug --config=dev/tests/playwright.config.ts  # Debug mode for tests
 npm run lint                                         # Lint test files
 npm run format                                       # Format test files
 
@@ -180,26 +180,46 @@ All AJAX handlers extend `MT_Base_Ajax` which enforces:
 
 ### E2E Testing with Playwright
 ```bash
-# Configuration files
-playwright.config.ts            # Default config
-playwright.config.local.ts      # Local environment
-playwright.config.staging.ts    # Staging environment
-playwright.config.production.ts # Production environment
+# Configuration files in dev/tests/
+dev/tests/playwright.config.ts            # Default config
+dev/tests/playwright.config.local.ts      # Local environment  
+dev/tests/playwright.config.staging.ts    # Staging environment
+dev/tests/playwright.config.production.ts # Production environment
+
+# Test files (22+ test suites in dev/tests/)
+dev/tests/assignment-management.spec.ts     # Assignment workflows
+dev/tests/authentication.spec.ts            # Login and auth
+dev/tests/candidate-management.spec.ts      # Candidate operations
+dev/tests/database-tables.spec.ts           # Database verification
+dev/tests/debug-center.spec.ts              # Admin debug interface
+dev/tests/elementor-widgets.spec.ts         # Widget functionality
+dev/tests/evaluation-forms.spec.ts          # Jury evaluation forms
+dev/tests/german-translations.spec.ts       # i18n functionality
+dev/tests/import-export.spec.ts             # Data import/export
+dev/tests/jury-dashboard.spec.ts            # Jury interface
+dev/tests/navigation.spec.ts                # Site navigation
+dev/tests/performance.spec.ts               # Load testing
+dev/tests/responsive-design.spec.ts         # Mobile/tablet testing
+dev/tests/responsive-phase2.spec.ts         # Advanced responsive tests
+dev/tests/security.spec.ts                  # Security vulnerability checks
+dev/tests/visual-regression.spec.ts         # Visual testing
+# ... and more comprehensive test coverage
 
 # Test coverage areas
-- Assignment management
-- Authentication & login
-- Candidate management  
-- Database tables verification
+- Assignment management workflows
+- Authentication & user sessions
+- Candidate management & profiles
+- Database tables & data integrity
 - Debug center admin interface
-- Elementor widgets
-- German translations
+- Elementor widget integration
+- German translations & i18n
 - Import/export functionality
-- Jury evaluation forms
+- Jury evaluation forms & workflows
 - Navigation & routing
-- Performance load testing
+- Performance & load testing
 - Responsive design & accessibility
-- Security vulnerability checks
+- Security vulnerability detection
+- Visual regression testing
 ```
 
 ## Development Workflow
@@ -227,9 +247,98 @@ npm install                                          # Install test dependencies
 1. **Debug Center:** Admin → MT Award System → Debug Center
 2. **Watch logs:** `tail -f /wp-content/debug.log`
 3. **Test imports:** Always use `--dry-run` first
-4. **Run tests:** `npm test` after changes
+4. **Run tests:** `npx playwright test --config=dev/tests/playwright.config.ts` after changes
 5. **Check browser console** for JavaScript errors
 6. **Use appropriate agents** for code review and security checks
+
+## CSS v4 Framework
+
+### Design Token System
+```css
+/* Core design tokens in assets/css/v4/mt-tokens.css */
+:root {
+    /* Brand Colors */
+    --mt-brand-primary: #003C3D;
+    --mt-brand-secondary: #26a69a;
+    --mt-bg-cream: #f8f0e3;
+    --mt-text-dark: #302c37;
+    --mt-text-light: #666666;
+    
+    /* Responsive Spacing */
+    --mt-space-xs: clamp(0.25rem, 1vw, 0.5rem);
+    --mt-space-sm: clamp(0.5rem, 2vw, 0.75rem);
+    --mt-space-md: clamp(0.75rem, 3vw, 1rem);
+    --mt-space-lg: clamp(1rem, 4vw, 1.5rem);
+    --mt-space-xl: clamp(1.5rem, 5vw, 2rem);
+    
+    /* Typography */
+    --mt-font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --mt-font-size-sm: clamp(0.875rem, 2vw, 0.9rem);
+    --mt-font-size-base: clamp(1rem, 2.5vw, 1.1rem);
+    --mt-font-size-lg: clamp(1.125rem, 3vw, 1.25rem);
+    
+    /* Shadows & Effects */
+    --mt-shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --mt-shadow-md: 0 4px 6px rgba(0,0,0,0.16);
+    --mt-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### BEM Component Architecture
+```css
+/* Example: Candidate Card Component */
+.mt-candidate-card {                    /* Block */
+    background: var(--mt-white);
+    border: 1px solid var(--mt-border);
+    transition: var(--mt-transition);
+}
+
+.mt-candidate-card__header {            /* Element */
+    padding: var(--mt-space-md);
+}
+
+.mt-candidate-card__title {             /* Element */
+    font-size: var(--mt-font-size-lg);
+    color: var(--mt-text-dark);
+}
+
+.mt-candidate-card--featured {          /* Modifier */
+    border-color: var(--mt-brand-primary);
+    box-shadow: var(--mt-shadow-md);
+}
+```
+
+### Mobile-First Responsive Approach
+```css
+/* Default: Mobile styles */
+.mt-component {
+    padding: var(--mt-space-sm);
+    font-size: var(--mt-font-size-sm);
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+    .mt-component {
+        padding: var(--mt-space-md);
+        font-size: var(--mt-font-size-base);
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .mt-component {
+        padding: var(--mt-space-lg);
+        font-size: var(--mt-font-size-lg);
+    }
+}
+```
+
+### CSS Architecture Guidelines
+- **Minimize !important**: Use proper specificity instead
+- **BEM naming**: Block__Element--Modifier pattern
+- **Mobile-first**: Design for smallest screens first
+- **Design tokens**: Use CSS custom properties consistently
+- **Component-based**: Isolate styles into reusable components
 
 ## Critical Files & Their Purpose
 
@@ -380,7 +489,7 @@ Automatic indexes on:
 ## Deployment Checklist
 
 Before deploying to production:
-1. ✅ Run all tests: `npm test`
+1. ✅ Run all tests: `npx playwright test --config=dev/tests/playwright.config.ts`
 2. ✅ Run `.\scripts\production-cleanup.ps1`
 3. ✅ Minify assets: `.\scripts\minify-assets.ps1`
 4. ✅ Compile translations: `.\scripts\compile-mo-local.ps1`
