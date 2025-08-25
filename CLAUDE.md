@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v4.1.0) manages 50+ candidates, 24 jury members, evaluations, and the complete award selection process using modern dependency injection architecture.
+**Mobility Trailblazers WordPress Plugin** - An enterprise-grade award management platform for recognizing mobility innovators in the DACH region. This WordPress plugin (v4.1.0) manages 100+ candidates, 24 jury members, evaluations, and the complete award selection process using modern dependency injection architecture and CSS v4 framework.
 
 **Key URLs:**
 - **Production:** https://mobilitytrailblazers.de/vote/
@@ -65,14 +65,15 @@ Always deploy one or several agents most relevant to the task
 
 ### Most Used Commands
 ```bash
-# Testing
-npm test                                             # Run Playwright E2E tests
-npm run test:headed                                  # Run tests with browser visible
-npm run test:debug                                   # Debug mode for tests
-npm run test:local                                   # Test local environment
-npm run test:staging                                 # Test staging environment
-npm run lint                                         # Lint test files
-npm run format                                       # Format test files
+# Testing (E2E tests located in dev/tests/, configs in doc/)
+# Note: Package.json may need to be recreated for npm scripts
+npx playwright test --config=doc/playwright.config.ts       # Run E2E tests (default/staging)
+npx playwright test --config=doc/playwright.config.local.ts # Run local tests
+npx playwright test --config=doc/playwright.config.production.ts # Run production tests
+npx playwright test --headed                        # Run tests with browser visible  
+npx playwright test --debug                         # Debug mode for tests
+npx playwright show-report                          # View test report
+npx playwright install                              # Install browsers if needed
 
 # Import/Export
 wp mt import-candidates --dry-run                    # Test import without changes
@@ -86,15 +87,13 @@ wp db export backup.sql                              # Backup database
 php scripts/run-db-upgrade.php                       # Run database upgrades
 php scripts/debug-db-create.php                      # Create debug tables
 
-# Asset Management (Windows PowerShell)
-.\scripts\minify-assets.ps1                          # Minify CSS/JS for production
-.\scripts\production-cleanup.ps1                     # Remove debug code for production
-.\scripts\production-backup.ps1                      # Create production backup
+# Asset Management
+# Note: Scripts may need to be created for asset management
+# Current CSS framework uses individual files for development
 
-# Translations
-.\scripts\compile-mo-local.ps1                       # Compile .po to .mo (Windows)
-.\scripts\regenerate-mo.ps1                          # Regenerate all .mo files
-php scripts/compile-translations.php                 # PHP-based compilation
+# Translations  
+wp i18n make-mo languages/ languages/               # Compile translations with WP-CLI
+php doc/scripts/compile-translations.php            # PHP translation compiler
 
 # Development
 wp cache flush                                       # Clear all caches
@@ -103,6 +102,31 @@ tail -f /wp-content/debug.log                        # Watch error logs
 ```
 
 ## Architecture Overview
+
+### CSS v4 Framework (CRITICAL)
+**NEVER use !important in CSS** - Will fail GitHub checks
+
+```css
+/* Design Token System */
+:root {
+  --mt-brand-primary: #003C3D;
+  --mt-space-md: clamp(0.75rem, 3vw, 1rem);
+  --mt-font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  --mt-shadow-md: 0 4px 12px rgba(48, 44, 55, 0.15);
+  --mt-transition: all 0.3s ease;
+}
+
+/* BEM Methodology Required */
+.mt-candidate-card {}              /* Block */
+.mt-candidate-card__header {}      /* Element */
+.mt-candidate-card--featured {}    /* Modifier */
+```
+
+**CSS File Organization:**
+- `assets/css/mt-core.css` - Core framework and tokens
+- `assets/css/mt-components.css` - BEM components  
+- `assets/css/mt-mobile.css` - Mobile-first responsive
+- Individual component files for specific features
 
 ### Modern Dependency Injection System
 ```php
@@ -180,11 +204,18 @@ All AJAX handlers extend `MT_Base_Ajax` which enforces:
 
 ### E2E Testing with Playwright
 ```bash
-# Configuration files
-playwright.config.ts            # Default config
-playwright.config.local.ts      # Local environment
-playwright.config.staging.ts    # Staging environment
-playwright.config.production.ts # Production environment
+# Test files: dev/tests/*.spec.ts
+# Config files: doc/playwright.config.ts (and variants)
+# Global setup: dev/tests/global-setup.ts & global-teardown.ts
+# Auth setup: dev/tests/auth.setup.ts
+# Test helpers: dev/tests/utils/test-helpers.ts
+# Test data: dev/tests/fixtures/test-data.ts
+
+# Environment-specific configs:
+# doc/playwright.config.ts           # Default (staging)
+# doc/playwright.config.local.ts     # Local development
+# doc/playwright.config.staging.ts   # Staging environment  
+# doc/playwright.config.production.ts # Production environment
 
 # Test coverage areas
 - Assignment management
@@ -227,9 +258,16 @@ npm install                                          # Install test dependencies
 1. **Debug Center:** Admin → MT Award System → Debug Center
 2. **Watch logs:** `tail -f /wp-content/debug.log`
 3. **Test imports:** Always use `--dry-run` first
-4. **Run tests:** `npm test` after changes
+4. **Run tests:** `npx playwright test --config=doc/playwright.config.ts` after changes
 5. **Check browser console** for JavaScript errors
 6. **Use appropriate agents** for code review and security checks
+
+### Development Setup Notes
+- **Missing package.json**: May need to recreate for npm script shortcuts
+- **Comprehensive test suite**: Available in `dev/tests/` with 22+ test files
+- **Multiple environments**: Local, staging, production configs available
+- **Test data fixtures**: Pre-configured test data in `dev/tests/fixtures/`
+- **Authentication setup**: Automated admin/jury user creation for testing
 
 ## Critical Files & Their Purpose
 
@@ -380,10 +418,10 @@ Automatic indexes on:
 ## Deployment Checklist
 
 Before deploying to production:
-1. ✅ Run all tests: `npm test`
-2. ✅ Run `.\scripts\production-cleanup.ps1`
-3. ✅ Minify assets: `.\scripts\minify-assets.ps1`
-4. ✅ Compile translations: `.\scripts\compile-mo-local.ps1`
+1. ✅ Run all tests: `npx playwright test --config=doc/playwright.config.production.ts`
+2. ✅ Verify CSS follows v4 framework (no !important)
+3. ✅ Minify CSS/JS assets if needed  
+4. ✅ Compile translations: `wp i18n make-mo languages/ languages/` or `php doc/scripts/compile-translations.php`
 5. ✅ Test on staging (http://localhost:8080/)
 6. ✅ Create backup: `.\scripts\production-backup.ps1`
 7. ✅ Update version number in main plugin file
@@ -476,25 +514,28 @@ mcp__wordpress__wp_debug_log        # View debug log
 
 ## Additional Documentation
 
-### Technical Guides
+### Consolidated Documentation
+- **CSS Refactoring:** `doc/CSS-REFACTORING-CONSOLIDATED.md` - Complete CSS v4 implementation guide
+- **Testing:** `doc/testing/TESTING-CONSOLIDATED.md` - All testing documentation
+- **Project Tasks:** `doc/PROJECT-TASKS.md` - Active development tasks
+- **Changelog:** `doc/CHANGELOG.md` - Version history
+
+### Technical Guides  
 - **API Reference:** `doc/API-REFERENCE.md`
-- **Category Editor:** `doc/CATEGORY-EDITOR-IMPLEMENTATION.md`
 - **CSS Framework:** `doc/CSS-V4-GUIDE.md`
 - **Dependency Injection:** `doc/DEPENDENCY-INJECTION-GUIDE.md`
-- **Email System:** `doc/EMAIL-GUIDE.md`
 - **Migration Guide:** `doc/MIGRATION-GUIDE.md`
 - **Testing Strategies:** `doc/TESTING-STRATEGIES.md`
 
-### Project Documentation
-- **Developer Guide:** `doc/developer-guide.md`
-- **Import/Export Guide:** `doc/IMPORT-EXPORT-GUIDE.md`
-- **Changelog:** `doc/CHANGELOG.md`
-- **Technical Debt:** `doc/TECHNICAL-DEBT.md`
-- **Jury Handbook:** `doc/jury-handbook-2025.md`
+### Archived Documentation
+- **CSS Archive:** `doc/archive/` - Historical CSS implementation files
+- **Legacy Reports:** `doc/archive/` - Phase reports and analysis
 
 ### Support Resources
 - **Debug Center:** Admin → MT Award System → Debug Center
-- **Error Logs:** `wp-content/debug.log` and Debug Center
-- **Test Reports:** `npm run test:report`
+- **Error Logs:** `wp-content/debug.log` and Debug Center  
+- **Test Reports:** `npx playwright show-report`
 - **Use appropriate agents** for specialized help
-- Adding !important in css should be avoided at any cost and will not pass github checks.
+
+### Critical CSS Rule
+**⚠️ NEVER use !important in CSS - Will fail GitHub checks and violate v4 framework principles**
