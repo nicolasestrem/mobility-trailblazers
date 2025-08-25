@@ -1,81 +1,218 @@
-/**
- * Mobility Trailblazers v4 CSS Framework
- * Design Tokens - CSS Custom Properties
- * Version: 4.0.0
+/*
+ * Mobility Trailblazers — CSS v4 Tokens
+ * Date: 2025-08-25
+ * Scope: global tokens for TT5 + plugin
+ * Notes:
+ * - Colors match main site palette (cream bg, deep teal, deep blue, copper)
+ * - Includes semantic tokens + component defaults
+ * - Includes v3 alias variables to avoid breaking old styles
  */
 
-:root {
-  /* Brand Colors */
-  --mt-color-primary: #26a69a;
-  --mt-color-primary-dark: #00897b;
-  --mt-color-primary-light: #4db6ac;
-  --mt-color-bg: #f8f0e3;
-  --mt-text: #302c37;
-  --mt-border: #a4dcd5;
-  
-  /* Secondary Colors */
-  --mt-color-secondary: #004c5f;
-  --mt-color-accent: #c1693c;
-  --mt-color-success: #4caf50;
+:root,
+:root[data-mt-theme="default"] {
+  /* 1) Color primitives */
+  --mt-white: #ffffff;
+  --mt-black: #000000;
+  --mt-cream-50: #F8F0E3;      /* site background */
+  --mt-teal-900: #003C3D;      /* primary */
+  --mt-blue-800: #004C5F;      /* secondary */
+  --mt-copper-600: #C1693C;    /* accent */
+  --mt-accent-blue-300: #A4DCD5; /* borders and subtle tints */
+  --mt-text-900: #302C37;      /* body text */
+
+  /* Neutrals (UI grays) */
+  --mt-gray-25: #fcfcfd;
+  --mt-gray-50: #f6f7f8;
+  --mt-gray-100: #edf0f2;
+  --mt-gray-200: #dfe3e6;
+  --mt-gray-300: #cdd3d8;
+  --mt-gray-400: #b6bec5;
+  --mt-gray-500: #9aa4ad;
+  --mt-gray-600: #7b8792;
+  --mt-gray-700: #5f6b76;
+  --mt-gray-800: #44505b;
+  --mt-gray-900: #2c3440;
+
+  /* 2) Semantic colors */
+  --mt-color-bg: var(--mt-cream-50);
+  --mt-color-surface: var(--mt-white);
+  --mt-color-text: var(--mt-text-900);
+  --mt-color-muted: var(--mt-gray-700);
+  --mt-color-border: var(--mt-accent-blue-300);
+
+  --mt-color-primary: var(--mt-teal-900);
+  --mt-color-primary-contrast: var(--mt-white);
+
+  --mt-color-secondary: var(--mt-blue-800);
+  --mt-color-secondary-contrast: var(--mt-white);
+
+  --mt-color-accent: var(--mt-copper-600);
+  --mt-color-accent-contrast: var(--mt-white);
+
+  /* Feedback (kept neutral but brand-friendly) */
+  --mt-color-success: #2e7d32;
   --mt-color-warning: #ff9800;
-  --mt-color-error: #f44336;
+  --mt-color-error: #d32f2f;
+
+  /* 3) Typography */
+  --mt-font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mt-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Type scale (fluid) */
+  --mt-fs-xs: clamp(0.78rem, 0.72rem + 0.20vw, 0.88rem);
+  --mt-fs-sm: clamp(0.90rem, 0.84rem + 0.20vw, 1.00rem);
+  --mt-fs-base: clamp(1.00rem, 0.95rem + 0.25vw, 1.10rem);
+  --mt-fs-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.35rem);
+  --mt-fs-xl: clamp(1.35rem, 1.20rem + 0.80vw, 1.90rem);
+  --mt-fs-2xl: clamp(1.60rem, 1.40rem + 1.20vw, 2.40rem);
+
+  --mt-leading-tight: 1.2;
+  --mt-leading-normal: 1.5;
+  --mt-leading-loose: 1.75;
+
+  /* 4) Spacing scale (4px baseline) */
+  --mt-space-0: 0;
+  --mt-space-1: 0.25rem;  /* 4px */
+  --mt-space-2: 0.5rem;   /* 8px */
+  --mt-space-3: 0.75rem;  /* 12px */
+  --mt-space-4: 1rem;     /* 16px */
+  --mt-space-5: 1.25rem;  /* 20px */
+  --mt-space-6: 1.5rem;   /* 24px */
+  --mt-space-8: 2rem;     /* 32px */
+  --mt-space-10: 2.5rem;  /* 40px */
+  --mt-space-12: 3rem;    /* 48px */
+  --mt-space-16: 4rem;    /* 64px */
+
+  /* 5) Radii */
+  --mt-radius-xs: 4px;
+  --mt-radius-sm: 8px;
+  --mt-radius-md: 12px;
+  --mt-radius-lg: 16px;
+  --mt-radius-xl: 20px;
+  --mt-radius-2xl: 24px;
+  --mt-radius-pill: 999px;
+
+  /* 6) Borders */
+  --mt-border-width: 1px;
+  --mt-border-width-lg: 2px;
+  --mt-focus-ring: 0 0 0 3px rgba(164, 220, 213, 0.60); /* based on accent-blue-300 */
+
+  /* 7) Shadows */
+  --mt-shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+  --mt-shadow-md: 0 6px 20px rgba(0,0,0,0.10);
+  --mt-shadow-lg: 0 12px 30px rgba(0,0,0,0.12);
+
+  /* 8) Motion */
+  --mt-ease: cubic-bezier(0.2, 0.0, 0.0, 1);
+  --mt-animate-fast: 120ms;
+  --mt-animate: 220ms;
+  --mt-animate-slow: 400ms;
+
+  /* 9) Breakpoints */
+  --mt-bp-sm: 480px;
+  --mt-bp-md: 768px;
+  --mt-bp-lg: 1024px;
+  --mt-bp-xl: 1280px;
+
+  /* 10) Component defaults */
+  /* Cards */
+  --mt-card-bg: var(--mt-color-bg);
+  --mt-card-text: var(--mt-color-text);
+  --mt-card-border: var(--mt-color-border);
+  --mt-card-radius: var(--mt-radius-lg);
+  --mt-card-shadow: var(--mt-shadow-md);
+  --mt-card-padding: var(--mt-space-6);
+
+  /* Buttons */
+  --mt-button-radius: var(--mt-radius-2xl);
+  --mt-button-primary-bg: var(--mt-color-secondary);
+  --mt-button-primary-text: var(--mt-color-secondary-contrast);
+  --mt-button-primary-hover: #003b57; /* slightly darker than blue-800 */
+
+  --mt-button-accent-bg: var(--mt-color-accent);
+  --mt-button-accent-text: var(--mt-color-accent-contrast);
+  --mt-button-accent-hover: #a95530; /* darker copper */
+
+  /* Inputs */
+  --mt-input-bg: var(--mt-white);
+  --mt-input-text: var(--mt-color-text);
+  --mt-input-border: var(--mt-color-border);
+  --mt-input-radius: var(--mt-radius-sm);
+  --mt-input-padding-y: 10px;
+  --mt-input-padding-x: 12px;
+
+  /* Links (semantic) */
+  --mt-link-color: var(--mt-color-secondary);
+  --mt-link-hover: #00364f;
+
+  /* Social links mapping used on candidate profiles */
+  --mt-link-linkedin: var(--mt-color-secondary);
+  --mt-link-website: var(--mt-color-accent);
+
+  /* 11) Layout helpers */
+  --mt-container-max: 1120px;
+  --mt-section-gap: var(--mt-space-12);
+
+  /* 12) Legacy aliases (v3 → v4) */
+  --mt-bg-beige: var(--mt-color-bg);
+  --mt-blue-accent: var(--mt-color-border);
+  --mt-primary: var(--mt-color-primary);
+  --mt-secondary: var(--mt-color-secondary);
+  --mt-accent: var(--mt-color-accent);
+  --mt-body: var(--mt-color-text);
+  --mt-text: var(--mt-color-text);
+  --mt-border: var(--mt-color-border);
   
-  /* Neutral Colors */
-  --mt-color-white: #ffffff;
-  --mt-color-gray-light: #f5f5f5;
-  --mt-color-gray-medium: #9e9e9e;
-  --mt-color-gray-dark: #616161;
-  
-  /* Typography - Mobile-First Fluid Scaling */
-  --mt-font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --mt-font-headings: "Poppins", var(--mt-font-family);
-  --mt-font-size-base: clamp(14px, 3.5vw, 16px);
-  --mt-font-size-small: clamp(12px, 3vw, 14px);
-  --mt-font-size-large: clamp(16px, 4vw, 18px);
-  --mt-font-size-h1: clamp(24px, 6vw, 32px);
-  --mt-font-size-h2: clamp(20px, 5vw, 24px);
-  --mt-font-size-h3: clamp(18px, 4.5vw, 20px);
-  --mt-line-height: 1.5;
-  
-  /* Mobile-First Spacing System */
-  --mt-space-xs: clamp(4px, 1vw, 6px);
-  --mt-space-sm: clamp(8px, 2vw, 12px);
-  --mt-space-md: clamp(12px, 3vw, 16px);
-  --mt-space: clamp(16px, 4vw, 20px);
-  --mt-space-lg: clamp(20px, 5vw, 24px);
-  --mt-space-xl: clamp(24px, 6vw, 32px);
-  --mt-space-2xl: clamp(32px, 8vw, 48px);
-  
-  /* Mobile Breakpoints */
-  --mt-mobile-xs: 320px;
-  --mt-mobile-sm: 375px;
-  --mt-mobile-md: 414px;
-  --mt-tablet: 768px;
-  --mt-desktop-sm: 1024px;
-  --mt-desktop: 1200px;
-  
-  /* Touch-Friendly Sizing */
+  /* Additional legacy mappings for backward compatibility */
+  --mt-color-primary-dark: #002a2b;
+  --mt-color-primary-light: #005253;
+  --mt-font-family: var(--mt-font-sans);
+  --mt-font-headings: var(--mt-font-sans);
+  --mt-font-size-base: var(--mt-fs-base);
+  --mt-font-size-small: var(--mt-fs-sm);
+  --mt-font-size-large: var(--mt-fs-lg);
+  --mt-font-size-h1: var(--mt-fs-2xl);
+  --mt-font-size-h2: var(--mt-fs-xl);
+  --mt-font-size-h3: var(--mt-fs-lg);
+  --mt-line-height: var(--mt-leading-normal);
+  --mt-space: var(--mt-space-4);
+  --mt-space-sm: var(--mt-space-2);
+  --mt-space-md: var(--mt-space-3);
+  --mt-space-lg: var(--mt-space-6);
+  --mt-space-xl: var(--mt-space-8);
+  --mt-space-2xl: var(--mt-space-12);
   --mt-touch-target: 44px;
   --mt-touch-target-large: 48px;
-  --mt-touch-padding: 12px;
+  --mt-touch-padding: var(--mt-space-3);
+  --mt-gap: var(--mt-space-5);
+  --mt-radius: var(--mt-radius-md);
+  --mt-shadow: var(--mt-shadow-md);
+  --mt-transition: all var(--mt-animate) var(--mt-ease);
+  --mt-transition-fast: all var(--mt-animate-fast) var(--mt-ease);
   
-  /* Layout */
-  --mt-container-max: 1200px;
-  --mt-gap: 20px;
-  
-  /* Border & Radius */
-  --mt-radius-sm: 8px;
-  --mt-radius: 14px;
-  --mt-radius-lg: 16px;
-  --mt-radius-full: 999px;
-  --mt-border-width: 1px;
-  
-  /* Shadows */
-  --mt-shadow-sm: 0 2px 4px rgba(0,0,0,.06);
-  --mt-shadow: 0 6px 16px rgba(0,0,0,.08);
-  --mt-shadow-lg: 0 10px 30px rgba(0,0,0,.12);
-  
-  /* Transitions */
-  --mt-transition: all 0.3s ease;
-  --mt-transition-fast: all 0.15s ease;
+  /* Additional legacy color mappings */
+  --mt-color-white: var(--mt-white);
+  --mt-color-gray-light: var(--mt-gray-100);
+  --mt-color-gray-medium: var(--mt-gray-500);
+  --mt-color-gray-dark: var(--mt-gray-700);
 }
+
+/* Optional dark theme hook (disabled by default) */
+/*
+:root[data-mt-theme="dark"] {
+  --mt-color-bg: #15191c;
+  --mt-color-surface: #1c2226;
+  --mt-color-text: #e8eaed;
+  --mt-color-muted: #a9b1b8;
+  --mt-color-border: #2b3238;
+  --mt-card-bg: var(--mt-color-surface);
+  --mt-card-text: var(--mt-color-text);
+}
+*/
+
+/* Minimal base application (safe to keep) */
+html { background: var(--mt-color-bg); }
+body { color: var(--mt-color-text); font-family: var(--mt-font-sans); }
+
+/* Focus ring utility */
+.mt-focus-ring:focus { outline: none; box-shadow: var(--mt-focus-ring); }

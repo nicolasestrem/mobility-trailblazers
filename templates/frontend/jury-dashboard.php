@@ -125,7 +125,17 @@ $layout_class = 'mt-candidates-' . (isset($dashboard_settings['card_layout']) ? 
             <p><?php _e('Review and evaluate your assigned candidates for the Mobility Trailblazers Awards', 'mobility-trailblazers'); ?></p>
         <?php endif; ?>
         
-        <?php /* Progress bar feature removed */ ?>
+        <?php if (isset($dashboard_settings['show_progress_bar']) ? $dashboard_settings['show_progress_bar'] : true) : ?>
+        <div class="mt-progress-widget <?php echo $progress['completion_rate'] == 100 ? 'mt-progress-widget--completed' : ''; ?>" style="--progress-width: <?php echo esc_attr($progress['completion_rate']); ?>%;">
+            <div class="mt-progress-widget__wrapper">
+                <div class="mt-progress-widget__track">
+                    <div class="mt-progress-widget__fill" style="width: <?php echo esc_attr($progress['completion_rate']); ?>%;">
+
+                    <span class="mt-progress-widget__label"><?php echo esc_html($progress['completion_rate']); ?>%</span>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     
     <?php if (isset($dashboard_settings['show_stats_cards']) ? $dashboard_settings['show_stats_cards'] : true) : ?>

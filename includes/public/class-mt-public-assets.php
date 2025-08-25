@@ -208,6 +208,15 @@ class MT_Public_Assets {
         // mt-header-gradient-fix removed - file deleted
         wp_enqueue_style('mt-mobile');
         wp_enqueue_style('mt-specificity-layer');
+        
+        // Enqueue progress bar fix CSS
+        wp_enqueue_style(
+            'mt-progress-bar-fix',
+            MT_PLUGIN_URL . 'assets/css/mt-progress-bar-fix.css',
+            ['mt-core'],
+            self::V4_VERSION,
+            'all'
+        );
         // Progress bar styles removed - feature deleted
         
         // Consolidated CSS fixes are now included in mt-core.css and mt-components.css

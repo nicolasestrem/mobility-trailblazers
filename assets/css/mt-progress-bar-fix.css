@@ -1,0 +1,219 @@
+/*
+ * MT Progress Bar Fix - CSS v4 Framework
+ * Fixes all conflicts with existing progress bar implementations
+ * Uses high specificity selectors for proper cascade management
+ */
+
+/* Reset any conflicting styles using high specificity namespace */
+.mt-progress-widget.mt-progress-widget {
+    /* Reset all box-model properties */
+    all: unset;
+    display: block;
+    width: 100%;
+    margin: var(--mt-space-6, 30px) 0;
+    padding: 0 var(--mt-space-5, 20px);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+.mt-progress-widget.mt-progress-widget * {
+    box-sizing: border-box;
+}
+
+.mt-progress-widget .mt-progress-widget__wrapper {
+    /* Complete reset of container */
+    all: unset;
+    display: block;
+    width: 100%;
+    height: auto;
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    z-index: 2;
+}
+
+.mt-progress-widget .mt-progress-widget__track {
+    /* Track styling with complete override */
+    all: unset;
+    display: block;
+    width: 100%;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    z-index: 3;
+    flex: none;
+    min-height: 44px;
+    max-height: 44px;
+}
+
+.mt-progress-widget .mt-progress-widget__fill {
+    /* Fill styling with complete override */
+    all: unset;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.95), 
+        rgba(255, 255, 255, 0.85));
+    border-radius: 22px;
+    transition: width var(--mt-animate-slow, 0.8s) var(--mt-ease, cubic-bezier(0.4, 0, 0.2, 1));
+    box-shadow: var(--mt-shadow-lg, 0 3px 10px rgba(0, 0, 0, 0.15)),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    z-index: 4;
+    min-width: 70px;
+    overflow: hidden;
+    flex: none;
+}
+
+.mt-progress-widget .mt-progress-widget__label {
+    /* Label styling with complete override */
+    all: unset;
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--mt-color-primary, #003C3D);
+    font-weight: var(--mt-weight-bold, 700);
+    font-size: var(--mt-text-lg, 18px);
+    font-family: var(--mt-font-base, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 1), 
+                 0 0 10px rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.5px;
+    z-index: 10;
+    white-space: nowrap;
+    line-height: 1;
+    text-align: center;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    pointer-events: none;
+    overflow: visible;
+}
+
+/* Completed state modifier with high specificity */
+.mt-progress-widget.mt-progress-widget--completed .mt-progress-widget__track {
+    background: rgba(46, 125, 50, 0.1);
+    border-color: rgba(46, 125, 50, 0.3);
+}
+
+.mt-progress-widget.mt-progress-widget--completed .mt-progress-widget__fill {
+    background: linear-gradient(90deg, var(--mt-color-success, #2e7d32), #00c436);
+}
+
+.mt-progress-widget.mt-progress-widget--completed .mt-progress-widget__label {
+    color: var(--mt-white, white);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Force inline styles to work with attribute selector */
+.mt-progress-widget .mt-progress-widget__fill[style*="width"] {
+    width: var(--progress-width);
+}
+
+/* Responsive adjustments with high specificity */
+@media (max-width: 768px) {
+    .mt-progress-widget.mt-progress-widget {
+        margin: var(--mt-space-5, 20px) 0;
+        padding: 0 var(--mt-space-4, 15px);
+    }
+    
+    .mt-progress-widget .mt-progress-widget__track,
+    .mt-progress-widget .mt-progress-widget__fill {
+        height: 40px;
+        min-height: 40px;
+        max-height: 40px;
+        border-radius: 20px;
+    }
+    
+    .mt-progress-widget .mt-progress-widget__fill {
+        min-width: 60px;
+    }
+    
+    .mt-progress-widget .mt-progress-widget__label {
+        font-size: var(--mt-text-base, 16px);
+    }
+}
+
+@media (max-width: 480px) {
+    .mt-progress-widget.mt-progress-widget {
+        margin: var(--mt-space-4, 15px) 0;
+        padding: 0 var(--mt-space-3, 10px);
+    }
+    
+    .mt-progress-widget .mt-progress-widget__track,
+    .mt-progress-widget .mt-progress-widget__fill {
+        height: 36px;
+        min-height: 36px;
+        max-height: 36px;
+        border-radius: 18px;
+    }
+    
+    .mt-progress-widget .mt-progress-widget__fill {
+        min-width: 50px;
+    }
+    
+    .mt-progress-widget .mt-progress-widget__label {
+        font-size: var(--mt-text-sm, 14px);
+    }
+}
+
+/* Animation for loading state */
+@keyframes mt-progress-pulse {
+    0% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.8;
+    }
+}
+
+.mt-progress-widget.mt-progress-widget--loading .mt-progress-widget__fill {
+    animation: mt-progress-pulse var(--mt-animate-slow, 1.5s) ease-in-out infinite;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .mt-progress-widget .mt-progress-widget__track {
+        background: var(--mt-high-contrast-bg, rgba(0, 0, 0, 0.1));
+        border: 2px solid var(--mt-high-contrast-text, rgba(0, 0, 0, 0.5));
+    }
+    
+    .mt-progress-widget .mt-progress-widget__fill {
+        background: rgba(0, 60, 61, 0.9);
+    }
+    
+    .mt-progress-widget .mt-progress-widget__label {
+        color: var(--mt-high-contrast-text, white);
+        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .mt-progress-widget .mt-progress-widget__fill {
+        transition: none;
+    }
+    
+    .mt-progress-widget.mt-progress-widget--loading .mt-progress-widget__fill {
+        animation: none;
+    }
+}
